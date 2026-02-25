@@ -6,9 +6,10 @@ import { ArrowRight, AlertCircle } from 'lucide-react'
 
 interface FeatureCardProps {
   feature: FeatureSummary
+  position?: number
 }
 
-export function FeatureCard({ feature }: FeatureCardProps) {
+export function FeatureCard({ feature, position }: FeatureCardProps) {
   return (
     <Link
       to={`/features/${feature.slug}`}
@@ -16,7 +17,14 @@ export function FeatureCard({ feature }: FeatureCardProps) {
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <h3 className="text-sm font-medium truncate">{feature.title}</h3>
+          <div className="flex items-baseline gap-1.5">
+            {position != null && (
+              <span className="text-[10px] font-mono font-semibold text-muted-foreground/60 shrink-0 tabular-nums">
+                #{position}
+              </span>
+            )}
+            <h3 className="text-sm font-medium truncate">{feature.title}</h3>
+          </div>
           <p className="text-xs text-muted-foreground mt-0.5 font-mono">{feature.slug}</p>
         </div>
         <StatusBadge status={feature.phase} />

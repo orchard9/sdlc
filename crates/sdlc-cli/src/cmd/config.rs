@@ -98,9 +98,7 @@ fn validate(root: &Path, json: bool) -> anyhow::Result<()> {
         }
     }
 
-    let has_errors = warnings
-        .iter()
-        .any(|w| w.level == WarnLevel::Error);
+    let has_errors = warnings.iter().any(|w| w.level == WarnLevel::Error);
     if has_errors {
         anyhow::bail!("config validation found errors");
     }

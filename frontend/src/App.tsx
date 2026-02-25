@@ -5,7 +5,6 @@ import { FeatureDetail } from '@/pages/FeatureDetail'
 import { FeaturesPage } from '@/pages/FeaturesPage'
 import { MilestonesPage } from '@/pages/MilestonesPage'
 import { MilestoneDetail } from '@/pages/MilestoneDetail'
-import { SetupWizard } from '@/pages/SetupWizard'
 import { ConfigPage } from '@/pages/ConfigPage'
 
 export default function App() {
@@ -18,8 +17,7 @@ export default function App() {
           <Route path="/features/:slug" element={<FeatureDetail />} />
           <Route path="/milestones" element={<MilestonesPage />} />
           <Route path="/milestones/:slug" element={<MilestoneDetail />} />
-          <Route path="/setup" element={<SetupWizard />} />
-          <Route path="/config" element={<ConfigPage />} />
+<Route path="/config" element={<ConfigPage />} />
         </Routes>
       </AppShell>
     </BrowserRouter>

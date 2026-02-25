@@ -1,12 +1,7 @@
 use crate::output::{print_json, print_table};
 use anyhow::Context;
 use clap::Subcommand;
-use sdlc_core::{
-    config::Config,
-    feature::Feature,
-    state::State,
-    types::Phase,
-};
+use sdlc_core::{config::Config, feature::Feature, state::State, types::Phase};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -33,9 +28,11 @@ pub enum FeatureSubcommand {
 
 pub fn run(root: &Path, subcmd: FeatureSubcommand, json: bool) -> anyhow::Result<()> {
     match subcmd {
-        FeatureSubcommand::Create { slug, title, description } => {
-            create(root, &slug, title, description, json)
-        }
+        FeatureSubcommand::Create {
+            slug,
+            title,
+            description,
+        } => create(root, &slug, title, description, json),
         FeatureSubcommand::List => list(root, json),
         FeatureSubcommand::Show { slug } => show(root, &slug, json),
         FeatureSubcommand::Transition { slug, phase } => transition(root, &slug, &phase, json),
@@ -99,7 +96,11 @@ fn list(root: &Path, json: bool) -> anyhow::Result<()> {
             vec![
                 f.slug.clone(),
                 f.phase.to_string(),
-                if f.archived { "archived".to_string() } else { String::new() },
+                if f.archived {
+                    "archived".to_string()
+                } else {
+                    String::new()
+                },
                 f.title.clone(),
             ]
         })
@@ -109,8 +110,8 @@ fn list(root: &Path, json: bool) -> anyhow::Result<()> {
 }
 
 fn show(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
-    let feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     if json {
         print_json(&feature)?;
@@ -147,19 +148,25 @@ fn show(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
 }
 
 fn transition(root: &Path, slug: &str, phase_str: &str, json: bool) -> anyhow::Result<()> {
-    let target = Phase::from_str(phase_str)
-        .with_context(|| format!("unknown phase: {phase_str}"))?;
+    let target =
+        Phase::from_str(phase_str).with_context(|| format!("unknown phase: {phase_str}"))?;
 
     let config = Config::load(root).context("failed to load config")?;
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
-    feature.transition(target, &config)
+    feature
+        .transition(target, &config)
         .with_context(|| format!("cannot transition '{slug}' to {phase_str}"))?;
     feature.save(root).context("failed to save feature")?;
 
     let mut state = State::load(root).context("failed to load state")?;
-    state.record_action(slug, sdlc_core::types::ActionType::ImplementTask, target, "transition");
+    state.record_action(
+        slug,
+        sdlc_core::types::ActionType::ImplementTask,
+        target,
+        "transition",
+    );
     state.save(root).context("failed to save state")?;
 
     if json {
@@ -174,8 +181,8 @@ fn transition(root: &Path, slug: &str, phase_str: &str, json: bool) -> anyhow::R
 }
 
 fn archive(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     feature.archived = true;
     feature.save(root).context("failed to save feature")?;
 

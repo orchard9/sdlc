@@ -91,24 +91,26 @@ fn dispatch(root: &Path, args: &[String]) -> anyhow::Result<()> {
     // Subcommand dispatch (e.g. `sdlc platform dev start`)
     if !cmd_config.subcommands.is_empty() {
         let sub_name = args.get(1).ok_or_else(|| {
-            let available: Vec<&str> =
-                cmd_config.subcommands.keys().map(|s| s.as_str()).collect();
+            let available: Vec<&str> = cmd_config.subcommands.keys().map(|s| s.as_str()).collect();
             anyhow::anyhow!(
                 "command '{}' requires a subcommand: {}",
                 cmd_name,
                 available.join(", ")
             )
         })?;
-        let script = cmd_config.subcommands.get(sub_name.as_str()).ok_or_else(|| {
-            let available: Vec<&str> =
-                cmd_config.subcommands.keys().map(|s| s.as_str()).collect();
-            anyhow::anyhow!(
-                "unknown subcommand '{}' for '{}'; available: {}",
-                sub_name,
-                cmd_name,
-                available.join(", ")
-            )
-        })?;
+        let script = cmd_config
+            .subcommands
+            .get(sub_name.as_str())
+            .ok_or_else(|| {
+                let available: Vec<&str> =
+                    cmd_config.subcommands.keys().map(|s| s.as_str()).collect();
+                anyhow::anyhow!(
+                    "unknown subcommand '{}' for '{}'; available: {}",
+                    sub_name,
+                    cmd_name,
+                    available.join(", ")
+                )
+            })?;
         let script_args: Vec<&str> = args[2..].iter().map(|s| s.as_str()).collect();
         return exec_script(root, script, &script_args);
     }
@@ -120,11 +122,7 @@ fn dispatch(root: &Path, args: &[String]) -> anyhow::Result<()> {
     exec_script(root, &cmd_config.script, &script_args)
 }
 
-fn validate_args(
-    specs: &[PlatformArg],
-    provided: &[&str],
-    cmd_name: &str,
-) -> anyhow::Result<()> {
+fn validate_args(specs: &[PlatformArg], provided: &[&str], cmd_name: &str) -> anyhow::Result<()> {
     for (i, spec) in specs.iter().enumerate() {
         match provided.get(i) {
             None if spec.required => {
@@ -133,7 +131,11 @@ fn validate_args(
                     spec.name,
                     cmd_name,
                     cmd_name,
-                    specs.iter().map(|a| format!("<{}>", a.name)).collect::<Vec<_>>().join(" ")
+                    specs
+                        .iter()
+                        .map(|a| format!("<{}>", a.name))
+                        .collect::<Vec<_>>()
+                        .join(" ")
                 );
             }
             Some(val) if !spec.choices.is_empty() && !spec.choices.contains(&val.to_string()) => {

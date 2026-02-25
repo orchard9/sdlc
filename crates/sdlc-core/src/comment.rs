@@ -119,13 +119,22 @@ mod tests {
     fn add_comment_increments_id() {
         let mut comments: Vec<Comment> = Vec::new();
         let mut seq: u32 = 0;
-        let id1 = add_comment(&mut comments, &mut seq, "first", None, CommentTarget::Feature, None);
+        let id1 = add_comment(
+            &mut comments,
+            &mut seq,
+            "first",
+            None,
+            CommentTarget::Feature,
+            None,
+        );
         let id2 = add_comment(
             &mut comments,
             &mut seq,
             "second",
             Some(CommentFlag::Blocker),
-            CommentTarget::Task { task_id: "T1".to_string() },
+            CommentTarget::Task {
+                task_id: "T1".to_string(),
+            },
             Some("alice".to_string()),
         );
         assert_eq!(id1, "C1");
@@ -144,7 +153,10 @@ mod tests {
     fn comment_target_display() {
         assert_eq!(CommentTarget::Feature.to_string(), "feature");
         assert_eq!(
-            CommentTarget::Task { task_id: "T2".to_string() }.to_string(),
+            CommentTarget::Task {
+                task_id: "T2".to_string()
+            }
+            .to_string(),
             "task:T2"
         );
     }
@@ -161,7 +173,14 @@ mod tests {
             CommentTarget::Feature,
             None,
         );
-        add_comment(&mut comments, &mut seq, "second", None, CommentTarget::Feature, None);
+        add_comment(
+            &mut comments,
+            &mut seq,
+            "second",
+            None,
+            CommentTarget::Feature,
+            None,
+        );
 
         let removed = resolve_comment(&mut comments, "C1");
         assert!(removed);
@@ -178,10 +197,31 @@ mod tests {
     fn no_id_collision_after_resolve() {
         let mut comments: Vec<Comment> = Vec::new();
         let mut seq: u32 = 0;
-        add_comment(&mut comments, &mut seq, "first", None, CommentTarget::Feature, None);  // C1
-        add_comment(&mut comments, &mut seq, "second", None, CommentTarget::Feature, None); // C2
+        add_comment(
+            &mut comments,
+            &mut seq,
+            "first",
+            None,
+            CommentTarget::Feature,
+            None,
+        ); // C1
+        add_comment(
+            &mut comments,
+            &mut seq,
+            "second",
+            None,
+            CommentTarget::Feature,
+            None,
+        ); // C2
         resolve_comment(&mut comments, "C1"); // C2 now the only comment
-        let id3 = add_comment(&mut comments, &mut seq, "third", None, CommentTarget::Feature, None);
+        let id3 = add_comment(
+            &mut comments,
+            &mut seq,
+            "third",
+            None,
+            CommentTarget::Feature,
+            None,
+        );
         assert_eq!(id3, "C3", "ID must not collide with existing C2");
         assert_eq!(comments.len(), 2);
         // Verify C2 is the original "second", not "third"

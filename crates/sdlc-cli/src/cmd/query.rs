@@ -61,9 +61,17 @@ fn ready(root: &Path, json: bool) -> anyhow::Result<()> {
         .iter()
         .filter(|f| !f.archived && !f.is_blocked())
         .filter(|f| {
-            let ctx = EvalContext { feature: f, state: &state, config: &config, root };
+            let ctx = EvalContext {
+                feature: f,
+                state: &state,
+                config: &config,
+                root,
+            };
             let c = classifier.classify(&ctx);
-            !matches!(c.action, ActionType::WaitForApproval | ActionType::Done | ActionType::UnblockDependency)
+            !matches!(
+                c.action,
+                ActionType::WaitForApproval | ActionType::Done | ActionType::UnblockDependency
+            )
         })
         .collect();
 
@@ -96,7 +104,12 @@ fn needs_approval(root: &Path, json: bool) -> anyhow::Result<()> {
         .iter()
         .filter(|f| !f.archived)
         .filter_map(|f| {
-            let ctx = EvalContext { feature: f, state: &state, config: &config, root };
+            let ctx = EvalContext {
+                feature: f,
+                state: &state,
+                config: &config,
+                root,
+            };
             let c = classifier.classify(&ctx);
             if matches!(
                 c.action,

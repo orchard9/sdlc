@@ -141,7 +141,12 @@ mod tests {
 
     #[test]
     fn severity_serde_roundtrip() {
-        for &sev in &[Severity::Critical, Severity::High, Severity::Medium, Severity::Low] {
+        for &sev in &[
+            Severity::Critical,
+            Severity::High,
+            Severity::Medium,
+            Severity::Low,
+        ] {
             let json = serde_json::to_string(&sev).unwrap();
             let parsed: Severity = serde_json::from_str(&json).unwrap();
             assert_eq!(parsed, sev);

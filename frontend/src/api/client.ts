@@ -32,6 +32,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ feature_slug: featureSlug }),
     }),
+  reorderMilestoneFeatures: (milestoneSlug: string, features: string[]) =>
+    request<import('@/lib/types').MilestoneDetail>(`/api/milestones/${milestoneSlug}/features/order`, {
+      method: 'PUT', body: JSON.stringify({ features })
+    }),
 
   getArtifact: (slug: string, type_: string) =>
     request<import('@/lib/types').Artifact>(`/api/artifacts/${slug}/${type_}`),

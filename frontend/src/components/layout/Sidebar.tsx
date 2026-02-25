@@ -1,12 +1,11 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, FolderKanban, Milestone, Settings, Wand2 } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, Milestone, Settings } from 'lucide-react'
 
 const navItems = [
   { path: '/', label: 'Dashboard', icon: LayoutDashboard },
   { path: '/features', label: 'Features', icon: FolderKanban },
   { path: '/milestones', label: 'Milestones', icon: Milestone },
-  { path: '/setup', label: 'Setup Wizard', icon: Wand2 },
   { path: '/config', label: 'Config', icon: Settings },
 ]
 

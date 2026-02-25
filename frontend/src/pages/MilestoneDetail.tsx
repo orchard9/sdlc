@@ -4,7 +4,7 @@ import { api } from '@/api/client'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { RunOutput } from '@/components/pipeline/RunOutput'
 import { useRunStream } from '@/hooks/useRunStream'
-import { ArrowLeft, Loader2, Play } from 'lucide-react'
+import { ArrowLeft, ArrowUp, ArrowDown, Loader2, Play } from 'lucide-react'
 import type { MilestoneDetail as MilestoneDetailType, MilestoneFeatureReview } from '@/lib/types'
 
 export function MilestoneDetail() {
@@ -12,6 +12,7 @@ export function MilestoneDetail() {
   const [milestone, setMilestone] = useState<MilestoneDetailType | null>(null)
   const [reviews, setReviews] = useState<MilestoneFeatureReview[]>([])
   const [loading, setLoading] = useState(true)
+  const [reordering, setReordering] = useState(false)
   const runStream = useRunStream()
 
   useEffect(() => {
@@ -26,6 +27,30 @@ export function MilestoneDetail() {
   }, [slug])
 
   if (!slug) return null
+
+  const handleMove = async (featureSlug: string, direction: 'up' | 'down') => {
+    if (!milestone || reordering) return
+    const idx = milestone.features.indexOf(featureSlug)
+    if (idx === -1) return
+    const newFeatures = [...milestone.features]
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1
+    if (swapIdx < 0 || swapIdx >= newFeatures.length) return
+    ;[newFeatures[idx], newFeatures[swapIdx]] = [newFeatures[swapIdx], newFeatures[idx]]
+
+    // Optimistic update
+    setMilestone(m => m ? { ...m, features: newFeatures } : m)
+    setReordering(true)
+    try {
+      const updated = await api.reorderMilestoneFeatures(slug, newFeatures)
+      setMilestone(updated)
+    } catch {
+      // Revert on error — milestone.features is intentionally the pre-move snapshot
+      // captured in closure at the start of this call, not the current state.
+      setMilestone(m => m ? { ...m, features: milestone.features } : m)
+    } finally {
+      setReordering(false)
+    }
+  }
 
   const handleRunMilestone = async () => {
     const { run_id } = await api.runMilestone(slug, 'auto')
@@ -91,28 +116,52 @@ export function MilestoneDetail() {
           <p className="text-xs text-muted-foreground">No features in this milestone.</p>
         ) : (
           <div className="space-y-2">
-            {milestone.features.map(fs => {
+            {milestone.features.map((fs, idx) => {
               const review = reviewBySlug.get(fs)
+              const isFirst = idx === 0
+              const isLast = idx === milestone.features.length - 1
               return (
-                <Link
-                  key={fs}
-                  to={`/features/${fs}`}
-                  className="block bg-card border border-border rounded-xl p-4 hover:border-accent transition-colors"
-                >
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <span className="text-sm font-medium">{fs}</span>
-                    {review && <StatusBadge status={review.phase} />}
+                <div key={fs} className="flex items-stretch gap-2">
+                  <div className="flex flex-col items-center gap-0.5 pt-1">
+                    <span className="text-xs font-mono font-semibold text-foreground/50 w-5 text-center tabular-nums">
+                      {idx + 1}
+                    </span>
+                    <button
+                      onClick={() => handleMove(fs, 'up')}
+                      disabled={isFirst || reordering}
+                      className="p-0.5 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-default transition-colors"
+                      aria-label={`Move ${fs} up`}
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleMove(fs, 'down')}
+                      disabled={isLast || reordering}
+                      className="p-0.5 rounded hover:bg-accent disabled:opacity-30 disabled:cursor-default transition-colors"
+                      aria-label={`Move ${fs} down`}
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                  {review && (
-                    <div className="text-xs text-muted-foreground">
-                      <span className="font-medium">
-                        Next: {review.action.replace(/_/g, ' ')}
-                      </span>
-                      <span className="mx-1.5">&middot;</span>
-                      <span>{review.message}</span>
+                  <Link
+                    to={`/features/${fs}`}
+                    className="flex-1 block bg-card border border-border rounded-xl p-4 hover:border-accent transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <span className="text-sm font-medium">{fs}</span>
+                      {review && <StatusBadge status={review.phase} />}
                     </div>
-                  )}
-                </Link>
+                    {review && (
+                      <div className="text-xs text-muted-foreground">
+                        <span className="font-medium">
+                          Next: {review.action.replace(/_/g, ' ')}
+                        </span>
+                        <span className="mx-1.5">&middot;</span>
+                        <span>{review.message}</span>
+                      </div>
+                    )}
+                  </Link>
+                </div>
               )
             })}
           </div>

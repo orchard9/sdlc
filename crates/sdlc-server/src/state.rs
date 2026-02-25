@@ -19,10 +19,19 @@ pub struct RunHandle {
 #[derive(Debug, Clone, serde::Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum RunEvent {
-    Stdout { line: String },
-    Stderr { line: String },
-    Finished { exit_code: i32, duration_seconds: f64 },
-    Error { message: String },
+    Stdout {
+        line: String,
+    },
+    Stderr {
+        line: String,
+    },
+    Finished {
+        exit_code: i32,
+        duration_seconds: f64,
+    },
+    Error {
+        message: String,
+    },
 }
 
 /// Shared application state passed to all route handlers.
@@ -105,11 +114,7 @@ mod tests {
             initial_rx: Mutex::new(Some(rx1)),
             completed: Arc::new(AtomicBool::new(false)),
         };
-        state
-            .runs
-            .write()
-            .await
-            .insert("run-a".into(), handle1);
+        state.runs.write().await.insert("run-a".into(), handle1);
 
         let (tx2, rx2) = broadcast::channel(16);
         let handle2 = RunHandle {
@@ -117,11 +122,7 @@ mod tests {
             initial_rx: Mutex::new(Some(rx2)),
             completed: Arc::new(AtomicBool::new(false)),
         };
-        state
-            .runs
-            .write()
-            .await
-            .insert("run-b".into(), handle2);
+        state.runs.write().await.insert("run-b".into(), handle2);
 
         state.sweep_completed_runs().await;
         assert_eq!(state.runs.read().await.len(), 2);
@@ -137,11 +138,7 @@ mod tests {
             initial_rx: Mutex::new(None),
             completed: Arc::new(AtomicBool::new(true)),
         };
-        state
-            .runs
-            .write()
-            .await
-            .insert("run-a".into(), handle1);
+        state.runs.write().await.insert("run-a".into(), handle1);
 
         let (tx2, _) = broadcast::channel(16);
         let handle2 = RunHandle {
@@ -149,11 +146,7 @@ mod tests {
             initial_rx: Mutex::new(None),
             completed: Arc::new(AtomicBool::new(true)),
         };
-        state
-            .runs
-            .write()
-            .await
-            .insert("run-b".into(), handle2);
+        state.runs.write().await.insert("run-b".into(), handle2);
 
         state.sweep_completed_runs().await;
         assert!(state.runs.read().await.is_empty());

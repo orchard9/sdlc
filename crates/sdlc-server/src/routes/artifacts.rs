@@ -12,9 +12,8 @@ pub async fn get_artifact(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let feature = sdlc_core::feature::Feature::load(&root, &slug)?;
-        let at: sdlc_core::types::ArtifactType = artifact_type
-            .parse()
-            .map_err(|e: sdlc_core::SdlcError| e)?;
+        let at: sdlc_core::types::ArtifactType =
+            artifact_type.parse().map_err(|e: sdlc_core::SdlcError| e)?;
 
         let artifact = feature
             .artifact(at)
@@ -58,9 +57,8 @@ pub async fn approve_artifact(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
-        let at: sdlc_core::types::ArtifactType = artifact_type
-            .parse()
-            .map_err(|e: sdlc_core::SdlcError| e)?;
+        let at: sdlc_core::types::ArtifactType =
+            artifact_type.parse().map_err(|e: sdlc_core::SdlcError| e)?;
 
         feature.approve_artifact(at, body.by)?;
         feature.save(&root)?;
@@ -91,9 +89,8 @@ pub async fn reject_artifact(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
-        let at: sdlc_core::types::ArtifactType = artifact_type
-            .parse()
-            .map_err(|e: sdlc_core::SdlcError| e)?;
+        let at: sdlc_core::types::ArtifactType =
+            artifact_type.parse().map_err(|e: sdlc_core::SdlcError| e)?;
 
         feature.reject_artifact(at, body.reason)?;
         feature.save(&root)?;

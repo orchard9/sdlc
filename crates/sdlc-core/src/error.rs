@@ -17,6 +17,9 @@ pub enum SdlcError {
     #[error("milestone already exists: {0}")]
     MilestoneExists(String),
 
+    #[error("invalid feature order: {0}")]
+    InvalidFeatureOrder(String),
+
     #[error("invalid slug '{0}': must be lowercase alphanumeric with hyphens")]
     InvalidSlug(String),
 

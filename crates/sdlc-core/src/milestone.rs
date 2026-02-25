@@ -131,6 +131,17 @@ impl Milestone {
         true
     }
 
+    /// Insert a feature slug at `pos` (0-based, clamped). Returns `false` if already present.
+    pub fn add_feature_at(&mut self, feature_slug: &str, pos: usize) -> bool {
+        if self.features.contains(&feature_slug.to_string()) {
+            return false;
+        }
+        let insert_at = pos.min(self.features.len());
+        self.features.insert(insert_at, feature_slug.to_string());
+        self.updated_at = Utc::now();
+        true
+    }
+
     /// Remove a feature slug. Returns `false` if not present.
     pub fn remove_feature(&mut self, feature_slug: &str) -> bool {
         let before = self.features.len();
@@ -158,6 +169,63 @@ impl Milestone {
     pub fn update_title(&mut self, title: impl Into<String>) {
         self.title = title.into();
         self.updated_at = Utc::now();
+    }
+
+    /// Replace the feature order with `ordered`. Every slug currently in
+    /// `self.features` must appear exactly once in `ordered`.
+    pub fn reorder_features(&mut self, ordered: &[&str]) -> Result<()> {
+        // Check for duplicates in the input list
+        let mut seen = std::collections::HashSet::new();
+        for &s in ordered {
+            if !seen.insert(s) {
+                return Err(SdlcError::InvalidFeatureOrder(format!(
+                    "duplicate slug in order list: '{s}'"
+                )));
+            }
+        }
+
+        // Build a set of existing features for O(n) lookups
+        let existing: std::collections::HashSet<&str> =
+            self.features.iter().map(|s| s.as_str()).collect();
+
+        // Check for slugs in ordered that are not in self.features
+        for &s in ordered {
+            if !existing.contains(s) {
+                return Err(SdlcError::InvalidFeatureOrder(format!(
+                    "'{s}' is not in this milestone"
+                )));
+            }
+        }
+
+        // Check for slugs in self.features that are missing from ordered
+        for f in &self.features {
+            if !seen.contains(f.as_str()) {
+                return Err(SdlcError::InvalidFeatureOrder(format!(
+                    "missing slug in order list: '{f}'"
+                )));
+            }
+        }
+
+        self.features = ordered.iter().map(|s| s.to_string()).collect();
+        self.updated_at = Utc::now();
+        Ok(())
+    }
+
+    /// Move `slug` to `to_index` (0-based). Clamps to valid range.
+    pub fn move_feature(&mut self, slug: &str, to_index: usize) -> Result<()> {
+        let from = self
+            .features
+            .iter()
+            .position(|s| s == slug)
+            .ok_or_else(|| SdlcError::FeatureNotFound(slug.to_string()))?;
+
+        let last = self.features.len() - 1;
+        let to = to_index.min(last);
+
+        let item = self.features.remove(from);
+        self.features.insert(to, item);
+        self.updated_at = Utc::now();
+        Ok(())
     }
 }
 
@@ -215,6 +283,133 @@ mod tests {
         assert!(m.remove_feature("auth"));
         assert!(!m.remove_feature("auth")); // already gone
         assert!(m.features.is_empty());
+    }
+
+    #[test]
+    fn reorder_basic() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+        m.add_feature("c");
+
+        m.reorder_features(&["c", "a", "b"]).unwrap();
+        assert_eq!(m.features, vec!["c", "a", "b"]);
+    }
+
+    #[test]
+    fn reorder_rejects_missing_slug() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+
+        let err = m.reorder_features(&["a"]).unwrap_err();
+        assert!(err.to_string().contains("missing slug in order list: 'b'"));
+    }
+
+    #[test]
+    fn reorder_rejects_extra_slug() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+
+        let err = m.reorder_features(&["a", "ghost"]).unwrap_err();
+        assert!(err.to_string().contains("'ghost' is not in this milestone"));
+    }
+
+    #[test]
+    fn reorder_rejects_duplicate() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+
+        let err = m.reorder_features(&["a", "a"]).unwrap_err();
+        assert!(err
+            .to_string()
+            .contains("duplicate slug in order list: 'a'"));
+    }
+
+    #[test]
+    fn reorder_yaml_round_trip() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("x");
+        m.add_feature("y");
+        m.add_feature("z");
+        m.reorder_features(&["z", "x", "y"]).unwrap();
+        m.save(dir.path()).unwrap();
+
+        let loaded = Milestone::load(dir.path(), "v2").unwrap();
+        assert_eq!(loaded.features, vec!["z", "x", "y"]);
+    }
+
+    #[test]
+    fn move_feature_forward() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+        m.add_feature("c");
+
+        m.move_feature("a", 2).unwrap();
+        assert_eq!(m.features, vec!["b", "c", "a"]);
+    }
+
+    #[test]
+    fn move_feature_backward() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+        m.add_feature("c");
+
+        m.move_feature("c", 0).unwrap();
+        assert_eq!(m.features, vec!["c", "a", "b"]);
+    }
+
+    #[test]
+    fn move_feature_clamps_to_last() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+        m.add_feature("c");
+
+        // to_index beyond end → clamp to 2
+        m.move_feature("a", 99).unwrap();
+        assert_eq!(m.features, vec!["b", "c", "a"]);
+    }
+
+    #[test]
+    fn move_feature_not_found() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+
+        assert!(matches!(
+            m.move_feature("ghost", 0),
+            Err(SdlcError::FeatureNotFound(_))
+        ));
     }
 
     #[test]

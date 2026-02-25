@@ -31,9 +31,21 @@ pub enum MilestoneSubcommand {
     /// List all tasks across every feature in a milestone
     Tasks { slug: String },
     /// Add a feature to a milestone
-    AddFeature { slug: String, feature_slug: String },
+    AddFeature {
+        slug: String,
+        feature_slug: String,
+        /// Insert at position N (0-based); appends if omitted
+        #[arg(long, value_name = "N")]
+        position: Option<usize>,
+    },
     /// Remove a feature from a milestone
     RemoveFeature { slug: String, feature_slug: String },
+    /// Reorder features in a milestone
+    Reorder {
+        slug: String,
+        /// Feature slugs in desired order
+        features: Vec<String>,
+    },
     /// Mark a milestone complete
     Complete { slug: String },
     /// Cancel a milestone
@@ -58,18 +70,23 @@ pub enum MilestoneSubcommand {
 
 pub fn run(root: &Path, subcmd: MilestoneSubcommand, json: bool) -> anyhow::Result<()> {
     match subcmd {
-        MilestoneSubcommand::Create { slug, title, features } => {
-            create(root, &slug, &title, &features, json)
-        }
+        MilestoneSubcommand::Create {
+            slug,
+            title,
+            features,
+        } => create(root, &slug, &title, &features, json),
         MilestoneSubcommand::List => list(root, json),
         MilestoneSubcommand::Info { slug } => info(root, &slug, json),
         MilestoneSubcommand::Tasks { slug } => tasks(root, &slug, json),
-        MilestoneSubcommand::AddFeature { slug, feature_slug } => {
-            add_feature(root, &slug, &feature_slug, json)
-        }
+        MilestoneSubcommand::AddFeature {
+            slug,
+            feature_slug,
+            position,
+        } => add_feature(root, &slug, &feature_slug, position, json),
         MilestoneSubcommand::RemoveFeature { slug, feature_slug } => {
             remove_feature(root, &slug, &feature_slug, json)
         }
+        MilestoneSubcommand::Reorder { slug, features } => reorder(root, &slug, &features, json),
         MilestoneSubcommand::Complete { slug } => complete(root, &slug, json),
         MilestoneSubcommand::Cancel { slug } => cancel(root, &slug, json),
         MilestoneSubcommand::Update { slug, title } => update(root, &slug, title.as_deref(), json),
@@ -105,8 +122,8 @@ fn create(
     initial_features: &[String],
     json: bool,
 ) -> anyhow::Result<()> {
-    let mut milestone =
-        Milestone::create(root, slug, title).with_context(|| format!("failed to create milestone '{slug}'"))?;
+    let mut milestone = Milestone::create(root, slug, title)
+        .with_context(|| format!("failed to create milestone '{slug}'"))?;
 
     for f in initial_features {
         milestone.add_feature(f);
@@ -259,13 +276,28 @@ fn tasks(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn add_feature(root: &Path, slug: &str, feature_slug: &str, json: bool) -> anyhow::Result<()> {
+fn add_feature(
+    root: &Path,
+    slug: &str,
+    feature_slug: &str,
+    position: Option<usize>,
+    json: bool,
+) -> anyhow::Result<()> {
     let mut milestone =
         Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
 
-    let added = milestone.add_feature(feature_slug);
+    let added = if let Some(pos) = position {
+        milestone.add_feature_at(feature_slug, pos)
+    } else {
+        milestone.add_feature(feature_slug)
+    };
+
     if !added {
-        anyhow::bail!("feature '{}' is already in milestone '{}'", feature_slug, slug);
+        anyhow::bail!(
+            "feature '{}' is already in milestone '{}'",
+            feature_slug,
+            slug
+        );
     }
     milestone.save(root).context("failed to save milestone")?;
 
@@ -281,13 +313,38 @@ fn add_feature(root: &Path, slug: &str, feature_slug: &str, json: bool) -> anyho
     Ok(())
 }
 
+fn reorder(root: &Path, slug: &str, features: &[String], json: bool) -> anyhow::Result<()> {
+    let mut milestone =
+        Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
+
+    let refs: Vec<&str> = features.iter().map(|s| s.as_str()).collect();
+    milestone.reorder_features(&refs)?;
+    milestone.save(root).context("failed to save milestone")?;
+
+    if json {
+        print_json(&serde_json::json!({
+            "slug": slug,
+            "features": milestone.features,
+        }))?;
+    } else {
+        for (i, f) in milestone.features.iter().enumerate() {
+            println!("{}. {}", i + 1, f);
+        }
+    }
+    Ok(())
+}
+
 fn remove_feature(root: &Path, slug: &str, feature_slug: &str, json: bool) -> anyhow::Result<()> {
     let mut milestone =
         Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
 
     let removed = milestone.remove_feature(feature_slug);
     if !removed {
-        anyhow::bail!("feature '{}' not found in milestone '{}'", feature_slug, slug);
+        anyhow::bail!(
+            "feature '{}' not found in milestone '{}'",
+            feature_slug,
+            slug
+        );
     }
     milestone.save(root).context("failed to save milestone")?;
 
@@ -367,8 +424,12 @@ fn review(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
     for feature_slug in &milestone.features {
         match Feature::load(root, feature_slug) {
             Ok(feature) => {
-                let ctx =
-                    EvalContext { feature: &feature, state: &state, config: &config, root };
+                let ctx = EvalContext {
+                    feature: &feature,
+                    state: &state,
+                    config: &config,
+                    root,
+                };
                 let c = classifier.classify(&ctx);
 
                 let next_action = if let Some(tid) = &c.task_id {
@@ -435,7 +496,11 @@ fn review(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
         "Milestone: {} ({} feature{})\n",
         slug,
         milestone.features.len(),
-        if milestone.features.len() == 1 { "" } else { "s" }
+        if milestone.features.len() == 1 {
+            ""
+        } else {
+            "s"
+        }
     );
 
     if rows.is_empty() {

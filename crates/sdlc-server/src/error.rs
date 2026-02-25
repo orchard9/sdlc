@@ -14,12 +14,10 @@ impl IntoResponse for AppError {
                 | SdlcError::MilestoneNotFound(_)
                 | SdlcError::TaskNotFound(_)
                 | SdlcError::ArtifactNotFound(_) => StatusCode::NOT_FOUND,
-                SdlcError::FeatureExists(_) | SdlcError::MilestoneExists(_) => {
-                    StatusCode::CONFLICT
-                }
-                SdlcError::InvalidSlug(_) | SdlcError::InvalidPhase(_) => {
-                    StatusCode::BAD_REQUEST
-                }
+                SdlcError::FeatureExists(_) | SdlcError::MilestoneExists(_) => StatusCode::CONFLICT,
+                SdlcError::InvalidSlug(_)
+                | SdlcError::InvalidPhase(_)
+                | SdlcError::InvalidFeatureOrder(_) => StatusCode::BAD_REQUEST,
                 SdlcError::InvalidTransition { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::MissingArtifact { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::Blocked(_) => StatusCode::CONFLICT,

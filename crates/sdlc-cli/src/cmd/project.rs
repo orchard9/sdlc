@@ -75,7 +75,10 @@ fn status(root: &Path, json: bool) -> anyhow::Result<()> {
         return Ok(());
     }
 
-    println!("Project: {}   Active features: {}", state.project, active_count);
+    println!(
+        "Project: {}   Active features: {}",
+        state.project, active_count
+    );
     println!();
 
     if !phase_counts.is_empty() {
@@ -194,8 +197,7 @@ fn blockers(root: &Path, json: bool) -> anyhow::Result<()> {
         if feature.archived {
             continue;
         }
-        if !feature.blockers.is_empty()
-            && !state.blocked.iter().any(|b| b.feature == feature.slug)
+        if !feature.blockers.is_empty() && !state.blocked.iter().any(|b| b.feature == feature.slug)
         {
             for reason in &feature.blockers {
                 blocker_rows.push((

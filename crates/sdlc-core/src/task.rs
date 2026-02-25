@@ -73,16 +73,27 @@ pub fn next_task(tasks: &[Task]) -> Option<&Task> {
 
     tasks.iter().find(|t| {
         matches!(t.status, TaskStatus::Pending | TaskStatus::InProgress)
-            && t.depends_on.iter().all(|dep| completed_ids.contains(dep.as_str()))
+            && t.depends_on
+                .iter()
+                .all(|dep| completed_ids.contains(dep.as_str()))
     })
 }
 
 /// Human-readable summary: "3/5 tasks complete, 1 in progress, 1 blocked"
 pub fn summarize(tasks: &[Task]) -> String {
     let total = tasks.len();
-    let done = tasks.iter().filter(|t| matches!(t.status, TaskStatus::Completed)).count();
-    let in_progress = tasks.iter().filter(|t| matches!(t.status, TaskStatus::InProgress)).count();
-    let blocked = tasks.iter().filter(|t| matches!(t.status, TaskStatus::Blocked)).count();
+    let done = tasks
+        .iter()
+        .filter(|t| matches!(t.status, TaskStatus::Completed))
+        .count();
+    let in_progress = tasks
+        .iter()
+        .filter(|t| matches!(t.status, TaskStatus::InProgress))
+        .count();
+    let blocked = tasks
+        .iter()
+        .filter(|t| matches!(t.status, TaskStatus::Blocked))
+        .count();
     format!("{done}/{total} completed, {in_progress} in progress, {blocked} blocked")
 }
 

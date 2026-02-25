@@ -37,12 +37,13 @@ export function MilestonesPage() {
               <p className="text-xs text-muted-foreground">{m.features.length} features</p>
               {m.features.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
-                  {m.features.map(fs => (
+                  {m.features.map((fs, idx) => (
                     <Link
                       key={fs}
                       to={`/features/${fs}`}
-                      className="text-xs bg-muted px-2 py-0.5 rounded hover:bg-accent transition-colors"
+                      className="text-xs bg-muted px-2 py-0.5 rounded hover:bg-accent transition-colors flex items-center gap-1"
                     >
+                      <span className="font-mono text-muted-foreground/60 tabular-nums">{idx + 1}.</span>
                       {fs}
                     </Link>
                   ))}

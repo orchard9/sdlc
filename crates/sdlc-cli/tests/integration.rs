@@ -5,8 +5,7 @@ use tempfile::TempDir;
 
 fn sdlc(dir: &TempDir) -> Command {
     let mut cmd = Command::cargo_bin("sdlc").unwrap();
-    cmd.current_dir(dir.path())
-        .env("SDLC_ROOT", dir.path());
+    cmd.current_dir(dir.path()).env("SDLC_ROOT", dir.path());
     cmd
 }
 
@@ -104,8 +103,14 @@ fn feature_create_duplicate_fails() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().failure();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .failure();
 }
 
 #[test]
@@ -135,7 +140,10 @@ fn next_returns_create_spec_for_new_feature() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir).args(["feature", "create", "auth-login"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth-login"])
+        .assert()
+        .success();
 
     sdlc(&dir)
         .args(["next", "--for", "auth-login", "--json"])
@@ -149,7 +157,10 @@ fn next_json_output_has_expected_fields() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir).args(["feature", "create", "f1"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "f1"])
+        .assert()
+        .success();
 
     let output = sdlc(&dir)
         .args(["next", "--for", "f1", "--json"])
@@ -175,7 +186,10 @@ fn approve_spec_enables_transition_to_specified() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir).args(["feature", "create", "auth-login"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth-login"])
+        .assert()
+        .success();
 
     // Next should be create_spec
     sdlc(&dir)
@@ -226,7 +240,10 @@ fn task_lifecycle() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir).args(["feature", "create", "feat"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "feat"])
+        .assert()
+        .success();
 
     sdlc(&dir)
         .args(["task", "add", "feat", "Write", "tests"])
@@ -260,7 +277,10 @@ fn state_shows_features() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir).args(["feature", "create", "my-feat"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "my-feat"])
+        .assert()
+        .success();
 
     sdlc(&dir)
         .arg("state")
@@ -293,8 +313,14 @@ fn query_needs_approval_empty_initially() {
 fn task_edit_title() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
-    sdlc(&dir).args(["task", "add", "auth", "Old title"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "auth", "Old title"])
+        .assert()
+        .success();
     sdlc(&dir)
         .args(["task", "edit", "auth", "T1", "--title", "New title"])
         .assert()
@@ -311,11 +337,29 @@ fn task_edit_title() {
 fn task_edit_description_and_depends() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
-    sdlc(&dir).args(["task", "add", "auth", "First task"]).assert().success();
-    sdlc(&dir).args(["task", "add", "auth", "Second task"]).assert().success();
     sdlc(&dir)
-        .args(["task", "edit", "auth", "T2", "--description", "Must run after T1", "--depends", "T1"])
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "auth", "First task"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "auth", "Second task"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args([
+            "task",
+            "edit",
+            "auth",
+            "T2",
+            "--description",
+            "Must run after T1",
+            "--depends",
+            "T1",
+        ])
         .assert()
         .success();
     sdlc(&dir)
@@ -334,7 +378,10 @@ fn task_edit_description_and_depends() {
 fn comment_create_and_list() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
     sdlc(&dir)
         .args(["comment", "create", "auth", "Spec section 3 is incomplete"])
         .assert()
@@ -351,10 +398,25 @@ fn comment_create_and_list() {
 fn comment_with_flag_and_task() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
-    sdlc(&dir).args(["task", "add", "auth", "Write tests"]).assert().success();
     sdlc(&dir)
-        .args(["comment", "create", "auth", "Blocked by legal", "--flag", "blocker", "--task", "T1"])
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "auth", "Write tests"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args([
+            "comment",
+            "create",
+            "auth",
+            "Blocked by legal",
+            "--flag",
+            "blocker",
+            "--task",
+            "T1",
+        ])
         .assert()
         .success();
     // Scoped list shows the comment
@@ -369,9 +431,14 @@ fn comment_with_flag_and_task() {
 fn comment_json_output() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
     sdlc(&dir)
-        .args(["comment", "create", "auth", "A note", "--flag", "fyi", "--by", "alice"])
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args([
+            "comment", "create", "auth", "A note", "--flag", "fyi", "--by", "alice",
+        ])
         .assert()
         .success();
     let out = sdlc(&dir)
@@ -391,9 +458,19 @@ fn comment_json_output() {
 fn blocker_comment_surfaces_in_next() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
     sdlc(&dir)
-        .args(["comment", "create", "auth", "Waiting on security review", "--flag", "blocker"])
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args([
+            "comment",
+            "create",
+            "auth",
+            "Waiting on security review",
+            "--flag",
+            "blocker",
+        ])
         .assert()
         .success();
     // sdlc next should surface the blocker comment, not create_spec
@@ -413,11 +490,21 @@ fn blocker_comment_surfaces_in_next() {
 fn comment_resolve_unblocks_pipeline() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
 
     // Add a blocker comment — pipeline stalls
     sdlc(&dir)
-        .args(["comment", "create", "auth", "Waiting on Stripe account", "--flag", "blocker"])
+        .args([
+            "comment",
+            "create",
+            "auth",
+            "Waiting on Stripe account",
+            "--flag",
+            "blocker",
+        ])
         .assert()
         .success();
     let out = sdlc(&dir)
@@ -451,7 +538,10 @@ fn comment_resolve_unblocks_pipeline() {
 fn comment_resolve_nonexistent_errors() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
     sdlc(&dir)
         .args(["comment", "resolve", "auth", "C99"])
         .assert()
@@ -463,10 +553,20 @@ fn comment_resolve_nonexistent_errors() {
 fn question_flag_comment_blocks_pipeline() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
 
     sdlc(&dir)
-        .args(["comment", "create", "auth", "What auth strategy?", "--flag", "question"])
+        .args([
+            "comment",
+            "create",
+            "auth",
+            "What auth strategy?",
+            "--flag",
+            "question",
+        ])
         .assert()
         .success();
     let out = sdlc(&dir)
@@ -478,7 +578,10 @@ fn question_flag_comment_blocks_pipeline() {
         .clone();
     let v: serde_json::Value = serde_json::from_slice(&out).unwrap();
     assert_eq!(v["action"], "wait_for_approval");
-    assert!(v["message"].as_str().unwrap().contains("What auth strategy?"));
+    assert!(v["message"]
+        .as_str()
+        .unwrap()
+        .contains("What auth strategy?"));
 }
 
 // ---------------------------------------------------------------------------
@@ -504,7 +607,10 @@ fn project_status_shows_feature_counts() {
 fn project_status_json() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
     let out = sdlc(&dir)
         .args(["--json", "project", "status"])
         .assert()
@@ -546,7 +652,10 @@ fn project_blockers_empty() {
 fn task_get_shows_detail() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
     sdlc(&dir)
         .args(["task", "add", "auth", "Write login form"])
         .assert()
@@ -562,7 +671,10 @@ fn task_get_shows_detail() {
 fn task_search_finds_match() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
     sdlc(&dir)
         .args(["task", "add", "auth", "Write login form"])
         .assert()
@@ -588,7 +700,10 @@ fn task_search_finds_match() {
 fn task_search_scoped_to_slug() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
-    sdlc(&dir).args(["feature", "create", "auth"]).assert().success();
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
     sdlc(&dir)
         .args(["task", "add", "auth", "Fix login bug"])
         .assert()
@@ -630,8 +745,14 @@ fn happy_path_through_specified() {
     // Write and approve spec
     let spec_path = dir.path().join(".sdlc/features/user-auth/spec.md");
     std::fs::write(&spec_path, "# User Auth Spec\n\nDetails here.").unwrap();
-    sdlc(&dir).args(["artifact", "draft", "user-auth", "spec"]).assert().success();
-    sdlc(&dir).args(["artifact", "approve", "user-auth", "spec"]).assert().success();
+    sdlc(&dir)
+        .args(["artifact", "draft", "user-auth", "spec"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["artifact", "approve", "user-auth", "spec"])
+        .assert()
+        .success();
 
     // Transition to specified
     sdlc(&dir)
@@ -729,7 +850,9 @@ fn milestone_add_and_remove_feature() {
         .args(["milestone", "add-feature", "v2", "auth"])
         .assert()
         .success()
-        .stdout(predicates::str::contains("Added feature 'auth' to milestone 'v2'"));
+        .stdout(predicates::str::contains(
+            "Added feature 'auth' to milestone 'v2'",
+        ));
 
     // Adding again fails (already present)
     sdlc(&dir)
@@ -741,7 +864,9 @@ fn milestone_add_and_remove_feature() {
         .args(["milestone", "remove-feature", "v2", "auth"])
         .assert()
         .success()
-        .stdout(predicates::str::contains("Removed feature 'auth' from milestone 'v2'"));
+        .stdout(predicates::str::contains(
+            "Removed feature 'auth' from milestone 'v2'",
+        ));
 
     // Removing again fails (not present)
     sdlc(&dir)
@@ -867,6 +992,176 @@ fn milestone_review_json() {
 }
 
 // ---------------------------------------------------------------------------
+// sdlc milestone reorder / add-feature --position
+// ---------------------------------------------------------------------------
+
+#[test]
+fn milestone_reorder_changes_feature_order() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "f1", "--title", "F1"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "f2", "--title", "F2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "f3", "--title", "F3"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "create", "v2", "--title", "v2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f1"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f3"])
+        .assert()
+        .success();
+
+    // Reorder: f3, f1, f2
+    sdlc(&dir)
+        .args(["milestone", "reorder", "v2", "f3", "f1", "f2"])
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("1. f3"))
+        .stdout(predicates::str::contains("2. f1"))
+        .stdout(predicates::str::contains("3. f2"));
+
+    // Verify JSON round-trip
+    let out = sdlc(&dir)
+        .args(["--json", "milestone", "info", "v2"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let json: serde_json::Value = serde_json::from_slice(&out).unwrap();
+    assert_eq!(json["features"][0], "f3");
+    assert_eq!(json["features"][1], "f1");
+    assert_eq!(json["features"][2], "f2");
+}
+
+#[test]
+fn milestone_reorder_rejects_missing_slug() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "f1", "--title", "F1"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "f2", "--title", "F2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "create", "v2", "--title", "v2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f1"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f2"])
+        .assert()
+        .success();
+
+    // Only provide f1 — f2 is missing
+    sdlc(&dir)
+        .args(["milestone", "reorder", "v2", "f1"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("missing slug"));
+}
+
+#[test]
+fn milestone_reorder_rejects_extra_slug() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "f1", "--title", "F1"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "create", "v2", "--title", "v2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f1"])
+        .assert()
+        .success();
+
+    // "ghost" is not in the milestone
+    sdlc(&dir)
+        .args(["milestone", "reorder", "v2", "f1", "ghost"])
+        .assert()
+        .failure()
+        .stderr(predicates::str::contains("not in this milestone"));
+}
+
+#[test]
+fn milestone_add_feature_with_position() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "f1", "--title", "F1"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "f2", "--title", "F2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "f3", "--title", "F3"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "create", "v2", "--title", "v2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f2"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f3"])
+        .assert()
+        .success();
+
+    // Insert f1 at position 0 — should be first
+    sdlc(&dir)
+        .args(["milestone", "add-feature", "v2", "f1", "--position", "0"])
+        .assert()
+        .success();
+
+    let out = sdlc(&dir)
+        .args(["--json", "milestone", "info", "v2"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let json: serde_json::Value = serde_json::from_slice(&out).unwrap();
+    assert_eq!(json["features"][0], "f1");
+    assert_eq!(json["features"][1], "f2");
+    assert_eq!(json["features"][2], "f3");
+}
+
+// ---------------------------------------------------------------------------
 // sdlc platform
 // ---------------------------------------------------------------------------
 
@@ -976,7 +1271,9 @@ fn platform_deploy_executes_script() {
         .args(["platform", "deploy", "auth-service", "staging"])
         .assert()
         .success()
-        .stdout(predicates::str::contains("Deploying auth-service to staging"));
+        .stdout(predicates::str::contains(
+            "Deploying auth-service to staging",
+        ));
 }
 
 #[test]
@@ -988,7 +1285,9 @@ fn platform_dev_subcommand_dispatches() {
         .args(["platform", "dev", "start"])
         .assert()
         .success()
-        .stdout(predicates::str::contains("Starting development environment"));
+        .stdout(predicates::str::contains(
+            "Starting development environment",
+        ));
 }
 
 #[test]
@@ -1055,7 +1354,15 @@ fn config_agent_set_default_xadk() {
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["config", "agent", "set-default", "--type", "xadk", "--agent-id", "sdlc_spec"])
+        .args([
+            "config",
+            "agent",
+            "set-default",
+            "--type",
+            "xadk",
+            "--agent-id",
+            "sdlc_spec",
+        ])
         .assert()
         .success();
 
@@ -1074,9 +1381,13 @@ fn config_agent_set_default_claude() {
 
     sdlc(&dir)
         .args([
-            "config", "agent", "set-default",
-            "--type", "claude",
-            "--model", "claude-haiku-4-5",
+            "config",
+            "agent",
+            "set-default",
+            "--type",
+            "claude",
+            "--model",
+            "claude-haiku-4-5",
         ])
         .assert()
         .success();
@@ -1095,9 +1406,14 @@ fn config_agent_set_action_override() {
 
     sdlc(&dir)
         .args([
-            "config", "agent", "set-action", "create_spec",
-            "--type", "xadk",
-            "--agent-id", "sdlc_spec",
+            "config",
+            "agent",
+            "set-action",
+            "create_spec",
+            "--type",
+            "xadk",
+            "--agent-id",
+            "sdlc_spec",
         ])
         .assert()
         .success();
@@ -1116,7 +1432,14 @@ fn config_agent_reset_clears_overrides() {
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["config", "agent", "set-action", "create_spec", "--type", "human"])
+        .args([
+            "config",
+            "agent",
+            "set-action",
+            "create_spec",
+            "--type",
+            "human",
+        ])
         .assert()
         .success();
 
@@ -1180,9 +1503,13 @@ fn run_dry_run_claude_prints_command() {
 
     sdlc(&dir)
         .args([
-            "config", "agent", "set-default",
-            "--type", "claude",
-            "--model", "claude-opus-4-6",
+            "config",
+            "agent",
+            "set-default",
+            "--type",
+            "claude",
+            "--model",
+            "claude-opus-4-6",
         ])
         .assert()
         .success();
@@ -1207,9 +1534,13 @@ fn run_dry_run_xadk_prints_command() {
 
     sdlc(&dir)
         .args([
-            "config", "agent", "set-default",
-            "--type", "xadk",
-            "--agent-id", "sdlc_spec",
+            "config",
+            "agent",
+            "set-default",
+            "--type",
+            "xadk",
+            "--agent-id",
+            "sdlc_spec",
         ])
         .assert()
         .success();
@@ -1234,7 +1565,9 @@ fn run_done_exits_zero_with_message() {
         .success();
 
     // Force the feature to Released phase by patching its manifest directly
-    let manifest_path = dir.path().join(".sdlc/features/released-feat/manifest.yaml");
+    let manifest_path = dir
+        .path()
+        .join(".sdlc/features/released-feat/manifest.yaml");
     let manifest = std::fs::read_to_string(&manifest_path).unwrap();
     let updated = manifest.replace("phase: draft", "phase: released");
     std::fs::write(&manifest_path, updated).unwrap();
@@ -1310,7 +1643,13 @@ fn e2e_full_pipeline_init_to_specified() {
 
     // 5. sdlc feature create user-profile --title "User Profile"
     sdlc(&dir)
-        .args(["feature", "create", "user-profile", "--title", "User Profile"])
+        .args([
+            "feature",
+            "create",
+            "user-profile",
+            "--title",
+            "User Profile",
+        ])
         .assert()
         .success();
 
@@ -1319,14 +1658,18 @@ fn e2e_full_pipeline_init_to_specified() {
         .args(["milestone", "add-feature", "mvp", "auth-login"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Added feature 'auth-login' to milestone 'mvp'"));
+        .stdout(predicate::str::contains(
+            "Added feature 'auth-login' to milestone 'mvp'",
+        ));
 
     // 7. sdlc milestone add-feature mvp user-profile
     sdlc(&dir)
         .args(["milestone", "add-feature", "mvp", "user-profile"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Added feature 'user-profile' to milestone 'mvp'"));
+        .stdout(predicate::str::contains(
+            "Added feature 'user-profile' to milestone 'mvp'",
+        ));
 
     // 8. sdlc milestone review mvp --json — verify both features show in review
     let review_out = sdlc(&dir)
@@ -1403,8 +1746,14 @@ fn e2e_full_pipeline_init_to_specified() {
         .clone();
     let review2_json: serde_json::Value = serde_json::from_slice(&review2_out).unwrap();
     let features2 = review2_json["features"].as_array().unwrap();
-    let auth_entry = features2.iter().find(|f| f["feature"] == "auth-login").unwrap();
-    let profile_entry = features2.iter().find(|f| f["feature"] == "user-profile").unwrap();
+    let auth_entry = features2
+        .iter()
+        .find(|f| f["feature"] == "auth-login")
+        .unwrap();
+    let profile_entry = features2
+        .iter()
+        .find(|f| f["feature"] == "user-profile")
+        .unwrap();
     assert_eq!(auth_entry["phase"], "specified");
     assert_eq!(profile_entry["phase"], "draft");
 
@@ -1435,7 +1784,13 @@ fn e2e_task_and_comment_lifecycle() {
     // 1. Init + create feature
     init_project(&dir);
     sdlc(&dir)
-        .args(["feature", "create", "payments", "--title", "Payment Integration"])
+        .args([
+            "feature",
+            "create",
+            "payments",
+            "--title",
+            "Payment Integration",
+        ])
         .assert()
         .success();
 
@@ -1479,9 +1834,12 @@ fn e2e_task_and_comment_lifecycle() {
     // 3. Add a blocker comment — verify pipeline stalls (next returns wait_for_approval)
     sdlc(&dir)
         .args([
-            "comment", "create", "payments",
+            "comment",
+            "create",
+            "payments",
             "Waiting on Stripe API key from finance team",
-            "--flag", "blocker",
+            "--flag",
+            "blocker",
         ])
         .assert()
         .success()
@@ -1496,12 +1854,10 @@ fn e2e_task_and_comment_lifecycle() {
         .clone();
     let next_blocked_json: serde_json::Value = serde_json::from_slice(&next_blocked).unwrap();
     assert_eq!(next_blocked_json["action"], "wait_for_approval");
-    assert!(
-        next_blocked_json["message"]
-            .as_str()
-            .unwrap()
-            .contains("blocker comment")
-    );
+    assert!(next_blocked_json["message"]
+        .as_str()
+        .unwrap()
+        .contains("blocker comment"));
 
     // 4. Resolve the blocker — verify pipeline resumes
     sdlc(&dir)
@@ -1556,9 +1912,12 @@ fn e2e_task_and_comment_lifecycle() {
     // Add a new blocker comment and verify next stalls again
     sdlc(&dir)
         .args([
-            "comment", "create", "payments",
+            "comment",
+            "create",
+            "payments",
             "Legal review pending for PCI compliance",
-            "--flag", "blocker",
+            "--flag",
+            "blocker",
         ])
         .assert()
         .success()
@@ -1573,12 +1932,10 @@ fn e2e_task_and_comment_lifecycle() {
         .clone();
     let next_blocked2_json: serde_json::Value = serde_json::from_slice(&next_blocked2).unwrap();
     assert_eq!(next_blocked2_json["action"], "wait_for_approval");
-    assert!(
-        next_blocked2_json["message"]
-            .as_str()
-            .unwrap()
-            .contains("PCI compliance")
-    );
+    assert!(next_blocked2_json["message"]
+        .as_str()
+        .unwrap()
+        .contains("PCI compliance"));
 
     // Resolve the second blocker and verify pipeline resumes
     sdlc(&dir)

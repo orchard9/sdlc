@@ -61,7 +61,10 @@ impl Artifact {
     }
 
     pub fn is_approved(&self) -> bool {
-        matches!(self.status, ArtifactStatus::Approved | ArtifactStatus::Passed)
+        matches!(
+            self.status,
+            ArtifactStatus::Approved | ArtifactStatus::Passed
+        )
     }
 
     pub fn exists_on_disk(&self, root: &std::path::Path) -> bool {

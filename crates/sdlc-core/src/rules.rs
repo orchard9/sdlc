@@ -97,10 +97,12 @@ fn feature_dir(ctx: &EvalContext) -> String {
 }
 
 fn has_blocker_comments(ctx: &EvalContext) -> bool {
-    ctx.feature
-        .comments
-        .iter()
-        .any(|c| matches!(&c.flag, Some(CommentFlag::Blocker) | Some(CommentFlag::Question)))
+    ctx.feature.comments.iter().any(|c| {
+        matches!(
+            &c.flag,
+            Some(CommentFlag::Blocker) | Some(CommentFlag::Question)
+        )
+    })
 }
 
 fn blocker_comments_message(ctx: &EvalContext) -> String {
@@ -108,7 +110,12 @@ fn blocker_comments_message(ctx: &EvalContext) -> String {
         .feature
         .comments
         .iter()
-        .filter(|c| matches!(&c.flag, Some(CommentFlag::Blocker) | Some(CommentFlag::Question)))
+        .filter(|c| {
+            matches!(
+                &c.flag,
+                Some(CommentFlag::Blocker) | Some(CommentFlag::Question)
+            )
+        })
         .collect();
     let details: Vec<String> = blockers
         .iter()
@@ -140,7 +147,6 @@ pub fn default_rules() -> Vec<Rule> {
             ),
             next_command: |_| String::new()
         },
-
         // 2. Blocker-flagged comments block progress until resolved
         rule! {
             id: "blocker_comment",
@@ -149,7 +155,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: blocker_comments_message,
             next_command: |_| String::new()
         },
-
         // 3. Draft — no spec exists
         rule! {
             id: "needs_spec",
@@ -168,7 +173,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/spec-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/spec.md", feature_dir(ctx))
         },
-
         // 3. Draft — spec written, awaiting approval
         rule! {
             id: "spec_needs_approval",
@@ -177,7 +181,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Spec for '{}' is ready for review.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc artifact approve {} spec", ctx.feature.slug)
         },
-
         // 4. Draft — spec rejected, needs rewrite
         rule! {
             id: "spec_rejected",
@@ -196,7 +199,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/spec-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/spec.md", feature_dir(ctx))
         },
-
         // 5. Draft — spec approved, transition to Specified
         rule! {
             id: "spec_approved",
@@ -206,7 +208,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} specified", ctx.feature.slug),
             transition_to: Phase::Specified
         },
-
         // 6. Specified — no design
         rule! {
             id: "needs_design",
@@ -216,7 +217,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/design-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/design.md", feature_dir(ctx))
         },
-
         // 7. Specified — design needs approval
         rule! {
             id: "design_needs_approval",
@@ -225,7 +225,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Design for '{}' is ready for review.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc artifact approve {} design", ctx.feature.slug)
         },
-
         // 8. Specified — design rejected
         rule! {
             id: "design_rejected",
@@ -235,7 +234,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/design-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/design.md", feature_dir(ctx))
         },
-
         // 9. Specified — design approved, no tasks
         rule! {
             id: "needs_tasks",
@@ -247,7 +245,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/tasks-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/tasks.md", feature_dir(ctx))
         },
-
         // 10. Specified — tasks exist, no QA plan
         rule! {
             id: "needs_qa_plan",
@@ -260,7 +257,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/qa-plan {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/qa-plan.md", feature_dir(ctx))
         },
-
         // 11. Specified — all planning artifacts approved, transition to Planned
         rule! {
             id: "ready_to_plan",
@@ -273,7 +269,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} planned", ctx.feature.slug),
             transition_to: Phase::Planned
         },
-
         // 12. Planned — transition to Ready (no further gates)
         rule! {
             id: "planned_to_ready",
@@ -283,7 +278,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} ready", ctx.feature.slug),
             transition_to: Phase::Ready
         },
-
         // 13. Ready — has pending tasks to implement
         rule! {
             id: "implement_task",
@@ -300,7 +294,6 @@ pub fn default_rules() -> Vec<Rule> {
                     .unwrap_or_default()
             }
         },
-
         // 14. Ready — all tasks done, no review
         rule! {
             id: "needs_review",
@@ -313,7 +306,6 @@ pub fn default_rules() -> Vec<Rule> {
             output_path: |ctx| format!("{}/review.md", feature_dir(ctx)),
             transition_to: Phase::Review
         },
-
         // 15. Review — review needs approval
         rule! {
             id: "review_needs_approval",
@@ -322,7 +314,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Review for '{}' is ready for approval.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc artifact approve {} review", ctx.feature.slug)
         },
-
         // 16. Review — review rejected, fix issues
         rule! {
             id: "fix_review_issues",
@@ -331,7 +322,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Review for '{}' failed. Fix the issues.", ctx.feature.slug),
             next_command: |ctx| format!("/fix-review {}", ctx.feature.slug)
         },
-
         // 17. Review — approved, transition to Audit
         rule! {
             id: "review_approved",
@@ -341,7 +331,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} audit", ctx.feature.slug),
             transition_to: Phase::Audit
         },
-
         // 18. Audit — no audit
         rule! {
             id: "needs_audit",
@@ -351,7 +340,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/audit-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/audit.md", feature_dir(ctx))
         },
-
         // 19. Audit — approved, transition to QA
         rule! {
             id: "audit_approved",
@@ -361,7 +349,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} qa", ctx.feature.slug),
             transition_to: Phase::Qa
         },
-
         // 20. QA — no results
         rule! {
             id: "needs_qa",
@@ -371,7 +358,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/run-qa {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/qa-results.md", feature_dir(ctx))
         },
-
         // 21. QA — results need approval / merge gate
         rule! {
             id: "qa_needs_approval",
@@ -380,7 +366,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("QA results for '{}' are ready for approval.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc artifact approve {} qa_results", ctx.feature.slug)
         },
-
         // 22. QA — results failed
         rule! {
             id: "qa_failed",
@@ -392,7 +377,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("QA failed for '{}'. Fix the issues.", ctx.feature.slug),
             next_command: |ctx| format!("/fix-qa {}", ctx.feature.slug)
         },
-
         // 23. QA passed, approve merge → Merge phase
         rule! {
             id: "qa_approved",
@@ -402,7 +386,6 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} merge", ctx.feature.slug),
             transition_to: Phase::Merge
         },
-
         // 24. Merge phase — execute the merge
         rule! {
             id: "do_merge",
@@ -411,7 +394,6 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Merge '{}' to main.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc merge {}", ctx.feature.slug)
         },
-
         // 25. Released — nothing left
         rule! {
             id: "released",
@@ -443,7 +425,12 @@ mod tests {
         config: &'a Config,
         root: &'a std::path::Path,
     ) -> EvalContext<'a> {
-        EvalContext { feature, state, config, root }
+        EvalContext {
+            feature,
+            state,
+            config,
+            root,
+        }
     }
 
     fn fresh_feature(dir: &TempDir, slug: &str) -> Feature {

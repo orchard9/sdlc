@@ -16,8 +16,8 @@ pub fn run(root: &Path, feature_slug: Option<&str>, json: bool) -> anyhow::Resul
 
     match feature_slug {
         Some(slug) => {
-            let feature = Feature::load(root, slug)
-                .with_context(|| format!("feature '{slug}' not found"))?;
+            let feature =
+                Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
             let ctx = EvalContext {
                 feature: &feature,
                 state: &state,
@@ -44,10 +44,7 @@ pub fn run(root: &Path, feature_slug: Option<&str>, json: bool) -> anyhow::Resul
         None => {
             // Classify all active features
             let features = Feature::list(root).context("failed to list features")?;
-            let active: Vec<&Feature> = features
-                .iter()
-                .filter(|f| !f.archived)
-                .collect();
+            let active: Vec<&Feature> = features.iter().filter(|f| !f.archived).collect();
 
             if active.is_empty() {
                 println!("No active features. Run: sdlc feature create <slug>");

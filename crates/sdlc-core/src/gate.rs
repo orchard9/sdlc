@@ -149,7 +149,8 @@ mod tests {
 
     #[test]
     fn gate_definition_rejects_unknown_fields() {
-        let yaml = "name: lint\ngate_type:\n  type: shell\n  command: npm run lint\ntimout_seconds: 30\n";
+        let yaml =
+            "name: lint\ngate_type:\n  type: shell\n  command: npm run lint\ntimout_seconds: 30\n";
         let result = serde_yaml::from_str::<GateDefinition>(yaml);
         assert!(result.is_err(), "typo in field name should be rejected");
     }

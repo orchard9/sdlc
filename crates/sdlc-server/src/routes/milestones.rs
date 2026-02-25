@@ -70,8 +70,7 @@ pub async fn review_milestone(
         let m = sdlc_core::milestone::Milestone::load(&root, &slug)?;
         let config = sdlc_core::config::Config::load(&root)?;
         let state = sdlc_core::state::State::load(&root)?;
-        let classifier =
-            sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
+        let classifier = sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
 
         let reviews: Vec<serde_json::Value> = m
             .features
@@ -179,6 +178,41 @@ pub async fn run_milestone(
     app.runs.write().await.insert(run_id.clone(), handle);
 
     Ok(Json(serde_json::json!({ "run_id": run_id })))
+}
+
+#[derive(serde::Deserialize)]
+pub struct ReorderFeaturesBody {
+    pub features: Vec<String>,
+}
+
+/// PUT /api/milestones/:slug/features/order — reorder features in a milestone.
+pub async fn reorder_milestone_features(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+    Json(body): Json<ReorderFeaturesBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let mut m = sdlc_core::milestone::Milestone::load(&root, &slug)?;
+        let refs: Vec<&str> = body.features.iter().map(|s| s.as_str()).collect();
+        m.reorder_features(&refs)?;
+        m.save(&root)?;
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "slug": m.slug,
+            "title": m.title,
+            "description": m.description,
+            "status": m.status,
+            "features": m.features,
+            "created_at": m.created_at,
+            "updated_at": m.updated_at,
+            "completed_at": m.completed_at,
+            "cancelled_at": m.cancelled_at,
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
 }
 
 #[derive(serde::Deserialize)]

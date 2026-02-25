@@ -4,15 +4,9 @@ mod root;
 
 use clap::{Parser, Subcommand};
 use cmd::{
-    artifact::ArtifactSubcommand,
-    comment::CommentSubcommand,
-    config::ConfigSubcommand,
-    feature::FeatureSubcommand,
-    milestone::MilestoneSubcommand,
-    platform::PlatformSubcommand,
-    project::ProjectSubcommand,
-    query::QuerySubcommand,
-    score::ScoreSubcommand,
+    artifact::ArtifactSubcommand, comment::CommentSubcommand, config::ConfigSubcommand,
+    feature::FeatureSubcommand, milestone::MilestoneSubcommand, platform::PlatformSubcommand,
+    project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
     task::TaskSubcommand,
 };
 use std::path::PathBuf;
@@ -159,33 +153,15 @@ fn main() {
     let result = match cli.command {
         Commands::Init { platform } => cmd::init::run(&root, platform.as_deref()),
         Commands::State => cmd::state::run(&root, cli.json),
-        Commands::Next { feature } => {
-            cmd::next::run(&root, feature.as_deref(), cli.json)
-        }
-        Commands::Feature { subcommand } => {
-            cmd::feature::run(&root, subcommand, cli.json)
-        }
-        Commands::Artifact { subcommand } => {
-            cmd::artifact::run(&root, subcommand, cli.json)
-        }
-        Commands::Task { subcommand } => {
-            cmd::task::run(&root, subcommand, cli.json)
-        }
-        Commands::Comment { subcommand } => {
-            cmd::comment::run(&root, subcommand, cli.json)
-        }
-        Commands::Milestone { subcommand } => {
-            cmd::milestone::run(&root, subcommand, cli.json)
-        }
-        Commands::Platform { subcommand } => {
-            cmd::platform::run(&root, subcommand, cli.json)
-        }
-        Commands::Project { subcommand } => {
-            cmd::project::run(&root, subcommand, cli.json)
-        }
-        Commands::Query { subcommand } => {
-            cmd::query::run(&root, subcommand, cli.json)
-        }
+        Commands::Next { feature } => cmd::next::run(&root, feature.as_deref(), cli.json),
+        Commands::Feature { subcommand } => cmd::feature::run(&root, subcommand, cli.json),
+        Commands::Artifact { subcommand } => cmd::artifact::run(&root, subcommand, cli.json),
+        Commands::Task { subcommand } => cmd::task::run(&root, subcommand, cli.json),
+        Commands::Comment { subcommand } => cmd::comment::run(&root, subcommand, cli.json),
+        Commands::Milestone { subcommand } => cmd::milestone::run(&root, subcommand, cli.json),
+        Commands::Platform { subcommand } => cmd::platform::run(&root, subcommand, cli.json),
+        Commands::Project { subcommand } => cmd::project::run(&root, subcommand, cli.json),
+        Commands::Query { subcommand } => cmd::query::run(&root, subcommand, cli.json),
         Commands::Config { subcommand } => cmd::config::run(&root, subcommand, cli.json),
         Commands::Score { subcommand } => cmd::score::run(&root, subcommand, cli.json),
         Commands::Run { slug, dry_run } => cmd::run::run(&root, &slug, dry_run),
@@ -197,8 +173,7 @@ fn main() {
             cmd::feature::run(&root, FeatureSubcommand::Archive { slug }, cli.json)
         }
         Commands::Ui { port, no_open } => {
-            let rt = tokio::runtime::Runtime::new()
-                .expect("failed to create tokio runtime");
+            let rt = tokio::runtime::Runtime::new().expect("failed to create tokio runtime");
             rt.block_on(sdlc_server::serve(root.clone(), port, !no_open))
                 .map_err(|e| anyhow::anyhow!("{e}"))
         }

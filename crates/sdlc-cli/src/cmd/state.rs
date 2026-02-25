@@ -140,10 +140,7 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
         if ms_features.is_empty() {
             println!("  (no features)");
         } else {
-            let rows: Vec<Vec<String>> = ms_features
-                .iter()
-                .map(|f| feature_row(f))
-                .collect();
+            let rows: Vec<Vec<String>> = ms_features.iter().map(|f| feature_row(f)).collect();
             print_table_indented(&["SLUG", "PHASE", "STATUS", "TITLE"], rows);
         }
     }
@@ -160,10 +157,7 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
         } else {
             println!("\nUnassigned:");
         }
-        let rows: Vec<Vec<String>> = unassigned
-            .iter()
-            .map(|f| feature_row(f))
-            .collect();
+        let rows: Vec<Vec<String>> = unassigned.iter().map(|f| feature_row(f)).collect();
         print_table_indented(&["SLUG", "PHASE", "STATUS", "TITLE"], rows);
     }
 

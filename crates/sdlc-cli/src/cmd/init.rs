@@ -27,8 +27,7 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     ];
     for dir in dirs {
         let p = root.join(dir);
-        io::ensure_dir(&p)
-            .with_context(|| format!("failed to create {}", p.display()))?;
+        io::ensure_dir(&p).with_context(|| format!("failed to create {}", p.display()))?;
     }
 
     // 2. Write config.yaml if missing
@@ -182,12 +181,19 @@ fn masquerade_platform_config() -> PlatformConfig {
     );
 
     let mut dev_subcommands: HashMap<String, String> = HashMap::new();
-    dev_subcommands.insert("start".to_string(), ".sdlc/platform/dev-start.sh".to_string());
+    dev_subcommands.insert(
+        "start".to_string(),
+        ".sdlc/platform/dev-start.sh".to_string(),
+    );
     dev_subcommands.insert("stop".to_string(), ".sdlc/platform/dev-stop.sh".to_string());
-    dev_subcommands
-        .insert("quality".to_string(), ".sdlc/platform/dev-quality.sh".to_string());
-    dev_subcommands
-        .insert("migrate".to_string(), ".sdlc/platform/dev-migrate.sh".to_string());
+    dev_subcommands.insert(
+        "quality".to_string(),
+        ".sdlc/platform/dev-quality.sh".to_string(),
+    );
+    dev_subcommands.insert(
+        "migrate".to_string(),
+        ".sdlc/platform/dev-migrate.sh".to_string(),
+    );
 
     commands.insert(
         "dev".to_string(),
@@ -234,9 +240,8 @@ fn write_agents_md(root: &Path, project_name: &str) -> anyhow::Result<()> {
             println!("  exists:  AGENTS.md (SDLC section already present)");
         }
     } else {
-        let content = format!(
-            "# AGENTS.md\n\nAgent instructions for {project_name}.{sdlc_section}"
-        );
+        let content =
+            format!("# AGENTS.md\n\nAgent instructions for {project_name}.{sdlc_section}");
         io::atomic_write(&agents_path, content.as_bytes())?;
         println!("  created: AGENTS.md");
     }

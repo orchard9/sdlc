@@ -52,26 +52,38 @@ pub enum TaskSubcommand {
 
 pub fn run(root: &Path, subcmd: TaskSubcommand, json: bool) -> anyhow::Result<()> {
     match subcmd {
-        TaskSubcommand::Add { slug, title } => {
-            add(root, &slug, &title.join(" "), json)
-        }
+        TaskSubcommand::Add { slug, title } => add(root, &slug, &title.join(" "), json),
         TaskSubcommand::Start { slug, task_id } => start(root, &slug, &task_id, json),
         TaskSubcommand::Complete { slug, task_id } => complete(root, &slug, &task_id, json),
-        TaskSubcommand::Block { slug, task_id, reason } => {
-            block(root, &slug, &task_id, &reason.join(" "), json)
-        }
+        TaskSubcommand::Block {
+            slug,
+            task_id,
+            reason,
+        } => block(root, &slug, &task_id, &reason.join(" "), json),
         TaskSubcommand::List { slug } => list(root, &slug, json),
-        TaskSubcommand::Edit { slug, task_id, title, description, depends } => {
-            edit(root, &slug, &task_id, title.as_deref(), description.as_deref(), depends.as_deref(), json)
-        }
+        TaskSubcommand::Edit {
+            slug,
+            task_id,
+            title,
+            description,
+            depends,
+        } => edit(
+            root,
+            &slug,
+            &task_id,
+            title.as_deref(),
+            description.as_deref(),
+            depends.as_deref(),
+            json,
+        ),
         TaskSubcommand::Get { slug, task_id } => get(root, &slug, &task_id, json),
         TaskSubcommand::Search { query, slug } => search(root, &query, slug.as_deref(), json),
     }
 }
 
 fn add(root: &Path, slug: &str, title: &str, json: bool) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     let id = task_ops::add_task(&mut feature.tasks, title);
     feature.save(root).context("failed to save feature")?;
 
@@ -84,14 +96,16 @@ fn add(root: &Path, slug: &str, title: &str, json: bool) -> anyhow::Result<()> {
 }
 
 fn start(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     task_ops::start_task(&mut feature.tasks, task_id)
         .with_context(|| format!("task '{task_id}' not found"))?;
     feature.save(root).context("failed to save feature")?;
 
     if json {
-        print_json(&serde_json::json!({ "slug": slug, "task_id": task_id, "status": "in_progress" }))?;
+        print_json(
+            &serde_json::json!({ "slug": slug, "task_id": task_id, "status": "in_progress" }),
+        )?;
     } else {
         println!("Started task [{task_id}]");
     }
@@ -99,14 +113,16 @@ fn start(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Result<(
 }
 
 fn complete(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     task_ops::complete_task(&mut feature.tasks, task_id)
         .with_context(|| format!("task '{task_id}' not found"))?;
     feature.save(root).context("failed to save feature")?;
 
     if json {
-        print_json(&serde_json::json!({ "slug": slug, "task_id": task_id, "status": "completed" }))?;
+        print_json(
+            &serde_json::json!({ "slug": slug, "task_id": task_id, "status": "completed" }),
+        )?;
     } else {
         println!("Completed task [{task_id}]");
     }
@@ -114,8 +130,8 @@ fn complete(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Resul
 }
 
 fn block(root: &Path, slug: &str, task_id: &str, reason: &str, json: bool) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     task_ops::block_task(&mut feature.tasks, task_id, reason)
         .with_context(|| format!("task '{task_id}' not found"))?;
     feature.save(root).context("failed to save feature")?;
@@ -142,8 +158,8 @@ fn edit(
     depends: Option<&str>,
     json: bool,
 ) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     let task = feature
         .tasks
         .iter_mut()
@@ -179,8 +195,8 @@ fn edit(
 }
 
 fn get(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Result<()> {
-    let feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
     let task = feature
         .tasks
         .iter()
@@ -204,7 +220,10 @@ fn get(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Result<()>
     if !task.depends_on.is_empty() {
         println!("Depends:     {}", task.depends_on.join(", "));
     }
-    println!("Blocker:     {}", task.blocker.as_deref().unwrap_or("(none)"));
+    println!(
+        "Blocker:     {}",
+        task.blocker.as_deref().unwrap_or("(none)")
+    );
 
     Ok(())
 }
@@ -269,8 +288,8 @@ fn search(root: &Path, query: &str, slug: Option<&str>, json: bool) -> anyhow::R
 }
 
 fn list(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
-    let feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     if json {
         print_json(&feature.tasks)?;

@@ -82,8 +82,7 @@ pub async fn get_feature_next(
             config: &config,
             root: &root,
         };
-        let classifier =
-            sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
+        let classifier = sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
         let c = classifier.classify(&ctx);
 
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
@@ -162,10 +161,8 @@ pub async fn transition_feature(
     let result = tokio::task::spawn_blocking(move || {
         let config = sdlc_core::config::Config::load(&root)?;
         let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
-        let target: sdlc_core::types::Phase = body
-            .phase
-            .parse()
-            .map_err(|e: sdlc_core::SdlcError| e)?;
+        let target: sdlc_core::types::Phase =
+            body.phase.parse().map_err(|e: sdlc_core::SdlcError| e)?;
 
         feature.transition(target, &config)?;
         feature.save(&root)?;

@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { useProjectState } from '@/hooks/useProjectState'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -93,14 +94,21 @@ export function Dashboard() {
         return (
           <section key={milestone.slug} className="mb-8">
             <div className="flex items-center gap-2 mb-3">
-              <h3 className="text-sm font-semibold">{milestone.title}</h3>
+              <Link
+                to={`/milestones/${milestone.slug}`}
+                className="text-sm font-semibold hover:text-primary transition-colors"
+              >
+                {milestone.title}
+              </Link>
               <StatusBadge status={milestone.status} />
               <span className="text-xs text-muted-foreground ml-auto">
                 {features.length} features
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {features.map(f => <FeatureCard key={f.slug} feature={f} />)}
+              {features.map((f, idx) => (
+                <FeatureCard key={f.slug} feature={f} position={idx + 1} />
+              ))}
             </div>
           </section>
         )

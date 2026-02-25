@@ -99,9 +99,7 @@ impl Feature {
         ];
         types
             .iter()
-            .map(|&t| {
-                Artifact::new(t, format!(".sdlc/features/{}/{}", slug, t.filename()))
-            })
+            .map(|&t| Artifact::new(t, format!(".sdlc/features/{}/{}", slug, t.filename())))
             .collect()
     }
 
@@ -230,15 +228,24 @@ impl Feature {
     // ---------------------------------------------------------------------------
 
     pub fn artifact(&self, artifact_type: ArtifactType) -> Option<&Artifact> {
-        self.artifacts.iter().find(|a| a.artifact_type == artifact_type)
+        self.artifacts
+            .iter()
+            .find(|a| a.artifact_type == artifact_type)
     }
 
     pub fn artifact_mut(&mut self, artifact_type: ArtifactType) -> Option<&mut Artifact> {
-        self.artifacts.iter_mut().find(|a| a.artifact_type == artifact_type)
+        self.artifacts
+            .iter_mut()
+            .find(|a| a.artifact_type == artifact_type)
     }
 
-    pub fn approve_artifact(&mut self, artifact_type: ArtifactType, by: Option<String>) -> Result<()> {
-        let artifact = self.artifacts
+    pub fn approve_artifact(
+        &mut self,
+        artifact_type: ArtifactType,
+        by: Option<String>,
+    ) -> Result<()> {
+        let artifact = self
+            .artifacts
             .iter_mut()
             .find(|a| a.artifact_type == artifact_type)
             .ok_or_else(|| SdlcError::ArtifactNotFound(artifact_type.to_string()))?;
@@ -247,8 +254,13 @@ impl Feature {
         Ok(())
     }
 
-    pub fn reject_artifact(&mut self, artifact_type: ArtifactType, reason: Option<String>) -> Result<()> {
-        let artifact = self.artifacts
+    pub fn reject_artifact(
+        &mut self,
+        artifact_type: ArtifactType,
+        reason: Option<String>,
+    ) -> Result<()> {
+        let artifact = self
+            .artifacts
             .iter_mut()
             .find(|a| a.artifact_type == artifact_type)
             .ok_or_else(|| SdlcError::ArtifactNotFound(artifact_type.to_string()))?;
@@ -258,7 +270,8 @@ impl Feature {
     }
 
     pub fn mark_artifact_draft(&mut self, artifact_type: ArtifactType) -> Result<()> {
-        let artifact = self.artifacts
+        let artifact = self
+            .artifacts
             .iter_mut()
             .find(|a| a.artifact_type == artifact_type)
             .ok_or_else(|| SdlcError::ArtifactNotFound(artifact_type.to_string()))?;
@@ -311,9 +324,7 @@ impl Feature {
     pub fn unapproved_artifacts(&self) -> Vec<&Artifact> {
         self.artifacts
             .iter()
-            .filter(|a| {
-                matches!(a.status, ArtifactStatus::Draft | ArtifactStatus::NeedsFix)
-            })
+            .filter(|a| matches!(a.status, ArtifactStatus::Draft | ArtifactStatus::NeedsFix))
             .collect()
     }
 }
@@ -383,10 +394,16 @@ mod tests {
             Some("OAuth with Google and GitHub.".to_string()),
         )
         .unwrap();
-        assert_eq!(feature.description.as_deref(), Some("OAuth with Google and GitHub."));
+        assert_eq!(
+            feature.description.as_deref(),
+            Some("OAuth with Google and GitHub.")
+        );
 
         let loaded = Feature::load(dir.path(), "desc-test").unwrap();
-        assert_eq!(loaded.description.as_deref(), Some("OAuth with Google and GitHub."));
+        assert_eq!(
+            loaded.description.as_deref(),
+            Some("OAuth with Google and GitHub.")
+        );
     }
 
     #[test]
@@ -436,7 +453,10 @@ mod tests {
         });
         assert_eq!(feature.scores.len(), 1);
         assert_eq!(feature.score_for("product_fit").unwrap().score, 90);
-        assert_eq!(feature.score_for("product_fit").unwrap().evaluator, "agent-2");
+        assert_eq!(
+            feature.score_for("product_fit").unwrap().evaluator,
+            "agent-2"
+        );
     }
 
     #[test]

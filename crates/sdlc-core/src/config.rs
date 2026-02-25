@@ -127,9 +127,7 @@ impl Default for AgentsConfig {
 
 impl AgentsConfig {
     pub fn backend_for(&self, action: ActionType) -> &AgentBackend {
-        self.actions
-            .get(action.as_str())
-            .unwrap_or(&self.default)
+        self.actions.get(action.as_str()).unwrap_or(&self.default)
     }
 }
 
@@ -277,10 +275,7 @@ impl Config {
     }
 
     pub fn gates_for(&self, action: &str) -> &[GateDefinition] {
-        self.gates
-            .get(action)
-            .map(|v| v.as_slice())
-            .unwrap_or(&[])
+        self.gates.get(action).map(|v| v.as_slice()).unwrap_or(&[])
     }
 
     pub fn load(root: &Path) -> Result<Self> {
@@ -311,10 +306,7 @@ impl Config {
             if !ActionType::is_valid(action_key) {
                 warnings.push(ConfigWarning {
                     level: WarnLevel::Warning,
-                    message: format!(
-                        "unknown action '{}' in agents.actions",
-                        action_key
-                    ),
+                    message: format!("unknown action '{}' in agents.actions", action_key),
                 });
             }
         }
@@ -325,10 +317,7 @@ impl Config {
             if !ActionType::is_valid(action_key) {
                 warnings.push(ConfigWarning {
                     level: WarnLevel::Warning,
-                    message: format!(
-                        "unknown action '{}' in gates",
-                        action_key
-                    ),
+                    message: format!("unknown action '{}' in gates", action_key),
                 });
             }
 
@@ -366,8 +355,13 @@ impl Config {
             self.agents.actions.get("create_review"),
         ) {
             if let (
-                AgentBackend::ClaudeAgentSdk { model: impl_model, .. },
-                AgentBackend::ClaudeAgentSdk { model: review_model, .. },
+                AgentBackend::ClaudeAgentSdk {
+                    model: impl_model, ..
+                },
+                AgentBackend::ClaudeAgentSdk {
+                    model: review_model,
+                    ..
+                },
             ) = (impl_backend, review_backend)
             {
                 if impl_model == review_model {
@@ -550,10 +544,9 @@ gates:
     #[test]
     fn validate_unknown_action_in_agents() {
         let mut cfg = Config::new("test-project");
-        cfg.agents.actions.insert(
-            "bogus_action".to_string(),
-            AgentBackend::Human,
-        );
+        cfg.agents
+            .actions
+            .insert("bogus_action".to_string(), AgentBackend::Human);
         let warnings = cfg.validate();
         assert!(!warnings.is_empty());
         assert!(warnings.iter().any(|w| {
@@ -581,8 +574,7 @@ gates:
         );
         let warnings = cfg.validate();
         assert!(warnings.iter().any(|w| {
-            w.message.contains("max_retries=15")
-                && w.message.contains(">10 is unusual")
+            w.message.contains("max_retries=15") && w.message.contains(">10 is unusual")
         }));
     }
 
@@ -626,8 +618,7 @@ gates:
         );
         let warnings = cfg.validate();
         assert!(warnings.iter().any(|w| {
-            w.message.contains("unknown action 'not_a_real_action'")
-                && w.message.contains("gates")
+            w.message.contains("unknown action 'not_a_real_action'") && w.message.contains("gates")
         }));
     }
 
@@ -654,7 +645,8 @@ gates:
         );
         let warnings = cfg.validate();
         assert!(warnings.iter().any(|w| {
-            w.message.contains("reviewer and implementer use the same model")
+            w.message
+                .contains("reviewer and implementer use the same model")
         }));
     }
 
@@ -681,7 +673,8 @@ gates:
         );
         let warnings = cfg.validate();
         assert!(!warnings.iter().any(|w| {
-            w.message.contains("reviewer and implementer use the same model")
+            w.message
+                .contains("reviewer and implementer use the same model")
         }));
     }
 

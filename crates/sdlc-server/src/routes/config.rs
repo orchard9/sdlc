@@ -33,8 +33,8 @@ pub async fn put_agents_config(
         let mut config = sdlc_core::config::Config::load(&root)?;
 
         // Deserialize the incoming JSON into the AgentsConfig struct
-        let agents: sdlc_core::config::AgentsConfig = serde_json::from_value(body)
-            .map_err(sdlc_core::SdlcError::Json)?;
+        let agents: sdlc_core::config::AgentsConfig =
+            serde_json::from_value(body).map_err(sdlc_core::SdlcError::Json)?;
         config.agents = agents;
 
         // Write the full config back atomically

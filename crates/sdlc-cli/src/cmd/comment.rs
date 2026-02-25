@@ -35,30 +35,30 @@ pub enum CommentSubcommand {
         task: Option<String>,
     },
     /// Resolve (remove) a comment, clearing any pipeline block it caused
-    Resolve {
-        slug: String,
-        comment_id: String,
-    },
+    Resolve { slug: String, comment_id: String },
 }
 
 pub fn run(root: &Path, subcmd: CommentSubcommand, json: bool) -> anyhow::Result<()> {
     match subcmd {
-        CommentSubcommand::Create { slug, body, task, artifact, flag, by } => {
-            create(
-                root,
-                &slug,
-                &body,
-                task.as_deref(),
-                artifact.as_deref(),
-                flag.as_deref(),
-                by.as_deref(),
-                json,
-            )
-        }
+        CommentSubcommand::Create {
+            slug,
+            body,
+            task,
+            artifact,
+            flag,
+            by,
+        } => create(
+            root,
+            &slug,
+            &body,
+            task.as_deref(),
+            artifact.as_deref(),
+            flag.as_deref(),
+            by.as_deref(),
+            json,
+        ),
         CommentSubcommand::List { slug, task } => list(root, &slug, task.as_deref(), json),
-        CommentSubcommand::Resolve { slug, comment_id } => {
-            resolve(root, &slug, &comment_id, json)
-        }
+        CommentSubcommand::Resolve { slug, comment_id } => resolve(root, &slug, &comment_id, json),
     }
 }
 
@@ -86,11 +86,13 @@ fn create(
     by: Option<&str>,
     json: bool,
 ) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     let target = if let Some(task_id) = task {
-        CommentTarget::Task { task_id: task_id.to_string() }
+        CommentTarget::Task {
+            task_id: task_id.to_string(),
+        }
     } else if let Some(art) = artifact {
         let artifact_type: ArtifactType = art
             .parse()
@@ -124,8 +126,8 @@ fn create(
 }
 
 fn list(root: &Path, slug: &str, task: Option<&str>, json: bool) -> anyhow::Result<()> {
-    let feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     let comments: Vec<_> = feature
         .comments
@@ -166,8 +168,8 @@ fn list(root: &Path, slug: &str, task: Option<&str>, json: bool) -> anyhow::Resu
 }
 
 fn resolve(root: &Path, slug: &str, comment_id: &str, json: bool) -> anyhow::Result<()> {
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     let removed = resolve_comment(&mut feature.comments, comment_id);
     if !removed {

@@ -175,10 +175,7 @@ pub fn run(root: &Path, slug: &str, dry_run: bool) -> anyhow::Result<()> {
                 if let Some(gate_def) = gates.iter().find(|g| g.name == failing.gate_name) {
                     match &gate_def.gate_type {
                         GateKind::Human { .. } | GateKind::StepBack { .. } => {
-                            eprintln!(
-                                "\nHuman gate '{}' requires approval.",
-                                failing.gate_name
-                            );
+                            eprintln!("\nHuman gate '{}' requires approval.", failing.gate_name);
                             return Err(RunExit::HumanGateRequired {
                                 gate_name: failing.gate_name.clone(),
                             }

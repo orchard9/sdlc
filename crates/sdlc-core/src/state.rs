@@ -105,7 +105,13 @@ impl State {
         self.last_updated = Utc::now();
     }
 
-    pub fn record_action(&mut self, feature: &str, action: ActionType, phase: Phase, outcome: &str) {
+    pub fn record_action(
+        &mut self,
+        feature: &str,
+        action: ActionType,
+        phase: Phase,
+        outcome: &str,
+    ) {
         self.history.push(HistoryEntry {
             feature: feature.to_string(),
             action,
@@ -197,7 +203,10 @@ mod tests {
     #[test]
     fn state_not_initialized() {
         let dir = TempDir::new().unwrap();
-        assert!(matches!(State::load(dir.path()), Err(SdlcError::NotInitialized)));
+        assert!(matches!(
+            State::load(dir.path()),
+            Err(SdlcError::NotInitialized)
+        ));
     }
 
     #[test]

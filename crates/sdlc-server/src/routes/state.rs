@@ -13,8 +13,7 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
         let milestones = sdlc_core::milestone::Milestone::list(&root)?;
 
         let config = sdlc_core::config::Config::load(&root)?;
-        let classifier =
-            sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
+        let classifier = sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
 
         let feature_summaries: Vec<serde_json::Value> = features
             .iter()

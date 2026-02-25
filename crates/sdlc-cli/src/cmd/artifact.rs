@@ -30,9 +30,11 @@ pub fn run(root: &Path, subcmd: ArtifactSubcommand, json: bool) -> anyhow::Resul
         ArtifactSubcommand::Approve { slug, artifact, by } => {
             approve(root, &slug, &artifact, by, json)
         }
-        ArtifactSubcommand::Reject { slug, artifact, reason } => {
-            reject(root, &slug, &artifact, reason, json)
-        }
+        ArtifactSubcommand::Reject {
+            slug,
+            artifact,
+            reason,
+        } => reject(root, &slug, &artifact, reason, json),
         ArtifactSubcommand::Draft { slug, artifact } => draft(root, &slug, &artifact, json),
     }
 }
@@ -47,8 +49,8 @@ fn approve(
     let artifact_type = ArtifactType::from_str(artifact_str)
         .with_context(|| format!("unknown artifact type: {artifact_str}"))?;
 
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     feature
         .approve_artifact(artifact_type, by.clone())
@@ -78,8 +80,8 @@ fn reject(
     let artifact_type = ArtifactType::from_str(artifact_str)
         .with_context(|| format!("unknown artifact type: {artifact_str}"))?;
 
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     feature
         .reject_artifact(artifact_type, reason.clone())
@@ -106,8 +108,8 @@ fn draft(root: &Path, slug: &str, artifact_str: &str, json: bool) -> anyhow::Res
     let artifact_type = ArtifactType::from_str(artifact_str)
         .with_context(|| format!("unknown artifact type: {artifact_str}"))?;
 
-    let mut feature = Feature::load(root, slug)
-        .with_context(|| format!("feature '{slug}' not found"))?;
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
     feature
         .mark_artifact_draft(artifact_type)

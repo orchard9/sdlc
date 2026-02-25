@@ -115,7 +115,14 @@ mod tests {
 
     #[test]
     fn invalid_slugs() {
-        for slug in ["", "-starts-with-dash", "ends-with-dash-", "has spaces", "UPPER", "a_b"] {
+        for slug in [
+            "",
+            "-starts-with-dash",
+            "ends-with-dash-",
+            "has spaces",
+            "UPPER",
+            "a_b",
+        ] {
             assert!(validate_slug(slug).is_err(), "expected invalid: {slug}");
         }
     }
@@ -123,7 +130,10 @@ mod tests {
     #[test]
     fn path_helpers() {
         let root = Path::new("/tmp/proj");
-        assert_eq!(config_path(root), PathBuf::from("/tmp/proj/.sdlc/config.yaml"));
+        assert_eq!(
+            config_path(root),
+            PathBuf::from("/tmp/proj/.sdlc/config.yaml")
+        );
         assert_eq!(
             feature_manifest(root, "auth"),
             PathBuf::from("/tmp/proj/.sdlc/features/auth/manifest.yaml")

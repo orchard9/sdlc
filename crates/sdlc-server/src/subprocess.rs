@@ -134,12 +134,7 @@ mod tests {
         // Collect events until Finished
         let mut events = vec![];
         loop {
-            match tokio::time::timeout(
-                tokio::time::Duration::from_secs(5),
-                rx.recv(),
-            )
-            .await
-            {
+            match tokio::time::timeout(tokio::time::Duration::from_secs(5), rx.recv()).await {
                 Ok(Ok(event)) => {
                     let is_finished = matches!(event, RunEvent::Finished { .. });
                     events.push(event);
@@ -180,12 +175,7 @@ mod tests {
 
         let mut got_error = false;
         loop {
-            match tokio::time::timeout(
-                tokio::time::Duration::from_secs(5),
-                rx.recv(),
-            )
-            .await
-            {
+            match tokio::time::timeout(tokio::time::Duration::from_secs(5), rx.recv()).await {
                 Ok(Ok(RunEvent::Error { message })) => {
                     assert!(
                         message.contains("__nonexistent_command_xyz__"),
@@ -227,11 +217,7 @@ mod tests {
     async fn stderr_is_captured() {
         // Use sh -c to write to stderr
         let handle = spawn_process(
-            vec![
-                "sh".into(),
-                "-c".into(),
-                "echo err-output >&2".into(),
-            ],
+            vec!["sh".into(), "-c".into(), "echo err-output >&2".into()],
             std::path::Path::new("/tmp"),
         );
 
@@ -239,12 +225,7 @@ mod tests {
 
         let mut events = vec![];
         loop {
-            match tokio::time::timeout(
-                tokio::time::Duration::from_secs(5),
-                rx.recv(),
-            )
-            .await
-            {
+            match tokio::time::timeout(tokio::time::Duration::from_secs(5), rx.recv()).await {
                 Ok(Ok(event)) => {
                     let is_finished = matches!(event, RunEvent::Finished { .. });
                     events.push(event);
@@ -273,11 +254,8 @@ mod tests {
     ) -> Vec<RunEvent> {
         let mut events = vec![];
         loop {
-            match tokio::time::timeout(
-                tokio::time::Duration::from_secs(timeout_secs),
-                rx.recv(),
-            )
-            .await
+            match tokio::time::timeout(tokio::time::Duration::from_secs(timeout_secs), rx.recv())
+                .await
             {
                 Ok(Ok(event)) => {
                     let is_finished = matches!(event, RunEvent::Finished { .. });
@@ -300,10 +278,7 @@ mod tests {
         // Spawn 10 processes and take their initial receivers immediately.
         let mut receivers = Vec::with_capacity(10);
         for n in 0..10 {
-            let handle = spawn_process(
-                vec!["echo".into(), format!("test-{n}")],
-                cwd,
-            );
+            let handle = spawn_process(vec!["echo".into(), format!("test-{n}")], cwd);
             let rx = handle.initial_rx.lock().unwrap().take().unwrap();
             receivers.push((n, rx));
         }
@@ -429,40 +404,34 @@ mod tests {
         let cwd = std::path::Path::new("/tmp");
 
         // Spawn a process that outputs 500 lines.
-        let handle = spawn_process(
-            vec!["seq".into(), "1".into(), "500".into()],
-            cwd,
-        );
+        let handle = spawn_process(vec!["seq".into(), "1".into(), "500".into()], cwd);
 
         let mut rx = handle.initial_rx.lock().unwrap().take().unwrap();
 
         let mut received_events: Vec<RunEvent> = Vec::new();
         let mut lagged_count: u64 = 0;
 
-        let outcome = tokio::time::timeout(
-            tokio::time::Duration::from_secs(10),
-            async {
-                loop {
-                    // Introduce a small delay to simulate a slow consumer.
-                    tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
+        let outcome = tokio::time::timeout(tokio::time::Duration::from_secs(10), async {
+            loop {
+                // Introduce a small delay to simulate a slow consumer.
+                tokio::time::sleep(tokio::time::Duration::from_millis(1)).await;
 
-                    match rx.recv().await {
-                        Ok(event) => {
-                            let is_finished = matches!(event, RunEvent::Finished { .. });
-                            received_events.push(event);
-                            if is_finished {
-                                break;
-                            }
+                match rx.recv().await {
+                    Ok(event) => {
+                        let is_finished = matches!(event, RunEvent::Finished { .. });
+                        received_events.push(event);
+                        if is_finished {
+                            break;
                         }
-                        Err(broadcast::error::RecvError::Lagged(n)) => {
-                            lagged_count += n;
-                            // Continue reading — lagged is recoverable.
-                        }
-                        Err(broadcast::error::RecvError::Closed) => break,
                     }
+                    Err(broadcast::error::RecvError::Lagged(n)) => {
+                        lagged_count += n;
+                        // Continue reading — lagged is recoverable.
+                    }
+                    Err(broadcast::error::RecvError::Closed) => break,
                 }
-            },
-        )
+            }
+        })
         .await;
 
         assert!(
