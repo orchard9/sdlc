@@ -1,21 +1,27 @@
 import { useParams, Link } from 'react-router-dom'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useFeature } from '@/hooks/useFeature'
-import { useRunStream } from '@/hooks/useRunStream'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PhaseProgressBar } from '@/components/shared/PhaseProgressBar'
 import { ArtifactViewer } from '@/components/features/ArtifactViewer'
-import { RunOutput } from '@/components/pipeline/RunOutput'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
 import { api } from '@/api/client'
-import { ArrowLeft, Play, Loader2 } from 'lucide-react'
+import { ArrowLeft, Copy, Check } from 'lucide-react'
 
 const ARTIFACT_TYPES = ['spec', 'design', 'tasks', 'qa_plan', 'review', 'audit', 'qa_results']
 
 export function FeatureDetail() {
   const { slug } = useParams<{ slug: string }>()
   const { feature, classification, loading, refresh } = useFeature(slug ?? '')
-  const runStream = useRunStream({ onComplete: refresh })
+
+  const [copied, setCopied] = useState<'run' | 'next' | null>(null)
+
+  const handleCopy = (text: string, which: 'run' | 'next') => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(which)
+      setTimeout(() => setCopied(null), 2000)
+    })
+  }
 
   // Keyboard shortcuts: Enter = approve first draft artifact, Escape = blur/deselect
   useEffect(() => {
@@ -55,13 +61,6 @@ export function FeatureDetail() {
     return <SkeletonFeatureDetail />
   }
 
-  const handleRun = async () => {
-    const result = await api.runFeature(slug)
-    if (result.run_id) {
-      runStream.start(result.run_id)
-    }
-  }
-
   return (
     <div className="max-w-4xl mx-auto">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
@@ -85,45 +84,58 @@ export function FeatureDetail() {
       {/* Next action */}
       {classification && classification.action !== 'done' && (
         <div className="bg-card border border-border rounded-xl p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Next: {classification.action.replace(/_/g, ' ')}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">{classification.message}</p>
+          <p className="text-sm font-medium mb-1">
+            Next: {classification.action === 'create_spec' ? 'view spec' : classification.action.replace(/_/g, ' ')}
+          </p>
+          <p className="text-xs text-muted-foreground mb-3">{classification.message}</p>
+          <div className="flex flex-col gap-2 mb-3">
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-3 py-2 rounded-lg text-muted-foreground select-all">
+                /sdlc-run {slug}
+              </code>
+              <button
+                onClick={() => handleCopy(`/sdlc-run ${slug}`, 'run')}
+                className="shrink-0 p-2 rounded-lg border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                title="Copy command"
+              >
+                {copied === 'run' ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
             </div>
-            <button
-              onClick={handleRun}
-              disabled={runStream.running}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-            >
-              {runStream.running ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Play className="w-3.5 h-3.5" />}
-              Run
-            </button>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-3 py-2 rounded-lg text-muted-foreground select-all">
+                /sdlc-next {slug}
+              </code>
+              <button
+                onClick={() => handleCopy(`/sdlc-next ${slug}`, 'next')}
+                className="shrink-0 p-2 rounded-lg border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                title="Copy command"
+              >
+                {copied === 'next' ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Run output */}
-      {(runStream.lines.length > 0 || runStream.running) && (
-        <RunOutput
-          lines={runStream.lines}
-          running={runStream.running}
-          exitCode={runStream.exitCode}
-          className="mb-6"
-        />
+      {classification && classification.action === 'done' && (
+        <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-xl mb-6">
+          <span className="text-xs font-medium text-green-400">Feature complete — no pending actions</span>
+        </div>
       )}
 
       {/* Artifacts */}
       <section className="mb-6">
         <h3 className="text-sm font-semibold mb-3">Artifacts</h3>
         <div className="space-y-3">
-          {ARTIFACT_TYPES.map(type => (
-            <ArtifactViewer
-              key={type}
-              slug={slug}
-              artifactType={type}
-              onStatusChange={refresh}
-            />
-          ))}
+          {ARTIFACT_TYPES.map(type => {
+            const artifact = feature.artifacts.find(a => a.artifact_type === type)
+            if (!artifact) return null
+            return (
+              <div key={type} id={`artifact-${type}`}>
+                <ArtifactViewer slug={slug} artifact={artifact} onStatusChange={refresh} />
+              </div>
+            )
+          })}
         </div>
       </section>
 

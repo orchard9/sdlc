@@ -43,6 +43,8 @@ export const api = {
     request(`/api/artifacts/${slug}/${type_}/approve`, { method: 'POST', body: JSON.stringify({ by }) }),
   rejectArtifact: (slug: string, type_: string, reason?: string) =>
     request(`/api/artifacts/${slug}/${type_}/reject`, { method: 'POST', body: JSON.stringify({ reason }) }),
+  waiveArtifact: (slug: string, type_: string, reason?: string) =>
+    request(`/api/artifacts/${slug}/${type_}/waive`, { method: 'POST', body: JSON.stringify({ reason }) }),
 
   addTask: (slug: string, title: string) =>
     request(`/api/features/${slug}/tasks`, { method: 'POST', body: JSON.stringify({ title }) }),
@@ -54,24 +56,21 @@ export const api = {
   addComment: (slug: string, body: string, flag?: string, by?: string) =>
     request(`/api/features/${slug}/comments`, { method: 'POST', body: JSON.stringify({ body, flag, by }) }),
 
-  getAgentsConfig: () => request('/api/config/agents'),
-  putAgentsConfig: (config: Record<string, unknown>) =>
-    request('/api/config/agents', { method: 'PUT', body: JSON.stringify(config) }),
+  getConfig: () => request<import('@/lib/types').ProjectConfig>('/api/config'),
+
+  querySearch: (q: string, limit = 10) =>
+    request<import('@/lib/types').QuerySearchResponse>(`/api/query/search?q=${encodeURIComponent(q)}&limit=${limit}`),
+  querySearchTasks: (q: string, limit = 10) =>
+    request<import('@/lib/types').QueryTaskSearchResponse>(`/api/query/search-tasks?q=${encodeURIComponent(q)}&limit=${limit}`),
+  queryBlocked: () =>
+    request<import('@/lib/types').QueryBlockedItem[]>('/api/query/blocked'),
+  queryReady: (phase?: string) =>
+    request<import('@/lib/types').QueryReadyItem[]>(`/api/query/ready${phase ? `?phase=${encodeURIComponent(phase)}` : ''}`),
+  queryNeedsApproval: () =>
+    request<import('@/lib/types').QueryNeedsApprovalItem[]>('/api/query/needs-approval'),
 
   getVision: () => request<{ content: string; exists: boolean }>('/api/vision'),
   putVision: (content: string) =>
     request('/api/vision', { method: 'PUT', body: JSON.stringify({ content }) }),
 
-  runFeature: (slug: string) =>
-    request<{ run_id?: string; status?: string; message?: string }>(`/api/run/${slug}`, { method: 'POST' }),
-  runMilestone: (slug: string, mode = 'auto') =>
-    request<{ run_id: string }>(`/api/milestones/${slug}/run`, {
-      method: 'POST',
-      body: JSON.stringify({ mode }),
-    }),
-  runCommand: (argv: string[]) =>
-    request<{ run_id: string }>('/api/run-command', { method: 'POST', body: JSON.stringify({ argv }) }),
-
-  initProject: (body?: { project_name?: string; platform?: string }) =>
-    request<{ run_id: string }>('/api/init', { method: 'POST', body: JSON.stringify(body ?? {}) }),
 }

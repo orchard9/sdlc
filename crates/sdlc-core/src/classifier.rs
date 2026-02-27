@@ -1,6 +1,5 @@
 use crate::config::Config;
 use crate::feature::Feature;
-use crate::gate::GateDefinition;
 use crate::state::State;
 use crate::types::{ActionType, Phase};
 use serde::{Deserialize, Serialize};
@@ -33,10 +32,12 @@ pub struct Classification {
     pub output_path: Option<String>,
     pub transition_to: Option<Phase>,
     pub task_id: Option<String>,
+    /// Advisory hint for directive consumers: true if this action is
+    /// resource-intensive. Included in directive output as consumer metadata.
     pub is_heavy: bool,
+    /// Advisory hint for directive consumers: suggested timeout budget in
+    /// minutes. Included in directive output as consumer metadata.
     pub timeout_minutes: u32,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub gates: Vec<GateDefinition>,
 }
 
 // ---------------------------------------------------------------------------
@@ -71,7 +72,6 @@ impl Classifier {
     pub fn classify(&self, ctx: &EvalContext) -> Classification {
         for rule in &self.rules {
             if (rule.condition)(ctx) {
-                let gates = ctx.config.gates_for(rule.action.as_str()).to_vec();
                 return Classification {
                     feature: ctx.feature.slug.clone(),
                     title: ctx.feature.title.clone(),
@@ -85,7 +85,6 @@ impl Classifier {
                     task_id: rule.task_id.map(|f| f(ctx)),
                     is_heavy: rule.action.is_heavy(),
                     timeout_minutes: rule.action.timeout_minutes(),
-                    gates,
                 };
             }
         }
@@ -104,7 +103,6 @@ impl Classifier {
             task_id: None,
             is_heavy: false,
             timeout_minutes: 0,
-            gates: Vec::new(),
         }
     }
 }

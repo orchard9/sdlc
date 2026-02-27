@@ -167,6 +167,7 @@ pub enum ArtifactStatus {
     NeedsFix,
     Passed,
     Failed,
+    Waived,
 }
 
 impl fmt::Display for ArtifactStatus {
@@ -179,6 +180,7 @@ impl fmt::Display for ArtifactStatus {
             ArtifactStatus::NeedsFix => "needs_fix",
             ArtifactStatus::Passed => "passed",
             ArtifactStatus::Failed => "failed",
+            ArtifactStatus::Waived => "waived",
         };
         f.write_str(s)
     }
@@ -196,12 +198,15 @@ pub enum ActionType {
     CreateDesign,
     ApproveDesign,
     CreateTasks,
+    ApproveTasks,
     CreateQaPlan,
+    ApproveQaPlan,
     ImplementTask,
     FixReviewIssues,
     CreateReview,
     ApproveReview,
     CreateAudit,
+    ApproveAudit,
     RunQa,
     ApproveMerge,
     Merge,
@@ -219,12 +224,15 @@ impl ActionType {
             ActionType::CreateDesign,
             ActionType::ApproveDesign,
             ActionType::CreateTasks,
+            ActionType::ApproveTasks,
             ActionType::CreateQaPlan,
+            ActionType::ApproveQaPlan,
             ActionType::ImplementTask,
             ActionType::FixReviewIssues,
             ActionType::CreateReview,
             ActionType::ApproveReview,
             ActionType::CreateAudit,
+            ActionType::ApproveAudit,
             ActionType::RunQa,
             ActionType::ApproveMerge,
             ActionType::Merge,
@@ -247,12 +255,15 @@ impl ActionType {
             ActionType::CreateDesign => "create_design",
             ActionType::ApproveDesign => "approve_design",
             ActionType::CreateTasks => "create_tasks",
+            ActionType::ApproveTasks => "approve_tasks",
             ActionType::CreateQaPlan => "create_qa_plan",
+            ActionType::ApproveQaPlan => "approve_qa_plan",
             ActionType::ImplementTask => "implement_task",
             ActionType::FixReviewIssues => "fix_review_issues",
             ActionType::CreateReview => "create_review",
             ActionType::ApproveReview => "approve_review",
             ActionType::CreateAudit => "create_audit",
+            ActionType::ApproveAudit => "approve_audit",
             ActionType::RunQa => "run_qa",
             ActionType::ApproveMerge => "approve_merge",
             ActionType::Merge => "merge",
@@ -263,6 +274,9 @@ impl ActionType {
         }
     }
 
+    /// Advisory hint for directive consumers indicating this action is
+    /// resource-intensive and may benefit from dedicated compute or scheduling.
+    /// This is metadata only — sdlc does not enforce or act on it.
     pub fn is_heavy(self) -> bool {
         matches!(
             self,
@@ -270,6 +284,8 @@ impl ActionType {
         )
     }
 
+    /// Advisory hint for directive consumers suggesting a timeout budget for
+    /// this action. This is metadata only — sdlc does not enforce or act on it.
     pub fn timeout_minutes(self) -> u32 {
         if self.is_heavy() {
             45
@@ -361,8 +377,8 @@ mod tests {
 
     #[test]
     fn action_type_all_complete() {
-        // Ensure all() returns 18 variants
-        assert_eq!(ActionType::all().len(), 18);
+        // Ensure all() returns 21 variants
+        assert_eq!(ActionType::all().len(), 21);
     }
 
     #[test]

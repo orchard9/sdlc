@@ -1,0 +1,33 @@
+version: 1
+project:
+  name: sdlc
+  description: null
+phases:
+  enabled:
+  - draft
+  - specified
+  - planned
+  - ready
+  - implementation
+  - review
+  - audit
+  - qa
+  - merge
+  - released
+  required_artifacts:
+    merge:
+    - qa_results
+    planned:
+    - spec
+    - design
+    - tasks
+    - qa_plan
+    audit:
+    - review
+    review:
+    - review
+    qa:
+    - audit
+    specified:
+    - spec
+sdlc_version: 0.1.0

@@ -1,20 +1,21 @@
 mod cmd;
 mod output;
 mod root;
+mod tools;
 
 use clap::{Parser, Subcommand};
 use cmd::{
-    artifact::ArtifactSubcommand, comment::CommentSubcommand, config::ConfigSubcommand,
-    feature::FeatureSubcommand, milestone::MilestoneSubcommand, platform::PlatformSubcommand,
-    project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
-    task::TaskSubcommand,
+    agent::AgentSubcommand, artifact::ArtifactSubcommand, comment::CommentSubcommand,
+    config::ConfigSubcommand, feature::FeatureSubcommand, milestone::MilestoneSubcommand,
+    platform::PlatformSubcommand, project::ProjectSubcommand, query::QuerySubcommand,
+    score::ScoreSubcommand, task::TaskSubcommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(
     name = "sdlc",
-    about = "Deterministic SDLC orchestration",
+    about = "Deterministic SDLC state machine — manage features, artifacts, tasks, and milestones",
     version,
     propagate_version = true
 )]
@@ -49,6 +50,9 @@ enum Commands {
         #[arg(long = "for")]
         feature: Option<String>,
     },
+
+    /// Show the single highest-priority actionable item (milestone order → feature order)
+    Focus,
 
     /// Manage features
     Feature {
@@ -98,7 +102,7 @@ enum Commands {
         subcommand: QuerySubcommand,
     },
 
-    /// Inspect and modify agent backend routing
+    /// Validate the project configuration
     Config {
         #[command(subcommand)]
         subcommand: ConfigSubcommand,
@@ -110,13 +114,8 @@ enum Commands {
         subcommand: ScoreSubcommand,
     },
 
-    /// Run the next SDLC step for a feature using the configured backend
-    Run {
-        slug: String,
-        /// Print the command that would be run without executing it
-        #[arg(long)]
-        dry_run: bool,
-    },
+    /// Refresh agent scaffolding and stamp the current binary version
+    Update,
 
     /// Merge a feature (stub)
     Merge { slug: String },
@@ -124,15 +123,27 @@ enum Commands {
     /// Archive a feature
     Archive { slug: String },
 
+    /// Run as an MCP stdio server (used by claude-agent)
+    Mcp,
+
+    /// Drive a feature using an AI agent (programmatic equivalent of /sdlc-run)
+    Agent {
+        #[command(subcommand)]
+        subcommand: AgentSubcommand,
+    },
+
     /// Launch the web UI
     Ui {
-        /// Port to listen on
-        #[arg(long, default_value = "3141")]
+        /// Port to listen on (0 = OS-assigned)
+        #[arg(long, default_value = "0")]
         port: u16,
 
         /// Don't open browser automatically
         #[arg(long)]
         no_open: bool,
+
+        #[command(subcommand)]
+        subcommand: Option<UiSubcommand>,
     },
 }
 
@@ -154,6 +165,7 @@ fn main() {
         Commands::Init { platform } => cmd::init::run(&root, platform.as_deref()),
         Commands::State => cmd::state::run(&root, cli.json),
         Commands::Next { feature } => cmd::next::run(&root, feature.as_deref(), cli.json),
+        Commands::Focus => cmd::focus::run(&root, cli.json),
         Commands::Feature { subcommand } => cmd::feature::run(&root, subcommand, cli.json),
         Commands::Artifact { subcommand } => cmd::artifact::run(&root, subcommand, cli.json),
         Commands::Task { subcommand } => cmd::task::run(&root, subcommand, cli.json),
@@ -164,27 +176,21 @@ fn main() {
         Commands::Query { subcommand } => cmd::query::run(&root, subcommand, cli.json),
         Commands::Config { subcommand } => cmd::config::run(&root, subcommand, cli.json),
         Commands::Score { subcommand } => cmd::score::run(&root, subcommand, cli.json),
-        Commands::Run { slug, dry_run } => cmd::run::run(&root, &slug, dry_run),
-        Commands::Merge { slug } => {
-            eprintln!("merge not yet implemented (slug: {slug})");
-            Ok(())
-        }
+        Commands::Update => cmd::update::run(&root),
+        Commands::Merge { slug } => cmd::merge::run(&root, &slug, cli.json),
         Commands::Archive { slug } => {
             cmd::feature::run(&root, FeatureSubcommand::Archive { slug }, cli.json)
         }
-        Commands::Ui { port, no_open } => {
-            let rt = tokio::runtime::Runtime::new().expect("failed to create tokio runtime");
-            rt.block_on(sdlc_server::serve(root.clone(), port, !no_open))
-                .map_err(|e| anyhow::anyhow!("{e}"))
-        }
+        Commands::Mcp => cmd::mcp::run(&root),
+        Commands::Agent { subcommand } => cmd::agent::run(&root, subcommand, cli.json),
+        Commands::Ui {
+            port,
+            no_open,
+            subcommand,
+        } => cmd::ui::run(&root, subcommand, port, no_open),
     };
 
     if let Err(e) = result {
-        // RunExit carries specific exit codes (1=agent, 2=gate, 3=human gate)
-        if let Some(run_exit) = e.downcast_ref::<cmd::run::RunExit>() {
-            eprintln!("error: {run_exit}");
-            std::process::exit(run_exit.exit_code());
-        }
         eprintln!("error: {e}");
         std::process::exit(1);
     }

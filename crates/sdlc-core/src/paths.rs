@@ -18,12 +18,19 @@ pub const ROADMAP_DIR: &str = ".sdlc/roadmap";
 
 pub const CONFIG_FILE: &str = ".sdlc/config.yaml";
 pub const STATE_FILE: &str = ".sdlc/state.yaml";
+pub const GUIDANCE_MD: &str = ".sdlc/guidance.md";
 
 pub const AI_LOOKUP_DIR: &str = ".ai";
 pub const AI_LOOKUP_INDEX: &str = ".ai/index.md";
 
 pub const CLAUDE_DIR: &str = ".claude";
 pub const CLAUDE_COMMANDS_DIR: &str = ".claude/commands";
+pub const GEMINI_DIR: &str = ".gemini";
+pub const GEMINI_COMMANDS_DIR: &str = ".gemini/commands";
+pub const OPENCODE_DIR: &str = ".opencode";
+pub const OPENCODE_COMMANDS_DIR: &str = ".opencode/command";
+pub const AGENTS_DIR: &str = ".agents";
+pub const AGENTS_SKILLS_DIR: &str = ".agents/skills";
 
 pub const VISION_MD: &str = "VISION.md";
 pub const AGENTS_MD: &str = "AGENTS.md";
@@ -49,6 +56,14 @@ pub fn milestone_manifest(root: &Path, slug: &str) -> PathBuf {
     milestone_dir(root, slug).join(MANIFEST_FILE)
 }
 
+pub fn milestone_acceptance_test_path(root: &Path, slug: &str) -> PathBuf {
+    milestone_dir(root, slug).join("acceptance_test.md")
+}
+
+pub fn milestone_uat_results_path(root: &Path, slug: &str) -> PathBuf {
+    milestone_dir(root, slug).join("uat_results.md")
+}
+
 pub fn artifact_path(root: &Path, slug: &str, filename: &str) -> PathBuf {
     feature_dir(root, slug).join(filename)
 }
@@ -59,6 +74,10 @@ pub fn config_path(root: &Path) -> PathBuf {
 
 pub fn state_path(root: &Path) -> PathBuf {
     root.join(STATE_FILE)
+}
+
+pub fn guidance_md_path(root: &Path) -> PathBuf {
+    root.join(GUIDANCE_MD)
 }
 
 pub fn sdlc_dir(root: &Path) -> PathBuf {
@@ -77,8 +96,56 @@ pub fn agents_md_path(root: &Path) -> PathBuf {
     root.join(AGENTS_MD)
 }
 
+pub fn directive_md_path(root: &Path, slug: &str) -> PathBuf {
+    feature_dir(root, slug).join("directive.md")
+}
+
 pub fn claude_commands_dir(root: &Path) -> PathBuf {
     root.join(CLAUDE_COMMANDS_DIR)
+}
+
+pub fn gemini_commands_dir(root: &Path) -> PathBuf {
+    root.join(GEMINI_COMMANDS_DIR)
+}
+
+pub fn opencode_commands_dir(root: &Path) -> PathBuf {
+    root.join(OPENCODE_COMMANDS_DIR)
+}
+
+pub fn codex_skills_dir(root: &Path) -> PathBuf {
+    root.join(AGENTS_SKILLS_DIR)
+}
+
+// ---------------------------------------------------------------------------
+// User-level (home dir) path helpers
+// ---------------------------------------------------------------------------
+
+pub fn user_home() -> Result<PathBuf> {
+    home::home_dir().ok_or(SdlcError::HomeNotFound)
+}
+
+pub fn user_claude_commands_dir() -> Result<PathBuf> {
+    Ok(user_home()?.join(".claude").join("commands"))
+}
+
+pub fn user_gemini_commands_dir() -> Result<PathBuf> {
+    Ok(user_home()?.join(".gemini").join("commands"))
+}
+
+pub fn user_opencode_commands_dir() -> Result<PathBuf> {
+    Ok(user_home()?.join(".opencode").join("command"))
+}
+
+pub fn user_agents_skills_dir() -> Result<PathBuf> {
+    Ok(user_home()?.join(".agents").join("skills"))
+}
+
+pub fn user_sdlc_dir() -> Result<PathBuf> {
+    Ok(user_home()?.join(".sdlc"))
+}
+
+pub fn user_ui_record_path(name: &str) -> Result<PathBuf> {
+    Ok(user_sdlc_dir()?.join(format!("{name}.yaml")))
 }
 
 // ---------------------------------------------------------------------------
@@ -141,6 +208,42 @@ mod tests {
         assert_eq!(
             milestone_manifest(root, "v2"),
             PathBuf::from("/tmp/proj/.sdlc/milestones/v2/manifest.yaml")
+        );
+        assert_eq!(
+            opencode_commands_dir(root),
+            PathBuf::from("/tmp/proj/.opencode/command")
+        );
+        assert_eq!(
+            codex_skills_dir(root),
+            PathBuf::from("/tmp/proj/.agents/skills")
+        );
+    }
+
+    #[test]
+    fn user_home_from_env() {
+        std::env::set_var("HOME", "/tmp/fakehome");
+        let home = user_home().expect("should resolve home");
+        assert_eq!(home, PathBuf::from("/tmp/fakehome"));
+    }
+
+    #[test]
+    fn user_level_path_helpers() {
+        std::env::set_var("HOME", "/tmp/fakehome");
+        assert_eq!(
+            user_claude_commands_dir().unwrap(),
+            PathBuf::from("/tmp/fakehome/.claude/commands")
+        );
+        assert_eq!(
+            user_gemini_commands_dir().unwrap(),
+            PathBuf::from("/tmp/fakehome/.gemini/commands")
+        );
+        assert_eq!(
+            user_opencode_commands_dir().unwrap(),
+            PathBuf::from("/tmp/fakehome/.opencode/command")
+        );
+        assert_eq!(
+            user_agents_skills_dir().unwrap(),
+            PathBuf::from("/tmp/fakehome/.agents/skills")
         );
     }
 }

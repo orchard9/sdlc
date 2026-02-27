@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/api/client'
+import { useSSE } from './useSSE'
 import type { FeatureDetail, Classification } from '@/lib/types'
 
 export function useFeature(slug: string) {
@@ -8,9 +9,8 @@ export function useFeature(slug: string) {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
-      setLoading(true)
       const [f, c] = await Promise.all([
         api.getFeature(slug),
         api.getFeatureNext(slug),
@@ -23,9 +23,10 @@ export function useFeature(slug: string) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [slug])
 
-  useEffect(() => { refresh() }, [slug])
+  useEffect(() => { refresh() }, [refresh])
+  useSSE(refresh)
 
   return { feature, classification, error, loading, refresh }
 }

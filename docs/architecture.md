@@ -18,16 +18,18 @@ sdlc/
 │   │       ├── feature.rs      # Feature struct, CRUD, artifact management
 │   │       ├── task.rs         # Task struct, lifecycle transitions
 │   │       ├── state.rs        # State struct (project-level summary)
-│   │       ├── config.rs       # Config struct (gates, platform, agent routing)
+│   │       ├── config.rs       # Config struct (gates, platform, quality thresholds)
 │   │       ├── classifier.rs   # sdlc next — rule engine
 │   │       ├── artifact.rs     # Artifact approval/rejection
 │   │       ├── comment.rs      # Comments with flag types
+│   │       ├── directive.rs    # Builds full directive output (quality standard, approach, task, completion steps)
 │   │       ├── milestone.rs    # Milestone containers
 │   │       ├── score.rs        # Three-lens quality scores
 │   │       ├── gate.rs         # Gate definitions and runner
 │   │       ├── rules.rs        # Classifier rule evaluation
 │   │       ├── paths.rs        # Path constants (.sdlc/, .ai/, etc.)
 │   │       ├── io.rs           # Atomic file writes, directory ops
+│   │       ├── search.rs       # In-memory full-text feature search using tantivy
 │   │       └── error.rs        # SdlcError enum
 │   │
 │   ├── sdlc-cli/               # the `sdlc` binary
@@ -38,12 +40,11 @@ sdlc/
 │   │       └── cmd/            # one file per top-level command
 │   │           ├── init.rs     # sdlc init
 │   │           ├── feature.rs  # sdlc feature *
-│   │           ├── artifact.rs # sdlc artifact approve|reject
+│   │           ├── artifact.rs # sdlc artifact draft|approve|reject
 │   │           ├── task.rs     # sdlc task *
 │   │           ├── comment.rs  # sdlc comment *
 │   │           ├── milestone.rs# sdlc milestone *
 │   │           ├── next.rs     # sdlc next
-│   │           ├── run.rs      # sdlc run
 │   │           ├── state.rs    # sdlc state
 │   │           ├── score.rs    # sdlc score *
 │   │           ├── gate.rs     # sdlc gate *
@@ -56,9 +57,9 @@ sdlc/
 │       └── src/
 │           ├── lib.rs          # serve() entry point
 │           ├── routes/         # axum route handlers
+│           │   └── config.rs   # project configuration (read-only)
 │           ├── state.rs        # shared AppState
 │           ├── embed.rs        # rust-embed for frontend/dist/
-│           ├── subprocess.rs   # SSE streaming for sdlc run
 │           └── error.rs        # server error types
 │
 └── frontend/                   # React + Vite dashboard
@@ -159,11 +160,12 @@ Per-feature artifacts. Each is a Markdown file written by an agent or human.
 **Rule evaluation order** (highest priority first):
 
 1. Feature is `released` → `Done`
-2. Unresolved blocker comment → `WaitForApproval`
-3. Missing required artifact for current phase → `Create*` action
-4. Artifact exists but not approved → `Approve*` action (human gate)
-5. All artifacts approved → advance phase, emit next creation action
-6. All phases complete → `Done`
+2. Unresolved blocker/question comment → `WaitForApproval` (human gate)
+3. Feature is blocked → `UnblockDependency` (human gate)
+4. Missing required artifact for current phase → `Create*` action (agent)
+5. Artifact exists but not verified → `Approve*` action (agent verifies, then approves)
+6. All artifacts approved → advance phase, emit next creation action
+7. All phases complete → `Done`
 
 Output schema:
 
@@ -184,44 +186,25 @@ Output schema:
 }
 ```
 
-**`is_heavy`** signals that the action is long-running (implementation, fix-review-issues, run-qa). Orchestrators use this to warn users or set longer timeouts.
+**`is_heavy`** signals that the action is long-running (implementation, fix-review-issues, run-qa). Consumers may use this to warn users or set longer timeouts.
 
-**`gates`** lists the verification gates that will run after this action completes. The orchestrator knows what checks to expect before it dispatches.
+**`gates`** lists the verification checks associated with this action. Consumers may use this to decide what verification to run after acting on the directive.
 
 ---
 
 ## Gate System
 
-Gates are defined in `config.yaml` and evaluated after each action.
+Gates are metadata defined in `config.yaml` and included in the directive output. sdlc publishes them; the consumer decides whether and how to run them.
 
 ### Gate Types
 
-| Type | Behavior |
+| Type | Meaning |
 |---|---|
-| `shell` | Runs a command. Passes if exit code 0. Retries on failure up to `max_retries`. |
-| `human` | Always pauses. Cannot be auto-approved. Orchestrator must wait for `sdlc artifact approve`. |
-| `step_back` | Dispatches a lightweight agent with adversarial questions at phase transitions. |
+| `shell` | A shell command the consumer may run to verify the action. Includes `command`, `max_retries`, and `timeout_seconds` hints. |
+| `human` | An optional human review step configured by the team. In autonomous consumer mode, the agent evaluates the artifact and calls `sdlc artifact approve` directly. When `auto: false`, consumers that support interactive mode may pause and surface the artifact to a human reviewer. |
+| `step_back` | Advisory questions the consumer may surface to a reviewer at phase transitions. |
 
-### Gate Runner
-
-```
-run_gate(gate, context):
-  if gate.type == shell:
-    for attempt in 1..=max_retries:
-      result = exec(gate.command)
-      if result.exit_code == 0: return Pass
-      if attempt < max_retries: re-dispatch with error context
-    return Fail(exhausted)
-
-  if gate.type == human:
-    return WaitForHuman(gate.name)
-```
-
-Exit codes from `sdlc run`:
-- `0` — all gates passed
-- `1` — agent error
-- `2` — gate failure (mechanical)
-- `3` — human gate (wait for approval)
+Gates appear in the `gates` array of `sdlc next --json` output. They are not enforced by sdlc — they are signals to the consumer.
 
 ---
 
@@ -229,100 +212,65 @@ Exit codes from `sdlc run`:
 
 Defined in `sdlc-core/src/types.rs`. These are the complete set of actions the classifier can emit. Orchestrators must handle all of them.
 
-| Action | Heavy | Default Timeout |
-|---|---|---|
-| `create_spec` | No | 10 min |
-| `approve_spec` | No | — (human) |
-| `create_design` | No | 10 min |
-| `approve_design` | No | — (human) |
-| `create_tasks` | No | 10 min |
-| `create_qa_plan` | No | 10 min |
-| `implement_task` | **Yes** | 45 min |
-| `fix_review_issues` | **Yes** | 45 min |
-| `create_review` | No | 10 min |
-| `approve_review` | No | — (human) |
-| `create_audit` | No | 10 min |
-| `run_qa` | **Yes** | 45 min |
-| `approve_merge` | No | — (human) |
-| `merge` | No | 10 min |
-| `archive` | No | 10 min |
-| `unblock_dependency` | No | 10 min |
-| `wait_for_approval` | No | — (human) |
-| `done` | No | — |
+| Action | Heavy | Who Acts | Default Timeout |
+|---|---|---|---|
+| `create_spec` | No | Agent | 10 min |
+| `approve_spec` | No | Agent — verifies spec quality, then approves | 10 min |
+| `create_design` | No | Agent | 10 min |
+| `approve_design` | No | Agent — verifies design soundness, then approves | 10 min |
+| `create_tasks` | No | Agent | 10 min |
+| `approve_tasks` | No | Agent — verifies task breakdown, then approves | 10 min |
+| `create_qa_plan` | No | Agent | 10 min |
+| `approve_qa_plan` | No | Agent — verifies QA plan coverage, then approves | 10 min |
+| `implement_task` | **Yes** | Agent | 45 min |
+| `fix_review_issues` | **Yes** | Agent | 45 min |
+| `create_review` | No | Agent | 10 min |
+| `approve_review` | No | Agent — verifies review accuracy, then approves | 10 min |
+| `create_audit` | No | Agent | 10 min |
+| `approve_audit` | No | Agent — verifies audit accuracy, then approves | 10 min |
+| `run_qa` | **Yes** | Agent | 45 min |
+| `approve_merge` | No | Agent — verifies QA results, then approves merge | 10 min |
+| `merge` | No | Agent | 10 min |
+| `archive` | No | Agent | 10 min |
+| `unblock_dependency` | No | **Human gate** — external blocker | — |
+| `wait_for_approval` | No | **Human gate** — blocker comment or planning complete | — |
+| `done` | No | — | — |
 
-`Rust sdlc-core` owns this schema. Orchestrators consume it as strings from `sdlc next --json` output.
-
----
-
-## `sdlc run` Dispatch
-
-`sdlc run <slug>` is the integration point between the state machine and agent backends.
-
-```
-1. sdlc next --for <slug> --json         → classify
-2. load .sdlc/config.yaml               → find agent route for action
-3. build context string:
-   - feature title + description
-   - VISION.md (if exists in project root)
-   - classification output (action, message, output_path)
-4. dispatch to configured backend
-5. evaluate gates on result
-6. exit with appropriate code (0/1/2/3)
-```
-
-Agent routing config in `.sdlc/config.yaml`:
-
-```yaml
-agents:
-  default:
-    type: claude_agent_sdk
-    model: claude-opus-4-6
-  actions:
-    create_spec:
-      type: xadk
-      agent_id: sdlc_spec
-    create_design:
-      type: claude_agent_sdk
-      model: claude-opus-4-6
-
-human_gates:
-  - approve_spec
-  - approve_design
-  - approve_review
-  - approve_merge
-```
-
-Supported backend types: `claude_agent_sdk`, `xadk`, `human`.
+`Rust sdlc-core` owns this schema. Directive consumers receive these as strings from `sdlc next --json` output.
 
 ---
 
 ## Web UI Server (`sdlc-server`)
 
-An axum HTTP server that exposes the same state machine operations as the CLI over REST + SSE.
+An axum HTTP server that exposes the same state machine operations as the CLI over REST, enabling remote access for web UIs and remote consumers.
 
 ### REST API
 
 ```
-GET  /api/state                       → project state
-GET  /api/features                    → all features
-GET  /api/features/:slug              → single feature
-POST /api/features/:slug/artifacts/:type/approve
-POST /api/features/:slug/artifacts/:type/reject
-GET  /api/features/:slug/next         → next action classification
-POST /api/features/create             → create feature
-GET  /api/milestones                  → all milestones
-```
-
-### SSE Streaming
-
-`sdlc run` output is streamed via SSE:
-
-```
-GET /api/run/:slug/stream
-→ Content-Type: text/event-stream
-→ data: { "type": "stdout", "line": "dispatching to claude..." }
-→ data: { "type": "gate", "name": "compile", "status": "pass" }
-→ data: { "type": "done", "exit_code": 0 }
+GET  /api/state                                    → project state summary
+GET  /api/config                                   → project configuration (read-only)
+GET  /api/features                                 → list all features
+POST /api/features                                 → create a feature
+GET  /api/features/:slug                           → single feature detail
+GET  /api/features/:slug/next                      → next action classification
+POST /api/features/:slug/transition                → transition feature phase
+POST /api/features/:slug/tasks                     → add a task
+POST /api/features/:slug/tasks/:id/start           → start a task
+POST /api/features/:slug/tasks/:id/complete        → complete a task
+POST /api/features/:slug/comments                  → add a comment
+GET  /api/artifacts/:slug/:type                    → get artifact content and status
+POST /api/artifacts/:slug/:type/approve            → approve an artifact
+POST /api/artifacts/:slug/:type/reject             → reject an artifact
+GET  /api/milestones                               → list all milestones
+POST /api/milestones                               → create a milestone
+GET  /api/milestones/:slug                         → milestone detail
+GET  /api/milestones/:slug/review                  → milestone feature review
+POST /api/milestones/:slug/features                → add feature to milestone
+PUT  /api/milestones/:slug/features/order           → reorder milestone features
+GET  /api/vision                                   → get vision document
+PUT  /api/vision                                   → update vision document
+POST /api/run/:slug                                → generate directive for feature
+POST /api/init                                     → initialize project
 ```
 
 ### Frontend Embedding

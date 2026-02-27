@@ -35,6 +35,8 @@ pub async fn get_artifact(
             "approved_by": artifact.approved_by,
             "rejected_at": artifact.rejected_at,
             "rejection_reason": artifact.rejection_reason,
+            "waived_at": artifact.waived_at,
+            "waive_reason": artifact.waive_reason,
         }))
     })
     .await
@@ -99,6 +101,38 @@ pub async fn reject_artifact(
             "slug": slug,
             "artifact_type": at,
             "status": "rejected",
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
+#[derive(serde::Deserialize)]
+pub struct WaiveBody {
+    pub reason: Option<String>,
+}
+
+/// POST /api/artifacts/:slug/:type/waive — waive an artifact.
+pub async fn waive_artifact(
+    State(app): State<AppState>,
+    Path((slug, artifact_type)): Path<(String, String)>,
+    Json(body): Json<WaiveBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
+        let at: sdlc_core::types::ArtifactType =
+            artifact_type.parse().map_err(|e: sdlc_core::SdlcError| e)?;
+
+        feature.waive_artifact(at, body.reason)?;
+        feature.save(&root)?;
+
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "slug": slug,
+            "artifact_type": at,
+            "status": "waived",
         }))
     })
     .await

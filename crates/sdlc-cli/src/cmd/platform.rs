@@ -1,14 +1,14 @@
 use crate::output::{print_json, print_table};
 use anyhow::Context;
 use clap::Subcommand;
-use sdlc_core::config::{Config, PlatformArg};
+use sdlc_core::config::Config;
 use std::path::Path;
 
 #[derive(Subcommand)]
 pub enum PlatformSubcommand {
     /// List all configured platform commands
     List,
-    /// Run a platform command (e.g. deploy, logs, dev start)
+    /// Show how to run a platform command (sdlc does not execute scripts)
     #[command(external_subcommand)]
     External(Vec<String>),
 }
@@ -16,7 +16,7 @@ pub enum PlatformSubcommand {
 pub fn run(root: &Path, subcmd: PlatformSubcommand, json: bool) -> anyhow::Result<()> {
     match subcmd {
         PlatformSubcommand::List => list(root, json),
-        PlatformSubcommand::External(args) => dispatch(root, &args),
+        PlatformSubcommand::External(args) => show_command(root, &args),
     }
 }
 
@@ -68,7 +68,9 @@ fn list(root: &Path, json: bool) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn dispatch(root: &Path, args: &[String]) -> anyhow::Result<()> {
+/// Resolve the script path and display it so the user can run it directly.
+/// sdlc does not execute platform scripts.
+fn show_command(root: &Path, args: &[String]) -> anyhow::Result<()> {
     if args.is_empty() {
         anyhow::bail!("no platform command specified; run 'sdlc platform list'");
     }
@@ -88,7 +90,7 @@ fn dispatch(root: &Path, args: &[String]) -> anyhow::Result<()> {
         )
     })?;
 
-    // Subcommand dispatch (e.g. `sdlc platform dev start`)
+    // Subcommand resolution (e.g. `sdlc platform dev start`)
     if !cmd_config.subcommands.is_empty() {
         let sub_name = args.get(1).ok_or_else(|| {
             let available: Vec<&str> = cmd_config.subcommands.keys().map(|s| s.as_str()).collect();
@@ -111,18 +113,26 @@ fn dispatch(root: &Path, args: &[String]) -> anyhow::Result<()> {
                     available.join(", ")
                 )
             })?;
-        let script_args: Vec<&str> = args[2..].iter().map(|s| s.as_str()).collect();
-        return exec_script(root, script, &script_args);
+        let extra_args: Vec<&str> = args[2..].iter().map(|s| s.as_str()).collect();
+        let script_path = root.join(script);
+        print_run_directive(&script_path, &extra_args);
+        return Ok(());
     }
 
     // Positional arg validation
-    let script_args: Vec<&str> = args[1..].iter().map(|s| s.as_str()).collect();
-    validate_args(&cmd_config.args, &script_args, cmd_name)?;
+    let extra_args: Vec<&str> = args[1..].iter().map(|s| s.as_str()).collect();
+    validate_args(&cmd_config.args, &extra_args, cmd_name)?;
 
-    exec_script(root, &cmd_config.script, &script_args)
+    let script_path = root.join(&cmd_config.script);
+    print_run_directive(&script_path, &extra_args);
+    Ok(())
 }
 
-fn validate_args(specs: &[PlatformArg], provided: &[&str], cmd_name: &str) -> anyhow::Result<()> {
+fn validate_args(
+    specs: &[sdlc_core::config::PlatformArg],
+    provided: &[&str],
+    cmd_name: &str,
+) -> anyhow::Result<()> {
     for (i, spec) in specs.iter().enumerate() {
         match provided.get(i) {
             None if spec.required => {
@@ -152,26 +162,11 @@ fn validate_args(specs: &[PlatformArg], provided: &[&str], cmd_name: &str) -> an
     Ok(())
 }
 
-fn exec_script(root: &Path, script: &str, args: &[&str]) -> anyhow::Result<()> {
-    if script.is_empty() {
-        anyhow::bail!("no script configured for this command");
+fn print_run_directive(script_path: &Path, args: &[&str]) {
+    eprintln!("sdlc does not execute platform scripts. Run the script directly:");
+    if args.is_empty() {
+        eprintln!("  {}", script_path.display());
+    } else {
+        eprintln!("  {} {}", script_path.display(), args.join(" "));
     }
-    let script_path = root.join(script);
-    if !script_path.exists() {
-        anyhow::bail!(
-            "platform script not found: {}\nRun 'sdlc init --platform <name>' to scaffold scripts",
-            script_path.display()
-        );
-    }
-
-    let status = std::process::Command::new("sh")
-        .arg(&script_path)
-        .args(args)
-        .status()
-        .with_context(|| format!("failed to execute '{}'", script_path.display()))?;
-
-    if !status.success() {
-        std::process::exit(status.code().unwrap_or(1));
-    }
-    Ok(())
 }

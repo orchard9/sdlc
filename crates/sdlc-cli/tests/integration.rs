@@ -9,8 +9,18 @@ fn sdlc(dir: &TempDir) -> Command {
     cmd
 }
 
+fn sdlc_with_home(project: &TempDir, home: &TempDir) -> Command {
+    let mut cmd = Command::cargo_bin("sdlc").unwrap();
+    cmd.current_dir(project.path())
+        .env("SDLC_ROOT", project.path())
+        .env("HOME", home.path());
+    cmd
+}
+
 fn init_project(dir: &TempDir) {
-    sdlc(dir).arg("init").assert().success();
+    // Create a throwaway home dir so init doesn't touch the real ~/.
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(dir, &home).arg("init").assert().success();
 }
 
 // ---------------------------------------------------------------------------
@@ -20,8 +30,10 @@ fn init_project(dir: &TempDir) {
 #[test]
 fn init_creates_directory_tree() {
     let dir = TempDir::new().unwrap();
-    sdlc(&dir).arg("init").assert().success();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
 
+    // Project-level SDLC structure
     assert!(dir.path().join(".sdlc").is_dir());
     assert!(dir.path().join(".sdlc/features").is_dir());
     assert!(dir.path().join(".sdlc/config.yaml").exists());
@@ -31,24 +43,92 @@ fn init_creates_directory_tree() {
     assert!(dir.path().join(".ai/patterns").is_dir());
     assert!(dir.path().join(".ai/decisions").is_dir());
     assert!(dir.path().join("AGENTS.md").exists());
-    assert!(dir.path().join(".claude/commands/sdlc-next.md").exists());
-    assert!(dir.path().join(".claude/commands/sdlc-status.md").exists());
-    assert!(dir.path().join(".claude/commands/sdlc-approve.md").exists());
+
+    // Commands are installed to user HOME, NOT project dir
+    assert!(
+        !dir.path().join(".claude/commands/sdlc-next.md").exists(),
+        ".claude/commands/ should NOT be created in project dir"
+    );
+    assert!(
+        !dir.path().join(".gemini/commands/sdlc-next.toml").exists(),
+        ".gemini/commands/ should NOT be created in project dir"
+    );
+    assert!(
+        !dir.path().join(".opencode/command/sdlc-next.md").exists(),
+        ".opencode/command/ should NOT be created in project dir"
+    );
+    assert!(
+        !dir.path()
+            .join(".agents/skills/sdlc-next/SKILL.md")
+            .exists(),
+        ".agents/skills/ should NOT be created in project dir"
+    );
 }
 
 #[test]
 fn init_is_idempotent() {
     let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
     // Run twice — should succeed both times without error
-    sdlc(&dir).arg("init").assert().success();
-    sdlc(&dir).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+}
+
+#[test]
+fn init_migrates_legacy_agent_scaffolds() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+
+    // Create legacy project-level files from older sdlc versions
+    std::fs::create_dir_all(dir.path().join(".claude/commands")).unwrap();
+    std::fs::create_dir_all(dir.path().join(".gemini/commands")).unwrap();
+    std::fs::create_dir_all(dir.path().join(".opencode/commands")).unwrap();
+    std::fs::create_dir_all(dir.path().join(".codex/commands")).unwrap();
+
+    for file in ["sdlc-next.md", "sdlc-status.md", "sdlc-approve.md"] {
+        std::fs::write(dir.path().join(".claude/commands").join(file), "# legacy").unwrap();
+        std::fs::write(dir.path().join(".gemini/commands").join(file), "# legacy").unwrap();
+        std::fs::write(dir.path().join(".opencode/commands").join(file), "# legacy").unwrap();
+        std::fs::write(dir.path().join(".codex/commands").join(file), "# legacy").unwrap();
+    }
+
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    // Legacy project-level files should be removed
+    for file in ["sdlc-next.md", "sdlc-status.md", "sdlc-approve.md"] {
+        assert!(
+            !dir.path().join(".claude/commands").join(file).exists(),
+            "legacy claude file should be removed: {file}"
+        );
+        assert!(
+            !dir.path().join(".gemini/commands").join(file).exists(),
+            "legacy gemini file should be removed: {file}"
+        );
+        assert!(
+            !dir.path().join(".opencode/commands").join(file).exists(),
+            "legacy opencode file should be removed: {file}"
+        );
+        assert!(
+            !dir.path().join(".codex/commands").join(file).exists(),
+            "legacy codex file should be removed: {file}"
+        );
+    }
+
+    // New commands are in user home, not project dir
+    assert!(home.path().join(".gemini/commands/sdlc-next.toml").exists());
+    assert!(home.path().join(".opencode/command/sdlc-next.md").exists());
+    assert!(home
+        .path()
+        .join(".agents/skills/sdlc-next/SKILL.md")
+        .exists());
 }
 
 #[test]
 fn init_appends_sdlc_section_to_existing_agents_md() {
     let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
     std::fs::write(dir.path().join("AGENTS.md"), "# Existing content\n").unwrap();
-    sdlc(&dir).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
 
     let content = std::fs::read_to_string(dir.path().join("AGENTS.md")).unwrap();
     assert!(content.contains("# Existing content"));
@@ -58,12 +138,257 @@ fn init_appends_sdlc_section_to_existing_agents_md() {
 #[test]
 fn init_does_not_duplicate_sdlc_section() {
     let dir = TempDir::new().unwrap();
-    sdlc(&dir).arg("init").assert().success();
-    sdlc(&dir).arg("init").assert().success();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
 
     let content = std::fs::read_to_string(dir.path().join("AGENTS.md")).unwrap();
     let count = content.matches("## SDLC").count();
     assert_eq!(count, 1, "SDLC section should appear exactly once");
+}
+
+#[test]
+fn init_installs_user_level_commands() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    // Claude commands (including sdlc-specialize)
+    assert!(home.path().join(".claude/commands/sdlc-next.md").exists());
+    assert!(home.path().join(".claude/commands/sdlc-status.md").exists());
+    assert!(home
+        .path()
+        .join(".claude/commands/sdlc-approve.md")
+        .exists());
+    assert!(home
+        .path()
+        .join(".claude/commands/sdlc-specialize.md")
+        .exists());
+
+    // Gemini commands
+    assert!(home.path().join(".gemini/commands/sdlc-next.toml").exists());
+    assert!(home
+        .path()
+        .join(".gemini/commands/sdlc-status.toml")
+        .exists());
+    assert!(home
+        .path()
+        .join(".gemini/commands/sdlc-approve.toml")
+        .exists());
+
+    // OpenCode commands
+    assert!(home.path().join(".opencode/command/sdlc-next.md").exists());
+    assert!(home
+        .path()
+        .join(".opencode/command/sdlc-status.md")
+        .exists());
+    assert!(home
+        .path()
+        .join(".opencode/command/sdlc-approve.md")
+        .exists());
+
+    // Agent skills
+    assert!(home
+        .path()
+        .join(".agents/skills/sdlc-next/SKILL.md")
+        .exists());
+    assert!(home
+        .path()
+        .join(".agents/skills/sdlc-status/SKILL.md")
+        .exists());
+    assert!(home
+        .path()
+        .join(".agents/skills/sdlc-approve/SKILL.md")
+        .exists());
+
+    // None of the above in project dir
+    assert!(!dir.path().join(".claude/commands").exists());
+    assert!(!dir.path().join(".gemini/commands").exists());
+    assert!(!dir.path().join(".opencode/command").exists());
+    assert!(!dir.path().join(".agents/skills").exists());
+}
+
+#[test]
+fn init_upserts_user_commands_on_second_run() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    // Files exist and contain expected content
+    let next_content =
+        std::fs::read_to_string(home.path().join(".claude/commands/sdlc-next.md")).unwrap();
+    assert!(next_content.contains("sdlc-next"));
+
+    let specialize_content =
+        std::fs::read_to_string(home.path().join(".claude/commands/sdlc-specialize.md")).unwrap();
+    assert!(specialize_content.contains("sdlc-specialize"));
+
+    let skill_content =
+        std::fs::read_to_string(home.path().join(".agents/skills/sdlc-next/SKILL.md")).unwrap();
+    assert!(skill_content.contains("SDLC Next Skill"));
+}
+
+// ---------------------------------------------------------------------------
+// sdlc init — sdlc_version stamping + marker support
+// ---------------------------------------------------------------------------
+
+#[test]
+fn init_stamps_sdlc_version_in_config() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    let config_yaml = std::fs::read_to_string(dir.path().join(".sdlc/config.yaml")).unwrap();
+    assert!(
+        config_yaml.contains("sdlc_version:"),
+        "config.yaml should contain sdlc_version after init"
+    );
+}
+
+#[test]
+fn init_writes_agents_md_with_markers() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    let content = std::fs::read_to_string(dir.path().join("AGENTS.md")).unwrap();
+    assert!(
+        content.contains("<!-- sdlc:start -->"),
+        "AGENTS.md should contain sdlc:start marker"
+    );
+    assert!(
+        content.contains("<!-- sdlc:end -->"),
+        "AGENTS.md should contain sdlc:end marker"
+    );
+}
+
+#[test]
+fn init_updates_agents_md_via_markers_on_second_run() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    let content = std::fs::read_to_string(dir.path().join("AGENTS.md")).unwrap();
+    // Should have exactly one start marker — no duplication
+    assert_eq!(
+        content.matches("<!-- sdlc:start -->").count(),
+        1,
+        "sdlc:start marker must appear exactly once"
+    );
+    assert_eq!(
+        content.matches("<!-- sdlc:end -->").count(),
+        1,
+        "sdlc:end marker must appear exactly once"
+    );
+}
+
+#[test]
+fn init_migrates_legacy_agents_md_to_markers() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+
+    // Write an AGENTS.md that looks like the old format (no markers, but has ## SDLC)
+    std::fs::write(
+        dir.path().join("AGENTS.md"),
+        "# AGENTS.md\n\nAgent instructions.\n\n## SDLC\n\nOld content here.\n\nProject: legacy\n",
+    )
+    .unwrap();
+
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    let content = std::fs::read_to_string(dir.path().join("AGENTS.md")).unwrap();
+    assert!(
+        content.contains("<!-- sdlc:start -->"),
+        "legacy AGENTS.md should be migrated to marker format"
+    );
+    assert!(
+        content.contains("<!-- sdlc:end -->"),
+        "legacy AGENTS.md should be migrated to marker format"
+    );
+    // Old content should be replaced, not duplicated
+    assert_eq!(
+        content.matches("## SDLC").count(),
+        1,
+        "## SDLC should appear exactly once after migration"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// sdlc update
+// ---------------------------------------------------------------------------
+
+#[test]
+fn update_fails_on_uninitialized_project() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home)
+        .arg("update")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("sdlc init"));
+}
+
+#[test]
+fn update_refreshes_user_commands() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    // Overwrite a command file to simulate stale content
+    let next_path = home.path().join(".claude/commands/sdlc-next.md");
+    std::fs::write(&next_path, "stale content").unwrap();
+
+    sdlc_with_home(&dir, &home).arg("update").assert().success();
+
+    let refreshed = std::fs::read_to_string(&next_path).unwrap();
+    assert!(
+        !refreshed.contains("stale content"),
+        "sdlc update should overwrite stale command files"
+    );
+    assert!(
+        refreshed.contains("sdlc-next"),
+        "refreshed command should contain expected content"
+    );
+}
+
+#[test]
+fn update_stamps_sdlc_version() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+    sdlc_with_home(&dir, &home).arg("update").assert().success();
+
+    let config_yaml = std::fs::read_to_string(dir.path().join(".sdlc/config.yaml")).unwrap();
+    assert!(config_yaml.contains("sdlc_version:"));
+}
+
+#[test]
+fn update_refreshes_agents_md_section() {
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    // Corrupt the content between markers to simulate stale content
+    let agents_path = dir.path().join("AGENTS.md");
+    let content = std::fs::read_to_string(&agents_path).unwrap();
+    let corrupted = content.replace("Key Commands", "OLD KEY COMMANDS STALE");
+    std::fs::write(&agents_path, corrupted).unwrap();
+
+    sdlc_with_home(&dir, &home).arg("update").assert().success();
+
+    let refreshed = std::fs::read_to_string(&agents_path).unwrap();
+    assert!(
+        !refreshed.contains("OLD KEY COMMANDS STALE"),
+        "sdlc update should replace stale AGENTS.md content between markers"
+    );
+    assert!(
+        refreshed.contains("Key Commands"),
+        "refreshed AGENTS.md should contain current section content"
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -290,6 +615,62 @@ fn state_shows_features() {
 }
 
 // ---------------------------------------------------------------------------
+// sdlc merge
+// ---------------------------------------------------------------------------
+
+#[test]
+fn merge_transitions_feature_to_released() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "merge-me"])
+        .assert()
+        .success();
+
+    // Enter merge phase (manual transition remains intentionally available).
+    sdlc(&dir)
+        .args(["artifact", "approve", "merge-me", "qa_results"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "transition", "merge-me", "merge"])
+        .assert()
+        .success();
+
+    sdlc(&dir).args(["merge", "merge-me"]).assert().success();
+
+    sdlc(&dir)
+        .args(["feature", "show", "merge-me"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("released"));
+
+    sdlc(&dir)
+        .args(["next", "--for", "merge-me", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"action\": \"done\""));
+}
+
+#[test]
+fn merge_fails_when_feature_not_in_merge_phase() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "not-ready"])
+        .assert()
+        .success();
+
+    sdlc(&dir)
+        .args(["merge", "not-ready"])
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("move it to 'merge' first"));
+}
+
+// ---------------------------------------------------------------------------
 // sdlc query
 // ---------------------------------------------------------------------------
 
@@ -303,6 +684,50 @@ fn query_needs_approval_empty_initially() {
         .assert()
         .success()
         .stdout(predicate::str::contains("No features need approval"));
+}
+
+#[test]
+fn query_needs_approval_includes_wait_for_approval_actions() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "approval-gap"])
+        .assert()
+        .success();
+
+    // Move to specified, then put tasks in draft to trigger approve_tasks (agent verification).
+    sdlc(&dir)
+        .args(["artifact", "approve", "approval-gap", "spec"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "transition", "approval-gap", "specified"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["artifact", "approve", "approval-gap", "design"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["artifact", "draft", "approval-gap", "tasks"])
+        .assert()
+        .success();
+
+    sdlc(&dir)
+        .args(["next", "--for", "approval-gap", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("\"action\": \"approve_tasks\""));
+
+    sdlc(&dir)
+        .args(["query", "needs-approval"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("approval-gap"))
+        .stdout(predicate::str::contains(
+            "artifact approve approval-gap tasks",
+        ));
 }
 
 // ---------------------------------------------------------------------------
@@ -668,7 +1093,7 @@ fn task_get_shows_detail() {
 }
 
 #[test]
-fn task_search_finds_match() {
+fn task_search_returns_matching_task() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
     sdlc(&dir)
@@ -697,7 +1122,7 @@ fn task_search_finds_match() {
 }
 
 #[test]
-fn task_search_scoped_to_slug() {
+fn task_search_no_results_exits_zero() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
     sdlc(&dir)
@@ -705,14 +1130,134 @@ fn task_search_scoped_to_slug() {
         .assert()
         .success();
     sdlc(&dir)
+        .args(["task", "add", "auth", "Write login form"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "search", "notfound"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No tasks matching 'notfound'."));
+}
+
+#[test]
+fn task_search_limit_flag_respected() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    // Add three tasks that all match "implement"
+    for title in &["Implement login", "Implement signup", "Implement logout"] {
+        sdlc(&dir)
+            .args(["task", "add", "auth", title])
+            .assert()
+            .success();
+    }
+    // With --limit 1, only one result row should appear
+    let out = sdlc(&dir)
+        .args(["task", "search", "implement", "--limit", "1"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let text = String::from_utf8(out).unwrap();
+    // The count header says "1 result"
+    assert!(
+        text.contains("1 result for"),
+        "expected '1 result for' in output, got: {text}"
+    );
+}
+
+#[test]
+fn task_search_slug_scopes_to_feature() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "payments"])
+        .assert()
+        .success();
+    sdlc(&dir)
         .args(["task", "add", "auth", "Fix login bug"])
         .assert()
         .success();
     sdlc(&dir)
+        .args(["task", "add", "payments", "Fix login redirect"])
+        .assert()
+        .success();
+    // Scoped to "auth" — only auth task should appear
+    sdlc(&dir)
         .args(["task", "search", "login", "--slug", "auth"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Fix login bug"));
+        .stdout(predicate::str::contains("Fix login bug"))
+        .stdout(predicate::str::contains("Fix login redirect").not());
+}
+
+#[test]
+fn task_search_status_field_scope() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc(&dir)
+        .args(["feature", "create", "api"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "api", "Build endpoint"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "api", "Write tests"])
+        .assert()
+        .success();
+    // Block T1
+    sdlc(&dir)
+        .args(["task", "block", "api", "T1", "waiting for infra"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "search", "status:blocked"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Build endpoint"))
+        .stdout(predicate::str::contains("Write tests").not());
+}
+
+#[test]
+fn task_search_json_output_has_score() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc(&dir)
+        .args(["feature", "create", "auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["task", "add", "auth", "Write login form"])
+        .assert()
+        .success();
+    let out = sdlc(&dir)
+        .args(["task", "search", "login", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let text = String::from_utf8(out).unwrap();
+    let json: serde_json::Value = serde_json::from_str(&text).expect("invalid JSON");
+    let arr = json.as_array().expect("expected JSON array");
+    assert!(!arr.is_empty(), "expected at least one result");
+    assert!(
+        arr[0].get("score").is_some(),
+        "expected 'score' field in JSON result"
+    );
+    assert_eq!(arr[0]["task_id"], "T1");
+    assert_eq!(arr[0]["feature"], "auth");
 }
 
 // ---------------------------------------------------------------------------
@@ -1263,7 +1808,7 @@ fn platform_no_config_errors() {
 }
 
 #[test]
-fn platform_deploy_executes_script() {
+fn platform_deploy_shows_run_directive() {
     let dir = TempDir::new().unwrap();
     init_with_platform(&dir);
 
@@ -1271,13 +1816,14 @@ fn platform_deploy_executes_script() {
         .args(["platform", "deploy", "auth-service", "staging"])
         .assert()
         .success()
-        .stdout(predicates::str::contains(
-            "Deploying auth-service to staging",
-        ));
+        .stderr(predicates::str::contains(
+            "sdlc does not execute platform scripts",
+        ))
+        .stderr(predicates::str::contains("deploy.sh"));
 }
 
 #[test]
-fn platform_dev_subcommand_dispatches() {
+fn platform_dev_subcommand_shows_run_directive() {
     let dir = TempDir::new().unwrap();
     init_with_platform(&dir);
 
@@ -1285,9 +1831,10 @@ fn platform_dev_subcommand_dispatches() {
         .args(["platform", "dev", "start"])
         .assert()
         .success()
-        .stdout(predicates::str::contains(
-            "Starting development environment",
-        ));
+        .stderr(predicates::str::contains(
+            "sdlc does not execute platform scripts",
+        ))
+        .stderr(predicates::str::contains("dev-start.sh"));
 }
 
 #[test]
@@ -1312,271 +1859,6 @@ fn platform_init_is_idempotent() {
     let config = std::fs::read_to_string(dir.path().join(".sdlc/config.yaml")).unwrap();
     let count = config.matches("platform:").count();
     assert_eq!(count, 1, "platform: section should appear exactly once");
-}
-
-// ---------------------------------------------------------------------------
-// sdlc config agent
-// ---------------------------------------------------------------------------
-
-#[test]
-fn config_agent_show_defaults() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args(["config", "agent", "show"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("claude_agent_sdk"));
-}
-
-#[test]
-fn config_agent_show_json() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    let out = sdlc(&dir)
-        .args(["--json", "config", "agent", "show"])
-        .assert()
-        .success()
-        .get_output()
-        .stdout
-        .clone();
-
-    let v: serde_json::Value = serde_json::from_slice(&out).unwrap();
-    assert!(v.get("default").is_some(), "JSON must have 'default' key");
-    assert!(v.get("actions").is_some(), "JSON must have 'actions' key");
-}
-
-#[test]
-fn config_agent_set_default_xadk() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args([
-            "config",
-            "agent",
-            "set-default",
-            "--type",
-            "xadk",
-            "--agent-id",
-            "sdlc_spec",
-        ])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["config", "agent", "show"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("xadk"))
-        .stdout(predicate::str::contains("sdlc_spec"));
-}
-
-#[test]
-fn config_agent_set_default_claude() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args([
-            "config",
-            "agent",
-            "set-default",
-            "--type",
-            "claude",
-            "--model",
-            "claude-haiku-4-5",
-        ])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["config", "agent", "show"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("claude-haiku-4-5"));
-}
-
-#[test]
-fn config_agent_set_action_override() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args([
-            "config",
-            "agent",
-            "set-action",
-            "create_spec",
-            "--type",
-            "xadk",
-            "--agent-id",
-            "sdlc_spec",
-        ])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["config", "agent", "show"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("create_spec"))
-        .stdout(predicate::str::contains("sdlc_spec"));
-}
-
-#[test]
-fn config_agent_reset_clears_overrides() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args([
-            "config",
-            "agent",
-            "set-action",
-            "create_spec",
-            "--type",
-            "human",
-        ])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["config", "agent", "reset"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("cleared"));
-
-    let out = sdlc(&dir)
-        .args(["--json", "config", "agent", "show"])
-        .assert()
-        .success()
-        .get_output()
-        .stdout
-        .clone();
-
-    let v: serde_json::Value = serde_json::from_slice(&out).unwrap();
-    assert_eq!(
-        v["actions"],
-        serde_json::json!({}),
-        "actions map must be empty after reset"
-    );
-}
-
-// ---------------------------------------------------------------------------
-// sdlc run
-// ---------------------------------------------------------------------------
-
-#[test]
-fn run_human_backend_exits_zero() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args(["feature", "create", "my-feat"])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["config", "agent", "set-default", "--type", "human"])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["run", "my-feat"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("Human action required"));
-}
-
-#[test]
-fn run_dry_run_claude_prints_command() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args(["feature", "create", "my-feat"])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args([
-            "config",
-            "agent",
-            "set-default",
-            "--type",
-            "claude",
-            "--model",
-            "claude-opus-4-6",
-        ])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["run", "my-feat", "--dry-run"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("claude"))
-        .stdout(predicate::str::contains("-p"));
-}
-
-#[test]
-fn run_dry_run_xadk_prints_command() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args(["feature", "create", "my-feat"])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args([
-            "config",
-            "agent",
-            "set-default",
-            "--type",
-            "xadk",
-            "--agent-id",
-            "sdlc_spec",
-        ])
-        .assert()
-        .success();
-
-    sdlc(&dir)
-        .args(["run", "my-feat", "--dry-run"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("python"))
-        .stdout(predicate::str::contains("xadk"))
-        .stdout(predicate::str::contains("sdlc_spec"));
-}
-
-#[test]
-fn run_done_exits_zero_with_message() {
-    let dir = TempDir::new().unwrap();
-    init_project(&dir);
-
-    sdlc(&dir)
-        .args(["feature", "create", "released-feat"])
-        .assert()
-        .success();
-
-    // Force the feature to Released phase by patching its manifest directly
-    let manifest_path = dir
-        .path()
-        .join(".sdlc/features/released-feat/manifest.yaml");
-    let manifest = std::fs::read_to_string(&manifest_path).unwrap();
-    let updated = manifest.replace("phase: draft", "phase: released");
-    std::fs::write(&manifest_path, updated).unwrap();
-
-    sdlc(&dir)
-        .args(["run", "released-feat"])
-        .assert()
-        .success()
-        .stdout(predicate::str::contains("complete — no pending actions"));
 }
 
 // ---------------------------------------------------------------------------
@@ -1963,204 +2245,448 @@ fn e2e_task_and_comment_lifecycle() {
 }
 
 // ---------------------------------------------------------------------------
-// Verification Gates
+// sdlc query search
 // ---------------------------------------------------------------------------
 
 #[test]
-fn next_json_includes_gates_when_configured() {
+fn query_search_finds_by_title() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["feature", "create", "auth", "--title", "Auth System"])
+        .args([
+            "feature",
+            "create",
+            "auth-login",
+            "--title",
+            "User Authentication",
+        ])
         .assert()
         .success();
 
-    // Write config with gates for create_spec
-    let config_path = dir.path().join(".sdlc/config.yaml");
-    let config = std::fs::read_to_string(&config_path).unwrap();
-    let config_with_gates = format!(
-        "{}\ngates:\n  create_spec:\n    - name: lint\n      gate_type:\n        type: shell\n        command: \"echo lint ok\"\n      max_retries: 1\n      timeout_seconds: 30\n",
-        config.trim()
-    );
-    std::fs::write(&config_path, config_with_gates).unwrap();
-
-    let output = sdlc(&dir)
-        .args(["next", "--for", "auth", "--json"])
+    sdlc(&dir)
+        .args(["query", "search", "authentication"])
         .assert()
         .success()
-        .get_output()
-        .stdout
-        .clone();
-    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
-    assert_eq!(json["action"], "create_spec");
-    assert!(json["gates"].is_array());
-    assert_eq!(json["gates"][0]["name"], "lint");
-    assert_eq!(json["gates"][0]["max_retries"], 1);
+        .stdout(predicate::str::contains("auth-login"));
 }
 
 #[test]
-fn next_json_omits_gates_when_not_configured() {
+fn query_search_finds_by_description() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["feature", "create", "auth", "--title", "Auth System"])
+        .args([
+            "feature",
+            "create",
+            "payments",
+            "--title",
+            "Payment Flow",
+            "--description",
+            "Stripe checkout integration",
+        ])
         .assert()
         .success();
 
-    let output = sdlc(&dir)
-        .args(["next", "--for", "auth", "--json"])
+    sdlc(&dir)
+        .args(["query", "search", "stripe"])
         .assert()
         .success()
-        .get_output()
-        .stdout
-        .clone();
-    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
-    assert_eq!(json["action"], "create_spec");
-    // gates should not appear in JSON when empty (skip_serializing_if)
-    assert!(json.get("gates").is_none());
+        .stdout(predicate::str::contains("payments"));
 }
 
 #[test]
-fn run_dry_run_shows_gates() {
+fn query_search_no_match_prints_no_results() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["feature", "create", "auth", "--title", "Auth System"])
+        .args(["feature", "create", "auth", "--title", "Auth"])
         .assert()
         .success();
 
-    // Write config with gates for create_spec
-    let config_path = dir.path().join(".sdlc/config.yaml");
-    let config = std::fs::read_to_string(&config_path).unwrap();
-    let config_with_gates = format!(
-        "{}\ngates:\n  create_spec:\n    - name: build\n      gate_type:\n        type: shell\n        command: \"npm run build\"\n      max_retries: 2\n      timeout_seconds: 120\n    - name: review\n      gate_type:\n        type: human\n        prompt: \"Review the spec before proceeding\"\n      auto: false\n",
-        config.trim()
-    );
-    std::fs::write(&config_path, config_with_gates).unwrap();
-
     sdlc(&dir)
-        .args(["run", "auth", "--dry-run"])
+        .args(["query", "search", "kubernetes"])
         .assert()
         .success()
-        .stdout(predicate::str::contains("Gates after create_spec"))
-        .stdout(predicate::str::contains("shell: build"))
-        .stdout(predicate::str::contains("npm run build"))
-        .stdout(predicate::str::contains("human: review"));
+        .stdout(predicate::str::contains("No results."));
 }
 
 #[test]
-fn config_backward_compat_no_gates() {
-    // A config without any gates section should still work
+fn query_search_phase_field_scope() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["feature", "create", "auth", "--title", "Auth System"])
+        .args(["feature", "create", "feat-a", "--title", "Feature A"])
         .assert()
         .success();
 
-    // Dry run should work without gates (no "Gates after" output)
-    let output = sdlc(&dir)
-        .args(["run", "auth", "--dry-run"])
+    // All fresh features are in draft phase
+    sdlc(&dir)
+        .args(["query", "search", "phase:draft"])
         .assert()
         .success()
-        .get_output()
-        .stdout
-        .clone();
-    let stdout = String::from_utf8(output).unwrap();
-    assert!(!stdout.contains("Gates after"));
+        .stdout(predicate::str::contains("feat-a"));
 }
 
 #[test]
-fn run_with_passing_gates_exits_zero() {
+fn query_search_limit_respected() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
-    sdlc(&dir)
-        .args(["feature", "create", "auth", "--title", "Auth System"])
-        .assert()
-        .success();
-
-    // Create a mock "claude" binary that exits 0
-    let bin_dir = dir.path().join("mock_bin");
-    std::fs::create_dir_all(&bin_dir).unwrap();
-    let mock_claude = bin_dir.join("claude");
-    std::fs::write(&mock_claude, "#!/bin/sh\nexit 0\n").unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        std::fs::set_permissions(&mock_claude, std::fs::Permissions::from_mode(0o755)).unwrap();
+    for slug in ["feat-a", "feat-b", "feat-c"] {
+        sdlc(&dir)
+            .args([
+                "feature",
+                "create",
+                slug,
+                "--title",
+                &format!("Feature {slug}"),
+            ])
+            .assert()
+            .success();
     }
 
-    // Configure gates for create_spec
-    let config_path = dir.path().join(".sdlc/config.yaml");
-    let config = std::fs::read_to_string(&config_path).unwrap();
-    let config_with_gates = format!(
-        "{}\ngates:\n  create_spec:\n    - name: check\n      gate_type:\n        type: shell\n        command: \"echo gate-passed\"\n      timeout_seconds: 5\n",
-        config.trim()
-    );
-    std::fs::write(&config_path, config_with_gates).unwrap();
-
-    // Run with mock claude in PATH — agent succeeds, gate passes, exit 0
-    let path = format!(
-        "{}:{}",
-        bin_dir.display(),
-        std::env::var("PATH").unwrap_or_default()
-    );
-    sdlc(&dir)
-        .args(["run", "auth"])
-        .env("PATH", &path)
+    // Search for a common term with limit 1 — output must contain exactly one slug reference
+    let output = sdlc(&dir)
+        .args(["query", "search", "phase:draft", "--limit", "1"])
         .assert()
         .success()
-        .stderr(predicate::str::contains("Running verification gates"))
-        .stderr(predicate::str::contains("All gates passed"));
+        .get_output()
+        .stdout
+        .clone();
+
+    let text = String::from_utf8_lossy(&output);
+    let slug_count = ["feat-a", "feat-b", "feat-c"]
+        .iter()
+        .filter(|&&s| text.contains(s))
+        .count();
+    assert_eq!(slug_count, 1, "only 1 result expected due to --limit 1");
 }
 
 #[test]
-fn run_with_failing_gate_exits_two() {
+fn query_search_json_output() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);
 
     sdlc(&dir)
-        .args(["feature", "create", "auth", "--title", "Auth System"])
+        .args([
+            "feature",
+            "create",
+            "oauth-flow",
+            "--title",
+            "OAuth Login Flow",
+        ])
         .assert()
         .success();
 
-    // Create a mock "claude" binary that exits 0
-    let bin_dir = dir.path().join("mock_bin");
-    std::fs::create_dir_all(&bin_dir).unwrap();
-    let mock_claude = bin_dir.join("claude");
-    std::fs::write(&mock_claude, "#!/bin/sh\nexit 0\n").unwrap();
-    #[cfg(unix)]
-    {
-        use std::os::unix::fs::PermissionsExt;
-        std::fs::set_permissions(&mock_claude, std::fs::Permissions::from_mode(0o755)).unwrap();
-    }
+    let output = sdlc(&dir)
+        .args(["query", "search", "oauth", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
 
-    // Configure a failing gate for create_spec
-    let config_path = dir.path().join(".sdlc/config.yaml");
-    let config = std::fs::read_to_string(&config_path).unwrap();
-    let config_with_gates = format!(
-        "{}\ngates:\n  create_spec:\n    - name: must-fail\n      gate_type:\n        type: shell\n        command: \"false\"\n      timeout_seconds: 5\n",
-        config.trim()
-    );
-    std::fs::write(&config_path, config_with_gates).unwrap();
+    let json: serde_json::Value = serde_json::from_slice(&output).expect("valid JSON");
+    let arr = json.as_array().expect("JSON array");
+    assert_eq!(arr.len(), 1);
+    assert_eq!(arr[0]["slug"], "oauth-flow");
+    assert_eq!(arr[0]["phase"], "draft");
+    assert!(arr[0]["score"].as_f64().unwrap() > 0.0);
+}
 
-    // Run with mock claude in PATH — agent succeeds, gate fails, exit 2
-    let path = format!(
-        "{}:{}",
-        bin_dir.display(),
-        std::env::var("PATH").unwrap_or_default()
-    );
+#[test]
+fn query_search_empty_project_returns_no_results() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
     sdlc(&dir)
-        .args(["run", "auth"])
-        .env("PATH", &path)
+        .args(["query", "search", "anything"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No results."));
+}
+
+// ---------------------------------------------------------------------------
+// sdlc artifact waive
+// ---------------------------------------------------------------------------
+
+#[test]
+fn artifact_waive_unblocks_pipeline() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "simple-crud"])
+        .assert()
+        .success();
+
+    // Approve spec and transition to specified
+    sdlc(&dir)
+        .args(["artifact", "draft", "simple-crud", "spec"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["artifact", "approve", "simple-crud", "spec"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "transition", "simple-crud", "specified"])
+        .assert()
+        .success();
+
+    // Next should be create_design
+    sdlc(&dir)
+        .args(["next", "--for", "simple-crud", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("create_design"));
+
+    // Waive design — simple CRUD needs no architecture doc
+    sdlc(&dir)
+        .args([
+            "artifact",
+            "waive",
+            "simple-crud",
+            "design",
+            "--reason",
+            "simple CRUD, no arch decisions",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Waived: simple-crud/design"));
+
+    // Next should now skip design and go to create_tasks
+    sdlc(&dir)
+        .args(["next", "--for", "simple-crud", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("create_tasks"));
+}
+
+#[test]
+fn artifact_waive_spec_skips_to_specified() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "pure-refactor"])
+        .assert()
+        .success();
+
+    // Next should be create_spec
+    sdlc(&dir)
+        .args(["next", "--for", "pure-refactor", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("create_spec"));
+
+    // Waive spec — this is a pure refactor with no behavioral change
+    sdlc(&dir)
+        .args([
+            "artifact",
+            "waive",
+            "pure-refactor",
+            "spec",
+            "--reason",
+            "pure refactor, behavior unchanged",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Waived: pure-refactor/spec"));
+
+    // Next should now transition to specified
+    sdlc(&dir)
+        .args(["next", "--for", "pure-refactor", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("specified"));
+}
+
+#[test]
+fn artifact_waive_audit_skips_to_qa() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "config-fix"])
+        .assert()
+        .success();
+
+    // Waive review so we can transition to audit (review is required to enter audit)
+    sdlc(&dir)
+        .args([
+            "artifact",
+            "waive",
+            "config-fix",
+            "review",
+            "--reason",
+            "trivial config change, review waived",
+        ])
+        .assert()
+        .success();
+
+    // Transition to audit phase
+    sdlc(&dir)
+        .args(["feature", "transition", "config-fix", "audit"])
+        .assert()
+        .success();
+
+    // Next should be create_audit
+    sdlc(&dir)
+        .args(["next", "--for", "config-fix", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("create_audit"));
+
+    // Waive audit — trivial config change, no security surface
+    sdlc(&dir)
+        .args([
+            "artifact",
+            "waive",
+            "config-fix",
+            "audit",
+            "--reason",
+            "trivial config change, no security surface",
+        ])
+        .assert()
+        .success();
+
+    // Next should now transition to QA
+    sdlc(&dir)
+        .args(["next", "--for", "config-fix", "--json"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("qa"));
+}
+
+#[test]
+fn artifact_waive_json_output() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "waive-json-test"])
+        .assert()
+        .success();
+
+    let output = sdlc(&dir)
+        .args([
+            "artifact",
+            "waive",
+            "waive-json-test",
+            "design",
+            "--reason",
+            "no design needed",
+            "--json",
+        ])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value =
+        serde_json::from_slice(&output).expect("output should be valid JSON");
+    assert_eq!(json["slug"], "waive-json-test");
+    assert_eq!(json["artifact"], "design");
+    assert_eq!(json["status"], "waived");
+    assert_eq!(json["reason"], "no design needed");
+}
+
+// ---------------------------------------------------------------------------
+// sdlc agent — CLI parsing and error paths (no Claude subprocess)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn agent_help_works() {
+    // Verifies the subcommand is wired and --help doesn't panic.
+    Command::cargo_bin("sdlc")
+        .unwrap()
+        .args(["agent", "--help"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("run"));
+}
+
+#[test]
+fn agent_run_missing_feature_fails() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["agent", "run", "no-such-feature"])
         .assert()
         .failure()
-        .code(2)
-        .stderr(predicate::str::contains("Running verification gates"))
-        .stderr(predicate::str::contains("must-fail"));
+        .stderr(predicate::str::contains("no-such-feature"));
+}
+
+// sdlc agent run — short-circuit paths (no Claude subprocess)
+// ---------------------------------------------------------------------------
+
+#[test]
+fn agent_run_done_feature_exits_without_spawning_claude() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create feature and drive it all the way to Released (done).
+    sdlc(&dir)
+        .args(["feature", "create", "done-feature"])
+        .assert()
+        .success();
+
+    // Approve qa_results to unlock merge phase, then transition and merge.
+    sdlc(&dir)
+        .args(["artifact", "approve", "done-feature", "qa_results"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "transition", "done-feature", "merge"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["merge", "done-feature"])
+        .assert()
+        .success();
+
+    // sdlc agent run should detect Done and exit cleanly without spawning Claude.
+    sdlc(&dir)
+        .args(["agent", "run", "done-feature"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("already done"));
+}
+
+#[test]
+fn agent_run_hitl_gate_exits_without_spawning_claude() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "blocked-feature"])
+        .assert()
+        .success();
+
+    // Add a blocker comment — this stalls the pipeline at wait_for_approval.
+    sdlc(&dir)
+        .args([
+            "comment",
+            "create",
+            "blocked-feature",
+            "Needs product sign-off before spec is written",
+            "--flag",
+            "blocker",
+        ])
+        .assert()
+        .success();
+
+    // sdlc agent run should detect the human gate and exit cleanly.
+    sdlc(&dir)
+        .args(["agent", "run", "blocked-feature"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("human gate"));
 }

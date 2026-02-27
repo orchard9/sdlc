@@ -193,7 +193,7 @@ impl Feature {
         let required = cfg.phases.required_for(target);
         for &artifact_type in required {
             let artifact = self.artifact(artifact_type);
-            if !artifact.map(|a| a.is_approved()).unwrap_or(false) {
+            if !artifact.map(|a| a.is_satisfied()).unwrap_or(false) {
                 return Err(SdlcError::MissingArtifact {
                     artifact: artifact_type.to_string(),
                     phase: target.to_string(),
@@ -280,6 +280,40 @@ impl Feature {
         Ok(())
     }
 
+    pub fn waive_artifact(
+        &mut self,
+        artifact_type: ArtifactType,
+        reason: Option<String>,
+    ) -> Result<()> {
+        let artifact = self
+            .artifacts
+            .iter_mut()
+            .find(|a| a.artifact_type == artifact_type)
+            .ok_or_else(|| SdlcError::ArtifactNotFound(artifact_type.to_string()))?;
+        artifact.waive(reason);
+        self.updated_at = Utc::now();
+        Ok(())
+    }
+
+    // ---------------------------------------------------------------------------
+    // Metadata mutations
+    // ---------------------------------------------------------------------------
+
+    pub fn update_title(&mut self, title: impl Into<String>) {
+        self.title = title.into();
+        self.updated_at = Utc::now();
+    }
+
+    pub fn set_description(&mut self, description: impl Into<String>) {
+        self.description = Some(description.into());
+        self.updated_at = Utc::now();
+    }
+
+    pub fn clear_description(&mut self) {
+        self.description = None;
+        self.updated_at = Utc::now();
+    }
+
     // ---------------------------------------------------------------------------
     // Quality score helpers
     // ---------------------------------------------------------------------------
@@ -317,7 +351,7 @@ impl Feature {
         cfg.phases
             .required_for(phase)
             .iter()
-            .all(|&t| self.artifact(t).map(|a| a.is_approved()).unwrap_or(false))
+            .all(|&t| self.artifact(t).map(|a| a.is_satisfied()).unwrap_or(false))
     }
 
     /// Returns artifacts that exist on disk but are still in Missing/Draft status.

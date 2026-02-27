@@ -14,7 +14,7 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
     let milestones = Milestone::list(root).unwrap_or_default();
     let active_milestones: Vec<&Milestone> = milestones
         .iter()
-        .filter(|m| m.status == MilestoneStatus::Active)
+        .filter(|m| m.compute_status(&features) == MilestoneStatus::Active)
         .collect();
 
     if json {
@@ -43,7 +43,7 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
             unassigned: Vec<MilestoneFeature<'a>>,
             feature_count: usize,
             last_action: Option<&'a sdlc_core::state::HistoryEntry>,
-            active_work: &'a [sdlc_core::state::ActiveWork],
+            active_directives: &'a [sdlc_core::state::ActiveDirective],
             blocked: &'a [sdlc_core::state::BlockedItem],
         }
 
@@ -70,7 +70,7 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
                 MilestoneSummary {
                     slug: &m.slug,
                     title: &m.title,
-                    status: m.status.to_string(),
+                    status: m.compute_status(&features).to_string(),
                     done,
                     total: mf.len(),
                     features: mf,
@@ -95,7 +95,7 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
             unassigned,
             feature_count: features.len(),
             last_action: state.last_action(),
-            active_work: &state.active_work,
+            active_directives: &state.active_directives,
             blocked: &state.blocked,
         };
         return print_json(&output);
@@ -161,10 +161,10 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
         print_table_indented(&["SLUG", "PHASE", "STATUS", "TITLE"], rows);
     }
 
-    // Active work
-    if !state.active_work.is_empty() {
-        println!("\nActive work:");
-        for w in &state.active_work {
+    // Active directives
+    if !state.active_directives.is_empty() {
+        println!("\nActive directives:");
+        for w in &state.active_directives {
             println!("  {} — {}", w.feature, w.action);
         }
     }

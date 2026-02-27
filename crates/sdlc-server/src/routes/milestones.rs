@@ -3,7 +3,6 @@ use axum::Json;
 
 use crate::error::AppError;
 use crate::state::AppState;
-use crate::subprocess;
 
 /// GET /api/milestones — list all milestones.
 pub async fn list_milestones(
@@ -12,6 +11,7 @@ pub async fn list_milestones(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let milestones = sdlc_core::milestone::Milestone::list(&root)?;
+        let features = sdlc_core::feature::Feature::list(&root)?;
         let list: Vec<serde_json::Value> = milestones
             .iter()
             .map(|m| {
@@ -19,7 +19,8 @@ pub async fn list_milestones(
                     "slug": m.slug,
                     "title": m.title,
                     "description": m.description,
-                    "status": m.status,
+                    "vision": m.vision,
+                    "status": m.compute_status(&features),
                     "features": m.features,
                     "created_at": m.created_at,
                     "updated_at": m.updated_at,
@@ -42,16 +43,18 @@ pub async fn get_milestone(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let m = sdlc_core::milestone::Milestone::load(&root, &slug)?;
+        let features = sdlc_core::feature::Feature::list(&root)?;
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": m.slug,
             "title": m.title,
             "description": m.description,
-            "status": m.status,
+            "vision": m.vision,
+            "status": m.compute_status(&features),
             "features": m.features,
             "created_at": m.created_at,
             "updated_at": m.updated_at,
-            "completed_at": m.completed_at,
-            "cancelled_at": m.cancelled_at,
+            "skipped_at": m.skipped_at,
+            "released_at": m.released_at,
         }))
     })
     .await
@@ -127,57 +130,13 @@ pub async fn create_milestone(
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": m.slug,
             "title": m.title,
-            "status": m.status,
+            "status": "active",
         }))
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
 
     Ok(Json(result))
-}
-
-#[derive(serde::Deserialize)]
-pub struct RunMilestoneBody {
-    pub mode: Option<String>,
-}
-
-/// POST /api/milestones/:slug/run — spawn sdlc_milestone_driver subprocess.
-pub async fn run_milestone(
-    State(app): State<AppState>,
-    Path(slug): Path<String>,
-    Json(body): Json<RunMilestoneBody>,
-) -> Result<Json<serde_json::Value>, AppError> {
-    let root = app.root.clone();
-
-    // Validate milestone exists on a blocking thread
-    tokio::task::spawn_blocking({
-        let root = root.clone();
-        let slug = slug.clone();
-        move || sdlc_core::milestone::Milestone::load(&root, &slug)
-    })
-    .await
-    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
-
-    let mode = body.mode.unwrap_or_else(|| "auto".to_string());
-    let argv = vec![
-        "python".to_string(),
-        "-m".to_string(),
-        "sdlc_milestone_driver".to_string(),
-        "--milestone".to_string(),
-        slug.clone(),
-        "--mode".to_string(),
-        mode,
-        "--root".to_string(),
-        root.to_string_lossy().to_string(),
-    ];
-
-    let run_id = uuid::Uuid::new_v4().to_string();
-    let handle = subprocess::spawn_process(argv, &root);
-
-    app.sweep_completed_runs().await;
-    app.runs.write().await.insert(run_id.clone(), handle);
-
-    Ok(Json(serde_json::json!({ "run_id": run_id })))
 }
 
 #[derive(serde::Deserialize)]
@@ -197,16 +156,18 @@ pub async fn reorder_milestone_features(
         let refs: Vec<&str> = body.features.iter().map(|s| s.as_str()).collect();
         m.reorder_features(&refs)?;
         m.save(&root)?;
+        let features = sdlc_core::feature::Feature::list(&root)?;
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": m.slug,
             "title": m.title,
             "description": m.description,
-            "status": m.status,
+            "vision": m.vision,
+            "status": m.compute_status(&features),
             "features": m.features,
             "created_at": m.created_at,
             "updated_at": m.updated_at,
-            "completed_at": m.completed_at,
-            "cancelled_at": m.cancelled_at,
+            "skipped_at": m.skipped_at,
+            "released_at": m.released_at,
         }))
     })
     .await

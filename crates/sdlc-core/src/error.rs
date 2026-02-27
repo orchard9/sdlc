@@ -45,6 +45,12 @@ pub enum SdlcError {
     #[error("blocked by: {0}")]
     Blocked(String),
 
+    #[error("search error: {0}")]
+    Search(String),
+
+    #[error("home directory not found: set HOME environment variable")]
+    HomeNotFound,
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 

@@ -1,0 +1,106 @@
+slug: vision-docs-update
+title: vision.md and architecture.md reflect directive model
+phase: released
+created_at: 2026-02-25T21:09:08.614861Z
+updated_at: 2026-02-27T07:46:21.606147Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/vision-docs-update/spec.md
+  created_at: null
+  approved_at: 2026-02-25T21:10:16.692240Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/vision-docs-update/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:14.900592Z
+  waive_reason: docs-only update, no design needed
+- artifact_type: tasks
+  status: waived
+  path: .sdlc/features/vision-docs-update/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:15.585996Z
+  waive_reason: docs-only update, no tasks
+- artifact_type: qa_plan
+  status: waived
+  path: .sdlc/features/vision-docs-update/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:16.260476Z
+  waive_reason: docs-only update, no QA plan
+- artifact_type: review
+  status: waived
+  path: .sdlc/features/vision-docs-update/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:18.921611Z
+  waive_reason: docs-only change, no code to review
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/vision-docs-update/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:19.579969Z
+  waive_reason: docs-only change, no security surface
+- artifact_type: qa_results
+  status: waived
+  path: .sdlc/features/vision-docs-update/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:20.238619Z
+  waive_reason: docs-only change, no QA needed
+tasks: []
+comments:
+- id: C1
+  author: null
+  body: 'Vision adjustment applied: vision.md, architecture.md, README.md, milestone.rs, gate.rs, init.rs updated. Stub files deleted. Roadmap initialized.'
+  flag: null
+  target:
+    kind: feature
+  created_at: 2026-02-25T21:10:23.314059Z
+next_comment_seq: 1
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-02-25T21:09:08.614861Z
+  exited: 2026-02-27T07:46:16.948119Z
+- phase: planned
+  entered: 2026-02-27T07:46:16.948119Z
+  exited: 2026-02-27T07:46:17.607828Z
+- phase: ready
+  entered: 2026-02-27T07:46:17.607828Z
+  exited: 2026-02-27T07:46:18.265822Z
+- phase: implementation
+  entered: 2026-02-27T07:46:18.265822Z
+  exited: 2026-02-27T07:46:20.926681Z
+- phase: merge
+  entered: 2026-02-27T07:46:20.926681Z
+  exited: 2026-02-27T07:46:21.606147Z
+- phase: released
+  entered: 2026-02-27T07:46:21.606147Z
+  exited: null
+dependencies: []
+archived: false

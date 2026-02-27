@@ -1,0 +1,111 @@
+slug: claude-code-consumer
+title: 'Claude Code skill: consume sdlc directive and act on it'
+phase: released
+created_at: 2026-02-25T21:09:08.609435Z
+updated_at: 2026-02-27T07:46:50.588579Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/claude-code-consumer/spec.md
+  created_at: null
+  approved_at: 2026-02-26T13:55:27.312617Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/claude-code-consumer/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:43.900344Z
+  waive_reason: design captured in spec; implemented as both Rust claude-agent crate and TypeScript packages/sdlc-agent
+- artifact_type: tasks
+  status: waived
+  path: .sdlc/features/claude-code-consumer/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:44.561396Z
+  waive_reason: implementation tracked via planning docs, not task list
+- artifact_type: qa_plan
+  status: waived
+  path: .sdlc/features/claude-code-consumer/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:45.216534Z
+  waive_reason: tested via cargo test (Rust) and bun test (TS)
+- artifact_type: review
+  status: waived
+  path: .sdlc/features/claude-code-consumer/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:47.904529Z
+  waive_reason: reviewed via /verify-completion; 279 tests pass, 0 clippy warnings
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/claude-code-consumer/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:48.585421Z
+  waive_reason: no external data exposure; MCP tools operate on local .sdlc/ files only
+- artifact_type: qa_results
+  status: waived
+  path: .sdlc/features/claude-code-consumer/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-02-27T07:46:49.254738Z
+  waive_reason: verified via /verify-completion — VERIFIED verdict
+tasks:
+- id: T1
+  title: Test task
+  description: null
+  status: completed
+  created_at: 2026-02-26T15:16:35.155986Z
+  started_at: null
+  completed_at: 2026-02-27T07:46:43.228710Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 2
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-02-25T21:09:08.609435Z
+  exited: 2026-02-26T14:48:30.233063Z
+- phase: specified
+  entered: 2026-02-26T14:48:30.233063Z
+  exited: 2026-02-27T07:46:45.887401Z
+- phase: planned
+  entered: 2026-02-27T07:46:45.887401Z
+  exited: 2026-02-27T07:46:46.553810Z
+- phase: ready
+  entered: 2026-02-27T07:46:46.553810Z
+  exited: 2026-02-27T07:46:47.242084Z
+- phase: implementation
+  entered: 2026-02-27T07:46:47.242084Z
+  exited: 2026-02-27T07:46:49.939798Z
+- phase: merge
+  entered: 2026-02-27T07:46:49.939798Z
+  exited: 2026-02-27T07:46:50.588579Z
+- phase: released
+  entered: 2026-02-27T07:46:50.588579Z
+  exited: null
+dependencies: []
+archived: false

@@ -1,5 +1,7 @@
 use crate::error::{Result, SdlcError};
+use crate::feature::Feature;
 use crate::paths;
+use crate::types::Phase;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use std::fmt;
@@ -9,20 +11,22 @@ use std::path::Path;
 // MilestoneStatus
 // ---------------------------------------------------------------------------
 
+/// Derived from feature phases at read time. Only `Skipped` is stored explicitly
+/// (via `skipped_at`). `Active` and `Released` are always computed.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MilestoneStatus {
     Active,
-    Complete,
-    Cancelled,
+    Released,
+    Skipped,
 }
 
 impl fmt::Display for MilestoneStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             MilestoneStatus::Active => "active",
-            MilestoneStatus::Complete => "complete",
-            MilestoneStatus::Cancelled => "cancelled",
+            MilestoneStatus::Released => "released",
+            MilestoneStatus::Skipped => "skipped",
         };
         f.write_str(s)
     }
@@ -36,13 +40,24 @@ impl fmt::Display for MilestoneStatus {
 pub struct Milestone {
     pub slug: String,
     pub title: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    /// Narrative: what "done" looks like from a user's perspective; why this milestone matters.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub vision: Option<String>,
     pub features: Vec<String>,
-    pub status: MilestoneStatus,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    pub completed_at: Option<DateTime<Utc>>,
-    pub cancelled_at: Option<DateTime<Utc>>,
+    /// Set when a milestone is explicitly skipped/cancelled.
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        alias = "cancelled_at"
+    )]
+    pub skipped_at: Option<DateTime<Utc>>,
+    /// Set when a milestone is explicitly marked complete (overrides computed status).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub released_at: Option<DateTime<Utc>>,
 }
 
 impl Milestone {
@@ -52,13 +67,31 @@ impl Milestone {
             slug: slug.into(),
             title: title.into(),
             description: None,
+            vision: None,
             features: Vec::new(),
-            status: MilestoneStatus::Active,
             created_at: now,
             updated_at: now,
-            completed_at: None,
-            cancelled_at: None,
+            skipped_at: None,
+            released_at: None,
         }
+    }
+
+    /// Derive milestone status. `Skipped` and `Released` (explicit) take priority over computed.
+    pub fn compute_status(&self, features: &[Feature]) -> MilestoneStatus {
+        if self.skipped_at.is_some() {
+            return MilestoneStatus::Skipped;
+        }
+        if self.released_at.is_some() {
+            return MilestoneStatus::Released;
+        }
+        let non_archived: Vec<&Feature> = features
+            .iter()
+            .filter(|f| self.features.contains(&f.slug) && !f.archived)
+            .collect();
+        if !non_archived.is_empty() && non_archived.iter().all(|f| f.phase == Phase::Released) {
+            return MilestoneStatus::Released;
+        }
+        MilestoneStatus::Active
     }
 
     // ---------------------------------------------------------------------------
@@ -154,21 +187,60 @@ impl Milestone {
         }
     }
 
-    pub fn complete(&mut self) {
-        self.status = MilestoneStatus::Complete;
-        self.completed_at = Some(Utc::now());
+    /// Mark the milestone as explicitly skipped/cancelled. Status becomes `Skipped`.
+    pub fn skip(&mut self) {
+        self.skipped_at = Some(Utc::now());
         self.updated_at = Utc::now();
     }
 
-    pub fn cancel(&mut self) {
-        self.status = MilestoneStatus::Cancelled;
-        self.cancelled_at = Some(Utc::now());
+    /// Mark the milestone as explicitly complete. Status becomes `Released` regardless of features.
+    pub fn release(&mut self) {
+        self.released_at = Some(Utc::now());
         self.updated_at = Utc::now();
     }
 
     pub fn update_title(&mut self, title: impl Into<String>) {
         self.title = title.into();
         self.updated_at = Utc::now();
+    }
+
+    pub fn set_vision(&mut self, vision: impl Into<String>) {
+        self.vision = Some(vision.into());
+        self.updated_at = Utc::now();
+    }
+
+    /// Load the acceptance test markdown from `.sdlc/milestones/<slug>/acceptance_test.md`.
+    /// Returns `None` if the file does not exist.
+    pub fn load_acceptance_test(&self, root: &Path) -> Result<Option<String>> {
+        let path = paths::milestone_acceptance_test_path(root, &self.slug);
+        if path.exists() {
+            Ok(Some(std::fs::read_to_string(&path)?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Write the acceptance test to `.sdlc/milestones/<slug>/acceptance_test.md`.
+    pub fn save_acceptance_test(&self, root: &Path, content: &str) -> Result<()> {
+        let path = paths::milestone_acceptance_test_path(root, &self.slug);
+        crate::io::atomic_write(&path, content.as_bytes())
+    }
+
+    /// Load the UAT results from `.sdlc/milestones/<slug>/uat_results.md`.
+    /// Returns `None` if no run has been recorded yet.
+    pub fn load_uat_results(&self, root: &Path) -> Result<Option<String>> {
+        let path = paths::milestone_uat_results_path(root, &self.slug);
+        if path.exists() {
+            Ok(Some(std::fs::read_to_string(&path)?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Write (overwrite) the UAT results to `.sdlc/milestones/<slug>/uat_results.md`.
+    pub fn save_uat_results(&self, root: &Path, content: &str) -> Result<()> {
+        let path = paths::milestone_uat_results_path(root, &self.slug);
+        crate::io::atomic_write(&path, content.as_bytes())
     }
 
     /// Replace the feature order with `ordered`. Every slug currently in
@@ -249,12 +321,12 @@ mod tests {
 
         let m = Milestone::create(dir.path(), "v2-launch", "v2.0 Launch").unwrap();
         assert_eq!(m.slug, "v2-launch");
-        assert_eq!(m.status, MilestoneStatus::Active);
         assert!(m.features.is_empty());
+        assert_eq!(m.compute_status(&[]), MilestoneStatus::Active);
 
         let loaded = Milestone::load(dir.path(), "v2-launch").unwrap();
         assert_eq!(loaded.title, "v2.0 Launch");
-        assert!(loaded.completed_at.is_none());
+        assert!(loaded.skipped_at.is_none());
     }
 
     #[test]
@@ -413,18 +485,91 @@ mod tests {
     }
 
     #[test]
-    fn milestone_complete_cancel() {
+    fn milestone_skip() {
         let dir = TempDir::new().unwrap();
         setup(&dir);
 
         let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
-        m.complete();
-        assert_eq!(m.status, MilestoneStatus::Complete);
-        assert!(m.completed_at.is_some());
+        assert_eq!(m.compute_status(&[]), MilestoneStatus::Active);
+        m.skip();
+        assert!(m.skipped_at.is_some());
+        assert_eq!(m.compute_status(&[]), MilestoneStatus::Skipped);
+    }
 
-        let mut m2 = Milestone::create(dir.path(), "v3", "v3").unwrap();
-        m2.cancel();
-        assert_eq!(m2.status, MilestoneStatus::Cancelled);
-        assert!(m2.cancelled_at.is_some());
+    #[test]
+    fn compute_status_all_released() {
+        use crate::feature::Feature;
+        use crate::types::Phase;
+
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+
+        let mut fa = Feature::new("a", "Feature A");
+        fa.phase = Phase::Released;
+        let mut fb = Feature::new("b", "Feature B");
+        fb.phase = Phase::Released;
+
+        assert_eq!(m.compute_status(&[fa, fb]), MilestoneStatus::Released);
+    }
+
+    #[test]
+    fn compute_status_mixed_phases() {
+        use crate::feature::Feature;
+        use crate::types::Phase;
+
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.add_feature("b");
+
+        let mut fa = Feature::new("a", "Feature A");
+        fa.phase = Phase::Released;
+        let fb = Feature::new("b", "Feature B"); // draft by default
+
+        assert_eq!(m.compute_status(&[fa, fb]), MilestoneStatus::Active);
+    }
+
+    #[test]
+    fn compute_status_skipped_overrides() {
+        use crate::feature::Feature;
+        use crate::types::Phase;
+
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.skip();
+
+        let mut fa = Feature::new("a", "Feature A");
+        fa.phase = Phase::Released;
+
+        // Even with all released, skipped wins
+        assert_eq!(m.compute_status(&[fa]), MilestoneStatus::Skipped);
+    }
+
+    #[test]
+    fn compute_status_archived_features_ignored() {
+        use crate::feature::Feature;
+        use crate::types::Phase;
+
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+
+        let mut fa = Feature::new("a", "Feature A");
+        fa.phase = Phase::Implementation;
+        fa.archived = true;
+
+        // No non-archived features → still Active
+        assert_eq!(m.compute_status(&[fa]), MilestoneStatus::Active);
     }
 }

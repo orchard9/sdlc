@@ -74,6 +74,13 @@ fn artifact_approved(ctx: &EvalContext, t: ArtifactType) -> bool {
         .unwrap_or(false)
 }
 
+fn artifact_satisfied(ctx: &EvalContext, t: ArtifactType) -> bool {
+    ctx.feature
+        .artifact(t)
+        .map(|a| a.is_satisfied())
+        .unwrap_or(false)
+}
+
 fn artifact_rejected(ctx: &EvalContext, t: ArtifactType) -> bool {
     ctx.feature
         .artifact(t)
@@ -168,6 +175,11 @@ pub fn default_rules() -> Vec<Rule> {
                 if let Some(ref desc) = ctx.feature.description {
                     msg.push_str(&format!("\nDescription: {desc}"));
                 }
+                msg.push_str(&format!(
+                    "\nIf this feature needs no spec (pure refactor, behavior unchanged), \
+                    run: sdlc artifact waive {} spec --reason \"<reason>\"",
+                    ctx.feature.slug
+                ));
                 msg
             },
             next_command: |ctx| format!("/spec-feature {}", ctx.feature.slug),
@@ -199,12 +211,22 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/spec-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/spec.md", feature_dir(ctx))
         },
-        // 5. Draft — spec approved, transition to Specified
+        // 5. Draft — spec approved or waived, transition to Specified
         rule! {
             id: "spec_approved",
-            condition: |ctx| in_phase(ctx, Phase::Draft) && artifact_approved(ctx, ArtifactType::Spec),
+            condition: |ctx| in_phase(ctx, Phase::Draft) && artifact_satisfied(ctx, ArtifactType::Spec),
             action: ActionType::ApproveSpec,
-            message: |ctx| format!("Spec approved. Transitioning '{}' to specified.", ctx.feature.slug),
+            message: |ctx| {
+                let spec_waived = ctx.feature
+                    .artifact(ArtifactType::Spec)
+                    .map(|a| matches!(a.status, ArtifactStatus::Waived))
+                    .unwrap_or(false);
+                if spec_waived {
+                    format!("Spec waived. Transitioning '{}' to specified.", ctx.feature.slug)
+                } else {
+                    format!("Spec approved. Transitioning '{}' to specified.", ctx.feature.slug)
+                }
+            },
             next_command: |ctx| format!("sdlc feature transition {} specified", ctx.feature.slug),
             transition_to: Phase::Specified
         },
@@ -213,7 +235,16 @@ pub fn default_rules() -> Vec<Rule> {
             id: "needs_design",
             condition: |ctx| in_phase(ctx, Phase::Specified) && artifact_missing(ctx, ArtifactType::Design),
             action: ActionType::CreateDesign,
-            message: |ctx| format!("No design exists. Write the design document for '{}'.", ctx.feature.slug),
+            message: |ctx| format!(
+                "No design exists for '{}'. Write design.md as the primary entry point.\n\
+                Format guidance: use plain markdown for most features. For architecture-heavy work, \
+                include diagrams (embed as images referenced from design.md). For UI features, include \
+                an HTML prototype or ASCII wireframes alongside design.md. Any companion files \
+                (images, HTML, diagrams) go in the same feature directory and must be referenced \
+                from design.md. If this feature needs no design (simple CRUD, config-only), \
+                run: sdlc artifact waive {} design --reason \"<reason>\"",
+                ctx.feature.slug, ctx.feature.slug
+            ),
             next_command: |ctx| format!("/design-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/design.md", feature_dir(ctx))
         },
@@ -234,42 +265,96 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/design-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/design.md", feature_dir(ctx))
         },
-        // 9. Specified — design approved, no tasks
+        // 9. Specified — design approved or waived, no tasks
         rule! {
             id: "needs_tasks",
             condition: |ctx| in_phase(ctx, Phase::Specified)
-                && artifact_approved(ctx, ArtifactType::Design)
+                && artifact_satisfied(ctx, ArtifactType::Design)
                 && artifact_missing(ctx, ArtifactType::Tasks),
             action: ActionType::CreateTasks,
-            message: |ctx| format!("Design approved. Write the task breakdown for '{}'.", ctx.feature.slug),
+            message: |ctx| {
+                let design_waived = ctx.feature
+                    .artifact(ArtifactType::Design)
+                    .map(|a| matches!(a.status, ArtifactStatus::Waived))
+                    .unwrap_or(false);
+                if design_waived {
+                    format!("Design waived. Write the task breakdown for '{}'.", ctx.feature.slug)
+                } else {
+                    format!("Design approved. Write the task breakdown for '{}'.", ctx.feature.slug)
+                }
+            },
             next_command: |ctx| format!("/tasks-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/tasks.md", feature_dir(ctx))
         },
-        // 10. Specified — tasks exist, no QA plan
+        // 10. Specified — tasks need approval
+        rule! {
+            id: "tasks_need_approval",
+            condition: |ctx| in_phase(ctx, Phase::Specified)
+                && artifact_satisfied(ctx, ArtifactType::Design)
+                && artifact_needs_approval(ctx, ArtifactType::Tasks),
+            action: ActionType::ApproveTasks,
+            message: |ctx| format!("Tasks for '{}' are ready for verification.", ctx.feature.slug),
+            next_command: |ctx| format!("sdlc artifact approve {} tasks", ctx.feature.slug)
+        },
+        // 11. Specified — tasks rejected
+        rule! {
+            id: "tasks_rejected",
+            condition: |ctx| in_phase(ctx, Phase::Specified)
+                && artifact_satisfied(ctx, ArtifactType::Design)
+                && artifact_rejected(ctx, ArtifactType::Tasks),
+            action: ActionType::CreateTasks,
+            message: |ctx| format!("Tasks for '{}' were rejected. Rewrite them.", ctx.feature.slug),
+            next_command: |ctx| format!("/tasks-feature {}", ctx.feature.slug),
+            output_path: |ctx| format!("{}/tasks.md", feature_dir(ctx))
+        },
+        // 12. Specified — tasks approved, no QA plan
         rule! {
             id: "needs_qa_plan",
             condition: |ctx| in_phase(ctx, Phase::Specified)
-                && artifact_approved(ctx, ArtifactType::Design)
-                && !artifact_missing(ctx, ArtifactType::Tasks)
+                && artifact_satisfied(ctx, ArtifactType::Design)
+                && artifact_approved(ctx, ArtifactType::Tasks)
                 && artifact_missing(ctx, ArtifactType::QaPlan),
             action: ActionType::CreateQaPlan,
             message: |ctx| format!("Write the QA plan for '{}'.", ctx.feature.slug),
             next_command: |ctx| format!("/qa-plan {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/qa-plan.md", feature_dir(ctx))
         },
-        // 11. Specified — all planning artifacts approved, transition to Planned
+        // 13. Specified — QA plan needs approval
+        rule! {
+            id: "qa_plan_needs_approval",
+            condition: |ctx| in_phase(ctx, Phase::Specified)
+                && artifact_satisfied(ctx, ArtifactType::Design)
+                && artifact_approved(ctx, ArtifactType::Tasks)
+                && artifact_needs_approval(ctx, ArtifactType::QaPlan),
+            action: ActionType::ApproveQaPlan,
+            message: |ctx| format!("QA plan for '{}' is ready for verification.", ctx.feature.slug),
+            next_command: |ctx| format!("sdlc artifact approve {} qa_plan", ctx.feature.slug)
+        },
+        // 14. Specified — QA plan rejected
+        rule! {
+            id: "qa_plan_rejected",
+            condition: |ctx| in_phase(ctx, Phase::Specified)
+                && artifact_satisfied(ctx, ArtifactType::Design)
+                && artifact_approved(ctx, ArtifactType::Tasks)
+                && artifact_rejected(ctx, ArtifactType::QaPlan),
+            action: ActionType::CreateQaPlan,
+            message: |ctx| format!("QA plan for '{}' was rejected. Rewrite it.", ctx.feature.slug),
+            next_command: |ctx| format!("/qa-plan {}", ctx.feature.slug),
+            output_path: |ctx| format!("{}/qa-plan.md", feature_dir(ctx))
+        },
+        // 15. Specified — all planning artifacts approved, transition to Planned
         rule! {
             id: "ready_to_plan",
             condition: |ctx| in_phase(ctx, Phase::Specified)
-                && artifact_approved(ctx, ArtifactType::Design)
+                && artifact_satisfied(ctx, ArtifactType::Design)
                 && artifact_approved(ctx, ArtifactType::Tasks)
                 && artifact_approved(ctx, ArtifactType::QaPlan),
-            action: ActionType::WaitForApproval,
+            action: ActionType::ImplementTask,
             message: |ctx| format!("All planning artifacts approved. Transitioning '{}' to planned.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc feature transition {} planned", ctx.feature.slug),
             transition_to: Phase::Planned
         },
-        // 12. Planned — transition to Ready (no further gates)
+        // 16. Planned — transition to Ready (no further gates)
         rule! {
             id: "planned_to_ready",
             condition: |ctx| in_phase(ctx, Phase::Planned),
@@ -278,10 +363,19 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} ready", ctx.feature.slug),
             transition_to: Phase::Ready
         },
-        // 13. Ready — has pending tasks to implement
+        // 17. Ready — start implementation phase
+        rule! {
+            id: "ready_to_implementation",
+            condition: |ctx| in_phase(ctx, Phase::Ready),
+            action: ActionType::ImplementTask,
+            message: |ctx| format!("Feature '{}' is ready. Transitioning to implementation.", ctx.feature.slug),
+            next_command: |ctx| format!("sdlc feature transition {} implementation", ctx.feature.slug),
+            transition_to: Phase::Implementation
+        },
+        // 18. Implementation — has pending tasks to implement
         rule! {
             id: "implement_task",
-            condition: |ctx| in_phase(ctx, Phase::Ready) && has_pending_task(ctx),
+            condition: |ctx| in_phase(ctx, Phase::Implementation) && has_pending_task(ctx),
             action: ActionType::ImplementTask,
             message: |ctx| format!("Implement the next task for '{}'.", ctx.feature.slug),
             next_command: |ctx| format!("/implement {}", ctx.feature.slug),
@@ -294,10 +388,10 @@ pub fn default_rules() -> Vec<Rule> {
                     .unwrap_or_default()
             }
         },
-        // 14. Ready — all tasks done, no review
+        // 19. Implementation — all tasks done, no review
         rule! {
             id: "needs_review",
-            condition: |ctx| in_phase(ctx, Phase::Ready)
+            condition: |ctx| in_phase(ctx, Phase::Implementation)
                 && !has_pending_task(ctx)
                 && artifact_missing(ctx, ArtifactType::Review),
             action: ActionType::CreateReview,
@@ -306,7 +400,38 @@ pub fn default_rules() -> Vec<Rule> {
             output_path: |ctx| format!("{}/review.md", feature_dir(ctx)),
             transition_to: Phase::Review
         },
-        // 15. Review — review needs approval
+        // 19b. Implementation — tasks done, review written but not yet approved
+        rule! {
+            id: "implementation_review_needs_approval",
+            condition: |ctx| in_phase(ctx, Phase::Implementation)
+                && !has_pending_task(ctx)
+                && artifact_needs_approval(ctx, ArtifactType::Review),
+            action: ActionType::ApproveReview,
+            message: |ctx| format!("Review for '{}' is ready for approval.", ctx.feature.slug),
+            next_command: |ctx| format!("sdlc artifact approve {} review", ctx.feature.slug)
+        },
+        // 19c. Implementation — tasks done, review rejected, needs rewrite
+        rule! {
+            id: "implementation_fix_review",
+            condition: |ctx| in_phase(ctx, Phase::Implementation)
+                && !has_pending_task(ctx)
+                && artifact_rejected(ctx, ArtifactType::Review),
+            action: ActionType::FixReviewIssues,
+            message: |ctx| format!("Review for '{}' failed. Fix the issues.", ctx.feature.slug),
+            next_command: |ctx| format!("/fix-review {}", ctx.feature.slug)
+        },
+        // 19d. Implementation — tasks done, review approved → transition to Review phase
+        rule! {
+            id: "implementation_review_approved",
+            condition: |ctx| in_phase(ctx, Phase::Implementation)
+                && !has_pending_task(ctx)
+                && artifact_approved(ctx, ArtifactType::Review),
+            action: ActionType::CreateAudit,
+            message: |ctx| format!("Review approved. Transitioning '{}' to review phase.", ctx.feature.slug),
+            next_command: |ctx| format!("sdlc feature transition {} review", ctx.feature.slug),
+            transition_to: Phase::Review
+        },
+        // 20. Review — review needs approval
         rule! {
             id: "review_needs_approval",
             condition: |ctx| in_phase(ctx, Phase::Review) && artifact_needs_approval(ctx, ArtifactType::Review),
@@ -314,7 +439,7 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Review for '{}' is ready for approval.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc artifact approve {} review", ctx.feature.slug)
         },
-        // 16. Review — review rejected, fix issues
+        // 21. Review — review rejected, fix issues
         rule! {
             id: "fix_review_issues",
             condition: |ctx| in_phase(ctx, Phase::Review) && artifact_rejected(ctx, ArtifactType::Review),
@@ -322,7 +447,7 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Review for '{}' failed. Fix the issues.", ctx.feature.slug),
             next_command: |ctx| format!("/fix-review {}", ctx.feature.slug)
         },
-        // 17. Review — approved, transition to Audit
+        // 22. Review — approved, transition to Audit
         rule! {
             id: "review_approved",
             condition: |ctx| in_phase(ctx, Phase::Review) && artifact_approved(ctx, ArtifactType::Review),
@@ -331,25 +456,57 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} audit", ctx.feature.slug),
             transition_to: Phase::Audit
         },
-        // 18. Audit — no audit
+        // 23. Audit — no audit
         rule! {
             id: "needs_audit",
             condition: |ctx| in_phase(ctx, Phase::Audit) && artifact_missing(ctx, ArtifactType::Audit),
             action: ActionType::CreateAudit,
-            message: |ctx| format!("Write the security audit for '{}'.", ctx.feature.slug),
+            message: |ctx| format!(
+                "Write the security audit for '{}'. \
+                If this change has no meaningful security surface (trivial config, internal rename), \
+                run: sdlc artifact waive {} audit --reason \"<reason>\"",
+                ctx.feature.slug, ctx.feature.slug
+            ),
             next_command: |ctx| format!("/audit-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/audit.md", feature_dir(ctx))
         },
-        // 19. Audit — approved, transition to QA
+        // 24. Audit — audit needs approval
+        rule! {
+            id: "audit_needs_approval",
+            condition: |ctx| in_phase(ctx, Phase::Audit) && artifact_needs_approval(ctx, ArtifactType::Audit),
+            action: ActionType::ApproveAudit,
+            message: |ctx| format!("Audit for '{}' is ready for verification.", ctx.feature.slug),
+            next_command: |ctx| format!("sdlc artifact approve {} audit", ctx.feature.slug)
+        },
+        // 25. Audit — audit rejected
+        rule! {
+            id: "audit_rejected",
+            condition: |ctx| in_phase(ctx, Phase::Audit) && artifact_rejected(ctx, ArtifactType::Audit),
+            action: ActionType::CreateAudit,
+            message: |ctx| format!("Audit for '{}' was rejected. Rewrite it.", ctx.feature.slug),
+            next_command: |ctx| format!("/audit-feature {}", ctx.feature.slug),
+            output_path: |ctx| format!("{}/audit.md", feature_dir(ctx))
+        },
+        // 26. Audit — approved or waived, transition to QA
         rule! {
             id: "audit_approved",
-            condition: |ctx| in_phase(ctx, Phase::Audit) && artifact_approved(ctx, ArtifactType::Audit),
+            condition: |ctx| in_phase(ctx, Phase::Audit) && artifact_satisfied(ctx, ArtifactType::Audit),
             action: ActionType::RunQa,
-            message: |ctx| format!("Audit approved. Transitioning '{}' to QA.", ctx.feature.slug),
+            message: |ctx| {
+                let audit_waived = ctx.feature
+                    .artifact(ArtifactType::Audit)
+                    .map(|a| matches!(a.status, ArtifactStatus::Waived))
+                    .unwrap_or(false);
+                if audit_waived {
+                    format!("Audit waived. Transitioning '{}' to QA.", ctx.feature.slug)
+                } else {
+                    format!("Audit approved. Transitioning '{}' to QA.", ctx.feature.slug)
+                }
+            },
             next_command: |ctx| format!("sdlc feature transition {} qa", ctx.feature.slug),
             transition_to: Phase::Qa
         },
-        // 20. QA — no results
+        // 27. QA — no results
         rule! {
             id: "needs_qa",
             condition: |ctx| in_phase(ctx, Phase::Qa) && artifact_missing(ctx, ArtifactType::QaResults),
@@ -358,7 +515,7 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/run-qa {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/qa-results.md", feature_dir(ctx))
         },
-        // 21. QA — results need approval / merge gate
+        // 28. QA — results need approval / merge gate
         rule! {
             id: "qa_needs_approval",
             condition: |ctx| in_phase(ctx, Phase::Qa) && artifact_needs_approval(ctx, ArtifactType::QaResults),
@@ -366,7 +523,7 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("QA results for '{}' are ready for approval.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc artifact approve {} qa_results", ctx.feature.slug)
         },
-        // 22. QA — results failed
+        // 29. QA — results failed
         rule! {
             id: "qa_failed",
             condition: |ctx| in_phase(ctx, Phase::Qa)
@@ -377,7 +534,7 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("QA failed for '{}'. Fix the issues.", ctx.feature.slug),
             next_command: |ctx| format!("/fix-qa {}", ctx.feature.slug)
         },
-        // 23. QA passed, approve merge → Merge phase
+        // 30. QA passed, approve merge → Merge phase
         rule! {
             id: "qa_approved",
             condition: |ctx| in_phase(ctx, Phase::Qa) && artifact_approved(ctx, ArtifactType::QaResults),
@@ -386,7 +543,7 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("sdlc feature transition {} merge", ctx.feature.slug),
             transition_to: Phase::Merge
         },
-        // 24. Merge phase — execute the merge
+        // 31. Merge phase — execute the merge
         rule! {
             id: "do_merge",
             condition: |ctx| in_phase(ctx, Phase::Merge),
@@ -394,7 +551,7 @@ pub fn default_rules() -> Vec<Rule> {
             message: |ctx| format!("Merge '{}' to main.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc merge {}", ctx.feature.slug)
         },
-        // 25. Released — nothing left
+        // 32. Released — nothing left
         rule! {
             id: "released",
             condition: |ctx| in_phase(ctx, Phase::Released),
@@ -466,99 +623,76 @@ mod tests {
     }
 
     #[test]
-    fn classification_includes_gates_from_config() {
-        use crate::gate::{GateDefinition, GateKind};
-        use std::collections::HashMap;
-
+    fn specified_tasks_draft_gives_approve_tasks() {
         let dir = TempDir::new().unwrap();
-        let feature = fresh_feature(&dir, "auth");
-        let state = State::new("proj");
-        let mut config = Config::new("proj");
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Specified;
+        feature.approve_artifact(ArtifactType::Spec, None).unwrap();
+        feature
+            .approve_artifact(ArtifactType::Design, None)
+            .unwrap();
+        feature.mark_artifact_draft(ArtifactType::Tasks).unwrap();
 
-        // Add a gate for create_spec action
-        let mut gates = HashMap::new();
-        gates.insert(
-            "create_spec".to_string(),
-            vec![GateDefinition {
-                name: "lint".to_string(),
-                gate_type: GateKind::Shell {
-                    command: "npm run lint".to_string(),
-                },
-                auto: true,
-                max_retries: 0,
-                timeout_seconds: 60,
-            }],
-        );
-        config.gates = gates;
-
-        let classifier = Classifier::new(default_rules());
-        let ctx = make_context(&feature, &state, &config, dir.path());
-        let c = classifier.classify(&ctx);
-        assert_eq!(c.action, ActionType::CreateSpec);
-        assert_eq!(c.gates.len(), 1);
-        assert_eq!(c.gates[0].name, "lint");
-    }
-
-    #[test]
-    fn classification_empty_gates_when_not_configured() {
-        let dir = TempDir::new().unwrap();
-        let feature = fresh_feature(&dir, "auth");
         let state = State::new("proj");
         let config = Config::new("proj");
-
         let classifier = Classifier::new(default_rules());
         let ctx = make_context(&feature, &state, &config, dir.path());
         let c = classifier.classify(&ctx);
-        assert_eq!(c.action, ActionType::CreateSpec);
-        assert!(c.gates.is_empty());
+        assert_eq!(c.action, ActionType::ApproveTasks);
+        assert!(c.next_command.contains("artifact approve auth tasks"));
     }
 
     #[test]
-    fn classification_gates_not_in_json_when_empty() {
+    fn specified_qa_plan_rejected_gives_create_qa_plan() {
         let dir = TempDir::new().unwrap();
-        let feature = fresh_feature(&dir, "auth");
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Specified;
+        feature.approve_artifact(ArtifactType::Spec, None).unwrap();
+        feature
+            .approve_artifact(ArtifactType::Design, None)
+            .unwrap();
+        feature.approve_artifact(ArtifactType::Tasks, None).unwrap();
+        feature
+            .reject_artifact(ArtifactType::QaPlan, Some("needs scenarios".to_string()))
+            .unwrap();
+
         let state = State::new("proj");
         let config = Config::new("proj");
-
         let classifier = Classifier::new(default_rules());
         let ctx = make_context(&feature, &state, &config, dir.path());
         let c = classifier.classify(&ctx);
-        let json = serde_json::to_string(&c).unwrap();
-        assert!(!json.contains("gates"));
+        assert_eq!(c.action, ActionType::CreateQaPlan);
     }
 
     #[test]
-    fn classification_gates_in_json_when_present() {
-        use crate::gate::{GateDefinition, GateKind};
-        use std::collections::HashMap;
-
+    fn ready_moves_into_implementation() {
         let dir = TempDir::new().unwrap();
-        let feature = fresh_feature(&dir, "auth");
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Ready;
+
         let state = State::new("proj");
-        let mut config = Config::new("proj");
-
-        let mut gates = HashMap::new();
-        gates.insert(
-            "create_spec".to_string(),
-            vec![GateDefinition {
-                name: "build".to_string(),
-                gate_type: GateKind::Shell {
-                    command: "cargo build".to_string(),
-                },
-                auto: true,
-                max_retries: 1,
-                timeout_seconds: 120,
-            }],
-        );
-        config.gates = gates;
-
+        let config = Config::new("proj");
         let classifier = Classifier::new(default_rules());
         let ctx = make_context(&feature, &state, &config, dir.path());
         let c = classifier.classify(&ctx);
-        let json = serde_json::to_string(&c).unwrap();
-        assert!(json.contains("\"gates\""));
-        assert!(json.contains("\"build\""));
-        assert!(json.contains("cargo build"));
+        assert_eq!(c.action, ActionType::ImplementTask);
+        assert_eq!(c.transition_to, Some(Phase::Implementation));
+    }
+
+    #[test]
+    fn audit_draft_gives_approve_audit_instead_of_done() {
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Audit;
+        feature.mark_artifact_draft(ArtifactType::Audit).unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        assert_eq!(c.action, ActionType::ApproveAudit);
+        assert_ne!(c.action, ActionType::Done);
     }
 
     #[test]
@@ -636,5 +770,147 @@ mod tests {
         let ctx = make_context(&feature, &state, &config, dir.path());
         let c = classifier.classify(&ctx);
         assert_eq!(c.action, ActionType::Done);
+    }
+
+    #[test]
+    fn waived_design_allows_tasks() {
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Specified;
+        feature.approve_artifact(ArtifactType::Spec, None).unwrap();
+        // Waive design instead of approving
+        feature
+            .waive_artifact(
+                ArtifactType::Design,
+                Some("simple config change".to_string()),
+            )
+            .unwrap();
+        feature.mark_artifact_draft(ArtifactType::Tasks).unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        // Waived design should allow tasks to be evaluated next
+        assert_eq!(c.action, ActionType::ApproveTasks);
+    }
+
+    #[test]
+    fn waived_design_missing_tasks_gives_create_tasks() {
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Specified;
+        feature.approve_artifact(ArtifactType::Spec, None).unwrap();
+        feature
+            .waive_artifact(ArtifactType::Design, Some("no arch needed".to_string()))
+            .unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        assert_eq!(c.action, ActionType::CreateTasks);
+    }
+
+    #[test]
+    fn waived_spec_transitions_to_specified() {
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature
+            .waive_artifact(ArtifactType::Spec, Some("pure refactor".to_string()))
+            .unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        assert_eq!(c.action, ActionType::ApproveSpec);
+        assert_eq!(c.transition_to, Some(Phase::Specified));
+        assert!(
+            c.message.contains("waived"),
+            "message should say 'waived', got: {}",
+            c.message
+        );
+        assert!(c.next_command.contains("transition auth specified"));
+    }
+
+    #[test]
+    fn waived_audit_transitions_to_qa() {
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Audit;
+        feature
+            .waive_artifact(ArtifactType::Audit, Some("no security surface".to_string()))
+            .unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        assert_eq!(c.action, ActionType::RunQa);
+        assert_eq!(c.transition_to, Some(Phase::Qa));
+        assert!(
+            c.message.contains("waived"),
+            "message should say 'waived', got: {}",
+            c.message
+        );
+        assert!(c.next_command.contains("transition auth qa"));
+    }
+
+    #[test]
+    fn waived_design_full_planning_chain_transitions_to_planned() {
+        // Covers rule 15 (ready_to_plan): waived design + approved tasks + approved qa_plan
+        // should trigger the transition to Planned, not stall on design gate.
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Specified;
+        feature.approve_artifact(ArtifactType::Spec, None).unwrap();
+        feature
+            .waive_artifact(ArtifactType::Design, Some("no arch needed".to_string()))
+            .unwrap();
+        feature.approve_artifact(ArtifactType::Tasks, None).unwrap();
+        feature
+            .approve_artifact(ArtifactType::QaPlan, None)
+            .unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        assert_eq!(c.transition_to, Some(Phase::Planned));
+        assert!(c.next_command.contains("transition auth planned"));
+    }
+
+    #[test]
+    fn needs_tasks_message_reflects_waived_vs_approved() {
+        // Rule 9 message should say "waived" not "approved" when design was waived.
+        let dir = TempDir::new().unwrap();
+        let mut feature = fresh_feature(&dir, "auth");
+        feature.phase = Phase::Specified;
+        feature
+            .waive_artifact(ArtifactType::Design, Some("no arch needed".to_string()))
+            .unwrap();
+
+        let state = State::new("proj");
+        let config = Config::new("proj");
+        let classifier = Classifier::new(default_rules());
+        let ctx = make_context(&feature, &state, &config, dir.path());
+        let c = classifier.classify(&ctx);
+        assert_eq!(c.action, ActionType::CreateTasks);
+        assert!(
+            c.message.contains("waived"),
+            "message should say 'waived', got: {}",
+            c.message
+        );
+        assert!(
+            !c.message.contains("approved"),
+            "message should not say 'approved', got: {}",
+            c.message
+        );
     }
 }

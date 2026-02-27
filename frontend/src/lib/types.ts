@@ -30,9 +30,92 @@ export type ActionType =
   | 'wait_for_approval'
   | 'done'
 
-export type ArtifactStatus = 'missing' | 'draft' | 'approved' | 'rejected' | 'needs_fix' | 'passed' | 'failed'
+export type ArtifactStatus = 'missing' | 'draft' | 'approved' | 'rejected' | 'needs_fix' | 'passed' | 'failed' | 'waived'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
-export type MilestoneStatus = 'active' | 'complete' | 'cancelled'
+export type MilestoneStatus = 'active' | 'released' | 'skipped'
+
+export interface PlatformArg {
+  name: string
+  required: boolean
+  choices: string[]
+}
+
+export interface PlatformCommand {
+  description: string
+  script: string
+  args: PlatformArg[]
+  subcommands: Record<string, string>
+}
+
+export interface QualityConfig {
+  min_score_to_advance: number
+  min_score_to_release: number
+  require_all_lenses: boolean
+}
+
+export interface PhaseConfig {
+  enabled: Phase[]
+  required_artifacts: Record<string, string[]>
+}
+
+export interface ProjectConfig {
+  version: number
+  project: { name: string; description: string | null }
+  phases: PhaseConfig
+  platform: { commands: Record<string, PlatformCommand> } | null
+  quality: QualityConfig | null
+}
+
+// ---------------------------------------------------------------------------
+// Query types
+// ---------------------------------------------------------------------------
+
+export interface QuerySearchResult {
+  slug: string
+  title: string
+  phase: string
+  score: number
+}
+
+export interface QuerySearchResponse {
+  results: QuerySearchResult[]
+  parse_error: string | null
+}
+
+export interface QueryTaskSearchResult {
+  feature_slug: string
+  task_id: string
+  title: string
+  status: string
+  score: number
+}
+
+export interface QueryTaskSearchResponse {
+  results: QueryTaskSearchResult[]
+  parse_error: string | null
+}
+
+export interface QueryBlockedItem {
+  slug: string
+  title: string
+  blockers: string[]
+}
+
+export interface QueryReadyItem {
+  slug: string
+  phase: string
+  action: string
+  message: string
+  next_command: string
+}
+
+export interface QueryNeedsApprovalItem {
+  slug: string
+  phase: string
+  action: string
+  message: string
+  next_command: string
+}
 
 export interface FeatureSummary {
   slug: string
@@ -50,6 +133,7 @@ export interface FeatureSummary {
 export interface MilestoneSummary {
   slug: string
   title: string
+  vision: string | null
   status: MilestoneStatus
   features: string[]
   created_at: string
@@ -59,12 +143,12 @@ export interface MilestoneDetail {
   slug: string
   title: string
   description: string | null
+  vision: string | null
   status: MilestoneStatus
   features: string[]
   created_at: string
   updated_at: string
-  completed_at: string | null
-  cancelled_at: string | null
+  skipped_at: string | null
 }
 
 export interface MilestoneFeatureReview {
@@ -82,14 +166,14 @@ export interface MilestoneReview {
 export interface ProjectState {
   project: string
   active_features: string[]
-  active_work: ActiveWork[]
+  active_directives: ActiveDirective[]
   blocked: BlockedItem[]
   features: FeatureSummary[]
   milestones: MilestoneSummary[]
   last_updated: string
 }
 
-export interface ActiveWork {
+export interface ActiveDirective {
   feature: string
   action: ActionType
   started_at: string
@@ -111,6 +195,8 @@ export interface Artifact {
   approved_by: string | null
   rejected_at: string | null
   rejection_reason: string | null
+  waived_at: string | null
+  waive_reason: string | null
 }
 
 export interface Task {

@@ -12,4 +12,6 @@ serde_json = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true }
 regex = { workspace = true }
+home = { workspace = true }
+tantivy = "0.22"
 tempfile = { workspace = true }

@@ -46,7 +46,8 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
                 serde_json::json!({
                     "slug": m.slug,
                     "title": m.title,
-                    "status": m.status,
+                    "vision": m.vision,
+                    "status": m.compute_status(&features),
                     "features": m.features,
                     "created_at": m.created_at,
                 })
@@ -56,7 +57,7 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "project": state.project,
             "active_features": state.active_features,
-            "active_work": state.active_work,
+            "active_directives": state.active_directives,
             "blocked": state.blocked,
             "features": feature_summaries,
             "milestones": milestone_summaries,

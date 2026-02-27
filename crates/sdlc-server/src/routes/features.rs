@@ -42,6 +42,29 @@ pub async fn get_feature(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let f = sdlc_core::feature::Feature::load(&root, &slug)?;
+        let artifacts: Vec<serde_json::Value> = f
+            .artifacts
+            .iter()
+            .map(|a| {
+                let content = if a.exists_on_disk(&root) {
+                    std::fs::read_to_string(root.join(&a.path)).ok()
+                } else {
+                    None
+                };
+                serde_json::json!({
+                    "artifact_type": a.artifact_type,
+                    "status": a.status,
+                    "path": a.path,
+                    "content": content,
+                    "approved_at": a.approved_at,
+                    "approved_by": a.approved_by,
+                    "rejected_at": a.rejected_at,
+                    "rejection_reason": a.rejection_reason,
+                    "waived_at": a.waived_at,
+                    "waive_reason": a.waive_reason,
+                })
+            })
+            .collect();
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": f.slug,
             "title": f.title,
@@ -50,7 +73,7 @@ pub async fn get_feature(
             "archived": f.archived,
             "blocked": f.is_blocked(),
             "blockers": f.blockers,
-            "artifacts": f.artifacts,
+            "artifacts": artifacts,
             "tasks": f.tasks,
             "comments": f.comments,
             "phase_history": f.phase_history,

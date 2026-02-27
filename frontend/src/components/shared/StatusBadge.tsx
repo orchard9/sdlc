@@ -19,8 +19,7 @@ const statusColors: Record<string, string> = {
   released: 'bg-emerald-700/80 text-emerald-100',
   // Statuses
   active: 'bg-emerald-600/80 text-emerald-100',
-  complete: 'bg-emerald-700/80 text-emerald-100',
-  cancelled: 'bg-neutral-600 text-neutral-300',
+  skipped: 'bg-neutral-600 text-neutral-300',
   // Artifact statuses
   missing: 'bg-neutral-700 text-neutral-400',
   approved: 'bg-emerald-600/80 text-emerald-100',
@@ -28,6 +27,7 @@ const statusColors: Record<string, string> = {
   needs_fix: 'bg-amber-600/80 text-amber-100',
   passed: 'bg-emerald-600/80 text-emerald-100',
   failed: 'bg-red-600/80 text-red-100',
+  waived: 'bg-neutral-600/80 text-neutral-300',
   // Task statuses
   pending: 'bg-neutral-600 text-neutral-200',
   in_progress: 'bg-blue-600/80 text-blue-100',

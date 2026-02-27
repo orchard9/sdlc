@@ -1,19 +1,42 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PhaseProgressBar } from '@/components/shared/PhaseProgressBar'
 import type { FeatureSummary } from '@/lib/types'
-import { ArrowRight, AlertCircle } from 'lucide-react'
+import { ArrowRight, AlertCircle, FileText, Copy, Check } from 'lucide-react'
 
 interface FeatureCardProps {
   feature: FeatureSummary
   position?: number
 }
 
+function deriveCommand(feature: FeatureSummary): string | null {
+  if (
+    feature.next_action === 'done' ||
+    feature.next_action === 'wait_for_approval' ||
+    feature.next_action === 'unblock_dependency'
+  ) return null
+  return `/sdlc-run ${feature.slug}`
+}
+
 export function FeatureCard({ feature, position }: FeatureCardProps) {
+  const navigate = useNavigate()
+  const [copied, setCopied] = useState(false)
+  const cmd = deriveCommand(feature)
+
+  const handleCopy = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!cmd) return
+    navigator.clipboard.writeText(cmd).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
+
   return (
-    <Link
-      to={`/features/${feature.slug}`}
-      className="block bg-card border border-border rounded-xl p-4 hover:border-primary/40 transition-colors"
+    <div
+      className="bg-card border border-border rounded-xl p-4 hover:border-primary/40 transition-colors cursor-pointer"
+      onClick={() => navigate(`/features/${feature.slug}`)}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
@@ -42,10 +65,37 @@ export function FeatureCard({ feature, position }: FeatureCardProps) {
         <span>{feature.task_summary}</span>
       </div>
 
-      <div className="mt-2 flex items-center gap-1.5 text-xs text-primary">
-        <ArrowRight className="w-3 h-3" />
-        <span className="truncate">{feature.next_action.replace(/_/g, ' ')}</span>
+      <div className="mt-3 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-1.5 text-xs text-primary min-w-0">
+          <ArrowRight className="w-3 h-3 shrink-0" />
+          <span className="truncate">
+            {feature.next_action === 'create_spec' ? 'view spec' : feature.next_action.replace(/_/g, ' ')}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1 shrink-0">
+          <Link
+            to={`/features/${feature.slug}#artifact-spec`}
+            onClick={e => e.stopPropagation()}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+            title="View spec"
+          >
+            <FileText className="w-3.5 h-3.5" />
+          </Link>
+          {cmd && (
+            <button
+              onClick={handleCopy}
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              title={`Copy: ${cmd}`}
+            >
+              {copied
+                ? <Check className="w-3.5 h-3.5 text-green-400" />
+                : <Copy className="w-3.5 h-3.5" />
+              }
+            </button>
+          )}
+        </div>
       </div>
-    </Link>
+    </div>
   )
 }

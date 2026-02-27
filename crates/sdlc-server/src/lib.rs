@@ -2,19 +2,15 @@ pub mod embed;
 pub mod error;
 pub mod routes;
 pub mod state;
-pub mod subprocess;
 
 use axum::routing::{get, post, put};
 use axum::Router;
 use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
 
-/// Start the SDLC web UI server.
-///
-/// In dev mode, run the Vite dev server on :5173 (which proxies /api requests
-/// to this server on :3141 via vite.config.ts). In release mode, frontend
-/// assets are embedded in the binary via rust-embed.
-pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Result<()> {
+/// Build the axum Router with all API routes and middleware.
+/// Used by `serve()` and available for integration testing.
+pub fn build_router(root: std::path::PathBuf) -> Router {
     let app_state = state::AppState::new(root);
 
     let cors = CorsLayer::new()
@@ -22,7 +18,9 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
         .allow_methods(Any)
         .allow_headers(Any);
 
-    let api = Router::new()
+    Router::new()
+        // Events (SSE)
+        .route("/api/events", get(routes::events::sse_events))
         // State
         .route("/api/state", get(routes::state::get_state))
         // Features
@@ -59,10 +57,6 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
             "/api/milestones/{slug}/features/order",
             put(routes::milestones::reorder_milestone_features),
         )
-        .route(
-            "/api/milestones/{slug}/run",
-            post(routes::milestones::run_milestone),
-        )
         // Artifacts
         .route(
             "/api/artifacts/{slug}/{artifact_type}",
@@ -75,6 +69,10 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
         .route(
             "/api/artifacts/{slug}/{artifact_type}/reject",
             post(routes::artifacts::reject_artifact),
+        )
+        .route(
+            "/api/artifacts/{slug}/{artifact_type}/waive",
+            post(routes::artifacts::waive_artifact),
         )
         // Tasks
         .route("/api/features/{slug}/tasks", post(routes::tasks::add_task))
@@ -91,25 +89,36 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
             "/api/features/{slug}/comments",
             post(routes::comments::add_comment),
         )
-        // Config
-        .route(
-            "/api/config/agents",
-            get(routes::config::get_agents_config).put(routes::config::put_agents_config),
-        )
         // Vision
         .route("/api/vision", get(routes::vision::get_vision))
         .route("/api/vision", put(routes::vision::put_vision))
+        // Run (generate directive)
+        .route("/api/run/{slug}", post(routes::runs::run_feature))
+        // Config
+        .route("/api/config", get(routes::config::get_config))
+        // Query
+        .route("/api/query/search", get(routes::query::search))
+        .route("/api/query/search-tasks", get(routes::query::search_tasks))
+        .route("/api/query/blocked", get(routes::query::blocked))
+        .route("/api/query/ready", get(routes::query::ready))
+        .route(
+            "/api/query/needs-approval",
+            get(routes::query::needs_approval),
+        )
         // Init
         .route("/api/init", post(routes::init::init_project))
-        // Runs
-        .route("/api/run/{slug}", post(routes::runs::run_feature))
-        .route("/api/run-command", post(routes::runs::run_command))
-        .route("/api/runs/{run_id}/stream", get(routes::runs::stream_run));
-
-    let app = api
         .fallback(embed::static_handler)
         .layer(cors)
-        .with_state(app_state);
+        .with_state(app_state)
+}
+
+/// Start the SDLC web UI server.
+///
+/// In dev mode, run the Vite dev server on :5173 (which proxies /api requests
+/// to this server on :3141 via vite.config.ts). In release mode, frontend
+/// assets are embedded in the binary via rust-embed.
+pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Result<()> {
+    let app = build_router(root);
 
     let addr = format!("0.0.0.0:{port}");
     let listener = tokio::net::TcpListener::bind(&addr).await?;
@@ -118,6 +127,30 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
 
     if open_browser {
         let url = format!("http://localhost:{port}");
+        let _ = open::that(&url);
+    }
+
+    axum::serve(listener, app).await?;
+    Ok(())
+}
+
+/// Start the SDLC web UI server on a pre-bound listener.
+///
+/// Unlike `serve`, this accepts a `TcpListener` that was already bound so the
+/// caller can read the actual port before starting (useful when `port = 0` and
+/// the OS picks a free port).
+pub async fn serve_on(
+    root: PathBuf,
+    listener: tokio::net::TcpListener,
+    open_browser: bool,
+) -> anyhow::Result<()> {
+    let actual_port = listener.local_addr()?.port();
+    let app = build_router(root);
+
+    tracing::info!("SDLC UI server listening on http://localhost:{actual_port}");
+
+    if open_browser {
+        let url = format!("http://localhost:{actual_port}");
         let _ = open::that(&url);
     }
 

@@ -4,6 +4,8 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 description = "Deterministic SDLC orchestration CLI"
+repository.workspace = true
+homepage = "https://github.com/orchard9/sdlc-releases"
 
 [[bin]]
 name = "sdlc"
@@ -12,6 +14,7 @@ path = "src/main.rs"
 [dependencies]
 sdlc-core = { path = "../sdlc-core" }
 sdlc-server = { path = "../sdlc-server" }
+claude-agent = { path = "../claude-agent" }
 clap = { workspace = true }
 anyhow = { workspace = true }
 serde_json = { workspace = true }
@@ -20,8 +23,10 @@ chrono = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 tokio = { workspace = true }
+open = { workspace = true }
 
 [dev-dependencies]
 assert_cmd = "2"
 tempfile = { workspace = true }
 predicates = "3"
+serde_yaml = { workspace = true }

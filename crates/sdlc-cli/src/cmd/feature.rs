@@ -17,13 +17,25 @@ pub enum FeatureSubcommand {
         description: Option<String>,
     },
     /// List all features
-    List,
+    List {
+        /// Filter by phase (e.g. draft, specified, implementation)
+        #[arg(long)]
+        phase: Option<String>,
+    },
     /// Show feature details
     Show { slug: String },
     /// Transition a feature to a new phase
     Transition { slug: String, phase: String },
     /// Archive a feature
     Archive { slug: String },
+    /// Update feature metadata (title, description)
+    Update {
+        slug: String,
+        #[arg(long)]
+        title: Option<String>,
+        #[arg(long)]
+        description: Option<String>,
+    },
 }
 
 pub fn run(root: &Path, subcmd: FeatureSubcommand, json: bool) -> anyhow::Result<()> {
@@ -33,10 +45,15 @@ pub fn run(root: &Path, subcmd: FeatureSubcommand, json: bool) -> anyhow::Result
             title,
             description,
         } => create(root, &slug, title, description, json),
-        FeatureSubcommand::List => list(root, json),
+        FeatureSubcommand::List { phase } => list(root, phase.as_deref(), json),
         FeatureSubcommand::Show { slug } => show(root, &slug, json),
         FeatureSubcommand::Transition { slug, phase } => transition(root, &slug, &phase, json),
         FeatureSubcommand::Archive { slug } => archive(root, &slug, json),
+        FeatureSubcommand::Update {
+            slug,
+            title,
+            description,
+        } => update(root, &slug, title.as_deref(), description.as_deref(), json),
     }
 }
 
@@ -64,8 +81,16 @@ fn create(
     Ok(())
 }
 
-fn list(root: &Path, json: bool) -> anyhow::Result<()> {
-    let features = Feature::list(root).context("failed to list features")?;
+fn list(root: &Path, phase_filter: Option<&str>, json: bool) -> anyhow::Result<()> {
+    let phase = phase_filter
+        .map(Phase::from_str)
+        .transpose()
+        .with_context(|| format!("unknown phase '{}'", phase_filter.unwrap_or_default()))?;
+
+    let mut features = Feature::list(root).context("failed to list features")?;
+    if let Some(p) = phase {
+        features.retain(|f| f.phase == p);
+    }
 
     if json {
         let summaries: Vec<_> = features
@@ -176,6 +201,46 @@ fn transition(root: &Path, slug: &str, phase_str: &str, json: bool) -> anyhow::R
         }))?;
     } else {
         println!("Transitioned '{slug}' to {target}");
+    }
+    Ok(())
+}
+
+fn update(
+    root: &Path,
+    slug: &str,
+    title: Option<&str>,
+    description: Option<&str>,
+    json: bool,
+) -> anyhow::Result<()> {
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
+
+    if title.is_none() && description.is_none() {
+        anyhow::bail!("nothing to update — provide --title and/or --description");
+    }
+
+    if let Some(t) = title {
+        feature.update_title(t);
+    }
+    if let Some(d) = description {
+        feature.set_description(d);
+    }
+    feature.save(root).context("failed to save feature")?;
+
+    if json {
+        print_json(&serde_json::json!({
+            "slug": slug,
+            "title": feature.title,
+            "description": feature.description,
+        }))?;
+    } else {
+        println!("Updated feature: {slug}");
+        if let Some(t) = title {
+            println!("  title: {t}");
+        }
+        if let Some(d) = description {
+            println!("  description: {d}");
+        }
     }
     Ok(())
 }

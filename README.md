@@ -1,22 +1,36 @@
 # sdlc
 
-A deterministic SDLC state machine for autonomous software projects. Manage features, artifacts, tasks, and milestones through a structured lifecycle — driven by AI agents or humans.
+A deterministic SDLC state machine for software projects. Manage features, artifacts, tasks, and milestones through a structured lifecycle. Emits structured JSON directives that AI agents and humans consume to decide what to do next.
 
 ## Quickstart
 
 ### Install
 
+**macOS / Linux** — prebuilt binary, no prerequisites:
+
+```bash
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orchard9/sdlc-releases/releases/latest/download/sdlc-installer.sh | sh
+```
+
+**Windows** — prebuilt binary, no prerequisites:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://github.com/orchard9/sdlc-releases/releases/latest/download/sdlc-installer.ps1 | iex"
+```
+
+**Homebrew** (macOS / Linux):
+
+```bash
+brew install orchard9/tap/sdlc
+```
+
+**From source** (requires [Rust](https://rustup.rs) and [Node.js ≥ 18](https://nodejs.org)):
+
 ```bash
 cargo install --git https://github.com/orchard9/sdlc sdlc-cli
 ```
 
-Or from source:
-
-```bash
-git clone https://github.com/orchard9/sdlc
-cd sdlc
-cargo install --path crates/sdlc-cli
-```
+The build script automatically compiles the frontend — no manual npm step needed.
 
 Verify:
 
@@ -34,9 +48,12 @@ sdlc init
 This creates:
 - `.sdlc/config.yaml` — gates, platform commands, quality thresholds
 - `.sdlc/state.yaml` — feature lifecycle state
-- `.ai/` — project knowledge base (harvested by agents)
+- `.ai/` — project knowledge base (patterns, decisions, gotchas)
 - `AGENTS.md` — SDLC section injected (or created)
-- `.claude/commands/` — `/sdlc-next`, `/sdlc-status`, `/sdlc-approve`
+- `.claude/commands/` — Claude Code slash command scaffolding
+- `.gemini/commands/` — Gemini CLI native command TOML files
+- `.opencode/command/` — OpenCode native command files
+- `.agents/skills/` — Codex native skills
 
 ### Create a feature
 
@@ -77,7 +94,42 @@ sdlc ui
 draft → specified → planned → ready → implementation → review → audit → qa → merge → released
 ```
 
-Each phase transition requires the relevant artifacts to be present and approved.
+The lifecycle is the recommended path: approvals and artifacts keep work reviewable, while manual transitions remain available when teams need to move with intent.
+
+### Typical daily workflow
+
+```bash
+# 1. See what needs attention
+sdlc next
+
+# 2. Get the directive for a specific feature
+sdlc next --for auth-login --json
+
+# 3. Act on the directive (write artifact, implement task, etc.)
+#    Then check the new state
+sdlc next --for auth-login
+
+# 4. Approve artifacts to advance phases
+sdlc artifact approve auth-login spec
+
+# 5. See all features waiting for approval
+sdlc query needs-approval
+
+# 6. See all blocked features
+sdlc query blocked
+```
+
+**With Claude Code:** use the slash commands installed by `sdlc init`:
+- `/sdlc-run <slug>` — autonomously drive a feature to the next human gate
+- `/sdlc-next <slug>` — get the next directive and act on it
+- `/sdlc-status` — project overview
+- `/sdlc-approve <slug> <type>` — review and approve an artifact
+
+**With Gemini CLI:** use `.gemini/commands/*.toml` (`sdlc-next.toml`, `sdlc-status.toml`, `sdlc-approve.toml`).
+
+**With OpenCode:** use `.opencode/command/*.md` (`sdlc-next.md`, `sdlc-status.md`, `sdlc-approve.md`).
+
+**With Codex:** use `.agents/skills/*/SKILL.md` (`sdlc-next`, `sdlc-status`, `sdlc-approve`).
 
 ---
 
@@ -100,7 +152,7 @@ sdlc feature list --phase implementation
 
 ### Artifacts
 
-Each phase requires specific artifacts. Artifacts are Markdown files written by agents or humans, then approved to advance the phase.
+Each phase requires specific artifacts. Artifacts are Markdown files (written by AI agents, humans, or both), then approved to advance the phase.
 
 | Phase | Artifact |
 |---|---|
@@ -129,7 +181,7 @@ sdlc task search "JWT"         # search across all features
 
 ### Comments
 
-Async collaboration on features, tasks, and artifacts. `Blocker`-flagged comments halt the classifier.
+Async collaboration on features, tasks, and artifacts. `Blocker` and `Question` comments halt the classifier.
 
 ```bash
 sdlc comment create <slug> --message "Need clarification on token expiry" --flag Blocker
@@ -146,9 +198,9 @@ sdlc milestone create v2-launch --title "Version 2.0 Launch"
 sdlc milestone review v2-launch    # status table across all features
 ```
 
-### Verification Gates
+### Gates (Consumer Hints)
 
-Every action has configurable verification gates — shell commands that must pass before the phase advances. Defined in `.sdlc/config.yaml`:
+Gates are verification hints published in the directive output. sdlc includes them in `sdlc next --json`; the consumer decides whether and how to act on them. Defined in `.sdlc/config.yaml`:
 
 ```yaml
 gates:
@@ -172,28 +224,46 @@ gates:
 # Lifecycle
 sdlc init [--platform <name>]          # initialize .sdlc/ in current project
 sdlc state                             # show project state
-sdlc next [--for <slug>] [--json]      # classify next action
-sdlc run <slug> [--dry-run]            # classify + dispatch to configured backend
+sdlc next [--for <slug>]               # classify next action (directive interface)
+sdlc focus                             # single highest-priority action (milestone order)
+sdlc update                            # refresh agent scaffolding after upgrading sdlc
 
 # Features
 sdlc feature create <slug> --title "..."
 sdlc feature list [--phase <phase>]
 sdlc feature show <slug>
-sdlc archive <slug>
+sdlc feature update <slug> [--title "..."] [--description "..."]
+sdlc feature transition <slug> <phase> # force a phase (setup/recovery only)
+sdlc archive <slug>                    # shorthand for sdlc feature archive
+sdlc merge <slug>                      # finalize merge phase and mark feature released
 
 # Artifacts
 sdlc artifact approve <slug> <type>
 sdlc artifact reject <slug> <type>
 
 # Tasks
-sdlc task add|start|complete|block <slug>
-sdlc task get|edit|search <slug>
+sdlc task add <slug> <title>
+sdlc task start <slug> <task-id>
+sdlc task complete <slug> <task-id>
+sdlc task block <slug> <task-id> <reason>
+sdlc task list [<slug>]                # list tasks for a feature (or all features)
+sdlc task get <slug> <task-id>
+sdlc task edit <slug> <task-id> [--title] [--description] [--depends T1,T2]
+sdlc task search <query> [--slug <slug>]
 
 # Comments
 sdlc comment create|list|resolve <slug>
 
 # Milestones
-sdlc milestone create|list|info|review <slug>
+sdlc milestone create <slug> --title "..." [--feature <slug>...]
+sdlc milestone list
+sdlc milestone info <slug>
+sdlc milestone tasks <slug>            # list all tasks across milestone features
+sdlc milestone add-feature <slug> <feature> [--position N]
+sdlc milestone remove-feature <slug> <feature>
+sdlc milestone reorder <slug> <feature>...
+sdlc milestone skip <slug>
+sdlc milestone release <slug>
 
 # Quality scoring
 sdlc score set <slug> <lens> <score>
@@ -202,7 +272,11 @@ sdlc score history <slug>
 
 # Project-level
 sdlc project status|stats|blockers
-sdlc query blocked|ready|needs-approval
+sdlc query blocked
+sdlc query ready [--phase <phase>]
+sdlc query needs-approval
+sdlc query search <query>              # full-text search across features
+sdlc query search-tasks <query>        # full-text search across tasks
 
 # Platform extension
 sdlc platform <command> [args]         # project-specific scripts from config
@@ -210,8 +284,14 @@ sdlc platform <command> [args]         # project-specific scripts from config
 # Configuration
 sdlc config validate
 
+# Autonomous agent (drives features with Claude)
+sdlc agent run <slug> [--max-turns N] [--model <id>]
+
 # Web UI
-sdlc ui [--port 3141] [--no-open]
+sdlc ui [--port <port>] [--no-open]
+sdlc ui list
+sdlc ui kill [<name>]
+sdlc ui open [<name>]
 ```
 
 All commands support `--json` for machine-readable output.
@@ -220,7 +300,7 @@ All commands support `--json` for machine-readable output.
 
 ## Configuration
 
-`.sdlc/config.yaml` controls gates, platform commands, agent routing, and quality thresholds. Created automatically by `sdlc init`.
+`.sdlc/config.yaml` controls gates, platform commands, and quality thresholds. Created automatically by `sdlc init`.
 
 See [`docs/architecture.md`](docs/architecture.md) for the full schema.
 
@@ -232,11 +312,13 @@ See [`docs/architecture.md`](docs/architecture.md) for the full schema.
 sdlc ui
 ```
 
-Opens a React dashboard on `http://localhost:3141`. Shows features grouped by attention type (needs approval / in progress / blocked / completed), live agent output via SSE, artifact approval flow, and gate status.
+Opens a React dashboard at a random OS-assigned port (printed on startup). Shows features grouped by milestone, phase progress, artifact approval flow, and the next command to run for each feature. State updates automatically via SSE — no refresh needed.
 
 ---
 
 ## Building from Source
+
+Requires [Rust](https://rustup.rs) and [Node.js ≥ 18](https://nodejs.org).
 
 ```bash
 git clone https://github.com/orchard9/sdlc
@@ -245,23 +327,17 @@ cargo build --release
 cargo test --all
 ```
 
+The frontend is built automatically by `crates/sdlc-server/build.rs` the first time Cargo compiles the server crate. After that, run `npm run build` in `frontend/` to update assets and they will be re-embedded on the next `cargo build`.
+
 The workspace has three crates:
 - `crates/sdlc-core` — state machine, classifier, types (no binary)
 - `crates/sdlc-cli` — the `sdlc` binary
 - `crates/sdlc-server` — axum HTTP server + SSE for the web UI
 
-To build the frontend separately:
-
-```bash
-cd frontend
-npm install
-npm run build    # outputs to frontend/dist/ (embedded into sdlc-server at compile time)
-```
-
 ---
 
 ## Integration with AI Agents
 
-`sdlc` is designed as the state layer for AI-driven development pipelines. The `sdlc next --json` command is the orchestrator interface — it returns a structured action classification that agents consume to decide what to do next.
+`sdlc next --json` is the directive interface — it returns a structured classification that any consumer (AI agent, script, or human) uses to decide what to do next. sdlc has no opinion on who or what acts on the directive.
 
-See [`docs/vision.md`](docs/vision.md) for the full orchestration model.
+See [`docs/vision.md`](docs/vision.md) for the full directive model.

@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/api/client'
+import { useSSE } from './useSSE'
 import type { ProjectState } from '@/lib/types'
 
 export function useProjectState() {
@@ -7,9 +8,8 @@ export function useProjectState() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
-  const refresh = async () => {
+  const refresh = useCallback(async () => {
     try {
-      setLoading(true)
       const data = await api.getState()
       setState(data)
       setError(null)
@@ -18,9 +18,10 @@ export function useProjectState() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  useEffect(() => { refresh() }, [])
+  useEffect(() => { refresh() }, [refresh])
+  useSSE(refresh)
 
-  return { state, error, loading, refresh }
+  return { state, error, loading }
 }

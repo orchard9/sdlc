@@ -1,5 +1,6 @@
-import { useState, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
+import { SearchModal } from '@/components/shared/SearchModal'
 import { Menu, X } from 'lucide-react'
 
 interface AppShellProps {
@@ -8,6 +9,18 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault()
+        setSearchOpen(prev => !prev)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return (
     <div className="flex h-screen overflow-hidden">
@@ -28,7 +41,7 @@ export function AppShell({ children }: AppShellProps) {
           md:translate-x-0
         `}
       >
-        <Sidebar onNavigate={() => setSidebarOpen(false)} />
+        <Sidebar onNavigate={() => setSidebarOpen(false)} onSearch={() => setSearchOpen(true)} />
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -48,6 +61,8 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </main>
       </div>
+
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   )
 }

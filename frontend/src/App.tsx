@@ -5,7 +5,7 @@ import { FeatureDetail } from '@/pages/FeatureDetail'
 import { FeaturesPage } from '@/pages/FeaturesPage'
 import { MilestonesPage } from '@/pages/MilestonesPage'
 import { MilestoneDetail } from '@/pages/MilestoneDetail'
-import { ConfigPage } from '@/pages/ConfigPage'
+import { SettingsPage } from '@/pages/SettingsPage'
 
 export default function App() {
   return (
@@ -16,8 +16,9 @@ export default function App() {
           <Route path="/features" element={<FeaturesPage />} />
           <Route path="/features/:slug" element={<FeatureDetail />} />
           <Route path="/milestones" element={<MilestonesPage />} />
+          <Route path="/milestones/archive" element={<MilestonesPage filter="released" />} />
           <Route path="/milestones/:slug" element={<MilestoneDetail />} />
-<Route path="/config" element={<ConfigPage />} />
+          <Route path="/config" element={<SettingsPage />} />
         </Routes>
       </AppShell>
     </BrowserRouter>

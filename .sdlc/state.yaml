@@ -1,0 +1,70 @@
+version: 1
+project: sdlc
+active_features:
+- server-directive-endpoint
+- server-remote-state
+- claude-code-consumer
+- vision-docs-update
+active_directives: []
+history:
+- feature: claude-code-consumer
+  action: implement_task
+  phase: specified
+  timestamp: 2026-02-26T14:48:30.234628Z
+  outcome: transition
+- feature: vision-docs-update
+  action: implement_task
+  phase: planned
+  timestamp: 2026-02-27T07:46:16.950001Z
+  outcome: transition
+- feature: vision-docs-update
+  action: implement_task
+  phase: ready
+  timestamp: 2026-02-27T07:46:17.609633Z
+  outcome: transition
+- feature: vision-docs-update
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-02-27T07:46:18.267533Z
+  outcome: transition
+- feature: vision-docs-update
+  action: implement_task
+  phase: merge
+  timestamp: 2026-02-27T07:46:20.928397Z
+  outcome: transition
+- feature: vision-docs-update
+  action: merge
+  phase: released
+  timestamp: 2026-02-27T07:46:21.608057Z
+  outcome: merged
+- feature: claude-code-consumer
+  action: implement_task
+  phase: planned
+  timestamp: 2026-02-27T07:46:45.889438Z
+  outcome: transition
+- feature: claude-code-consumer
+  action: implement_task
+  phase: ready
+  timestamp: 2026-02-27T07:46:46.555862Z
+  outcome: transition
+- feature: claude-code-consumer
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-02-27T07:46:47.243909Z
+  outcome: transition
+- feature: claude-code-consumer
+  action: implement_task
+  phase: merge
+  timestamp: 2026-02-27T07:46:49.942008Z
+  outcome: transition
+- feature: claude-code-consumer
+  action: merge
+  phase: released
+  timestamp: 2026-02-27T07:46:50.591057Z
+  outcome: merged
+blocked: []
+milestones:
+- v01-directive-core
+- v02-server-interface
+- v03-consumer-examples
+last_updated: 2026-02-27T07:55:47.372712Z

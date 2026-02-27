@@ -31,6 +31,39 @@ pub fn write_if_missing(path: &Path, data: &[u8]) -> Result<bool> {
     Ok(true)
 }
 
+/// Replace content between `start_marker` and `end_marker` (inclusive) in a file.
+///
+/// Replaces everything from the first character of `start_marker` through the last
+/// character of `end_marker` with `replacement`. Returns `true` if both markers were
+/// found and the file was updated, `false` if the markers were not found (file unchanged).
+pub fn replace_between_markers(
+    path: &Path,
+    start_marker: &str,
+    end_marker: &str,
+    replacement: &str,
+) -> Result<bool> {
+    if !path.exists() {
+        return Ok(false);
+    }
+    let content = std::fs::read_to_string(path)?;
+    let Some(start_pos) = content.find(start_marker) else {
+        return Ok(false);
+    };
+    let search_from = start_pos + start_marker.len();
+    let Some(end_offset) = content[search_from..].find(end_marker) else {
+        return Ok(false);
+    };
+    let end_pos = search_from + end_offset + end_marker.len();
+
+    let mut updated = String::with_capacity(content.len());
+    updated.push_str(&content[..start_pos]);
+    updated.push_str(replacement);
+    updated.push_str(&content[end_pos..]);
+
+    atomic_write(path, updated.as_bytes())?;
+    Ok(true)
+}
+
 /// Append text to a file, creating it if it doesn't exist.
 pub fn append_text(path: &Path, text: &str) -> Result<()> {
     use std::io::Write as _;

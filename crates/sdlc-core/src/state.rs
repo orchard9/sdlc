@@ -10,7 +10,7 @@ use std::path::Path;
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ActiveWork {
+pub struct ActiveDirective {
     pub feature: String,
     pub action: ActionType,
     pub started_at: DateTime<Utc>,
@@ -43,7 +43,8 @@ pub struct State {
     pub version: u32,
     pub project: String,
     pub active_features: Vec<String>,
-    pub active_work: Vec<ActiveWork>,
+    #[serde(alias = "active_work")]
+    pub active_directives: Vec<ActiveDirective>,
     pub history: Vec<HistoryEntry>,
     pub blocked: Vec<BlockedItem>,
     #[serde(default)]
@@ -61,7 +62,7 @@ impl State {
             version: 1,
             project: project.into(),
             active_features: Vec::new(),
-            active_work: Vec::new(),
+            active_directives: Vec::new(),
             history: Vec::new(),
             blocked: Vec::new(),
             milestones: Vec::new(),
@@ -126,10 +127,10 @@ impl State {
         self.last_updated = Utc::now();
     }
 
-    pub fn start_work(&mut self, feature: &str, action: ActionType) {
-        // Remove any existing work for this feature
-        self.active_work.retain(|w| w.feature != feature);
-        self.active_work.push(ActiveWork {
+    pub fn issue_directive(&mut self, feature: &str, action: ActionType) {
+        // Remove any existing directive for this feature
+        self.active_directives.retain(|w| w.feature != feature);
+        self.active_directives.push(ActiveDirective {
             feature: feature.to_string(),
             action,
             started_at: Utc::now(),
@@ -138,8 +139,8 @@ impl State {
         self.last_updated = Utc::now();
     }
 
-    pub fn finish_work(&mut self, feature: &str) {
-        self.active_work.retain(|w| w.feature != feature);
+    pub fn complete_directive(&mut self, feature: &str) {
+        self.active_directives.retain(|w| w.feature != feature);
         self.last_updated = Utc::now();
     }
 
@@ -210,13 +211,13 @@ mod tests {
     }
 
     #[test]
-    fn active_work_tracking() {
+    fn active_directives_tracking() {
         let mut state = State::new("proj");
-        state.start_work("auth", ActionType::ImplementTask);
-        assert_eq!(state.active_work.len(), 1);
-        assert_eq!(state.active_work[0].timeout_minutes, 45);
+        state.issue_directive("auth", ActionType::ImplementTask);
+        assert_eq!(state.active_directives.len(), 1);
+        assert_eq!(state.active_directives[0].timeout_minutes, 45);
 
-        state.finish_work("auth");
-        assert!(state.active_work.is_empty());
+        state.complete_directive("auth");
+        assert!(state.active_directives.is_empty());
     }
 }

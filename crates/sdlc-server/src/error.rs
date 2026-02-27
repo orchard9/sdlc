@@ -3,6 +3,7 @@ use axum::response::{IntoResponse, Response};
 use sdlc_core::error::SdlcError;
 
 /// Unified error type for HTTP responses.
+#[derive(Debug)]
 pub struct AppError(pub anyhow::Error);
 
 impl IntoResponse for AppError {
@@ -21,9 +22,11 @@ impl IntoResponse for AppError {
                 SdlcError::InvalidTransition { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::MissingArtifact { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::Blocked(_) => StatusCode::CONFLICT,
-                SdlcError::Io(_) | SdlcError::Yaml(_) | SdlcError::Json(_) => {
-                    StatusCode::INTERNAL_SERVER_ERROR
-                }
+                SdlcError::Search(_)
+                | SdlcError::Io(_)
+                | SdlcError::Yaml(_)
+                | SdlcError::Json(_)
+                | SdlcError::HomeNotFound => StatusCode::INTERNAL_SERVER_ERROR,
             }
         } else {
             StatusCode::INTERNAL_SERVER_ERROR

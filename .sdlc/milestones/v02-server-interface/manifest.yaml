@@ -1,0 +1,11 @@
+slug: v02-server-interface
+title: Server as remote PM interface
+description: null
+features:
+- server-directive-endpoint
+- server-remote-state
+status: active
+created_at: 2026-02-25T21:09:01.894722Z
+updated_at: 2026-02-25T21:09:11.871953Z
+completed_at: null
+cancelled_at: null

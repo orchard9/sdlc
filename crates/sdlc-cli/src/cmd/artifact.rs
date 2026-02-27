@@ -23,6 +23,13 @@ pub enum ArtifactSubcommand {
     },
     /// Mark artifact as draft (written but not yet approved)
     Draft { slug: String, artifact: String },
+    /// Waive an artifact (mark as intentionally skipped — treated as satisfied for downstream gates)
+    Waive {
+        slug: String,
+        artifact: String,
+        #[arg(long)]
+        reason: Option<String>,
+    },
 }
 
 pub fn run(root: &Path, subcmd: ArtifactSubcommand, json: bool) -> anyhow::Result<()> {
@@ -36,6 +43,11 @@ pub fn run(root: &Path, subcmd: ArtifactSubcommand, json: bool) -> anyhow::Resul
             reason,
         } => reject(root, &slug, &artifact, reason, json),
         ArtifactSubcommand::Draft { slug, artifact } => draft(root, &slug, &artifact, json),
+        ArtifactSubcommand::Waive {
+            slug,
+            artifact,
+            reason,
+        } => waive(root, &slug, &artifact, reason, json),
     }
 }
 
@@ -97,6 +109,40 @@ fn reject(
         }))?;
     } else {
         println!("Rejected: {slug}/{artifact_str}");
+        if let Some(r) = &reason {
+            println!("Reason: {r}");
+        }
+    }
+    Ok(())
+}
+
+fn waive(
+    root: &Path,
+    slug: &str,
+    artifact_str: &str,
+    reason: Option<String>,
+    json: bool,
+) -> anyhow::Result<()> {
+    let artifact_type = ArtifactType::from_str(artifact_str)
+        .with_context(|| format!("unknown artifact type: {artifact_str}"))?;
+
+    let mut feature =
+        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
+
+    feature
+        .waive_artifact(artifact_type, reason.clone())
+        .with_context(|| format!("failed to waive {artifact_str}"))?;
+    feature.save(root).context("failed to save feature")?;
+
+    if json {
+        print_json(&serde_json::json!({
+            "slug": slug,
+            "artifact": artifact_str,
+            "status": "waived",
+            "reason": reason,
+        }))?;
+    } else {
+        println!("Waived: {slug}/{artifact_str}");
         if let Some(r) = &reason {
             println!("Reason: {r}");
         }

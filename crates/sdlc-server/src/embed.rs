@@ -3,7 +3,7 @@ use axum::response::{IntoResponse, Response};
 use rust_embed::Embed;
 
 #[derive(Embed)]
-#[folder = "../../frontend/dist/"]
+#[folder = "$SDLC_FRONTEND_DIST"]
 struct FrontendAssets;
 
 /// Serve embedded frontend assets. Falls back to index.html for SPA routing.

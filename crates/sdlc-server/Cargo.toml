@@ -20,3 +20,8 @@ chrono = { workspace = true }
 uuid = { workspace = true }
 mime_guess = { workspace = true }
 anyhow = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tower = { version = "0.5", features = ["util"] }
+http-body-util = "0.1"

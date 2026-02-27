@@ -10,6 +10,7 @@ use sdlc_core::{
     state::State,
     types::ActionType,
 };
+use std::io::Read as IoRead;
 use std::path::Path;
 
 #[derive(Subcommand)]
@@ -46,26 +47,30 @@ pub enum MilestoneSubcommand {
         /// Feature slugs in desired order
         features: Vec<String>,
     },
-    /// Mark a milestone complete
+    /// Mark a milestone as complete (explicitly released)
     Complete { slug: String },
-    /// Cancel a milestone
+    /// Cancel a milestone (marks it as intentionally skipped)
     Cancel { slug: String },
+    /// Skip a milestone (marks it as intentionally bypassed)
+    Skip { slug: String },
     /// Update milestone metadata
     Update {
         slug: String,
         #[arg(long)]
         title: Option<String>,
+        /// Product narrative: what "done" looks like from a user's perspective
+        #[arg(long)]
+        vision: Option<String>,
+    },
+    /// Set the acceptance test for a milestone (reads from --file or stdin)
+    SetAcceptanceTest {
+        slug: String,
+        /// Path to acceptance test markdown file (omit to read from stdin)
+        #[arg(long)]
+        file: Option<std::path::PathBuf>,
     },
     /// Run the classifier on every feature in the milestone
     Review { slug: String },
-    /// Orchestrate all features in a milestone using sdlc_milestone_driver
-    Run {
-        /// Milestone slug to orchestrate
-        slug: String,
-        /// Execution mode: advise | guided | auto
-        #[arg(long, default_value = "auto")]
-        mode: String,
-    },
 }
 
 pub fn run(root: &Path, subcmd: MilestoneSubcommand, json: bool) -> anyhow::Result<()> {
@@ -89,30 +94,17 @@ pub fn run(root: &Path, subcmd: MilestoneSubcommand, json: bool) -> anyhow::Resu
         MilestoneSubcommand::Reorder { slug, features } => reorder(root, &slug, &features, json),
         MilestoneSubcommand::Complete { slug } => complete(root, &slug, json),
         MilestoneSubcommand::Cancel { slug } => cancel(root, &slug, json),
-        MilestoneSubcommand::Update { slug, title } => update(root, &slug, title.as_deref(), json),
-        MilestoneSubcommand::Review { slug } => review(root, &slug, json),
-        MilestoneSubcommand::Run { slug, mode } => run_driver(root, &slug, &mode),
-    }
-}
-
-fn run_driver(root: &Path, slug: &str, mode: &str) -> anyhow::Result<()> {
-    let status = std::process::Command::new("python")
-        .args([
-            "-m",
-            "sdlc_milestone_driver",
-            "--milestone",
+        MilestoneSubcommand::Skip { slug } => skip(root, &slug, json),
+        MilestoneSubcommand::Update {
             slug,
-            "--mode",
-            mode,
-            "--root",
-            root.to_str().unwrap_or("."),
-        ])
-        .status()
-        .context("failed to launch sdlc_milestone_driver")?;
-    if !status.success() {
-        std::process::exit(status.code().unwrap_or(1));
+            title,
+            vision,
+        } => update(root, &slug, title.as_deref(), vision.as_deref(), json),
+        MilestoneSubcommand::SetAcceptanceTest { slug, file } => {
+            set_acceptance_test(root, &slug, file.as_deref(), json)
+        }
+        MilestoneSubcommand::Review { slug } => review(root, &slug, json),
     }
-    Ok(())
 }
 
 fn create(
@@ -151,6 +143,7 @@ fn create(
 
 fn list(root: &Path, json: bool) -> anyhow::Result<()> {
     let milestones = Milestone::list(root).context("failed to list milestones")?;
+    let features = Feature::list(root).unwrap_or_default();
 
     if json {
         let items: Vec<serde_json::Value> = milestones
@@ -159,7 +152,7 @@ fn list(root: &Path, json: bool) -> anyhow::Result<()> {
                 serde_json::json!({
                     "slug": m.slug,
                     "title": m.title,
-                    "status": m.status.to_string(),
+                    "status": m.compute_status(&features).to_string(),
                     "feature_count": m.features.len(),
                 })
             })
@@ -179,7 +172,7 @@ fn list(root: &Path, json: bool) -> anyhow::Result<()> {
             vec![
                 m.slug.clone(),
                 m.title.clone(),
-                m.status.to_string(),
+                m.compute_status(&features).to_string(),
                 m.features.len().to_string(),
             ]
         })
@@ -191,23 +184,54 @@ fn list(root: &Path, json: bool) -> anyhow::Result<()> {
 fn info(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
     let milestone =
         Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
+    let features = Feature::list(root).unwrap_or_default();
+    let status = milestone.compute_status(&features);
+    let acceptance_test = milestone
+        .load_acceptance_test(root)
+        .context("failed to load acceptance test")?;
+    let uat_results = milestone
+        .load_uat_results(root)
+        .context("failed to load UAT results")?;
+
+    // Extract a one-line verdict from the results header (the "**Verdict:**" line)
+    let uat_verdict: Option<String> = uat_results.as_deref().and_then(|r| {
+        r.lines()
+            .find(|l| l.contains("**Verdict:**"))
+            .map(|l| l.replace("**Verdict:**", "").trim().to_string())
+    });
 
     if json {
         print_json(&serde_json::json!({
             "slug": milestone.slug,
             "title": milestone.title,
-            "status": milestone.status.to_string(),
+            "vision": milestone.vision,
+            "acceptance_test": acceptance_test,
+            "uat_results": uat_results,
+            "uat_verdict": uat_verdict,
+            "status": status.to_string(),
             "features": milestone.features,
             "created_at": milestone.created_at,
             "updated_at": milestone.updated_at,
-            "completed_at": milestone.completed_at,
-            "cancelled_at": milestone.cancelled_at,
+            "skipped_at": milestone.skipped_at,
         }))?;
         return Ok(());
     }
 
     println!("Milestone: {} — {}", milestone.slug, milestone.title);
-    println!("Status:    {}", milestone.status);
+    println!("Status:    {}", status);
+    if let Some(ref v) = milestone.vision {
+        println!("Vision:    {v}");
+    }
+    if acceptance_test.is_some() {
+        let verdict_str = uat_verdict
+            .map(|v| format!(" — last run: {v}"))
+            .unwrap_or_default();
+        println!("UAT:       acceptance_test.md (set){verdict_str}");
+    } else {
+        println!(
+            "UAT:       (not set — use `sdlc milestone set-acceptance-test {slug} --file acceptance_test.md`)"
+        );
+    }
     println!("Features:  {}", milestone.features.len());
     if milestone.features.is_empty() {
         println!("  (none)");
@@ -364,11 +388,11 @@ fn complete(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
     let mut milestone =
         Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
 
-    milestone.complete();
+    milestone.release();
     milestone.save(root).context("failed to save milestone")?;
 
     if json {
-        print_json(&serde_json::json!({ "slug": slug, "status": "complete" }))?;
+        print_json(&serde_json::json!({ "slug": slug, "status": "released" }))?;
     } else {
         println!("Milestone '{slug}' marked complete.");
     }
@@ -379,23 +403,47 @@ fn cancel(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
     let mut milestone =
         Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
 
-    milestone.cancel();
+    milestone.skip();
     milestone.save(root).context("failed to save milestone")?;
 
     if json {
-        print_json(&serde_json::json!({ "slug": slug, "status": "cancelled" }))?;
+        print_json(&serde_json::json!({ "slug": slug, "status": "skipped" }))?;
     } else {
         println!("Milestone '{slug}' cancelled.");
     }
     Ok(())
 }
 
-fn update(root: &Path, slug: &str, title: Option<&str>, json: bool) -> anyhow::Result<()> {
+fn skip(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
+    let mut milestone =
+        Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
+
+    milestone.skip();
+    milestone.save(root).context("failed to save milestone")?;
+
+    if json {
+        print_json(&serde_json::json!({ "slug": slug, "status": "skipped" }))?;
+    } else {
+        println!("Milestone '{slug}' skipped.");
+    }
+    Ok(())
+}
+
+fn update(
+    root: &Path,
+    slug: &str,
+    title: Option<&str>,
+    vision: Option<&str>,
+    json: bool,
+) -> anyhow::Result<()> {
     let mut milestone =
         Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
 
     if let Some(t) = title {
         milestone.update_title(t);
+    }
+    if let Some(v) = vision {
+        milestone.set_vision(v);
     }
     milestone.save(root).context("failed to save milestone")?;
 
@@ -403,9 +451,49 @@ fn update(root: &Path, slug: &str, title: Option<&str>, json: bool) -> anyhow::R
         print_json(&serde_json::json!({
             "slug": slug,
             "title": milestone.title,
+            "vision": milestone.vision,
         }))?;
     } else {
         println!("Updated milestone '{slug}'.");
+    }
+    Ok(())
+}
+
+fn set_acceptance_test(
+    root: &Path,
+    slug: &str,
+    file: Option<&std::path::Path>,
+    json: bool,
+) -> anyhow::Result<()> {
+    let milestone =
+        Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
+
+    let content = if let Some(path) = file {
+        std::fs::read_to_string(path)
+            .with_context(|| format!("failed to read file '{}'", path.display()))?
+    } else {
+        let mut buf = String::new();
+        std::io::stdin()
+            .read_to_string(&mut buf)
+            .context("failed to read acceptance test from stdin")?;
+        buf
+    };
+
+    milestone
+        .save_acceptance_test(root, &content)
+        .context("failed to save acceptance test")?;
+
+    if json {
+        print_json(&serde_json::json!({
+            "slug": slug,
+            "acceptance_test_set": true,
+            "bytes": content.len(),
+        }))?;
+    } else {
+        println!(
+            "Acceptance test set for milestone '{slug}' ({} bytes).",
+            content.len()
+        );
     }
     Ok(())
 }

@@ -23,8 +23,8 @@ pub enum TaskSubcommand {
         #[arg(required = true)]
         reason: Vec<String>,
     },
-    /// List tasks for a feature
-    List { slug: String },
+    /// List tasks for a feature, or all tasks across every feature when no slug is given
+    List { slug: Option<String> },
     /// Edit task fields (title, description, dependencies)
     Edit {
         slug: String,
@@ -47,6 +47,9 @@ pub enum TaskSubcommand {
         /// Scope search to a single feature
         #[arg(long)]
         slug: Option<String>,
+        /// Maximum results (default: 10)
+        #[arg(short, long, default_value_t = 10)]
+        limit: usize,
     },
 }
 
@@ -60,7 +63,7 @@ pub fn run(root: &Path, subcmd: TaskSubcommand, json: bool) -> anyhow::Result<()
             task_id,
             reason,
         } => block(root, &slug, &task_id, &reason.join(" "), json),
-        TaskSubcommand::List { slug } => list(root, &slug, json),
+        TaskSubcommand::List { slug } => list(root, slug.as_deref(), json),
         TaskSubcommand::Edit {
             slug,
             task_id,
@@ -77,7 +80,9 @@ pub fn run(root: &Path, subcmd: TaskSubcommand, json: bool) -> anyhow::Result<()
             json,
         ),
         TaskSubcommand::Get { slug, task_id } => get(root, &slug, &task_id, json),
-        TaskSubcommand::Search { query, slug } => search(root, &query, slug.as_deref(), json),
+        TaskSubcommand::Search { query, slug, limit } => {
+            search(root, &query, slug.as_deref(), limit, json)
+        }
     }
 }
 
@@ -228,45 +233,34 @@ fn get(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Result<()>
     Ok(())
 }
 
-fn search(root: &Path, query: &str, slug: Option<&str>, json: bool) -> anyhow::Result<()> {
+fn search(
+    root: &Path,
+    query: &str,
+    slug: Option<&str>,
+    limit: usize,
+    json: bool,
+) -> anyhow::Result<()> {
+    use sdlc_core::search::TaskIndex;
+
     let features: Vec<_> = if let Some(s) = slug {
         vec![Feature::load(root, s).with_context(|| format!("feature '{s}' not found"))?]
     } else {
         Feature::list(root).context("failed to list features")?
     };
 
-    let query_lower = query.to_lowercase();
-    let mut matches: Vec<(String, String, String, String)> = Vec::new(); // (slug, id, status, title)
-
-    for feature in &features {
-        for task in &feature.tasks {
-            let title_match = task.title.to_lowercase().contains(&query_lower);
-            let desc_match = task
-                .description
-                .as_deref()
-                .unwrap_or("")
-                .to_lowercase()
-                .contains(&query_lower);
-            if title_match || desc_match {
-                matches.push((
-                    feature.slug.clone(),
-                    task.id.clone(),
-                    task.status.to_string(),
-                    task.title.clone(),
-                ));
-            }
-        }
-    }
+    let index = TaskIndex::build(&features).context("failed to build task index")?;
+    let results = index.search(query, limit).context("search failed")?;
 
     if json {
-        let items: Vec<serde_json::Value> = matches
+        let items: Vec<serde_json::Value> = results
             .iter()
-            .map(|(slug, id, status, title)| {
+            .map(|r| {
                 serde_json::json!({
-                    "feature": slug,
-                    "task_id": id,
-                    "status": status,
-                    "title": title,
+                    "feature": r.feature_slug,
+                    "task_id": r.task_id,
+                    "status": r.status,
+                    "title": r.title,
+                    "score": r.score,
                 })
             })
             .collect();
@@ -274,48 +268,118 @@ fn search(root: &Path, query: &str, slug: Option<&str>, json: bool) -> anyhow::R
         return Ok(());
     }
 
-    if matches.is_empty() {
+    if results.is_empty() {
         println!("No tasks matching '{}'.", query);
         return Ok(());
     }
 
-    let rows: Vec<Vec<String>> = matches
-        .into_iter()
-        .map(|(slug, id, status, title)| vec![slug, id, status, title])
-        .collect();
-    print_table(&["FEATURE", "TASK ID", "STATUS", "TITLE"], rows);
-    Ok(())
-}
-
-fn list(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
-    let feature =
-        Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
-
-    if json {
-        print_json(&feature.tasks)?;
-        return Ok(());
-    }
-
-    if feature.tasks.is_empty() {
-        println!("No tasks for '{slug}'.");
-        return Ok(());
-    }
-
-    println!("{}", task_ops::summarize(&feature.tasks));
+    let count = results.len();
+    println!(
+        "{count} result{} for \"{}\":",
+        if count == 1 { "" } else { "s" },
+        query
+    );
     println!();
-
-    let rows: Vec<Vec<String>> = feature
-        .tasks
-        .iter()
-        .map(|t| {
+    let rows: Vec<Vec<String>> = results
+        .into_iter()
+        .map(|r| {
             vec![
-                t.id.clone(),
-                t.status.to_string(),
-                t.title.clone(),
-                t.blocker.clone().unwrap_or_default(),
+                format!("{:.2}", r.score),
+                r.feature_slug,
+                r.task_id,
+                r.status,
+                r.title,
             ]
         })
         .collect();
-    print_table(&["ID", "STATUS", "TITLE", "BLOCKER"], rows);
+    print_table(&["SCORE", "FEATURE", "TASK ID", "STATUS", "TITLE"], rows);
+    Ok(())
+}
+
+fn list(root: &Path, slug: Option<&str>, json: bool) -> anyhow::Result<()> {
+    if let Some(slug) = slug {
+        // Single-feature mode — preserve existing compact output
+        let feature =
+            Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
+
+        if json {
+            print_json(&feature.tasks)?;
+            return Ok(());
+        }
+
+        if feature.tasks.is_empty() {
+            println!("No tasks for '{slug}'.");
+            return Ok(());
+        }
+
+        println!("{}", task_ops::summarize(&feature.tasks));
+        println!();
+
+        let rows: Vec<Vec<String>> = feature
+            .tasks
+            .iter()
+            .map(|t| {
+                vec![
+                    t.id.clone(),
+                    t.status.to_string(),
+                    t.title.clone(),
+                    t.blocker.clone().unwrap_or_default(),
+                ]
+            })
+            .collect();
+        print_table(&["ID", "STATUS", "TITLE", "BLOCKER"], rows);
+    } else {
+        // All-features mode — scan every feature and aggregate
+        let features = Feature::list(root).context("failed to list features")?;
+
+        // Collect (feature_slug, task) pairs, skip features with no tasks
+        let rows: Vec<Vec<String>> = features
+            .iter()
+            .flat_map(|f| {
+                f.tasks.iter().map(move |t| {
+                    vec![
+                        f.slug.clone(),
+                        t.id.clone(),
+                        t.status.to_string(),
+                        t.title.clone(),
+                        t.blocker.clone().unwrap_or_default(),
+                    ]
+                })
+            })
+            .collect();
+
+        if json {
+            let items: Vec<serde_json::Value> = features
+                .iter()
+                .flat_map(|f| {
+                    f.tasks.iter().map(move |t| {
+                        serde_json::json!({
+                            "feature": f.slug,
+                            "task_id": t.id,
+                            "status": t.status,
+                            "title": t.title,
+                            "blocker": t.blocker,
+                        })
+                    })
+                })
+                .collect();
+            print_json(&items)?;
+            return Ok(());
+        }
+
+        if rows.is_empty() {
+            println!("No tasks found.");
+            return Ok(());
+        }
+
+        let total: usize = rows.len();
+        let done = rows.iter().filter(|r| r[2] == "completed").count();
+        println!(
+            "{done}/{total} tasks completed across {} feature(s)",
+            features.iter().filter(|f| !f.tasks.is_empty()).count()
+        );
+        println!();
+        print_table(&["FEATURE", "ID", "STATUS", "TITLE", "BLOCKER"], rows);
+    }
     Ok(())
 }
