@@ -5,9 +5,10 @@ import { Loader2, Sparkles } from 'lucide-react'
 
 interface AmaAnswerPanelProps {
   runKey: string
+  onDone?: (finalText: string) => void
 }
 
-export function AmaAnswerPanel({ runKey }: AmaAnswerPanelProps) {
+export function AmaAnswerPanel({ runKey, onDone }: AmaAnswerPanelProps) {
   const [text, setText] = useState('')
   const [done, setDone] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -17,20 +18,24 @@ export function AmaAnswerPanel({ runKey }: AmaAnswerPanelProps) {
     setDone(false)
     setError(null)
 
+    let accumulated = ''
     const es = new EventSource(`/api/run/${encodeURIComponent(runKey)}/events`)
 
     es.addEventListener('agent', (e: MessageEvent) => {
       try {
         const data = JSON.parse(e.data)
         if (data.type === 'assistant' && data.text) {
+          accumulated += data.text
           setText(prev => prev + data.text)
         } else if (data.type === 'result') {
           setDone(true)
           if (data.is_error) setError(data.text || 'Agent error')
+          onDone?.(accumulated)
           es.close()
         } else if (data.type === 'error') {
           setError(data.message || 'Synthesis error')
           setDone(true)
+          onDone?.(accumulated)
           es.close()
         }
       } catch {
@@ -41,6 +46,7 @@ export function AmaAnswerPanel({ runKey }: AmaAnswerPanelProps) {
     es.onerror = () => {
       // 404 = run ended or not found — just mark done
       setDone(true)
+      onDone?.(accumulated)
       es.close()
     }
 

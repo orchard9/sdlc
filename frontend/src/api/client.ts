@@ -190,10 +190,19 @@ export const api = {
       method: 'POST',
       body: '{}',
     }),
-  answerAma: (question: string, sources: import('@/lib/types').AmaSource[]) =>
+  answerAma: (
+    question: string,
+    sources: import('@/lib/types').AmaSource[],
+    opts?: { turnIndex?: number; threadContext?: string }
+  ) =>
     request<{ status: string; run_id: string; run_key: string }>('/api/tools/ama/answer', {
       method: 'POST',
-      body: JSON.stringify({ question, sources }),
+      body: JSON.stringify({
+        question,
+        sources,
+        turn_index: opts?.turnIndex ?? 0,
+        thread_context: opts?.threadContext ?? null,
+      }),
     }),
   reconfigureQualityGates: () =>
     request<{ status: string; run_id: string; run_key: string }>('/api/tools/quality-check/reconfigure', {

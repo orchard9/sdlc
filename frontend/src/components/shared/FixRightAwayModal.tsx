@@ -8,6 +8,7 @@ import type { DiagnoseResult } from '@/lib/types'
 interface FixRightAwayModalProps {
   open: boolean
   onClose: () => void
+  initialDescription?: string
 }
 
 type Step = 'input' | 'diagnosing' | 'review' | 'creating'
@@ -39,12 +40,12 @@ function ConfidenceBadge({ confidence }: { confidence: string }) {
   )
 }
 
-export function FixRightAwayModal({ open, onClose }: FixRightAwayModalProps) {
+export function FixRightAwayModal({ open, onClose, initialDescription }: FixRightAwayModalProps) {
   const navigate = useNavigate()
   const { setPanelOpen } = useAgentRuns()
 
   const [step, setStep] = useState<Step>('input')
-  const [description, setDescription] = useState('')
+  const [description, setDescription] = useState(initialDescription ?? '')
   const [diagnosis, setDiagnosis] = useState<DiagnoseResult | null>(null)
   const [title, setTitle] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -56,13 +57,13 @@ export function FixRightAwayModal({ open, onClose }: FixRightAwayModalProps) {
   useEffect(() => {
     if (open) {
       setStep('input')
-      setDescription('')
+      setDescription(initialDescription ?? '')
       setDiagnosis(null)
       setTitle('')
       setError(null)
       setTimeout(() => textareaRef.current?.focus(), 0)
     }
-  }, [open])
+  }, [open, initialDescription])
 
   // Focus title field when reaching review step
   useEffect(() => {

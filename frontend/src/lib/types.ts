@@ -677,6 +677,14 @@ export interface AmaData {
   sources: AmaSource[]
 }
 
+export interface AmaThreadTurn {
+  question: string
+  sources: AmaSource[]
+  synthesisRunKey: string
+  synthesisText: string | null  // null until streaming completes
+  timestamp: string
+}
+
 // ---------------------------------------------------------------------------
 // Tunnel types
 // ---------------------------------------------------------------------------

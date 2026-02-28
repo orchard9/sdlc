@@ -1,151 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/api/client'
 import { ToolCard } from '@/components/tools/ToolCard'
-import { AmaResultPanel } from '@/components/tools/AmaResultPanel'
+import { AmaThreadPanel } from '@/components/tools/AmaThreadPanel'
 import { AmaAnswerPanel } from '@/components/tools/AmaAnswerPanel'
 import { QualityCheckPanel } from '@/components/tools/QualityCheckPanel'
-import { CommandBlock } from '@/components/shared/CommandBlock'
-import { Loader2, AlertTriangle, Play, Wrench, RefreshCw, Bot, Terminal, ChevronDown } from 'lucide-react'
+import { ToolUsageSection } from '@/components/tools/ToolUsageSection'
+import { Loader2, AlertTriangle, Play, Wrench, RefreshCw } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ToolMeta, ToolResult, AmaData, QualityCheckData, CheckResult } from '@/lib/types'
-
-// ---------------------------------------------------------------------------
-// CLI help construction from ToolMeta
-// ---------------------------------------------------------------------------
-
-type SchemaProps = Record<string, { type?: string; description?: string }>
-
-function buildCliCommand(tool: ToolMeta): string {
-  const schema = tool.input_schema as { properties?: SchemaProps; required?: string[] }
-  const props = schema?.properties ?? {}
-  const required = schema?.required ?? []
-
-  const flags = Object.entries(props)
-    .filter(([key]) => required.includes(key))
-    .map(([key, prop]) => {
-      if (tool.name === 'ama' && key === 'question') return '--question "..."'
-      return `--${key} <${(prop.type ?? 'value').toUpperCase()}>`
-    })
-
-  const optionals = Object.entries(props)
-    .filter(([key]) => !required.includes(key))
-    .map(([key, prop]) => {
-      if (tool.name === 'quality-check' && key === 'scope') return '[--scope <filter>]'
-      return `[--${key} <${(prop.type ?? 'value').toUpperCase()}>]`
-    })
-
-  const allFlags = [...flags, ...optionals]
-  return `sdlc tool run ${tool.name}${allFlags.length ? ' ' + allFlags.join(' ') : ''}`
-}
-
-function buildCliHelp(tool: ToolMeta): string {
-  const schema = tool.input_schema as { properties?: SchemaProps; required?: string[] }
-  const props = schema?.properties ?? {}
-  const required = (schema?.required ?? []) as string[]
-  const outSchema = tool.output_schema as { properties?: SchemaProps }
-  const outProps = outSchema?.properties ?? {}
-
-  const lines: string[] = []
-
-  lines.push(`sdlc tool run ${tool.name} [OPTIONS]`)
-  lines.push('')
-  lines.push(`  ${tool.description}`)
-  lines.push('')
-
-  if (tool.requires_setup) {
-    lines.push('Setup (required before first use):')
-    lines.push(`  sdlc tool run ${tool.name} --setup`)
-    if (tool.setup_description) {
-      lines.push(`  └ ${tool.setup_description}`)
-    }
-    lines.push('')
-  }
-
-  if (Object.keys(props).length > 0) {
-    lines.push('Options:')
-    for (const [key, prop] of Object.entries(props)) {
-      const req = required.includes(key)
-      const type = (prop.type ?? 'value').toUpperCase()
-      const desc = prop.description ?? ''
-      lines.push(`  --${key} <${type}>${req ? '  (required)' : '  (optional)'}`)
-      if (desc) lines.push(`    ${desc}`)
-    }
-    lines.push('')
-  }
-
-  lines.push('Input:')
-  if (Object.keys(props).length > 0) {
-    const ex: Record<string, string> = {}
-    for (const [key, prop] of Object.entries(props)) {
-      ex[key] = `<${prop.type ?? 'value'}>`
-    }
-    lines.push('  ' + JSON.stringify(ex, null, 2).split('\n').join('\n  '))
-  } else {
-    lines.push('  {}  (no input required)')
-  }
-  lines.push('')
-
-  lines.push('Output:')
-  if (Object.keys(outProps).length > 0) {
-    const ex: Record<string, string> = {}
-    for (const [key, prop] of Object.entries(outProps)) {
-      ex[key] = `<${prop.type ?? 'value'}>`
-    }
-    lines.push('  ' + JSON.stringify({ ok: '<boolean>', data: ex }, null, 2).split('\n').join('\n  '))
-  } else {
-    lines.push('  { "ok": <boolean>, "data": { ... } }')
-  }
-
-  return lines.join('\n')
-}
-
-// ---------------------------------------------------------------------------
-// Usage section component
-// ---------------------------------------------------------------------------
-
-function ToolUsageSection({ tool }: { tool: ToolMeta }) {
-  const [expanded, setExpanded] = useState(false)
-  const agentCmd = `/sdlc-tool-run ${tool.name}`
-  const cliCmd = buildCliCommand(tool)
-
-  return (
-    <div className="rounded-lg border border-border/50 bg-muted/20 overflow-hidden">
-      <div className="px-3 py-2.5 space-y-2">
-        {/* Agent */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Bot className="w-3 h-3 text-muted-foreground/60" />
-            <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Agent</span>
-          </div>
-          <CommandBlock cmd={agentCmd} />
-        </div>
-        {/* CLI */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-1">
-            <Terminal className="w-3 h-3 text-muted-foreground/60" />
-            <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">CLI</span>
-          </div>
-          <CommandBlock cmd={cliCmd} />
-        </div>
-      </div>
-
-      {/* Expandable full reference */}
-      <button
-        onClick={() => setExpanded(v => !v)}
-        className="w-full flex items-center gap-1 px-3 py-1.5 text-[10px] font-medium text-muted-foreground/50 hover:text-muted-foreground border-t border-border/40 transition-colors"
-      >
-        <ChevronDown className={cn('w-3 h-3 transition-transform', expanded && 'rotate-180')} />
-        {expanded ? 'Hide reference' : 'Full reference'}
-      </button>
-
-      {expanded && (
-        <pre className="px-3 pb-3 text-[11px] font-mono text-muted-foreground/70 whitespace-pre overflow-x-auto leading-relaxed border-t border-border/40 bg-muted/10 pt-2">
-          {buildCliHelp(tool)}
-        </pre>
-      )}
-    </div>
-  )
-}
+import type { ToolMeta, ToolResult, QualityCheckData, CheckResult } from '@/lib/types'
 
 // ---------------------------------------------------------------------------
 // Tool run panel (right side)
@@ -156,7 +18,6 @@ interface ToolRunPanelProps {
 }
 
 function ToolRunPanel({ tool }: ToolRunPanelProps) {
-  const [question, setQuestion] = useState('')
   const [scope, setScope] = useState('')
   const [jsonInput, setJsonInput] = useState('{}')
   const [running, setRunning] = useState(false)
@@ -166,19 +27,16 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
   const [result, setResult] = useState<ToolResult | null>(null)
   const [setupResult, setSetupResult] = useState<ToolResult | null>(null)
   const [setupDone, setSetupDone] = useState(false)
-  const [answerRunKey, setAnswerRunKey] = useState<string | null>(null)
   const [reconfigureRunKey, setReconfigureRunKey] = useState<string | null>(null)
   const [fixRunKey, setFixRunKey] = useState<string | null>(null)
 
   // Reset state when the selected tool changes
   useEffect(() => {
-    setQuestion('')
     setScope('')
     setJsonInput('{}')
     setResult(null)
     setSetupResult(null)
     setSetupDone(false)
-    setAnswerRunKey(null)
     setReconfigureRunKey(null)
     setFixRunKey(null)
   }, [tool.name])
@@ -200,12 +58,9 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
   const handleRun = async () => {
     setRunning(true)
     setResult(null)
-    setAnswerRunKey(null)
     try {
       let input: unknown
-      if (tool.name === 'ama') {
-        input = { question: question.trim() }
-      } else if (tool.name === 'quality-check') {
+      if (tool.name === 'quality-check') {
         input = scope.trim() ? { scope: scope.trim() } : {}
       } else {
         try {
@@ -218,19 +73,6 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
       }
       const res = await api.runTool(tool.name, input)
       setResult(res)
-
-      // Auto-synthesize an answer after AMA returns sources
-      if (tool.name === 'ama' && res.ok && res.data) {
-        const amaData = res.data as AmaData
-        if (amaData.sources.length > 0) {
-          try {
-            const answerResp = await api.answerAma(question.trim(), amaData.sources)
-            setAnswerRunKey(answerResp.run_key)
-          } catch {
-            // synthesis failed to start — non-fatal, sources still visible
-          }
-        }
-      }
     } catch (e) {
       setResult({ ok: false, error: e instanceof Error ? e.message : 'Run failed' })
     } finally {
@@ -264,9 +106,7 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
     }
   }
 
-  const canRun = tool.name === 'ama'
-    ? question.trim().length > 0
-    : true
+  const canRun = true
 
   return (
     <div className="flex flex-col h-full min-h-0 overflow-y-auto">
@@ -332,117 +172,106 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
           </div>
         )}
 
-        {/* Input area */}
-        <div className="space-y-2">
-          {tool.name === 'ama' && (
-            <>
-              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">Question</label>
-              <input
-                type="text"
-                value={question}
-                onChange={e => setQuestion(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && canRun && !running) handleRun() }}
-                placeholder="e.g. Where is JWT validation?"
-                className="w-full px-3 py-2 text-sm bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50"
-              />
-            </>
-          )}
-          {tool.name === 'quality-check' && (
-            <>
-              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">Scope <span className="normal-case text-muted-foreground/50">(optional — filter by name)</span></label>
-              <input
-                type="text"
-                value={scope}
-                onChange={e => setScope(e.target.value)}
-                placeholder="e.g. test"
-                className="w-full px-3 py-2 text-sm bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50"
-              />
-            </>
-          )}
-          {tool.name !== 'ama' && tool.name !== 'quality-check' && (
-            <>
-              <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">JSON Input</label>
-              <textarea
-                value={jsonInput}
-                onChange={e => setJsonInput(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 text-sm font-mono bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50 resize-none"
-              />
-            </>
-          )}
-        </div>
+        {/* AMA: threaded question panel */}
+        {tool.name === 'ama' ? (
+          <AmaThreadPanel tool={tool} />
+        ) : (
+          <>
+            {/* Input area */}
+            <div className="space-y-2">
+              {tool.name === 'quality-check' && (
+                <>
+                  <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">Scope <span className="normal-case text-muted-foreground/50">(optional — filter by name)</span></label>
+                  <input
+                    type="text"
+                    value={scope}
+                    onChange={e => setScope(e.target.value)}
+                    placeholder="e.g. test"
+                    className="w-full px-3 py-2 text-sm bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50"
+                  />
+                </>
+              )}
+              {tool.name !== 'quality-check' && (
+                <>
+                  <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">JSON Input</label>
+                  <textarea
+                    value={jsonInput}
+                    onChange={e => setJsonInput(e.target.value)}
+                    rows={4}
+                    className="w-full px-3 py-2 text-sm font-mono bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50 resize-none"
+                  />
+                </>
+              )}
+            </div>
 
-        {/* Run button (+ Reconfigure for quality-check) */}
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleRun}
-            disabled={running || !canRun}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {running
-              ? <Loader2 className="w-4 h-4 animate-spin" />
-              : <Play className="w-4 h-4" />
-            }
-            {running ? 'Running…' : 'Run'}
-          </button>
-          {tool.name === 'quality-check' && (
-            <button
-              onClick={handleReconfigure}
-              disabled={reconfiguring}
-              title="Detect project stack and reconfigure quality gates"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg border border-border/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {reconfiguring
-                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                : <RefreshCw className="w-3.5 h-3.5" />
-              }
-              {reconfiguring ? 'Reconfiguring…' : 'Reconfigure'}
-            </button>
-          )}
-        </div>
+            {/* Run button (+ Reconfigure for quality-check) */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleRun}
+                disabled={running || !canRun}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {running
+                  ? <Loader2 className="w-4 h-4 animate-spin" />
+                  : <Play className="w-4 h-4" />
+                }
+                {running ? 'Running…' : 'Run'}
+              </button>
+              {tool.name === 'quality-check' && (
+                <button
+                  onClick={handleReconfigure}
+                  disabled={reconfiguring}
+                  title="Detect project stack and reconfigure quality gates"
+                  className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg border border-border/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {reconfiguring
+                    ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : <RefreshCw className="w-3.5 h-3.5" />
+                  }
+                  {reconfiguring ? 'Reconfiguring…' : 'Reconfigure'}
+                </button>
+              )}
+            </div>
 
-        {/* Reconfigure streaming output */}
-        {reconfigureRunKey && (
-          <AmaAnswerPanel runKey={reconfigureRunKey} />
-        )}
+            {/* Reconfigure streaming output */}
+            {reconfigureRunKey && (
+              <AmaAnswerPanel runKey={reconfigureRunKey} />
+            )}
 
-        {/* Fix Issues streaming output */}
-        {fixRunKey && (
-          <AmaAnswerPanel runKey={fixRunKey} />
-        )}
+            {/* Fix Issues streaming output */}
+            {fixRunKey && (
+              <AmaAnswerPanel runKey={fixRunKey} />
+            )}
 
-        {/* Results */}
-        {result && (
-          <div className="mt-2">
-            {tool.name === 'quality-check' && result.data ? (
-              // Show structured check results even when ok:false (checks ran, some failed)
-              <>
-                <QualityCheckPanel
-                  data={result.data as QualityCheckData}
-                  onFixIssues={handleFixIssues}
-                  fixing={fixing}
-                />
-                {fixRunKey && null /* streaming panel shown above */}
-              </>
-            ) : !result.ok ? (
-              <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                <p className="text-sm text-red-300">{result.error}</p>
+            {/* Results */}
+            {result && (
+              <div className="mt-2">
+                {tool.name === 'quality-check' && result.data ? (
+                  // Show structured check results even when ok:false (checks ran, some failed)
+                  <>
+                    <QualityCheckPanel
+                      data={result.data as QualityCheckData}
+                      onFixIssues={handleFixIssues}
+                      fixing={fixing}
+                    />
+                    {fixRunKey && null /* streaming panel shown above */}
+                  </>
+                ) : !result.ok ? (
+                  <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
+                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <p className="text-sm text-red-300">{result.error}</p>
+                  </div>
+                ) : (
+                  <pre className="text-xs font-mono bg-muted/30 border border-border rounded-lg p-3 overflow-x-auto whitespace-pre-wrap text-muted-foreground">
+                    {JSON.stringify(result, null, 2)}
+                  </pre>
+                )}
+                {result.ok && result.duration_ms !== undefined && (
+                  <p className="text-xs text-muted-foreground/50 mt-2">{result.duration_ms}ms</p>
+                )}
               </div>
-            ) : tool.name === 'ama' ? (
-              <>
-                <AmaResultPanel data={result.data as AmaData} />
-                {answerRunKey && <AmaAnswerPanel runKey={answerRunKey} />}
-              </>
-            ) : (
-              <pre className="text-xs font-mono bg-muted/30 border border-border rounded-lg p-3 overflow-x-auto whitespace-pre-wrap text-muted-foreground">
-                {JSON.stringify(result, null, 2)}
-              </pre>
             )}
-            {result.ok && result.duration_ms !== undefined && (
-              <p className="text-xs text-muted-foreground/50 mt-2">{result.duration_ms}ms</p>
-            )}
-          </div>
+          </>
         )}
       </div>
     </div>
