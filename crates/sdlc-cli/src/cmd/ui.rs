@@ -1,7 +1,9 @@
+use crate::cmd::tunnel::{generate_token, print_tunnel_info, Tunnel, TunnelError};
 use crate::output::print_table;
 use anyhow::{anyhow, Result};
 use clap::Subcommand;
 use sdlc_core::{config::Config, ui_registry};
+use sdlc_server::auth::TunnelConfig;
 use std::path::Path;
 
 // ---------------------------------------------------------------------------
@@ -18,6 +20,9 @@ pub enum UiSubcommand {
         /// Don't open browser automatically
         #[arg(long)]
         no_open: bool,
+        /// Open a public tunnel and print a QR code for remote access (requires cloudflared)
+        #[arg(long)]
+        tunnel: bool,
     },
     /// List all running UI instances
     List,
@@ -37,13 +42,20 @@ pub enum UiSubcommand {
 // Dispatch
 // ---------------------------------------------------------------------------
 
-pub fn run(root: &Path, subcommand: Option<UiSubcommand>, port: u16, no_open: bool) -> Result<()> {
+pub fn run(
+    root: &Path,
+    subcommand: Option<UiSubcommand>,
+    port: u16,
+    no_open: bool,
+    tunnel: bool,
+) -> Result<()> {
     match subcommand {
-        None => run_start(root, port, no_open),
+        None => run_start(root, port, no_open, tunnel),
         Some(UiSubcommand::Start {
             port: p,
             no_open: n,
-        }) => run_start(root, p, n),
+            tunnel: t,
+        }) => run_start(root, p, n, t),
         Some(UiSubcommand::List) => run_list(),
         Some(UiSubcommand::Kill { name }) => run_kill(name.as_deref(), root),
         Some(UiSubcommand::Open { name }) => run_open(name.as_deref(), root),
@@ -54,7 +66,7 @@ pub fn run(root: &Path, subcommand: Option<UiSubcommand>, port: u16, no_open: bo
 // start
 // ---------------------------------------------------------------------------
 
-fn run_start(root: &Path, port: u16, no_open: bool) -> Result<()> {
+fn run_start(root: &Path, port: u16, no_open: bool, use_tunnel: bool) -> Result<()> {
     let config = Config::load(root).map_err(|e| anyhow!("{e}"))?;
     let name = config.project.name.clone();
 
@@ -81,24 +93,56 @@ fn run_start(root: &Path, port: u16, no_open: bool) -> Result<()> {
         let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await?;
         let actual_port = listener.local_addr()?.port();
         let pid = std::process::id();
-        let url = format!("http://localhost:{actual_port}");
+        let local_url = format!("http://localhost:{actual_port}");
 
         let record = ui_registry::UiRecord {
             project: name.clone(),
             root: root_buf.clone(),
             pid,
             port: actual_port,
-            url: url.clone(),
+            url: local_url.clone(),
             started_at: chrono::Utc::now(),
         };
         record.write().map_err(|e| anyhow!("{e}"))?;
 
-        println!("SDLC UI for '{name}' → {url}  (PID {pid})");
-
         let record_clone = record.clone();
-        let result = tokio::select! {
-            res = sdlc_server::serve_on(root_buf, listener, !no_open) => res,
-            _ = tokio::signal::ctrl_c() => Ok(()),
+
+        let result = if use_tunnel {
+            // Warn that the server is public.
+            eprintln!("Warning: tunnel mode exposes your SDLC server publicly. Share the QR code only with trusted parties.");
+
+            // Start cloudflared tunnel.
+            let tun = match Tunnel::start(actual_port).await {
+                Ok(t) => t,
+                Err(TunnelError::NotFound) => {
+                    let _ = record_clone.remove();
+                    return Err(anyhow!("{}", TunnelError::NotFound));
+                }
+                Err(e) => {
+                    let _ = record_clone.remove();
+                    return Err(anyhow!("{e}"));
+                }
+            };
+
+            let token = generate_token();
+            let tunnel_config = TunnelConfig::with_token(token.clone());
+
+            print_tunnel_info(&name, actual_port, &tun.url, &token);
+
+            let result = tokio::select! {
+                res = sdlc_server::serve_on(root_buf, listener, false, tunnel_config) => res,
+                _ = tokio::signal::ctrl_c() => Ok(()),
+            };
+
+            tun.stop().await;
+            result
+        } else {
+            println!("SDLC UI for '{name}' → {local_url}  (PID {pid})");
+
+            tokio::select! {
+                res = sdlc_server::serve_on(root_buf, listener, !no_open, TunnelConfig::none()) => res,
+                _ = tokio::signal::ctrl_c() => Ok(()),
+            }
         };
 
         let _ = record_clone.remove();

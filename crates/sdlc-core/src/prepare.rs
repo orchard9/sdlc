@@ -131,6 +131,9 @@ pub struct PrepareResult {
     pub waves: Vec<Wave>,
     pub blocked: Vec<BlockedFeature>,
     pub next_commands: Vec<String>,
+    /// The wave number currently being executed (the first non-empty wave's number).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub current_wave: Option<usize>,
 }
 
 // ---------------------------------------------------------------------------
@@ -224,6 +227,7 @@ pub fn prepare(root: &Path, milestone_slug: Option<&str>) -> Result<PrepareResul
                     waves: Vec::new(),
                     blocked: Vec::new(),
                     next_commands: Vec::new(),
+                    current_wave: None,
                 });
             }
         },
@@ -484,14 +488,8 @@ pub fn prepare(root: &Path, milestone_slug: Option<&str>) -> Result<PrepareResul
                     let info = features.get(slug)?;
                     let needs_worktree = info.action.is_heavy();
 
-                    // blocked_by = deps that were in earlier waves
-                    let blocked_by: Vec<String> = info
-                        .feature
-                        .dependencies
-                        .iter()
-                        .filter(|dep| assigned.contains(*dep))
-                        .cloned()
-                        .collect();
+                    // blocked_by = full transitive closure of deps in earlier waves
+                    let blocked_by = transitive_deps_in_assigned(slug, &features, &assigned);
 
                     Some(WaveItem {
                         slug: slug.clone(),
@@ -520,6 +518,8 @@ pub fn prepare(root: &Path, milestone_slug: Option<&str>) -> Result<PrepareResul
             }
         })
         .collect();
+
+    let current_wave = wave_structs.first().map(|w| w.number);
 
     // -- Progress --
     let mut released_count = 0usize;
@@ -552,17 +552,27 @@ pub fn prepare(root: &Path, milestone_slug: Option<&str>) -> Result<PrepareResul
     // and all Wave-1 features share the same planning action, suggest
     // /sdlc-prepare <slug> for holistic readiness analysis instead of
     // N individual /sdlc-run commands.
+    // When already prepared and Wave-1 has multiple parallelizable items,
+    // suggest /sdlc-run-wave <slug>.
     let next_commands: Vec<String> = match wave_structs.first() {
         None => Vec::new(),
         Some(wave1) => {
             let milestone_fresh = released_count == 0 && in_progress_count == 0;
-            let uniform_action = {
-                let actions: std::collections::HashSet<&str> =
-                    wave1.items.iter().map(|i| i.action.as_str()).collect();
-                actions.len() == 1
-            };
+            let uniform_action = wave1
+                .items
+                .iter()
+                .map(|i| i.action.as_str())
+                .collect::<std::collections::HashSet<_>>()
+                .len()
+                == 1;
+            let parallelizable_count = wave1.items.iter().filter(|i| !i.needs_worktree).count();
+
             if milestone_fresh && uniform_action && wave1.items.len() > 1 {
+                // Not yet started — full prepare first
                 vec![format!("/sdlc-prepare {}", milestone.slug)]
+            } else if milestone.prepared_at.is_some() && parallelizable_count > 1 {
+                // Already prepared with parallel work — run-wave
+                vec![format!("/sdlc-run-wave {}", milestone.slug)]
             } else {
                 wave1
                     .items
@@ -589,7 +599,25 @@ pub fn prepare(root: &Path, milestone_slug: Option<&str>) -> Result<PrepareResul
         waves: wave_structs,
         blocked: blocked_features,
         next_commands,
+        current_wave,
     })
+}
+
+// ---------------------------------------------------------------------------
+// write_wave_plan
+// ---------------------------------------------------------------------------
+
+/// Persist the wave plan to `.sdlc/milestones/<slug>/wave_plan.yaml`.
+/// Call this after `prepare()` to write a structural record that agents
+/// can reference without recomputing.
+pub fn write_wave_plan(root: &Path, milestone_slug: &str, waves: &[Wave]) -> Result<()> {
+    let path = root
+        .join(".sdlc")
+        .join("milestones")
+        .join(milestone_slug)
+        .join("wave_plan.yaml");
+    let data = serde_yaml::to_string(waves)?;
+    crate::io::atomic_write(&path, data.as_bytes())
 }
 
 // ---------------------------------------------------------------------------
@@ -606,35 +634,63 @@ struct ClassifiedFeature {
 // Helpers
 // ---------------------------------------------------------------------------
 
+/// Compute the full transitive closure of dependencies that are in `assigned`
+/// (i.e., placed in earlier waves). Returns a sorted list.
+fn transitive_deps_in_assigned(
+    slug: &str,
+    features: &HashMap<String, ClassifiedFeature>,
+    assigned: &HashSet<String>,
+) -> Vec<String> {
+    let mut result: HashSet<String> = HashSet::new();
+    let mut queue: Vec<String> = Vec::new();
+
+    if let Some(info) = features.get(slug) {
+        for dep in &info.feature.dependencies {
+            if assigned.contains(dep) {
+                queue.push(dep.clone());
+            }
+        }
+    }
+
+    while let Some(dep) = queue.pop() {
+        if result.insert(dep.clone()) {
+            if let Some(dep_info) = features.get(&dep) {
+                for transitive in &dep_info.feature.dependencies {
+                    if assigned.contains(transitive) && !result.contains(transitive) {
+                        queue.push(transitive.clone());
+                    }
+                }
+            }
+        }
+    }
+
+    let mut deps: Vec<String> = result.into_iter().collect();
+    deps.sort();
+    deps
+}
+
 fn wave_label(items: &[WaveItem]) -> String {
     if items.is_empty() {
         return "Empty".to_string();
     }
-
     let mut planning = 0usize;
     let mut implementation = 0usize;
     let mut review = 0usize;
-
     for item in items {
         match item.phase {
             Phase::Draft | Phase::Specified | Phase::Planned | Phase::Ready => planning += 1,
             Phase::Implementation => implementation += 1,
             Phase::Review | Phase::Audit | Phase::Qa | Phase::Merge => review += 1,
-            Phase::Released => {} // shouldn't be in waves
+            Phase::Released => {}
         }
     }
-
-    let max = planning.max(implementation).max(review);
-    if max == 0 {
-        return "Mixed".to_string();
-    }
-
-    if planning == max && implementation < max && review < max {
-        "Planning".to_string()
-    } else if implementation == max && planning < max && review < max {
-        "Implementation".to_string()
-    } else if review == max && planning < max && implementation < max {
+    // Plurality winner; on tie prefer the more advanced phase
+    if review >= implementation && review >= planning && review > 0 {
         "Review".to_string()
+    } else if implementation >= planning && implementation > 0 {
+        "Implementation".to_string()
+    } else if planning > 0 {
+        "Planning".to_string()
     } else {
         "Mixed".to_string()
     }
@@ -849,10 +905,47 @@ mod tests {
         assert_eq!(result.waves[2].items.len(), 1);
         assert_eq!(result.waves[2].items[0].slug, "feat-c");
 
-        // Wave 2 blocked_by Wave 1
+        // Wave 2 blocked_by Wave 1 (direct dep only)
         assert_eq!(result.waves[1].items[0].blocked_by, vec!["feat-a"]);
-        // Wave 3 blocked_by Wave 2
-        assert_eq!(result.waves[2].items[0].blocked_by, vec!["feat-b"]);
+        // Wave 3 blocked_by Wave 2 AND transitively Wave 1
+        assert_eq!(
+            result.waves[2].items[0].blocked_by,
+            vec!["feat-a", "feat-b"]
+        );
+    }
+
+    #[test]
+    fn prepare_transitive_blocked_by() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        // A → B → C → D (linear chain, 4 deep)
+        add_feature(&dir, "feat-a");
+        add_feature(&dir, "feat-b");
+        add_feature(&dir, "feat-c");
+        add_feature(&dir, "feat-d");
+
+        let mut fb = Feature::load(dir.path(), "feat-b").unwrap();
+        fb.dependencies = vec!["feat-a".to_string()];
+        fb.save(dir.path()).unwrap();
+
+        let mut fc = Feature::load(dir.path(), "feat-c").unwrap();
+        fc.dependencies = vec!["feat-b".to_string()];
+        fc.save(dir.path()).unwrap();
+
+        let mut fd = Feature::load(dir.path(), "feat-d").unwrap();
+        fd.dependencies = vec!["feat-c".to_string()];
+        fd.save(dir.path()).unwrap();
+
+        add_milestone(&dir, "v1", &["feat-a", "feat-b", "feat-c", "feat-d"]);
+
+        let result = prepare(dir.path(), Some("v1")).unwrap();
+        assert_eq!(result.waves.len(), 4);
+
+        // Wave 4 (feat-d) should have transitive closure: a, b, c
+        let wave4_item = &result.waves[3].items[0];
+        assert_eq!(wave4_item.slug, "feat-d");
+        assert_eq!(wave4_item.blocked_by, vec!["feat-a", "feat-b", "feat-c"]);
     }
 
     #[test]

@@ -1,8 +1,10 @@
+pub mod auth;
 pub mod embed;
 pub mod error;
 pub mod routes;
 pub mod state;
 
+use auth::TunnelConfig;
 use axum::routing::{delete, get, post, put};
 use axum::Router;
 use std::path::PathBuf;
@@ -190,6 +192,41 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
             "/api/milestone/{slug}/prepare/stop",
             post(routes::runs::stop_milestone_prepare),
         )
+        // Escalations
+        .route(
+            "/api/escalations",
+            get(routes::escalations::list_escalations),
+        )
+        .route(
+            "/api/escalations",
+            post(routes::escalations::create_escalation),
+        )
+        .route(
+            "/api/escalations/{id}",
+            get(routes::escalations::get_escalation),
+        )
+        .route(
+            "/api/escalations/{id}/resolve",
+            post(routes::escalations::resolve_escalation),
+        )
+        // Secrets (metadata only — no decrypt server-side)
+        .route("/api/secrets/status", get(routes::secrets::get_status))
+        .route("/api/secrets/keys", get(routes::secrets::list_keys))
+        .route("/api/secrets/keys", post(routes::secrets::add_key))
+        .route(
+            "/api/secrets/keys/{name}",
+            delete(routes::secrets::remove_key),
+        )
+        .route("/api/secrets/envs", get(routes::secrets::list_envs))
+        .route(
+            "/api/secrets/envs/{name}",
+            delete(routes::secrets::delete_env),
+        )
+        // Tools
+        .route("/api/tools", get(routes::tools::list_tools))
+        .route("/api/tools/{name}", get(routes::tools::get_tool_meta))
+        .route("/api/tools/{name}/run", post(routes::tools::run_tool))
+        .route("/api/tools/{name}/setup", post(routes::tools::setup_tool))
         // Config
         .route("/api/config", get(routes::config::get_config))
         // Project (prepare / phase)
@@ -220,9 +257,14 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
 /// In dev mode, run the Vite dev server on :5173 (which proxies /api requests
 /// to this server on :3141 via vite.config.ts). In release mode, frontend
 /// assets are embedded in the binary via rust-embed.
-pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Result<()> {
-    let app = build_router(root);
-
+///
+/// Pass [`TunnelConfig::none()`] when no tunnel is active.
+pub async fn serve(
+    root: PathBuf,
+    port: u16,
+    open_browser: bool,
+    tunnel: TunnelConfig,
+) -> anyhow::Result<()> {
     let addr = format!("0.0.0.0:{port}");
     let listener = tokio::net::TcpListener::bind(&addr).await?;
 
@@ -233,6 +275,11 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
         let _ = open::that(&url);
     }
 
+    let app = build_router(root).layer(axum::middleware::from_fn_with_state(
+        tunnel,
+        auth::auth_middleware,
+    ));
+
     axum::serve(listener, app).await?;
     Ok(())
 }
@@ -242,13 +289,15 @@ pub async fn serve(root: PathBuf, port: u16, open_browser: bool) -> anyhow::Resu
 /// Unlike `serve`, this accepts a `TcpListener` that was already bound so the
 /// caller can read the actual port before starting (useful when `port = 0` and
 /// the OS picks a free port).
+///
+/// Pass [`TunnelConfig::none()`] when no tunnel is active.
 pub async fn serve_on(
     root: PathBuf,
     listener: tokio::net::TcpListener,
     open_browser: bool,
+    tunnel: TunnelConfig,
 ) -> anyhow::Result<()> {
     let actual_port = listener.local_addr()?.port();
-    let app = build_router(root);
 
     tracing::info!("SDLC UI server listening on http://localhost:{actual_port}");
 
@@ -256,6 +305,11 @@ pub async fn serve_on(
         let url = format!("http://localhost:{actual_port}");
         let _ = open::that(&url);
     }
+
+    let app = build_router(root).layer(axum::middleware::from_fn_with_state(
+        tunnel,
+        auth::auth_middleware,
+    ));
 
     axum::serve(listener, app).await?;
     Ok(())

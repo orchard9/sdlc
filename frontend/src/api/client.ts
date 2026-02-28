@@ -111,7 +111,77 @@ export const api = {
   stopPonderChat: (slug: string) =>
     request<void>(`/api/ponder/${slug}/chat/current`, { method: 'DELETE' }),
 
+  // Investigations
+  getInvestigations: (kind?: import('@/lib/types').InvestigationKind) =>
+    request<import('@/lib/types').InvestigationSummary[]>(
+      `/api/investigations${kind ? `?kind=${encodeURIComponent(kind)}` : ''}`
+    ),
+  getInvestigation: (slug: string) =>
+    request<import('@/lib/types').InvestigationDetail>(`/api/investigations/${slug}`),
+  createInvestigation: (data: { slug: string; title: string; kind: import('@/lib/types').InvestigationKind; context?: string }) =>
+    request<{ slug: string; title: string; kind: string; phase: string; status: string }>(
+      '/api/investigations', { method: 'POST', body: JSON.stringify(data) }
+    ),
+  updateInvestigation: (slug: string, data: Partial<{ phase: string; status: string; title: string; scope: string; confidence: number; output_type: string; output_ref: string }>) =>
+    request<{ slug: string; phase: string; status: string }>(
+      `/api/investigations/${slug}`, { method: 'PUT', body: JSON.stringify(data) }
+    ),
+  getInvestigationSessions: (slug: string) =>
+    request<import('@/lib/types').SessionMeta[]>(`/api/investigations/${slug}/sessions`),
+  getInvestigationSession: (slug: string, n: number) =>
+    request<import('@/lib/types').SessionContent>(`/api/investigations/${slug}/sessions/${n}`),
+  startInvestigationChat: (slug: string, message?: string) =>
+    request<import('@/lib/types').InvestigationChatResponse>(`/api/investigation/${slug}/chat`, {
+      method: 'POST',
+      body: JSON.stringify({ message: message ?? null }),
+    }),
+  stopInvestigationChat: (slug: string) =>
+    request<void>(`/api/investigation/${slug}/chat/current`, { method: 'DELETE' }),
+
   // Run history
   getRuns: () => request<import('@/lib/types').RunRecord[]>('/api/runs'),
   getRun: (id: string) => request<import('@/lib/types').RunRecord & { events: import('@/lib/types').AgentEvent[] }>(`/api/runs/${id}`),
+
+  // Escalations
+  getEscalations: (status?: string) =>
+    request<import('@/lib/types').EscalationDetail[]>(
+      `/api/escalations${status ? `?status=${encodeURIComponent(status)}` : ''}`
+    ),
+  getEscalation: (id: string) =>
+    request<import('@/lib/types').EscalationDetail>(`/api/escalations/${encodeURIComponent(id)}`),
+  createEscalation: (data: { kind: string; title: string; context: string; source_feature?: string }) =>
+    request<import('@/lib/types').EscalationDetail>('/api/escalations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  resolveEscalation: (id: string, resolution: string) =>
+    request<import('@/lib/types').EscalationDetail>(`/api/escalations/${encodeURIComponent(id)}/resolve`, {
+      method: 'POST',
+      body: JSON.stringify({ resolution }),
+    }),
+
+  // Tools
+  listTools: () => request<import('@/lib/types').ToolMeta[]>('/api/tools'),
+  getTool: (name: string) => request<import('@/lib/types').ToolMeta>(`/api/tools/${encodeURIComponent(name)}`),
+  runTool: (name: string, input: unknown) =>
+    request<import('@/lib/types').ToolResult>(`/api/tools/${encodeURIComponent(name)}/run`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  setupTool: (name: string) =>
+    request<import('@/lib/types').ToolResult>(`/api/tools/${encodeURIComponent(name)}/setup`, {
+      method: 'POST',
+      body: '{}',
+    }),
+
+  // Secrets (metadata only — decryption is CLI-only)
+  getSecretsStatus: () => request<{ key_count: number; env_count: number }>('/api/secrets/status'),
+  getSecretsKeys: () => request<import('@/lib/types').SecretsKey[]>('/api/secrets/keys'),
+  addSecretsKey: (body: { name: string; public_key: string }) =>
+    request('/api/secrets/keys', { method: 'POST', body: JSON.stringify(body) }),
+  removeSecretsKey: (name: string) =>
+    request(`/api/secrets/keys/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+  getSecretsEnvs: () => request<import('@/lib/types').SecretsEnvMeta[]>('/api/secrets/envs'),
+  deleteSecretsEnv: (name: string) =>
+    request(`/api/secrets/envs/${encodeURIComponent(name)}`, { method: 'DELETE' }),
 }

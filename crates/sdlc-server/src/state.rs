@@ -3,6 +3,10 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex};
 
+/// Entry in the active-runs map: the broadcast sender for SSE subscribers
+/// and an abort handle to cancel the spawned task.
+pub type AgentRunEntry = (broadcast::Sender<String>, tokio::task::AbortHandle);
+
 // ---------------------------------------------------------------------------
 // RunRecord — persistent agent run metadata
 // ---------------------------------------------------------------------------
@@ -191,9 +195,9 @@ pub enum SseMessage {
 pub struct AppState {
     pub root: PathBuf,
     pub event_tx: broadcast::Sender<SseMessage>,
-    /// Active agent runs keyed by feature slug. Each sender broadcasts
-    /// JSON-serialized agent events to SSE subscribers.
-    pub agent_runs: Arc<Mutex<HashMap<String, broadcast::Sender<String>>>>,
+    /// Active agent runs keyed by feature slug. Each entry holds the broadcast
+    /// sender (for SSE subscribers) and an abort handle to cancel the task.
+    pub agent_runs: Arc<Mutex<HashMap<String, AgentRunEntry>>>,
     /// Persistent run history (active + completed).
     pub run_history: Arc<Mutex<Vec<RunRecord>>>,
 }
@@ -250,6 +254,7 @@ impl AppState {
 
             // Watch investigations dir for investigation workspace changes.
             let investigations_dir = state.root.join(".sdlc").join("investigations");
+            let tx_inv = tx.clone();
             tokio::spawn(async move {
                 let mut last_mtime = None::<std::time::SystemTime>;
                 loop {
@@ -257,7 +262,25 @@ impl AppState {
                     let latest = scan_dir_mtime(&investigations_dir).await;
                     if latest != last_mtime {
                         last_mtime = latest;
-                        let _ = tx.send(SseMessage::Update);
+                        let _ = tx_inv.send(SseMessage::Update);
+                    }
+                }
+            });
+
+            // Watch escalations.yaml for create/resolve mutations (CLI or API).
+            let escalations_file = state.root.join(".sdlc").join("escalations.yaml");
+            let tx_esc = tx.clone();
+            tokio::spawn(async move {
+                let mut last_mtime = None::<std::time::SystemTime>;
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                    if let Ok(meta) = tokio::fs::metadata(&escalations_file).await {
+                        if let Ok(mtime) = meta.modified() {
+                            if last_mtime != Some(mtime) {
+                                last_mtime = Some(mtime);
+                                let _ = tx_esc.send(SseMessage::Update);
+                            }
+                        }
                     }
                 }
             });

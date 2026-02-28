@@ -16,6 +16,15 @@ pub const BRANCHES_DIR: &str = ".sdlc/branches";
 pub const ARCHIVES_DIR: &str = ".sdlc/archives";
 pub const ROADMAP_DIR: &str = ".sdlc/roadmap";
 pub const INVESTIGATIONS_DIR: &str = ".sdlc/investigations";
+pub const TOOLS_DIR: &str = ".sdlc/tools";
+pub const TOOLS_MANIFEST: &str = ".sdlc/tools/tools.md";
+pub const TOOLS_SHARED_DIR: &str = ".sdlc/tools/_shared";
+
+pub const SECRETS_DIR: &str = ".sdlc/secrets";
+pub const SECRETS_KEYS_FILE: &str = ".sdlc/secrets/keys.yaml";
+pub const SECRETS_ENVS_DIR: &str = ".sdlc/secrets/envs";
+
+pub const ESCALATIONS_FILE: &str = ".sdlc/escalations.yaml";
 
 pub const CONFIG_FILE: &str = ".sdlc/config.yaml";
 pub const STATE_FILE: &str = ".sdlc/state.yaml";
@@ -111,6 +120,62 @@ pub fn guidance_md_path(root: &Path) -> PathBuf {
 
 pub fn sdlc_dir(root: &Path) -> PathBuf {
     root.join(SDLC_DIR)
+}
+
+pub fn tools_dir(root: &Path) -> PathBuf {
+    root.join(TOOLS_DIR)
+}
+
+pub fn tool_dir(root: &Path, name: &str) -> PathBuf {
+    tools_dir(root).join(name)
+}
+
+pub fn tool_script(root: &Path, name: &str) -> PathBuf {
+    tool_dir(root, name).join("tool.ts")
+}
+
+pub fn tool_config(root: &Path, name: &str) -> PathBuf {
+    tool_dir(root, name).join("config.yaml")
+}
+
+pub fn tool_readme(root: &Path, name: &str) -> PathBuf {
+    tool_dir(root, name).join("README.md")
+}
+
+pub fn tool_index_dir(root: &Path, name: &str) -> PathBuf {
+    tool_dir(root, name).join("index")
+}
+
+pub fn tools_manifest_path(root: &Path) -> PathBuf {
+    root.join(TOOLS_MANIFEST)
+}
+
+pub fn tools_shared_dir(root: &Path) -> PathBuf {
+    root.join(TOOLS_SHARED_DIR)
+}
+
+pub fn secrets_dir(root: &Path) -> PathBuf {
+    root.join(SECRETS_DIR)
+}
+
+pub fn secrets_keys_path(root: &Path) -> PathBuf {
+    root.join(SECRETS_KEYS_FILE)
+}
+
+pub fn secrets_envs_dir(root: &Path) -> PathBuf {
+    root.join(SECRETS_ENVS_DIR)
+}
+
+pub fn secrets_env_path(root: &Path, env_name: &str) -> PathBuf {
+    secrets_envs_dir(root).join(format!("{env_name}.age"))
+}
+
+pub fn secrets_env_meta_path(root: &Path, env_name: &str) -> PathBuf {
+    secrets_envs_dir(root).join(format!("{env_name}.meta.yaml"))
+}
+
+pub fn escalations_path(root: &Path) -> PathBuf {
+    root.join(ESCALATIONS_FILE)
 }
 
 pub fn ai_lookup_dir(root: &Path) -> PathBuf {
@@ -245,6 +310,28 @@ mod tests {
         assert_eq!(
             codex_skills_dir(root),
             PathBuf::from("/tmp/proj/.agents/skills")
+        );
+    }
+
+    #[test]
+    fn tools_path_helpers() {
+        let root = Path::new("/tmp/proj");
+        assert_eq!(tools_dir(root), PathBuf::from("/tmp/proj/.sdlc/tools"));
+        assert_eq!(
+            tool_dir(root, "ama"),
+            PathBuf::from("/tmp/proj/.sdlc/tools/ama")
+        );
+        assert_eq!(
+            tool_script(root, "ama"),
+            PathBuf::from("/tmp/proj/.sdlc/tools/ama/tool.ts")
+        );
+        assert_eq!(
+            tools_manifest_path(root),
+            PathBuf::from("/tmp/proj/.sdlc/tools/tools.md")
+        );
+        assert_eq!(
+            tools_shared_dir(root),
+            PathBuf::from("/tmp/proj/.sdlc/tools/_shared")
         );
     }
 

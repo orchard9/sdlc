@@ -1,9 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { FileText, ChevronDown, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
-import { MarkdownContent } from '@/components/shared/MarkdownContent'
+import { ArtifactContent } from '@/components/shared/ArtifactContent'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
+import { AreaCards } from '@/components/investigation/AreaCards'
+import { OutputGate } from '@/components/investigation/OutputGate'
+import { SynthesisCard } from '@/components/investigation/SynthesisCard'
+import { LensCards } from '@/components/investigation/LensCards'
+import { EvolveOutputGate } from '@/components/investigation/EvolveOutputGate'
 import { cn } from '@/lib/utils'
-import type { PonderArtifact } from '@/lib/types'
+import type { PonderArtifact, InvestigationArtifact, InvestigationDetail } from '@/lib/types'
 
 function formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`
@@ -26,28 +31,16 @@ function relativeDate(iso: string): string {
   return d.toLocaleDateString()
 }
 
-function ArtifactContent({ filename, content }: { filename: string; content: string }) {
-  const ext = filename.split('.').pop()?.toLowerCase() ?? ''
-  if (['md', 'markdown'].includes(ext)) {
-    return <MarkdownContent content={content} />
-  }
-  const lang = ext === 'tsx' ? 'tsx'
-    : ext === 'ts' ? 'typescript'
-    : ext === 'jsx' ? 'jsx'
-    : ext === 'js' ? 'javascript'
-    : ext === 'html' || ext === 'htm' ? 'html'
-    : ext === 'json' ? 'json'
-    : ext === 'rs' ? 'rust'
-    : ext || 'text'
-  return <MarkdownContent content={'```' + lang + '\n' + content + '\n```'} />
-}
 
 interface Props {
   artifacts: PonderArtifact[]
   onClose?: () => void
+  phase?: string
+  kind?: string
+  investigation?: InvestigationDetail
 }
 
-export function WorkspacePanel({ artifacts, onClose }: Props) {
+export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation }: Props) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const touchStartX = useRef<number | null>(null)
@@ -99,6 +92,42 @@ export function WorkspacePanel({ artifacts, onClose }: Props) {
           >
             <X className="w-4 h-4" />
           </button>
+        </div>
+      )}
+
+      {/* Phase-aware panels (investigation only) */}
+      {kind === 'root_cause' && phase === 'investigate' && (
+        <div className="shrink-0 border-b border-border/40 px-0 py-0">
+          <AreaCards artifacts={artifacts as unknown as InvestigationArtifact[]} />
+        </div>
+      )}
+      {kind === 'root_cause' && phase === 'output' && investigation && (
+        <div className="shrink-0 border-b border-border/40">
+          <OutputGate investigation={investigation} />
+        </div>
+      )}
+      {kind === 'root_cause' && phase === 'synthesize' && (
+        <div className="shrink-0 border-b border-border/40">
+          <SynthesisCard artifacts={artifacts as unknown as InvestigationArtifact[]} confidence={investigation?.confidence ?? null} />
+        </div>
+      )}
+      {kind === 'evolve' && phase === 'analyze' && investigation && (
+        <div className="shrink-0 border-b border-border/40 px-0 py-0">
+          <LensCards lensScores={investigation.lens_scores} />
+        </div>
+      )}
+      {kind === 'evolve' && (phase === 'paths' || phase === 'roadmap') && (() => {
+        const filename = phase === 'paths' ? 'paths.md' : 'roadmap.md'
+        const artifact = artifacts.find(a => a.filename === filename)
+        return artifact?.content ? (
+          <div className="shrink-0 border-b border-border/40 overflow-auto max-h-48 px-3 py-2">
+            <ArtifactContent filename={filename} content={artifact.content} />
+          </div>
+        ) : null
+      })()}
+      {kind === 'evolve' && phase === 'output' && investigation && (
+        <div className="shrink-0 border-b border-border/40">
+          <EvolveOutputGate investigation={investigation} />
         </div>
       )}
 
@@ -244,7 +273,7 @@ export function WorkspacePanel({ artifacts, onClose }: Props) {
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
-          <ArtifactContent filename={activeArtifact.filename} content={activeArtifact.content} />
+          <ArtifactContent filename={activeArtifact.filename} content={activeArtifact.content} fullscreen />
         </FullscreenModal>
       )}
     </div>

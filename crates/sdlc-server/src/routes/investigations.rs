@@ -188,6 +188,10 @@ pub struct UpdateInvestigationBody {
     pub scope: Option<String>,
     #[serde(default)]
     pub confidence: Option<u32>,
+    #[serde(default)]
+    pub output_type: Option<String>,
+    #[serde(default)]
+    pub output_ref: Option<String>,
 }
 
 /// PUT /api/investigations/:slug — update phase/status/title/scope/confidence.
@@ -239,6 +243,24 @@ pub async fn update_investigation(
                 ));
             }
             entry.confidence = Some(c);
+            entry.updated_at = chrono::Utc::now();
+        }
+        if let Some(ot) = body.output_type {
+            if entry.kind != sdlc_core::investigation::InvestigationKind::RootCause {
+                return Err(sdlc_core::SdlcError::InvalidInvestigationKind(
+                    "output_type is only valid for root-cause".to_string(),
+                ));
+            }
+            entry.output_type = Some(ot);
+            entry.updated_at = chrono::Utc::now();
+        }
+        if let Some(or_) = body.output_ref {
+            if entry.kind != sdlc_core::investigation::InvestigationKind::RootCause {
+                return Err(sdlc_core::SdlcError::InvalidInvestigationKind(
+                    "output_ref is only valid for root-cause".to_string(),
+                ));
+            }
+            entry.output_ref = Some(or_);
             entry.updated_at = chrono::Utc::now();
         }
 

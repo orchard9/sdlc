@@ -1,14 +1,17 @@
-import { useMemo } from 'react'
-import { FileText } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { FileText, ChevronDown, ChevronUp } from 'lucide-react'
 import { parseSession } from '@/lib/parseSession'
 import { ToolCallBlock } from './ToolCallBlock'
 import { PartnerMessage } from './PartnerMessage'
 import { MarkdownContent } from '@/components/shared/MarkdownContent'
-import type { SessionContent } from '@/lib/types'
+import { ArtifactContent } from '@/components/shared/ArtifactContent'
+import { cn } from '@/lib/utils'
+import type { SessionContent, PonderArtifact } from '@/lib/types'
 
 interface Props {
   session: SessionContent
   ownerName?: string | null
+  artifacts?: PonderArtifact[]
 }
 
 function relativeDate(iso: string | null): string {
@@ -28,9 +31,10 @@ function relativeDate(iso: string | null): string {
   return d.toLocaleDateString()
 }
 
-export function SessionBlock({ session, ownerName }: Props) {
+export function SessionBlock({ session, ownerName, artifacts = [] }: Props) {
   const events = useMemo(() => parseSession(session.content), [session.content])
   const dateLabel = relativeDate(session.timestamp)
+  const [expandedFilename, setExpandedFilename] = useState<string | null>(null)
 
   return (
     <div className="mb-8">
@@ -50,26 +54,46 @@ export function SessionBlock({ session, ownerName }: Props) {
             case 'tool':
               return <ToolCallBlock key={idx} tool={event.tool} summary={event.summary} />
 
-            case 'artifact':
+            case 'artifact': {
+              const workspaceArtifact = artifacts.find(a => a.filename === event.filename)
+              const hasContent = workspaceArtifact?.content != null
+              const isExpanded = expandedFilename === event.filename
               return (
                 <div
                   key={idx}
                   className="my-2 border border-border/50 rounded-lg overflow-hidden text-xs"
                 >
-                  <div className="flex items-center gap-2 px-3 py-2 bg-muted/30">
+                  <button
+                    onClick={() => hasContent && setExpandedFilename(isExpanded ? null : event.filename)}
+                    className={cn(
+                      'w-full flex items-center gap-2 px-3 py-2 bg-muted/30 text-left',
+                      hasContent && 'hover:bg-muted/50 transition-colors',
+                    )}
+                  >
                     <FileText className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
                     <span className="font-mono text-foreground/80 flex-1 truncate">
                       {event.filename}
                     </span>
                     <span className="text-muted-foreground/40">written</span>
-                  </div>
-                  {event.summary && (
+                    {hasContent && (
+                      isExpanded
+                        ? <ChevronUp className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                        : <ChevronDown className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                    )}
+                  </button>
+                  {event.summary && !isExpanded && (
                     <div className="px-3 py-1.5 text-muted-foreground/60 font-mono truncate border-t border-border/30">
                       {event.summary.split('\n')[0]}
                     </div>
                   )}
+                  {isExpanded && workspaceArtifact?.content && (
+                    <div className="border-t border-border/30 overflow-auto max-h-72 px-3 py-2">
+                      <ArtifactContent filename={event.filename} content={workspaceArtifact.content} />
+                    </div>
+                  )}
                 </div>
               )
+            }
 
             case 'partner': {
               const isOwner = ownerName

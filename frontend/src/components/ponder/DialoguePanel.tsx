@@ -325,6 +325,7 @@ export function DialoguePanel({ entry, onRefresh }: Props) {
                 key={s.session}
                 session={s}
                 ownerName={isRunning && runState.status === 'running' ? runState.ownerName : undefined}
+                artifacts={entry.artifacts}
               />
             ))}
 

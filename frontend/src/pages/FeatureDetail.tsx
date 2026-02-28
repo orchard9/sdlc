@@ -18,7 +18,7 @@ export function FeatureDetail() {
   if (!slug) return null
 
   if (loading || !feature) {
-    return <SkeletonFeatureDetail />
+    return <div className="p-6"><SkeletonFeatureDetail /></div>
   }
 
   const running = isRunning(slug)
@@ -40,7 +40,7 @@ export function FeatureDetail() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto p-6">
       <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Back

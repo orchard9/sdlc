@@ -153,10 +153,23 @@ pub fn list_sessions(dir: &Path) -> Result<Vec<SessionMeta>> {
         if !name.ends_with(".md") {
             continue;
         }
+        // Canonical session number comes from the filename (session-NNN.md), not
+        // frontmatter. Agents sometimes write stale numbers in the frontmatter;
+        // read_session(n) constructs the path from the filename, so these must agree.
+        let file_n: Option<u32> = name
+            .strip_suffix(".md")
+            .and_then(|stem| stem.strip_prefix("session-"))
+            .and_then(|num| num.parse().ok());
+        let Some(file_n) = file_n else { continue };
+
         let content = std::fs::read_to_string(entry.path())?;
-        if let Some(meta) = parse_session_meta(&content) {
-            metas.push(meta);
-        }
+        let mut meta = parse_session_meta(&content).unwrap_or_else(|| SessionMeta {
+            session: file_n,
+            timestamp: Utc::now(),
+            orientation: None,
+        });
+        meta.session = file_n;
+        metas.push(meta);
     }
     metas.sort_by_key(|m| m.session);
     Ok(metas)

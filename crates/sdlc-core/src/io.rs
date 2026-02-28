@@ -75,6 +75,35 @@ pub fn append_text(path: &Path, text: &str) -> Result<()> {
     Ok(())
 }
 
+/// Add `entry` to `root/.gitignore` if it isn't already present.
+///
+/// Checks for an exact line match. Appends with a leading newline separator
+/// if the file doesn't already end with one.
+pub fn ensure_gitignore_entry(root: &Path, entry: &str) -> Result<()> {
+    let gitignore = root.join(".gitignore");
+    let existing = if gitignore.exists() {
+        std::fs::read_to_string(&gitignore)?
+    } else {
+        String::new()
+    };
+    // Exact line match — avoids false positives from substring checks.
+    if existing.lines().any(|l| l == entry) {
+        return Ok(());
+    }
+    let sep = if existing.is_empty() || existing.ends_with('\n') {
+        ""
+    } else {
+        "\n"
+    };
+    use std::io::Write as _;
+    let mut f = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(&gitignore)?;
+    writeln!(f, "{sep}{entry}")?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -94,6 +123,39 @@ mod tests {
         let path = dir.path().join("a/b/c/test.yaml");
         atomic_write(&path, b"data").unwrap();
         assert!(path.exists());
+    }
+
+    #[test]
+    fn ensure_gitignore_entry_adds_when_missing() {
+        let dir = TempDir::new().unwrap();
+        ensure_gitignore_entry(dir.path(), ".sdlc/secrets/envs/staging.meta.yaml").unwrap();
+        let content = std::fs::read_to_string(dir.path().join(".gitignore")).unwrap();
+        assert!(content.contains(".sdlc/secrets/envs/staging.meta.yaml"));
+    }
+
+    #[test]
+    fn ensure_gitignore_entry_idempotent() {
+        let dir = TempDir::new().unwrap();
+        ensure_gitignore_entry(dir.path(), ".sdlc/secrets/envs/prod.meta.yaml").unwrap();
+        ensure_gitignore_entry(dir.path(), ".sdlc/secrets/envs/prod.meta.yaml").unwrap();
+        let content = std::fs::read_to_string(dir.path().join(".gitignore")).unwrap();
+        assert_eq!(
+            content
+                .lines()
+                .filter(|l| *l == ".sdlc/secrets/envs/prod.meta.yaml")
+                .count(),
+            1
+        );
+    }
+
+    #[test]
+    fn ensure_gitignore_entry_appends_to_existing() {
+        let dir = TempDir::new().unwrap();
+        std::fs::write(dir.path().join(".gitignore"), "node_modules\n").unwrap();
+        ensure_gitignore_entry(dir.path(), ".sdlc/secrets/envs/staging.meta.yaml").unwrap();
+        let content = std::fs::read_to_string(dir.path().join(".gitignore")).unwrap();
+        assert!(content.contains("node_modules"));
+        assert!(content.contains(".sdlc/secrets/envs/staging.meta.yaml"));
     }
 
     #[test]

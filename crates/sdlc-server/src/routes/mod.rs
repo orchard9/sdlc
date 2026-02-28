@@ -1,6 +1,7 @@
 pub mod artifacts;
 pub mod comments;
 pub mod config;
+pub mod escalations;
 pub mod events;
 pub mod features;
 pub mod init;
@@ -10,6 +11,8 @@ pub mod prepare;
 pub mod query;
 pub mod roadmap;
 pub mod runs;
+pub mod secrets;
 pub mod state;
 pub mod tasks;
+pub mod tools;
 pub mod vision;

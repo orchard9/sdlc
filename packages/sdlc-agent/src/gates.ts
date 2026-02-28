@@ -33,12 +33,80 @@ export async function runGates(
   return results;
 }
 
+/**
+ * Parse a command string into an array of argument tokens.
+ *
+ * Supported:
+ *   - Whitespace-separated bare tokens
+ *   - Single-quoted strings: 'value with spaces' → one token, quotes stripped
+ *   - Double-quoted strings: "value with spaces" → one token, quotes stripped
+ *   - Backslash-escaped spaces: value\ with\ spaces → one token
+ *
+ * Not supported (use a wrapper script for these):
+ *   - Pipes and redirects: | > < >>
+ *   - Subshell expressions: $(...) or `...`
+ *   - Environment variable expansion: $VAR or ${VAR}
+ *   - Glob expansion: * ? [...]
+ *
+ * Throws if a quoted string is not closed.
+ */
+function parseCommandArgs(command: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  let i = 0;
+
+  while (i < command.length) {
+    // command[i] is always defined inside `i < command.length` bounds
+    const ch = command[i]!;
+
+    if (ch === "'" || ch === '"') {
+      // Quoted string — consume until the matching closing quote
+      const quote = ch;
+      i++;
+      while (i < command.length && command[i] !== quote) {
+        current += command[i]!;
+        i++;
+      }
+      if (i >= command.length) {
+        throw new Error(
+          `Unclosed ${quote === "'" ? "single" : "double"} quote in command: ${command}`
+        );
+      }
+      i++; // skip closing quote
+    } else if (ch === "\\") {
+      // Backslash escape — treat next character literally
+      i++;
+      if (i < command.length) {
+        current += command[i]!;
+        i++;
+      }
+    } else if (/\s/u.test(ch)) {
+      // Whitespace — flush current token if non-empty
+      if (current.length > 0) {
+        tokens.push(current);
+        current = "";
+      }
+      i++;
+    } else {
+      current += ch;
+      i++;
+    }
+  }
+
+  if (current.length > 0) {
+    tokens.push(current);
+  }
+
+  return tokens;
+}
+
 async function runShellGate(gate: GateDefinition, cwd: string): Promise<GateResult> {
   const command = gate.command!;
 
-  // Split the command safely — support simple commands with args but not pipes/redirects
-  // For complex commands, the gate config should be a single executable with args
-  const parts = command.split(/\s+/u);
+  // Parse the command into tokens with proper quoted-argument support.
+  // Pipes, redirects, subshells, and env var expansion are not supported —
+  // use a wrapper script for those cases.
+  const parts = parseCommandArgs(command);
   const [bin, ...args] = parts;
 
   if (!bin) {

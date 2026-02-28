@@ -58,7 +58,7 @@ export function MilestoneDetail() {
 
   if (loading || !milestone) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full p-6">
         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
       </div>
     )
@@ -67,7 +67,7 @@ export function MilestoneDetail() {
   const featureBySlug = new Map((state?.features ?? []).map(f => [f.slug, f]))
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto p-6">
       <Link
         to="/milestones"
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors"

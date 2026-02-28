@@ -61,6 +61,10 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     // 4. Write / refresh engineering guidance (always overwritten — managed content)
     write_guidance_md(root)?;
 
+    // 4.5. Write / refresh core tool suite (.sdlc/tools/)
+    println!("\nInstalling core tool suite:");
+    write_core_tools(root)?;
+
     // 5. Create .ai knowledge base skeleton
     let ai_lookup_dirs = [
         ".ai",
@@ -365,6 +369,17 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         - `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features\n\
         - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent\n\
         - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions\n\n\
+        ### Tool Suite\n\n\
+        <!-- sdlc:tools -->\n\
+        Project-scoped TypeScript tools in `.sdlc/tools/` — callable by agents and humans\n\
+        during any lifecycle phase. Read `.sdlc/tools/tools.md` for the full help menu.\n\n\
+        - `sdlc tool list` — show installed tools\n\
+        - `sdlc tool run <name> [args]` — run a tool; pass `--json '{{...}}'` for complex input\n\
+        - `sdlc tool sync` — regenerate `tools.md` after adding a custom tool\n\
+        - `sdlc tool scaffold <name> \"desc\"` — create a new tool skeleton\n\n\
+        **Core tools:** `ama` (codebase Q&A), `quality-check` (runs platform shell gates)\n\n\
+        Use `/sdlc-tool-run`, `/sdlc-tool-build`, `/sdlc-tool-audit`, `/sdlc-tool-uat` in Claude Code for guided tool workflows.\n\
+        <!-- /sdlc:tools -->\n\n\
         Project: {project_name}\n\n"
     )
 }
@@ -534,6 +549,11 @@ fn write_user_claude_commands() -> anyhow::Result<()> {
             ("sdlc-recruit.md", SDLC_RECRUIT_COMMAND),
             ("sdlc-empathy.md", SDLC_EMPATHY_COMMAND),
             ("sdlc-prepare.md", SDLC_PREPARE_COMMAND),
+            ("sdlc-run-wave.md", SDLC_RUN_WAVE_COMMAND),
+            ("sdlc-tool-run.md", SDLC_TOOL_RUN_COMMAND),
+            ("sdlc-tool-build.md", SDLC_TOOL_BUILD_COMMAND),
+            ("sdlc-tool-audit.md", SDLC_TOOL_AUDIT_COMMAND),
+            ("sdlc-tool-uat.md", SDLC_TOOL_UAT_COMMAND),
         ],
     )
 }
@@ -652,9 +672,41 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
         (
             "sdlc-prepare.toml",
             gemini_command_toml(
-                "Survey a milestone — find gaps, organize into parallelizable waves",
+                "Pre-flight a milestone — align features, fix gaps, write wave plan, mark prepared",
                 SDLC_PREPARE_PLAYBOOK,
             ),
+        ),
+        (
+            "sdlc-run-wave.toml",
+            gemini_command_toml(
+                "Execute Wave 1 features in parallel, then advance to the next wave",
+                SDLC_RUN_WAVE_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-run.toml",
+            gemini_command_toml(
+                "Run an SDLC tool and act on the JSON result",
+                SDLC_TOOL_RUN_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-build.toml",
+            gemini_command_toml(
+                "Scaffold and implement a new SDLC tool",
+                SDLC_TOOL_BUILD_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-audit.toml",
+            gemini_command_toml(
+                "Audit an SDLC tool against the full quality contract",
+                SDLC_TOOL_AUDIT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-uat.toml",
+            gemini_command_toml("Run UAT scenarios for an SDLC tool", SDLC_TOOL_UAT_PLAYBOOK),
         ),
     ];
 
@@ -798,9 +850,49 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
         (
             "sdlc-prepare.md",
             opencode_command_md(
-                "Survey a milestone — find gaps, organize into parallelizable waves",
-                "[milestone-slug]",
+                "Pre-flight a milestone — align features, fix gaps, write wave plan, mark prepared",
+                "<milestone-slug>",
                 SDLC_PREPARE_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-run-wave.md",
+            opencode_command_md(
+                "Execute Wave 1 features in parallel, then advance to the next wave",
+                "<milestone-slug>",
+                SDLC_RUN_WAVE_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-run.md",
+            opencode_command_md(
+                "Run an SDLC tool and act on the JSON result",
+                "<tool-name> [args]",
+                SDLC_TOOL_RUN_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-build.md",
+            opencode_command_md(
+                "Scaffold and implement a new SDLC tool",
+                "<name> \"<description>\"",
+                SDLC_TOOL_BUILD_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-audit.md",
+            opencode_command_md(
+                "Audit an SDLC tool against the full quality contract",
+                "<tool-name>",
+                SDLC_TOOL_AUDIT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-tool-uat.md",
+            opencode_command_md(
+                "Run UAT scenarios for an SDLC tool",
+                "<tool-name>",
+                SDLC_TOOL_UAT_PLAYBOOK,
             ),
         ),
     ];
@@ -834,6 +926,11 @@ fn write_user_agents_skills() -> anyhow::Result<()> {
             ("sdlc-recruit", SDLC_RECRUIT_SKILL),
             ("sdlc-empathy", SDLC_EMPATHY_SKILL),
             ("sdlc-prepare", SDLC_PREPARE_SKILL),
+            ("sdlc-run-wave", SDLC_RUN_WAVE_SKILL),
+            ("sdlc-tool-run", SDLC_TOOL_RUN_SKILL),
+            ("sdlc-tool-build", SDLC_TOOL_BUILD_SKILL),
+            ("sdlc-tool-audit", SDLC_TOOL_AUDIT_SKILL),
+            ("sdlc-tool-uat", SDLC_TOOL_UAT_SKILL),
         ],
     )
 }
@@ -858,6 +955,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-recruit.md",
         "sdlc-empathy.md",
         "sdlc-prepare.md",
+        "sdlc-run-wave.md",
+        "sdlc-tool-run.md",
+        "sdlc-tool-build.md",
+        "sdlc-tool-audit.md",
+        "sdlc-tool-uat.md",
     ];
 
     remove_if_exists(
@@ -886,6 +988,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-recruit.toml",
             "sdlc-empathy.toml",
             "sdlc-prepare.toml",
+            "sdlc-run-wave.toml",
+            "sdlc-tool-run.toml",
+            "sdlc-tool-build.toml",
+            "sdlc-tool-audit.toml",
+            "sdlc-tool-uat.toml",
             "sdlc-next.md",
             "sdlc-status.md",
             "sdlc-approve.md",
@@ -903,6 +1010,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-recruit.md",
             "sdlc-empathy.md",
             "sdlc-prepare.md",
+            "sdlc-run-wave.md",
+            "sdlc-tool-run.md",
+            "sdlc-tool-build.md",
+            "sdlc-tool-audit.md",
+            "sdlc-tool-uat.md",
         ],
     )?;
     remove_if_exists(
@@ -936,6 +1048,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-recruit/SKILL.md",
             "sdlc-empathy/SKILL.md",
             "sdlc-prepare/SKILL.md",
+            "sdlc-run-wave/SKILL.md",
+            "sdlc-tool-run/SKILL.md",
+            "sdlc-tool-build/SKILL.md",
+            "sdlc-tool-audit/SKILL.md",
+            "sdlc-tool-uat/SKILL.md",
         ],
     )?;
     remove_if_exists(&root.join(".codex/commands"), ".codex/commands", sdlc_files)?;
@@ -1114,10 +1231,85 @@ Direct edits cause deserialization failures and corrupt state.
 | List tasks | `sdlc task list <slug>` |
 | Project state | `sdlc state` |
 | Survey milestone waves | `sdlc project prepare [--milestone <slug>]` |
+| Mark milestone prepared | `sdlc milestone mark-prepared <slug>` |
 | Project phase | `sdlc project status` |
+| Escalate to human | `sdlc escalate create --kind <kind> --title "…" --context "…" [--feature <slug>]` |
+| List escalations | `sdlc escalate list` |
+| Resolve escalation | `sdlc escalate resolve <id> "resolution note"` |
 
 Phases advance automatically from artifact approvals — never call `sdlc feature transition`.
 The only files you write directly are Markdown artifacts to `output_path`.
+
+## 7. SDLC Tool Suite
+
+Project-scoped TypeScript tools in `.sdlc/tools/` — callable by agents and humans during any lifecycle phase.
+Read `.sdlc/tools/tools.md` for the full list, or each tool's `README.md` for detailed docs.
+
+| Tool | Command | Purpose |
+|---|---|---|
+| ama | `sdlc tool run ama --setup` then `sdlc tool run ama --question "..."` | Search codebase for relevant file excerpts |
+
+Build a custom tool: `sdlc tool scaffold <name> "<description>"`
+Update the manifest after adding/changing tools: `sdlc tool sync`
+
+## 8. Project Secrets
+
+Encrypted secrets live in `.sdlc/secrets/`. The encrypted files (`.age`) and key
+name sidecars (`.meta.yaml`) are **safe to commit**. Plain `.env.*` files must never
+be committed — they are gitignored automatically.
+
+| Action | Command |
+|---|---|
+| List environments | `sdlc secrets env list` |
+| List key names (no decrypt) | `sdlc secrets env names <env>` |
+| Load secrets into shell | `eval $(sdlc secrets env export <env>)` |
+| Set a secret | `sdlc secrets env set <env> KEY=value` |
+| List authorized keys | `sdlc secrets keys list` |
+| Add a key | `sdlc secrets keys add --name <n> --key "$(cat ~/.ssh/id_ed25519.pub)"` |
+| Rekey after key change | `sdlc secrets keys rekey` |
+
+**For agents:** Check `sdlc secrets env names <env>` to see which variables are
+available. Load them before executing tasks that need credentials:
+
+    eval $(sdlc secrets env export production)
+
+Never log or hardcode secret values. Reference secrets by environment variable
+name only (e.g. `$ANTHROPIC_API_KEY`).
+
+## 9. Escalating to the Human
+
+Escalations are for **actions only a human can take**. They are rare and deliberate — not a
+general-purpose communication channel. Before escalating, ask: "Can I resolve this myself?"
+If yes, do it. If not, escalate.
+
+| Kind | When to escalate | Example |
+|---|---|---|
+| `secret_request` | Need a credential or env var that doesn't exist | "Add STRIPE_API_KEY to production env in Secrets page" |
+| `question` | Strategic decision with no clear right answer | "Should checkout support crypto payments?" |
+| `vision` | Product direction is undefined or contradictory | "No vision defined — what is the milestone goal?" |
+| `manual_test` | Testing requires physical interaction | "Verify Google OAuth login in production browser" |
+
+**Do NOT escalate:** code review findings, spec ambiguity you can resolve, implementation
+decisions, anything an agent can handle autonomously.
+
+**How to escalate:**
+
+```bash
+sdlc escalate create \
+  --kind secret_request \
+  --title "Need OPENAI_API_KEY in .env.production" \
+  --context "AI summary feature calls OpenAI in prod. Dev works with a mock. Need the real key to test end-to-end." \
+  --feature my-ai-feature   # omit if not feature-specific
+```
+
+**After creating:** stop the current run immediately. If `--feature` was specified, the feature
+is now gated by an auto-added Blocker comment. The escalation appears in the Dashboard under
+**"Needs Your Attention"**. The human must act before the feature can proceed.
+
+**The difference from `comment --flag blocker`:**
+
+- `comment --flag blocker` — an implementation concern the next agent cycle might fix
+- `sdlc escalate create` — an action only a human can perform; stop until resolved
 "#;
 
 const SDLC_NEXT_COMMAND: &str = r#"---
@@ -1719,6 +1911,11 @@ Use `sdlc-run` when you want the agent to drive as far as it can autonomously.
 | `unblock_dependency` | External blocker only a human can resolve |
 
 Everything else — including `approve_merge` — runs autonomously.
+
+> **Escalations** (`sdlc escalate create`) are a separate mechanism from HITL gates.
+> When you create an escalation with `--feature`, a Blocker comment is automatically
+> added to the feature, which triggers `wait_for_approval`. Stop the run after escalating.
+> See §9 of `.sdlc/guidance.md` for when and how to escalate.
 
 ---
 
@@ -3871,66 +4068,136 @@ Use this skill to run deep empathy interviews.
 // ---------------------------------------------------------------------------
 
 const SDLC_PREPARE_COMMAND: &str = r#"---
-description: Survey a milestone — find gaps, organize features into parallelizable execution waves
-argument-hint: [milestone-slug]
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+description: Pre-flight a milestone — align features with vision, fix gaps, write wave plan, mark ready to execute
+argument-hint: <milestone-slug>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
 ---
 
 # sdlc-prepare
 
-Survey a milestone's readiness and organize its features into parallelizable execution waves. Read-only analysis — no state changes.
+Pre-flight a milestone end-to-end: read the vision, audit every feature for alignment, fix structural gaps, write a wave plan, and mark the milestone prepared. This command makes real changes — it is not read-only.
 
 > **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Steps
 
-### 1. Run prepare
+### 1. Resolve the milestone slug
 
+Use `$ARGUMENTS` as the slug. If none provided, run:
 ```bash
 sdlc project prepare --json
 ```
+and pick the active milestone from `milestone_slug` in the output.
 
-If a milestone slug was provided in $ARGUMENTS:
+### 2. Read the product vision
+
+In order:
+1. `docs/vision.md` — if it exists, read it
+2. `CLAUDE.md` — read the `## Project` section
+3. `README.md` — first two sections
+
+Synthesize a one-paragraph vision statement to use as the alignment anchor.
+
+### 3. Read milestone state
+
+```bash
+sdlc milestone info <slug> --json
+```
+
+Note: `vision`, `features` list, `prepared_at`.
+
+### 4. Audit each feature for alignment
+
+For each feature slug in the milestone:
+
+```bash
+sdlc feature show <slug> --json
+```
+
+Then read any existing artifacts:
+- `.sdlc/features/<slug>/spec.md`
+- `.sdlc/features/<slug>/design.md`
+- `.sdlc/features/<slug>/tasks.md`
+
+Check:
+- Does the description exist and clearly connect to the milestone vision?
+- Are tasks concrete and actionable (not vague placeholders)?
+- Do dependency references point to real feature slugs?
+
+### 5. Fix structural gaps
+
+For each feature needing repair:
+
+**Missing or weak description:**
+```bash
+sdlc feature update <slug> --description "<clear one-liner tied to the vision>"
+```
+
+**Broken dependency reference** (dep slug doesn't exist):
+```bash
+sdlc feature update <slug> --depends-on <correct-slug>
+```
+
+**Vague tasks** — rewrite with specific action verbs:
+```bash
+sdlc task update <slug> <task-id> --title "<specific action>"
+```
+
+**Features that don't belong** (contradict vision, wrong milestone) — archive them:
+```bash
+sdlc feature archive <slug>
+```
+
+### 6. Run prepare and build wave plan
+
 ```bash
 sdlc project prepare --milestone <slug> --json
 ```
 
-### 2. Assess the result
+Parse the `waves` array. Write a wave plan file:
 
-Parse the JSON output. Key fields:
-- `project_phase` — where the project is in its lifecycle (idle/pondering/planning/executing/verifying)
-- `gaps` — issues found (blocker/warning/info severity)
-- `waves` — features grouped into parallelizable execution waves
-- `blocked` — features that can't proceed and why
-- `next_commands` — suggested `/sdlc-run` commands for Wave 1
+```bash
+# Build wave_plan.yaml content from prepare output and write to the milestone dir
+```
 
-### 3. Report findings
+Wave plan format at `.sdlc/milestones/<slug>/wave_plan.yaml`:
+```yaml
+milestone: <slug>
+waves:
+  - number: 1
+    label: Planning
+    slugs: [feat-a, feat-b]
+  - number: 2
+    label: Implementation
+    slugs: [feat-c]
+```
 
-Present a clear summary:
+Use wave labels from the prepare output if present; otherwise label Wave 1 `Planning`, Wave 2 `Implementation`, remaining waves `Wave N`.
 
-1. **Phase & Progress** — current project phase, milestone progress bar
-2. **Gaps** — blockers first (these must be resolved), then warnings, then info
-3. **Wave Plan** — for each wave: features, their phases, and actions. Wave 1 runs first; subsequent waves depend on prior waves completing.
-4. **Blocked Features** — what's stuck and why
-5. **Next Steps** — the concrete commands to run
+### 7. Mark milestone prepared
 
-### 4. Address gaps (if any blockers)
+```bash
+sdlc milestone mark-prepared <slug>
+```
 
-If there are blocker-severity gaps:
-- Missing descriptions: write them with `sdlc feature update <slug> --description "..."`
-- Broken dependency references: fix with `sdlc feature update <slug> --depends-on <correct-slug>`
-- Dependency cycles: identify the cycle and suggest which dependency to remove
+### 8. Report
 
-### 5. Next
+Print a summary:
+1. **Vision** — the one-paragraph anchor used
+2. **Fixes applied** — what was changed and why
+3. **Wave Plan** — wave number, label, feature slugs, feature count
+4. **Blocked features** — any features that couldn't be fixed (explain why)
 
-Always end with a single `**Next:**` line:
+### 9. Next
+
+Always end with exactly one `**Next:**` line:
 
 | Outcome | Next |
 |---|---|
-| Wave 1 has features to run | `**Next:** /sdlc-run <first-wave-1-slug>` |
-| Blockers prevent progress | `**Next:** Fix the blockers listed above, then /sdlc-prepare` |
-| All features done (verifying) | `**Next:** /sdlc-milestone-uat <milestone-slug>` |
-| Project idle | `**Next:** /sdlc-ponder to start exploring ideas` |
+| Wave plan written, milestone prepared | `**Next:** /sdlc-run-wave <slug>` |
+| Blockers remain after fixes | `**Next:** Resolve the blockers above, then re-run /sdlc-prepare <slug>` |
+| All features already done (verifying) | `**Next:** /sdlc-milestone-uat <slug>` |
+| Project idle (no active milestone) | `**Next:** /sdlc-ponder to start exploring ideas` |
 "#;
 
 // ---------------------------------------------------------------------------
@@ -3939,18 +4206,20 @@ Always end with a single `**Next:**` line:
 
 const SDLC_PREPARE_PLAYBOOK: &str = r#"# sdlc-prepare
 
-Use this playbook to survey a milestone and organize features into parallelizable execution waves.
+Pre-flight a milestone: align features with vision, fix gaps, write wave plan, mark prepared.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
-1. Run `sdlc project prepare --json` (add `--milestone <slug>` if a slug was provided).
-2. Parse JSON: `project_phase`, `gaps`, `waves`, `blocked`, `next_commands`.
-3. Present: phase/progress → gaps (blockers first) → wave plan → blocked → next steps.
-4. If blocker gaps exist, fix them (write descriptions, fix dep refs, break cycles).
-5. Suggest Wave 1 commands: `/sdlc-run <slug>` for each Wave 1 feature.
-6. If verifying: suggest `/sdlc-milestone-uat`. If idle: suggest `/sdlc-ponder`.
+1. Resolve slug from arguments; if missing, run `sdlc project prepare --json` and read `milestone_slug`.
+2. Read product vision from `docs/vision.md`, `CLAUDE.md` §Project, and `README.md`.
+3. Run `sdlc milestone info <slug> --json`. For each feature: `sdlc feature show <slug> --json` and read spec/design/tasks.md if present.
+4. Fix structural gaps: missing descriptions (`sdlc feature update`), broken deps, vague tasks (`sdlc task update`), out-of-scope features (`sdlc feature archive`).
+5. Run `sdlc project prepare --milestone <slug> --json`. Write `.sdlc/milestones/<slug>/wave_plan.yaml` from the `waves` array.
+6. Run `sdlc milestone mark-prepared <slug>`.
+7. Report: vision anchor, fixes applied, wave plan summary, any remaining blockers.
+8. End: `**Next:** /sdlc-run-wave <slug>` (or `fix blockers then /sdlc-prepare` if blockers remain).
 "#;
 
 // ---------------------------------------------------------------------------
@@ -3959,20 +4228,1924 @@ Use this playbook to survey a milestone and organize features into parallelizabl
 
 const SDLC_PREPARE_SKILL: &str = r#"---
 name: sdlc-prepare
-description: Survey a milestone — find gaps, organize features into parallelizable execution waves. Use when starting work on a milestone or after completing a feature.
+description: Pre-flight a milestone — align features with vision, fix gaps, write wave plan, mark prepared. Use before executing a milestone.
 ---
 
 # SDLC Prepare Skill
 
-Use this skill to survey a milestone and organize features into parallelizable execution waves.
+Pre-flight a milestone end-to-end and mark it ready for parallel execution.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
-1. Run `sdlc project prepare --json` (add `--milestone <slug>` if provided).
-2. Report: phase/progress, gaps (blockers first), wave plan, blocked features.
-3. Fix any blocker gaps (missing descriptions, broken deps, cycles).
-4. Present Wave 1 `/sdlc-run` commands.
-5. If verifying: suggest `/sdlc-milestone-uat`. If idle: suggest `/sdlc-ponder`.
+1. Resolve slug; if missing run `sdlc project prepare --json` to find active milestone.
+2. Read vision from `docs/vision.md`, `CLAUDE.md`, `README.md`.
+3. Audit each feature: `sdlc feature show <slug> --json` + read artifacts. Fix descriptions, tasks, deps.
+4. Run `sdlc project prepare --milestone <slug> --json`. Write `.sdlc/milestones/<slug>/wave_plan.yaml`.
+5. Run `sdlc milestone mark-prepared <slug>`.
+6. End: `**Next:** /sdlc-run-wave <slug>`.
 "#;
+
+// ---------------------------------------------------------------------------
+// sdlc-run-wave — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_RUN_WAVE_COMMAND: &str = r#"---
+description: Execute Wave 1 features in parallel, then advance to the next wave
+argument-hint: <milestone-slug>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
+---
+
+# sdlc-run-wave
+
+Execute the current wave of a milestone in parallel, then re-run prepare to advance to the next wave.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Resolve the milestone slug
+
+Use `$ARGUMENTS` as the slug. If none provided, run:
+```bash
+sdlc project prepare --json
+```
+and read `milestone_slug` from the output.
+
+### 2. Check for wave plan
+
+Read `.sdlc/milestones/<slug>/wave_plan.yaml`. If missing, stop and tell the user:
+
+> Wave plan not found. Run `/sdlc-prepare <slug>` first to generate it.
+
+### 3. Get the authoritative current wave
+
+Re-run prepare to get live state — this is always authoritative:
+```bash
+sdlc project prepare --milestone <slug> --json
+```
+
+Wave 1 of the prepare output is the current wave (features not yet done). The wave_plan.yaml is the structural record; prepare output is the live state.
+
+### 4. Summarize the wave
+
+Print:
+- Wave number and label
+- Feature count
+- For each feature: slug, phase, next action
+- Whether any features need worktrees (`needs_worktrees` flag)
+
+### 5. Handle worktree features
+
+If any Wave 1 features have `needs_worktrees: true`, print a notice for each:
+
+> **Manual step required:** Feature `<slug>` needs a dedicated worktree.
+> Run in a separate terminal: `/sdlc-run <slug>`
+
+Skip these features from the parallel batch.
+
+### 6. Execute remaining Wave 1 features in parallel
+
+For each remaining feature in Wave 1, spawn a parallel Agent call running `/sdlc-run <feature-slug>`.
+
+Use the Agent tool with multiple concurrent calls — one per feature. Do not run them sequentially.
+
+Wait for all agents to complete.
+
+### 7. Advance to next wave
+
+After all Wave 1 agents complete, re-run:
+```bash
+sdlc project prepare --milestone <slug> --json
+```
+
+### 8. Next
+
+Always end with exactly one `**Next:**` line:
+
+| Outcome | Next |
+|---|---|
+| More waves remain | `**Next:** /sdlc-run-wave <slug>` |
+| All features done (milestone verifying) | `**Next:** /sdlc-milestone-uat <slug>` |
+| Blockers surfaced | `**Next:** Resolve blockers listed above, then /sdlc-run-wave <slug>` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-run-wave — Playbook (Gemini / OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_RUN_WAVE_PLAYBOOK: &str = r#"# sdlc-run-wave
+
+Execute the current wave of a milestone in parallel, then advance to the next wave.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Resolve slug from arguments; if missing, run `sdlc project prepare --json` and read `milestone_slug`.
+2. Read `.sdlc/milestones/<slug>/wave_plan.yaml` — if missing, tell user to run `/sdlc-prepare <slug>` first.
+3. Run `sdlc project prepare --milestone <slug> --json` — Wave 1 of this output is the authoritative current wave.
+4. For features with `needs_worktrees: true`: print manual step instructions; skip from parallel batch.
+5. Execute remaining Wave 1 features in parallel (spawn concurrent `/sdlc-run <slug>` calls).
+6. After all complete, re-run `sdlc project prepare --milestone <slug> --json`.
+7. End: `**Next:** /sdlc-run-wave <slug>` (more waves) or `**Next:** /sdlc-milestone-uat <slug>` (all done).
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-run-wave — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_RUN_WAVE_SKILL: &str = r#"---
+name: sdlc-run-wave
+description: Execute Wave 1 features of a milestone in parallel, then advance to the next wave. Use after /sdlc-prepare.
+---
+
+# SDLC Run-Wave Skill
+
+Execute the current milestone wave in parallel and advance.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Resolve slug; if missing run `sdlc project prepare --json` to find active milestone.
+2. Check `.sdlc/milestones/<slug>/wave_plan.yaml` exists — if not, tell user to run `/sdlc-prepare <slug>`.
+3. Run `sdlc project prepare --milestone <slug> --json`. Wave 1 is the current wave.
+4. Skip features needing worktrees (print manual instructions). Execute the rest in parallel via `/sdlc-run <slug>`.
+5. After all complete, re-run prepare. End: `**Next:** /sdlc-run-wave <slug>` or `/sdlc-milestone-uat <slug>`.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-run — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_RUN_COMMAND: &str = r#"---
+description: Run an SDLC tool and act on the JSON result
+argument-hint: <tool-name> [args]
+allowed-tools: Bash, Read
+---
+
+# sdlc-tool-run
+
+Run an installed SDLC tool and act on the JSON result.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §7 "SDLC Tool Suite". <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Check available tools
+
+```bash
+cat .sdlc/tools/tools.md
+```
+
+### 2. Run the tool
+
+Use `$ARGUMENTS` as `<tool-name>` (and any extra args):
+
+```bash
+# Simple question
+sdlc tool run <name> --question "..."
+
+# Scoped run
+sdlc tool run <name> --scope "..."
+
+# Complex JSON input
+sdlc tool run <name> --json '{"key": "val"}'
+```
+
+### 3. Parse and act on the result
+
+The tool outputs `{ ok, data, error?, duration_ms }`.
+
+- If `ok: false` — explain the error and suggest a fix
+- If `ok: true` — describe the findings and recommend next steps based on the data
+
+**Next:** `/sdlc-tool-audit <name>` if the tool output reveals quality issues
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-build — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_BUILD_COMMAND: &str = r#"---
+description: Scaffold and implement a new SDLC tool
+argument-hint: <name> "<description>"
+allowed-tools: Bash, Read, Write, Edit
+---
+
+# sdlc-tool-build
+
+Scaffold and implement a new SDLC tool end-to-end.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §7 "SDLC Tool Suite". <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Read an existing tool for reference
+
+```bash
+cat .sdlc/tools/ama/tool.ts
+```
+
+### 2. Scaffold the new tool
+
+Use `$ARGUMENTS` as `<name> "<description>"`:
+
+```bash
+sdlc tool scaffold <name> "<description>"
+```
+
+This creates `.sdlc/tools/<name>/tool.ts`, `config.yaml`, and `README.md`.
+
+### 3. Fill in the metadata
+
+Open `tool.ts` and update the `meta` object:
+- `name` — matches directory name exactly
+- `display_name` — human-readable title
+- `description` — one sentence, no trailing period
+- `version` — semver (start at `"0.1.0"`)
+- `input_schema` — JSON Schema for `--run` input
+- `output_schema` — JSON Schema for `data` field in result
+
+### 4. Implement `run()`
+
+Implement the `run()` async function:
+- Accept typed input matching `input_schema`
+- Return `ToolResult<YourOutputType>`
+- Return `{ ok: false, error: "..." }` on any error (never throw)
+- Log progress to stderr via `makeLogger`
+
+### 5. Add `--setup` mode (if needed)
+
+Only add setup if the tool requires one-time initialization (e.g., building an index).
+Skip this step for tools that are always ready.
+
+### 6. Write README.md
+
+Update `.sdlc/tools/<name>/README.md` with:
+- One-sentence description
+- Setup instructions (if applicable)
+- Usage examples with exact commands
+- How it works (1–3 sentences)
+
+### 7. Test `--meta` mode
+
+```bash
+bun run .sdlc/tools/<name>/tool.ts --meta | jq .
+```
+
+Verify all fields are present and correct.
+
+### 8. Test `--run` mode
+
+```bash
+echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .ok
+echo '{"key": "val"}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .
+```
+
+### 9. Test via CLI wrapper
+
+```bash
+sdlc tool run <name>
+sdlc tool run <name> --json '{"key": "val"}'
+```
+
+### 10. Sync tools.md
+
+```bash
+sdlc tool sync
+```
+
+### 11. Commit
+
+Stage and commit the new tool files.
+
+**Next:** `/sdlc-tool-audit <name>`
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-audit — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_AUDIT_COMMAND: &str = r#"---
+description: Audit an SDLC tool against the full quality contract
+argument-hint: <tool-name>
+allowed-tools: Bash, Read
+---
+
+# sdlc-tool-audit
+
+Audit an SDLC tool against the full quality contract.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §7 "SDLC Tool Suite". <!-- sdlc:guidance -->
+
+Use `$ARGUMENTS` as `<tool-name>`.
+
+## Checklist
+
+Read `.sdlc/tools/<name>/tool.ts` and verify each item. Mark ✓ or ✗.
+
+### Metadata (5 checks)
+
+- [ ] `name` matches the directory name exactly (e.g. `"quality-check"` in `quality-check/`)
+- [ ] `display_name` is human-readable and title-cased
+- [ ] `description` is one sentence, present tense, no trailing period
+- [ ] `version` is valid semver (e.g. `"0.1.0"`)
+- [ ] `input_schema` and `output_schema` are defined
+
+### Protocol (4 checks)
+
+- [ ] `--meta` mode: exits 0 and outputs valid `ToolMeta` JSON
+- [ ] `--run` mode: reads JSON from stdin before doing any work
+- [ ] `--run` mode: exits 1 when `ok: false`
+- [ ] `--setup` mode: handled gracefully (or explicitly absent with a comment)
+
+### Error handling (4 checks)
+
+- [ ] Errors return `{ ok: false, error: "..." }` — never throw unhandled exceptions
+- [ ] All `catch` branches log the error and return an error result
+- [ ] No bare `process.exit()` calls in library functions (only in the CLI entrypoint)
+- [ ] All log output goes to stderr, not stdout
+
+### Logging (2 checks)
+
+- [ ] Uses `makeLogger` from `_shared/log.ts`
+- [ ] No `console.log()` calls for logs (only `console.error()` via logger)
+
+### Documentation (3 checks)
+
+- [ ] `README.md` exists and has Usage section
+- [ ] `README.md` has Setup section (or "Setup required: No" note)
+- [ ] Instruction header in `tool.ts` has WHAT IT DOES, WHAT IT READS, WHAT IT WRITES, EXTENDING
+
+## Commands
+
+```bash
+# Read the tool
+cat .sdlc/tools/<name>/tool.ts
+
+# Test --meta mode
+bun run .sdlc/tools/<name>/tool.ts --meta | jq .
+
+# Verify exit code
+echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run; echo "exit: $?"
+```
+
+**Next:** `/sdlc-tool-uat <name>` after all checks pass
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-uat — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_UAT_COMMAND: &str = r#"---
+description: Run UAT scenarios for an SDLC tool
+argument-hint: <tool-name>
+allowed-tools: Bash
+---
+
+# sdlc-tool-uat
+
+Run UAT scenarios for an SDLC tool.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §7 "SDLC Tool Suite". <!-- sdlc:guidance -->
+
+Use `$ARGUMENTS` as `<tool-name>`.
+
+## Scenarios
+
+Run each scenario and record the verdict (PASS / FAIL / SKIP).
+
+### 1. Metadata
+
+```bash
+bun run .sdlc/tools/<name>/tool.ts --meta | jq .
+```
+
+Verify: `name`, `display_name`, `description`, `version`, `input_schema`, `output_schema` all present.
+
+### 2. Happy path
+
+```bash
+echo '{"question":"test"}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .ok
+```
+
+Expected: `true`
+
+### 3. Empty input (optional fields)
+
+```bash
+echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .ok
+```
+
+Expected: `true` — tools must handle missing optional inputs gracefully.
+
+### 4. CLI wrapper
+
+```bash
+sdlc tool run <name> --question "test"
+```
+
+Expected: JSON output on stdout, exit 0.
+
+### 5. Error path
+
+Supply invalid or missing required input and verify the tool returns an error result:
+
+```bash
+echo '{"invalid_key": true}' | bun run .sdlc/tools/<name>/tool.ts --run | jq '{ok, error}'
+```
+
+Expected: `{ "ok": false, "error": "..." }` (not a crash).
+
+### 6. Logging format
+
+```bash
+echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run 2>&1 >/dev/null | head -5
+```
+
+Expected: lines match `[sdlc-tool:<name>] (INFO|WARN|ERROR|DEBUG):`.
+
+### 7. Discovery
+
+```bash
+sdlc tool list
+```
+
+Expected: `<name>` appears in the output.
+
+**Next:** `sdlc tool sync` to regenerate `tools.md`
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-run — Gemini playbook + Agents skill
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_RUN_PLAYBOOK: &str = r#"# sdlc-tool-run
+
+Run an installed SDLC tool and act on its JSON result.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Check available tools: `cat .sdlc/tools/tools.md`
+2. Run the tool using `$ARGUMENTS` as `<tool-name>` (plus any extra args):
+   - Simple question: `sdlc tool run <name> --question "..."`
+   - Scoped run: `sdlc tool run <name> --scope "..."`
+   - Complex input: `sdlc tool run <name> --input '{"key":"val"}'`
+3. Parse the JSON result `{ ok, data, error?, duration_ms }`.
+4. If `ok: false` — explain the error and suggest a fix.
+   If `ok: true` — describe the findings and recommend next steps.
+
+**Next:** `/sdlc-tool-audit <name>` if the tool output reveals quality issues
+"#;
+
+const SDLC_TOOL_RUN_SKILL: &str = r#"---
+name: sdlc-tool-run
+description: Run an installed SDLC tool and act on its JSON result. Use when an agent needs to invoke a tool and interpret the output.
+---
+
+# SDLC Tool-Run Skill
+
+Run an SDLC tool and act on the result.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Check available tools: `cat .sdlc/tools/tools.md`
+2. Run: `sdlc tool run <name> --question "..."` (or `--scope` / `--input` for complex input).
+3. Parse `{ ok, data, error?, duration_ms }`.
+4. `ok: false` → explain error. `ok: true` → act on findings.
+5. End: `**Next:** /sdlc-tool-audit <name>` if issues found.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-build — Gemini playbook + Agents skill
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_BUILD_PLAYBOOK: &str = r#"# sdlc-tool-build
+
+Scaffold and implement a new SDLC tool end-to-end.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Read `cat .sdlc/tools/ama/tool.ts` as the reference implementation.
+2. Scaffold: `sdlc tool scaffold <name> "<description>"`
+3. Open `.sdlc/tools/<name>/tool.ts` and fill the `--meta` mode (ToolMeta object).
+4. Implement the `--run` mode: read JSON from stdin, do work, write `ToolResult` to stdout.
+5. Handle `--setup` mode if the tool needs one-time setup; otherwise add a comment skipping it.
+6. Write `README.md` with Usage and Setup sections.
+7. Test `--meta`: `bun run .sdlc/tools/<name>/tool.ts --meta | jq .`
+8. Test `--run` happy path: `echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .ok`
+9. Run `/sdlc-tool-audit <name>` to check the full quality contract.
+10. Run `/sdlc-tool-uat <name>` to verify all 7 scenarios.
+11. Sync discovery: `sdlc tool sync`
+12. Commit all changes.
+
+**Next:** `/sdlc-tool-audit <name>`
+"#;
+
+const SDLC_TOOL_BUILD_SKILL: &str = r#"---
+name: sdlc-tool-build
+description: Scaffold and implement a new SDLC tool end-to-end. Use when building a new tool from scratch.
+---
+
+# SDLC Tool-Build Skill
+
+Scaffold, implement, and ship a new SDLC tool.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Read `ama/tool.ts` as a reference implementation.
+2. `sdlc tool scaffold <name> "<description>"` to create the skeleton.
+3. Fill `--meta` mode (ToolMeta), `--run` mode (stdin → ToolResult), and `--setup` if needed.
+4. Write `README.md` with Usage + Setup sections.
+5. Test: `--meta` then `--run` happy path.
+6. Audit: `/sdlc-tool-audit <name>` then UAT: `/sdlc-tool-uat <name>`.
+7. `sdlc tool sync` and commit.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-audit — Gemini playbook + Agents skill
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_AUDIT_PLAYBOOK: &str = r#"# sdlc-tool-audit
+
+Audit an SDLC tool against the full quality contract (18-item checklist).
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Checklist
+
+Read `.sdlc/tools/<name>/tool.ts` and mark ✓ or ✗ for each item.
+
+### Metadata (5)
+- [ ] `name` matches the directory name exactly
+- [ ] `display_name` is human-readable and title-cased
+- [ ] `description` is one sentence, present tense, no trailing period
+- [ ] `version` is valid semver (e.g. `"0.1.0"`)
+- [ ] `input_schema` and `output_schema` are defined
+
+### Protocol (4)
+- [ ] `--meta` mode: exits 0 and outputs valid ToolMeta JSON
+- [ ] `--run` mode: reads JSON from stdin before doing any work
+- [ ] `--run` mode: exits 1 when `ok: false`
+- [ ] `--setup` mode: handled gracefully (or explicitly absent with a comment)
+
+### Error handling (4)
+- [ ] Errors return `{ ok: false, error: "..." }` — never throw unhandled exceptions
+- [ ] All `catch` branches log the error and return an error result
+- [ ] No bare `process.exit()` calls in library functions (only in CLI entrypoint)
+- [ ] All log output goes to stderr, not stdout
+
+### Logging (2)
+- [ ] Uses `makeLogger` from `_shared/log.ts`
+- [ ] No `console.log()` calls for logs (only `console.error()` via logger)
+
+### Documentation (3)
+- [ ] `README.md` exists and has Usage section
+- [ ] `README.md` has Setup section (or "Setup required: No" note)
+- [ ] Instruction header in `tool.ts` has WHAT IT DOES, WHAT IT READS, WHAT IT WRITES, EXTENDING
+
+**Next:** `/sdlc-tool-uat <name>` after all 18 checks pass
+"#;
+
+const SDLC_TOOL_AUDIT_SKILL: &str = r#"---
+name: sdlc-tool-audit
+description: Audit an SDLC tool against the full quality contract (18-item checklist). Use when verifying tool correctness before shipping.
+---
+
+# SDLC Tool-Audit Skill
+
+Audit an SDLC tool against 18 quality checks in 5 categories.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Read `.sdlc/tools/<name>/tool.ts`.
+2. Check all 18 items: Metadata (5), Protocol (4), Error handling (4), Logging (2), Documentation (3).
+3. Mark ✓/✗ for each. Report failing items with suggested fixes.
+4. End: `**Next:** /sdlc-tool-uat <name>` when all pass.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-tool-uat — Gemini playbook + Agents skill
+// ---------------------------------------------------------------------------
+
+const SDLC_TOOL_UAT_PLAYBOOK: &str = r#"# sdlc-tool-uat
+
+Run UAT scenarios for an SDLC tool. Record PASS / FAIL / SKIP for each.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Scenarios
+
+Use `$ARGUMENTS` as `<name>`.
+
+### 1. Metadata
+`bun run .sdlc/tools/<name>/tool.ts --meta | jq .`
+Verify: `name`, `display_name`, `description`, `version`, `input_schema`, `output_schema` all present.
+
+### 2. Happy path
+`echo '{"question":"test"}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .ok`
+Expected: `true`
+
+### 3. Empty input (optional fields)
+`echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run | jq .ok`
+Expected: `true` — tools must handle missing optional inputs gracefully.
+
+### 4. CLI wrapper
+`sdlc tool run <name> --question "test"`
+Expected: JSON output on stdout, exit 0.
+
+### 5. Error path
+`echo '{"invalid_key": true}' | bun run .sdlc/tools/<name>/tool.ts --run | jq '{ok, error}'`
+Expected: `{ "ok": false, "error": "..." }` (not a crash).
+
+### 6. Logging format
+`echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run 2>&1 >/dev/null | head -5`
+Expected: lines match `[sdlc-tool:<name>] (INFO|WARN|ERROR|DEBUG):`.
+
+### 7. Discovery
+`sdlc tool list`
+Expected: `<name>` appears in the output.
+
+**Next:** `sdlc tool sync` to regenerate `tools.md`
+"#;
+
+const SDLC_TOOL_UAT_SKILL: &str = r#"---
+name: sdlc-tool-uat
+description: Run 7 UAT scenarios for an SDLC tool and record PASS/FAIL/SKIP. Use when validating a tool before shipping.
+---
+
+# SDLC Tool-UAT Skill
+
+Run 7 UAT scenarios for an SDLC tool.
+
+> Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
+
+## Workflow
+
+Record PASS / FAIL / SKIP for each scenario:
+1. `--meta` — all required fields present
+2. Happy path `--run` — `ok: true`
+3. Empty input — `ok: true` (optional fields handled)
+4. CLI wrapper `sdlc tool run` — JSON out, exit 0
+5. Error path — `ok: false` with error message (no crash)
+6. Logging format — lines match `[sdlc-tool:<name>] LEVEL:`
+7. Discovery — `sdlc tool list` shows the tool
+
+End: `**Next:** sdlc tool sync` if all pass.
+"#;
+
+// ---------------------------------------------------------------------------
+// Tool Suite TypeScript content
+//
+// These are the TypeScript files installed into `.sdlc/tools/` by `sdlc init`
+// and `sdlc update`. Shared files (_shared/) are always overwritten (managed
+// content). Per-tool config.yaml and README.md are written-if-missing
+// (user-editable). Per-tool tool.ts is always overwritten (managed content).
+// ---------------------------------------------------------------------------
+
+/// Shared TypeScript contract — every tool imports from this file.
+/// STDOUT is reserved for JSON; all logs go to STDERR.
+const TOOL_SHARED_TYPES_TS: &str = r#"/**
+ * SDLC Tool Shared Interface
+ *
+ * Every SDLC tool imports from this file. It defines the full type contract
+ * that tools must satisfy. Do not change the shape of these types without
+ * updating all core tools and regenerating tools.md.
+ *
+ * Tool protocol (stdin/stdout):
+ * - --meta   No stdin. Writes ToolMeta JSON to stdout.
+ * - --run    Reads JSON from stdin. Writes ToolResult JSON to stdout. Exit 0 ok, 1 error.
+ * - --setup  No stdin. Writes ToolResult JSON to stdout. Exit 0 ok, 1 error.
+ *
+ * All log output goes to STDERR. STDOUT is reserved for JSON only.
+ */
+
+/** Metadata describing a tool — returned by --meta mode. */
+export interface ToolMeta {
+  /** Matches the directory name exactly (e.g. "ama", "quality-check") */
+  name: string
+  /** Human-readable title shown in the tools list */
+  display_name: string
+  /** One sentence, present tense, no trailing period */
+  description: string
+  /** Semver, mirrors sdlc binary version at install time */
+  version: string
+  /** JSON Schema describing valid input for --run */
+  input_schema: JsonSchema
+  /** JSON Schema describing the data field in ToolResult */
+  output_schema: JsonSchema
+  /** True if --setup must run before first --run */
+  requires_setup: boolean
+  /** One sentence describing what setup does (required if requires_setup = true) */
+  setup_description?: string
+}
+
+/** The result envelope returned by --run and --setup modes. */
+export interface ToolResult<T = unknown> {
+  ok: boolean
+  data?: T
+  /** Present only when ok = false */
+  error?: string
+  /** Wall-clock milliseconds for the operation */
+  duration_ms?: number
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type JsonSchema = Record<string, any>
+"#;
+
+/// Standard SDLC Tool Logger — writes structured lines to STDERR.
+const TOOL_SHARED_LOG_TS: &str = r#"/**
+ * Standard SDLC Tool Logger
+ *
+ * Writes structured log lines to STDERR (never stdout — stdout is reserved
+ * for JSON output). Use this in every tool to produce consistent, parseable logs.
+ *
+ * Format: [sdlc-tool:<name>] LEVEL: message
+ * Example: [sdlc-tool:ama] INFO:  Indexed 312 files in 842ms
+ *
+ * Set SDLC_TOOL_DEBUG=1 to enable debug-level output.
+ */
+
+export function makeLogger(toolName: string) {
+  const prefix = `[sdlc-tool:${toolName}]`
+  return {
+    info:  (msg: string) => console.error(`${prefix} INFO:  ${msg}`),
+    warn:  (msg: string) => console.error(`${prefix} WARN:  ${msg}`),
+    error: (msg: string) => console.error(`${prefix} ERROR: ${msg}`),
+    debug: (msg: string) => {
+      if (process.env.SDLC_TOOL_DEBUG) console.error(`${prefix} DEBUG: ${msg}`)
+    },
+  }
+}
+
+export type Logger = ReturnType<typeof makeLogger>
+"#;
+
+/// Config loader — reads .sdlc/tools/<name>/config.yaml with defaults fallback.
+const TOOL_SHARED_CONFIG_TS: &str = r#"/**
+ * SDLC Tool Config Loader
+ *
+ * Reads .sdlc/tools/<name>/config.yaml. If the file is missing or unparseable,
+ * returns the provided defaults — tools should never hard-fail on missing config.
+ *
+ * Supports flat key: value YAML only. Arrays and nested objects are intentionally
+ * not supported — keep tool configs simple scalars.
+ */
+import { readFileSync } from 'node:fs'
+import { join } from 'node:path'
+
+export function loadToolConfig<T extends Record<string, unknown>>(
+  root: string,
+  toolName: string,
+  defaults: T,
+): T {
+  const configPath = join(root, '.sdlc', 'tools', toolName, 'config.yaml')
+  try {
+    const raw = readFileSync(configPath, 'utf8')
+    const parsed = parseSimpleYaml(raw)
+    return { ...defaults, ...parsed } as T
+  } catch {
+    return defaults
+  }
+}
+
+/** Parse a flat key: value YAML file. Skips blank lines, comments, and array items. */
+function parseSimpleYaml(content: string): Record<string, unknown> {
+  const result: Record<string, unknown> = {}
+  for (const line of content.split('\n')) {
+    const trimmed = line.trim()
+    if (!trimmed || trimmed.startsWith('#') || trimmed.startsWith('-')) continue
+    const colonIdx = trimmed.indexOf(':')
+    if (colonIdx === -1) continue
+    const key = trimmed.slice(0, colonIdx).trim()
+    const rawValue = trimmed.slice(colonIdx + 1).trim()
+    if (!key || !rawValue) continue
+    const value = rawValue.replace(/^["'](.*)["']$/, '$1')
+    const num = Number(value)
+    result[key] = Number.isNaN(num) ? value : num
+  }
+  return result
+}
+"#;
+
+/// Cross-runtime helpers — normalizes argv, stdin, env, and exit for Bun/Deno/Node.
+const TOOL_SHARED_RUNTIME_TS: &str = r#"/**
+ * Cross-runtime helpers for Bun, Deno, and Node.
+ *
+ * Normalizes: argv access, stdin reading, env access, and process exit
+ * across the three supported runtimes.
+ *
+ * Detection: checks for globalThis.Deno to identify Deno; falls back
+ * to process (Node.js / Bun).
+ */
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+/** Returns command-line arguments after the script name (process.argv[2+]). */
+export function getArgs(): string[] {
+  if (typeof (globalThis as any).Deno !== 'undefined') {
+    return [...(globalThis as any).Deno.args]
+  }
+  return process.argv.slice(2)
+}
+
+/** Read all of stdin as a UTF-8 string. Returns empty string if stdin is a TTY or closed. */
+export async function readStdin(): Promise<string> {
+  if (typeof (globalThis as any).Deno !== 'undefined') {
+    const chunks: Uint8Array[] = []
+    const reader = (globalThis as any).Deno.stdin.readable.getReader()
+    try {
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        chunks.push(value)
+      }
+    } finally {
+      reader.releaseLock()
+    }
+    const total = chunks.reduce((sum: number, c: Uint8Array) => sum + c.length, 0)
+    const merged = new Uint8Array(total)
+    let offset = 0
+    for (const chunk of chunks) {
+      merged.set(chunk, offset)
+      offset += chunk.length
+    }
+    return new TextDecoder().decode(merged)
+  }
+  // Node.js / Bun
+  if ((process.stdin as any).isTTY) return ''
+  const chunks: Buffer[] = []
+  for await (const chunk of process.stdin) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+  }
+  return Buffer.concat(chunks).toString('utf8')
+}
+
+/** Get a process environment variable. Works across Bun, Deno, and Node. */
+export function getEnv(key: string): string | undefined {
+  if (typeof (globalThis as any).Deno !== 'undefined') {
+    return (globalThis as any).Deno.env.get(key)
+  }
+  return process.env[key]
+}
+
+/** Exit the process with the given code. */
+export function exit(code: number): never {
+  if (typeof (globalThis as any).Deno !== 'undefined') {
+    ;(globalThis as any).Deno.exit(code)
+  }
+  process.exit(code)
+  throw new Error('unreachable')
+}
+"#;
+
+/// AMA tool implementation — keyword-indexed codebase search.
+const TOOL_AMA_TS: &str = r#"/**
+ * AMA — Ask Me Anything
+ * =====================
+ * Answers questions about the codebase by searching a pre-built keyword index.
+ *
+ * WHAT IT DOES
+ * ------------
+ * --setup:  Walks all source files matching configured extensions. On first run,
+ *           indexes every file. On subsequent runs, skips unchanged files (mtime
+ *           check), re-indexes changed/new files, and prunes deleted files.
+ *           Writes chunks.json (TF-IDF index) and last_indexed.json (mtime map).
+ *           Re-running --setup is always safe (incremental or full).
+ *
+ * --run:    Reads JSON from stdin: { "question": "string" }
+ *           Loads the TF-IDF index, scores chunks by IDF-weighted keyword overlap,
+ *           returns top results as source excerpts with relevance scores.
+ *           Sources from files changed since last indexing are flagged stale.
+ *
+ * --meta:   Writes ToolMeta JSON to stdout. Used by `sdlc tool sync`.
+ *
+ * WHAT IT READS
+ * -------------
+ * - .sdlc/tools/ama/config.yaml                (extensions, chunk settings)
+ * - .sdlc/tools/ama/index/chunks.json          (built by --setup)
+ * - .sdlc/tools/ama/index/last_indexed.json    (mtime map; built by --setup)
+ * - Source files matching config.extensions    (during --setup only)
+ *
+ * WHAT IT WRITES
+ * --------------
+ * - .sdlc/tools/ama/index/chunks.json          (during --setup; TF-IDF index)
+ * - .sdlc/tools/ama/index/last_indexed.json    (during --setup; mtime map for incremental re-runs)
+ * - STDERR: structured log lines via _shared/log.ts
+ * - STDOUT: JSON only (ToolResult shape from _shared/types.ts)
+ *
+ * EXTENDING
+ * ---------
+ * Replace scoreChunks() with embedding-based cosine similarity to improve answer
+ * quality. The rest of the pipeline (chunking, index format, protocol) stays the same.
+ *
+ * For LLM synthesis: call the Claude API in run() with the top excerpts as context.
+ * Add "synthesis_model" to config.yaml to control which model is used.
+ */
+
+import type { ToolMeta, ToolResult } from '../_shared/types.ts'
+import { makeLogger } from '../_shared/log.ts'
+import { loadToolConfig } from '../_shared/config.ts'
+import { getArgs, readStdin, exit } from '../_shared/runtime.ts'
+import {
+  readdirSync, readFileSync, writeFileSync, mkdirSync, statSync, existsSync,
+} from 'node:fs'
+import { join, extname, relative } from 'node:path'
+
+const log = makeLogger('ama')
+
+// ---------------------------------------------------------------------------
+// Config
+// ---------------------------------------------------------------------------
+
+interface AmaConfig {
+  chunk_lines: number
+  chunk_overlap: number
+  max_results: number
+  max_file_kb: number
+  extensions: string
+}
+
+const DEFAULT_CONFIG: AmaConfig = {
+  chunk_lines: 40,
+  chunk_overlap: 5,
+  max_results: 5,
+  max_file_kb: 500,
+  extensions: '.ts,.js,.tsx,.jsx,.rs,.go,.py,.rb,.java,.md,.txt,.yaml,.yml,.toml',
+}
+
+// ---------------------------------------------------------------------------
+// Tool metadata
+// ---------------------------------------------------------------------------
+
+export const meta: ToolMeta = {
+  name: 'ama',
+  display_name: 'AMA — Ask Me Anything',
+  description: 'Answers questions about the codebase using a pre-built TF-IDF keyword index',
+  version: '0.2.1',
+  requires_setup: true,
+  setup_description: 'Indexes source files for keyword search (first run is full index; subsequent runs are incremental)',
+  input_schema: {
+    type: 'object',
+    required: ['question'],
+    properties: {
+      question: { type: 'string', description: 'The question to answer about the codebase' },
+    },
+  },
+  output_schema: {
+    type: 'object',
+    properties: {
+      sources: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            path: { type: 'string' },
+            lines: { type: 'array', items: { type: 'number' }, minItems: 2, maxItems: 2 },
+            excerpt: { type: 'string' },
+            score: { type: 'number', description: 'TF-IDF relevance score (0.0–1.0)' },
+            stale: { type: 'boolean', description: 'True if the source file changed since last index run' },
+          },
+        },
+      },
+    },
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Index types
+// ---------------------------------------------------------------------------
+
+interface Chunk {
+  path: string
+  start: number
+  end: number
+  tokens: string[]
+}
+
+interface Index {
+  version: number
+  generated: string
+  chunks: Chunk[]
+  idf: Record<string, number>
+}
+
+interface MtimeMap {
+  version: number
+  indexed_at: string
+  files: Record<string, number>
+}
+
+interface AmaSource {
+  path: string
+  lines: [number, number]
+  excerpt: string
+  score: number
+  stale?: boolean
+}
+
+interface AmaOutput {
+  sources: AmaSource[]
+}
+
+// ---------------------------------------------------------------------------
+// Setup — build the keyword index
+// ---------------------------------------------------------------------------
+
+export async function setup(root: string): Promise<ToolResult<{
+  files_indexed: number
+  files_skipped: number
+  files_pruned: number
+  chunks_written: number
+  total_chunks: number
+  duration_ms: number
+  index_size_kb: number
+}>> {
+  const start = Date.now()
+  const config = loadToolConfig(root, 'ama', DEFAULT_CONFIG)
+  const extensions = new Set(
+    String(config.extensions).split(',').map(e => e.trim()).filter(Boolean),
+  )
+
+  const indexDir = join(root, '.sdlc', 'tools', 'ama', 'index')
+  mkdirSync(indexDir, { recursive: true })
+
+  const chunksPath = join(indexDir, 'chunks.json')
+  const mtimePath = join(indexDir, 'last_indexed.json')
+
+  // Load previous index and mtime map for incremental re-indexing
+  let prevChunks: Chunk[] = []
+  let prevMtimes: Record<string, number> = {}
+  const isIncremental = existsSync(chunksPath) && existsSync(mtimePath)
+  if (isIncremental) {
+    try {
+      const prevIndex = JSON.parse(readFileSync(chunksPath, 'utf8')) as Index
+      prevChunks = prevIndex.chunks ?? []
+      const mtimeData = JSON.parse(readFileSync(mtimePath, 'utf8')) as MtimeMap
+      prevMtimes = mtimeData.files ?? {}
+      log.info(`incremental mode: ${prevChunks.length} existing chunks, ${Object.keys(prevMtimes).length} tracked files`)
+    } catch {
+      log.warn('could not load previous index — falling back to full re-index')
+      prevChunks = []
+      prevMtimes = {}
+    }
+  } else {
+    log.info('full index mode (no previous index found)')
+  }
+
+  log.info(`indexing with extensions: ${[...extensions].join(', ')}`)
+
+  const allFiles = walkFiles(root, extensions, Number(config.max_file_kb))
+  log.info(`found ${allFiles.length} files to consider`)
+
+  // Group previous chunks by file for efficient lookup
+  const prevChunksByFile = new Map<string, Chunk[]>()
+  for (const chunk of prevChunks) {
+    const arr = prevChunksByFile.get(chunk.path) ?? []
+    arr.push(chunk)
+    prevChunksByFile.set(chunk.path, arr)
+  }
+
+  const newMtimes: Record<string, number> = {}
+  const unchangedChunks: Chunk[] = []
+  const freshChunks: Chunk[] = []
+  let filesSkipped = 0
+  let filesIndexed = 0
+
+  for (const filePath of allFiles) {
+    const relPath = relative(root, filePath)
+    const mtime = statSync(filePath).mtimeMs
+    if (isIncremental && prevMtimes[relPath] === mtime) {
+      unchangedChunks.push(...(prevChunksByFile.get(relPath) ?? []))
+      newMtimes[relPath] = mtime
+      filesSkipped++
+    } else {
+      try {
+        const content = readFileSync(filePath, 'utf8')
+        const fileChunks = chunkFile(relPath, content, Number(config.chunk_lines), Number(config.chunk_overlap))
+        freshChunks.push(...fileChunks)
+        newMtimes[relPath] = mtime
+        filesIndexed++
+      } catch (e) {
+        log.warn(`skipping ${relPath}: ${e}`)
+      }
+    }
+  }
+
+  // Count pruned files (tracked before but no longer on disk)
+  const currentPaths = new Set(allFiles.map(f => relative(root, f)))
+  const filesPruned = Object.keys(prevMtimes).filter(p => !currentPaths.has(p)).length
+  if (filesPruned > 0) log.info(`pruned ${filesPruned} deleted/moved file(s) from index`)
+
+  const allChunks = [...unchangedChunks, ...freshChunks]
+  log.info(`${filesIndexed} indexed, ${filesSkipped} skipped, ${filesPruned} pruned — ${allChunks.length} total chunks`)
+
+  // Compute smoothed IDF: log((N+1)/(df+1)) + 1 for each term
+  const N = allChunks.length
+  const df: Record<string, number> = {}
+  for (const chunk of allChunks) {
+    for (const token of chunk.tokens) {
+      df[token] = (df[token] ?? 0) + 1
+    }
+  }
+  const idf: Record<string, number> = {}
+  for (const [term, freq] of Object.entries(df)) {
+    idf[term] = Math.log((N + 1) / (freq + 1)) + 1
+  }
+
+  // Write index and mtime map
+  const index: Index = { version: 2, generated: new Date().toISOString(), chunks: allChunks, idf }
+  const indexJson = JSON.stringify(index)
+  writeFileSync(chunksPath, indexJson)
+
+  const mtimeMap: MtimeMap = { version: 1, indexed_at: new Date().toISOString(), files: newMtimes }
+  writeFileSync(mtimePath, JSON.stringify(mtimeMap))
+
+  const duration_ms = Date.now() - start
+  const index_size_kb = Math.round(indexJson.length / 1024)
+  log.info(`done in ${duration_ms}ms — index size: ${index_size_kb}KB`)
+
+  return {
+    ok: true,
+    data: {
+      files_indexed: filesIndexed,
+      files_skipped: filesSkipped,
+      files_pruned: filesPruned,
+      chunks_written: freshChunks.length,
+      total_chunks: allChunks.length,
+      duration_ms,
+      index_size_kb,
+    },
+    duration_ms,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Run — answer a question using the index
+// ---------------------------------------------------------------------------
+
+export async function run(
+  input: { question?: string },
+  root: string,
+): Promise<ToolResult<AmaOutput>> {
+  const start = Date.now()
+  const config = loadToolConfig(root, 'ama', DEFAULT_CONFIG)
+
+  const question = input.question?.trim()
+  if (!question) {
+    return { ok: false, error: 'input.question is required' }
+  }
+
+  const indexPath = join(root, '.sdlc', 'tools', 'ama', 'index', 'chunks.json')
+  if (!existsSync(indexPath)) {
+    return {
+      ok: false,
+      error: 'Index not built. Run setup first: sdlc tool run ama --setup',
+    }
+  }
+
+  let index: Index
+  try {
+    index = JSON.parse(readFileSync(indexPath, 'utf8')) as Index
+  } catch (e) {
+    return { ok: false, error: `Failed to load index: ${e}. Re-run: sdlc tool run ama --setup` }
+  }
+
+  // Load mtime map for stale source detection (non-fatal if absent)
+  let mtimes: Record<string, number> = {}
+  try {
+    const mtimePath = join(root, '.sdlc', 'tools', 'ama', 'index', 'last_indexed.json')
+    if (existsSync(mtimePath)) {
+      mtimes = (JSON.parse(readFileSync(mtimePath, 'utf8')) as MtimeMap).files ?? {}
+    }
+  } catch { /* stale detection skipped */ }
+
+  log.info(`scoring ${index.chunks.length} chunks for: "${question}"`)
+
+  // idf falls back gracefully to 1.0 weights for v1 indexes without IDF
+  const idf = index.idf ?? {}
+  const topChunks = scoreChunks(question, index.chunks, idf).slice(0, Number(config.max_results))
+
+  const sources: AmaSource[] = []
+  for (const { chunk, score } of topChunks) {
+    const fullPath = join(root, chunk.path)
+    try {
+      const lines = readFileSync(fullPath, 'utf8').split('\n')
+      const excerpt = lines.slice(chunk.start - 1, chunk.end).join('\n')
+
+      // Stale detection: flag if file changed since last index run
+      let stale = false
+      try {
+        if (mtimes[chunk.path] !== undefined && statSync(fullPath).mtimeMs !== mtimes[chunk.path]) {
+          stale = true
+          log.warn(`stale source: ${chunk.path} changed since last index run`)
+        }
+      } catch { /* file may not exist — handled above */ }
+
+      const source: AmaSource = { path: chunk.path, lines: [chunk.start, chunk.end], excerpt, score }
+      if (stale) source.stale = true
+      sources.push(source)
+    } catch {
+      log.warn(`skipping deleted/moved file: ${chunk.path}`)
+    }
+  }
+
+  const duration_ms = Date.now() - start
+  log.info(`returned ${sources.length} sources in ${duration_ms}ms`)
+
+  return { ok: true, data: { sources }, duration_ms }
+}
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
+
+const SKIP_DIRS = new Set([
+  'node_modules', '.git', 'target', 'dist', 'build', '.sdlc',
+  '.next', '__pycache__', '.cache', 'coverage',
+])
+
+function walkFiles(root: string, extensions: Set<string>, maxFileKb: number): string[] {
+  const results: string[] = []
+
+  function walk(dir: string) {
+    let entries: ReturnType<typeof readdirSync>
+    try {
+      entries = readdirSync(dir, { withFileTypes: true })
+    } catch {
+      return
+    }
+    for (const entry of entries) {
+      if (entry.name.startsWith('.')) continue
+      const full = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        if (!SKIP_DIRS.has(entry.name)) walk(full)
+      } else if (entry.isFile()) {
+        if (!extensions.has(extname(entry.name))) continue
+        try {
+          if (statSync(full).size > maxFileKb * 1024) {
+            log.warn(`skipping large file (${Math.round(statSync(full).size / 1024)}KB): ${relative(root, full)}`)
+            continue
+          }
+        } catch {
+          continue
+        }
+        results.push(full)
+      }
+    }
+  }
+
+  walk(root)
+  return results
+}
+
+function chunkFile(
+  relPath: string,
+  content: string,
+  chunkLines: number,
+  overlap: number,
+): Chunk[] {
+  const lines = content.split('\n')
+  const chunks: Chunk[] = []
+  const step = Math.max(1, chunkLines - overlap)
+
+  for (let i = 0; i < lines.length; i += step) {
+    const start = i + 1 // 1-based line numbers
+    const end = Math.min(i + chunkLines, lines.length)
+    const tokens = extractTokens(lines.slice(i, end).join(' '))
+    if (tokens.length > 0) {
+      chunks.push({ path: relPath, start, end, tokens })
+    }
+    if (end >= lines.length) break
+  }
+
+  return chunks
+}
+
+/**
+ * Extract lowercase tokens from text, splitting on camelCase and snake_case
+ * boundaries to enable code-aware search. Words < 4 chars are omitted as noise.
+ *
+ * Examples:
+ *   featureTransition → ['feature', 'transition']
+ *   SdlcError         → ['sdlc', 'error']
+ *   auth_token        → ['auth', 'token']
+ *   authenticate      → ['authenticate']
+ */
+function extractTokens(text: string): string[] {
+  // Split on camelCase and acronym boundaries before lowercasing
+  const expanded = text
+    .replace(/([a-z])([A-Z])/g, '$1 $2')        // camelCase → camel Case
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')  // XMLParser → XML Parser
+  const seen = new Set<string>()
+  const tokens: string[] = []
+  for (const word of expanded.toLowerCase().split(/[^a-z0-9]+/)) {
+    if (word.length >= 3 && !seen.has(word)) {
+      seen.add(word)
+      tokens.push(word)
+    }
+  }
+  return tokens
+}
+
+/**
+ * Score chunks using TF-IDF weighted overlap.
+ * IDF is precomputed at index time (stored in chunks.json v2+).
+ * Falls back to uniform weights (raw overlap) for v1 indexes without IDF.
+ */
+function scoreChunks(
+  question: string,
+  chunks: Chunk[],
+  idf: Record<string, number>,
+): { chunk: Chunk; score: number }[] {
+  const queryTokens = extractTokens(question)
+  if (queryTokens.length === 0) return []
+
+  const hasIdf = Object.keys(idf).length > 0
+  const results: { chunk: Chunk; score: number }[] = []
+
+  for (const chunk of chunks) {
+    const chunkSet = new Set(chunk.tokens)
+    let score = 0
+    let totalWeight = 0
+
+    for (const token of queryTokens) {
+      const weight = hasIdf ? (idf[token] ?? 1.0) : 1.0
+      totalWeight += weight
+      if (chunkSet.has(token)) score += weight
+    }
+
+    if (score > 0) {
+      results.push({ chunk, score: totalWeight > 0 ? score / totalWeight : 0 })
+    }
+  }
+
+  return results.sort((a, b) => b.score - a.score)
+}
+
+// ---------------------------------------------------------------------------
+// CLI entrypoint
+// ---------------------------------------------------------------------------
+
+const mode = getArgs()[0] ?? '--run'
+const root = process.env.SDLC_ROOT ?? process.cwd()
+
+if (mode === '--meta') {
+  console.log(JSON.stringify(meta))
+  exit(0)
+} else if (mode === '--setup') {
+  setup(root)
+    .then(result => { console.log(JSON.stringify(result)); exit(result.ok ? 0 : 1) })
+    .catch(e => { console.log(JSON.stringify({ ok: false, error: String(e) })); exit(1) })
+} else if (mode === '--run') {
+  readStdin()
+    .then(raw => run(JSON.parse(raw || '{}') as { question?: string }, root))
+    .then(result => { console.log(JSON.stringify(result)); exit(result.ok ? 0 : 1) })
+    .catch(e => { console.log(JSON.stringify({ ok: false, error: String(e) })); exit(1) })
+} else {
+  console.error(`Unknown mode: ${mode}. Use --meta, --setup, or --run.`)
+  exit(1)
+}
+"#;
+
+const TOOL_AMA_CONFIG_YAML: &str = r#"name: ama
+version: 0.1.0
+description: Answers questions about the codebase using a pre-built keyword index
+
+# File extensions to include in the index (comma-separated)
+extensions: .ts,.js,.tsx,.jsx,.rs,.go,.py,.rb,.java,.md,.txt,.yaml,.yml,.toml
+
+# Number of lines per chunk
+chunk_lines: 40
+
+# Lines of overlap between consecutive chunks (reduces missed context at boundaries)
+chunk_overlap: 5
+
+# Maximum results to return per query
+max_results: 5
+
+# Skip files larger than this size (kilobytes)
+max_file_kb: 500
+"#;
+
+const TOOL_AMA_README_MD: &str = r#"# AMA — Ask Me Anything
+
+Answers questions about the codebase by searching a pre-built keyword index.
+
+## Setup (run once)
+
+```bash
+sdlc tool run ama --setup
+```
+
+## Usage
+
+```bash
+sdlc tool run ama --question "where is JWT validation?"
+sdlc tool run ama --question "how does feature transition work?"
+```
+
+## How it works
+
+1. `--setup` walks source files, chunks them into 40-line windows, extracts keyword tokens,
+   and writes `.sdlc/tools/ama/index/chunks.json`
+2. `--run` scores chunks by keyword overlap with your question, returns top file excerpts
+3. Your AI assistant reads the excerpts and synthesizes an answer
+
+## Configuration
+
+Edit `.sdlc/tools/ama/config.yaml` to change which file extensions are indexed
+or to adjust chunk size, overlap, and result count.
+
+## Index location
+
+`.sdlc/tools/ama/index/chunks.json` — gitignored, regenerate with `--setup`
+
+## Re-index when needed
+
+Re-run `--setup` after significant file changes. It's fast and safe to run any time.
+"#;
+
+/// Quality-Check tool implementation — runs platform shell commands from .sdlc/config.yaml.
+const TOOL_QUALITY_CHECK_TS: &str = r#"/**
+ * Quality Check
+ * =============
+ * Runs platform shell commands from .sdlc/config.yaml and reports pass/fail.
+ *
+ * WHAT IT DOES
+ * ------------
+ * --run:   Reads JSON from stdin: { "scope"?: "string" }
+ *          Loads platform.commands from .sdlc/config.yaml via `sdlc config show --json`.
+ *          Runs each command's script as a shell command, records pass/fail + output.
+ *          If scope is provided, only runs checks whose name matches the filter string.
+ *          Returns ToolResult<{ passed, failed, checks[] }>.
+ *
+ * --meta:  Writes ToolMeta JSON to stdout. Used by `sdlc tool sync`.
+ *
+ * WHAT IT READS
+ * -------------
+ * - .sdlc/config.yaml (via `sdlc config show --json`)
+ *   → platform.commands[]: { name, description, script }
+ * - .sdlc/tools/quality-check/config.yaml (tool-level config, currently unused)
+ *
+ * WHAT IT WRITES
+ * --------------
+ * - STDERR: structured log lines via _shared/log.ts
+ * - STDOUT: JSON only (ToolResult shape from _shared/types.ts)
+ *
+ * EXTENDING
+ * ---------
+ * Add checks under platform.commands in .sdlc/config.yaml:
+ *   platform:
+ *     commands:
+ *       - name: test
+ *         description: Run unit tests
+ *         script: cargo test --all
+ * The quality-check tool picks them up automatically — no code changes needed.
+ */
+
+import type { ToolMeta, ToolResult } from '../_shared/types.ts'
+import { makeLogger } from '../_shared/log.ts'
+import { loadToolConfig } from '../_shared/config.ts'
+import { getArgs, readStdin, exit } from '../_shared/runtime.ts'
+import { execSync } from 'node:child_process'
+import { join } from 'node:path'
+
+const log = makeLogger('quality-check')
+
+// ---------------------------------------------------------------------------
+// Config (tool-level — currently no per-tool settings)
+// ---------------------------------------------------------------------------
+
+interface QualityCheckConfig {
+  name: string
+  version: string
+}
+
+const DEFAULT_CONFIG: QualityCheckConfig = {
+  name: 'quality-check',
+  version: '0.1.0',
+}
+
+// ---------------------------------------------------------------------------
+// Tool metadata
+// ---------------------------------------------------------------------------
+
+export const meta: ToolMeta = {
+  name: 'quality-check',
+  display_name: 'Quality Check',
+  description: 'Runs platform shell commands from .sdlc/config.yaml and reports pass/fail',
+  version: '0.1.0',
+  requires_setup: false,
+  input_schema: {
+    type: 'object',
+    properties: {
+      scope: {
+        type: 'string',
+        description: 'Optional filter — only run checks whose name matches this string',
+      },
+    },
+  },
+  output_schema: {
+    type: 'object',
+    properties: {
+      passed: { type: 'number' },
+      failed: { type: 'number' },
+      checks: {
+        type: 'array',
+        items: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            description: { type: 'string' },
+            command: { type: 'string' },
+            status: { type: 'string', enum: ['passed', 'failed'] },
+            output: { type: 'string' },
+            duration_ms: { type: 'number' },
+          },
+        },
+      },
+    },
+  },
+}
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+interface PlatformCommand {
+  name: string
+  description?: string
+  script: string
+}
+
+interface SdlcConfig {
+  platform?: {
+    commands?: PlatformCommand[]
+  }
+}
+
+interface CheckResult {
+  name: string
+  description: string
+  command: string
+  status: 'passed' | 'failed'
+  output: string
+  duration_ms: number
+}
+
+interface QualityCheckOutput {
+  passed: number
+  failed: number
+  checks: CheckResult[]
+}
+
+// ---------------------------------------------------------------------------
+// Run — execute platform checks
+// ---------------------------------------------------------------------------
+
+export async function run(
+  input: { scope?: string },
+  root: string,
+): Promise<ToolResult<QualityCheckOutput>> {
+  const start = Date.now()
+  loadToolConfig(root, 'quality-check', DEFAULT_CONFIG)
+
+  // Load sdlc config via CLI to avoid YAML parsing dependency
+  let sdlcConfig: SdlcConfig = {}
+  try {
+    const raw = execSync('sdlc config show --json', {
+      cwd: root,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    sdlcConfig = JSON.parse(raw) as SdlcConfig
+  } catch (e) {
+    log.warn(`Could not load sdlc config: ${e}`)
+  }
+
+  const commands = sdlcConfig?.platform?.commands ?? []
+
+  if (commands.length === 0) {
+    log.warn('No platform commands configured in .sdlc/config.yaml — nothing to check')
+    const duration_ms = Date.now() - start
+    return {
+      ok: true,
+      data: { passed: 0, failed: 0, checks: [] },
+      duration_ms,
+    }
+  }
+
+  // Apply scope filter
+  const scope = input.scope?.trim()
+  const filtered = scope
+    ? commands.filter(c => c.name.includes(scope))
+    : commands
+
+  log.info(`running ${filtered.length} check(s)${scope ? ` (scope: "${scope}")` : ''}`)
+
+  const checks: CheckResult[] = []
+
+  for (const cmd of filtered) {
+    const checkStart = Date.now()
+    log.info(`running check: ${cmd.name}`)
+
+    let status: 'passed' | 'failed' = 'passed'
+    let output = ''
+
+    try {
+      const result = execSync(cmd.script, {
+        cwd: root,
+        encoding: 'utf8',
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+      output = result.slice(-500) // last 500 chars
+    } catch (e: unknown) {
+      status = 'failed'
+      if (e && typeof e === 'object' && 'stdout' in e && 'stderr' in e) {
+        const err = e as { stdout?: string; stderr?: string }
+        const combined = `${err.stdout ?? ''}${err.stderr ?? ''}`
+        output = combined.slice(-500)
+      } else {
+        output = String(e).slice(-500)
+      }
+    }
+
+    const duration_ms = Date.now() - checkStart
+    log.info(`  ${cmd.name}: ${status} (${duration_ms}ms)`)
+
+    checks.push({
+      name: cmd.name,
+      description: cmd.description ?? '',
+      command: cmd.script,
+      status,
+      output,
+      duration_ms,
+    })
+  }
+
+  const passed = checks.filter(c => c.status === 'passed').length
+  const failed = checks.filter(c => c.status === 'failed').length
+  const duration_ms = Date.now() - start
+
+  log.info(`done: ${passed} passed, ${failed} failed in ${duration_ms}ms`)
+
+  return {
+    ok: failed === 0,
+    data: { passed, failed, checks },
+    duration_ms,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// CLI entrypoint
+// ---------------------------------------------------------------------------
+
+const mode = getArgs()[0] ?? '--run'
+const root = process.env.SDLC_ROOT ?? process.cwd()
+
+if (mode === '--meta') {
+  console.log(JSON.stringify(meta))
+  exit(0)
+} else if (mode === '--run') {
+  readStdin()
+    .then(raw => run(JSON.parse(raw || '{}') as { scope?: string }, root))
+    .then(result => { console.log(JSON.stringify(result)); exit(result.ok ? 0 : 1) })
+    .catch(e => { console.log(JSON.stringify({ ok: false, error: String(e) })); exit(1) })
+} else {
+  console.error(`Unknown mode: ${mode}. Use --meta or --run.`)
+  exit(1)
+}
+"#;
+
+const TOOL_QUALITY_CHECK_CONFIG_YAML: &str = r#"# quality-check tool configuration
+# No tool-specific settings yet — all inputs come from .sdlc/config.yaml platform.commands
+name: quality-check
+version: "0.1.0"
+"#;
+
+const TOOL_QUALITY_CHECK_README_MD: &str = r#"# Quality Check
+
+Runs platform shell commands from `.sdlc/config.yaml` and reports pass/fail.
+
+## Usage
+
+```bash
+# Run all configured checks
+sdlc tool run quality-check
+
+# Filter to checks whose name matches a string
+sdlc tool run quality-check --scope test
+```
+
+## How it works
+
+Reads `platform.commands` from `.sdlc/config.yaml`, runs each script as a shell command,
+and reports pass/fail with the last 500 characters of output.
+
+## Adding checks
+
+Add entries under `platform:` → `commands:` in `.sdlc/config.yaml`:
+
+```yaml
+platform:
+  commands:
+    - name: test
+      description: Run unit tests
+      script: cargo test --all
+    - name: lint
+      description: Run linter
+      script: cargo clippy --all -- -D warnings
+```
+
+The quality-check tool picks them up automatically — no code changes needed.
+"#;
+
+/// Static tools.md manifest written at init time (before any TS runtime is available).
+const TOOL_STATIC_TOOLS_MD: &str = r#"# SDLC Tools
+
+Project-specific tools installed by sdlc. Use `sdlc tool run <name>` to invoke.
+
+Run `sdlc tool sync` to regenerate this file from live tool metadata.
+
+---
+
+## ama — AMA — Ask Me Anything
+
+Answers questions about the codebase by searching a pre-built keyword index.
+
+**Run:** `sdlc tool run ama --question "..."`
+**Setup required:** Yes — `sdlc tool run ama --setup`
+_Indexes source files for keyword search (run once, then re-run when files change significantly)_
+
+---
+
+## quality-check — Quality Check
+
+Runs platform shell commands from .sdlc/config.yaml and reports pass/fail.
+
+**Run:** `sdlc tool run quality-check`
+**Setup required:** No
+_Add checks under `platform.commands` in `.sdlc/config.yaml`_
+
+---
+
+## Adding a Custom Tool
+
+Run `sdlc tool scaffold <name> "<description>"` to create a new tool skeleton.
+Then implement the `run()` function in `.sdlc/tools/<name>/tool.ts` and run `sdlc tool sync`.
+"#;
+
+// ---------------------------------------------------------------------------
+// write_core_tools — install TypeScript tool suite into .sdlc/tools/
+// ---------------------------------------------------------------------------
+
+/// Install (or refresh) the core SDLC tool suite into `.sdlc/tools/`.
+///
+/// - Creates `.sdlc/tools/` and `.sdlc/tools/_shared/` if missing.
+/// - Shared files (`_shared/*.ts`) are always overwritten — managed content.
+/// - `ama/tool.ts` is always overwritten — managed content.
+/// - `ama/config.yaml` and `ama/README.md` are written-if-missing — user-editable.
+/// - Writes a static `tools.md` manifest (overwritten; re-generated by `sdlc tool sync`).
+/// - Appends `.sdlc/tools/*/index/` to `.gitignore` if not already present.
+///
+/// Called by both `sdlc init` and `sdlc update`.
+pub fn write_core_tools(root: &Path) -> anyhow::Result<()> {
+    let tools_dir = paths::tools_dir(root);
+    let shared_dir = paths::tools_shared_dir(root);
+    let ama_dir = paths::tool_dir(root, "ama");
+
+    io::ensure_dir(&tools_dir)?;
+    io::ensure_dir(&shared_dir)?;
+    io::ensure_dir(&ama_dir)?;
+
+    // Shared files — always overwrite (managed content agents must not edit)
+    let shared_files: &[(&str, &str)] = &[
+        ("types.ts", TOOL_SHARED_TYPES_TS),
+        ("log.ts", TOOL_SHARED_LOG_TS),
+        ("config.ts", TOOL_SHARED_CONFIG_TS),
+        ("runtime.ts", TOOL_SHARED_RUNTIME_TS),
+    ];
+    for (filename, content) in shared_files {
+        let path = shared_dir.join(filename);
+        let existed = path.exists();
+        io::atomic_write(&path, content.as_bytes())
+            .with_context(|| format!("failed to write _shared/{filename}"))?;
+        if existed {
+            println!("  updated: .sdlc/tools/_shared/{filename}");
+        } else {
+            println!("  created: .sdlc/tools/_shared/{filename}");
+        }
+    }
+
+    // AMA tool.ts — always overwrite
+    let ama_script = paths::tool_script(root, "ama");
+    let existed = ama_script.exists();
+    io::atomic_write(&ama_script, TOOL_AMA_TS.as_bytes()).context("failed to write ama/tool.ts")?;
+    if existed {
+        println!("  updated: .sdlc/tools/ama/tool.ts");
+    } else {
+        println!("  created: .sdlc/tools/ama/tool.ts");
+    }
+
+    // AMA config.yaml — write-if-missing (user may customize)
+    let ama_config = paths::tool_config(root, "ama");
+    let created = io::write_if_missing(&ama_config, TOOL_AMA_CONFIG_YAML.as_bytes())
+        .context("failed to write ama/config.yaml")?;
+    if created {
+        println!("  created: .sdlc/tools/ama/config.yaml");
+    } else {
+        println!("  exists:  .sdlc/tools/ama/config.yaml");
+    }
+
+    // AMA README.md — write-if-missing
+    let ama_readme = paths::tool_readme(root, "ama");
+    let created = io::write_if_missing(&ama_readme, TOOL_AMA_README_MD.as_bytes())
+        .context("failed to write ama/README.md")?;
+    if created {
+        println!("  created: .sdlc/tools/ama/README.md");
+    } else {
+        println!("  exists:  .sdlc/tools/ama/README.md");
+    }
+
+    // Quality-check tool
+    let qc_dir = paths::tool_dir(root, "quality-check");
+    io::ensure_dir(&qc_dir)?;
+
+    // quality-check tool.ts — always overwrite (managed content)
+    let qc_script = paths::tool_script(root, "quality-check");
+    let existed = qc_script.exists();
+    io::atomic_write(&qc_script, TOOL_QUALITY_CHECK_TS.as_bytes())
+        .context("failed to write quality-check/tool.ts")?;
+    println!(
+        "  {}: .sdlc/tools/quality-check/tool.ts",
+        if existed { "updated" } else { "created" }
+    );
+
+    // quality-check config.yaml — write-if-missing (user may customize)
+    let qc_config = paths::tool_config(root, "quality-check");
+    let created = io::write_if_missing(&qc_config, TOOL_QUALITY_CHECK_CONFIG_YAML.as_bytes())
+        .context("failed to write quality-check/config.yaml")?;
+    println!(
+        "  {}: .sdlc/tools/quality-check/config.yaml",
+        if created { "created" } else { "exists " }
+    );
+
+    // quality-check README.md — write-if-missing
+    let qc_readme = paths::tool_readme(root, "quality-check");
+    let created = io::write_if_missing(&qc_readme, TOOL_QUALITY_CHECK_README_MD.as_bytes())
+        .context("failed to write quality-check/README.md")?;
+    println!(
+        "  {}: .sdlc/tools/quality-check/README.md",
+        if created { "created" } else { "exists " }
+    );
+
+    // Static tools.md — overwrite (sdlc tool sync will regenerate from live metadata)
+    let manifest_path = paths::tools_manifest_path(root);
+    io::atomic_write(&manifest_path, TOOL_STATIC_TOOLS_MD.as_bytes())
+        .context("failed to write tools/tools.md")?;
+
+    // .gitignore — ensure index dirs are excluded
+    append_gitignore_entry(root, ".sdlc/tools/*/index/")?;
+
+    // .gitignore — ensure plain env files are never committed
+    // (.sdlc/secrets/envs/*.age and *.meta.yaml are safe to commit)
+    append_gitignore_entry(root, ".env")?;
+    append_gitignore_entry(root, ".env.*")?;
+    append_gitignore_entry(root, "!.env.example")?;
+
+    Ok(())
+}
+
+/// Append `entry` to `.gitignore` if it is not already present.
+/// Creates `.gitignore` if it does not exist. Idempotent.
+fn append_gitignore_entry(root: &Path, entry: &str) -> anyhow::Result<()> {
+    let gitignore = root.join(".gitignore");
+    if gitignore.exists() {
+        let current = std::fs::read_to_string(&gitignore).context("failed to read .gitignore")?;
+        if current.lines().any(|l| l.trim() == entry) {
+            return Ok(()); // already present
+        }
+        let suffix = if current.ends_with('\n') { "" } else { "\n" };
+        let appended = format!("{current}{suffix}{entry}\n");
+        io::atomic_write(&gitignore, appended.as_bytes()).context("failed to update .gitignore")?;
+    } else {
+        io::atomic_write(&gitignore, format!("{entry}\n").as_bytes())
+            .context("failed to create .gitignore")?;
+    }
+    Ok(())
+}

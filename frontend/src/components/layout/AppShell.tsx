@@ -61,7 +61,7 @@ export function AppShell({ children }: AppShellProps) {
           <span className="text-sm font-semibold tracking-tight">SDLC</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>

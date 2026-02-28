@@ -4,7 +4,7 @@ use std::path::Path;
 
 use super::init::{
     install_user_scaffolding, migrate_legacy_project_scaffolding, stamp_sdlc_version,
-    write_agents_md, write_guidance_md, SDLC_BINARY_VERSION,
+    write_agents_md, write_core_tools, write_guidance_md, SDLC_BINARY_VERSION,
 };
 
 /// `sdlc update` — refresh agent scaffolding and stamp the current binary version.
@@ -37,6 +37,10 @@ pub fn run(root: &Path) -> anyhow::Result<()> {
 
     // Write / refresh engineering guidance
     write_guidance_md(root)?;
+
+    // Write / refresh core tool suite (.sdlc/tools/)
+    println!("\nInstalling core tool suite:");
+    write_core_tools(root)?;
 
     // Refresh all user-level agent commands and skills
     println!("\nInstalling user-level command scaffolding:");

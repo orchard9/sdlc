@@ -1,10 +1,16 @@
 use crate::output::{print_json, print_table};
 use anyhow::Context;
-use sdlc_core::prepare::{self, GapSeverity, PrepareResult, ProjectPhase};
+use sdlc_core::prepare::{self, write_wave_plan, GapSeverity, PrepareResult, ProjectPhase};
 use std::path::Path;
 
 pub fn run(root: &Path, milestone: Option<&str>, json: bool) -> anyhow::Result<()> {
     let result = prepare::prepare(root, milestone).context("failed to prepare milestone")?;
+
+    if let Some(ref slug) = result.milestone {
+        if !result.waves.is_empty() {
+            write_wave_plan(root, slug, &result.waves).context("failed to write wave_plan.yaml")?;
+        }
+    }
 
     if json {
         print_json(&result)?;

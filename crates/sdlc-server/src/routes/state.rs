@@ -11,6 +11,7 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
         let state = sdlc_core::state::State::load(&root)?;
         let features = sdlc_core::feature::Feature::list(&root)?;
         let milestones = sdlc_core::milestone::Milestone::list(&root)?;
+        let open_escalations = sdlc_core::escalation::list(&root, None)?;
 
         let config = sdlc_core::config::Config::load(&root)?;
         let classifier = sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
@@ -54,6 +55,20 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
             })
             .collect();
 
+        let escalation_summaries: Vec<serde_json::Value> = open_escalations
+            .iter()
+            .map(|e| {
+                serde_json::json!({
+                    "id": e.id,
+                    "kind": e.kind.to_string(),
+                    "title": e.title,
+                    "context": e.context,
+                    "source_feature": e.source_feature,
+                    "created_at": e.created_at,
+                })
+            })
+            .collect();
+
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "project": state.project,
             "active_features": state.active_features,
@@ -61,6 +76,7 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
             "blocked": state.blocked,
             "features": feature_summaries,
             "milestones": milestone_summaries,
+            "escalations": escalation_summaries,
             "last_updated": state.last_updated,
         }))
     })

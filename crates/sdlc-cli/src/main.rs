@@ -6,10 +6,11 @@ mod tools;
 use clap::{Parser, Subcommand};
 use cmd::{
     agent::AgentSubcommand, artifact::ArtifactSubcommand, comment::CommentSubcommand,
-    config::ConfigSubcommand, feature::FeatureSubcommand, investigate::InvestigateSubcommand,
-    milestone::MilestoneSubcommand, platform::PlatformSubcommand, ponder::PonderSubcommand,
-    project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
-    task::TaskSubcommand, ui::UiSubcommand,
+    config::ConfigSubcommand, escalate::EscalateSubcommand, feature::FeatureSubcommand,
+    investigate::InvestigateSubcommand, milestone::MilestoneSubcommand,
+    platform::PlatformSubcommand, ponder::PonderSubcommand, project::ProjectSubcommand,
+    query::QuerySubcommand, score::ScoreSubcommand, secrets::SecretsSubcommand,
+    task::TaskSubcommand, tool::ToolCommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -127,6 +128,24 @@ enum Commands {
         subcommand: ScoreSubcommand,
     },
 
+    /// Manage encrypted project secrets (AGE + SSH keys)
+    Secrets {
+        #[command(subcommand)]
+        subcommand: SecretsSubcommand,
+    },
+
+    /// Escalate an action that requires human intervention
+    Escalate {
+        #[command(subcommand)]
+        subcommand: EscalateSubcommand,
+    },
+
+    /// Manage SDLC tool scripts (.sdlc/tools/)
+    Tool {
+        #[command(subcommand)]
+        cmd: ToolCommand,
+    },
+
     /// Refresh agent scaffolding and stamp the current binary version
     Update,
 
@@ -154,6 +173,10 @@ enum Commands {
         /// Don't open browser automatically
         #[arg(long)]
         no_open: bool,
+
+        /// Open a public tunnel and print a QR code for remote access (requires cloudflared)
+        #[arg(long)]
+        tunnel: bool,
 
         #[command(subcommand)]
         subcommand: Option<UiSubcommand>,
@@ -195,6 +218,9 @@ fn main() {
         Commands::Query { subcommand } => cmd::query::run(&root, subcommand, cli.json),
         Commands::Config { subcommand } => cmd::config::run(&root, subcommand, cli.json),
         Commands::Score { subcommand } => cmd::score::run(&root, subcommand, cli.json),
+        Commands::Secrets { subcommand } => cmd::secrets::run(&root, subcommand, cli.json),
+        Commands::Escalate { subcommand } => cmd::escalate::run(&root, subcommand, cli.json),
+        Commands::Tool { cmd } => cmd::tool::run(cmd, &root),
         Commands::Update => cmd::update::run(&root),
         Commands::Merge { slug } => cmd::merge::run(&root, &slug, cli.json),
         Commands::Archive { slug } => {
@@ -205,8 +231,9 @@ fn main() {
         Commands::Ui {
             port,
             no_open,
+            tunnel,
             subcommand,
-        } => cmd::ui::run(&root, subcommand, port, no_open),
+        } => cmd::ui::run(&root, subcommand, port, no_open, tunnel),
     };
 
     if let Err(e) = result {

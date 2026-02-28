@@ -128,6 +128,23 @@ export interface QueryNeedsApprovalItem {
   next_command: string
 }
 
+// ---------------------------------------------------------------------------
+// Secrets types
+// ---------------------------------------------------------------------------
+
+export interface SecretsKey {
+  name: string
+  type: 'ssh' | 'age'
+  short_id: string
+  added_at: string
+}
+
+export interface SecretsEnvMeta {
+  env: string
+  key_names: string[]
+  updated_at: string
+}
+
 export interface FeatureSummary {
   slug: string
   title: string
@@ -174,6 +191,29 @@ export interface MilestoneReview {
   features: MilestoneFeatureReview[]
 }
 
+// ---------------------------------------------------------------------------
+// Escalation types
+// ---------------------------------------------------------------------------
+
+export type EscalationKind = 'secret_request' | 'question' | 'vision' | 'manual_test'
+export type EscalationStatus = 'open' | 'resolved'
+
+export interface EscalationSummary {
+  id: string
+  kind: EscalationKind
+  title: string
+  context: string
+  source_feature: string | null
+  created_at: string
+}
+
+export interface EscalationDetail extends EscalationSummary {
+  linked_comment_id: string | null
+  status: EscalationStatus
+  resolved_at: string | null
+  resolution: string | null
+}
+
 export interface ProjectState {
   project: string
   active_features: string[]
@@ -181,6 +221,7 @@ export interface ProjectState {
   blocked: BlockedItem[]
   features: FeatureSummary[]
   milestones: MilestoneSummary[]
+  escalations: EscalationSummary[]
   last_updated: string
 }
 
@@ -434,7 +475,7 @@ export interface PonderSseEvent {
 // ---------------------------------------------------------------------------
 
 export type RunStatus = 'running' | 'completed' | 'failed' | 'stopped'
-export type RunType = 'feature' | 'milestone_uat' | 'milestone_prepare' | 'ponder'
+export type RunType = 'feature' | 'milestone_uat' | 'milestone_prepare' | 'ponder' | 'investigation'
 
 export interface RunRecord {
   id: string
@@ -471,4 +512,155 @@ export interface PonderDetail {
   committed_to: string[]
   team: PonderTeamMember[]
   artifacts: PonderArtifact[]
+}
+
+// ---------------------------------------------------------------------------
+// Investigation types
+// ---------------------------------------------------------------------------
+
+export type InvestigationKind = 'root_cause' | 'evolve' | 'guideline'
+export type InvestigationStatus = 'in_progress' | 'complete' | 'parked'
+
+// Phase names vary by kind:
+// root_cause: triage | investigate | synthesize | output | done
+// evolve:     survey | analyze | paths | roadmap | output | done
+// guideline:  problem | evidence | principles | draft | publish | done
+export type InvestigationPhase = string
+
+export interface InvestigationSummary {
+  slug: string
+  title: string
+  kind: InvestigationKind
+  phase: InvestigationPhase
+  status: InvestigationStatus
+  sessions: number
+  artifact_count: number
+  created_at: string
+  updated_at: string
+}
+
+export interface LensScores {
+  pit_of_success?: string
+  coupling?: string
+  growth_readiness?: string
+  self_documenting?: string
+  failure_modes?: string
+}
+
+export interface EvidenceCounts {
+  anti_patterns: number
+  good_examples: number
+  prior_art: number
+  adjacent: number
+}
+
+export interface InvestigationOrientation {
+  current: string
+  next: string
+  commit: string
+}
+
+// Artifacts reuse PonderArtifact shape (same fields)
+export type InvestigationArtifact = PonderArtifact
+
+export interface InvestigationDetail {
+  slug: string
+  title: string
+  kind: InvestigationKind
+  phase: InvestigationPhase
+  status: InvestigationStatus
+  context: string | null
+  sessions: number
+  orientation: InvestigationOrientation | null
+  created_at: string
+  updated_at: string
+  // root_cause specific
+  confidence: number | null
+  output_type: string | null      // "task" | "guideline"
+  output_ref: string | null
+  // evolve specific
+  scope: string | null
+  lens_scores: LensScores | null
+  output_refs: string[]
+  // guideline specific
+  guideline_scope: string | null
+  problem_statement: string | null
+  evidence_counts: EvidenceCounts | null
+  principles_count: number | null
+  publish_path: string | null
+  // always
+  artifacts: InvestigationArtifact[]
+}
+
+export type InvestigationRunState =
+  | { status: 'idle' }
+  | { status: 'running'; session: number; ownerName: string; ownerMessage: string | null }
+  | { status: 'stopped'; session: number }
+
+export interface InvestigationChatResponse {
+  status: 'started' | 'conflict'
+  session: number
+  owner_name: string
+}
+
+export interface InvestigationSseEvent {
+  type: 'investigation_run_started' | 'investigation_run_completed' | 'investigation_run_stopped'
+  slug: string
+  session?: number
+}
+
+// ---------------------------------------------------------------------------
+// Tool Suite types
+// ---------------------------------------------------------------------------
+
+export interface ToolMeta {
+  name: string
+  display_name: string
+  description: string
+  version: string
+  requires_setup: boolean
+  setup_description?: string
+  input_schema: Record<string, unknown>
+  output_schema: Record<string, unknown>
+}
+
+export interface ToolResult<T = unknown> {
+  ok: boolean
+  data?: T
+  error?: string
+  duration_ms?: number
+}
+
+export interface CheckResult {
+  name: string
+  command: string
+  status: 'passed' | 'failed'
+  output: string
+  duration_ms: number
+}
+
+export interface QualityCheckData {
+  passed: number
+  failed: number
+  checks: CheckResult[]
+}
+
+export interface AmaSource {
+  path: string
+  lines: [number, number]
+  excerpt: string
+  score: number
+  stale?: boolean
+}
+
+export interface AmaData {
+  sources: AmaSource[]
+}
+
+// Area artifact frontmatter — parsed from area-N-*.md files by parseInvestigation.ts
+export interface AreaArtifactMeta {
+  area: string       // "code_paths" | "bottlenecks" | "data_flow" | "auth_chain" | "environment"
+  status: 'pending' | 'investigating' | 'finding' | 'hypothesis'
+  confidence?: number
+  finding?: string   // first non-empty line after frontmatter
 }

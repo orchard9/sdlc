@@ -8,13 +8,131 @@ import { Skeleton, SkeletonCard } from '@/components/shared/Skeleton'
 import { CopyButton } from '@/components/shared/CopyButton'
 import { CommandBlock } from '@/components/shared/CommandBlock'
 import { api } from '@/api/client'
-import type { ProjectConfig } from '@/lib/types'
+import type { EscalationSummary, ProjectConfig } from '@/lib/types'
 import { PreparePanel } from '@/components/features/PreparePanel'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
-import { AlertTriangle, Clock, ChevronDown, ChevronRight, Lightbulb, FileText, Users } from 'lucide-react'
+import { AlertTriangle, Clock, ChevronDown, ChevronRight, Lightbulb, FileText, Users, Key, HelpCircle, Target, FlaskConical, Zap, Check } from 'lucide-react'
 import type { PonderSummary } from '@/lib/types'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
 import { MarkdownContent } from '@/components/shared/MarkdownContent'
+
+// ---------------------------------------------------------------------------
+// Escalation helpers
+// ---------------------------------------------------------------------------
+
+function EscalationIcon({ kind }: { kind: EscalationSummary['kind'] }) {
+  switch (kind) {
+    case 'secret_request': return <Key className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+    case 'question':       return <HelpCircle className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+    case 'vision':         return <Target className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+    case 'manual_test':    return <FlaskConical className="w-4 h-4 text-green-400 shrink-0 mt-0.5" />
+  }
+}
+
+interface EscalationCardProps {
+  item: EscalationSummary
+  onResolved: () => void
+}
+
+function EscalationCard({ item, onResolved }: EscalationCardProps) {
+  const [resolving, setResolving] = useState(false)
+  const [note, setNote] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  const submit = async () => {
+    if (!note.trim()) return
+    setError(null)
+    try {
+      await api.resolveEscalation(item.id, note.trim())
+      onResolved()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to resolve')
+    }
+  }
+
+  return (
+    <div className="flex items-start gap-2.5">
+      <EscalationIcon kind={item.kind} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs font-mono text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+            {item.kind}
+          </span>
+          <span className="text-sm font-medium">{item.title}</span>
+        </div>
+        <p className={`text-xs text-muted-foreground mt-0.5 ${resolving ? '' : 'line-clamp-2'}`}>{item.context}</p>
+        <div className="flex items-center gap-2 mt-1 flex-wrap">
+          {item.source_feature && (
+            <Link
+              to={`/features/${item.source_feature}`}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors font-mono"
+            >
+              → {item.source_feature}
+            </Link>
+          )}
+          {item.kind === 'secret_request' && (
+            <Link
+              to="/secrets"
+              className="text-xs text-amber-400 hover:text-amber-300 transition-colors"
+            >
+              Go to Secrets →
+            </Link>
+          )}
+          {!resolving && (
+            <button
+              onClick={() => setResolving(true)}
+              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Resolve
+            </button>
+          )}
+        </div>
+        {resolving && (
+          <div className="mt-2 space-y-1.5">
+            <textarea
+              value={note}
+              onChange={e => setNote(e.target.value)}
+              placeholder={item.kind === 'secret_request'
+                ? 'Describe what you added and where (e.g. "Added STRIPE_KEY to production env")…'
+                : item.kind === 'manual_test'
+                ? 'Describe what you tested and what passed/failed…'
+                : 'Your answer or resolution…'}
+              rows={3}
+              className="w-full text-xs px-2 py-1.5 bg-background border border-border rounded focus:outline-none focus:ring-1 focus:ring-ring resize-none"
+              onKeyDown={e => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) submit() }}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+            />
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-muted-foreground">⌘↵ to submit</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { setResolving(false); setNote('') }}
+                  className="text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded hover:bg-accent"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={submit}
+                  disabled={!note.trim()}
+                  className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center gap-1"
+                >
+                  <Check className="w-3 h-3" />
+                  Resolve
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+        {error && <p className="text-xs text-destructive mt-1">{error}</p>}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Vision section
+// ---------------------------------------------------------------------------
 
 function VisionSection({ content }: { content: string }) {
   const [open, setOpen] = useState(false)
@@ -61,7 +179,7 @@ export function Dashboard() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full p-6">
         <p className="text-destructive text-sm">{error}</p>
       </div>
     )
@@ -69,7 +187,7 @@ export function Dashboard() {
 
   if (loading || !state) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-6 p-6">
         <div className="space-y-2">
           <Skeleton width="w-48" className="h-7" />
           <Skeleton width="w-64" className="h-4" />
@@ -104,7 +222,7 @@ export function Dashboard() {
   const blockedCount = state.blocked.length
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto p-6">
 
       {/* Project Overview */}
       <div className="mb-6">
@@ -204,6 +322,31 @@ export function Dashboard() {
 
       {/* Wave Plan (replaces What's Next) */}
       <PreparePanel />
+
+      {/* Needs Your Attention — escalations from agents */}
+      {state.escalations?.length > 0 && (
+        <div className="bg-amber-950/20 border border-amber-500/30 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Zap className="w-4 h-4 text-amber-400" />
+            <h3 className="text-sm font-semibold">Needs Your Attention</h3>
+            <span className="text-xs text-muted-foreground bg-amber-500/10 px-1.5 py-0.5 rounded-md">
+              {state.escalations.length} open
+            </span>
+          </div>
+          <div className="space-y-3 divide-y divide-border/50">
+            {state.escalations.map(e => (
+              <div key={e.id} className="pt-3 first:pt-0">
+                <EscalationCard
+                  item={e}
+                  onResolved={() => {
+                    // ProjectState will refresh via SSE; no manual reload needed.
+                  }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* HITL / blocked needing human */}
       {hitlFeatures.length > 0 && (

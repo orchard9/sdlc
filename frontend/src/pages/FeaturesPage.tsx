@@ -11,7 +11,7 @@ export function FeaturesPage() {
 
   if (loading || !state) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full p-6">
         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
       </div>
     )
@@ -29,7 +29,7 @@ export function FeaturesPage() {
     : active
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-5xl mx-auto p-6">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Features</h2>
         <span className="text-xs text-muted-foreground">{filtered.length} of {active.length}</span>

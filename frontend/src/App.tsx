@@ -7,7 +7,11 @@ import { FeaturesPage } from '@/pages/FeaturesPage'
 import { MilestonesPage } from '@/pages/MilestonesPage'
 import { MilestoneDetail } from '@/pages/MilestoneDetail'
 import { PonderPage } from '@/pages/PonderPage'
+import { InvestigationPage } from '@/pages/InvestigationPage'
+import { EvolvePage } from '@/pages/EvolvePage'
 import { SettingsPage } from '@/pages/SettingsPage'
+import { SecretsPage } from '@/pages/SecretsPage'
+import { ToolsPage } from '@/pages/ToolsPage'
 
 export default function App() {
   return (
@@ -23,6 +27,12 @@ export default function App() {
             <Route path="/milestones/:slug" element={<MilestoneDetail />} />
             <Route path="/ponder" element={<PonderPage />} />
             <Route path="/ponder/:slug" element={<PonderPage />} />
+            <Route path="/investigations" element={<InvestigationPage />} />
+            <Route path="/investigations/:slug" element={<InvestigationPage />} />
+            <Route path="/evolve" element={<EvolvePage />} />
+            <Route path="/evolve/:slug" element={<EvolvePage />} />
+            <Route path="/secrets" element={<SecretsPage />} />
+            <Route path="/tools" element={<ToolsPage />} />
             <Route path="/config" element={<SettingsPage />} />
           </Routes>
         </AppShell>

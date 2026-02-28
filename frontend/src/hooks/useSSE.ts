@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import type { PonderSseEvent, RunSseEvent } from '@/lib/types'
+import type { InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
 
 /** Subscribe to /api/events and call onUpdate whenever state changes.
  *  Rapid updates are debounced (500ms) to prevent connection saturation
@@ -11,11 +11,15 @@ import type { PonderSseEvent, RunSseEvent } from '@/lib/types'
  *
  *  Optionally pass onRunEvent to receive agent run lifecycle events.
  *  Run events are NOT debounced — they are structural signals.
+ *
+ *  Optionally pass onInvestigationEvent to receive investigation run lifecycle events.
+ *  Investigation events are NOT debounced — they are structural signals.
  */
 export function useSSE(
   onUpdate: () => void,
   onPonderEvent?: (event: PonderSseEvent) => void,
   onRunEvent?: (event: RunSseEvent) => void,
+  onInvestigationEvent?: (event: InvestigationSseEvent) => void,
 ) {
   useEffect(() => {
     const es = new EventSource('/api/events')
@@ -48,10 +52,21 @@ export function useSSE(
       })
     }
 
+    if (onInvestigationEvent) {
+      es.addEventListener('investigation', (e: MessageEvent) => {
+        try {
+          const data = JSON.parse(e.data) as InvestigationSseEvent
+          onInvestigationEvent(data)
+        } catch {
+          // malformed event — ignore
+        }
+      })
+    }
+
     es.onerror = () => {} // browser auto-reconnects
     return () => {
       if (timer) clearTimeout(timer)
       es.close()
     }
-  }, [onUpdate, onPonderEvent, onRunEvent])
+  }, [onUpdate, onPonderEvent, onRunEvent, onInvestigationEvent])
 }

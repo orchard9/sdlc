@@ -71,6 +71,8 @@ pub enum MilestoneSubcommand {
     },
     /// Run the classifier on every feature in the milestone
     Review { slug: String },
+    /// Mark a milestone as prepared (pre-flight complete, wave plan ready)
+    MarkPrepared { slug: String },
 }
 
 pub fn run(root: &Path, subcmd: MilestoneSubcommand, json: bool) -> anyhow::Result<()> {
@@ -104,6 +106,7 @@ pub fn run(root: &Path, subcmd: MilestoneSubcommand, json: bool) -> anyhow::Resu
             set_acceptance_test(root, &slug, file.as_deref(), json)
         }
         MilestoneSubcommand::Review { slug } => review(root, &slug, json),
+        MilestoneSubcommand::MarkPrepared { slug } => mark_prepared(root, &slug),
     }
 }
 
@@ -213,6 +216,7 @@ fn info(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
             "created_at": milestone.created_at,
             "updated_at": milestone.updated_at,
             "skipped_at": milestone.skipped_at,
+            "prepared_at": milestone.prepared_at,
         }))?;
         return Ok(());
     }
@@ -495,6 +499,15 @@ fn set_acceptance_test(
             content.len()
         );
     }
+    Ok(())
+}
+
+fn mark_prepared(root: &Path, slug: &str) -> anyhow::Result<()> {
+    let mut milestone =
+        Milestone::load(root, slug).with_context(|| format!("milestone '{slug}' not found"))?;
+    milestone.mark_prepared();
+    milestone.save(root).context("failed to save milestone")?;
+    println!("Milestone '{slug}' marked as prepared.");
     Ok(())
 }
 

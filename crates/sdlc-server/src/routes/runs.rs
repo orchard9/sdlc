@@ -27,6 +27,25 @@ use crate::{
 };
 
 // ---------------------------------------------------------------------------
+// Input validation
+// ---------------------------------------------------------------------------
+
+/// Validate that a slug contains only safe characters: a-z, A-Z, 0-9, hyphen, underscore.
+/// Returns 400 Bad Request if the slug contains anything else.
+fn validate_slug(slug: &str) -> Result<(), AppError> {
+    if slug.is_empty()
+        || !slug
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
+    {
+        return Err(AppError::bad_request(format!(
+            "Invalid slug '{slug}': must contain only letters, digits, hyphens, and underscores"
+        )));
+    }
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 // Shared helpers
 // ---------------------------------------------------------------------------
 
@@ -41,18 +60,8 @@ async fn spawn_agent_run(
     label: &str,
 ) -> Result<Json<serde_json::Value>, AppError> {
     info!(key = %key, "spawn_agent_run: request received");
-    {
-        let runs = app.agent_runs.lock().await;
-        if runs.contains_key(&key) {
-            warn!(key = %key, "spawn_agent_run: agent already running");
-            return Ok(Json(serde_json::json!({
-                "status": "already_running",
-                "message": format!("Agent already running for '{key}'")
-            })));
-        }
-    }
 
-    // Create RunRecord
+    // Create the broadcast channel and build the RunRecord before taking the lock.
     let run_id = generate_run_id();
     let target = key.split(':').next_back().unwrap_or(&key).to_string();
     let record = RunRecord {
@@ -69,25 +78,9 @@ async fn spawn_agent_run(
         error: None,
     };
 
-    // Persist and add to in-memory history
-    {
-        let root = app.root.clone();
-        let rec = record.clone();
-        tokio::task::spawn_blocking(move || persist_run(&root, &rec))
-            .await
-            .ok();
-    }
-    app.run_history.lock().await.insert(0, record.clone());
-
-    // Emit RunStarted SSE
-    let _ = app.event_tx.send(SseMessage::RunStarted {
-        id: run_id.clone(),
-        key: key.clone(),
-        label: label.to_string(),
-    });
-
     let (tx, _) = tokio::sync::broadcast::channel::<String>(512);
-    app.agent_runs.lock().await.insert(key.clone(), tx.clone());
+    // Clone tx for the spawned task; keep the original to store in the map.
+    let tx_task = tx.clone();
 
     let key_clone = key.clone();
     let agent_runs = app.agent_runs.clone();
@@ -97,7 +90,8 @@ async fn spawn_agent_run(
     let run_id_clone = run_id.clone();
 
     info!(key = %key, "spawn_agent_run: spawning agent task");
-    tokio::spawn(async move {
+    let handle = tokio::spawn(async move {
+        let tx = tx_task;
         let mut stream = query(prompt, opts);
         let mut message_count: u64 = 0;
         let mut accumulated_events: Vec<serde_json::Value> = Vec::new();
@@ -190,6 +184,37 @@ async fn spawn_agent_run(
         info!(key = %key_clone, message_count, "agent run cleanup");
         agent_runs.lock().await.remove(&key_clone);
     });
+    let abort_handle = handle.abort_handle();
+
+    // Atomically check for a duplicate and insert — single lock window, no async work inside.
+    {
+        let mut runs = app.agent_runs.lock().await;
+        if runs.contains_key(&key) {
+            warn!(key = %key, "spawn_agent_run: agent already running");
+            handle.abort();
+            return Err(AppError::conflict(format!(
+                "Agent already running for '{key}'"
+            )));
+        }
+        runs.insert(key.clone(), (tx.clone(), abort_handle));
+    }
+
+    // Async I/O happens after the lock is released.
+    {
+        let root = app.root.clone();
+        let rec = record.clone();
+        tokio::task::spawn_blocking(move || persist_run(&root, &rec))
+            .await
+            .ok();
+    }
+    app.run_history.lock().await.insert(0, record.clone());
+
+    // Emit RunStarted SSE
+    let _ = app.event_tx.send(SseMessage::RunStarted {
+        id: run_id.clone(),
+        key: key.clone(),
+        label: label.to_string(),
+    });
 
     Ok(Json(serde_json::json!({
         "status": "started",
@@ -203,7 +228,7 @@ async fn get_run_events(key: &str, app: &AppState) -> Response {
     info!(key = %key, "get_run_events: SSE subscribe");
     let rx = {
         let runs = app.agent_runs.lock().await;
-        runs.get(key).map(|tx| tx.subscribe())
+        runs.get(key).map(|(tx, _)| tx.subscribe())
     };
 
     match rx {
@@ -231,7 +256,8 @@ async fn stop_run_by_key(key: &str, app: &AppState) -> Json<serde_json::Value> {
     info!(key = %key, "stop_run_by_key: request received");
     let removed = app.agent_runs.lock().await.remove(key);
     match removed {
-        Some(_) => {
+        Some((_, abort_handle)) => {
+            abort_handle.abort();
             info!(key = %key, "stop_run_by_key: agent stopped");
 
             // Update RunRecord in history
@@ -316,6 +342,7 @@ pub async fn start_run(
     Path(slug): Path<String>,
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
     let opts = sdlc_query_options(app.root.clone(), 200);
     let prompt = format!(
         "Drive feature '{}' through the sdlc state machine. \
@@ -350,6 +377,7 @@ pub async fn start_milestone_uat(
     Path(slug): Path<String>,
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
     let key = format!("milestone-uat:{slug}");
     let opts = sdlc_query_options(app.root.clone(), 200);
     let prompt = format!(
@@ -391,6 +419,7 @@ pub async fn start_milestone_prepare(
     Path(slug): Path<String>,
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
     let key = format!("milestone-prepare:{slug}");
     let opts = sdlc_query_options(app.root.clone(), 100);
     let prompt = format!(
@@ -521,14 +550,14 @@ pub async fn start_ponder_chat(
     State(app): State<AppState>,
     Json(body): Json<PonderChatRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
     let run_key = format!("ponder:{slug}");
 
     // 409 if already running
     if app.agent_runs.lock().await.contains_key(&run_key) {
-        return Ok(Json(serde_json::json!({
-            "status": "conflict",
-            "message": format!("Session already running for '{slug}'")
-        })));
+        return Err(AppError::conflict(format!(
+            "Session already running for '{slug}'"
+        )));
     }
 
     // Get next session number and git user name (best-effort, non-blocking)
@@ -616,7 +645,19 @@ pub async fn start_ponder_chat(
          ---\n\
          \n\
          <full session dialogue>\n\
-         ```",
+         ```\n\
+         \n\
+         ## Step 4 — Update status (MANDATORY when commit signal is met)\n\
+         \n\
+         After logging the session, update the ponder status based on thinking state:\n\
+         - Commit signal met (idea is shaped, ready to build):\n\
+           `sdlc ponder update {slug} --status converging`\n\
+         - Still exploring: no update needed (status stays `exploring`)\n\
+         - Idea shelved: `sdlc ponder update {slug} --status parked`\n\
+         \n\
+         This step is not optional when the commit signal is met. The web UI shows \
+         the Commit button only when status is `converging`. Without this update the \
+         user has no UI path to commit.",
         slug = slug,
         message_context = message_context,
     );
@@ -693,14 +734,14 @@ pub async fn start_investigation_chat(
     State(app): State<AppState>,
     Json(body): Json<InvestigationChatRequest>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
     let run_key = format!("investigation:{slug}");
 
     // 409 if already running
     if app.agent_runs.lock().await.contains_key(&run_key) {
-        return Ok(Json(serde_json::json!({
-            "status": "conflict",
-            "message": format!("Session already running for '{slug}'")
-        })));
+        return Err(AppError::conflict(format!(
+            "Session already running for '{slug}'"
+        )));
     }
 
     // Load investigation to get kind + context, get next session number
@@ -770,6 +811,72 @@ pub async fn start_investigation_chat(
          sdlc investigate capture {slug} --content \"<markdown>\" --as <name>.md\n\
          ```\n\
          Use inline markers: `⚑  Decided:` for resolved points, `?  Open:` for live tensions.\n\
+         \n\
+         ### Root-cause artifact conventions\n\
+         \n\
+         For `root_cause` investigations, the five investigation areas map to these exact filenames:\n\
+         ```\n\
+         Area 1 — Code Paths    → area-1-code-paths.md\n\
+         Area 2 — Bottlenecks   → area-2-bottlenecks.md\n\
+         Area 3 — Data Flow     → area-3-data-flow.md\n\
+         Area 4 — Auth Chain    → area-4-auth-chain.md\n\
+         Area 5 — Environment   → area-5-environment.md\n\
+         ```\n\
+         \n\
+         Each area artifact MUST begin with YAML frontmatter so the UI can render the progress cards:\n\
+         ```markdown\n\
+         ---\n\
+         area: code_paths\n\
+         status: finding    # pending | investigating | finding | hypothesis\n\
+         confidence: 72     # 0-100, required when status=hypothesis\n\
+         ---\n\
+         One-line finding summary here.\n\
+         \n\
+         [rest of investigation notes]\n\
+         ```\n\
+         \n\
+         Valid `area` values: `code_paths`, `bottlenecks`, `data_flow`, `auth_chain`, `environment`.\n\
+         When you reach a hypothesis for an area, set `status: hypothesis` and include `confidence`.\n\
+         Write the synthesis document as `synthesis.md` once the cross-area picture is clear.\n\
+         \n\
+         ### Evolve artifact conventions\n\
+         \n\
+         For `evolve` investigations, use these exact artifact filenames at each phase:\n\
+         ```\n\
+         survey    → survey.md       (system structure, entry points, docs state, TODOs/FIXMEs)\n\
+         analyze   → lens-analysis.md (maturity table: Low/Medium/High/Excellent per lens + gaps)\n\
+         paths     → paths.md        (2-4 evolution paths: name, vision, effort 1-5, impact 1-5)\n\
+         roadmap   → roadmap.md      (proper solution → enabling changes → extended vision)\n\
+         ```\n\
+         \n\
+         After writing `lens-analysis.md`, record the lens scores in the manifest:\n\
+         ```bash\n\
+         sdlc investigate update {slug} --lens pit_of_success=<low|medium|high|excellent>\n\
+         sdlc investigate update {slug} --lens coupling=<low|medium|high|excellent>\n\
+         sdlc investigate update {slug} --lens growth_readiness=<low|medium|high|excellent>\n\
+         sdlc investigate update {slug} --lens self_documenting=<low|medium|high|excellent>\n\
+         sdlc investigate update {slug} --lens failure_modes=<low|medium|high|excellent>\n\
+         ```\n\
+         The five lenses: Pit of Success (do defaults lead to good outcomes?), \
+         Coupling (are related things together?), Growth Readiness (will it scale 10x?), \
+         Self-Documenting (can you understand it from the code?), \
+         Failure Modes (what happens when it breaks?).\n\
+         \n\
+         Apply strategic step-back before Roadmap: challenge each path for YAGNI, \
+         hidden stakeholders, and execution reality.\n\
+         \n\
+         ### Phase advancement\n\
+         \n\
+         After writing a phase-gate artifact, advance the phase explicitly:\n\
+         ```bash\n\
+         sdlc investigate update {slug} --phase <next-phase>\n\
+         ```\n\
+         Root-cause sequence: `triage` → `investigate` → `synthesize` → `output`\n\
+         Root-cause gate artifacts: `triage.md` unlocks `investigate`, `synthesis.md` unlocks `output`.\n\
+         \n\
+         Evolve sequence: `survey` → `analyze` → `paths` → `roadmap` → `output`\n\
+         Evolve gate artifacts: each phase artifact unlocks the next phase.\n\
+         Call the update command immediately after capturing the gate artifact — do not wait.\n\
          \n\
          ## Step 3 — Log the session (MANDATORY)\n\
          \n\

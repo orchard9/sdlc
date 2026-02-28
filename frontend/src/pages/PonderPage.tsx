@@ -7,7 +7,7 @@ import { Skeleton } from '@/components/shared/Skeleton'
 import { DialoguePanel } from '@/components/ponder/DialoguePanel'
 import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
 import {
-  Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files,
+  Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Check,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { PonderSummary, PonderStatus, PonderDetail } from '@/lib/types'
@@ -185,6 +185,7 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState(false)
+  const [commitCopied, setCommitCopied] = useState(false)
 
   const load = useCallback(() => {
     api.getPonderEntry(slug)
@@ -233,6 +234,27 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
           <p className="text-xs text-muted-foreground/60 font-mono truncate hidden sm:block">{entry.slug}</p>
         </div>
         <StatusBadge status={entry.status} />
+        {entry.sessions > 0 && entry.status !== 'committed' && entry.status !== 'parked' && (
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(`/sdlc-ponder-commit ${entry.slug}`)
+              setCommitCopied(true)
+              setTimeout(() => setCommitCopied(false), 2000)
+            }}
+            className={cn(
+              'shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors',
+              entry.status === 'converging'
+                ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                : 'text-muted-foreground/60 border-border/40 hover:text-foreground hover:bg-accent/50',
+            )}
+            title="Copy /sdlc-ponder-commit command"
+          >
+            {commitCopied
+              ? <Check className="w-3 h-3" />
+              : <GitMerge className="w-3 h-3" />}
+            <span className="hidden sm:inline">{commitCopied ? 'Copied!' : 'Commit'}</span>
+          </button>
+        )}
         <div className="relative shrink-0 md:hidden">
           <button
             onClick={() => setMobileWorkspaceOpen(o => !o)}
@@ -319,7 +341,7 @@ export function PonderPage() {
   const showMobileDetail = !!slug
 
   return (
-    <div className="h-full flex flex-col -m-6 overflow-hidden">
+    <div className="h-full flex flex-col overflow-hidden">
       <div className="flex-1 flex min-h-0">
         {/* Left pane: entry list */}
         <div className={cn(

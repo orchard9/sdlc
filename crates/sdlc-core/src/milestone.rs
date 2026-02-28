@@ -62,6 +62,9 @@ pub struct Milestone {
     /// Set when a milestone is explicitly marked complete (overrides computed status).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub released_at: Option<DateTime<Utc>>,
+    /// Set when a milestone has been through `/sdlc-prepare` and is ready to execute.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub prepared_at: Option<DateTime<Utc>>,
 }
 
 impl Milestone {
@@ -77,6 +80,7 @@ impl Milestone {
             updated_at: now,
             skipped_at: None,
             released_at: None,
+            prepared_at: None,
         }
     }
 
@@ -207,6 +211,12 @@ impl Milestone {
     /// Mark the milestone as explicitly complete. Status becomes `Released` regardless of features.
     pub fn release(&mut self) {
         self.released_at = Some(Utc::now());
+        self.updated_at = Utc::now();
+    }
+
+    /// Mark the milestone as prepared — pre-flight complete, wave plan written, ready to execute.
+    pub fn mark_prepared(&mut self) {
+        self.prepared_at = Some(Utc::now());
         self.updated_at = Utc::now();
     }
 

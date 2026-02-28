@@ -12,6 +12,13 @@ use std::path::Path;
 pub enum ConfigSubcommand {
     /// Validate the config for common mistakes
     Validate,
+
+    /// Show the project configuration as JSON
+    Show {
+        /// Output as JSON (default when flag not set: human-readable)
+        #[arg(long)]
+        json: bool,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -21,12 +28,27 @@ pub enum ConfigSubcommand {
 pub fn run(root: &Path, subcmd: ConfigSubcommand, json: bool) -> anyhow::Result<()> {
     match subcmd {
         ConfigSubcommand::Validate => validate(root, json),
+        ConfigSubcommand::Show { json: show_json } => show_config(root, json || show_json),
     }
 }
 
 // ---------------------------------------------------------------------------
 // validate
 // ---------------------------------------------------------------------------
+
+fn show_config(root: &Path, json: bool) -> anyhow::Result<()> {
+    let config = Config::load(root).context("failed to load config")?;
+
+    if json {
+        print_json(&config)?;
+    } else {
+        // Human-readable: pretty-print as YAML
+        let yaml = serde_yaml::to_string(&config).context("failed to serialize config")?;
+        print!("{yaml}");
+    }
+
+    Ok(())
+}
 
 fn validate(root: &Path, json: bool) -> anyhow::Result<()> {
     use sdlc_core::config::WarnLevel;

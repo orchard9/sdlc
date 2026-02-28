@@ -51,18 +51,24 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
               ul: ({ children }) => <ul className="list-disc pl-5 mb-3 space-y-1 text-sm text-foreground">{children}</ul>,
               ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 space-y-1 text-sm text-foreground">{children}</ol>,
               li: ({ children }) => <li className="text-sm text-foreground leading-relaxed">{children}</li>,
-              code: ({ children, className: codeClass }) => {
+              code: ({ children, className: codeClass, node }) => {
                 const lang = codeClass?.replace('language-', '') ?? ''
+                const isBlock = node?.position?.start.line !== node?.position?.end.line
                 if (lang === 'mermaid') return <MermaidBlock chart={String(children).trim()} />
                 if (lang) return (
                   <SyntaxHighlighter
                     language={lang}
                     style={atomOneDark}
-                    customStyle={{ margin: 0, borderRadius: '0.5rem', fontSize: '0.75rem' }}
+                    customStyle={{ margin: 0, borderRadius: '0.5rem', fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}
                     wrapLongLines={false}
                   >
                     {String(children).trim()}
                   </SyntaxHighlighter>
+                )
+                if (isBlock) return (
+                  <pre className="text-xs font-mono bg-muted/60 border border-border/50 rounded p-3 whitespace-pre-wrap overflow-x-auto text-muted-foreground">
+                    <code>{children}</code>
+                  </pre>
                 )
                 return <code className="text-xs font-mono bg-muted/60 border border-border/50 px-1 py-0.5 rounded text-muted-foreground">{children}</code>
               },

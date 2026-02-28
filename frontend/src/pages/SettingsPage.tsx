@@ -26,7 +26,7 @@ export function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full p-6">
         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
       </div>
     )
@@ -34,7 +34,7 @@ export function SettingsPage() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center h-full p-6">
         <p className="text-destructive text-sm">{error}</p>
       </div>
     )
@@ -45,7 +45,7 @@ export function SettingsPage() {
   const commandEntries = Object.entries(config.platform?.commands ?? {})
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto p-6">
       <div className="mb-6">
         <h2 className="text-xl font-semibold">Config</h2>
         <p className="text-sm text-muted-foreground mt-0.5">{config.project.name}</p>

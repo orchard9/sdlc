@@ -4,7 +4,7 @@ import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { api } from '@/api/client'
 import { WavePlan } from './WavePlan'
 import { CommandBlock } from '@/components/shared/CommandBlock'
-import type { PrepareResult } from '@/lib/types'
+import type { PrepareResult, Wave } from '@/lib/types'
 import { AlertTriangle, CheckCircle, Layers, Play, Loader2 } from 'lucide-react'
 
 function PhaseLabel({ phase }: { phase: PrepareResult['project_phase'] }) {
@@ -31,9 +31,13 @@ function PhaseLabel({ phase }: { phase: PrepareResult['project_phase'] }) {
   )
 }
 
-function ProgressBar({ progress }: { progress: PrepareResult['milestone_progress'] }) {
+function ProgressBar({ progress, waves }: {
+  progress: PrepareResult['milestone_progress']
+  waves: Wave[]
+}) {
   if (!progress) return null
   const pct = progress.total > 0 ? Math.round((progress.released / progress.total) * 100) : 0
+  const currentWave = waves[0]?.number ?? null
 
   return (
     <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -43,6 +47,9 @@ function ProgressBar({ progress }: { progress: PrepareResult['milestone_progress
       <span className="tabular-nums shrink-0">
         {progress.released}/{progress.total} released
       </span>
+      {currentWave !== null && pct < 100 && (
+        <span className="text-muted-foreground/70">wave {currentWave}</span>
+      )}
       {progress.in_progress > 0 && <span>{progress.in_progress} active</span>}
       {progress.blocked > 0 && <span className="text-amber-400">{progress.blocked} blocked</span>}
     </div>
@@ -200,7 +207,7 @@ export function PreparePanel() {
         <PhaseLabel phase={project_phase} />
       </div>
 
-      <ProgressBar progress={milestone_progress} />
+      <ProgressBar progress={milestone_progress} waves={waves} />
 
       <div className={`${milestone_progress ? 'mt-2' : ''}`}>
         <WavePlan waves={waves} blocked={blocked} nextCommands={next_commands} />

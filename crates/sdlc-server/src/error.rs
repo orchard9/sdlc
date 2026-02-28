@@ -2,12 +2,73 @@ use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use sdlc_core::error::SdlcError;
 
+// ---------------------------------------------------------------------------
+// Internal sentinel for explicit 409 Conflict errors
+// ---------------------------------------------------------------------------
+
+/// Private sentinel error type used to carry an explicit HTTP 409 through
+/// the `anyhow::Error` chain without touching the `SdlcError` enum.
+#[derive(Debug)]
+struct ConflictError(String);
+
+impl std::fmt::Display for ConflictError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for ConflictError {}
+
+/// Private sentinel error type used to carry an explicit HTTP 404 through
+/// the `anyhow::Error` chain without touching the `SdlcError` enum.
+#[derive(Debug)]
+struct NotFoundError(String);
+
+impl std::fmt::Display for NotFoundError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for NotFoundError {}
+
+// ---------------------------------------------------------------------------
+// AppError — unified error type for HTTP responses
+// ---------------------------------------------------------------------------
+
 /// Unified error type for HTTP responses.
 #[derive(Debug)]
 pub struct AppError(pub anyhow::Error);
 
+impl AppError {
+    /// Construct a 400 Bad Request error with the given message.
+    pub fn bad_request(msg: impl Into<String>) -> Self {
+        Self(SdlcError::InvalidSlug(msg.into()).into())
+    }
+
+    /// Construct a 409 Conflict error.
+    pub fn conflict(msg: impl Into<String>) -> Self {
+        Self(ConflictError(msg.into()).into())
+    }
+
+    /// Construct a 404 Not Found error.
+    pub fn not_found(msg: impl Into<String>) -> Self {
+        Self(NotFoundError(msg.into()).into())
+    }
+}
+
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
+        // Check for explicit sentinel types before falling through to SdlcError.
+        if let Some(c) = self.0.downcast_ref::<ConflictError>() {
+            let body = serde_json::json!({ "error": c.0.clone() });
+            return (StatusCode::CONFLICT, axum::Json(body)).into_response();
+        }
+        if let Some(n) = self.0.downcast_ref::<NotFoundError>() {
+            let body = serde_json::json!({ "error": n.0.clone() });
+            return (StatusCode::NOT_FOUND, axum::Json(body)).into_response();
+        }
+
         let status = if let Some(e) = self.0.downcast_ref::<SdlcError>() {
             match e {
                 SdlcError::NotInitialized => StatusCode::BAD_REQUEST,
@@ -17,27 +78,39 @@ impl IntoResponse for AppError {
                 | SdlcError::InvestigationNotFound(_)
                 | SdlcError::TaskNotFound(_)
                 | SdlcError::ArtifactNotFound(_)
-                | SdlcError::SessionNotFound(_) => StatusCode::NOT_FOUND,
+                | SdlcError::SessionNotFound(_)
+                | SdlcError::SecretEnvNotFound(_)
+                | SdlcError::SecretEnvKeyNotFound(_, _)
+                | SdlcError::SecretKeyNotFound(_)
+                | SdlcError::EscalationNotFound(_) => StatusCode::NOT_FOUND,
                 SdlcError::FeatureExists(_)
                 | SdlcError::MilestoneExists(_)
                 | SdlcError::PonderExists(_)
-                | SdlcError::InvestigationExists(_) => StatusCode::CONFLICT,
+                | SdlcError::InvestigationExists(_)
+                | SdlcError::SecretKeyExists(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidSlug(_)
                 | SdlcError::InvalidPhase(_)
                 | SdlcError::InvalidPonderStatus(_)
                 | SdlcError::InvalidInvestigationKind(_)
                 | SdlcError::InvalidInvestigationStatus(_)
                 | SdlcError::InvalidArtifactFilename(_)
-                | SdlcError::InvalidFeatureOrder(_) => StatusCode::BAD_REQUEST,
+                | SdlcError::InvalidFeatureOrder(_)
+                | SdlcError::InvalidSecretKeyType(_) => StatusCode::BAD_REQUEST,
                 SdlcError::DuplicateTeamMember(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidTransition { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::MissingArtifact { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::Blocked(_) => StatusCode::CONFLICT,
+                SdlcError::NoToolRuntime => StatusCode::SERVICE_UNAVAILABLE,
+                SdlcError::ToolFailed(_) => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::Search(_)
                 | SdlcError::Io(_)
                 | SdlcError::Yaml(_)
                 | SdlcError::Json(_)
-                | SdlcError::HomeNotFound => StatusCode::INTERNAL_SERVER_ERROR,
+                | SdlcError::HomeNotFound
+                | SdlcError::ToolSpawnFailed(_)
+                | SdlcError::AgeNotInstalled
+                | SdlcError::AgeDecryptFailed(_)
+                | SdlcError::AgeEncryptFailed(_) => StatusCode::INTERNAL_SERVER_ERROR,
             }
         } else {
             StatusCode::INTERNAL_SERVER_ERROR
@@ -190,6 +263,34 @@ mod tests {
     }
 
     #[test]
+    fn no_tool_runtime_maps_to_503() {
+        let err = AppError(SdlcError::NoToolRuntime.into());
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::SERVICE_UNAVAILABLE);
+    }
+
+    #[test]
+    fn tool_failed_maps_to_422() {
+        let err = AppError(SdlcError::ToolFailed("exit 1".into()).into());
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::UNPROCESSABLE_ENTITY);
+    }
+
+    #[test]
+    fn tool_spawn_failed_maps_to_500() {
+        let err = AppError(SdlcError::ToolSpawnFailed("ENOENT".into()).into());
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    }
+
+    #[test]
+    fn not_found_constructor_maps_to_404() {
+        let err = AppError::not_found("tool 'foo' not found");
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[test]
     fn response_body_contains_error_field() {
         let err = AppError(SdlcError::FeatureNotFound("my-feat".into()).into());
         let response = err.into_response();
@@ -203,5 +304,12 @@ mod tests {
             "expected JSON content type, got {:?}",
             ct
         );
+    }
+
+    #[test]
+    fn conflict_constructor_maps_to_409() {
+        let err = AppError::conflict("Agent already running for 'my-feat'");
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
     }
 }

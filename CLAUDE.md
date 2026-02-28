@@ -41,6 +41,8 @@ cd frontend && npm ci && npm run build
 | `crates/sdlc-cli/src/cmd/next.rs` | `sdlc next` — classifies and formats the directive |
 | `crates/sdlc-cli/src/cmd/ponder.rs` | `sdlc ponder *` — CLI for the ideation workspace |
 | `crates/sdlc-server/src/routes/roadmap.rs` | REST routes for ponder entries (`/api/roadmap`) |
+| `crates/sdlc-server/src/auth.rs` | Tunnel auth middleware — token/cookie gate, local bypass |
+| `crates/sdlc-cli/src/cmd/tunnel.rs` | Tunnel process lifecycle (cloudflared), QR printing, token generation |
 | `.sdlc/state.yaml` | Project-level state summary (includes `active_ponders`) |
 | `.sdlc/config.yaml` | Gates, platform commands, quality thresholds |
 | `.sdlc/features/<slug>/` | Per-feature artifact Markdown files |
@@ -167,6 +169,8 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 | `/sdlc-run <slug>` | Autonomous run to next HITL gate |
 | `/sdlc-status` | Project overview |
 | `/sdlc-plan` | Distribute a plan into milestones, features, tasks |
+| `/sdlc-prepare <milestone>` | Pre-flight milestone — align features with vision, fix gaps, write wave plan |
+| `/sdlc-run-wave <milestone>` | Execute Wave 1 features in parallel, advance to next wave |
 | `/sdlc-pressure-test <milestone>` | Pressure-test milestone against user perspectives |
 | `/sdlc-milestone-uat <milestone>` | Run acceptance test for a milestone |
 | `/sdlc-enterprise-readiness` | Production readiness analysis |

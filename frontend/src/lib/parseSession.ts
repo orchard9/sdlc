@@ -50,6 +50,8 @@ const DECISION = /^⚑\s+(.+)$/
 const QUESTION = /^\?\s+(.+)$/
 const TOOL_OPEN = /^<!--\s*tool:\s*(.+?)\s*-->$/
 const TOOL_CLOSE = /^<!--\s*\/tool\s*-->$/
+const ARTIFACT_OPEN = /^<!--\s*artifact:\s*(.+?)\s*-->$/
+const ARTIFACT_CLOSE = /^<!--\s*\/artifact\s*-->$/
 const FENCE = /^```/
 // ASCII box-drawing characters that mark a sketch block
 const BOX_DRAWING = /[─│┌└┐┘├┤┬┴┼╔╗╚╝╠╣╦╩╬═║→←↑↓▸▶◦•]/
@@ -72,6 +74,22 @@ export function parseSession(raw: string): SessionEvent[] {
 
   while (i < lines.length) {
     const line = lines[i]
+
+    // --- Explicit artifact comment block ---
+    // <!-- artifact: filename.md --> ... summary ... <!-- /artifact -->
+    const artifactCommentMatch = line.match(ARTIFACT_OPEN)
+    if (artifactCommentMatch) {
+      const filename = artifactCommentMatch[1].trim()
+      const summaryLines: string[] = []
+      i++
+      while (i < lines.length && !lines[i].match(ARTIFACT_CLOSE)) {
+        summaryLines.push(lines[i])
+        i++
+      }
+      i++ // skip <!-- /artifact -->
+      events.push({ kind: 'artifact', filename, summary: summaryLines.join('\n').trim() })
+      continue
+    }
 
     // --- Tool block ---
     const toolMatch = line.match(TOOL_OPEN)

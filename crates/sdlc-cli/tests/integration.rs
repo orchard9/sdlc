@@ -2902,3 +2902,506 @@ We had a great discussion.
         .success()
         .stdout(predicate::str::contains("We had a great discussion"));
 }
+
+// ---------------------------------------------------------------------------
+// sdlc tool list
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_tool_list_after_init() {
+    // After sdlc init, `sdlc tool list` exits 0 and shows the core tools.
+    // Listing does not require a JS runtime — it only reads the filesystem.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["tool", "list"])
+        .assert()
+        .success()
+        // Core AMA tool must be listed after init
+        .stdout(predicate::str::contains("ama"));
+}
+
+// ---------------------------------------------------------------------------
+// sdlc config show
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_config_show_json() {
+    // `sdlc config show --json` loads the config and emits valid JSON.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let output = sdlc(&dir)
+        .args(["config", "show", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let text = String::from_utf8(output).expect("output must be UTF-8");
+    serde_json::from_str::<serde_json::Value>(&text)
+        .expect("sdlc config show --json must emit valid JSON");
+}
+
+// ---------------------------------------------------------------------------
+// Week 2 — core tool suite installation
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_shared_types_written_by_init() {
+    // sdlc init must create the four _shared TypeScript files.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let shared = dir.path().join(".sdlc/tools/_shared");
+    assert!(
+        shared.join("types.ts").exists(),
+        "_shared/types.ts must exist after init"
+    );
+    assert!(
+        shared.join("log.ts").exists(),
+        "_shared/log.ts must exist after init"
+    );
+    assert!(
+        shared.join("config.ts").exists(),
+        "_shared/config.ts must exist after init"
+    );
+    assert!(
+        shared.join("runtime.ts").exists(),
+        "_shared/runtime.ts must exist after init"
+    );
+
+    // types.ts must declare ToolMeta and ToolResult
+    let types_content = std::fs::read_to_string(shared.join("types.ts")).unwrap();
+    assert!(
+        types_content.contains("ToolMeta"),
+        "types.ts must define ToolMeta"
+    );
+    assert!(
+        types_content.contains("ToolResult"),
+        "types.ts must define ToolResult"
+    );
+}
+
+#[test]
+fn test_ama_tool_and_readme_installed() {
+    // sdlc init must create ama/tool.ts (overwrite) and ama/README.md, ama/config.yaml
+    // (write-if-missing). tools.md must also exist.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let ama = dir.path().join(".sdlc/tools/ama");
+    assert!(
+        ama.join("tool.ts").exists(),
+        "ama/tool.ts must exist after init"
+    );
+    assert!(
+        ama.join("README.md").exists(),
+        "ama/README.md must exist after init"
+    );
+    assert!(
+        ama.join("config.yaml").exists(),
+        "ama/config.yaml must exist after init"
+    );
+
+    // tool.ts must declare the ToolMeta const and import from _shared
+    let tool_content = std::fs::read_to_string(ama.join("tool.ts")).unwrap();
+    assert!(
+        tool_content.contains("_shared/types.ts"),
+        "tool.ts must import from _shared/types.ts"
+    );
+    assert!(
+        tool_content.contains("--meta"),
+        "tool.ts must handle --meta mode"
+    );
+    assert!(
+        tool_content.contains("--setup"),
+        "tool.ts must handle --setup mode"
+    );
+    assert!(
+        tool_content.contains("--run"),
+        "tool.ts must handle --run mode"
+    );
+
+    // tools.md must exist
+    let manifest = dir.path().join(".sdlc/tools/tools.md");
+    assert!(manifest.exists(), "tools/tools.md must exist after init");
+    let manifest_content = std::fs::read_to_string(&manifest).unwrap();
+    assert!(
+        manifest_content.contains("ama"),
+        "tools.md must mention ama"
+    );
+
+    // re-running init must not fail (idempotency)
+    init_project(&dir);
+    assert!(
+        ama.join("tool.ts").exists(),
+        "ama/tool.ts must still exist after second init"
+    );
+}
+
+#[test]
+fn test_guidance_md_has_tools_section() {
+    // sdlc init must write guidance.md with a §7 SDLC Tool Suite section.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let guidance = std::fs::read_to_string(dir.path().join(".sdlc/guidance.md")).unwrap();
+    assert!(
+        guidance.contains("## 7. SDLC Tool Suite"),
+        "guidance.md must contain '## 7. SDLC Tool Suite'"
+    );
+    assert!(
+        guidance.contains("tools.md"),
+        "guidance.md §7 must reference tools.md"
+    );
+    assert!(
+        guidance.contains("sdlc tool run ama"),
+        "guidance.md §7 must include the ama run command"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Week 3 — quality-check tool + AGENTS.md Tool Suite + tool slash commands
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_quality_check_tool_installed() {
+    // sdlc init must create quality-check/tool.ts, config.yaml, and README.md
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let qc = dir.path().join(".sdlc/tools/quality-check");
+    assert!(
+        qc.join("tool.ts").exists(),
+        "quality-check/tool.ts must exist after init"
+    );
+    assert!(
+        qc.join("config.yaml").exists(),
+        "quality-check/config.yaml must exist after init"
+    );
+    assert!(
+        qc.join("README.md").exists(),
+        "quality-check/README.md must exist after init"
+    );
+
+    // tool.ts must handle --meta and --run modes and import from _shared
+    let tool_content = std::fs::read_to_string(qc.join("tool.ts")).unwrap();
+    assert!(
+        tool_content.contains("_shared/types.ts"),
+        "quality-check/tool.ts must import from _shared/types.ts"
+    );
+    assert!(
+        tool_content.contains("--meta"),
+        "quality-check/tool.ts must handle --meta mode"
+    );
+    assert!(
+        tool_content.contains("--run"),
+        "quality-check/tool.ts must handle --run mode"
+    );
+    assert!(
+        tool_content.contains("quality-check"),
+        "quality-check/tool.ts must declare name as quality-check"
+    );
+
+    // tools.md must mention quality-check
+    let manifest = dir.path().join(".sdlc/tools/tools.md");
+    let manifest_content = std::fs::read_to_string(&manifest).unwrap();
+    assert!(
+        manifest_content.contains("quality-check"),
+        "tools.md must mention quality-check"
+    );
+
+    // idempotent
+    init_project(&dir);
+    assert!(
+        qc.join("tool.ts").exists(),
+        "quality-check/tool.ts must still exist after second init"
+    );
+}
+
+#[test]
+fn test_agents_md_has_tool_suite_section() {
+    // sdlc init must write AGENTS.md with the Tool Suite subsection
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let agents_md = std::fs::read_to_string(dir.path().join("AGENTS.md")).unwrap();
+    assert!(
+        agents_md.contains("<!-- sdlc:tools -->"),
+        "AGENTS.md must contain <!-- sdlc:tools --> marker"
+    );
+    assert!(
+        agents_md.contains("sdlc tool list"),
+        "AGENTS.md Tool Suite section must include 'sdlc tool list'"
+    );
+    assert!(
+        agents_md.contains("quality-check"),
+        "AGENTS.md Tool Suite section must mention quality-check"
+    );
+    assert!(
+        agents_md.contains("Tool Suite"),
+        "AGENTS.md must contain '### Tool Suite' heading"
+    );
+}
+
+#[test]
+fn test_tool_slash_commands_installed() {
+    // sdlc init must install all 4 tool slash commands to ~/.claude/commands/
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    let commands_dir = home.path().join(".claude/commands");
+    assert!(
+        commands_dir.join("sdlc-tool-run.md").exists(),
+        "sdlc-tool-run.md must be installed"
+    );
+    assert!(
+        commands_dir.join("sdlc-tool-build.md").exists(),
+        "sdlc-tool-build.md must be installed"
+    );
+    assert!(
+        commands_dir.join("sdlc-tool-audit.md").exists(),
+        "sdlc-tool-audit.md must be installed"
+    );
+    assert!(
+        commands_dir.join("sdlc-tool-uat.md").exists(),
+        "sdlc-tool-uat.md must be installed"
+    );
+
+    // Spot-check content of each command
+    let tool_run = std::fs::read_to_string(commands_dir.join("sdlc-tool-run.md")).unwrap();
+    assert!(
+        tool_run.contains("sdlc tool run"),
+        "sdlc-tool-run.md must reference 'sdlc tool run'"
+    );
+
+    let tool_build = std::fs::read_to_string(commands_dir.join("sdlc-tool-build.md")).unwrap();
+    assert!(
+        tool_build.contains("sdlc tool scaffold"),
+        "sdlc-tool-build.md must reference 'sdlc tool scaffold'"
+    );
+
+    let tool_audit = std::fs::read_to_string(commands_dir.join("sdlc-tool-audit.md")).unwrap();
+    assert!(
+        tool_audit.contains("Metadata"),
+        "sdlc-tool-audit.md must contain the Metadata checklist section"
+    );
+
+    let tool_uat = std::fs::read_to_string(commands_dir.join("sdlc-tool-uat.md")).unwrap();
+    assert!(
+        tool_uat.contains("--meta"),
+        "sdlc-tool-uat.md must include --meta scenario"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Week 5: AMA v0.2 — incremental indexing + TF-IDF + code-aware tokenization
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_ama_tool_has_incremental_indexing() {
+    // ama/tool.ts must contain the incremental indexing machinery:
+    // last_indexed.json for mtime tracking, and the MtimeMap interface.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let tool_content = std::fs::read_to_string(dir.path().join(".sdlc/tools/ama/tool.ts")).unwrap();
+
+    assert!(
+        tool_content.contains("last_indexed.json"),
+        "ama/tool.ts must reference last_indexed.json for incremental re-indexing"
+    );
+    assert!(
+        tool_content.contains("MtimeMap"),
+        "ama/tool.ts must define MtimeMap interface"
+    );
+    assert!(
+        tool_content.contains("files_skipped"),
+        "ama/tool.ts setup() must report files_skipped in output"
+    );
+    assert!(
+        tool_content.contains("files_pruned"),
+        "ama/tool.ts setup() must report files_pruned in output"
+    );
+    assert!(
+        tool_content.contains("index_size_kb"),
+        "ama/tool.ts setup() must report index_size_kb in output"
+    );
+}
+
+#[test]
+fn test_ama_tool_has_tfidf_scoring() {
+    // ama/tool.ts must contain TF-IDF scoring: idf field in Index, IDF computation,
+    // and IDF-weighted scoreChunks().
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let tool_content = std::fs::read_to_string(dir.path().join(".sdlc/tools/ama/tool.ts")).unwrap();
+
+    assert!(
+        tool_content.contains("idf: Record<string, number>"),
+        "ama/tool.ts Index interface must include idf field"
+    );
+    assert!(
+        tool_content.contains("Math.log("),
+        "ama/tool.ts must compute IDF weights using log formula"
+    );
+    assert!(
+        tool_content.contains("hasIdf"),
+        "ama/tool.ts scoreChunks() must check for IDF availability (graceful v1 fallback)"
+    );
+    assert!(
+        tool_content.contains("score: number"),
+        "ama/tool.ts AmaSource must expose relevance score"
+    );
+    assert!(
+        tool_content.contains("stale?: boolean"),
+        "ama/tool.ts AmaSource must include optional stale flag"
+    );
+}
+
+#[test]
+fn test_ama_tool_has_camelcase_tokenization() {
+    // ama/tool.ts extractTokens() must split camelCase and acronym boundaries
+    // so that code identifiers like featureTransition and SdlcError are searchable
+    // by their component words.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let tool_content = std::fs::read_to_string(dir.path().join(".sdlc/tools/ama/tool.ts")).unwrap();
+
+    assert!(
+        tool_content.contains("([a-z])([A-Z])"),
+        "ama/tool.ts extractTokens() must split camelCase boundaries"
+    );
+    assert!(
+        tool_content.contains("([A-Z]+)([A-Z][a-z])"),
+        "ama/tool.ts extractTokens() must split acronym+word boundaries (e.g. XMLParser)"
+    );
+}
+
+#[test]
+fn test_ama_tool_version_is_v2() {
+    // ama/tool.ts must report version 0.2.0 after the Week 5 upgrade.
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let tool_content = std::fs::read_to_string(dir.path().join(".sdlc/tools/ama/tool.ts")).unwrap();
+
+    assert!(
+        tool_content.contains("version: '0.2.1'"),
+        "ama/tool.ts must declare version 0.2.1 in ToolMeta"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Week 7: Cross-platform tool command registration
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_tool_commands_all_platforms() {
+    // sdlc init must install all 4 tool commands on Gemini, OpenCode, and Agents
+    let dir = TempDir::new().unwrap();
+    let home = TempDir::new().unwrap();
+    sdlc_with_home(&dir, &home).arg("init").assert().success();
+
+    // Gemini — .toml files
+    let gemini_dir = home.path().join(".gemini/commands");
+    for name in &[
+        "sdlc-tool-run",
+        "sdlc-tool-build",
+        "sdlc-tool-audit",
+        "sdlc-tool-uat",
+    ] {
+        let file = gemini_dir.join(format!("{name}.toml"));
+        assert!(
+            file.exists(),
+            "{name}.toml must be installed in ~/.gemini/commands"
+        );
+        let content = std::fs::read_to_string(&file).unwrap();
+        assert!(
+            content.contains("description"),
+            "{name}.toml must have a description field"
+        );
+    }
+
+    // Spot-check Gemini content
+    let toml = std::fs::read_to_string(gemini_dir.join("sdlc-tool-run.toml")).unwrap();
+    assert!(
+        toml.contains("Run an SDLC tool and act on the JSON result"),
+        "sdlc-tool-run.toml must contain the expected description"
+    );
+    let toml = std::fs::read_to_string(gemini_dir.join("sdlc-tool-audit.toml")).unwrap();
+    assert!(
+        toml.contains("Metadata"),
+        "sdlc-tool-audit.toml must contain the Metadata checklist"
+    );
+
+    // OpenCode — .md files
+    let opencode_dir = home.path().join(".opencode/command");
+    for name in &[
+        "sdlc-tool-run",
+        "sdlc-tool-build",
+        "sdlc-tool-audit",
+        "sdlc-tool-uat",
+    ] {
+        let file = opencode_dir.join(format!("{name}.md"));
+        assert!(
+            file.exists(),
+            "{name}.md must be installed in ~/.opencode/command"
+        );
+        let content = std::fs::read_to_string(&file).unwrap();
+        assert!(
+            content.contains("description:"),
+            "{name}.md must have a description frontmatter field"
+        );
+    }
+
+    // Spot-check OpenCode content
+    let md = std::fs::read_to_string(opencode_dir.join("sdlc-tool-build.md")).unwrap();
+    assert!(
+        md.contains("sdlc tool scaffold"),
+        "sdlc-tool-build.md must reference 'sdlc tool scaffold'"
+    );
+    let md = std::fs::read_to_string(opencode_dir.join("sdlc-tool-uat.md")).unwrap();
+    assert!(
+        md.contains("--meta"),
+        "sdlc-tool-uat.md must include --meta scenario"
+    );
+
+    // Agents — SKILL.md files
+    let agents_dir = home.path().join(".agents/skills");
+    for name in &[
+        "sdlc-tool-run",
+        "sdlc-tool-build",
+        "sdlc-tool-audit",
+        "sdlc-tool-uat",
+    ] {
+        let file = agents_dir.join(name).join("SKILL.md");
+        assert!(
+            file.exists(),
+            "{name}/SKILL.md must be installed in ~/.agents/skills"
+        );
+        let content = std::fs::read_to_string(&file).unwrap();
+        assert!(
+            content.contains("name:"),
+            "{name}/SKILL.md must have a name frontmatter field"
+        );
+    }
+
+    // Spot-check Agents content
+    let skill = std::fs::read_to_string(agents_dir.join("sdlc-tool-audit/SKILL.md")).unwrap();
+    assert!(
+        skill.contains("18"),
+        "sdlc-tool-audit/SKILL.md must reference the 18-item checklist"
+    );
+    let skill = std::fs::read_to_string(agents_dir.join("sdlc-tool-uat/SKILL.md")).unwrap();
+    assert!(
+        skill.contains("PASS"),
+        "sdlc-tool-uat/SKILL.md must mention PASS verdict"
+    );
+}

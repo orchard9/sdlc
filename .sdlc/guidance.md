@@ -60,7 +60,32 @@ Direct edits cause deserialization failures and corrupt state.
 | List tasks | `sdlc task list <slug>` |
 | Project state | `sdlc state` |
 | Survey milestone waves | `sdlc project prepare [--milestone <slug>]` |
+| Mark milestone prepared | `sdlc milestone mark-prepared <slug>` |
 | Project phase | `sdlc project status` |
 
 Phases advance automatically from artifact approvals — never call `sdlc feature transition`.
 The only files you write directly are Markdown artifacts to `output_path`.
+
+## 7. Project Secrets
+
+Encrypted secrets live in `.sdlc/secrets/`. The encrypted files (`.age`) and key
+name sidecars (`.meta.yaml`) are **safe to commit**. Plain `.env.*` files must never
+be committed — they are gitignored automatically.
+
+| Action | Command |
+|---|---|
+| List environments | `sdlc secrets env list` |
+| List key names (no decrypt) | `sdlc secrets env names <env>` |
+| Load secrets into shell | `eval $(sdlc secrets env export <env>)` |
+| Set a secret | `sdlc secrets env set <env> KEY=value` |
+| List authorized keys | `sdlc secrets keys list` |
+| Add a key | `sdlc secrets keys add --name <n> --key "$(cat ~/.ssh/id_ed25519.pub)"` |
+| Rekey after key change | `sdlc secrets keys rekey` |
+
+**For agents:** Check `sdlc secrets env names <env>` to see which variables are
+available. Load them before executing tasks that need credentials:
+
+    eval $(sdlc secrets env export production)
+
+Never log or hardcode secret values. Reference secrets by environment variable
+name only (e.g. `$ANTHROPIC_API_KEY`).

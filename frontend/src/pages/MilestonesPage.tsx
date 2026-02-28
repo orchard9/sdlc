@@ -39,7 +39,7 @@ export function MilestonesPage({ filter }: { filter?: 'released' }) {
 
   if (loading || !state) {
     return (
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto p-6">
         <Skeleton width="w-32" className="h-6 mb-6" />
         <div className="space-y-3">
           <SkeletonMilestone />

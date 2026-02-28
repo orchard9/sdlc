@@ -81,6 +81,44 @@ pub enum SdlcError {
     #[error("home directory not found: set HOME environment variable")]
     HomeNotFound,
 
+    #[error(
+        "age encryption tool not found — install with: brew install age  (or: apt install age)"
+    )]
+    AgeNotInstalled,
+
+    #[error("age decryption failed: {0}")]
+    AgeDecryptFailed(String),
+
+    #[error("age encryption failed: {0}")]
+    AgeEncryptFailed(String),
+
+    #[error("secret env not found: {0}")]
+    SecretEnvNotFound(String),
+
+    #[error("secret env key not found: '{0}' in env '{1}'")]
+    SecretEnvKeyNotFound(String, String),
+
+    #[error("secret key not found: {0}")]
+    SecretKeyNotFound(String),
+
+    #[error("secret key already exists: {0}")]
+    SecretKeyExists(String),
+
+    #[error("escalation not found: {0}")]
+    EscalationNotFound(String),
+
+    #[error("invalid key type '{0}': must be 'ssh' or 'age'")]
+    InvalidSecretKeyType(String),
+
+    #[error("No supported JavaScript runtime found. Install bun to use SDLC tools:\n  curl -fsSL https://bun.sh/install | bash\n  Or install deno: https://deno.land or node: https://nodejs.org")]
+    NoToolRuntime,
+
+    #[error("Failed to spawn tool subprocess: {0}")]
+    ToolSpawnFailed(String),
+
+    #[error("Tool exited with error: {0}")]
+    ToolFailed(String),
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 
