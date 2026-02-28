@@ -45,6 +45,36 @@ pub enum SdlcError {
     #[error("blocked by: {0}")]
     Blocked(String),
 
+    #[error("ponder entry not found: {0}")]
+    PonderNotFound(String),
+
+    #[error("ponder entry already exists: {0}")]
+    PonderExists(String),
+
+    #[error("invalid ponder status: {0}")]
+    InvalidPonderStatus(String),
+
+    #[error("investigation not found: {0}")]
+    InvestigationNotFound(String),
+
+    #[error("investigation already exists: {0}")]
+    InvestigationExists(String),
+
+    #[error("invalid investigation kind '{0}': must be root_cause, evolve, or guideline")]
+    InvalidInvestigationKind(String),
+
+    #[error("invalid investigation status '{0}': must be in_progress, complete, or parked")]
+    InvalidInvestigationStatus(String),
+
+    #[error("invalid artifact filename '{0}': must not contain path separators or '..'")]
+    InvalidArtifactFilename(String),
+
+    #[error("duplicate team member: {0}")]
+    DuplicateTeamMember(String),
+
+    #[error("session {0} not found")]
+    SessionNotFound(u32),
+
     #[error("search error: {0}")]
     Search(String),
 

@@ -3,10 +3,11 @@ pub mod error;
 pub mod routes;
 pub mod state;
 
-use axum::routing::{get, post, put};
+use axum::routing::{delete, get, post, put};
 use axum::Router;
 use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
+use tower_http::trace::TraceLayer;
 
 /// Build the axum Router with all API routes and middleware.
 /// Used by `serve()` and available for integration testing.
@@ -57,6 +58,70 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
             "/api/milestones/{slug}/features/order",
             put(routes::milestones::reorder_milestone_features),
         )
+        // Roadmap (Ponder Space)
+        .route("/api/roadmap", get(routes::roadmap::list_ponders))
+        .route("/api/roadmap", post(routes::roadmap::create_ponder))
+        .route("/api/roadmap/{slug}", get(routes::roadmap::get_ponder))
+        .route(
+            "/api/roadmap/{slug}/capture",
+            post(routes::roadmap::capture_artifact),
+        )
+        .route("/api/roadmap/{slug}", put(routes::roadmap::update_ponder))
+        .route(
+            "/api/roadmap/{slug}/sessions",
+            get(routes::roadmap::list_ponder_sessions),
+        )
+        .route(
+            "/api/roadmap/{slug}/sessions/{n}",
+            get(routes::roadmap::get_ponder_session),
+        )
+        // Ponder chat (agent-driven sessions)
+        .route(
+            "/api/ponder/{slug}/chat",
+            post(routes::runs::start_ponder_chat),
+        )
+        .route(
+            "/api/ponder/{slug}/chat/current",
+            delete(routes::runs::stop_ponder_chat),
+        )
+        // Investigations
+        .route(
+            "/api/investigations",
+            get(routes::investigations::list_investigations),
+        )
+        .route(
+            "/api/investigations",
+            post(routes::investigations::create_investigation),
+        )
+        .route(
+            "/api/investigations/{slug}",
+            get(routes::investigations::get_investigation),
+        )
+        .route(
+            "/api/investigations/{slug}",
+            put(routes::investigations::update_investigation),
+        )
+        .route(
+            "/api/investigations/{slug}/capture",
+            post(routes::investigations::capture_artifact),
+        )
+        .route(
+            "/api/investigations/{slug}/sessions",
+            get(routes::investigations::list_investigation_sessions),
+        )
+        .route(
+            "/api/investigations/{slug}/sessions/{n}",
+            get(routes::investigations::get_investigation_session),
+        )
+        // Investigation chat (agent-driven sessions)
+        .route(
+            "/api/investigation/{slug}/chat",
+            post(routes::runs::start_investigation_chat),
+        )
+        .route(
+            "/api/investigation/{slug}/chat/current",
+            delete(routes::runs::stop_investigation_chat),
+        )
         // Artifacts
         .route(
             "/api/artifacts/{slug}/{artifact_type}",
@@ -92,10 +157,47 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
         // Vision
         .route("/api/vision", get(routes::vision::get_vision))
         .route("/api/vision", put(routes::vision::put_vision))
-        // Run (generate directive)
-        .route("/api/run/{slug}", post(routes::runs::run_feature))
+        // Run history
+        .route("/api/runs", get(routes::runs::list_runs))
+        .route("/api/runs/{id}", get(routes::runs::get_run))
+        // Run (agent execution via claude-agent + MCP)
+        .route("/api/run/{slug}", post(routes::runs::start_run))
+        .route("/api/run/{slug}/events", get(routes::runs::run_events))
+        .route("/api/run/{slug}/stop", post(routes::runs::stop_run))
+        // Milestone UAT (agent execution)
+        .route(
+            "/api/milestone/{slug}/uat",
+            post(routes::runs::start_milestone_uat),
+        )
+        .route(
+            "/api/milestone/{slug}/uat/events",
+            get(routes::runs::milestone_uat_events),
+        )
+        .route(
+            "/api/milestone/{slug}/uat/stop",
+            post(routes::runs::stop_milestone_uat),
+        )
+        // Milestone prepare (agent execution)
+        .route(
+            "/api/milestone/{slug}/prepare",
+            post(routes::runs::start_milestone_prepare),
+        )
+        .route(
+            "/api/milestone/{slug}/prepare/events",
+            get(routes::runs::milestone_prepare_events),
+        )
+        .route(
+            "/api/milestone/{slug}/prepare/stop",
+            post(routes::runs::stop_milestone_prepare),
+        )
         // Config
         .route("/api/config", get(routes::config::get_config))
+        // Project (prepare / phase)
+        .route(
+            "/api/project/phase",
+            get(routes::prepare::get_project_phase),
+        )
+        .route("/api/project/prepare", get(routes::prepare::get_prepare))
         // Query
         .route("/api/query/search", get(routes::query::search))
         .route("/api/query/search-tasks", get(routes::query::search_tasks))
@@ -108,6 +210,7 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
         // Init
         .route("/api/init", post(routes::init::init_project))
         .fallback(embed::static_handler)
+        .layer(TraceLayer::new_for_http())
         .layer(cors)
         .with_state(app_state)
 }

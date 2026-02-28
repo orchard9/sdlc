@@ -305,13 +305,55 @@ impl fmt::Display for ActionType {
 // TaskStatus
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum TaskStatus {
+    #[default]
     Pending,
     InProgress,
     Completed,
     Blocked,
+}
+
+impl<'de> serde::Deserialize<'de> for TaskStatus {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        match s.as_str() {
+            "pending" => Ok(TaskStatus::Pending),
+            "in_progress" => Ok(TaskStatus::InProgress),
+            "completed" => Ok(TaskStatus::Completed),
+            "blocked" => Ok(TaskStatus::Blocked),
+            // Synonyms — warn and map to the canonical value
+            "done" | "finished" | "complete" => {
+                eprintln!(
+                    "warning: task status '{}' is not canonical, treating as 'completed'",
+                    s
+                );
+                Ok(TaskStatus::Completed)
+            }
+            "todo" | "not_started" => {
+                eprintln!(
+                    "warning: task status '{}' is not canonical, treating as 'pending'",
+                    s
+                );
+                Ok(TaskStatus::Pending)
+            }
+            "active" | "started" | "wip" => {
+                eprintln!(
+                    "warning: task status '{}' is not canonical, treating as 'in_progress'",
+                    s
+                );
+                Ok(TaskStatus::InProgress)
+            }
+            other => Err(serde::de::Error::unknown_variant(
+                other,
+                &["pending", "in_progress", "completed", "blocked"],
+            )),
+        }
+    }
 }
 
 impl fmt::Display for TaskStatus {

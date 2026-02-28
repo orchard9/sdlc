@@ -1,5 +1,5 @@
 use super::SdlcTool;
-use sdlc_core::{feature::Feature, task::complete_task};
+use sdlc_core::{classifier::try_auto_transition, feature::Feature, task::complete_task};
 use std::path::Path;
 
 pub struct CompleteTaskTool;
@@ -42,10 +42,16 @@ impl SdlcTool for CompleteTaskTool {
         complete_task(&mut feature.tasks, task_id).map_err(|e| e.to_string())?;
         feature.save(root).map_err(|e| e.to_string())?;
 
-        Ok(serde_json::json!({
+        let transitioned_to = try_auto_transition(root, slug);
+
+        let mut result = serde_json::json!({
             "task_id": task_id,
             "status": "completed"
-        }))
+        });
+        if let Some(phase) = transitioned_to {
+            result["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok(result)
     }
 }
 

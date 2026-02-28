@@ -14,6 +14,12 @@ pub enum ProjectSubcommand {
     Stats,
     /// List all blocked features with duration and reason
     Blockers,
+    /// Survey milestone, find gaps, organize into parallelizable waves
+    Prepare {
+        /// Milestone slug (auto-detects if omitted)
+        #[arg(long)]
+        milestone: Option<String>,
+    },
 }
 
 pub fn run(root: &Path, subcmd: ProjectSubcommand, json: bool) -> anyhow::Result<()> {
@@ -21,6 +27,9 @@ pub fn run(root: &Path, subcmd: ProjectSubcommand, json: bool) -> anyhow::Result
         ProjectSubcommand::Status => status(root, json),
         ProjectSubcommand::Stats => stats(root, json),
         ProjectSubcommand::Blockers => blockers(root, json),
+        ProjectSubcommand::Prepare { milestone } => {
+            super::prepare::run(root, milestone.as_deref(), json)
+        }
     }
 }
 

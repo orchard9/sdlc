@@ -1,7 +1,10 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { Sidebar } from './Sidebar'
+import { AgentPanel } from './AgentPanel'
+import { AgentPanelFab } from './AgentPanelFab'
 import { SearchModal } from '@/components/shared/SearchModal'
-import { Menu, X } from 'lucide-react'
+import { useAgentRuns } from '@/contexts/AgentRunContext'
+import { Menu, X, PanelRightOpen } from 'lucide-react'
 
 interface AppShellProps {
   children: ReactNode
@@ -10,6 +13,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const { panelOpen, setPanelOpen } = useAgentRuns()
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -44,7 +48,7 @@ export function AppShell({ children }: AppShellProps) {
         <Sidebar onNavigate={() => setSidebarOpen(false)} onSearch={() => setSearchOpen(true)} />
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Mobile header with hamburger */}
         <header className="flex items-center gap-3 px-4 py-3 border-b border-border md:hidden">
           <button
@@ -61,6 +65,23 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </main>
       </div>
+
+      {/* Desktop agent panel */}
+      <AgentPanel />
+
+      {/* Panel open button when collapsed (desktop only) */}
+      {!panelOpen && (
+        <button
+          onClick={() => setPanelOpen(true)}
+          className="hidden md:flex items-center justify-center w-8 border-l border-border bg-background hover:bg-muted transition-colors shrink-0"
+          aria-label="Open agent panel"
+        >
+          <PanelRightOpen className="w-4 h-4 text-muted-foreground" />
+        </button>
+      )}
+
+      {/* Mobile FAB + drawer */}
+      <AgentPanelFab />
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>

@@ -65,11 +65,17 @@ pub async fn approve_artifact(
         feature.approve_artifact(at, body.by)?;
         feature.save(&root)?;
 
-        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+        let transitioned_to = sdlc_core::classifier::try_auto_transition(&root, &slug);
+
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact_type": at,
             "status": "approved",
-        }))
+        });
+        if let Some(phase) = transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok::<_, sdlc_core::SdlcError>(val)
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
@@ -97,11 +103,17 @@ pub async fn reject_artifact(
         feature.reject_artifact(at, body.reason)?;
         feature.save(&root)?;
 
-        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+        let transitioned_to = sdlc_core::classifier::try_auto_transition(&root, &slug);
+
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact_type": at,
             "status": "rejected",
-        }))
+        });
+        if let Some(phase) = transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok::<_, sdlc_core::SdlcError>(val)
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
@@ -129,11 +141,17 @@ pub async fn waive_artifact(
         feature.waive_artifact(at, body.reason)?;
         feature.save(&root)?;
 
-        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+        let transitioned_to = sdlc_core::classifier::try_auto_transition(&root, &slug);
+
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact_type": at,
             "status": "waived",
-        }))
+        });
+        if let Some(phase) = transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok::<_, sdlc_core::SdlcError>(val)
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;

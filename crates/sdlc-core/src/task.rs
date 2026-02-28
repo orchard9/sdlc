@@ -7,12 +7,19 @@ use serde::{Deserialize, Serialize};
 pub struct Task {
     pub id: String,
     pub title: String,
+    #[serde(default)]
     pub description: Option<String>,
+    #[serde(default)]
     pub status: TaskStatus,
+    #[serde(default = "Utc::now")]
     pub created_at: DateTime<Utc>,
+    #[serde(default)]
     pub started_at: Option<DateTime<Utc>>,
+    #[serde(default)]
     pub completed_at: Option<DateTime<Utc>>,
+    #[serde(default)]
     pub blocker: Option<String>,
+    #[serde(default)]
     pub depends_on: Vec<String>,
 }
 

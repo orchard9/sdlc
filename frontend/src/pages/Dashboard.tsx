@@ -1,26 +1,20 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProjectState } from '@/hooks/useProjectState'
+import { useSSE } from '@/hooks/useSSE'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Skeleton, SkeletonCard } from '@/components/shared/Skeleton'
+import { CopyButton } from '@/components/shared/CopyButton'
+import { CommandBlock } from '@/components/shared/CommandBlock'
 import { api } from '@/api/client'
 import type { ProjectConfig } from '@/lib/types'
-import { Copy, Check, AlertTriangle, Clock, ArrowRight, ChevronDown, ChevronRight } from 'lucide-react'
+import { PreparePanel } from '@/components/features/PreparePanel'
+import { useAgentRuns } from '@/contexts/AgentRunContext'
+import { AlertTriangle, Clock, ChevronDown, ChevronRight, Lightbulb, FileText, Users } from 'lucide-react'
+import type { PonderSummary } from '@/lib/types'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
 import { MarkdownContent } from '@/components/shared/MarkdownContent'
-
-function CopyButton({ text, copied, onCopy }: { text: string; copied: string | null; onCopy: (t: string) => void }) {
-  return (
-    <button
-      onClick={() => onCopy(text)}
-      className="shrink-0 p-1.5 rounded-lg border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-      title="Copy command"
-    >
-      {copied === text ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-    </button>
-  )
-}
 
 function VisionSection({ content }: { content: string }) {
   const [open, setOpen] = useState(false)
@@ -42,36 +36,28 @@ function VisionSection({ content }: { content: string }) {
   )
 }
 
-function CommandBlock({ cmd, copied, onCopy }: { cmd: string; copied: string | null; onCopy: (t: string) => void }) {
-  return (
-    <div className="flex items-center gap-2">
-      <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-3 py-1.5 rounded-lg text-muted-foreground select-all">
-        {cmd}
-      </code>
-      <CopyButton text={cmd} copied={copied} onCopy={onCopy} />
-    </div>
-  )
-}
-
 export function Dashboard() {
   const { state, error, loading } = useProjectState()
+  const { isRunning } = useAgentRuns()
   const [config, setConfig] = useState<ProjectConfig | null>(null)
   const [vision, setVision] = useState<{ content: string; exists: boolean } | null>(null)
-  const [copied, setCopied] = useState<string | null>(null)
+  const [ponders, setPonders] = useState<PonderSummary[]>([])
   const [showArchive, setShowArchive] = useState(false)
+
+  const loadPonders = useCallback(() => {
+    api.getRoadmap()
+      .then(road => setPonders(road))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     Promise.all([api.getConfig(), api.getVision()])
       .then(([cfg, vis]) => { setConfig(cfg); setVision(vis) })
       .catch(() => {})
-  }, [])
+    loadPonders()
+  }, [loadPonders])
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(text)
-      setTimeout(() => setCopied(null), 2000)
-    })
-  }
+  useSSE(loadPonders)
 
   if (error) {
     return (
@@ -113,34 +99,6 @@ export function Dashboard() {
   const activeFeatures = state.features.filter(
     f => !f.archived && f.next_action !== 'done' && f.next_action !== 'wait_for_approval' && f.next_action !== 'unblock_dependency'
   )
-
-  // Primary next command: first active milestone's next feature, or first ungrouped active feature
-  let primaryCmd: string | null = null
-  let primaryLabel: string | null = null
-  let primaryMessage: string | null = null
-
-  for (const milestone of activeMilestones) {
-    const nextSlug = milestone.features.find(s => {
-      const f = featureBySlug.get(s)
-      return f && !f.archived && f.next_action !== 'done'
-        && f.next_action !== 'wait_for_approval'
-        && f.next_action !== 'unblock_dependency'
-    })
-    if (nextSlug) {
-      const f = featureBySlug.get(nextSlug)
-      primaryCmd = `/sdlc-run ${nextSlug}`
-      primaryLabel = f?.title ?? nextSlug
-      primaryMessage = f?.next_message ?? null
-      break
-    }
-  }
-
-  if (!primaryCmd && activeFeatures.length > 0) {
-    const f = activeFeatures[0]
-    primaryCmd = `/sdlc-run ${f.slug}`
-    primaryLabel = f.title
-    primaryMessage = f.next_message
-  }
 
   const doneCount = state.features.filter(f => !f.archived && f.next_action === 'done').length
   const blockedCount = state.blocked.length
@@ -195,90 +153,94 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* What's Next */}
-      {(hitlFeatures.length > 0 || primaryCmd || state.blocked.length > 0) && (
-        <section className="mb-8">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">What's Next</h3>
-
-          {/* HITL / blocked needing human */}
-          {hitlFeatures.length > 0 && (
-            <div className="bg-amber-950/30 border border-amber-500/20 rounded-xl p-4 mb-3 space-y-2">
-              {hitlFeatures.map(f => (
-                <div key={f.slug} className="flex items-start gap-2.5">
-                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-                  <div className="min-w-0">
-                    <Link to={`/features/${f.slug}`} className="text-sm font-medium hover:text-primary transition-colors">
-                      {f.title}
+      {/* Pondering */}
+      <section className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Lightbulb className="w-3.5 h-3.5" />
+            Pondering
+          </h3>
+          <Link
+            to="/ponder"
+            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            View all →
+          </Link>
+        </div>
+        {(() => {
+          const activePonders = ponders.filter(p => p.status === 'exploring' || p.status === 'converging')
+          return activePonders.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+            {activePonders.map(p => (
+                <div key={p.slug} className="bg-card border border-border rounded-xl p-3 flex items-start gap-3">
+                  <div className="min-w-0 flex-1">
+                    <Link to={`/ponder/${p.slug}`} className="text-sm font-medium hover:text-primary transition-colors">
+                      {p.title}
                     </Link>
-                    <p className="text-xs text-muted-foreground mt-0.5">{f.next_message}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Active directives (in-flight) */}
-          {state.active_directives.length > 0 && (
-            <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-3 space-y-2">
-              {state.active_directives.map(d => {
-                const f = featureBySlug.get(d.feature)
-                return (
-                  <div key={d.feature} className="flex items-start gap-2.5">
-                    <Clock className="w-4 h-4 text-primary shrink-0 mt-0.5" />
-                    <div className="min-w-0">
-                      <Link to={`/features/${d.feature}`} className="text-sm font-medium hover:text-primary transition-colors">
-                        {f?.title ?? d.feature}
-                      </Link>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {d.action} · started {new Date(d.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
+                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                      <span className="flex items-center gap-0.5"><FileText className="w-3 h-3" />{p.artifact_count}</span>
+                      <span className="flex items-center gap-0.5"><Users className="w-3 h-3" />{p.team_size}</span>
                     </div>
                   </div>
-                )
-              })}
-            </div>
-          )}
+                  <CopyButton text={`/sdlc-ponder ${p.slug}`} />
+                </div>
+              ))}
+          </div>
+        ) : (
+          <Link
+            to="/ponder"
+            className="block bg-card border border-dashed border-border rounded-xl p-4 text-center hover:border-primary/50 transition-colors group"
+          >
+            <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+              Start exploring a new idea
+            </p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">
+              Use the Roadmap to capture and develop ideas before they become features
+            </p>
+          </Link>
+        )
+        })()}
+      </section>
 
-          {/* Primary next command */}
-          {primaryCmd && hitlFeatures.length === 0 && (
-            <div className="bg-card border border-border rounded-xl p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <ArrowRight className="w-4 h-4 text-primary shrink-0" />
-                <span className="text-sm font-medium">{primaryLabel}</span>
+      {/* Wave Plan (replaces What's Next) */}
+      <PreparePanel />
+
+      {/* HITL / blocked needing human */}
+      {hitlFeatures.length > 0 && (
+        <div className="bg-amber-950/30 border border-amber-500/20 rounded-xl p-4 mb-6 space-y-2">
+          {hitlFeatures.map(f => (
+            <div key={f.slug} className="flex items-start gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="min-w-0">
+                <Link to={`/features/${f.slug}`} className="text-sm font-medium hover:text-primary transition-colors">
+                  {f.title}
+                </Link>
+                <p className="text-xs text-muted-foreground mt-0.5">{f.next_message}</p>
               </div>
-              {primaryMessage && (
-                <p className="text-xs text-muted-foreground mb-3 ml-6">{primaryMessage}</p>
-              )}
-              <CommandBlock cmd={primaryCmd} copied={copied} onCopy={handleCopy} />
             </div>
-          )}
-
-          {/* Blocked items */}
-          {state.blocked.length > 0 && (
-            <div className="mt-3 space-y-1.5">
-              {state.blocked.map(b => {
-                const f = featureBySlug.get(b.feature)
-                return (
-                  <div key={b.feature} className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                    <span>
-                      <Link to={`/features/${b.feature}`} className="font-medium hover:text-foreground transition-colors">
-                        {f?.title ?? b.feature}
-                      </Link>
-                      {' '}— {b.reason}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
-        </section>
+          ))}
+        </div>
       )}
 
-      {/* All done */}
-      {state.features.length > 0 && activeFeatures.length === 0 && hitlFeatures.length === 0 && state.blocked.length === 0 && (
-        <div className="mb-8 bg-green-950/20 border border-green-500/20 rounded-xl p-4 text-center">
-          <p className="text-sm text-green-400 font-medium">All features complete</p>
+      {/* Active directives (in-flight) */}
+      {state.active_directives.length > 0 && (
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6 space-y-2">
+          {state.active_directives.map(d => {
+            const f = featureBySlug.get(d.feature)
+            return (
+              <div key={d.feature} className="flex items-start gap-2.5">
+                <Clock className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div className="min-w-0">
+                  <Link to={`/features/${d.feature}`} className="text-sm font-medium hover:text-primary transition-colors">
+                    {f?.title ?? d.feature}
+                  </Link>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {d.action} · started {new Date(d.started_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 
@@ -311,8 +273,8 @@ export function Dashboard() {
               <span className="text-xs text-muted-foreground ml-auto">{features.length} features</span>
             </div>
             {cmd && (
-              <div className="mb-3">
-                <CommandBlock cmd={cmd} copied={copied} onCopy={handleCopy} />
+              <div className={`mb-3 ${nextFeature && isRunning(nextFeature) ? 'opacity-50' : ''}`}>
+                <CommandBlock cmd={cmd} />
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">

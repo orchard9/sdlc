@@ -13,12 +13,23 @@ impl IntoResponse for AppError {
                 SdlcError::NotInitialized => StatusCode::BAD_REQUEST,
                 SdlcError::FeatureNotFound(_)
                 | SdlcError::MilestoneNotFound(_)
+                | SdlcError::PonderNotFound(_)
+                | SdlcError::InvestigationNotFound(_)
                 | SdlcError::TaskNotFound(_)
-                | SdlcError::ArtifactNotFound(_) => StatusCode::NOT_FOUND,
-                SdlcError::FeatureExists(_) | SdlcError::MilestoneExists(_) => StatusCode::CONFLICT,
+                | SdlcError::ArtifactNotFound(_)
+                | SdlcError::SessionNotFound(_) => StatusCode::NOT_FOUND,
+                SdlcError::FeatureExists(_)
+                | SdlcError::MilestoneExists(_)
+                | SdlcError::PonderExists(_)
+                | SdlcError::InvestigationExists(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidSlug(_)
                 | SdlcError::InvalidPhase(_)
+                | SdlcError::InvalidPonderStatus(_)
+                | SdlcError::InvalidInvestigationKind(_)
+                | SdlcError::InvalidInvestigationStatus(_)
+                | SdlcError::InvalidArtifactFilename(_)
                 | SdlcError::InvalidFeatureOrder(_) => StatusCode::BAD_REQUEST,
+                SdlcError::DuplicateTeamMember(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidTransition { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::MissingArtifact { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::Blocked(_) => StatusCode::CONFLICT,
@@ -83,6 +94,20 @@ mod tests {
     #[test]
     fn feature_exists_maps_to_409() {
         let err = AppError(SdlcError::FeatureExists("test".into()).into());
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+    }
+
+    #[test]
+    fn ponder_not_found_maps_to_404() {
+        let err = AppError(SdlcError::PonderNotFound("my-idea".into()).into());
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
+
+    #[test]
+    fn ponder_exists_maps_to_409() {
+        let err = AppError(SdlcError::PonderExists("my-idea".into()).into());
         let response = err.into_response();
         assert_eq!(response.status(), StatusCode::CONFLICT);
     }

@@ -1,64 +1,42 @@
 import { useParams, Link } from 'react-router-dom'
-import { useEffect, useState } from 'react'
 import { useFeature } from '@/hooks/useFeature'
+import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { PhaseProgressBar } from '@/components/shared/PhaseProgressBar'
 import { ArtifactViewer } from '@/components/features/ArtifactViewer'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
-import { api } from '@/api/client'
-import { ArrowLeft, Copy, Check } from 'lucide-react'
+import { CopyButton } from '@/components/shared/CopyButton'
+import { ArrowLeft, Play, Loader2 } from 'lucide-react'
 
 const ARTIFACT_TYPES = ['spec', 'design', 'tasks', 'qa_plan', 'review', 'audit', 'qa_results']
 
 export function FeatureDetail() {
   const { slug } = useParams<{ slug: string }>()
-  const { feature, classification, loading, refresh } = useFeature(slug ?? '')
-
-  const [copied, setCopied] = useState<'run' | 'next' | null>(null)
-
-  const handleCopy = (text: string, which: 'run' | 'next') => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopied(which)
-      setTimeout(() => setCopied(null), 2000)
-    })
-  }
-
-  // Keyboard shortcuts: Enter = approve first draft artifact, Escape = blur/deselect
-  useEffect(() => {
-    if (!slug || !feature) return
-
-    const handler = (e: KeyboardEvent) => {
-      // Skip if user is typing in an input/textarea
-      const tag = (e.target as HTMLElement)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
-
-      if (e.key === 'Enter') {
-        const draftArtifact = feature.artifacts.find(
-          a => a.status === 'draft' || a.status === 'needs_fix',
-        )
-        if (draftArtifact) {
-          e.preventDefault()
-          api.approveArtifact(slug, draftArtifact.artifact_type, 'keyboard').then(() => refresh())
-        }
-      }
-
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        // Blur any focused element to deselect
-        if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur()
-        }
-      }
-    }
-
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [slug, feature, refresh])
+  const { feature, classification, loading } = useFeature(slug ?? '')
+  const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
 
   if (!slug) return null
 
   if (loading || !feature) {
     return <SkeletonFeatureDetail />
+  }
+
+  const running = isRunning(slug)
+  const activeRun = getRunForKey(slug)
+
+  const handleRun = () => {
+    startRun({
+      key: slug,
+      runType: 'feature',
+      target: slug,
+      label: slug,
+      startUrl: `/api/run/${slug}`,
+      stopUrl: `/api/run/${slug}/stop`,
+    })
+  }
+
+  const handleFocus = () => {
+    if (activeRun) focusRun(activeRun.id)
   }
 
   return (
@@ -84,34 +62,44 @@ export function FeatureDetail() {
       {/* Next action */}
       {classification && classification.action !== 'done' && (
         <div className="bg-card border border-border rounded-xl p-4 mb-6">
-          <p className="text-sm font-medium mb-1">
-            Next: {classification.action === 'create_spec' ? 'view spec' : classification.action.replace(/_/g, ' ')}
-          </p>
-          <p className="text-xs text-muted-foreground mb-3">{classification.message}</p>
-          <div className="flex flex-col gap-2 mb-3">
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-3 py-2 rounded-lg text-muted-foreground select-all">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <div>
+              <p className="text-sm font-medium mb-1">
+                Next: {classification.action === 'create_spec' ? 'view spec' : classification.action.replace(/_/g, ' ')}
+              </p>
+              <p className="text-xs text-muted-foreground">{classification.message}</p>
+            </div>
+            {running ? (
+              <button
+                onClick={handleFocus}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors"
+              >
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Running...
+              </button>
+            ) : (
+              <button
+                onClick={handleRun}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Run
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <code className="text-xs font-mono bg-muted/60 border border-border/50 px-2 py-1 rounded text-muted-foreground select-all">
                 /sdlc-run {slug}
               </code>
-              <button
-                onClick={() => handleCopy(`/sdlc-run ${slug}`, 'run')}
-                className="shrink-0 p-2 rounded-lg border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                title="Copy command"
-              >
-                {copied === 'run' ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
+              <CopyButton text={`/sdlc-run ${slug}`} className="shrink-0 p-1 rounded border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" />
             </div>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-3 py-2 rounded-lg text-muted-foreground select-all">
+            <div className="flex items-center gap-1">
+              <code className="text-xs font-mono bg-muted/60 border border-border/50 px-2 py-1 rounded text-muted-foreground select-all">
                 /sdlc-next {slug}
               </code>
-              <button
-                onClick={() => handleCopy(`/sdlc-next ${slug}`, 'next')}
-                className="shrink-0 p-2 rounded-lg border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                title="Copy command"
-              >
-                {copied === 'next' ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5" />}
-              </button>
+              <CopyButton text={`/sdlc-next ${slug}`} className="shrink-0 p-1 rounded border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" />
             </div>
           </div>
         </div>
@@ -132,7 +120,7 @@ export function FeatureDetail() {
             if (!artifact) return null
             return (
               <div key={type} id={`artifact-${type}`}>
-                <ArtifactViewer slug={slug} artifact={artifact} onStatusChange={refresh} />
+                <ArtifactViewer artifact={artifact} />
               </div>
             )
           })}

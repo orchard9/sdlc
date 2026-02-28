@@ -86,9 +86,28 @@ pub struct SystemInit {
     pub model: String,
     pub tools: Vec<String>,
     pub mcp_servers: Vec<McpServerStatus>,
+    /// Permission mode — CLI sends camelCase (`permissionMode`)
+    #[serde(alias = "permissionMode")]
     pub permission_mode: String,
     pub claude_code_version: String,
     pub cwd: String,
+    // ── Fields added in Claude CLI 2.x ──
+    #[serde(default, alias = "apiKeySource")]
+    pub api_key_source: Option<String>,
+    #[serde(default, alias = "outputStyle")]
+    pub output_style: Option<String>,
+    #[serde(default)]
+    pub agents: Vec<String>,
+    #[serde(default)]
+    pub skills: Vec<String>,
+    #[serde(default)]
+    pub slash_commands: Vec<String>,
+    #[serde(default)]
+    pub plugins: Vec<serde_json::Value>,
+    #[serde(default)]
+    pub uuid: Option<String>,
+    #[serde(default, alias = "fastModeState")]
+    pub fast_mode_state: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -413,6 +432,10 @@ pub struct QueryOptions {
     pub model: Option<String>,
     /// Maximum number of agentic turns before stopping with `error_max_turns`
     pub max_turns: Option<u32>,
+    /// Maximum budget in USD before stopping with `error_max_budget_usd`
+    pub max_budget_usd: Option<f64>,
+    /// Effort level for reasoning depth
+    pub effort: Option<Effort>,
     /// Tool names that are auto-approved without user prompting
     pub allowed_tools: Vec<String>,
     /// Tool names that are explicitly disallowed
@@ -425,10 +448,46 @@ pub struct QueryOptions {
     pub append_system_prompt: Option<String>,
     /// Session ID to resume (loads conversation history)
     pub resume: Option<String>,
+    /// Continue the most recent conversation
+    pub continue_conversation: bool,
+    /// Session ID for a specific conversation
+    pub session_id: Option<String>,
     /// MCP servers to register for this session
     pub mcp_servers: Vec<McpServerConfig>,
     /// Working directory for the subprocess (default: current dir)
     pub cwd: Option<std::path::PathBuf>,
+    /// Additional environment variables for the subprocess
+    pub env: HashMap<String, String>,
+    /// Additional working directories (`--add-dir`)
+    pub additional_directories: Vec<String>,
+    /// Custom path to the `claude` binary (default: `"claude"`)
+    pub path_to_executable: Option<String>,
+    /// Enable debug mode (`--debug`)
+    pub debug: bool,
+    /// Include partial/streaming messages (`--include-partial-messages`)
+    pub include_partial_messages: bool,
+    /// Disable session persistence (`--no-session-persistence`)
+    pub no_session_persistence: bool,
+}
+
+/// Effort level for Claude reasoning depth.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Effort {
+    Low,
+    Medium,
+    High,
+    Max,
+}
+
+impl Effort {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Effort::Low => "low",
+            Effort::Medium => "medium",
+            Effort::High => "high",
+            Effort::Max => "max",
+        }
+    }
 }
 
 /// Permission mode — controls how tool executions are authorized.

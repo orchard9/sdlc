@@ -6,9 +6,10 @@ mod tools;
 use clap::{Parser, Subcommand};
 use cmd::{
     agent::AgentSubcommand, artifact::ArtifactSubcommand, comment::CommentSubcommand,
-    config::ConfigSubcommand, feature::FeatureSubcommand, milestone::MilestoneSubcommand,
-    platform::PlatformSubcommand, project::ProjectSubcommand, query::QuerySubcommand,
-    score::ScoreSubcommand, task::TaskSubcommand, ui::UiSubcommand,
+    config::ConfigSubcommand, feature::FeatureSubcommand, investigate::InvestigateSubcommand,
+    milestone::MilestoneSubcommand, platform::PlatformSubcommand, ponder::PonderSubcommand,
+    project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
+    task::TaskSubcommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -84,6 +85,18 @@ enum Commands {
         subcommand: MilestoneSubcommand,
     },
 
+    /// Manage ponder space (pre-milestone ideation)
+    Ponder {
+        #[command(subcommand)]
+        subcommand: PonderSubcommand,
+    },
+
+    /// Manage investigations (root-cause, evolve, guideline)
+    Investigate {
+        #[command(subcommand)]
+        subcommand: InvestigateSubcommand,
+    },
+
     /// Run platform-specific commands (deploy, logs, dev, etc.)
     Platform {
         #[command(subcommand)]
@@ -150,10 +163,14 @@ enum Commands {
 fn main() {
     let cli = Cli::parse();
 
+    let default_level = match &cli.command {
+        Commands::Ui { .. } | Commands::Mcp => tracing::Level::INFO,
+        _ => tracing::Level::WARN,
+    };
+
     tracing_subscriber::fmt()
         .with_env_filter(
-            tracing_subscriber::EnvFilter::from_default_env()
-                .add_directive(tracing::Level::WARN.into()),
+            tracing_subscriber::EnvFilter::from_default_env().add_directive(default_level.into()),
         )
         .with_target(false)
         .init();
@@ -171,6 +188,8 @@ fn main() {
         Commands::Task { subcommand } => cmd::task::run(&root, subcommand, cli.json),
         Commands::Comment { subcommand } => cmd::comment::run(&root, subcommand, cli.json),
         Commands::Milestone { subcommand } => cmd::milestone::run(&root, subcommand, cli.json),
+        Commands::Ponder { subcommand } => cmd::ponder::run(&root, subcommand, cli.json),
+        Commands::Investigate { subcommand } => cmd::investigate::run(&root, subcommand, cli.json),
         Commands::Platform { subcommand } => cmd::platform::run(&root, subcommand, cli.json),
         Commands::Project { subcommand } => cmd::project::run(&root, subcommand, cli.json),
         Commands::Query { subcommand } => cmd::query::run(&root, subcommand, cli.json),
@@ -191,7 +210,8 @@ fn main() {
     };
 
     if let Err(e) = result {
-        eprintln!("error: {e}");
+        // Print the full error chain (anyhow's alternate Display)
+        eprintln!("error: {e:#}");
         std::process::exit(1);
     }
 }

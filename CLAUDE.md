@@ -10,6 +10,8 @@
 - **Workspace crates**: `sdlc-core` (library), `sdlc-cli` (binary), `sdlc-server` (HTTP server)
 - **Frontend**: React + Vite in `frontend/` — embedded into `sdlc-server` at compile time
 - **State storage**: YAML files in `.sdlc/` — no database, no network
+  - `.sdlc/features/<slug>/` — per-feature artifact Markdown files
+  - `.sdlc/roadmap/<slug>/` — ponder (ideation) entries: manifest, team, scrapbook artifacts
 
 ## Build & Test
 
@@ -35,10 +37,14 @@ cd frontend && npm ci && npm run build
 | `crates/sdlc-core/src/classifier.rs` | Rule engine that evaluates rules against feature state |
 | `crates/sdlc-core/src/feature.rs` | Feature struct, artifact management, phase transitions |
 | `crates/sdlc-core/src/gate.rs` | Gate definitions (shell, human, step_back) |
+| `crates/sdlc-core/src/ponder.rs` | PonderEntry, PonderStatus, team/artifact CRUD — roadmap ideation layer |
 | `crates/sdlc-cli/src/cmd/next.rs` | `sdlc next` — classifies and formats the directive |
-| `.sdlc/state.yaml` | Project-level state summary |
+| `crates/sdlc-cli/src/cmd/ponder.rs` | `sdlc ponder *` — CLI for the ideation workspace |
+| `crates/sdlc-server/src/routes/roadmap.rs` | REST routes for ponder entries (`/api/roadmap`) |
+| `.sdlc/state.yaml` | Project-level state summary (includes `active_ponders`) |
 | `.sdlc/config.yaml` | Gates, platform commands, quality thresholds |
 | `.sdlc/features/<slug>/` | Per-feature artifact Markdown files |
+| `.sdlc/roadmap/<slug>/` | Ponder entry: `manifest.yaml`, `team.yaml`, scrapbook Markdown files |
 
 ## The State Machine Flow
 
@@ -104,6 +110,16 @@ All other actions — including all `approve_*` verification steps and `approve_
 
 ## How Agents Use sdlc
 
+**Explore an idea before committing to milestones:**
+```bash
+/sdlc-ponder [slug or new idea]
+```
+
+**Crystallize a pondered idea into milestones and features:**
+```bash
+/sdlc-ponder-commit <slug>
+```
+
 **One step at a time:**
 ```bash
 /sdlc-next <slug>
@@ -139,7 +155,26 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 | OpenCode | `~/.opencode/command/sdlc-*.md` | Markdown with frontmatter — concise playbook variant |
 | Agents (generic) | `~/.agents/skills/sdlc-*/SKILL.md` | SKILL.md (Agent Skills open standard) — minimal variant |
 
+**Current commands (Claude Code slash commands):**
+
+| Command | Purpose |
+|---|---|
+| `/sdlc-ponder [slug]` | Open ideation workspace — explore ideas, capture artifacts, recruit thought partners |
+| `/sdlc-ponder-commit <slug>` | Crystallize pondered idea into milestones/features via `/sdlc-plan` |
+| `/sdlc-recruit <role>` | Recruit an expert thought partner as a persistent agent |
+| `/sdlc-empathy <subject>` | Deep user perspective interviews before making decisions |
+| `/sdlc-next <slug>` | Execute one directive step |
+| `/sdlc-run <slug>` | Autonomous run to next HITL gate |
+| `/sdlc-status` | Project overview |
+| `/sdlc-plan` | Distribute a plan into milestones, features, tasks |
+| `/sdlc-pressure-test <milestone>` | Pressure-test milestone against user perspectives |
+| `/sdlc-milestone-uat <milestone>` | Run acceptance test for a milestone |
+| `/sdlc-enterprise-readiness` | Production readiness analysis |
+| `/sdlc-setup-quality-gates` | Set up pre-commit hooks |
+
 **Adding a command:** Add a `const SDLC_*_COMMAND: &str` (Claude format), `const SDLC_*_PLAYBOOK: &str` (Gemini/OpenCode), and `const SDLC_*_SKILL: &str` (Agents). Register in all four `write_user_*` functions. Add filenames to `migrate_legacy_project_scaffolding()`.
+
+**Changing CLI commands:** If you add, rename, or change the arguments of any `sdlc` subcommand, update the command reference table in `GUIDANCE_MD_CONTENT` (§6 "Using sdlc") in `init.rs`. That table is the single source of truth agents read before acting — stale entries cause agents to call nonexistent commands or skip new ones.
 
 **Legacy migration:** `migrate_legacy_project_scaffolding()` removes old project-level `.claude/commands/sdlc-*.md` files (and equivalents for Gemini, OpenCode, `.agents/`, `.codex/`) since commands are now user-level.
 

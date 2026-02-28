@@ -97,8 +97,8 @@ impl FeatureIndex {
             for filename in ARTIFACT_FILES {
                 let path = root.join("features").join(&f.slug).join(filename);
                 if let Ok(content) = std::fs::read_to_string(&path) {
-                    let truncated = content[..content.len().min(8000)].to_string();
-                    artifact_contents.push(truncated);
+                    let end = content.floor_char_boundary(8000);
+                    artifact_contents.push(content[..end].to_string());
                 }
             }
             for content in &artifact_contents {
@@ -350,6 +350,149 @@ impl TaskIndex {
 }
 
 // ---------------------------------------------------------------------------
+// PonderIndex
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+pub struct PonderSearchResult {
+    pub slug: String,
+    pub title: String,
+    pub status: String,
+    pub score: f32,
+}
+
+struct PonderFields {
+    slug: Field,
+    title: Field,
+    status: Field,
+    body: Field,
+}
+
+pub struct PonderIndex {
+    index: Index,
+    reader: tantivy::IndexReader,
+    fields: PonderFields,
+}
+
+impl PonderIndex {
+    /// Build an ephemeral in-RAM index from the given ponder entries.
+    ///
+    /// Indexed fields:
+    /// - `slug`   — STRING (exact-match, stored)
+    /// - `title`  — TEXT (tokenized, stored)
+    /// - `status` — STRING (exact-match, stored) — `status:exploring` scoping
+    /// - `body`   — TEXT — tags + artifact content
+    pub fn build(
+        entries: &[(
+            crate::ponder::PonderEntry,
+            Vec<crate::ponder::PonderArtifactMeta>,
+        )],
+        root: &Path,
+    ) -> Result<Self> {
+        let (schema, fields) = build_ponder_schema();
+
+        let index = Index::create_in_ram(schema);
+
+        let mut writer: IndexWriter = index
+            .writer(15_000_000)
+            .map_err(|e| SdlcError::Search(e.to_string()))?;
+
+        for (entry, artifacts) in entries {
+            let mut doc = TantivyDocument::default();
+            doc.add_text(fields.slug, &entry.slug);
+            doc.add_text(fields.title, &entry.title);
+            doc.add_text(fields.status, entry.status.to_string());
+
+            let mut body_parts: Vec<String> = Vec::new();
+            body_parts.push(entry.tags.join(" "));
+
+            // Read artifact content (capped at 8 KB each)
+            body_parts.push(entry.slug.replace('-', " "));
+
+            for artifact in artifacts {
+                let path = crate::paths::ponder_dir(root, &entry.slug).join(&artifact.filename);
+                if let Ok(content) = std::fs::read_to_string(&path) {
+                    let end = content.floor_char_boundary(8000);
+                    body_parts.push(content[..end].to_string());
+                }
+            }
+
+            doc.add_text(fields.body, body_parts.join(" "));
+
+            writer
+                .add_document(doc)
+                .map_err(|e| SdlcError::Search(e.to_string()))?;
+        }
+
+        writer
+            .commit()
+            .map_err(|e| SdlcError::Search(e.to_string()))?;
+
+        let reader = index
+            .reader_builder()
+            .reload_policy(ReloadPolicy::Manual)
+            .try_into()
+            .map_err(|e: tantivy::TantivyError| SdlcError::Search(e.to_string()))?;
+
+        Ok(Self {
+            index,
+            reader,
+            fields,
+        })
+    }
+
+    /// BM25 full-text search. Returns up to `limit` results sorted by score descending.
+    pub fn search(&self, query_str: &str, limit: usize) -> Result<Vec<PonderSearchResult>> {
+        let searcher = self.reader.searcher();
+
+        let default_fields = vec![self.fields.title, self.fields.body];
+        let mut parser = QueryParser::for_index(&self.index, default_fields);
+        parser.set_conjunction_by_default();
+
+        let query = match parser.parse_query(query_str) {
+            Ok(q) => q,
+            Err(_) => return Ok(vec![]),
+        };
+
+        let top_docs = searcher
+            .search(&query, &TopDocs::with_limit(limit))
+            .map_err(|e| SdlcError::Search(e.to_string()))?;
+
+        let mut results = Vec::with_capacity(top_docs.len());
+        for (score, doc_addr) in top_docs {
+            let doc: TantivyDocument = searcher
+                .doc(doc_addr)
+                .map_err(|e| SdlcError::Search(e.to_string()))?;
+
+            let slug = doc
+                .get_first(self.fields.slug)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let title = doc
+                .get_first(self.fields.title)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+            let status = doc
+                .get_first(self.fields.status)
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            results.push(PonderSearchResult {
+                slug,
+                title,
+                status,
+                score,
+            });
+        }
+
+        Ok(results)
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Schema construction
 // ---------------------------------------------------------------------------
 
@@ -390,6 +533,24 @@ fn build_task_schema() -> (Schema, TaskFields) {
         title,
         status,
         description,
+        body,
+    };
+    (schema, fields)
+}
+
+fn build_ponder_schema() -> (Schema, PonderFields) {
+    let mut builder = Schema::builder();
+
+    let slug = builder.add_text_field("slug", STRING | STORED);
+    let title = builder.add_text_field("title", TEXT | STORED);
+    let status = builder.add_text_field("status", STRING | STORED);
+    let body = builder.add_text_field("body", TEXT);
+
+    let schema = builder.build();
+    let fields = PonderFields {
+        slug,
+        title,
+        status,
         body,
     };
     (schema, fields)

@@ -6,6 +6,8 @@ Agent instructions for sdlc.
 
 ## SDLC
 
+> **Required reading:** `.sdlc/guidance.md` — engineering principles that govern all implementation decisions on this project. <!-- sdlc:guidance -->
+
 This project uses `sdlc` as its SDLC state machine. `sdlc` manages feature lifecycle, artifacts, tasks, and milestones. It emits structured directives via `sdlc next --json` that any consumer (Claude Code, custom scripts, or humans) acts on to decide what to do next.
 
 Consumer scaffolding is installed globally under `~/.claude/commands/`, `~/.gemini/commands/`, `~/.opencode/command/`, and `~/.agents/skills/` — available across all projects. Use `/sdlc-specialize` in Claude Code to generate a project-specific AI team (agents + skills) tailored to this project's tech stack and roles.
@@ -30,6 +32,10 @@ Treat this lifecycle as the default pathway. You can use explicit manual transit
 
 `spec` `design` `tasks` `qa_plan` `review` `audit` `qa_results`
 
+### CRITICAL: Never edit .sdlc/ YAML directly
+
+All state changes go through `sdlc` CLI commands. See §6 of `.sdlc/guidance.md` for the full command reference. Direct YAML edits corrupt state.
+
 ### Directive Interface
 
 Use `sdlc next --for <slug> --json` to get the next directive. The JSON output tells the consumer what to do next (action, message, output_path, is_heavy, gates).
@@ -44,6 +50,12 @@ Use `sdlc next --for <slug> --json` to get the next directive. The JSON output t
 - `/sdlc-pressure-test <milestone-slug>` — pressure-test a milestone against user perspectives
 - `/sdlc-enterprise-readiness [--stage <stage>]` — analyze production readiness
 - `/sdlc-setup-quality-gates` — set up pre-commit hooks and quality gates
+- `/sdlc-cookbook <milestone-slug>` — create developer-scenario cookbook recipes
+- `/sdlc-cookbook-run <milestone-slug>` — execute cookbook recipes and record results
+- `/sdlc-ponder [slug]` — open the ideation workspace for exploring and committing ideas
+- `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features
+- `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent
+- `/sdlc-empathy <subject>` — deep user perspective interviews before decisions
 
 Project: sdlc
 
@@ -86,6 +98,7 @@ Exact subcommands. Anything not listed here does not exist — do not guess.
 | `sdlc comment` | `create` · `list` · `resolve` |
 | `sdlc score` | `set` |
 | `sdlc next` | _(no subcommands — use `--for <slug>` and `--json` flags)_ |
+| `sdlc ponder` | `create` · `list` · `show` · `capture` · `team add` · `team list` · `update` · `archive` · `artifacts` |
 
 ---
 
@@ -184,6 +197,13 @@ The state machine emits one of three kinds of actions:
 
 ## Consumer Commands
 
+**Ideation (pre-feature):**
+- `/sdlc-ponder [slug]` — open the ideation workspace; explore ideas, recruit thought partners, capture scrapbook artifacts
+- `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features
+- `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent (usable independently or within ponder)
+- `/sdlc-empathy <subject>` — deep user perspective interviews (usable independently or within ponder)
+
+**Execution:**
 - `/sdlc-next <slug>` — execute one step, then stop (human controls cadence)
 - `/sdlc-run <slug>` — run autonomously until a HITL gate or completion
 - `/sdlc-status [<slug>]` — show current state

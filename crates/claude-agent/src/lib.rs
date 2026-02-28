@@ -10,8 +10,8 @@
 //! QueryOptions
 //!     │
 //!     ▼
-//! ClaudeProcess   ← spawns `claude --print --output-format stream-json …`
-//!     │              reads JSONL from stdout
+//! ClaudeProcess   ← spawns `claude --input-format stream-json --output-format stream-json …`
+//!     │              sends prompt via stdin, reads JSONL from stdout
 //!     ▼
 //! QueryStream     ← implements futures::Stream<Item = Result<Message>>
 //!     │              background task + mpsc channel
@@ -66,9 +66,9 @@ pub use runner::{run as agent_run, RunConfig, RunResult};
 pub use session::SessionStore;
 pub use stream::QueryStream;
 pub use types::{
-    AssistantContent, AssistantMessage, ContentBlock, McpServerConfig, Message, PermissionMode,
-    QueryOptions, ResultError, ResultMessage, ResultSuccess, SystemMessage, SystemPayload,
-    TokenUsage, UserMessage,
+    AssistantContent, AssistantMessage, ContentBlock, Effort, McpServerConfig, Message,
+    PermissionMode, QueryOptions, ResultError, ResultMessage, ResultSuccess, SystemMessage,
+    SystemPayload, TokenUsage, UserMessage,
 };
 
 /// Convenience `Result` alias for this crate.

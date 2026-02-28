@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSearch } from '@/hooks/useSearch'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { cn } from '@/lib/utils'
+import { Lightbulb } from 'lucide-react'
 
 interface SearchModalProps {
   open: boolean
@@ -29,6 +30,16 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     setHighlightedIndex(0)
   }, [results])
 
+  const navigateToResult = (index: number) => {
+    const result = results[index]
+    if (!result) return
+    const path = result.kind === 'ponder'
+      ? `/ponder/${result.slug}`
+      : `/features/${result.slug}`
+    navigate(path)
+    onClose()
+  }
+
   // Keyboard handling
   useEffect(() => {
     if (!open) return
@@ -45,10 +56,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
         e.preventDefault()
         setHighlightedIndex(prev => Math.max(prev - 1, 0))
       } else if (e.key === 'Enter') {
-        if (results[highlightedIndex]) {
-          navigate(`/features/${results[highlightedIndex].slug}`)
-          onClose()
-        }
+        navigateToResult(highlightedIndex)
       }
     }
 
@@ -66,7 +74,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Search features"
+      aria-label="Search features and ideas"
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60"
       onClick={onClose}
     >
@@ -86,7 +94,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
           aria-autocomplete="list"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Search features..."
+          placeholder="Search features and ideas..."
           className="w-full px-4 py-3 text-sm bg-transparent outline-none placeholder:text-muted-foreground"
         />
 
@@ -113,7 +121,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
           >
             {results.map((result, index) => (
               <li
-                key={result.slug}
+                key={`${result.kind}-${result.slug}`}
                 id={getOptionId(index)}
                 role="option"
                 aria-selected={index === highlightedIndex}
@@ -124,10 +132,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                     index === highlightedIndex ? 'bg-accent' : 'hover:bg-accent'
                   )}
                   onMouseEnter={() => setHighlightedIndex(index)}
-                  onClick={() => {
-                    navigate(`/features/${result.slug}`)
-                    onClose()
-                  }}
+                  onClick={() => navigateToResult(index)}
                 >
                   <span className="flex-1 min-w-0">
                     <span className="text-sm font-medium text-foreground block truncate">
@@ -135,7 +140,10 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                     </span>
                   </span>
                   <span className="flex items-center gap-2 shrink-0">
-                    <StatusBadge status={result.phase} />
+                    {result.kind === 'ponder' && (
+                      <Lightbulb className="w-3.5 h-3.5 text-violet-400" />
+                    )}
+                    <StatusBadge status={result.status} />
                     <span className="text-xs text-muted-foreground font-mono">{result.slug}</span>
                   </span>
                 </button>

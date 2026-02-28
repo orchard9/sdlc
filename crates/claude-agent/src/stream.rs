@@ -37,7 +37,7 @@ impl QueryStream {
         let (tx, rx) = mpsc::channel(32);
 
         tokio::spawn(async move {
-            let mut process = match ClaudeProcess::spawn(&prompt, &opts) {
+            let mut process = match ClaudeProcess::spawn(&prompt, &opts).await {
                 Ok(p) => p,
                 Err(e) => {
                     let _ = tx.send(Err(e)).await;
@@ -45,6 +45,7 @@ impl QueryStream {
                 }
             };
 
+            let mut got_result = false;
             loop {
                 match process.next_message().await {
                     Err(e) => {
@@ -54,6 +55,9 @@ impl QueryStream {
                     Ok(None) => break, // EOF — process exited
                     Ok(Some(msg)) => {
                         let is_terminal = matches!(msg, Message::Result(_));
+                        if is_terminal {
+                            got_result = true;
+                        }
                         if tx.send(Ok(msg)).await.is_err() {
                             break; // Receiver dropped
                         }
@@ -61,6 +65,15 @@ impl QueryStream {
                             break;
                         }
                     }
+                }
+            }
+
+            // If the process exited without sending a Result message, check
+            // for a non-zero exit code and surface stderr (matches TS SDK's
+            // `getProcessExitError` pattern).
+            if !got_result {
+                if let Some(exit_err) = process.wait_exit_error().await {
+                    let _ = tx.send(Err(exit_err)).await;
                 }
             }
 

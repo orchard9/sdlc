@@ -1,5 +1,5 @@
 use super::SdlcTool;
-use sdlc_core::{feature::Feature, types::ArtifactType};
+use sdlc_core::{classifier::try_auto_transition, feature::Feature, types::ArtifactType};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -54,11 +54,17 @@ impl SdlcTool for RejectArtifactTool {
             .map_err(|e| e.to_string())?;
         feature.save(root).map_err(|e| e.to_string())?;
 
-        Ok(serde_json::json!({
+        let transitioned_to = try_auto_transition(root, slug);
+
+        let mut result = serde_json::json!({
             "artifact_type": artifact_type_str,
             "status": "rejected",
             "reason": reason
-        }))
+        });
+        if let Some(phase) = transitioned_to {
+            result["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok(result)
     }
 }
 

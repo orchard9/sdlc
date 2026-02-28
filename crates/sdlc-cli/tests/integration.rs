@@ -536,19 +536,13 @@ fn approve_spec_enables_transition_to_specified() {
         .success()
         .stdout(predicate::str::contains("approve_spec"));
 
-    // Approve spec
+    // Approve spec — auto-transitions to specified
     sdlc(&dir)
         .args(["artifact", "approve", "auth-login", "spec"])
         .assert()
         .success();
 
-    // Transition to specified
-    sdlc(&dir)
-        .args(["feature", "transition", "auth-login", "specified"])
-        .assert()
-        .success();
-
-    // Phase should now be specified
+    // Phase should now be specified (auto-transitioned by approve)
     sdlc(&dir)
         .args(["feature", "show", "auth-login"])
         .assert()
@@ -696,13 +690,9 @@ fn query_needs_approval_includes_wait_for_approval_actions() {
         .assert()
         .success();
 
-    // Move to specified, then put tasks in draft to trigger approve_tasks (agent verification).
+    // Approve spec — auto-transitions to specified
     sdlc(&dir)
         .args(["artifact", "approve", "approval-gap", "spec"])
-        .assert()
-        .success();
-    sdlc(&dir)
-        .args(["feature", "transition", "approval-gap", "specified"])
         .assert()
         .success();
     sdlc(&dir)
@@ -1299,13 +1289,7 @@ fn happy_path_through_specified() {
         .assert()
         .success();
 
-    // Transition to specified
-    sdlc(&dir)
-        .args(["feature", "transition", "user-auth", "specified"])
-        .assert()
-        .success();
-
-    // Verify phase is now specified
+    // Verify phase is now specified (auto-transitioned by approve)
     let out = sdlc(&dir)
         .args(["next", "--for", "user-auth", "--json"])
         .assert()
@@ -1989,10 +1973,7 @@ fn e2e_full_pipeline_init_to_specified() {
         .assert()
         .success();
 
-    sdlc(&dir)
-        .args(["feature", "transition", "auth-login", "specified"])
-        .assert()
-        .success();
+    // Auto-transitioned to specified by approve
 
     // 10. Verify auth-login is now at "specified" phase via sdlc next --for auth-login --json
     let next_auth = sdlc(&dir)
@@ -2424,17 +2405,13 @@ fn artifact_waive_unblocks_pipeline() {
         .assert()
         .success();
 
-    // Approve spec and transition to specified
+    // Approve spec — auto-transitions to specified
     sdlc(&dir)
         .args(["artifact", "draft", "simple-crud", "spec"])
         .assert()
         .success();
     sdlc(&dir)
         .args(["artifact", "approve", "simple-crud", "spec"])
-        .assert()
-        .success();
-    sdlc(&dir)
-        .args(["feature", "transition", "simple-crud", "specified"])
         .assert()
         .success();
 
@@ -2689,4 +2666,239 @@ fn agent_run_hitl_gate_exits_without_spawning_claude() {
         .assert()
         .success()
         .stdout(predicate::str::contains("human gate"));
+}
+
+// ---------------------------------------------------------------------------
+// sdlc ponder
+// ---------------------------------------------------------------------------
+
+#[test]
+fn ponder_roundtrip() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "create",
+            "my-idea",
+            "--title",
+            "My Great Idea",
+            "--brief",
+            "I want to build something amazing",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Created ponder entry 'my-idea'"));
+
+    // Capture content
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "capture",
+            "my-idea",
+            "--content",
+            "## Problem\n\nThe problem is...",
+            "--as",
+            "problem.md",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Captured 'problem.md'"));
+
+    // Team add
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "team",
+            "add",
+            "my-idea",
+            "--name",
+            "kai-tanaka",
+            "--role",
+            "Architect",
+            "--context",
+            "Built Spotify's preference engine",
+            "--agent",
+            ".claude/agents/kai-tanaka.md",
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Added 'kai-tanaka'"));
+
+    // Show
+    sdlc(&dir)
+        .args(["ponder", "show", "my-idea"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("My Great Idea"))
+        .stdout(predicate::str::contains("kai-tanaka"))
+        .stdout(predicate::str::contains("Artifacts: 2")); // brief.md + problem.md
+
+    // Update
+    sdlc(&dir)
+        .args(["ponder", "update", "my-idea", "--status", "converging"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Updated ponder entry 'my-idea'"));
+
+    // Archive
+    sdlc(&dir)
+        .args(["ponder", "archive", "my-idea"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Archived ponder entry 'my-idea'"));
+}
+
+#[test]
+fn ponder_list_json() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["ponder", "create", "idea-a", "--title", "Idea A"])
+        .assert()
+        .success();
+
+    sdlc(&dir)
+        .args(["ponder", "create", "idea-b", "--title", "Idea B"])
+        .assert()
+        .success();
+
+    let output = sdlc(&dir)
+        .args(["ponder", "list", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    let arr = json.as_array().unwrap();
+    assert_eq!(arr.len(), 2);
+    assert_eq!(arr[0]["slug"], "idea-a");
+    assert_eq!(arr[1]["slug"], "idea-b");
+}
+
+#[test]
+fn ponder_artifacts() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["ponder", "create", "my-idea", "--title", "My Idea"])
+        .assert()
+        .success();
+
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "capture",
+            "my-idea",
+            "--content",
+            "## Research\n\nSome research...",
+            "--as",
+            "research.md",
+        ])
+        .assert()
+        .success();
+
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "capture",
+            "my-idea",
+            "--content",
+            "## Notes\n\nSome notes...",
+            "--as",
+            "notes.md",
+        ])
+        .assert()
+        .success();
+
+    let output = sdlc(&dir)
+        .args(["ponder", "artifacts", "my-idea", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+
+    let json: serde_json::Value = serde_json::from_slice(&output).unwrap();
+    let arr = json.as_array().unwrap();
+    assert_eq!(arr.len(), 2);
+    // Sorted alphabetically
+    assert_eq!(arr[0]["filename"], "notes.md");
+    assert_eq!(arr[1]["filename"], "research.md");
+}
+
+#[test]
+fn ponder_session_log_list_read() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create ponder entry
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "create",
+            "session-idea",
+            "--title",
+            "Session Test Idea",
+        ])
+        .assert()
+        .success();
+
+    // Log starts empty
+    sdlc(&dir)
+        .args(["ponder", "session", "list", "session-idea"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("No sessions for ponder"));
+
+    // Write a session file to a temp path
+    let session_content = r#"---
+session: 1
+timestamp: "2026-01-01T12:00:00Z"
+orientation:
+  current: "We explored the core concept"
+  next: "Prototype the UI"
+  commit: "Prototype is working"
+---
+
+# Session 1
+
+We had a great discussion.
+"#;
+    let session_file = dir.path().join("session-1.md");
+    std::fs::write(&session_file, session_content).unwrap();
+
+    // Log the session
+    sdlc(&dir)
+        .args([
+            "ponder",
+            "session",
+            "log",
+            "session-idea",
+            "--file",
+            session_file.to_str().unwrap(),
+        ])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Logged session 1 for ponder"));
+
+    // List now shows the session (table row with session number 1)
+    sdlc(&dir)
+        .args(["ponder", "session", "list", "session-idea"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("We explored the core concept"));
+
+    // Read session 1
+    sdlc(&dir)
+        .args(["ponder", "session", "read", "session-idea", "1"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("We had a great discussion"));
 }

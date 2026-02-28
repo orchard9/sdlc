@@ -1,11 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import { atomOneDark } from 'react-syntax-highlighter/dist/esm/styles/hljs'
+import mermaid from 'mermaid'
 import { cn } from '@/lib/utils'
 
 interface MarkdownContentProps {
   content: string
   className?: string
+}
+
+function MermaidBlock({ chart }: { chart: string }) {
+  const id = useMemo(() => `mmd-${Math.random().toString(36).slice(2)}`, [])
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' })
+    mermaid.render(id, chart)
+      .then(({ svg }) => { if (ref.current) ref.current.innerHTML = svg })
+      .catch(() => { if (ref.current) ref.current.textContent = chart })
+  }, [chart, id])
+  return <div ref={ref} className="my-3 flex justify-start" />
 }
 
 export function MarkdownContent({ content, className }: MarkdownContentProps) {
@@ -37,12 +52,21 @@ export function MarkdownContent({ content, className }: MarkdownContentProps) {
               ol: ({ children }) => <ol className="list-decimal pl-5 mb-3 space-y-1 text-sm text-foreground">{children}</ol>,
               li: ({ children }) => <li className="text-sm text-foreground leading-relaxed">{children}</li>,
               code: ({ children, className: codeClass }) => {
-                if (codeClass) {
-                  return <code className="block text-xs font-mono text-muted-foreground">{children}</code>
-                }
+                const lang = codeClass?.replace('language-', '') ?? ''
+                if (lang === 'mermaid') return <MermaidBlock chart={String(children).trim()} />
+                if (lang) return (
+                  <SyntaxHighlighter
+                    language={lang}
+                    style={atomOneDark}
+                    customStyle={{ margin: 0, borderRadius: '0.5rem', fontSize: '0.75rem' }}
+                    wrapLongLines={false}
+                  >
+                    {String(children).trim()}
+                  </SyntaxHighlighter>
+                )
                 return <code className="text-xs font-mono bg-muted/60 border border-border/50 px-1 py-0.5 rounded text-muted-foreground">{children}</code>
               },
-              pre: ({ children }) => <pre className="bg-muted/60 border border-border/50 rounded-lg p-3 overflow-x-auto mb-3 text-xs font-mono text-muted-foreground">{children}</pre>,
+              pre: ({ children }) => <div className="mb-3">{children}</div>,
               blockquote: ({ children }) => <blockquote className="border-l-2 border-border pl-3 my-3 text-muted-foreground italic">{children}</blockquote>,
               hr: () => <hr className="border-border my-4" />,
               strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,

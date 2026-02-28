@@ -14,7 +14,12 @@ pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
     let milestones = Milestone::list(root).unwrap_or_default();
     let active_milestones: Vec<&Milestone> = milestones
         .iter()
-        .filter(|m| m.compute_status(&features) == MilestoneStatus::Active)
+        .filter(|m| {
+            !matches!(
+                m.compute_status(&features),
+                MilestoneStatus::Released | MilestoneStatus::Skipped
+            )
+        })
         .collect();
 
     if json {

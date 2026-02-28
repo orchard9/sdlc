@@ -154,6 +154,14 @@ mod tests {
                 permission_mode: "default".into(),
                 claude_code_version: "0.0.0".into(),
                 cwd: "/tmp".into(),
+                api_key_source: None,
+                output_style: None,
+                agents: vec![],
+                skills: vec![],
+                slash_commands: vec![],
+                plugins: vec![],
+                uuid: None,
+                fast_mode_state: None,
             }),
         })
     }

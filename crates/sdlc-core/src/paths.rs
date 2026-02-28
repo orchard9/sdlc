@@ -15,6 +15,7 @@ pub const AUDITS_DIR: &str = ".sdlc/audits";
 pub const BRANCHES_DIR: &str = ".sdlc/branches";
 pub const ARCHIVES_DIR: &str = ".sdlc/archives";
 pub const ROADMAP_DIR: &str = ".sdlc/roadmap";
+pub const INVESTIGATIONS_DIR: &str = ".sdlc/investigations";
 
 pub const CONFIG_FILE: &str = ".sdlc/config.yaml";
 pub const STATE_FILE: &str = ".sdlc/state.yaml";
@@ -62,6 +63,34 @@ pub fn milestone_acceptance_test_path(root: &Path, slug: &str) -> PathBuf {
 
 pub fn milestone_uat_results_path(root: &Path, slug: &str) -> PathBuf {
     milestone_dir(root, slug).join("uat_results.md")
+}
+
+pub fn investigation_dir(root: &Path, slug: &str) -> PathBuf {
+    root.join(INVESTIGATIONS_DIR).join(slug)
+}
+
+pub fn investigation_manifest(root: &Path, slug: &str) -> PathBuf {
+    investigation_dir(root, slug).join(MANIFEST_FILE)
+}
+
+pub fn ponder_dir(root: &Path, slug: &str) -> PathBuf {
+    root.join(ROADMAP_DIR).join(slug)
+}
+
+pub fn ponder_manifest(root: &Path, slug: &str) -> PathBuf {
+    ponder_dir(root, slug).join(MANIFEST_FILE)
+}
+
+pub fn ponder_team_path(root: &Path, slug: &str) -> PathBuf {
+    ponder_dir(root, slug).join("team.yaml")
+}
+
+pub fn ponder_sessions_dir(root: &Path, slug: &str) -> PathBuf {
+    ponder_dir(root, slug).join("sessions")
+}
+
+pub fn ponder_session_path(root: &Path, slug: &str, n: u32) -> PathBuf {
+    ponder_sessions_dir(root, slug).join(format!("session-{n:03}.md"))
 }
 
 pub fn artifact_path(root: &Path, slug: &str, filename: &str) -> PathBuf {

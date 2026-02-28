@@ -122,15 +122,14 @@ pub async fn create_milestone(
     let result = tokio::task::spawn_blocking(move || {
         let m = sdlc_core::milestone::Milestone::create(&root, body.slug, body.title)?;
 
-        if let Ok(mut state) = sdlc_core::state::State::load(&root) {
-            state.add_milestone(&m.slug);
-            let _ = state.save(&root);
-        }
+        let mut state = sdlc_core::state::State::load(&root)?;
+        state.add_milestone(&m.slug);
+        state.save(&root)?;
 
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": m.slug,
             "title": m.title,
-            "status": "active",
+            "status": m.compute_status(&[]),
         }))
     })
     .await

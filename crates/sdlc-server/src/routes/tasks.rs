@@ -66,11 +66,17 @@ pub async fn complete_task(
         sdlc_core::task::complete_task(&mut feature.tasks, &task_id)?;
         feature.save(&root)?;
 
-        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+        let transitioned_to = sdlc_core::classifier::try_auto_transition(&root, &slug);
+
+        let mut val = serde_json::json!({
             "slug": slug,
             "task_id": task_id,
             "status": "completed",
-        }))
+        });
+        if let Some(phase) = transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok::<_, sdlc_core::SdlcError>(val)
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;

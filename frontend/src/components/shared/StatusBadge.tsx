@@ -19,6 +19,7 @@ const statusColors: Record<string, string> = {
   released: 'bg-emerald-700/80 text-emerald-100',
   // Statuses
   active: 'bg-emerald-600/80 text-emerald-100',
+  verifying: 'bg-amber-600/80 text-amber-100',
   skipped: 'bg-neutral-600 text-neutral-300',
   // Artifact statuses
   missing: 'bg-neutral-700 text-neutral-400',
@@ -33,6 +34,11 @@ const statusColors: Record<string, string> = {
   in_progress: 'bg-blue-600/80 text-blue-100',
   completed: 'bg-emerald-600/80 text-emerald-100',
   blocked: 'bg-red-600/80 text-red-100',
+  // Ponder statuses
+  exploring: 'bg-violet-600/80 text-violet-100',
+  converging: 'bg-amber-600/80 text-amber-100',
+  committed: 'bg-emerald-600/80 text-emerald-100',
+  parked: 'bg-neutral-600 text-neutral-300',
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {

@@ -1,7 +1,7 @@
 use crate::output::print_json;
 use anyhow::Context;
 use clap::Subcommand;
-use sdlc_core::{feature::Feature, types::ArtifactType};
+use sdlc_core::{classifier::try_auto_transition, feature::Feature, types::ArtifactType};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -69,15 +69,24 @@ fn approve(
         .with_context(|| format!("failed to approve {artifact_str}"))?;
     feature.save(root).context("failed to save feature")?;
 
+    let transitioned_to = try_auto_transition(root, slug);
+
     if json {
-        print_json(&serde_json::json!({
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact": artifact_str,
             "status": "approved",
             "by": by,
-        }))?;
+        });
+        if let Some(phase) = &transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase.clone());
+        }
+        print_json(&val)?;
     } else {
         println!("Approved: {slug}/{artifact_str}");
+        if let Some(phase) = &transitioned_to {
+            println!("Transitioned to: {phase}");
+        }
     }
     Ok(())
 }
@@ -100,17 +109,26 @@ fn reject(
         .with_context(|| format!("failed to reject {artifact_str}"))?;
     feature.save(root).context("failed to save feature")?;
 
+    let transitioned_to = try_auto_transition(root, slug);
+
     if json {
-        print_json(&serde_json::json!({
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact": artifact_str,
             "status": "rejected",
             "reason": reason,
-        }))?;
+        });
+        if let Some(phase) = &transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase.clone());
+        }
+        print_json(&val)?;
     } else {
         println!("Rejected: {slug}/{artifact_str}");
         if let Some(r) = &reason {
             println!("Reason: {r}");
+        }
+        if let Some(phase) = &transitioned_to {
+            println!("Transitioned to: {phase}");
         }
     }
     Ok(())
@@ -134,17 +152,26 @@ fn waive(
         .with_context(|| format!("failed to waive {artifact_str}"))?;
     feature.save(root).context("failed to save feature")?;
 
+    let transitioned_to = try_auto_transition(root, slug);
+
     if json {
-        print_json(&serde_json::json!({
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact": artifact_str,
             "status": "waived",
             "reason": reason,
-        }))?;
+        });
+        if let Some(phase) = &transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase.clone());
+        }
+        print_json(&val)?;
     } else {
         println!("Waived: {slug}/{artifact_str}");
         if let Some(r) = &reason {
             println!("Reason: {r}");
+        }
+        if let Some(phase) = &transitioned_to {
+            println!("Transitioned to: {phase}");
         }
     }
     Ok(())
@@ -162,14 +189,23 @@ fn draft(root: &Path, slug: &str, artifact_str: &str, json: bool) -> anyhow::Res
         .with_context(|| format!("failed to mark {artifact_str} as draft"))?;
     feature.save(root).context("failed to save feature")?;
 
+    let transitioned_to = try_auto_transition(root, slug);
+
     if json {
-        print_json(&serde_json::json!({
+        let mut val = serde_json::json!({
             "slug": slug,
             "artifact": artifact_str,
             "status": "draft",
-        }))?;
+        });
+        if let Some(phase) = &transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase.clone());
+        }
+        print_json(&val)?;
     } else {
         println!("Marked as draft: {slug}/{artifact_str}");
+        if let Some(phase) = &transitioned_to {
+            println!("Transitioned to: {phase}");
+        }
     }
     Ok(())
 }

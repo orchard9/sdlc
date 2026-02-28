@@ -1567,6 +1567,8 @@ dependencies = [
  "anyhow",
  "axum",
  "chrono",
+ "claude-agent",
+ "futures",
  "http-body-util",
  "mime_guess",
  "open",

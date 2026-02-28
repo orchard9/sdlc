@@ -7,11 +7,13 @@ description = "Web UI server for SDLC orchestration"
 
 [dependencies]
 sdlc-core = { path = "../sdlc-core" }
+claude-agent = { path = "../claude-agent" }
 axum = { workspace = true }
 tokio = { workspace = true }
 tower-http = { workspace = true }
 rust-embed = { workspace = true }
 tokio-stream = { workspace = true }
+futures = "0.3"
 open = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

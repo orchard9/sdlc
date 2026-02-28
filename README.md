@@ -120,10 +120,16 @@ sdlc query blocked
 ```
 
 **With Claude Code:** use the slash commands installed by `sdlc init`:
+- `/sdlc-ponder [slug]` — open the ideation workspace (explore ideas, recruit thought partners, capture artifacts)
+- `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features
+- `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent
+- `/sdlc-empathy <subject>` — deep user perspective interviews before making decisions
 - `/sdlc-run <slug>` — autonomously drive a feature to the next human gate
 - `/sdlc-next <slug>` — get the next directive and act on it
 - `/sdlc-status` — project overview
-- `/sdlc-approve <slug> <type>` — review and approve an artifact
+- `/sdlc-plan` — distribute a plan into milestones, features, and tasks
+- `/sdlc-pressure-test <milestone-slug>` — pressure-test a milestone against user perspectives
+- `/sdlc-milestone-uat <milestone-slug>` — run the acceptance test for a milestone
 
 **With Gemini CLI:** use `.gemini/commands/*.toml` (`sdlc-next.toml`, `sdlc-status.toml`, `sdlc-approve.toml`).
 
@@ -198,6 +204,39 @@ sdlc milestone create v2-launch --title "Version 2.0 Launch"
 sdlc milestone review v2-launch    # status table across all features
 ```
 
+### Roadmap (Ideation / Ponder)
+
+A pre-milestone ideation workspace for exploring ideas before they enter the state machine. Ideas live at `.sdlc/roadmap/<slug>/` as a scrapbook of Markdown artifacts, a recruited team of thought partners, and a manifest tracking status.
+
+```bash
+# Open an idea (or start a new one)
+sdlc ponder create preference-engine --title "Dynamic preference system"
+sdlc ponder list                                           # all active ideas
+sdlc ponder show preference-engine                        # manifest + team + scrapbook
+
+# Capture thinking into the scrapbook
+sdlc ponder capture preference-engine --content "..." --as problem.md
+sdlc ponder capture preference-engine --file /tmp/notes.md --as exploration.md
+
+# Manage thought partners
+sdlc ponder team add preference-engine --name kai-tanaka --role "Preference systems architect" \
+  --context "Built Spotify's preference engine" --agent .claude/agents/kai-tanaka.md
+
+# Update status and park unused ideas
+sdlc ponder update preference-engine --status converging
+sdlc ponder archive old-idea                              # parks without deleting
+```
+
+**Ideation flow with Claude Code:**
+```
+/sdlc-ponder <slug>              # explore: interrogate, empathize, recruit, capture
+/sdlc-ponder-commit <slug>       # commit: synthesize scrapbook → milestones + features
+/sdlc-pressure-test <milestone>  # validate: pressure-test the new milestone
+/sdlc-run <feature-slug>         # execute: drive features through the lifecycle
+```
+
+**Status lifecycle:** `exploring` → `converging` → `committed` (or `parked` if shelved)
+
 ### Gates (Consumer Hints)
 
 Gates are verification hints published in the directive output. sdlc includes them in `sdlc next --json`; the consumer decides whether and how to act on them. Defined in `.sdlc/config.yaml`:
@@ -221,6 +260,18 @@ gates:
 ## CLI Reference
 
 ```bash
+# Ideation (Ponder / Roadmap)
+sdlc ponder create <slug> --title "..."
+sdlc ponder list [--status <status>]
+sdlc ponder show <slug>
+sdlc ponder capture <slug> --content "<text>" --as <filename>
+sdlc ponder capture <slug> --file <path> [--as <filename>]
+sdlc ponder team add <slug> --name <name> --role <role> --context <ctx> --agent <path>
+sdlc ponder team list <slug>
+sdlc ponder update <slug> [--status <status>] [--title "..."] [--tag <tag>]
+sdlc ponder archive <slug>
+sdlc ponder artifacts <slug>
+
 # Lifecycle
 sdlc init [--platform <name>]          # initialize .sdlc/ in current project
 sdlc state                             # show project state
@@ -313,6 +364,13 @@ sdlc ui
 ```
 
 Opens a React dashboard at a random OS-assigned port (printed on startup). Shows features grouped by milestone, phase progress, artifact approval flow, and the next command to run for each feature. State updates automatically via SSE — no refresh needed.
+
+Pages:
+- **Dashboard** — active features, milestones, and pondering ideas at a glance
+- **Features** — all features with phase and status
+- **Milestones** — milestone containers with feature progress
+- **Roadmap** — ponder entries (ideation workspace); click any entry to see the scrapbook, team, and copy `/sdlc-ponder` commands
+- **Archive** — released and archived features
 
 ---
 

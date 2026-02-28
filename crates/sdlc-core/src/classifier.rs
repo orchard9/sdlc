@@ -1,8 +1,10 @@
 use crate::config::Config;
 use crate::feature::Feature;
+use crate::rules::default_rules;
 use crate::state::State;
 use crate::types::{ActionType, Phase};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 // ---------------------------------------------------------------------------
 // EvalContext
@@ -105,4 +107,38 @@ impl Classifier {
             timeout_minutes: 0,
         }
     }
+}
+
+// ---------------------------------------------------------------------------
+// Auto-transition helper
+// ---------------------------------------------------------------------------
+
+/// Re-classify a feature after a state change (artifact approved/rejected/waived,
+/// task completed, etc.). If the classifier determines a phase transition is
+/// ready, execute it automatically.
+///
+/// Returns `Some(phase_name)` if a transition occurred, `None` otherwise.
+///
+/// This implements the CLAUDE.md contract: "Phases advance from artifact state,
+/// not direct transition calls."
+pub fn try_auto_transition(root: &Path, slug: &str) -> Option<String> {
+    let config = Config::load(root).ok()?;
+    let state = State::load(root).ok()?;
+    let feature = Feature::load(root, slug).ok()?;
+
+    let ctx = EvalContext {
+        feature: &feature,
+        state: &state,
+        config: &config,
+        root,
+    };
+    let classification = Classifier::new(default_rules()).classify(&ctx);
+
+    if let Some(target_phase) = classification.transition_to {
+        let mut feature = feature;
+        if feature.transition(target_phase, &config).is_ok() && feature.save(root).is_ok() {
+            return Some(target_phase.to_string());
+        }
+    }
+    None
 }

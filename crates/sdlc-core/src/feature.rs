@@ -131,6 +131,7 @@ impl Feature {
     }
 
     pub fn load(root: &Path, slug: &str) -> Result<Self> {
+        paths::validate_slug(slug)?;
         let manifest = paths::feature_manifest(root, slug);
         if !manifest.exists() {
             return Err(SdlcError::FeatureNotFound(slug.to_string()));

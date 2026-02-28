@@ -1,7 +1,7 @@
 use crate::output::{print_json, print_table};
 use anyhow::Context;
 use clap::Subcommand;
-use sdlc_core::{feature::Feature, task as task_ops};
+use sdlc_core::{classifier::try_auto_transition, feature::Feature, task as task_ops};
 use std::path::Path;
 
 #[derive(Subcommand)]
@@ -124,12 +124,20 @@ fn complete(root: &Path, slug: &str, task_id: &str, json: bool) -> anyhow::Resul
         .with_context(|| format!("task '{task_id}' not found"))?;
     feature.save(root).context("failed to save feature")?;
 
+    let transitioned_to = try_auto_transition(root, slug);
+
     if json {
-        print_json(
-            &serde_json::json!({ "slug": slug, "task_id": task_id, "status": "completed" }),
-        )?;
+        let mut val =
+            serde_json::json!({ "slug": slug, "task_id": task_id, "status": "completed" });
+        if let Some(phase) = &transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase.clone());
+        }
+        print_json(&val)?;
     } else {
         println!("Completed task [{task_id}]");
+        if let Some(phase) = &transitioned_to {
+            println!("Transitioned to: {phase}");
+        }
     }
     Ok(())
 }

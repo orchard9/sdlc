@@ -30,8 +30,8 @@ pub enum AgentSubcommand {
         /// Feature slug to drive
         slug: String,
 
-        /// Maximum agent turns (default: 50)
-        #[arg(long, default_value = "50")]
+        /// Maximum agent turns (default: 200)
+        #[arg(long, default_value = "200")]
         max_turns: u32,
 
         /// Model override (default: claude-sonnet-4-6)
@@ -85,6 +85,7 @@ pub fn run(root: &Path, subcommand: AgentSubcommand, _json: bool) -> Result<()> 
     // Build MCP server config — points to the `sdlc mcp` subcommand of this
     // same binary. Claude will connect to it via JSON-RPC over stdio.
     let sdlc_bin = std::env::current_exe().unwrap_or_else(|_| std::path::PathBuf::from("sdlc"));
+    tracing::info!(binary = %sdlc_bin.display(), cwd = %root.display(), "sdlc agent config");
 
     let mcp_server = McpServerConfig {
         name: "sdlc".into(),
@@ -102,6 +103,8 @@ pub fn run(root: &Path, subcommand: AgentSubcommand, _json: bool) -> Result<()> 
         "mcp__sdlc__sdlc_add_task".into(),
         "mcp__sdlc__sdlc_complete_task".into(),
         "mcp__sdlc__sdlc_add_comment".into(),
+        "mcp__sdlc__sdlc_project_phase".into(),
+        "mcp__sdlc__sdlc_prepare".into(),
     ];
 
     let opts = QueryOptions {
@@ -122,12 +125,16 @@ pub fn run(root: &Path, subcommand: AgentSubcommand, _json: bool) -> Result<()> 
 
     // Drive the agent — Claude handles the full directive loop internally via
     // MCP tool calls. We block until it completes (up to max_turns turns).
+    tracing::info!(slug = %slug, max_turns, "spawning claude subprocess");
     let rt = tokio::runtime::Handle::try_current()
         .map(|_| None)
         .unwrap_or_else(|_| Some(tokio::runtime::Runtime::new().expect("tokio runtime")));
 
     let result = match rt {
-        Some(rt) => rt.block_on(runner::run(run_cfg)),
+        Some(rt) => {
+            tracing::debug!("using new tokio runtime");
+            rt.block_on(runner::run(run_cfg))
+        }
         None => {
             // Already inside a runtime (e.g., integration test)
             tokio::task::block_in_place(|| {

@@ -56,6 +56,16 @@ export const api = {
   addComment: (slug: string, body: string, flag?: string, by?: string) =>
     request(`/api/features/${slug}/comments`, { method: 'POST', body: JSON.stringify({ body, flag, by }) }),
 
+  startRun: (slug: string) =>
+    request<{ status: string; message: string }>(`/api/run/${slug}`, { method: 'POST' }),
+  stopRun: (slug: string) =>
+    request<{ status: string; message: string }>(`/api/run/${slug}/stop`, { method: 'POST' }),
+
+  startMilestoneUat: (slug: string) =>
+    request<{ status: string; message: string }>(`/api/milestone/${encodeURIComponent(slug)}/uat`, { method: 'POST' }),
+  stopMilestoneUat: (slug: string) =>
+    request<{ status: string; message: string }>(`/api/milestone/${encodeURIComponent(slug)}/uat/stop`, { method: 'POST' }),
+
   getConfig: () => request<import('@/lib/types').ProjectConfig>('/api/config'),
 
   querySearch: (q: string, limit = 10) =>
@@ -69,8 +79,39 @@ export const api = {
   queryNeedsApproval: () =>
     request<import('@/lib/types').QueryNeedsApprovalItem[]>('/api/query/needs-approval'),
 
+  // Project prepare
+  getProjectPhase: () => request<import('@/lib/types').ProjectPhase>('/api/project/phase'),
+  getProjectPrepare: (milestone?: string) =>
+    request<import('@/lib/types').PrepareResult>(`/api/project/prepare${milestone ? `?milestone=${encodeURIComponent(milestone)}` : ''}`),
+
   getVision: () => request<{ content: string; exists: boolean }>('/api/vision'),
   putVision: (content: string) =>
     request('/api/vision', { method: 'PUT', body: JSON.stringify({ content }) }),
 
+  // Roadmap / Ponder
+  getRoadmap: () => request<import('@/lib/types').PonderSummary[]>('/api/roadmap'),
+  getPonderEntry: (slug: string) => request<import('@/lib/types').PonderDetail>(`/api/roadmap/${slug}`),
+  createPonderEntry: (data: { slug: string; title: string; brief?: string }) =>
+    request<{ slug: string; title: string; status: string }>('/api/roadmap', { method: 'POST', body: JSON.stringify(data) }),
+  updatePonderEntry: (slug: string, data: Partial<{ title: string; status: import('@/lib/types').PonderStatus; tags: string[] }>) =>
+    request<{ slug: string; title: string; status: string; tags: string[] }>(`/api/roadmap/${slug}`, { method: 'PUT', body: JSON.stringify(data) }),
+  capturePonderArtifact: (slug: string, data: { filename: string; content: string }) =>
+    request<void>(`/api/roadmap/${slug}/capture`, { method: 'POST', body: JSON.stringify(data) }),
+  getPonderSessions: (slug: string) =>
+    request<import('@/lib/types').SessionMeta[]>(`/api/roadmap/${slug}/sessions`),
+  getPonderSession: (slug: string, n: number) =>
+    request<import('@/lib/types').SessionContent>(`/api/roadmap/${slug}/sessions/${n}`),
+
+  // Ponder chat — start / stop agent sessions
+  startPonderChat: (slug: string, message?: string) =>
+    request<import('@/lib/types').PonderChatResponse>(`/api/ponder/${slug}/chat`, {
+      method: 'POST',
+      body: JSON.stringify({ message: message ?? null }),
+    }),
+  stopPonderChat: (slug: string) =>
+    request<void>(`/api/ponder/${slug}/chat/current`, { method: 'DELETE' }),
+
+  // Run history
+  getRuns: () => request<import('@/lib/types').RunRecord[]>('/api/runs'),
+  getRun: (id: string) => request<import('@/lib/types').RunRecord & { events: import('@/lib/types').AgentEvent[] }>(`/api/runs/${id}`),
 }

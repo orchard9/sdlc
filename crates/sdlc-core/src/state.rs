@@ -49,6 +49,8 @@ pub struct State {
     pub blocked: Vec<BlockedItem>,
     #[serde(default)]
     pub milestones: Vec<String>,
+    #[serde(default)]
+    pub active_ponders: Vec<String>,
     pub last_updated: DateTime<Utc>,
 }
 
@@ -66,6 +68,7 @@ impl State {
             history: Vec::new(),
             blocked: Vec::new(),
             milestones: Vec::new(),
+            active_ponders: Vec::new(),
             last_updated: Utc::now(),
         }
     }
@@ -168,6 +171,18 @@ impl State {
 
     pub fn remove_milestone(&mut self, slug: &str) {
         self.milestones.retain(|s| s != slug);
+        self.last_updated = Utc::now();
+    }
+
+    pub fn add_ponder(&mut self, slug: &str) {
+        if !self.active_ponders.contains(&slug.to_string()) {
+            self.active_ponders.push(slug.to_string());
+        }
+        self.last_updated = Utc::now();
+    }
+
+    pub fn remove_ponder(&mut self, slug: &str) {
+        self.active_ponders.retain(|s| s != slug);
         self.last_updated = Utc::now();
     }
 

@@ -1,10 +1,18 @@
 import { useState, useEffect, useRef } from 'react'
 import { api } from '@/api/client'
-import type { QuerySearchResult } from '@/lib/types'
+import type { QuerySearchResult, QueryPonderSearchResult } from '@/lib/types'
+
+export interface SearchResultItem {
+  kind: 'feature' | 'ponder'
+  slug: string
+  title: string
+  status: string // phase for features, status for ponders
+  score: number
+}
 
 export function useSearch() {
   const [query, setQuery] = useState('')
-  const [results, setResults] = useState<QuerySearchResult[]>([])
+  const [results, setResults] = useState<SearchResultItem[]>([])
   const [loading, setLoading] = useState(false)
   const [parseError, setParseError] = useState<string | null>(null)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -30,7 +38,23 @@ export function useSearch() {
         const res = await api.querySearch(query, 10)
         // Only apply results if this request was not superseded
         if (!controller.signal.aborted) {
-          setResults(res.results)
+          const featureItems: SearchResultItem[] = res.results.map((r: QuerySearchResult) => ({
+            kind: 'feature' as const,
+            slug: r.slug,
+            title: r.title,
+            status: r.phase,
+            score: r.score,
+          }))
+          const ponderItems: SearchResultItem[] = (res.ponder_results ?? []).map((r: QueryPonderSearchResult) => ({
+            kind: 'ponder' as const,
+            slug: r.slug,
+            title: r.title,
+            status: r.status,
+            score: r.score,
+          }))
+          // Merge and sort by score descending
+          const merged = [...featureItems, ...ponderItems].sort((a, b) => b.score - a.score)
+          setResults(merged)
           setParseError(res.parse_error)
         }
       } catch {

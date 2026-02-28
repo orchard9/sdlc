@@ -55,6 +55,11 @@ pub fn run(root: &Path) -> anyhow::Result<()> {
     let stdout = std::io::stdout();
     let tools = tools::all_tools();
 
+    eprintln!(
+        "[sdlc-mcp] server started, {} tools registered",
+        tools.len()
+    );
+
     for line in stdin.lock().lines() {
         let line = line?;
         if line.trim().is_empty() {
@@ -64,6 +69,7 @@ pub fn run(root: &Path) -> anyhow::Result<()> {
         let raw: Value = match serde_json::from_str(&line) {
             Ok(v) => v,
             Err(e) => {
+                eprintln!("[sdlc-mcp] parse error: {e}");
                 let resp = JsonRpcResponse {
                     jsonrpc: "2.0",
                     id: None,
@@ -108,7 +114,19 @@ pub fn run(root: &Path) -> anyhow::Result<()> {
             }
         };
 
+        eprintln!(
+            "[sdlc-mcp] request: method={} id={}",
+            request.method,
+            request
+                .id
+                .as_ref()
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "null".into())
+        );
         let response = handle_request(&request, &tools, root);
+        if let Some(ref err) = response.error {
+            eprintln!("[sdlc-mcp] error response: {} ({})", err.message, err.code);
+        }
         let mut out = stdout.lock();
         serde_json::to_writer(&mut out, &response)?;
         writeln!(out)?;
@@ -206,6 +224,7 @@ pub fn handle_request(
                     }),
                 },
                 Some(tool) => {
+                    let start = std::time::Instant::now();
                     let (text, is_error) = match tool.call(args, root) {
                         Ok(v) => (
                             serde_json::to_string_pretty(&v)
@@ -214,6 +233,13 @@ pub fn handle_request(
                         ),
                         Err(e) => (e, true),
                     };
+                    let elapsed = start.elapsed();
+                    eprintln!(
+                        "[sdlc-mcp] tool={} is_error={} duration={:.1}ms",
+                        tool_name,
+                        is_error,
+                        elapsed.as_secs_f64() * 1000.0
+                    );
 
                     let call_result = ToolCallResult {
                         content: vec![ToolContent {
@@ -307,7 +333,7 @@ mod tests {
     }
 
     #[test]
-    fn tools_list_returns_all_seven() {
+    fn tools_list_returns_all_eleven() {
         let dir = TempDir::new().unwrap();
         setup(&dir);
         let tools = tools::all_tools();
@@ -317,7 +343,7 @@ mod tests {
         assert!(resp.error.is_none());
         let result = resp.result.unwrap();
         let tool_list = result["tools"].as_array().unwrap();
-        assert_eq!(tool_list.len(), 7);
+        assert_eq!(tool_list.len(), 11);
 
         let names: Vec<&str> = tool_list
             .iter()

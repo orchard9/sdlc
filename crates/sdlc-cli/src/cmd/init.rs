@@ -344,6 +344,9 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         but approvals/artifacts are the recommended way to keep quality and traceability.\n\n\
         ### Artifact Types\n\n\
         `spec` `design` `tasks` `qa_plan` `review` `audit` `qa_results`\n\n\
+        ### CRITICAL: Never edit .sdlc/ YAML directly\n\n\
+        All state changes go through `sdlc` CLI commands. See §6 of `.sdlc/guidance.md` \
+        for the full command reference. Direct YAML edits corrupt state.\n\n\
         ### Directive Interface\n\n\
         Use `sdlc next --for <slug> --json` to get the next directive. The JSON output tells the \
         consumer what to do next (action, message, output_path, is_heavy, gates).\n\n\
@@ -357,7 +360,11 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         - `/sdlc-enterprise-readiness [--stage <stage>]` — analyze production readiness\n\
         - `/sdlc-setup-quality-gates` — set up pre-commit hooks and quality gates\n\
         - `/sdlc-cookbook <milestone-slug>` — create developer-scenario cookbook recipes\n\
-        - `/sdlc-cookbook-run <milestone-slug>` — execute cookbook recipes and record results\n\n\
+        - `/sdlc-cookbook-run <milestone-slug>` — execute cookbook recipes and record results\n\
+        - `/sdlc-ponder [slug]` — open the ideation workspace for exploring and committing ideas\n\
+        - `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features\n\
+        - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent\n\
+        - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions\n\n\
         Project: {project_name}\n\n"
     )
 }
@@ -522,6 +529,11 @@ fn write_user_claude_commands() -> anyhow::Result<()> {
             ),
             ("sdlc-cookbook.md", SDLC_COOKBOOK_COMMAND),
             ("sdlc-cookbook-run.md", SDLC_COOKBOOK_RUN_COMMAND),
+            ("sdlc-ponder.md", SDLC_PONDER_COMMAND),
+            ("sdlc-ponder-commit.md", SDLC_PONDER_COMMIT_COMMAND),
+            ("sdlc-recruit.md", SDLC_RECRUIT_COMMAND),
+            ("sdlc-empathy.md", SDLC_EMPATHY_COMMAND),
+            ("sdlc-prepare.md", SDLC_PREPARE_COMMAND),
         ],
     )
 }
@@ -607,6 +619,41 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
             gemini_command_toml(
                 "Execute cookbook recipes and record results for a milestone",
                 SDLC_COOKBOOK_RUN_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-ponder.toml",
+            gemini_command_toml(
+                "Open the ideation workspace for exploring ideas with thought partners",
+                SDLC_PONDER_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-ponder-commit.toml",
+            gemini_command_toml(
+                "Crystallize a pondered idea into milestones and features",
+                SDLC_PONDER_COMMIT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-recruit.toml",
+            gemini_command_toml(
+                "Recruit an expert thought partner as a persistent agent",
+                SDLC_RECRUIT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-empathy.toml",
+            gemini_command_toml(
+                "Interview user perspectives deeply before making decisions",
+                SDLC_EMPATHY_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-prepare.toml",
+            gemini_command_toml(
+                "Survey a milestone — find gaps, organize into parallelizable waves",
+                SDLC_PREPARE_PLAYBOOK,
             ),
         ),
     ];
@@ -716,6 +763,46 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
                 SDLC_COOKBOOK_RUN_PLAYBOOK,
             ),
         ),
+        (
+            "sdlc-ponder.md",
+            opencode_command_md(
+                "Open the ideation workspace for exploring ideas with thought partners",
+                "[slug or new idea]",
+                SDLC_PONDER_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-ponder-commit.md",
+            opencode_command_md(
+                "Crystallize a pondered idea into milestones and features",
+                "<ponder-slug>",
+                SDLC_PONDER_COMMIT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-recruit.md",
+            opencode_command_md(
+                "Recruit an expert thought partner as a persistent agent",
+                "<role or domain context>",
+                SDLC_RECRUIT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-empathy.md",
+            opencode_command_md(
+                "Interview user perspectives deeply before making decisions",
+                "<feature, system, or decision>",
+                SDLC_EMPATHY_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-prepare.md",
+            opencode_command_md(
+                "Survey a milestone — find gaps, organize into parallelizable waves",
+                "[milestone-slug]",
+                SDLC_PREPARE_PLAYBOOK,
+            ),
+        ),
     ];
 
     write_user_command_scaffold_owned(
@@ -742,6 +829,11 @@ fn write_user_agents_skills() -> anyhow::Result<()> {
             ("sdlc-specialize", SDLC_SPECIALIZE_SKILL),
             ("sdlc-cookbook", SDLC_COOKBOOK_SKILL),
             ("sdlc-cookbook-run", SDLC_COOKBOOK_RUN_SKILL),
+            ("sdlc-ponder", SDLC_PONDER_SKILL),
+            ("sdlc-ponder-commit", SDLC_PONDER_COMMIT_SKILL),
+            ("sdlc-recruit", SDLC_RECRUIT_SKILL),
+            ("sdlc-empathy", SDLC_EMPATHY_SKILL),
+            ("sdlc-prepare", SDLC_PREPARE_SKILL),
         ],
     )
 }
@@ -761,6 +853,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-setup-quality-gates.md",
         "sdlc-cookbook.md",
         "sdlc-cookbook-run.md",
+        "sdlc-ponder.md",
+        "sdlc-ponder-commit.md",
+        "sdlc-recruit.md",
+        "sdlc-empathy.md",
+        "sdlc-prepare.md",
     ];
 
     remove_if_exists(
@@ -784,6 +881,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-setup-quality-gates.toml",
             "sdlc-cookbook.toml",
             "sdlc-cookbook-run.toml",
+            "sdlc-ponder.toml",
+            "sdlc-ponder-commit.toml",
+            "sdlc-recruit.toml",
+            "sdlc-empathy.toml",
+            "sdlc-prepare.toml",
             "sdlc-next.md",
             "sdlc-status.md",
             "sdlc-approve.md",
@@ -796,6 +898,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-setup-quality-gates.md",
             "sdlc-cookbook.md",
             "sdlc-cookbook-run.md",
+            "sdlc-ponder.md",
+            "sdlc-ponder-commit.md",
+            "sdlc-recruit.md",
+            "sdlc-empathy.md",
+            "sdlc-prepare.md",
         ],
     )?;
     remove_if_exists(
@@ -824,6 +931,11 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-setup-quality-gates/SKILL.md",
             "sdlc-cookbook/SKILL.md",
             "sdlc-cookbook-run/SKILL.md",
+            "sdlc-ponder/SKILL.md",
+            "sdlc-ponder-commit/SKILL.md",
+            "sdlc-recruit/SKILL.md",
+            "sdlc-empathy/SKILL.md",
+            "sdlc-prepare/SKILL.md",
         ],
     )?;
     remove_if_exists(&root.join(".codex/commands"), ".codex/commands", sdlc_files)?;
@@ -979,6 +1091,33 @@ Tests must earn their place. When a test breaks, choose deliberately:
 - **Quick-fix** — only if the fix is obvious and the test is clearly valuable
 
 Never keep a flaky or low-value test just to preserve coverage numbers.
+
+## 6. Using sdlc
+
+All state lives in `.sdlc/` YAML files. **Never edit them directly** — use the CLI.
+Direct edits cause deserialization failures and corrupt state.
+
+| Action | Command |
+|---|---|
+| Create feature | `sdlc feature create <slug> --title "…"` |
+| Get next action | `sdlc next --for <slug> --json` |
+| Write artifact | Write Markdown to `output_path` from the directive |
+| Submit draft | `sdlc artifact draft <slug> <type>` |
+| Approve artifact | `sdlc artifact approve <slug> <type>` |
+| Reject artifact | `sdlc artifact reject <slug> <type>` |
+| Add task | `sdlc task add <slug> "title"` |
+| Start task | `sdlc task start <slug> <task-id>` |
+| Complete task | `sdlc task complete <slug> <task-id>` |
+| Block task | `sdlc task block <slug> <task-id> "reason"` |
+| Add comment | `sdlc comment create <slug> "body"` |
+| Show feature | `sdlc feature show <slug> --json` |
+| List tasks | `sdlc task list <slug>` |
+| Project state | `sdlc state` |
+| Survey milestone waves | `sdlc project prepare [--milestone <slug>]` |
+| Project phase | `sdlc project status` |
+
+Phases advance automatically from artifact approvals — never call `sdlc feature transition`.
+The only files you write directly are Markdown artifacts to `output_path`.
 "#;
 
 const SDLC_NEXT_COMMAND: &str = r#"---
@@ -1004,7 +1143,7 @@ Every phase requires specific Markdown artifacts to be written and approved befo
 
 ## Steps
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ### 1. Resolve the slug
 
@@ -1069,7 +1208,7 @@ allowed-tools: Bash
 
 Show the current SDLC state — what features exist, what phase they're in, and what needs attention.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Usage
 
@@ -1086,9 +1225,10 @@ sdlc next
 sdlc query needs-approval
 sdlc query blocked
 sdlc query ready
+sdlc ponder list
 ```
 
-Show features grouped by: needs approval, blocked, in progress, ready.
+Show features grouped by: needs approval, blocked, in progress, ready. Include active ponder entries (exploring/converging ideas).
 
 ## Single-feature detail
 
@@ -1118,7 +1258,7 @@ allowed-tools: Bash, Read
 
 Read an artifact, present it for review, and approve it to advance the feature to the next phase.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Usage
 
@@ -1170,7 +1310,7 @@ Generate a project-specific AI team — Claude agent personas and blueprint-styl
 tailored to this project's tech stack, domain, and team roles. Runs across 4 sessions with
 explicit human checkpoints so you approve each stage before files are written.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Overview
 
@@ -1407,7 +1547,9 @@ const SDLC_NEXT_PLAYBOOK: &str = r#"# sdlc-next
 
 Use this playbook to drive the next SDLC directive for a feature.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+> **NEVER edit `.sdlc/` YAML files directly.** All state changes go through `sdlc` CLI commands. The only files you write are Markdown artifacts to the `output_path` from `sdlc next --json`.
 
 ## Steps
 
@@ -1432,7 +1574,7 @@ const SDLC_STATUS_PLAYBOOK: &str = r#"# sdlc-status
 
 Use this playbook to report SDLC state for the whole project or one feature.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Project view
 
@@ -1442,6 +1584,7 @@ Run:
 - `sdlc query needs-approval`
 - `sdlc query blocked`
 - `sdlc query ready`
+- `sdlc ponder list`
 
 ## Feature view
 
@@ -1456,7 +1599,7 @@ const SDLC_APPROVE_PLAYBOOK: &str = r#"# sdlc-approve
 
 Use this playbook to review and approve an SDLC artifact.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -1485,7 +1628,9 @@ description: Get the next SDLC directive for a feature and act on it. Use when d
 
 Use this skill when a user asks for the next SDLC action for a feature.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+> Never edit `.sdlc/` YAML directly — see §6 of `.sdlc/guidance.md`.
 
 ## Workflow
 
@@ -1507,7 +1652,7 @@ description: Show SDLC state for the project or a specific feature. Use when che
 
 Use this skill when a user asks for SDLC status across the project or for one feature.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -1517,6 +1662,7 @@ Project view:
 - `sdlc query needs-approval`
 - `sdlc query blocked`
 - `sdlc query ready`
+- `sdlc ponder list`
 
 Feature view:
 - `sdlc feature show <slug>`
@@ -1534,7 +1680,7 @@ description: Review and approve an SDLC artifact to advance the feature phase. U
 
 Use this skill when a user wants to review and approve an SDLC artifact.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -1563,7 +1709,7 @@ Drive a feature forward autonomously — executing every action in the state mac
 Use `sdlc-next` when you want to execute one step at a time with human control between steps.
 Use `sdlc-run` when you want the agent to drive as far as it can autonomously.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## True HITL gates (where sdlc-run stops)
 
@@ -1646,8 +1792,9 @@ Always end with a single `**Next:**` line:
 
 | Outcome | Next |
 |---|---|
-| Feature `done`, in a milestone | `**Next:** /sdlc-milestone-uat <milestone-slug>` |
-| Feature `done`, no milestone | `**Next:** /sdlc-focus` |
+| Feature `done`, milestone has more work | `**Next:** /sdlc-prepare <milestone-slug>` |
+| Feature `done`, milestone all released | `**Next:** /sdlc-milestone-uat <milestone-slug>` |
+| Feature `done`, no milestone | `**Next:** /sdlc-prepare` |
 | HITL gate reached | `**Next:** /sdlc-run <slug>` _(after resolving the gate)_ |
 | Unexpected failure | `**Next:** /sdlc-run <slug>` _(after fixing the blocker)_ |
 "#;
@@ -1666,7 +1813,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task
 
 Takes a body of work and distributes it into the sdlc structure. Creates milestones, features, and tasks where they don't exist. Refines them where they do. Running it again with a tweaked plan is safe and correct — the second run adjusts, not piles on.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Idempotency Contract
 
@@ -1769,7 +1916,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 
 Run a milestone's acceptance test end-to-end. Executes every checklist item, signs each one as it passes, and for failures either fixes immediately, creates a task and continues, or creates a task and halts. Writes a signed `uat_results.md` to the milestone directory.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Ethos
 
@@ -1856,7 +2003,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task
 
 Pressure-test a milestone's direction against real user perspectives. This is not a code review or quality gate — it's a "are we solving the right problem?" check. Runs empathy interviews, identifies gaps between what's planned and what users need, and autonomously edits project docs to align them.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## When to Use
 
@@ -1974,7 +2121,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task
 
 Run an enterprise readiness analysis against the current project and translate findings into sdlc structure. The output is not a report — it's milestones, features, and tasks that enter the state machine and get built.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 Three modes of operation:
 
@@ -2060,7 +2207,9 @@ const SDLC_RUN_PLAYBOOK: &str = r#"# sdlc-run
 
 Use this playbook to autonomously drive a feature to completion or the next human gate.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+> Never edit `.sdlc/` YAML directly — see §6 of `.sdlc/guidance.md`.
 
 ## Steps
 
@@ -2081,7 +2230,9 @@ const SDLC_PLAN_PLAYBOOK: &str = r#"# sdlc-plan
 
 Use this playbook to distribute a plan into sdlc milestones, features, and tasks.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+> Never edit `.sdlc/` YAML directly — see §6 of `.sdlc/guidance.md`.
 
 ## Steps
 
@@ -2108,7 +2259,7 @@ const SDLC_MILESTONE_UAT_PLAYBOOK: &str = r#"# sdlc-milestone-uat
 
 Use this playbook to run a milestone's acceptance test end-to-end.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -2134,7 +2285,7 @@ const SDLC_PRESSURE_TEST_PLAYBOOK: &str = r#"# sdlc-pressure-test
 
 Use this playbook to pressure-test a milestone against user perspectives.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -2162,7 +2313,7 @@ const SDLC_ENTERPRISE_READINESS_PLAYBOOK: &str = r#"# sdlc-enterprise-readiness
 
 Use this playbook to analyze a project for enterprise readiness and distribute findings into sdlc.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -2196,7 +2347,9 @@ description: Autonomously drive a feature to completion or the next human gate. 
 
 Use this skill to autonomously drive a feature through the sdlc state machine until a human gate or completion.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+> Never edit `.sdlc/` YAML directly — see §6 of `.sdlc/guidance.md`.
 
 ## Workflow
 
@@ -2218,7 +2371,9 @@ description: Distribute a plan into sdlc milestones, features, and tasks. Use wh
 
 Use this skill to distribute a plan into sdlc milestones, features, and tasks.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+> Never edit `.sdlc/` YAML directly — see §6 of `.sdlc/guidance.md`.
 
 ## Workflow
 
@@ -2243,7 +2398,7 @@ description: Run the acceptance test for a milestone end-to-end. Use when valida
 
 Use this skill to run a milestone's acceptance test end-to-end.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2264,7 +2419,7 @@ description: Pressure-test a milestone against user perspectives. Use when valid
 
 Use this skill to pressure-test a milestone against user perspectives.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2285,7 +2440,7 @@ description: Analyze a project for enterprise readiness and distribute findings 
 
 Use this skill to analyze a project for enterprise readiness and distribute findings into sdlc structure.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2311,7 +2466,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 
 Detect the project's languages and install pre-commit hooks with auto-fix and verification phases. Quality is enforced at commit time — the hook runs automatically on every `git commit`, ensuring no broken code ever reaches the repo.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Modes
 
@@ -2495,7 +2650,7 @@ const SDLC_SETUP_QUALITY_GATES_PLAYBOOK: &str = r#"# sdlc-setup-quality-gates
 
 Use this playbook to set up pre-commit hooks for a project.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Modes
 
@@ -2545,7 +2700,7 @@ description: Set up pre-commit hooks and quality gates for a project. Use when c
 
 Use this skill to set up pre-commit hooks and quality gates for a project.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2571,7 +2726,7 @@ const SDLC_SPECIALIZE_PLAYBOOK: &str = r#"# sdlc-specialize
 
 Survey this project and generate a tailored AI team (agents + skills).
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -2606,7 +2761,7 @@ description: Survey this project and generate a tailored AI team (agents + skill
 
 Use this skill to generate a project-specific AI team with agent personas and skills.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2640,7 +2795,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 
 Create developer-scenario cookbook recipes for a milestone. Cookbooks prove milestones deliver meaningful, usable capability — not just that features pass their tests. UAT asks "does the feature work?" while cookbooks ask "can a developer actually accomplish something?"
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Ethos
 
@@ -2758,7 +2913,7 @@ allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 
 Execute cookbook recipes for a milestone and record the results. Be the developer. Run every step. Record honest verdicts. Failures become `[cookbook-gap]` tasks on the owning feature.
 
-> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Ethos
 
@@ -2860,7 +3015,7 @@ const SDLC_COOKBOOK_PLAYBOOK: &str = r#"# sdlc-cookbook
 
 Create developer-scenario cookbook recipes that prove a milestone delivers real value.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -2889,7 +3044,7 @@ const SDLC_COOKBOOK_RUN_PLAYBOOK: &str = r#"# sdlc-cookbook-run
 
 Execute cookbook recipes for a milestone and record results.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
@@ -2922,7 +3077,7 @@ description: Create developer-scenario cookbook recipes for a milestone. Use whe
 
 Use this skill to create developer-scenario cookbook recipes that prove a milestone delivers real value.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2955,7 +3110,7 @@ description: Execute cookbook recipes for a milestone and record results. Use wh
 
 Use this skill to execute cookbook recipes and record results for a milestone.
 
-> Read `.sdlc/guidance.md` before acting. <!-- sdlc:guidance -->
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
@@ -2966,4 +3121,858 @@ Use this skill to execute cookbook recipes and record results for a milestone.
 5. On failure: `sdlc task add <feature-slug> --title "[cookbook-gap] <recipe>: <failure>"`.
 6. Write result files + summary in run directory.
 7. Report overall verdict. All PASS → milestone-verify. Any FAIL → sdlc-run on failing feature.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-ponder — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_PONDER_COMMAND: &str = r#"---
+description: Open the ideation workspace — explore ideas with recruited thought partners, capture artifacts in the scrapbook, commit when ready. Embeds ideation, empathy, and recruitment protocols natively.
+argument-hint: [slug or new idea description]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task, AskUserQuestion
+---
+
+# sdlc-ponder
+
+Open the ponder workspace for creative exploration. This command sets the context —
+from here, everything is conversation. You have access to all thinking tools. Artifacts
+you produce land in the scrapbook and persist across sessions. Every session is logged
+as a Markdown dialogue that accumulates over time.
+
+> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+## Entering the workspace
+
+### If $ARGUMENTS is a known slug
+
+```bash
+sdlc ponder show <slug>
+sdlc ponder session list <slug>
+```
+
+Read the manifest, team, and all scrapbook artifacts. Load the team's agent definitions.
+Read the session list — if sessions exist, read the most recent one to restore full context:
+
+```bash
+sdlc ponder session read <slug> <number>
+```
+
+Orient yourself from the **orientation strip** in the most recent session (or the manifest):
+
+```
+WHERE WE ARE   <current state of the thinking>
+→ NEXT MOVE    <what the previous session said to do next>
+COMMIT SIGNAL  <condition that unlocks commitment>
+```
+
+Summarize where the idea stands: what's been explored, who's on the team, open questions,
+and what the orientation strip says to do next. Then dive in.
+
+### If $ARGUMENTS looks like a new idea (not an existing slug)
+
+1. Derive a slug from the idea text (lowercase, hyphens, max 40 chars).
+2. Create the entry:
+```bash
+sdlc ponder create <slug> --title "<derived title>"
+sdlc ponder capture <slug> --content "<verbatim user text>" --as brief.md
+```
+3. Read the brief. Identify domain signals. Recruit 2-3 initial thought partners —
+   always include:
+   - A domain expert (someone who's built something like this before)
+   - An end-user advocate (who uses what this produces?)
+   - A pragmatic skeptic (should this exist at all?)
+4. Register them:
+```bash
+sdlc ponder team add <slug> --name "<name>" --role "<role>" \
+  --context "<why this person>" --agent <agent-path>
+```
+
+### If no arguments
+
+```bash
+sdlc ponder list
+```
+
+Show all active ponder entries. Ask the user what they want to explore.
+
+---
+
+## During the session
+
+You are a facilitator running a collaborative thinking session. The recruited team
+members are your co-thinkers — channel their expertise and perspectives.
+
+### What you do naturally
+
+- **Interrogate the brief.** Push past the stated solution to find the real problem.
+  "You said database — what problem does the database solve? Who reads these preferences?
+  At what scale? What happens when cohort preferences conflict with individual ones?"
+- **Channel thought partners.** Don't just think as yourself — voice the perspectives
+  of recruited team members. "Kai would push back here — layered config inheritance is
+  notoriously hard to debug. Have you thought about how a developer traces why a
+  preference has a particular value?"
+- **Suggest captures.** When a breakthrough happens — a reframing, a key decision, a
+  constraint surfaced — offer to capture it: "That reframing is important. Should I
+  capture it as problem.md in the scrapbook?"
+- **Surface what's missing.** Track which dimensions of the idea have been explored.
+  Problem framing? User perspectives? Technical landscape? Solution options? Decisions?
+  Gently surface gaps: "We've been deep on the data model but haven't talked about who
+  the users of this system actually are."
+
+### Capturing artifacts
+
+When something is worth persisting:
+
+```bash
+# Write inline content
+sdlc ponder capture <slug> --content "<markdown content>" --as <filename>.md
+
+# Or write to a temp file first for larger artifacts
+# (write the file, then capture it)
+sdlc ponder capture <slug> --file /tmp/exploration.md --as exploration.md
+```
+
+### Recruiting additional partners
+
+If a new domain surfaces ("oh, this also needs a real-time sync layer"), recruit:
+
+```bash
+# Create the agent, then register them
+sdlc ponder team add <slug> --name "<name>" --role "<role>" \
+  --context "<context>" --agent .claude/agents/<name>.md
+```
+
+### Embedded capabilities
+
+#### Ideation protocol
+
+When exploring a problem:
+1. **Understand** — capture the problem statement, your interpretation, scope, success criteria
+2. **Gather context** — read relevant code, specs, adjacent systems
+3. **Synthesize** — landscape, constraints, gaps, key files
+4. **Consult thought partners** — channel each recruited expert's perspective
+5. **Explore solutions** — 3-4 options including "do nothing", with trade-offs
+6. **Step back** — assumption audit, fresh eyes test, skeptic's questions, reversal
+7. **Think out loud** — share learnings, surprises, core tension, questions
+8. **Collaborate** — listen, adjust, iterate with the user
+
+#### Empathy protocol
+
+When exploring user perspectives:
+1. **Identify stakeholders** — direct users, indirect, blockers, forgotten
+2. **Create perspective agents** — specific humans in specific situations
+3. **Deep interview each** — context, needs, friction, delight, deal-breakers
+4. **Synthesize** — alignments, conflicts, gaps, surprises
+5. **Step back** — bias check, quiet voice, stress test, humility check
+6. **Recommend** — evidence-based, tradeoffs acknowledged, unknowns flagged
+
+Always include at least 3 perspectives. Always include a skeptic.
+
+#### Recruitment protocol
+
+When a domain signal emerges and you need a thought partner:
+1. **Orient** — what expertise is needed and why
+2. **Design the expert** — real name, career background at named companies, specific
+   technical philosophy, strong opinions
+3. **Create the agent** — write to `.claude/agents/<name>.md`
+4. **Register** — `sdlc ponder team add <slug> --name ... --agent ...`
+
+#### Feature shaping protocol
+
+When an idea starts converging toward something buildable:
+1. **Seed** — working name, one-liner, hypothesis, trigger
+2. **User perspectives** — who uses this, who's affected, who's skeptical
+3. **Expert consultation** — technical feasibility, architecture fit, constraints
+4. **Shape** — core value prop, user stories, design decisions, trade-offs
+5. **Define MVP** — minimum lovable, not minimum viable
+6. **Step back** — do we need this? scope creep? quiet voices heard?
+
+---
+
+## Session Log Protocol
+
+**Every session must be logged before ending.** The log is the persistent record
+of the dialogue — it's how future sessions restore context without re-reading transcripts.
+
+> ⚠️ **Sessions are not scrapbook artifacts — these are different things.**
+>
+> - ❌ Do NOT use the `Write` tool to create session files directly in the ponder directory
+> - ❌ Do NOT use `sdlc ponder capture` to save sessions
+> - ✓ ALWAYS use `sdlc ponder session log` — this is the only correct path
+>
+> Why it matters: `sdlc ponder session log` auto-numbers the file, places it in the
+> correct `sessions/` subdirectory, increments the session counter in the manifest,
+> and mirrors the orientation fields so future sessions and the web UI can read them.
+> Skipping this command means the session is invisible — it becomes an artifact,
+> not a session.
+
+### Session file format
+
+Session files are Markdown with a YAML frontmatter block. The frontmatter carries
+metadata; the body is the free-form dialogue.
+
+```markdown
+---
+session: <N>
+timestamp: <ISO-8601 UTC>
+orientation:
+  current: "<one-liner: where the thinking is right now>"
+  next: "<one-liner: concrete next action or focus>"
+  commit: "<one-liner: condition that unlocks commitment>"
+---
+
+<session dialogue here — tool calls, partner voices, sketches, decisions, questions>
+```
+
+Inline markers to use consistently:
+- `⚑  Decided:` — something resolved, with brief rationale
+- `?  Open:` — unresolved question or tension still alive
+- `Recruited: NAME · ROLE` — when a new partner joins mid-session
+- `**NAME · ROLE**` — header for each partner voice block
+
+### The only correct logging procedure
+
+1. Write the session content to a temp file using the Write tool:
+```bash
+# Write tool → /tmp/ponder-session-<slug>.md
+```
+2. Register it:
+```bash
+sdlc ponder session log <slug> --file /tmp/ponder-session-<slug>.md
+```
+
+The system auto-assigns the session number — do not try to number the file yourself.
+
+---
+
+## Ending the session
+
+Before summarizing:
+
+1. **Compose the session document.** Write a complete Markdown file to
+   `/tmp/ponder-session-<slug>.md` using the Write tool. Include everything that
+   happened — tool calls, partner voices, sketches, decisions (⚑), open questions (?),
+   and recruitment events. Set the orientation fields to reflect where the thinking
+   is right now, what should happen next, and what unlocks commitment.
+
+2. **Log it:**
+```bash
+sdlc ponder session log <slug> --file /tmp/ponder-session-<slug>.md
+```
+
+3. **Summarize** what was explored, what was captured, and what remains unexplored.
+   Include the orientation strip so the user sees it.
+
+Always end with **Next:**
+
+| State | Next |
+|---|---|
+| Early exploration, many gaps | `**Next:** /sdlc-ponder <slug>` (continue exploring) |
+| Direction emerging, need depth | `**Next:** /sdlc-ponder <slug>` (continue with focus on <gap>) |
+| Idea shaped, ready to commit | `**Next:** /sdlc-ponder-commit <slug>` |
+| Idea explored and parked | `**Next:** /sdlc-ponder` (explore something else) |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-ponder-commit — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_PONDER_COMMIT_COMMAND: &str = r#"---
+description: Commit to a pondered idea — crystallize it into milestones and features via sdlc-plan
+argument-hint: <ponder-slug>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task
+---
+
+# sdlc-ponder-commit
+
+Commit to a pondered idea. Reads the entire scrapbook, synthesizes with the recruited
+thought partners using the feature-shaping protocol, and produces milestones, features,
+and tasks that enter the state machine. The bridge from sketchbook to blueprint.
+
+> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+## Prerequisites
+
+A ponder entry should have enough substance to commit. Not a rigid checklist, but assess:
+
+- Is the problem understood? (not just the solution)
+- Have user perspectives been considered?
+- Are the key technical decisions made?
+- Is the scope defined?
+
+If substance is thin, say so and suggest `/sdlc-ponder <slug>` to continue exploring.
+
+---
+
+## Steps
+
+### 1. Load the scrapbook
+
+```bash
+sdlc ponder show <slug> --json
+```
+
+Read every artifact in the scrapbook. Read the team definitions. Build full context.
+
+### 2. Load existing sdlc state
+
+```bash
+sdlc milestone list --json
+sdlc feature list --json
+```
+
+Understand what already exists — avoid duplicating milestones or features.
+
+### 3. Synthesize
+
+With the full scrapbook and team context, determine the right structure:
+
+**Small idea** (single capability, fits in one feature) →
+- One feature, possibly added to an existing milestone
+- Tasks decomposed from the exploration/decisions artifacts
+
+**Medium idea** (multiple related capabilities) →
+- One milestone with 2-5 features
+- Vision synthesized from the problem framing and user perspectives
+
+**Large idea** (significant initiative, multiple delivery phases) →
+- Multiple milestones with clear ordering
+- Each milestone has a user-observable goal
+
+Present the proposed structure to the user.
+
+### 4. Produce the plan
+
+Write a structured plan to the scrapbook:
+
+```bash
+sdlc ponder capture <slug> --file /tmp/<slug>-plan.md --as plan.md
+```
+
+### 5. Distribute via sdlc-plan
+
+Feed the plan into the state machine using the `/sdlc-plan` flow.
+
+### 6. Update the ponder entry
+
+```bash
+sdlc ponder update <slug> --status committed
+```
+
+Record which milestones were created (update `committed_to` in manifest).
+
+### 7. Report
+
+Show what was created: milestones, features, tasks. Link back to the scrapbook.
+
+---
+
+### 8. Next
+
+| Outcome | Next |
+|---|---|
+| Single feature created | `**Next:** /sdlc-run <feature-slug>` |
+| Milestone created | `**Next:** /sdlc-pressure-test <milestone-slug>` |
+| Multiple milestones | `**Next:** /sdlc-pressure-test <first-milestone-slug>` |
+| Plan needs refinement | `**Next:** /sdlc-ponder <slug>` (back to exploring) |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-recruit — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_RECRUIT_COMMAND: &str = r#"---
+description: Recruit an expert thought partner — creates an agent with real background, strong opinions, and domain expertise
+argument-hint: <role description or domain context>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
+---
+
+# sdlc-recruit
+
+Identify and recruit the ideal expert for a specific need. Produces a fully realized
+agent definition — not a generic role, but a specific person with career history,
+technical philosophy, and strong opinions.
+
+> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Orient
+
+Read the project to understand what expertise is needed:
+- `VISION.md` or `docs/vision.md`
+- `CLAUDE.md` or `AGENTS.md`
+- Root config files for tech stack signals
+- `sdlc state` for current project context
+
+Parse $ARGUMENTS for the domain/role being recruited for.
+
+### 2. Design the expert
+
+Create a specific person, not a generic role:
+- **Real name** (first-last, e.g., `kai-tanaka`)
+- **Career background** — 3-4 sentences at named companies/projects with concrete
+  technical contributions
+- **Technical philosophy** — deeply held beliefs that create productive tension
+- **Strong opinions** — specific to this domain, not generic best practices
+- **Blind spots** — what this expert might miss (so other partners compensate)
+
+### 3. Create the agent
+
+Write to `.claude/agents/<name>.md`:
+
+```markdown
+---
+name: <first-last>
+description: Use when <specific triggers>. Examples — "<example 1>", "<example 2>".
+model: opus
+---
+
+You are <Full Name>, <career background paragraph>.
+
+## Your Principles
+- **<Principle>.** <Why this matters>.
+(3-5 principles)
+
+## This Codebase
+**<Area>:**
+- `path/to/file` — relevance
+(actual paths from the project)
+
+## ALWAYS
+- <concrete rule about this codebase>
+(3-6 rules)
+
+## NEVER
+- <concrete anti-pattern for this domain>
+(3-6 rules)
+
+## When You're Stuck
+1. **<Failure mode>:** <Specific approach with actual commands/paths>.
+(2-4 entries)
+```
+
+### 4. Optionally register with a ponder entry
+
+If recruiting for a ponder session:
+```bash
+sdlc ponder team add <ponder-slug> --name "<name>" --role "<role>" \
+  --context "<why this person>" --agent .claude/agents/<name>.md
+```
+
+---
+
+### 5. Next
+
+| Context | Next |
+|---|---|
+| Within a ponder session | `**Next:** /sdlc-ponder <slug>` (continue with new partner) |
+| For a pressure test | `**Next:** /sdlc-pressure-test <milestone-slug>` |
+| Standalone | `**Next:** Use @<name> in conversation to invoke the agent` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-empathy — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_EMPATHY_COMMAND: &str = r#"---
+description: Interview user perspectives deeply — surface needs, friction, deal-breakers, and conflicts before making decisions
+argument-hint: <feature, system, or decision to evaluate>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Task, AskUserQuestion
+---
+
+# sdlc-empathy
+
+Run deep empathy interviews against a feature, system, or decision. Identifies specific
+user personas, interviews each with probing questions, synthesizes findings, and surfaces
+conflicts that reveal design tensions.
+
+> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+## Ethos
+
+- **Users over builders.** What we want to build matters less than what users need.
+- **Absence is information.** If we can't find a perspective, that's a gap to acknowledge.
+- **Conflicts are gold.** Disagreement between personas reveals tensions to resolve.
+- **Empathy requires effort.** Quick assumptions aren't empathy. Deep interviews are.
+
+---
+
+## Steps
+
+### 1. Identify stakeholders
+
+For the subject in question, identify 3-5 specific personas:
+1. **Primary user** — hands on keyboard daily
+2. **Indirect stakeholder** — affected downstream (ops, support, consumers)
+3. **Adoption blocker** — skeptic or reluctant user
+4. **Forgotten voice** — new user, edge case, accessibility need
+
+Be specific: not "developer" but "developer debugging a production issue at 2am."
+
+### 2. Find or create perspective agents
+
+For each persona, check if an agent exists. If missing, recruit one using the
+recruitment protocol — write a perspective agent to `.claude/agents/<persona>-perspective.md`.
+
+**PAUSE if a critical perspective is missing.** Surface the gap to the user before
+proceeding blind.
+
+### 3. Deep interview each perspective
+
+For each persona, ask across five dimensions:
+
+**Context:** "Walk me through your typical day when you'd interact with this."
+**Needs:** "What problem are you solving? What does success look like?"
+**Friction:** "What would make you sigh? Give up? Try something else?"
+**Delight:** "What would make you think 'they get it'?"
+**Deal-breakers:** "What would make you refuse to use this? Actively complain?"
+
+### 4. Synthesize
+
+| Analysis | What to surface |
+|---|---|
+| Alignments | Needs shared across 3+ personas |
+| Conflicts | Where personas disagree — these are the most valuable |
+| Gaps | Needs we didn't anticipate |
+| Overbuilding | Things we planned that no persona actually wants |
+
+### 5. Step back
+
+- **Bias check** — did we hear uncomfortable truths, or only what we wanted?
+- **Quiet voice** — whose perspective was easiest to ignore?
+- **Stress test** — what if each persona is right and we're wrong?
+- **Humility** — what don't we know that we don't know?
+
+### 6. Recommend
+
+Evidence-based recommendations tied to specific interview findings.
+Acknowledge tradeoffs — who loses and why.
+Flag what still needs real user validation.
+
+---
+
+### 7. Capture (if in a ponder session)
+
+```bash
+sdlc ponder capture <slug> --file /tmp/perspectives.md --as perspectives.md
+```
+
+### 8. Next
+
+| Context | Next |
+|---|---|
+| Within a ponder session | `**Next:** /sdlc-ponder <slug>` |
+| Pre-pressure-test | `**Next:** /sdlc-pressure-test <milestone-slug>` |
+| Standalone for a feature | `**Next:** /sdlc-run <feature-slug>` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-ponder — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_PONDER_PLAYBOOK: &str = r#"# sdlc-ponder
+
+Open the ponder workspace for creative exploration and ideation.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. If a slug is provided, load the entry:
+   - `sdlc ponder show <slug>`
+   - `sdlc ponder session list <slug>` — if sessions exist, read the most recent one:
+     `sdlc ponder session read <slug> <N>`
+   - Orient from the orientation strip (WHERE WE ARE / NEXT MOVE / COMMIT SIGNAL).
+   - Summarize what's been explored, open questions, and what to do next.
+2. If a new idea is provided, create the entry:
+   - `sdlc ponder create <slug> --title "<title>"`
+   - `sdlc ponder capture <slug> --content "<brief>" --as brief.md`
+   - Recruit 2-3 thought partners: domain expert, end-user advocate, pragmatic skeptic.
+3. If no arguments: `sdlc ponder list` and ask which to explore.
+4. Facilitate: interrogate the brief, channel thought partners, suggest captures.
+5. When artifacts are ready: `sdlc ponder capture <slug> --content "..." --as <name>.md`.
+6. Before ending: write and log the session file:
+   - Compose a Markdown session with YAML frontmatter (session, timestamp, orientation).
+   - `sdlc ponder session log <slug> --file /tmp/session-<N>.md`
+7. End with **Next:** — continue exploring, commit, or park.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-ponder-commit — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_PONDER_COMMIT_PLAYBOOK: &str = r#"# sdlc-ponder-commit
+
+Crystallize a pondered idea into milestones and features.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Load scrapbook: `sdlc ponder show <slug> --json`. Read all artifacts.
+2. Load existing state: `sdlc milestone list --json`, `sdlc feature list --json`.
+3. Assess readiness: problem understood? users considered? scope defined?
+4. Synthesize: small → feature, medium → milestone + features, large → multiple milestones.
+5. Write plan: `sdlc ponder capture <slug> --file /tmp/plan.md --as plan.md`.
+6. Feed into state machine via `/sdlc-plan`.
+7. Update: `sdlc ponder update <slug> --status committed`.
+8. Report what was created. **Next:** pressure-test or run.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-recruit — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_RECRUIT_PLAYBOOK: &str = r#"# sdlc-recruit
+
+Recruit an expert thought partner as a persistent agent.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Orient: read project context (CLAUDE.md, AGENTS.md, sdlc state).
+2. Design the expert: real name, career background at named companies, strong opinions, blind spots.
+3. Write agent to `.claude/agents/<name>.md` with principles, codebase context, ALWAYS/NEVER rules.
+4. Optionally register with ponder entry:
+   `sdlc ponder team add <slug> --name "<name>" --role "<role>" --context "<why>" --agent .claude/agents/<name>.md`
+5. **Next:** use @<name> in conversation, or continue ponder session.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-empathy — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_EMPATHY_PLAYBOOK: &str = r#"# sdlc-empathy
+
+Run deep empathy interviews to surface user needs and conflicts.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Identify 3-5 specific personas: primary user, indirect stakeholder, adoption blocker, forgotten voice.
+2. For each, create a perspective agent if missing.
+3. Deep interview across: context, needs, friction, delight, deal-breakers.
+4. Synthesize: alignments, conflicts, gaps, overbuilding.
+5. Step back: bias check, quiet voice, stress test, humility.
+6. Recommend with evidence. Acknowledge tradeoffs.
+7. If in ponder session: `sdlc ponder capture <slug> --file /tmp/perspectives.md --as perspectives.md`.
+8. **Next:** continue ponder, pressure-test, or run.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-ponder — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_PONDER_SKILL: &str = r#"---
+name: sdlc-ponder
+description: Open the ideation workspace for creative exploration. Use when exploring, interrogating, or developing ideas before they become features.
+---
+
+# SDLC Ponder Skill
+
+Use this skill to open a ponder workspace for exploring ideas.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. If slug given: `sdlc ponder show <slug>`. Then `sdlc ponder session list <slug>` —
+   read the most recent session to restore context. Orient from the orientation strip.
+2. If new idea: create entry, capture brief, recruit 2-3 thought partners.
+3. If no args: `sdlc ponder list`. Ask which to explore.
+4. Facilitate: interrogate, channel partners, capture artifacts.
+5. Capture with `sdlc ponder capture <slug> --content "..." --as <name>.md`.
+6. Before ending: compose session Markdown with YAML frontmatter (session, timestamp,
+   orientation) and log it: `sdlc ponder session log <slug> --file /tmp/session.md`.
+7. End with **Next:** — continue, commit, or park.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-ponder-commit — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_PONDER_COMMIT_SKILL: &str = r#"---
+name: sdlc-ponder-commit
+description: Crystallize a pondered idea into milestones and features. Use when an idea is ready to enter the state machine.
+---
+
+# SDLC Ponder Commit Skill
+
+Use this skill to commit a pondered idea into the state machine.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Load scrapbook: `sdlc ponder show <slug> --json`.
+2. Load existing state: `sdlc milestone list --json`, `sdlc feature list --json`.
+3. Assess readiness. If thin, suggest `/sdlc-ponder <slug>` instead.
+4. Synthesize into milestones/features/tasks.
+5. Write plan and feed via `/sdlc-plan`.
+6. `sdlc ponder update <slug> --status committed`.
+7. Report. **Next:** pressure-test or run.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-recruit — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_RECRUIT_SKILL: &str = r#"---
+name: sdlc-recruit
+description: Recruit an expert thought partner as a persistent agent. Use when you need domain expertise, user perspectives, or productive skepticism.
+---
+
+# SDLC Recruit Skill
+
+Use this skill to recruit an expert agent for the project.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Orient: read project context (CLAUDE.md, AGENTS.md, stack signals).
+2. Design expert: real name, career at named companies, strong opinions, blind spots.
+3. Write agent to `.claude/agents/<name>.md`.
+4. Optionally register: `sdlc ponder team add <slug> --name ... --agent ...`.
+5. **Next:** invoke with @<name> or continue session.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-empathy — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_EMPATHY_SKILL: &str = r#"---
+name: sdlc-empathy
+description: Interview user perspectives deeply to surface needs, friction, and conflicts. Use before making design decisions or when pressure-testing scope.
+---
+
+# SDLC Empathy Skill
+
+Use this skill to run deep empathy interviews.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Identify 3-5 specific personas for the subject.
+2. Create perspective agents if missing.
+3. Deep interview: context, needs, friction, delight, deal-breakers.
+4. Synthesize: alignments, conflicts, gaps, overbuilding.
+5. Step back: bias, quiet voice, stress test, humility.
+6. Recommend with evidence. If in ponder, capture as perspectives.md.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-prepare — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_PREPARE_COMMAND: &str = r#"---
+description: Survey a milestone — find gaps, organize features into parallelizable execution waves
+argument-hint: [milestone-slug]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+---
+
+# sdlc-prepare
+
+Survey a milestone's readiness and organize its features into parallelizable execution waves. Read-only analysis — no state changes.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Run prepare
+
+```bash
+sdlc project prepare --json
+```
+
+If a milestone slug was provided in $ARGUMENTS:
+```bash
+sdlc project prepare --milestone <slug> --json
+```
+
+### 2. Assess the result
+
+Parse the JSON output. Key fields:
+- `project_phase` — where the project is in its lifecycle (idle/pondering/planning/executing/verifying)
+- `gaps` — issues found (blocker/warning/info severity)
+- `waves` — features grouped into parallelizable execution waves
+- `blocked` — features that can't proceed and why
+- `next_commands` — suggested `/sdlc-run` commands for Wave 1
+
+### 3. Report findings
+
+Present a clear summary:
+
+1. **Phase & Progress** — current project phase, milestone progress bar
+2. **Gaps** — blockers first (these must be resolved), then warnings, then info
+3. **Wave Plan** — for each wave: features, their phases, and actions. Wave 1 runs first; subsequent waves depend on prior waves completing.
+4. **Blocked Features** — what's stuck and why
+5. **Next Steps** — the concrete commands to run
+
+### 4. Address gaps (if any blockers)
+
+If there are blocker-severity gaps:
+- Missing descriptions: write them with `sdlc feature update <slug> --description "..."`
+- Broken dependency references: fix with `sdlc feature update <slug> --depends-on <correct-slug>`
+- Dependency cycles: identify the cycle and suggest which dependency to remove
+
+### 5. Next
+
+Always end with a single `**Next:**` line:
+
+| Outcome | Next |
+|---|---|
+| Wave 1 has features to run | `**Next:** /sdlc-run <first-wave-1-slug>` |
+| Blockers prevent progress | `**Next:** Fix the blockers listed above, then /sdlc-prepare` |
+| All features done (verifying) | `**Next:** /sdlc-milestone-uat <milestone-slug>` |
+| Project idle | `**Next:** /sdlc-ponder to start exploring ideas` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-prepare — Playbook (Gemini / OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_PREPARE_PLAYBOOK: &str = r#"# sdlc-prepare
+
+Use this playbook to survey a milestone and organize features into parallelizable execution waves.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Run `sdlc project prepare --json` (add `--milestone <slug>` if a slug was provided).
+2. Parse JSON: `project_phase`, `gaps`, `waves`, `blocked`, `next_commands`.
+3. Present: phase/progress → gaps (blockers first) → wave plan → blocked → next steps.
+4. If blocker gaps exist, fix them (write descriptions, fix dep refs, break cycles).
+5. Suggest Wave 1 commands: `/sdlc-run <slug>` for each Wave 1 feature.
+6. If verifying: suggest `/sdlc-milestone-uat`. If idle: suggest `/sdlc-ponder`.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-prepare — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_PREPARE_SKILL: &str = r#"---
+name: sdlc-prepare
+description: Survey a milestone — find gaps, organize features into parallelizable execution waves. Use when starting work on a milestone or after completing a feature.
+---
+
+# SDLC Prepare Skill
+
+Use this skill to survey a milestone and organize features into parallelizable execution waves.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Run `sdlc project prepare --json` (add `--milestone <slug>` if provided).
+2. Report: phase/progress, gaps (blockers first), wave plan, blocked features.
+3. Fix any blocker gaps (missing descriptions, broken deps, cycles).
+4. Present Wave 1 `/sdlc-run` commands.
+5. If verifying: suggest `/sdlc-milestone-uat`. If idle: suggest `/sdlc-ponder`.
 "#;

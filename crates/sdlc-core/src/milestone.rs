@@ -11,12 +11,15 @@ use std::path::Path;
 // MilestoneStatus
 // ---------------------------------------------------------------------------
 
-/// Derived from feature phases at read time. Only `Skipped` is stored explicitly
-/// (via `skipped_at`). `Active` and `Released` are always computed.
+/// Derived from feature phases at read time. Only `Skipped` and `Released`
+/// (via `released_at`) are stored explicitly. `Active`, `Verifying`, and the
+/// computed `Released` are always derived.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum MilestoneStatus {
     Active,
+    /// All features released but `released_at` not yet set — awaiting UAT sign-off.
+    Verifying,
     Released,
     Skipped,
 }
@@ -25,6 +28,7 @@ impl fmt::Display for MilestoneStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
             MilestoneStatus::Active => "active",
+            MilestoneStatus::Verifying => "verifying",
             MilestoneStatus::Released => "released",
             MilestoneStatus::Skipped => "skipped",
         };
@@ -76,7 +80,13 @@ impl Milestone {
         }
     }
 
-    /// Derive milestone status. `Skipped` and `Released` (explicit) take priority over computed.
+    /// Derive milestone status.
+    ///
+    /// Priority: `Skipped` > explicit `Released` (via `released_at`) > computed.
+    /// When all non-archived features are released but `released_at` is not yet
+    /// set, the milestone is `Verifying` — code-complete but awaiting UAT.
+    /// Call `milestone.release()` (which sets `released_at`) after UAT passes
+    /// to advance to `Released`.
     pub fn compute_status(&self, features: &[Feature]) -> MilestoneStatus {
         if self.skipped_at.is_some() {
             return MilestoneStatus::Skipped;
@@ -89,7 +99,7 @@ impl Milestone {
             .filter(|f| self.features.contains(&f.slug) && !f.archived)
             .collect();
         if !non_archived.is_empty() && non_archived.iter().all(|f| f.phase == Phase::Released) {
-            return MilestoneStatus::Released;
+            return MilestoneStatus::Verifying;
         }
         MilestoneStatus::Active
     }
@@ -113,6 +123,7 @@ impl Milestone {
     }
 
     pub fn load(root: &Path, slug: &str) -> Result<Self> {
+        paths::validate_slug(slug)?;
         let manifest = paths::milestone_manifest(root, slug);
         if !manifest.exists() {
             return Err(SdlcError::MilestoneNotFound(slug.to_string()));
@@ -497,7 +508,7 @@ mod tests {
     }
 
     #[test]
-    fn compute_status_all_released() {
+    fn compute_status_all_features_released_is_verifying() {
         use crate::feature::Feature;
         use crate::types::Phase;
 
@@ -513,7 +524,26 @@ mod tests {
         let mut fb = Feature::new("b", "Feature B");
         fb.phase = Phase::Released;
 
-        assert_eq!(m.compute_status(&[fa, fb]), MilestoneStatus::Released);
+        // All features released but released_at not set → Verifying (awaiting UAT)
+        assert_eq!(m.compute_status(&[fa, fb]), MilestoneStatus::Verifying);
+    }
+
+    #[test]
+    fn compute_status_released_at_seals_as_released() {
+        use crate::feature::Feature;
+        use crate::types::Phase;
+
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut m = Milestone::create(dir.path(), "v2", "v2").unwrap();
+        m.add_feature("a");
+        m.release(); // explicitly sealed after UAT
+
+        let mut fa = Feature::new("a", "Feature A");
+        fa.phase = Phase::Released;
+
+        assert_eq!(m.compute_status(&[fa]), MilestoneStatus::Released);
     }
 
     #[test]

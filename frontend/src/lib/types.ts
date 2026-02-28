@@ -16,12 +16,15 @@ export type ActionType =
   | 'create_design'
   | 'approve_design'
   | 'create_tasks'
+  | 'approve_tasks'
   | 'create_qa_plan'
+  | 'approve_qa_plan'
   | 'implement_task'
   | 'fix_review_issues'
   | 'create_review'
   | 'approve_review'
   | 'create_audit'
+  | 'approve_audit'
   | 'run_qa'
   | 'approve_merge'
   | 'merge'
@@ -32,7 +35,7 @@ export type ActionType =
 
 export type ArtifactStatus = 'missing' | 'draft' | 'approved' | 'rejected' | 'needs_fix' | 'passed' | 'failed' | 'waived'
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
-export type MilestoneStatus = 'active' | 'released' | 'skipped'
+export type MilestoneStatus = 'active' | 'verifying' | 'released' | 'skipped'
 
 export interface PlatformArg {
   name: string
@@ -77,8 +80,16 @@ export interface QuerySearchResult {
   score: number
 }
 
+export interface QueryPonderSearchResult {
+  slug: string
+  title: string
+  status: PonderStatus
+  score: number
+}
+
 export interface QuerySearchResponse {
   results: QuerySearchResult[]
+  ponder_results: QueryPonderSearchResult[]
   parse_error: string | null
 }
 
@@ -255,4 +266,209 @@ export interface Classification {
   task_id: string | null
   is_heavy: boolean
   timeout_minutes: number
+}
+
+// ---------------------------------------------------------------------------
+// Agent run events (SSE from /api/run/:slug/events)
+// ---------------------------------------------------------------------------
+
+export interface AgentEvent {
+  type: 'init' | 'assistant' | 'tool_progress' | 'tool_summary' | 'result' | 'error' | 'status' | 'system' | 'user' | 'stream_event' | 'auth_status' | 'not_running'
+  // init
+  model?: string
+  tools_count?: number
+  mcp_servers?: string[]
+  // assistant
+  text?: string
+  tools?: { name: string; input: unknown }[]
+  // tool_progress
+  tool?: string
+  elapsed_seconds?: number
+  // tool_summary
+  summary?: string
+  // result
+  is_error?: boolean
+  cost_usd?: number
+  turns?: number
+  // error / status
+  message?: string
+  status?: string
+}
+
+// ---------------------------------------------------------------------------
+// Ponder / Roadmap types
+// ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Prepare / Wave types
+// ---------------------------------------------------------------------------
+
+export type ProjectPhaseType = 'idle' | 'pondering' | 'planning' | 'executing' | 'verifying'
+
+export interface ProjectPhase {
+  phase: ProjectPhaseType
+  milestone?: string
+}
+
+export type GapSeverity = 'blocker' | 'warning' | 'info'
+
+export interface Gap {
+  feature: string
+  severity: GapSeverity
+  message: string
+}
+
+export interface WaveItem {
+  slug: string
+  title: string
+  phase: Phase
+  action: string
+  needs_worktree: boolean
+  blocked_by: string[]
+}
+
+export interface Wave {
+  number: number
+  label: string
+  items: WaveItem[]
+  needs_worktrees: boolean
+}
+
+export interface BlockedFeatureItem {
+  slug: string
+  title: string
+  reason: string
+}
+
+export interface MilestoneProgress {
+  total: number
+  released: number
+  in_progress: number
+  blocked: number
+  pending: number
+}
+
+export interface PrepareResult {
+  project_phase: ProjectPhase
+  milestone?: string
+  milestone_title?: string
+  milestone_progress?: MilestoneProgress
+  gaps: Gap[]
+  waves: Wave[]
+  blocked: BlockedFeatureItem[]
+  next_commands: string[]
+}
+
+// ---------------------------------------------------------------------------
+// Ponder / Roadmap types
+// ---------------------------------------------------------------------------
+
+export type PonderStatus = 'exploring' | 'converging' | 'committed' | 'parked'
+
+export interface PonderSummary {
+  slug: string
+  title: string
+  status: PonderStatus
+  tags: string[]
+  artifact_count: number
+  team_size: number
+  sessions: number
+  created_at: string
+  updated_at: string
+  committed_at: string | null
+  committed_to: string[]
+}
+
+export interface PonderTeamMember {
+  name: string
+  role: string
+  context: string
+  agent: string
+  recruited_at: string
+}
+
+export interface PonderArtifact {
+  filename: string
+  size_bytes: number
+  modified_at: string
+  content: string | null
+}
+
+export interface PonderOrientation {
+  current: string
+  next: string
+  commit: string
+}
+
+export interface SessionMeta {
+  session: number
+  timestamp: string | null
+  orientation: PonderOrientation | null
+}
+
+export interface SessionContent extends SessionMeta {
+  content: string
+}
+
+// Ponder run state (from SSE ponder events)
+export type PonderRunState =
+  | { status: 'idle' }
+  | { status: 'running'; session: number; ownerName: string; ownerMessage: string | null }
+  | { status: 'stopped'; session: number }
+
+export interface PonderChatResponse {
+  status: 'started' | 'conflict'
+  session: number
+  owner_name: string
+}
+
+// SSE ponder event payload (event: "ponder")
+export interface PonderSseEvent {
+  type: 'ponder_run_started' | 'ponder_run_completed' | 'ponder_run_stopped'
+  slug: string
+  session?: number
+}
+
+// ---------------------------------------------------------------------------
+// Agent run tracking (panel)
+// ---------------------------------------------------------------------------
+
+export type RunStatus = 'running' | 'completed' | 'failed' | 'stopped'
+export type RunType = 'feature' | 'milestone_uat' | 'milestone_prepare' | 'ponder'
+
+export interface RunRecord {
+  id: string
+  key: string
+  run_type: RunType
+  target: string
+  label: string
+  status: RunStatus
+  started_at: string
+  completed_at?: string
+  cost_usd?: number
+  turns?: number
+  error?: string
+}
+
+export interface RunSseEvent {
+  type: 'run_started' | 'run_finished'
+  id: string
+  key: string
+  label?: string
+  status?: string
+}
+
+export interface PonderDetail {
+  slug: string
+  title: string
+  status: PonderStatus
+  tags: string[]
+  sessions: number
+  orientation: PonderOrientation | null
+  created_at: string
+  updated_at: string
+  committed_at: string | null
+  committed_to: string[]
+  team: PonderTeamMember[]
+  artifacts: PonderArtifact[]
 }
