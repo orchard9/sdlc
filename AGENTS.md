@@ -43,11 +43,13 @@ Use `sdlc next --for <slug> --json` to get the next directive. The JSON output t
 ### Consumer Commands
 
 - `/sdlc-next <slug>` — execute one step, then stop (human controls cadence)
-- `/sdlc-run <slug>` — run autonomously until a HITL gate or completion
+- `/sdlc-run <slug>` — run autonomously to completion
 - `/sdlc-status [<slug>]` — show current state
 - `/sdlc-plan` — distribute a plan into milestones, features, and tasks
 - `/sdlc-milestone-uat <milestone-slug>` — run the acceptance test for a milestone
 - `/sdlc-pressure-test <milestone-slug>` — pressure-test a milestone against user perspectives
+- `/sdlc-vision-adjustment [description]` — align all docs, sdlc state, and code to a vision change
+- `/sdlc-architecture-adjustment [description]` — align all docs, code, and sdlc state to an architecture change
 - `/sdlc-enterprise-readiness [--stage <stage>]` — analyze production readiness
 - `/sdlc-setup-quality-gates` — set up pre-commit hooks and quality gates
 - `/sdlc-cookbook <milestone-slug>` — create developer-scenario cookbook recipes
@@ -56,6 +58,22 @@ Use `sdlc next --for <slug> --json` to get the next directive. The JSON output t
 - `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features
 - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent
 - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions
+
+### Tool Suite
+
+<!-- sdlc:tools -->
+Project-scoped TypeScript tools in `.sdlc/tools/` — callable by agents and humans
+during any lifecycle phase. Read `.sdlc/tools/tools.md` for the full help menu.
+
+- `sdlc tool list` — show installed tools
+- `sdlc tool run <name> [args]` — run a tool; pass `--json '{...}'` for complex input
+- `sdlc tool sync` — regenerate `tools.md` after adding a custom tool
+- `sdlc tool scaffold <name> "desc"` — create a new tool skeleton
+
+**Core tools:** `ama` (codebase Q&A), `quality-check` (runs platform shell gates)
+
+Use `/sdlc-tool-run`, `/sdlc-tool-build`, `/sdlc-tool-audit`, `/sdlc-tool-uat` in Claude Code for guided tool workflows.
+<!-- /sdlc:tools -->
 
 Project: sdlc
 

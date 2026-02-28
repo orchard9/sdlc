@@ -25,6 +25,7 @@ pub const SECRETS_KEYS_FILE: &str = ".sdlc/secrets/keys.yaml";
 pub const SECRETS_ENVS_DIR: &str = ".sdlc/secrets/envs";
 
 pub const ESCALATIONS_FILE: &str = ".sdlc/escalations.yaml";
+pub const FEEDBACK_FILE: &str = ".sdlc/feedback.yaml";
 
 pub const CONFIG_FILE: &str = ".sdlc/config.yaml";
 pub const STATE_FILE: &str = ".sdlc/state.yaml";
@@ -43,6 +44,7 @@ pub const AGENTS_DIR: &str = ".agents";
 pub const AGENTS_SKILLS_DIR: &str = ".agents/skills";
 
 pub const VISION_MD: &str = "VISION.md";
+pub const ARCHITECTURE_MD: &str = "ARCHITECTURE.md";
 pub const AGENTS_MD: &str = "AGENTS.md";
 pub const MANIFEST_FILE: &str = "manifest.yaml";
 
@@ -178,12 +180,20 @@ pub fn escalations_path(root: &Path) -> PathBuf {
     root.join(ESCALATIONS_FILE)
 }
 
+pub fn feedback_path(root: &Path) -> PathBuf {
+    root.join(FEEDBACK_FILE)
+}
+
 pub fn ai_lookup_dir(root: &Path) -> PathBuf {
     root.join(AI_LOOKUP_DIR)
 }
 
 pub fn vision_md_path(root: &Path) -> PathBuf {
     root.join(VISION_MD)
+}
+
+pub fn architecture_md_path(root: &Path) -> PathBuf {
+    root.join(ARCHITECTURE_MD)
 }
 
 pub fn agents_md_path(root: &Path) -> PathBuf {
@@ -232,6 +242,10 @@ pub fn user_opencode_commands_dir() -> Result<PathBuf> {
 
 pub fn user_agents_skills_dir() -> Result<PathBuf> {
     Ok(user_home()?.join(".agents").join("skills"))
+}
+
+pub fn user_claude_agents_dir() -> Result<PathBuf> {
+    Ok(user_home()?.join(".claude").join("agents"))
 }
 
 pub fn user_sdlc_dir() -> Result<PathBuf> {

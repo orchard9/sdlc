@@ -1,9 +1,9 @@
-use crate::cmd::tunnel::{generate_token, print_tunnel_info, Tunnel, TunnelError};
+use crate::cmd::tunnel::print_tunnel_info;
 use crate::output::print_table;
 use anyhow::{anyhow, Result};
 use clap::Subcommand;
 use sdlc_core::{config::Config, ui_registry};
-use sdlc_server::auth::TunnelConfig;
+use sdlc_server::tunnel::{generate_token, Tunnel, TunnelError};
 use std::path::Path;
 
 // ---------------------------------------------------------------------------
@@ -125,22 +125,18 @@ fn run_start(root: &Path, port: u16, no_open: bool, use_tunnel: bool) -> Result<
             };
 
             let token = generate_token();
-            let tunnel_config = TunnelConfig::with_token(token.clone());
 
             print_tunnel_info(&name, actual_port, &tun.url, &token);
 
-            let result = tokio::select! {
-                res = sdlc_server::serve_on(root_buf, listener, false, tunnel_config) => res,
+            tokio::select! {
+                res = sdlc_server::serve_on(root_buf, listener, false, Some((tun, token))) => res,
                 _ = tokio::signal::ctrl_c() => Ok(()),
-            };
-
-            tun.stop().await;
-            result
+            }
         } else {
             println!("SDLC UI for '{name}' → {local_url}  (PID {pid})");
 
             tokio::select! {
-                res = sdlc_server::serve_on(root_buf, listener, !no_open, TunnelConfig::none()) => res,
+                res = sdlc_server::serve_on(root_buf, listener, !no_open, None) => res,
                 _ = tokio::signal::ctrl_c() => Ok(()),
             }
         };

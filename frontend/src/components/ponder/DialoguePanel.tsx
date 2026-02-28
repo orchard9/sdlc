@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Send, Square, Loader2 } from 'lucide-react'
+import { Send, Square, Loader2, GitMerge, Zap } from 'lucide-react'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
 import { OrientationStrip } from './OrientationStrip'
@@ -65,6 +65,32 @@ function WorkingPlaceholder() {
       <Loader2 className="w-3.5 h-3.5 animate-spin" />
       <span>agent working...</span>
     </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Zero-state commit shortcut
+// ---------------------------------------------------------------------------
+
+function ZeroStateCommitButton({
+  onCommit,
+  running,
+}: {
+  onCommit: () => void
+  running: boolean
+}) {
+  return (
+    <button
+      onClick={onCommit}
+      disabled={running}
+      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-border/40 text-muted-foreground/50 hover:text-foreground hover:border-border hover:bg-accent/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      title="Commit this ponder — synthesize milestones and mark committed"
+    >
+      {running
+        ? <Loader2 className="w-3 h-3 animate-spin" />
+        : <GitMerge className="w-3 h-3" />}
+      <span>{running ? 'Committing…' : 'Commit anyway'}</span>
+    </button>
   )
 }
 
@@ -150,9 +176,11 @@ function InputBar({
 interface Props {
   entry: PonderDetail
   onRefresh: () => void
+  onCommit?: () => void
+  commitRunning?: boolean
 }
 
-export function DialoguePanel({ entry, onRefresh }: Props) {
+export function DialoguePanel({ entry, onRefresh, onCommit, commitRunning = false }: Props) {
   const { slug } = entry
   const [sessions, setSessions] = useState<SessionContent[]>([])
   const [loading, setLoading] = useState(true)
@@ -314,9 +342,27 @@ export function DialoguePanel({ entry, onRefresh }: Props) {
               The agent will interview this idea, recruit thought partners, and write the
               dialogue here.
             </p>
-            <p className="text-xs text-muted-foreground/30 mt-1">
-              Add a seed thought below or just hit send.
+            {entry.status !== 'committed' && entry.status !== 'parked' && (
+              <button
+                onClick={() => {
+                  const briefArtifact = entry.artifacts.find(a => a.filename === 'brief.md')
+                  const seed = briefArtifact?.content
+                    ? `${entry.title}\n\n${briefArtifact.content.trim()}`
+                    : entry.title
+                  handleSend(seed)
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                <Zap className="w-3 h-3" />
+                Start from title &amp; brief
+              </button>
+            )}
+            <p className="text-xs text-muted-foreground/30 -mt-1">
+              or add a seed thought below
             </p>
+            {entry.status !== 'committed' && entry.status !== 'parked' && onCommit && (
+              <ZeroStateCommitButton onCommit={onCommit} running={commitRunning} />
+            )}
           </div>
         ) : (
           <>

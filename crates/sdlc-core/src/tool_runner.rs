@@ -110,15 +110,17 @@ pub fn run_tool(
         .wait_with_output()
         .map_err(|e| SdlcError::ToolSpawnFailed(e.to_string()))?;
 
-    if !output.status.success() {
-        let stderr_hint = String::from_utf8_lossy(&output.stdout)
-            .chars()
-            .take(500)
-            .collect::<String>();
-        return Err(SdlcError::ToolFailed(stderr_hint));
+    let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+
+    // For --run mode, a non-zero exit code means ok:false (checks failed), not a crash.
+    // The JSON result is always in stdout — return it regardless of exit code.
+    // For --meta and --setup, a non-zero exit is a genuine error.
+    if !output.status.success() && mode != "--run" {
+        let hint = stdout.chars().take(500).collect::<String>();
+        return Err(SdlcError::ToolFailed(hint));
     }
 
-    Ok(String::from_utf8_lossy(&output.stdout).into_owned())
+    Ok(stdout)
 }
 
 fn build_command(runtime: Runtime, script: &str, mode: &str) -> Command {

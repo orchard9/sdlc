@@ -2,7 +2,7 @@
 
 **Spec references:** `docs/sdlc-tools-suite.md`, `docs/sdlc-tools-suite-technical.md`
 **Date:** 2026-02-27
-**Updated:** 2026-02-28 (Week 7 complete)
+**Updated:** 2026-02-28 (Weeks 1–7 complete + quality-check hardening)
 
 ---
 
@@ -80,9 +80,18 @@
 - 4 new integration tests: `test_ama_tool_has_incremental_indexing`, `test_ama_tool_has_tfidf_scoring`, `test_ama_tool_has_camelcase_tokenization`, `test_ama_tool_version_is_v2`
 - Total tests: 390 passing, 0 failing
 
+### Quality-check hardening (post-Week 7)
+
+Applied during quality-check integration testing:
+
+- **`tool_runner.rs` exit code fix** — `--run` mode no longer errors on non-zero exit. Exit 1 means `ok:false` (checks failed), not a subprocess crash. Stdout always contains valid JSON. Only `--meta` and `--setup` fail on non-zero exit.
+- **`setup_done` field in `--meta`** — `quality-check/tool.ts` now computes `setup_done: existsSync(hookPath)` and includes it in `ToolMeta` output. UI reads this to persistently show/hide the setup banner across page refreshes.
+- **Idempotent `--setup`** — If `.githooks/pre-commit` already exists, `setup()` returns success immediately without rewriting the hook file. Prevents double-install when multiple parallel agents (e.g. run-wave features) each invoke setup.
+- **`fix_quality_issues` prompt invokes real skills** — Updated to dispatch to `/fix-forward` (1 failure), `/fix-all` (2–5 failures), or `/remediate` (6+ failures) instead of describing the strategy inline.
+- **`SDLC_QUALITY_FIX_COMMAND`** — New slash command registered on all 4 platforms (Claude, Gemini, OpenCode, Agents). 4-step playbook: read `/tmp/quality-check-result.json`, dispatch to appropriate fix skill, re-run `quality-check`, report.
+
 ### What remains
-- Week 6: Frontend Tools page, AmaResultPanel, QualityCheckPanel, Sidebar nav
-- Week 7: Expanded slash command consts (full 11-step build, 18-item audit, 7-scenario UAT templates); Gemini/OpenCode variants
+
 - Week 8: `POST /api/tools` → agent run + `CreateToolModal` + SSE streaming
 
 ---
@@ -508,7 +517,7 @@
 1. **`frontend/src/lib/types.ts`** — add types mirroring Rust structs:
    ```typescript
    export interface ToolMeta { name, display_name, description, version,
-     requires_setup, setup_description?, input_schema, output_schema }
+     requires_setup, setup_done?, setup_description?, input_schema, output_schema }
    export interface ToolResult<T = unknown> { ok: boolean, data?: T, error?: string, duration_ms?: number }
    export interface CheckResult { name, command, action, status: 'passed'|'failed', output, duration_ms }
    export interface QualityCheckData { passed: number, failed: number, checks: CheckResult[] }

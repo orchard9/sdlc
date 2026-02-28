@@ -178,6 +178,10 @@ pub struct Config {
     /// Version of the `sdlc` binary that last ran `sdlc init` or `sdlc update` on this project.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub sdlc_version: Option<String>,
+    /// Preferred port for the app tunnel (project dev server). Persisted so the
+    /// UI can pre-populate the port input across restarts.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub app_port: Option<u16>,
 }
 
 fn default_version() -> u32 {
@@ -196,6 +200,7 @@ impl Config {
             platform: None,
             quality: None,
             sdlc_version: None,
+            app_port: None,
         }
     }
 

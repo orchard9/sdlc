@@ -1,0 +1,18 @@
+name: ama
+version: 0.1.0
+description: Answers questions about the codebase using a pre-built keyword index
+
+# File extensions to include in the index (comma-separated)
+extensions: .ts,.js,.tsx,.jsx,.rs,.go,.py,.rb,.java,.md,.txt,.yaml,.yml,.toml
+
+# Number of lines per chunk
+chunk_lines: 40
+
+# Lines of overlap between consecutive chunks (reduces missed context at boundaries)
+chunk_overlap: 5
+
+# Maximum results to return per query
+max_results: 5
+
+# Skip files larger than this size (kilobytes)
+max_file_kb: 500

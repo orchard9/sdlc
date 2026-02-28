@@ -27,7 +27,7 @@ export function ToolCard({ tool, selected, onSelect }: ToolCardProps) {
         </span>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-2 pl-5">{tool.description}</p>
-      {tool.requires_setup && (
+      {tool.requires_setup && !tool.setup_done && (
         <div className="flex items-center gap-1 mt-1 pl-5">
           <AlertTriangle className="w-3 h-3 text-amber-400 shrink-0" />
           <span className="text-[10px] text-amber-400/80">setup required</span>

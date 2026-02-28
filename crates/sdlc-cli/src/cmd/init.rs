@@ -356,11 +356,13 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         consumer what to do next (action, message, output_path, is_heavy, gates).\n\n\
         ### Consumer Commands\n\n\
         - `/sdlc-next <slug>` — execute one step, then stop (human controls cadence)\n\
-        - `/sdlc-run <slug>` — run autonomously until a HITL gate or completion\n\
+        - `/sdlc-run <slug>` — run autonomously to completion\n\
         - `/sdlc-status [<slug>]` — show current state\n\
         - `/sdlc-plan` — distribute a plan into milestones, features, and tasks\n\
         - `/sdlc-milestone-uat <milestone-slug>` — run the acceptance test for a milestone\n\
         - `/sdlc-pressure-test <milestone-slug>` — pressure-test a milestone against user perspectives\n\
+        - `/sdlc-vision-adjustment [description]` — align all docs, sdlc state, and code to a vision change\n\
+        - `/sdlc-architecture-adjustment [description]` — align all docs, code, and sdlc state to an architecture change\n\
         - `/sdlc-enterprise-readiness [--stage <stage>]` — analyze production readiness\n\
         - `/sdlc-setup-quality-gates` — set up pre-commit hooks and quality gates\n\
         - `/sdlc-cookbook <milestone-slug>` — create developer-scenario cookbook recipes\n\
@@ -554,6 +556,12 @@ fn write_user_claude_commands() -> anyhow::Result<()> {
             ("sdlc-tool-build.md", SDLC_TOOL_BUILD_COMMAND),
             ("sdlc-tool-audit.md", SDLC_TOOL_AUDIT_COMMAND),
             ("sdlc-tool-uat.md", SDLC_TOOL_UAT_COMMAND),
+            ("sdlc-quality-fix.md", SDLC_QUALITY_FIX_COMMAND),
+            ("sdlc-vision-adjustment.md", SDLC_VISION_ADJUSTMENT_COMMAND),
+            (
+                "sdlc-architecture-adjustment.md",
+                SDLC_ARCHITECTURE_ADJUSTMENT_COMMAND,
+            ),
         ],
     )
 }
@@ -581,7 +589,7 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
         (
             "sdlc-run.toml",
             gemini_command_toml(
-                "Autonomously drive a feature to completion or the next human gate",
+                "Autonomously drive a feature to completion",
                 SDLC_RUN_PLAYBOOK,
             ),
         ),
@@ -708,6 +716,27 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
             "sdlc-tool-uat.toml",
             gemini_command_toml("Run UAT scenarios for an SDLC tool", SDLC_TOOL_UAT_PLAYBOOK),
         ),
+        (
+            "sdlc-quality-fix.toml",
+            gemini_command_toml(
+                "Fix failing quality-check results by triage and targeted fix",
+                SDLC_QUALITY_FIX_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-vision-adjustment.toml",
+            gemini_command_toml(
+                "Align all project docs, sdlc state, and code to a vision change",
+                SDLC_VISION_ADJUSTMENT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-architecture-adjustment.toml",
+            gemini_command_toml(
+                "Align all project docs, code, and sdlc state to an architecture change",
+                SDLC_ARCHITECTURE_ADJUSTMENT_PLAYBOOK,
+            ),
+        ),
     ];
 
     write_user_command_scaffold_owned(
@@ -746,7 +775,7 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
         (
             "sdlc-run.md",
             opencode_command_md(
-                "Autonomously drive a feature to completion or the next human gate",
+                "Autonomously drive a feature to completion",
                 "<feature-slug>",
                 SDLC_RUN_PLAYBOOK,
             ),
@@ -895,6 +924,30 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
                 SDLC_TOOL_UAT_PLAYBOOK,
             ),
         ),
+        (
+            "sdlc-quality-fix.md",
+            opencode_command_md(
+                "Fix failing quality-check results by triage and targeted fix",
+                "[tool-name]",
+                SDLC_QUALITY_FIX_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-vision-adjustment.md",
+            opencode_command_md(
+                "Align all project docs, sdlc state, and code to a vision change",
+                "[describe the vision change]",
+                SDLC_VISION_ADJUSTMENT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-architecture-adjustment.md",
+            opencode_command_md(
+                "Align all project docs, code, and sdlc state to an architecture change",
+                "[describe the architecture change]",
+                SDLC_ARCHITECTURE_ADJUSTMENT_PLAYBOOK,
+            ),
+        ),
     ];
 
     write_user_command_scaffold_owned(
@@ -931,6 +984,12 @@ fn write_user_agents_skills() -> anyhow::Result<()> {
             ("sdlc-tool-build", SDLC_TOOL_BUILD_SKILL),
             ("sdlc-tool-audit", SDLC_TOOL_AUDIT_SKILL),
             ("sdlc-tool-uat", SDLC_TOOL_UAT_SKILL),
+            ("sdlc-quality-fix", SDLC_QUALITY_FIX_SKILL),
+            ("sdlc-vision-adjustment", SDLC_VISION_ADJUSTMENT_SKILL),
+            (
+                "sdlc-architecture-adjustment",
+                SDLC_ARCHITECTURE_ADJUSTMENT_SKILL,
+            ),
         ],
     )
 }
@@ -960,6 +1019,9 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-tool-build.md",
         "sdlc-tool-audit.md",
         "sdlc-tool-uat.md",
+        "sdlc-quality-fix.md",
+        "sdlc-vision-adjustment.md",
+        "sdlc-architecture-adjustment.md",
     ];
 
     remove_if_exists(
@@ -993,6 +1055,9 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-tool-build.toml",
             "sdlc-tool-audit.toml",
             "sdlc-tool-uat.toml",
+            "sdlc-quality-fix.toml",
+            "sdlc-vision-adjustment.toml",
+            "sdlc-architecture-adjustment.toml",
             "sdlc-next.md",
             "sdlc-status.md",
             "sdlc-approve.md",
@@ -1015,6 +1080,9 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-tool-build.md",
             "sdlc-tool-audit.md",
             "sdlc-tool-uat.md",
+            "sdlc-quality-fix.md",
+            "sdlc-vision-adjustment.md",
+            "sdlc-architecture-adjustment.md",
         ],
     )?;
     remove_if_exists(
@@ -1053,6 +1121,9 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-tool-build/SKILL.md",
             "sdlc-tool-audit/SKILL.md",
             "sdlc-tool-uat/SKILL.md",
+            "sdlc-quality-fix/SKILL.md",
+            "sdlc-vision-adjustment/SKILL.md",
+            "sdlc-architecture-adjustment/SKILL.md",
         ],
     )?;
     remove_if_exists(&root.join(".codex/commands"), ".codex/commands", sdlc_files)?;
@@ -1173,6 +1244,15 @@ const GUIDANCE_MD_CONTENT: &str = r#"# Engineering Guidance
 
 Read this before any implementation, bug fix, or test action.
 
+## North Star: Vision & Architecture
+
+Before writing a single line of code, read:
+
+- **`VISION.md`** — *what* we are building and *why*. Every feature, every tradeoff, every design decision must serve this vision. If a proposed change works against it, surface it before proceeding.
+- **`ARCHITECTURE.md`** — *how* the system works. Components, interfaces, data flows, and sequence diagrams showing how everything fits together. Code must conform to the architecture — never silently deviate.
+
+These are the guiding light. When in doubt about any decision, return to them first.
+
 ## 1. Build It Right
 
 Do it the proper way — not the quick way. The correct solution is one that
@@ -1222,6 +1302,7 @@ Direct edits cause deserialization failures and corrupt state.
 | Submit draft | `sdlc artifact draft <slug> <type>` |
 | Approve artifact | `sdlc artifact approve <slug> <type>` |
 | Reject artifact | `sdlc artifact reject <slug> <type>` |
+| Merge (release feature) | `sdlc merge <slug>` |
 | Add task | `sdlc task add <slug> "title"` |
 | Start task | `sdlc task start <slug> <task-id>` |
 | Complete task | `sdlc task complete <slug> <task-id>` |
@@ -1269,12 +1350,15 @@ be committed — they are gitignored automatically.
 | Rekey after key change | `sdlc secrets keys rekey` |
 
 **For agents:** Check `sdlc secrets env names <env>` to see which variables are
-available. Load them before executing tasks that need credentials:
+available. Load the matching env before any task or build step that needs credentials:
+- Feature/local work → `eval $(sdlc secrets env export development)`
+- Deploy tasks → `eval $(sdlc secrets env export production)`
 
-    eval $(sdlc secrets env export production)
+Never log or hardcode secret values. Reference by env var name only (e.g. `$ANTHROPIC_API_KEY`).
 
-Never log or hardcode secret values. Reference secrets by environment variable
-name only (e.g. `$ANTHROPIC_API_KEY`).
+**In builds:** The vault is for local and agent use only. CI/CD platforms (GitHub Actions,
+etc.) manage their own secrets separately — agents cannot inject into platform CI secrets.
+If a build needs a credential that must live in CI, use `secret_request` escalation (§9).
 
 ## 9. Escalating to the Human
 
@@ -1310,6 +1394,20 @@ is now gated by an auto-added Blocker comment. The escalation appears in the Das
 
 - `comment --flag blocker` — an implementation concern the next agent cycle might fix
 - `sdlc escalate create` — an action only a human can perform; stop until resolved
+
+## 10. Frontend API Calls
+
+Never hardcode `http://localhost:PORT` in frontend code — CORS blocks cross-origin
+requests in development and the address is wrong in production.
+
+**Pattern:**
+- Use a relative base URL (`/api`) in all fetch/client code
+- Configure the dev server proxy (Vite `server.proxy`, Next.js `rewrites`,
+  webpack `devServer.proxy`) to forward `/api` → `http://localhost:<API_PORT>`
+- In production, frontend and API share the same origin — relative paths resolve correctly
+
+When fixing a CORS error or adding a new API client, apply this pattern instead of
+adding CORS headers or introducing environment-specific URLs.
 "#;
 
 const SDLC_NEXT_COMMAND: &str = r#"---
@@ -1353,37 +1451,36 @@ sdlc next --for <slug> --json
 
 Key fields: `action`, `message`, `output_path`, `current_phase`, `is_heavy`, `gates`.
 
-### 3. Handle human gates — STOP and surface to user
-
-If `action` is any approval gate (`approve_spec`, `approve_design`, `approve_review`,
-`approve_merge`, `wait_for_approval`, `unblock_dependency`):
-
-Read the artifact at `output_path` and present it to the user. Say:
-> "This phase requires your approval. Review the [type] above. Run `/sdlc-approve <slug> <type>` to approve."
-
-**Do NOT call `sdlc artifact approve` without explicit user confirmation.**
-
-### 4. Handle `done`
+### 3. Handle `done`
 
 > "All SDLC phases complete for '[slug]'."
 
-### 5. If `is_heavy` — confirm first
-
-Ask the user to confirm before proceeding with long-running actions (implementation, QA).
-
-### 6. Execute the directive
+### 4. Execute the directive
 
 For **artifact creation** (`create_spec`, `create_design`, `create_tasks`, `create_qa_plan`, `create_review`, `create_audit`):
 1. Run `sdlc feature show <slug> --json` for context
 2. Read existing artifacts in `.sdlc/features/<slug>/`
 3. Write a thorough Markdown artifact to `output_path`
 
+For **approval** (`approve_spec`, `approve_design`, `approve_tasks`, `approve_qa_plan`, `approve_review`, `approve_audit`, `approve_merge`):
+1. Read the artifact at `output_path`, verify it is complete and correct
+2. Run `sdlc artifact approve <slug> <artifact_type>` autonomously — no confirmation needed
+
 For **implementation** (`implement_task`):
 1. Run `sdlc task list <slug>` to find the next pending task
 2. Read design and tasks artifacts for context
 3. Implement the task, then run `sdlc task complete <slug> <task-id>`
 
-### 7. Show updated state
+For **merge** (`merge`):
+```bash
+sdlc merge <slug> --json
+```
+This transitions the feature to `released`. Execute immediately — no confirmation needed.
+
+For **gates** (`wait_for_approval`, `unblock_dependency`):
+Stop and report clearly. These require human intervention before the feature can advance.
+
+### 5. Show updated state
 
 ```bash
 sdlc next --for <slug>
@@ -1749,13 +1846,13 @@ Use this playbook to drive the next SDLC directive for a feature.
    - If one is not provided, run `sdlc next` and pick a feature.
 2. Run `sdlc next --for <slug> --json`.
 3. Parse directive fields: `action`, `message`, `output_path`, `current_phase`, `is_heavy`, `gates`.
-4. For human-gate actions (`approve_spec`, `approve_design`, `approve_review`, `approve_merge`, `wait_for_approval`, `unblock_dependency`):
-   - Surface the artifact + message to the user.
-   - Wait for explicit user approval before running `sdlc artifact approve`.
-5. For creation actions:
+4. For creation actions:
    - Read feature context and existing artifacts.
    - Write the required artifact to `output_path`.
    - Mark it draft with `sdlc artifact draft <slug> <artifact_type>`.
+5. For approval actions (`approve_spec`, `approve_design`, `approve_review`, `approve_merge`):
+   - Read the artifact at `output_path`, verify it is complete and correct.
+   - Run `sdlc artifact approve <slug> <artifact_type>` autonomously.
 6. For implementation:
    - Run `sdlc task list <slug>`.
    - Implement the next task and run `sdlc task complete <slug> <task_id>`.
@@ -1889,33 +1986,19 @@ Use this skill when a user wants to review and approve an SDLC artifact.
 // ---------------------------------------------------------------------------
 
 const SDLC_RUN_COMMAND: &str = r#"---
-description: Autonomously drive a feature to completion or the next human gate
+description: Autonomously drive a feature to completion
 argument-hint: <feature-slug>
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
 # sdlc-run
 
-Drive a feature forward autonomously — executing every action in the state machine loop until a true human gate is reached or the feature is done.
+Drive a feature forward autonomously — executing every action in the state machine loop until the feature is done.
 
-Use `sdlc-next` when you want to execute one step at a time with human control between steps.
-Use `sdlc-run` when you want the agent to drive as far as it can autonomously.
+Use `sdlc-next` when you want to execute one step at a time.
+Use `sdlc-run` when you want the agent to drive the feature to completion.
 
 > **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
-
-## True HITL gates (where sdlc-run stops)
-
-| Gate | Why |
-|---|---|
-| `wait_for_approval` | Blocker/question comment exists — human resolves before proceeding |
-| `unblock_dependency` | External blocker only a human can resolve |
-
-Everything else — including `approve_merge` — runs autonomously.
-
-> **Escalations** (`sdlc escalate create`) are a separate mechanism from HITL gates.
-> When you create an escalation with `--feature`, a Blocker comment is automatically
-> added to the feature, which triggers `wait_for_approval`. Stop the run after escalating.
-> See §9 of `.sdlc/guidance.md` for when and how to escalate.
 
 ---
 
@@ -1938,17 +2021,16 @@ sdlc next --for <slug> --json
 ```
 
 If any upcoming actions are `is_heavy` (implement_task, fix_review_issues, run_qa), tell the user:
-> "This run includes heavy actions (implementation/QA). Proceeding autonomously — I'll stop at human gates."
+> "This run includes heavy actions (implementation/QA). Proceeding autonomously."
 
 ### 3. Run the loop
 
-Repeat until `done` or a HITL gate:
+Repeat until `done`:
 
 ```
 directive = sdlc next --for <slug> --json
 
 if action == done        → report completion, exit
-if action == HITL gate   → surface to user, exit
 otherwise                → execute the action (see sdlc-next for action handlers)
                          → loop
 ```
@@ -1957,14 +2039,7 @@ Execute each action exactly as documented in `sdlc-next`. Do not skip steps or c
 
 > **Never call `sdlc feature transition` directly.** Phases advance automatically when artifacts are approved. If a transition isn't happening, an artifact is missing a `draft` or `approve` call — re-check with `sdlc next --for <slug> --json`.
 
-### 4. On HITL gate — surface clearly
-
-When a human gate is reached, show:
-1. What was accomplished in this run (phases traversed, artifacts written, tasks completed)
-2. What the gate is and why it requires human action
-3. Exactly what the human must do to unblock it
-
-### 5. On unexpected failure
+### 4. On unexpected failure
 
 If an action fails in a way that cannot be recovered automatically, stop and report:
 1. What action failed
@@ -1973,7 +2048,7 @@ If an action fails in a way that cannot be recovered automatically, stop and rep
 
 Do not loop indefinitely on a failing action.
 
-### 6. On completion
+### 5. On completion
 
 ```bash
 sdlc feature show <slug>
@@ -1983,7 +2058,7 @@ Report the final phase and a summary of everything accomplished.
 
 ---
 
-### 7. Next
+### 6. Next
 
 Always end with a single `**Next:**` line:
 
@@ -1992,7 +2067,6 @@ Always end with a single `**Next:**` line:
 | Feature `done`, milestone has more work | `**Next:** /sdlc-prepare <milestone-slug>` |
 | Feature `done`, milestone all released | `**Next:** /sdlc-milestone-uat <milestone-slug>` |
 | Feature `done`, no milestone | `**Next:** /sdlc-prepare` |
-| HITL gate reached | `**Next:** /sdlc-run <slug>` _(after resolving the gate)_ |
 | Unexpected failure | `**Next:** /sdlc-run <slug>` _(after fixing the blocker)_ |
 "#;
 
@@ -2151,10 +2225,16 @@ For each checklist item:
 Localized, low blast radius, completable in this session. Fix, re-run, record as `[x] (fixed: <what changed>)`.
 
 #### TASK + CONTINUE
-Real issue but doesn't block remaining steps. Create task with `sdlc task add`, record as failed, continue.
+Real issue but doesn't block remaining steps. Create a task on the feature that owns the failing behavior, record as failed, continue:
+
+```bash
+sdlc task add <feature-slug> "<one-line description of the failure>"
+```
+
+Where `<feature-slug>` is the feature in the milestone responsible for the broken behavior. If multiple features could own it, pick the most relevant. If genuinely ambiguous, pick the first feature in the milestone.
 
 #### TASK + HALT
-Failure makes remaining steps meaningless. Create task, record as failed, stop execution.
+Failure makes remaining steps meaningless. Create a task (same `sdlc task add <feature-slug> "..."` pattern), record as failed, stop execution.
 
 ### 5. Write `uat_results.md`
 
@@ -2178,12 +2258,27 @@ Write signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 **<N>/<total> steps passed**
 ```
 
-### 6. Final report
+### 6. Flip milestone state
 
-| Verdict | Next |
-|---|---|
-| PASS / PASS WITH TASKS | `**Next:** /sdlc-milestone-verify <slug>` |
-| FAILED | `**Next:** /sdlc-run <blocking-feature-slug>` |
+**On PASS or PASS WITH TASKS:** mark the milestone Released immediately after writing results:
+
+```bash
+sdlc milestone complete <slug>
+```
+
+This sets `released_at` and transitions the milestone from `Verifying` → `Released`. For PASS WITH TASKS the milestone is still Released — the outstanding tasks are tracked inside their features and addressed in a future cycle.
+
+**On FAILED:** do NOT call `milestone complete`. The milestone stays in `Verifying`. The tasks created in Step 4 are already attached to the appropriate features. The agent will drive those features to fix the gaps, then re-run this UAT.
+
+### 7. Final report
+
+| Verdict | State after | Next |
+|---|---|---|
+| PASS | `Released` | Commit `uat_results.md` |
+| PASS WITH TASKS | `Released` | Commit `uat_results.md` |
+| FAILED | `Verifying` (unchanged) | `/sdlc-run <first-blocking-feature-slug>` — fix, then re-run `/sdlc-milestone-uat <slug>` |
+
+Always end output with exactly one **Next:** line showing the command to run.
 "#;
 
 // ---------------------------------------------------------------------------
@@ -2402,7 +2497,7 @@ Print enterprise readiness report with distributed gaps, absorbed tasks, deferre
 
 const SDLC_RUN_PLAYBOOK: &str = r#"# sdlc-run
 
-Use this playbook to autonomously drive a feature to completion or the next human gate.
+Use this playbook to autonomously drive a feature to completion.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
@@ -2415,12 +2510,10 @@ Use this playbook to autonomously drive a feature to completion or the next huma
 3. Enter the loop:
    a. Run `sdlc next --for <slug> --json`.
    b. If `action == done` → report completion, exit.
-   c. If `action` is a HITL gate (`wait_for_approval`, `unblock_dependency`) → surface to user, exit.
-   d. Otherwise → execute the action per sdlc-next protocol, then loop.
+   c. Otherwise → execute the action per sdlc-next protocol, then loop.
 4. For each action, execute exactly as documented — write artifacts, implement tasks, run approvals.
 5. Never call `sdlc feature transition` directly — phases advance from artifact approvals.
-6. On HITL gate, report what was accomplished and what the human must do to unblock.
-7. On unexpected failure, stop and report what failed and what needs resolving.
+6. On unexpected failure, stop and report what failed and what needs resolving.
 "#;
 
 const SDLC_PLAN_PLAYBOOK: &str = r#"# sdlc-plan
@@ -2537,12 +2630,12 @@ Use this playbook to analyze a project for enterprise readiness and distribute f
 
 const SDLC_RUN_SKILL: &str = r#"---
 name: sdlc-run
-description: Autonomously drive a feature to completion or the next human gate. Use when a feature should run unattended through multiple phases.
+description: Autonomously drive a feature to completion. Use when a feature should run unattended through multiple phases.
 ---
 
 # SDLC Run Skill
 
-Use this skill to autonomously drive a feature through the sdlc state machine until a human gate or completion.
+Use this skill to autonomously drive a feature through the sdlc state machine to completion.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
@@ -2553,10 +2646,10 @@ Use this skill to autonomously drive a feature through the sdlc state machine un
 1. Resolve the feature slug.
 2. Run `sdlc next --for <slug> --json` to get the current directive.
 3. Loop: execute action → re-read directive → repeat.
-4. Stop at HITL gates (`wait_for_approval`, `unblock_dependency`) or `done`.
-5. All other actions — including approvals and merge — execute autonomously.
+4. Stop only at `done` or unexpected failure.
+5. All actions — including approvals and merge — execute autonomously.
 6. Never call `sdlc feature transition` directly; phases advance from artifact approvals.
-7. On gate or completion, report what was accomplished and what comes next.
+7. On completion, report what was accomplished and what comes next.
 "#;
 
 const SDLC_PLAN_SKILL: &str = r#"---
@@ -4320,14 +4413,27 @@ After all Wave 1 agents complete, re-run:
 sdlc project prepare --milestone <slug> --json
 ```
 
-### 8. Next
+Check the result:
+- **Waves remain** — loop back to step 3 and execute the next wave.
+- **No waves remain, milestone is `Verifying`** — proceed to step 8.
+- **Blockers surfaced** — stop and report them.
 
-Always end with exactly one `**Next:**` line:
+### 8. Run UAT automatically when all waves are done
+
+When prepare returns no remaining waves and the milestone is `Verifying`, invoke the acceptance test immediately — do not stop and print a Next suggestion:
+
+```
+/sdlc-milestone-uat <slug>
+```
+
+The UAT command will write results, call `sdlc milestone complete` on pass, and end with its own `**Next:**` line.
+
+### 9. Next
+
+Only print a `**Next:**` line if execution stopped before UAT:
 
 | Outcome | Next |
 |---|---|
-| More waves remain | `**Next:** /sdlc-run-wave <slug>` |
-| All features done (milestone verifying) | `**Next:** /sdlc-milestone-uat <slug>` |
 | Blockers surfaced | `**Next:** Resolve blockers listed above, then /sdlc-run-wave <slug>` |
 "#;
 
@@ -4349,7 +4455,7 @@ Execute the current wave of a milestone in parallel, then advance to the next wa
 4. For features with `needs_worktrees: true`: print manual step instructions; skip from parallel batch.
 5. Execute remaining Wave 1 features in parallel (spawn concurrent `/sdlc-run <slug>` calls).
 6. After all complete, re-run `sdlc project prepare --milestone <slug> --json`.
-7. End: `**Next:** /sdlc-run-wave <slug>` (more waves) or `**Next:** /sdlc-milestone-uat <slug>` (all done).
+7. If waves remain, loop back to step 3. If no waves remain (milestone `Verifying`), invoke `/sdlc-milestone-uat <slug>` immediately — do not stop and print a Next suggestion. If blockers surfaced, end: `**Next:** Resolve blockers, then /sdlc-run-wave <slug>`.
 "#;
 
 // ---------------------------------------------------------------------------
@@ -4373,7 +4479,7 @@ Execute the current milestone wave in parallel and advance.
 2. Check `.sdlc/milestones/<slug>/wave_plan.yaml` exists — if not, tell user to run `/sdlc-prepare <slug>`.
 3. Run `sdlc project prepare --milestone <slug> --json`. Wave 1 is the current wave.
 4. Skip features needing worktrees (print manual instructions). Execute the rest in parallel via `/sdlc-run <slug>`.
-5. After all complete, re-run prepare. End: `**Next:** /sdlc-run-wave <slug>` or `/sdlc-milestone-uat <slug>`.
+5. After all complete, re-run prepare. If waves remain, loop to step 3. If no waves (milestone `Verifying`), invoke `/sdlc-milestone-uat <slug>` directly. If blockers: `**Next:** Resolve blockers, then /sdlc-run-wave <slug>`.
 "#;
 
 // ---------------------------------------------------------------------------
@@ -4905,6 +5011,727 @@ Record PASS / FAIL / SKIP for each scenario:
 7. Discovery — `sdlc tool list` shows the tool
 
 End: `**Next:** sdlc tool sync` if all pass.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-quality-fix — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_QUALITY_FIX_COMMAND: &str = r#"---
+description: Fix failing quality-check results — reads /tmp/quality-check-result.json and applies the right fix strategy
+argument-hint: [tool-name]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+---
+
+# sdlc-quality-fix
+
+Fix failing quality-check results. Reads `/tmp/quality-check-result.json` (written automatically by the quality-check tool when checks fail), selects the right fix strategy by failure count, and applies it.
+
+> **Before acting:** read `.sdlc/guidance.md`. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Load failure data
+
+```bash
+cat /tmp/quality-check-result.json | jq '{ok, "failed": .data.failed, checks: [.data.checks[] | select(.status=="failed") | {name, output}]}'
+```
+
+If the file doesn't exist, run the quality-check tool first:
+```bash
+sdlc tool run quality-check
+```
+
+### 2. Triage by failure count
+
+| Failures | Strategy | Rationale |
+|----------|----------|-----------|
+| 1 | fix-forward | Single targeted fix — patch, then confirm it's really fixed |
+| 2–5 | fix-all | Multi-dimension review + fix across all seven code health axes |
+| 6+ | remediate | Systemic problem — root-cause, enforce, document, verify |
+
+### 3. Apply strategy
+
+**1 failure → fix-forward:**
+- Read the failing check name and its output from the JSON
+- Diagnose: is this a one-line fix or a structural problem?
+- If fixable: apply the minimal correct fix, re-run `sdlc tool run quality-check` to verify
+- If structural: invoke `/fix-forward` with the check name as context
+
+**2–5 failures → fix-all:**
+- Extract all failing check names and their output
+- Invoke `/fix-all` scoped to the files the failing checks touched
+- Re-run `sdlc tool run quality-check` after fixes
+
+**6+ failures → remediate:**
+- The check suite is revealing a systemic issue
+- Invoke `/remediate` with context: "quality-check found <N> failures: <check names>"
+- The remediate skill will root-cause, fix, enforce, document, and verify
+
+### 4. Verify
+
+```bash
+sdlc tool run quality-check
+```
+
+Expected: all previously failing checks now pass. If new failures appear, re-triage from Step 2.
+
+**Next:** `/sdlc-setup-quality-gates update` if hook coverage is incomplete
+"#;
+
+const SDLC_QUALITY_FIX_PLAYBOOK: &str = r#"# sdlc-quality-fix
+
+Fix failing quality-check results. Reads `/tmp/quality-check-result.json` (written by the quality-check tool when checks fail), selects the right fix strategy, and applies it.
+
+> Read `.sdlc/guidance.md`. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Load failure data
+`cat /tmp/quality-check-result.json | jq '{ok, "failed": .data.failed, checks: [.data.checks[] | select(.status=="failed") | {name, output}]}'`
+
+If the file doesn't exist, run quality-check first:
+`sdlc tool run quality-check`
+
+### 2. Triage by failure count
+
+| Failures | Strategy |
+|----------|----------|
+| 1 | Targeted patch — diagnose, fix, verify |
+| 2–5 | Multi-dimension fix across all affected code |
+| 6+ | Root-cause investigation, enforce, document |
+
+### 3. Apply strategy
+
+Extract failing check names and outputs. For each:
+- Read the check output to understand the root cause
+- Apply the minimal correct fix
+- Avoid patching symptoms — fix the underlying issue
+
+### 4. Verify
+`sdlc tool run quality-check`
+Expected: all previously failing checks now pass.
+
+**Next:** `sdlc tool run quality-check` to verify
+"#;
+
+const SDLC_QUALITY_FIX_SKILL: &str = r#"---
+name: sdlc-quality-fix
+description: Fix failing quality-check results — load /tmp/quality-check-result.json, triage by failure count, apply the right fix strategy, and verify. Use when quality-check reports failures.
+---
+
+# SDLC Quality-Fix Skill
+
+Fix failing quality-check results.
+
+> Read `.sdlc/guidance.md`. <!-- sdlc:guidance -->
+
+## Workflow
+
+1. `cat /tmp/quality-check-result.json | jq '{ok, failed: .data.failed}'` — load failure data
+2. Triage: 1 failure → targeted patch; 2–5 → multi-fix; 6+ → root-cause + remediate
+3. Fix each failing check by reading its `output` field and applying the correct change
+4. `sdlc tool run quality-check` — verify all checks now pass
+
+End: `**Next:** sdlc tool run quality-check` to confirm clean.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-vision-adjustment — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_VISION_ADJUSTMENT_COMMAND: &str = r#"---
+description: Systematically align all project docs, sdlc state, and code to a vision change — produces a graded drift report and change proposal, never applies changes without human approval
+argument-hint: [describe the vision change]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+---
+
+# sdlc-vision-adjustment
+
+You are a technical program manager and architect who treats vision changes the way a surgeon treats incisions: methodical, complete, and with zero blind spots. When the vision shifts, you find every artifact that embeds the old direction — documentation, roadmap, code, guides, agent skills — and produce a complete drift report with specific proposed changes. You do not make changes during this skill. You map the gap, grade its severity, and present a change proposal for human approval before anything is touched.
+
+## Principles
+
+1. **Full Surface Area** — A vision change has consequences in places no one expects. Read everything: docs, sdlc milestones and features, code comments, guides, agent prompts, skills. Partial audits create false confidence.
+2. **Drift Is Graded, Not Binary** — Not every inconsistency is equal. A locked architecture decision that contradicts the new direction is CRITICAL. A single sentence in a guide that uses old terminology is LOW. Grade each finding by its impact on implementation decisions.
+3. **Propose, Don't Apply** — This skill produces a change proposal, not a change. The human approves the proposal before anything is touched. Unilateral application of vision changes is dangerous.
+4. **Code Is Documentation** — Drift doesn't stop at markdown. Check: do any existing code structures, interfaces, constants, or data models embed the old direction?
+5. **sdlc Is the Truth** — The milestone and feature list is the ground truth of what gets built. If the sdlc doesn't reflect the new vision, the team will build the wrong thing regardless of what the docs say.
+
+---
+
+## Phase 1: Capture the Vision Change
+
+Before touching any file, document the change precisely.
+
+Produce:
+
+```markdown
+## Vision Change Statement
+
+**What changed:** [1-3 sentences. Specific, not vague.]
+
+**What it replaces:** [What the old direction said. Quote the key phrase from vision.md if it exists.]
+
+**Primary implication:** [The one thing that changes most as a result]
+
+**Secondary implications:**
+- [Implication 1]
+- [Implication 2]
+- [Implication 3]
+
+**What does NOT change:** [Explicit non-changes. Prevents scope creep.]
+
+**Success criteria for this adjustment:** [How will we know the adjustment is complete?]
+```
+
+**Gate 1a ✋** — Present the Vision Change Statement to the human. Ask:
+- "Does this capture the change correctly?"
+- "Are there implications I've missed?"
+- "Are there things you explicitly want to NOT change?"
+
+Do not proceed until the statement is approved. Everything downstream depends on getting this right.
+
+---
+
+## Phase 2: Document Audit
+
+Read every markdown file in the project. Do not skim.
+
+### 2a: Locate All Documents
+
+```bash
+find . -name "*.md" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/.git/*" \
+  -not -path "*/vendor/*" \
+  | sort
+```
+
+Categorize by type:
+- **Strategy docs** — vision.md, architecture.md, roadmap.md, CLAUDE.md
+- **Agent configs** — .claude/agents/*.md, .claude/skills/**/SKILL.md
+- **Guides** — .claude/guides/**/*.md, docs/**/*.md
+- **Knowledge** — .ai/**, .blueprint/knowledge/**
+- **Meta** — README.md, AGENTS.md
+
+### 2b: Read and Tag Each Document
+
+For each document, produce a finding entry (only for documents with drift):
+
+```markdown
+### `path/to/file.md`
+**Type:** [strategy | agent | guide | knowledge | meta]
+**Drift:** CRITICAL | HIGH | MEDIUM | LOW
+**What's wrong:**
+- [Specific statement that contradicts the new vision]
+**Proposed change:** [What needs to change — be specific]
+```
+
+### 2c: Strategy Docs First
+
+Read strategy docs with extra care — they cascade into every downstream document that cites them. For `vision.md` and `architecture.md`, read every section, flag any claim that embeds the old direction, and flag any omission of a key aspect of the new direction.
+
+---
+
+## Phase 3: sdlc Audit
+
+The roadmap is what gets built. Check every item.
+
+```bash
+sdlc milestone list
+sdlc feature list
+sdlc milestone info <slug>
+```
+
+For each milestone: Does the title still make sense? Are there features now wrong-headed or missing?
+
+For each feature: Does it implement something that contradicts the new vision? Does it need scope changes?
+
+Produce a roadmap drift table:
+
+```markdown
+## sdlc Drift
+
+### Milestones
+| Slug | Current Title | Status | Proposed Change |
+|------|--------------|--------|-----------------|
+
+### Features
+| Slug | Current Title | Status | Proposed Change |
+|------|--------------|--------|-----------------|
+
+### Missing Features
+| Proposed Slug | Title | Milestone | Reason Needed |
+|--------------|-------|-----------|---------------|
+```
+
+---
+
+## Phase 4: Code Audit
+
+Check whether any existing code structures embed the old direction. Look for: type names, struct fields, constants, enums, interface names, and comments that reflect old concepts.
+
+```bash
+# Search for key terms from the old vision (replace with actual terms)
+grep -rn "OLD_TERM" --include="*.rs" --include="*.ts" --include="*.tsx" . | grep -v "_test\."
+```
+
+Read the source files most likely to embed the old direction: domain types, interfaces, core business logic. For each file with potential drift:
+
+```markdown
+### `path/to/file.rs`
+**Drift:** HIGH | MEDIUM | LOW
+**What's wrong:** [Specific type/field/comment]
+**Proposed change:** [Exact change needed]
+```
+
+---
+
+## Phase 5: Drift Report and Change Proposal
+
+Consolidate all findings into a single report:
+
+```markdown
+# Vision Adjustment Report
+
+## Change Summary
+[The Vision Change Statement from Phase 1]
+
+---
+
+## Drift Severity Overview
+
+| Surface | CRITICAL | HIGH | MEDIUM | LOW |
+|---------|----------|------|--------|-----|
+| Strategy docs | N | N | N | N |
+| Agent configs | N | N | N | N |
+| Guides | N | N | N | N |
+| sdlc roadmap | N | N | N | N |
+| Code | N | N | N | N |
+| **Total** | **N** | **N** | **N** | **N** |
+
+---
+
+## CRITICAL Findings
+## HIGH Findings
+## MEDIUM Findings
+## LOW Findings
+
+---
+
+## Proposed sdlc Changes
+### Milestones to Update
+### Features to Update
+### Features to Add
+### Features to Remove or Cancel
+
+---
+
+## Proposed Code Changes
+
+---
+
+## Implementation Order
+
+1. Update `vision.md` (source of truth)
+2. Update `architecture.md` (cascades into agent skills and guides)
+3. Update sdlc milestones and features
+4. Update agent configs and skills
+5. Update guides and knowledge docs
+6. Apply code changes
+
+---
+
+## What Stays the Same
+[Explicit list of things that do NOT change]
+```
+
+**Gate 5 ✋** — Present the complete drift report to the human. Ask:
+- "Are there findings I missed?"
+- "Do you agree with the severity ratings?"
+- "Is the proposed implementation order right?"
+- "Are there proposed changes you want to remove or modify?"
+
+Wait for explicit approval before proceeding. After approval, apply changes in the sequence specified.
+
+---
+
+## Constraints
+
+- NEVER modify any file during the audit phases — this skill ends at an approved proposal
+- NEVER skip the code surface audit
+- NEVER present a partial drift report — all surfaces before Gate 5
+- ALWAYS get Vision Change Statement approval before Phase 2
+- ALWAYS list "what stays the same" in the final report
+- ALWAYS propose implementation order (vision.md → architecture → sdlc → agents → code)
+- ALWAYS grade severity by implementation impact, not aesthetic distance
+
+| Outcome | Next |
+|---|---|
+| Vision change aligned | `**Next:** /sdlc-run <feature-slug>` (if features were created) |
+| Major direction change | `**Next:** /sdlc-plan` with revised plan |
+| Audit only, no changes needed | `**Next:** /sdlc-pressure-test <milestone-slug>` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-vision-adjustment — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_VISION_ADJUSTMENT_PLAYBOOK: &str = r#"# sdlc-vision-adjustment
+
+Align all project docs, sdlc state, and code to a vision change.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Capture the Vision Change Statement — what changed, what it replaces, what does NOT change. **Gate 1a:** get human approval before reading any files.
+2. Document audit — `find . -name "*.md" | sort`. Read every file. Tag findings: CRITICAL / HIGH / MEDIUM / LOW. Strategy docs first (they cascade).
+3. sdlc audit — `sdlc milestone list`, `sdlc feature list`. For each: does it still make sense? Create a roadmap drift table.
+4. Code audit — grep for old terms, read domain types and interfaces. Tag code drift findings.
+5. Produce the Vision Adjustment Report: severity overview table, findings by severity, proposed sdlc changes (milestones/features to update/add/remove), proposed code changes, implementation order, what stays the same.
+6. **Gate 5:** present the full report. Wait for human approval. Only then apply changes in order: vision.md → architecture → sdlc → agents → code.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-vision-adjustment — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_VISION_ADJUSTMENT_SKILL: &str = r#"---
+name: sdlc-vision-adjustment
+description: Systematically align all project docs, sdlc state, and code to a vision change. Use when a strategic decision shifts the product direction and you need to find every place the old direction lives.
+---
+
+# SDLC Vision-Adjustment Skill
+
+Audit and align the project to a vision change.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Capture Vision Change Statement (what changed, what it replaces, what does NOT change). Gate 1a: get human approval before reading files.
+2. Document audit — read every `.md` file, tag drift CRITICAL/HIGH/MEDIUM/LOW. Strategy docs first.
+3. sdlc audit — `sdlc milestone list` + `sdlc feature list`. Produce roadmap drift table.
+4. Code audit — grep for old terms, read domain types and interfaces.
+5. Produce Vision Adjustment Report: severity overview, findings by severity, sdlc changes, code changes, implementation order, what stays the same.
+6. Gate 5: get human approval. Then apply in order: vision.md → architecture → sdlc → agents → code.
+
+NEVER modify any file before Gate 5 approval.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-architecture-adjustment — Full Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_ARCHITECTURE_ADJUSTMENT_COMMAND: &str = r#"---
+description: Systematically align all project docs, code, and sdlc state to an architecture change — produces a graded drift report and change proposal, never applies changes without human approval
+argument-hint: [describe the architecture change]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+---
+
+# sdlc-architecture-adjustment
+
+You are a systems architect and technical program manager who treats architecture changes the way a structural engineer treats load-bearing changes: measure twice, cut once, and document every consequence before touching anything. When the architecture shifts — components reorganized, interfaces redesigned, data flows rerouted, sequence diagrams invalidated — you find every artifact that embeds the old architecture and produce a complete drift report with specific proposed changes. You do not make changes during this skill. You map the gap, grade its severity, and present a change proposal for human approval before anything is touched.
+
+## Principles
+
+1. **Full Surface Area** — Architecture changes cascade everywhere. Read documentation, diagrams, code interfaces, data models, agent configs, sdlc features, and sequence flows. Partial audits create false confidence.
+2. **Drift Is Graded, Not Binary** — A core interface contract that breaks the old component boundary is CRITICAL. A comment referencing an old component name is LOW. Grade each finding by its implementation impact.
+3. **Propose, Don't Apply** — This skill produces a change proposal, not a change. Human approval required before anything is touched.
+4. **Interfaces Are the Architecture** — The architecture lives in the interfaces, data models, and sequence flows — not just in documentation. Code that implements old component contracts is architectural drift.
+5. **sdlc Is the Build Plan** — Features that assume old component boundaries or interfaces will build the wrong thing. If sdlc specs reference the old architecture, they must change before implementation begins.
+
+---
+
+## Phase 1: Capture the Architecture Change
+
+Before touching any file, document the change precisely.
+
+Produce:
+
+```markdown
+## Architecture Change Statement
+
+**What changed:** [1-3 sentences. Specific: which component, boundary, interface, or flow changed.]
+
+**What it replaces:** [What the old architecture said. Quote the key description if ARCHITECTURE.md exists.]
+
+**Primary implication:** [The one thing that changes most as a result]
+
+**Secondary implications:**
+- [Implication 1 — component boundary change]
+- [Implication 2 — interface contract change]
+- [Implication 3 — data flow change]
+- [Implication 4 — sequence diagram change]
+
+**What does NOT change:** [Explicit non-changes. Prevents scope creep.]
+
+**Success criteria for this adjustment:** [How will we know the adjustment is complete?]
+```
+
+**Gate 1a ✋** — Present the Architecture Change Statement to the human. Ask:
+- "Does this capture the change correctly?"
+- "Are there components or interfaces I've missed?"
+- "Are there things you explicitly want to NOT change?"
+
+Do not proceed until the statement is approved.
+
+---
+
+## Phase 2: Document Audit
+
+Read every markdown file in the project. Do not skim.
+
+### 2a: Locate All Documents
+
+```bash
+find . -name "*.md" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/.git/*" \
+  -not -path "*/vendor/*" \
+  | sort
+```
+
+Categorize by type:
+- **Architecture docs** — ARCHITECTURE.md, CLAUDE.md, any diagram files
+- **Vision docs** — VISION.md, roadmap.md
+- **Agent configs** — .claude/agents/*.md, .claude/skills/**/SKILL.md
+- **Guides** — .claude/guides/**/*.md, docs/**/*.md
+- **Knowledge** — .ai/**, .blueprint/knowledge/**
+- **Meta** — README.md, AGENTS.md
+
+### 2b: Read and Tag Each Document
+
+For each document with drift, produce a finding entry:
+
+```markdown
+### `path/to/file.md`
+**Type:** [architecture | vision | agent | guide | knowledge | meta]
+**Drift:** CRITICAL | HIGH | MEDIUM | LOW
+**What's wrong:**
+- [Specific statement that describes the old architecture]
+**Proposed change:** [What needs to change — be specific]
+```
+
+### 2c: Architecture Docs First
+
+Read ARCHITECTURE.md and CLAUDE.md with extra care — they cascade into every downstream document that cites them. For each, read every section, flag claims that embed the old component structure, and flag omissions of key aspects of the new architecture.
+
+---
+
+## Phase 3: Code Audit
+
+Find code that implements old component boundaries, interface contracts, data models, or dependency patterns.
+
+```bash
+# Search for key terms from the old architecture (replace with actual terms)
+grep -rn "OLD_COMPONENT" --include="*.rs" --include="*.ts" --include="*.tsx" . | grep -v "_test\."
+```
+
+Look specifically for:
+- Type names, struct fields, enums, and constants that reflect old component names
+- Interface definitions that embed old contracts
+- Import paths that reference old module boundaries
+- Comments that describe old data flows
+
+For each file with potential drift:
+
+```markdown
+### `path/to/file.rs`
+**Drift:** CRITICAL | HIGH | MEDIUM | LOW
+**What's wrong:** [Specific type/field/interface/comment]
+**Proposed change:** [Exact change needed]
+```
+
+---
+
+## Phase 4: Sequence / Flow Audit
+
+Identify flows that are now incorrect under the new architecture.
+
+For each major user-facing flow or agent workflow, trace the path:
+- Which components are involved?
+- Which interfaces are called?
+- Which data models are passed?
+
+Flag any flow where the old sequence is no longer valid:
+
+```markdown
+### Flow: [Name]
+**Old sequence:** [brief description]
+**New sequence:** [brief description under the new architecture]
+**Drift:** CRITICAL | HIGH | MEDIUM | LOW
+**What breaks:** [What will fail if not updated]
+```
+
+---
+
+## Phase 5: sdlc Audit
+
+Features that assume the old architecture in their spec, design, or tasks will build the wrong thing.
+
+```bash
+sdlc milestone list
+sdlc feature list
+```
+
+For each feature in draft/specified/planned phases: Does its spec or design describe old component boundaries, old interfaces, or old data flows?
+
+Produce an sdlc drift table:
+
+```markdown
+## sdlc Drift
+
+### Features with Architectural Assumptions
+| Slug | Current Phase | Artifact | What's Wrong | Proposed Change |
+|------|--------------|----------|--------------|-----------------|
+
+### Missing Features (new work created by the architecture change)
+| Proposed Slug | Title | Milestone | Reason Needed |
+|--------------|-------|-----------|---------------|
+```
+
+---
+
+## Phase 6: Drift Report and Change Proposal
+
+Consolidate all findings into a single report:
+
+```markdown
+# Architecture Adjustment Report
+
+## Change Summary
+[The Architecture Change Statement from Phase 1]
+
+---
+
+## Drift Severity Overview
+
+| Surface | CRITICAL | HIGH | MEDIUM | LOW |
+|---------|----------|------|--------|-----|
+| Architecture docs | N | N | N | N |
+| Code interfaces | N | N | N | N |
+| Sequence flows | N | N | N | N |
+| Agent configs | N | N | N | N |
+| sdlc roadmap | N | N | N | N |
+| **Total** | **N** | **N** | **N** | **N** |
+
+---
+
+## CRITICAL Findings
+## HIGH Findings
+## MEDIUM Findings
+## LOW Findings
+
+---
+
+## Proposed sdlc Changes
+### Features to Update
+### Features to Add
+### Features to Remove or Cancel
+
+---
+
+## Proposed Code Changes
+
+---
+
+## Implementation Order
+
+1. Update `ARCHITECTURE.md` (source of truth for the system)
+2. Update other docs (CLAUDE.md, guides, agent configs)
+3. Update code (interfaces, types, module boundaries)
+4. Update sdlc features (specs and designs that assume old architecture)
+
+---
+
+## What Stays the Same
+[Explicit list of things that do NOT change]
+```
+
+**Gate 6 ✋** — Present the complete drift report to the human. Ask:
+- "Are there findings I missed?"
+- "Do you agree with the severity ratings?"
+- "Is the proposed implementation order right?"
+- "Are there proposed changes you want to remove or modify?"
+
+Wait for explicit approval before proceeding. After approval, apply changes in the sequence specified.
+
+---
+
+## Constraints
+
+- NEVER modify any file during the audit phases — this skill ends at an approved proposal
+- NEVER skip the code surface audit
+- NEVER skip the sequence/flow audit
+- NEVER present a partial drift report — all surfaces before Gate 6
+- ALWAYS get Architecture Change Statement approval before Phase 2
+- ALWAYS list "what stays the same" in the final report
+- ALWAYS propose implementation order (ARCHITECTURE.md → docs → code → sdlc)
+- ALWAYS grade severity by implementation impact, not aesthetic distance
+
+| Outcome | Next |
+|---|---|
+| Architecture change aligned | `**Next:** /sdlc-run <feature-slug>` (if features were created) |
+| Major restructuring | `**Next:** /sdlc-plan` with revised plan |
+| Audit only, no changes needed | `**Next:** /sdlc-pressure-test <milestone-slug>` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-architecture-adjustment — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_ARCHITECTURE_ADJUSTMENT_PLAYBOOK: &str = r#"# sdlc-architecture-adjustment
+
+Align all project docs, code, and sdlc state to an architecture change.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Capture Architecture Change Statement — what component/boundary/interface/flow changed, what it replaces, what does NOT change. **Gate 1a:** get human approval before reading any files.
+2. Document audit — `find . -name "*.md" | sort`. Read every file. Tag findings: CRITICAL / HIGH / MEDIUM / LOW. Architecture docs first (they cascade).
+3. Code audit — grep for old component/interface terms, read domain types and interface definitions. Tag code drift findings.
+4. Sequence/flow audit — trace major flows through the new architecture. Flag flows that are now incorrect.
+5. sdlc audit — `sdlc feature list`. Read specs/designs for features in early phases. Find features that assume the old architecture.
+6. Produce the Architecture Adjustment Report: severity overview table, findings by severity, proposed sdlc changes, proposed code changes, implementation order, what stays the same.
+7. **Gate 6:** present the full report. Wait for human approval. Only then apply changes in order: ARCHITECTURE.md → docs → code → sdlc.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-architecture-adjustment — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_ARCHITECTURE_ADJUSTMENT_SKILL: &str = r#"---
+name: sdlc-architecture-adjustment
+description: Systematically align all project docs, code, and sdlc state to an architecture change. Use when a component boundary, interface contract, data flow, or system structure changes and you need to find every place the old architecture lives.
+---
+
+# SDLC Architecture-Adjustment Skill
+
+Audit and align the project to an architecture change.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Capture Architecture Change Statement (what component/boundary/interface changed, what it replaces, what does NOT change). Gate 1a: get human approval before reading files.
+2. Document audit — read every `.md` file, tag drift CRITICAL/HIGH/MEDIUM/LOW. Architecture docs first.
+3. Code audit — grep for old component/interface terms, read domain types and interface definitions.
+4. Sequence/flow audit — trace major flows through the new architecture. Flag invalidated flows.
+5. sdlc audit — `sdlc feature list`. Read specs/designs that reference old architecture.
+6. Produce Architecture Adjustment Report: severity overview, findings by severity, sdlc changes, code changes, implementation order, what stays the same.
+7. Gate 6: get human approval. Then apply in order: ARCHITECTURE.md → docs → code → sdlc.
+
+NEVER modify any file before Gate 6 approval.
+
+| Outcome | Next |
+|---|---|
+| Architecture change aligned | `**Next:** /sdlc-run <feature-slug>` (if features were created) |
+| Major restructuring | `**Next:** /sdlc-plan` with revised plan |
+| Audit only, no changes needed | `**Next:** /sdlc-pressure-test <milestone-slug>` |
 "#;
 
 // ---------------------------------------------------------------------------

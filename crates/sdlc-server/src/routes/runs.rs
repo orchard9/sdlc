@@ -1,5 +1,6 @@
 use axum::{
     extract::{Path, State},
+    http::{header, HeaderValue},
     response::{
         sse::{Event, KeepAlive, Sse},
         IntoResponse, Response,
@@ -51,6 +52,11 @@ fn validate_slug(slug: &str) -> Result<(), AppError> {
 
 /// Spawn a Claude agent keyed by `key`, streaming events into the broadcast map.
 /// Creates a RunRecord, persists it, and emits SSE lifecycle events.
+///
+/// `completion_event` is an optional domain-specific SSE message emitted after
+/// `RunFinished` and after the run is removed from the active map. Used by
+/// ponder and investigation handlers to emit `PonderRunCompleted` /
+/// `InvestigationRunCompleted` without a separate polling task.
 async fn spawn_agent_run(
     key: String,
     prompt: String,
@@ -58,6 +64,7 @@ async fn spawn_agent_run(
     app: &AppState,
     run_type: &str,
     label: &str,
+    completion_event: Option<SseMessage>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     info!(key = %key, "spawn_agent_run: request received");
 
@@ -183,6 +190,11 @@ async fn spawn_agent_run(
         // Clean up active run
         info!(key = %key_clone, message_count, "agent run cleanup");
         agent_runs.lock().await.remove(&key_clone);
+
+        // Emit domain-specific completion event (e.g. PonderRunCompleted)
+        if let Some(evt) = completion_event {
+            let _ = event_tx.send(evt);
+        }
     });
     let abort_handle = handle.abort_handle();
 
@@ -237,9 +249,18 @@ async fn get_run_events(key: &str, app: &AppState) -> Response {
                 msg.ok()
                     .map(|data| Ok::<Event, Infallible>(Event::default().event("agent").data(data)))
             });
-            Sse::new(stream)
+            let mut response = Sse::new(stream)
                 .keep_alive(KeepAlive::default())
-                .into_response()
+                .into_response();
+            // Disable Cloudflare (and nginx) buffering so SSE events are
+            // delivered immediately rather than being held until the buffer fills.
+            let h = response.headers_mut();
+            h.insert(header::CACHE_CONTROL, HeaderValue::from_static("no-cache"));
+            h.insert(
+                header::HeaderName::from_static("x-accel-buffering"),
+                HeaderValue::from_static("no"),
+            );
+            response
         }
         None => (
             // AppError cannot be used here: this fn returns Response directly (SSE vs JSON branch)
@@ -307,7 +328,10 @@ fn sdlc_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions 
         permission_mode: PermissionMode::AcceptEdits,
         mcp_servers: vec![McpServerConfig {
             name: "sdlc".into(),
-            command: "sdlc".into(),
+            command: std::env::current_exe()
+                .unwrap_or_else(|_| std::path::PathBuf::from("sdlc"))
+                .to_string_lossy()
+                .into_owned(),
             args: vec!["mcp".into()],
             env: HashMap::new(),
         }],
@@ -325,6 +349,7 @@ fn sdlc_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions 
             "mcp__sdlc__sdlc_add_task".into(),
             "mcp__sdlc__sdlc_complete_task".into(),
             "mcp__sdlc__sdlc_add_comment".into(),
+            "mcp__sdlc__sdlc_merge".into(),
         ],
         cwd: Some(root),
         max_turns: Some(max_turns),
@@ -338,20 +363,52 @@ fn sdlc_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions 
 
 /// POST /api/run/{slug} — spawn a Claude agent that drives a feature through
 /// the sdlc state machine via MCP tools.
+///
+/// Accepts an optional JSON body `{ "context": "..." }`. When provided, the
+/// context is injected into the agent prompt as additional user-supplied detail
+/// (e.g. the description typed in the Fix Right Away modal).
 pub async fn start_run(
     Path(slug): Path<String>,
     State(app): State<AppState>,
+    request: axum::extract::Request,
 ) -> Result<Json<serde_json::Value>, AppError> {
     validate_slug(&slug)?;
+
+    // Parse optional body — empty or missing body is fine.
+    let body_bytes = axum::body::to_bytes(request.into_body(), 8 * 1024)
+        .await
+        .unwrap_or_default();
+    let context: Option<String> = if body_bytes.is_empty() {
+        None
+    } else {
+        serde_json::from_slice::<serde_json::Value>(&body_bytes)
+            .ok()
+            .and_then(|v| {
+                v.get("context")
+                    .and_then(|c| c.as_str())
+                    .map(|s| s.to_string())
+            })
+    };
+
     let opts = sdlc_query_options(app.root.clone(), 200);
-    let prompt = format!(
-        "Drive feature '{}' through the sdlc state machine. \
-         Run `sdlc next --for {} --json` to get the next action, \
-         execute it, then loop until done or a HITL gate is reached.",
-        slug, slug
-    );
+    let prompt = match context.as_deref() {
+        Some(ctx) if !ctx.is_empty() => format!(
+            "Drive feature '{}' through the sdlc state machine. \
+             User context: \"{}\". Use this as the core problem statement \
+             when writing artifacts. \
+             Run `sdlc next --for {} --json` to get the next action, \
+             execute it, then loop until done or a HITL gate is reached.",
+            slug, ctx, slug
+        ),
+        _ => format!(
+            "Drive feature '{}' through the sdlc state machine. \
+             Run `sdlc next --for {} --json` to get the next action, \
+             execute it, then loop until done or a HITL gate is reached.",
+            slug, slug
+        ),
+    };
     let label = slug.clone();
-    spawn_agent_run(slug, prompt, opts, &app, "feature", &label).await
+    spawn_agent_run(slug, prompt, opts, &app, "feature", &label, None).await
 }
 
 /// GET /api/run/{slug}/events — SSE stream of agent messages for an active run.
@@ -388,7 +445,7 @@ pub async fn start_milestone_uat(
          Then call `sdlc milestone complete {slug}` if all steps pass.",
     );
     let label = format!("UAT: {slug}");
-    spawn_agent_run(key, prompt, opts, &app, "milestone_uat", &label).await
+    spawn_agent_run(key, prompt, opts, &app, "milestone_uat", &label, None).await
 }
 
 /// GET /api/milestone/{slug}/uat/events — SSE stream of milestone UAT agent messages.
@@ -431,7 +488,7 @@ pub async fn start_milestone_prepare(
          Then re-run prepare and present the final wave plan with next steps.",
     );
     let label = format!("prepare: {slug}");
-    spawn_agent_run(key, prompt, opts, &app, "milestone_prepare", &label).await
+    spawn_agent_run(key, prompt, opts, &app, "milestone_prepare", &label, None).await
 }
 
 /// GET /api/milestone/{slug}/prepare/events — SSE stream of prepare agent messages.
@@ -449,6 +506,49 @@ pub async fn stop_milestone_prepare(
     State(app): State<AppState>,
 ) -> Json<serde_json::Value> {
     let key = format!("milestone-prepare:{slug}");
+    stop_run_by_key(&key, &app).await
+}
+
+// ---------------------------------------------------------------------------
+// Milestone run-wave endpoints
+// ---------------------------------------------------------------------------
+
+/// POST /api/milestone/{slug}/run-wave — spawn a Claude agent that executes
+/// the current wave of a milestone in parallel.
+pub async fn start_milestone_run_wave(
+    Path(slug): Path<String>,
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
+    let key = format!("milestone-run-wave:{slug}");
+    let opts = sdlc_query_options(app.root.clone(), 200);
+    let prompt = format!(
+        "Execute the current wave of milestone '{slug}' in parallel. \
+         Run `sdlc project prepare --milestone {slug} --json` to get the live wave plan. \
+         Wave 1 of the output is the current wave. \
+         For each feature in Wave 1 that does not need a worktree, \
+         spawn a parallel Agent call running `/sdlc-run <feature-slug>`. \
+         Wait for all agents to complete, then re-run prepare and report the updated wave plan.",
+    );
+    let label = format!("run-wave: {slug}");
+    spawn_agent_run(key, prompt, opts, &app, "milestone_run_wave", &label, None).await
+}
+
+/// GET /api/milestone/{slug}/run-wave/events — SSE stream of run-wave agent messages.
+pub async fn milestone_run_wave_events(
+    Path(slug): Path<String>,
+    State(app): State<AppState>,
+) -> Response {
+    let key = format!("milestone-run-wave:{slug}");
+    get_run_events(&key, &app).await
+}
+
+/// POST /api/milestone/{slug}/run-wave/stop — stop a running run-wave agent.
+pub async fn stop_milestone_run_wave(
+    Path(slug): Path<String>,
+    State(app): State<AppState>,
+) -> Json<serde_json::Value> {
+    let key = format!("milestone-run-wave:{slug}");
     stop_run_by_key(&key, &app).await
 }
 
@@ -655,9 +755,7 @@ pub async fn start_ponder_chat(
          - Still exploring: no update needed (status stays `exploring`)\n\
          - Idea shelved: `sdlc ponder update {slug} --status parked`\n\
          \n\
-         This step is not optional when the commit signal is met. The web UI shows \
-         the Commit button only when status is `converging`. Without this update the \
-         user has no UI path to commit.",
+         This step is not optional when the commit signal is met.",
         slug = slug,
         message_context = message_context,
     );
@@ -667,31 +765,21 @@ pub async fn start_ponder_chat(
     opts.allowed_tools
         .push("mcp__sdlc__sdlc_ponder_chat".into());
 
-    let event_tx = app.event_tx.clone();
-    let slug_for_completion = slug.clone();
-    let session_n_for_completion = session_n;
-
-    // Spawn using the shared helper, then hook completion signal
     let ponder_label = format!("ponder: {slug}");
-    let _ = spawn_agent_run(run_key.clone(), prompt, opts, &app, "ponder", &ponder_label).await?;
-
-    // After spawn, watch for completion and emit ponder_run_completed.
-    // We do this by watching the agent_runs map: when our key disappears,
-    // the run finished. A short-polling task is sufficient here.
-    let agent_runs = app.agent_runs.clone();
-    tokio::spawn(async move {
-        loop {
-            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-            let still_running = agent_runs.lock().await.contains_key(&run_key);
-            if !still_running {
-                let _ = event_tx.send(SseMessage::PonderRunCompleted {
-                    slug: slug_for_completion,
-                    session: session_n_for_completion,
-                });
-                break;
-            }
-        }
-    });
+    let completion = SseMessage::PonderRunCompleted {
+        slug: slug.clone(),
+        session: session_n,
+    };
+    let _ = spawn_agent_run(
+        run_key,
+        prompt,
+        opts,
+        &app,
+        "ponder",
+        &ponder_label,
+        Some(completion),
+    )
+    .await?;
 
     Ok(Json(serde_json::json!({
         "status": "started",
@@ -709,6 +797,83 @@ pub async fn stop_ponder_chat(
     let result = stop_run_by_key(&run_key, &app).await;
     let _ = app.event_tx.send(SseMessage::PonderRunStopped { slug });
     result
+}
+
+// ---------------------------------------------------------------------------
+// Ponder commit endpoint
+// ---------------------------------------------------------------------------
+
+/// POST /api/ponder/:slug/commit — spawn a headless agent that synthesizes
+/// milestones/features from the ponder and marks it committed.
+///
+/// The agent reads the ponder manifest, scrapbook, and sessions; sizes the
+/// idea; creates milestones and features via the sdlc CLI; then calls
+/// `sdlc ponder update <slug> --status committed --committed-to <slugs>`.
+///
+/// Tracked as a normal agent run (key `ponder-commit:<slug>`) — visible in
+/// the FAB run panel. Returns 409 if a commit run is already in progress.
+pub async fn commit_ponder(
+    Path(slug): Path<String>,
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
+    let run_key = format!("ponder-commit:{slug}");
+
+    let prompt = format!(
+        "You are running the commit flow for ponder '{slug}' in the sdlc workspace.\n\
+         \n\
+         ## Step 1 — Load context\n\
+         \n\
+         ```bash\n\
+         sdlc ponder show {slug}\n\
+         sdlc ponder artifacts {slug}\n\
+         sdlc ponder session list {slug}\n\
+         ```\n\
+         \n\
+         Read every scrapbook artifact and all session logs \
+         (`sdlc ponder session read {slug} <N>`) to understand the full idea. \
+         Also check existing milestones to avoid duplication:\n\
+         ```bash\n\
+         sdlc milestone list\n\
+         sdlc feature list\n\
+         ```\n\
+         \n\
+         ## Step 2 — Size the idea\n\
+         \n\
+         Based on scope:\n\
+         - Single concern → one feature, add to an existing milestone if one fits\n\
+         - Medium idea → one new milestone with 2–5 features\n\
+         - Large idea → multiple milestones\n\
+         \n\
+         ## Step 3 — Create milestones and features\n\
+         \n\
+         ```bash\n\
+         sdlc milestone create <slug> --title \"<title>\" --vision \"<one-line why>\"\n\
+         sdlc feature create <slug> --title \"<title>\"\n\
+         sdlc milestone add-feature <milestone-slug> <feature-slug>\n\
+         ```\n\
+         \n\
+         Track every milestone slug you create or update.\n\
+         \n\
+         ## Step 4 — Mark committed (MANDATORY)\n\
+         \n\
+         After creating all milestones and features, close the ponder:\n\
+         ```bash\n\
+         sdlc ponder update {slug} --status committed \
+         --committed-to <milestone-slug> [--committed-to <milestone-2> ...]\n\
+         ```\n\
+         \n\
+         This is not optional. It is the signal that closes the ponder loop.\n\
+         \n\
+         ## Step 5 — Report\n\
+         \n\
+         Output a brief summary: what was created, which milestones, suggested next command.",
+        slug = slug,
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 100);
+    let label = format!("commit: {slug}");
+    spawn_agent_run(run_key, prompt, opts, &app, "ponder", &label, None).await
 }
 
 // ---------------------------------------------------------------------------
@@ -918,37 +1083,21 @@ pub async fn start_investigation_chat(
 
     let opts = sdlc_query_options(app.root.clone(), 100);
 
-    let event_tx = app.event_tx.clone();
-    let slug_for_completion = slug.clone();
-    let session_n_for_completion = session_n;
-
-    // Spawn using the shared helper, then hook completion signal
     let investigation_label = format!("investigate: {slug}");
+    let completion = SseMessage::InvestigationRunCompleted {
+        slug: slug.clone(),
+        session: session_n,
+    };
     let _ = spawn_agent_run(
-        run_key.clone(),
+        run_key,
         prompt,
         opts,
         &app,
         "investigation",
         &investigation_label,
+        Some(completion),
     )
     .await?;
-
-    // After spawn, watch for completion and emit investigation_run_completed.
-    let agent_runs = app.agent_runs.clone();
-    tokio::spawn(async move {
-        loop {
-            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-            let still_running = agent_runs.lock().await.contains_key(&run_key);
-            if !still_running {
-                let _ = event_tx.send(SseMessage::InvestigationRunCompleted {
-                    slug: slug_for_completion,
-                    session: session_n_for_completion,
-                });
-                break;
-            }
-        }
-    });
 
     Ok(Json(serde_json::json!({
         "status": "started",
@@ -968,6 +1117,72 @@ pub async fn stop_investigation_chat(
         .event_tx
         .send(SseMessage::InvestigationRunStopped { slug });
     result
+}
+
+// ---------------------------------------------------------------------------
+// Doc alignment handlers
+// ---------------------------------------------------------------------------
+
+/// POST /api/vision/run — align VISION.md with current project state.
+///
+/// Spawns an agent that reads the current VISION.md and project state, then
+/// updates the document to reflect what was actually learned through building.
+/// Fires `vision_align_completed` SSE on finish so the page re-fetches.
+pub async fn start_vision_align(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let key = "vision-align".to_string();
+    let opts = sdlc_query_options(app.root.clone(), 40);
+    let prompt = "Read the current VISION.md in the project root and the current project \
+        state — active features, milestones, and their artifact content — using the \
+        available sdlc and filesystem tools.\n\n\
+        Identify where the project's trajectory has refined or extended the vision through \
+        implementation: assumptions validated or invalidated, scope that became clearer, \
+        direction that evolved through building. Update VISION.md to capture what was \
+        actually learned while preserving strategic intent and aspirational language. \
+        Do not water down ambition — sharpen it with what we now know.\n\n\
+        Write the updated VISION.md directly to the project root using the Write tool.";
+    spawn_agent_run(
+        key,
+        prompt.to_string(),
+        opts,
+        &app,
+        "vision_align",
+        "align: vision",
+        Some(SseMessage::VisionAlignCompleted),
+    )
+    .await
+}
+
+/// POST /api/architecture/run — align ARCHITECTURE.md with the real codebase.
+///
+/// Spawns an agent that scans the actual code structure and updates the
+/// architecture document to reflect the real system. Fires
+/// `architecture_align_completed` SSE on finish so the page re-fetches.
+pub async fn start_architecture_align(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let key = "architecture-align".to_string();
+    let opts = sdlc_query_options(app.root.clone(), 40);
+    let prompt = "Read the current ARCHITECTURE.md in the project root and scan the actual \
+        codebase — key source files, module structure, interfaces, data flows, and \
+        component boundaries — using filesystem tools (Read, Glob, Grep).\n\n\
+        Identify where the documented architecture has drifted from what was actually \
+        built: renamed components, new modules, changed interfaces, evolved data flows, \
+        or patterns that emerged during implementation. Update ARCHITECTURE.md to \
+        accurately describe the real system as it exists today — components, interfaces, \
+        data flows, and sequence diagrams that match the code.\n\n\
+        Write the updated ARCHITECTURE.md directly to the project root using the Write tool.";
+    spawn_agent_run(
+        key,
+        prompt.to_string(),
+        opts,
+        &app,
+        "architecture_align",
+        "align: architecture",
+        Some(SseMessage::ArchitectureAlignCompleted),
+    )
+    .await
 }
 
 // ---------------------------------------------------------------------------
@@ -1020,6 +1235,346 @@ pub async fn get_run(Path(id): Path<String>, State(app): State<AppState>) -> Res
         )
             .into_response(),
     }
+}
+
+// ---------------------------------------------------------------------------
+// AMA answer synthesis endpoint
+// ---------------------------------------------------------------------------
+
+/// Request body for POST /api/tools/ama/answer
+#[derive(serde::Deserialize)]
+pub struct AmaAnswerRequest {
+    pub question: String,
+    pub sources: Vec<serde_json::Value>,
+    /// Formatted prior Q&A turns — injected as context for follow-up questions.
+    pub thread_context: Option<String>,
+    /// Prevents run key collision when the same question is asked multiple times in a thread.
+    pub turn_index: Option<u32>,
+}
+
+/// POST /api/tools/ama/answer — spawn a short synthesis agent that answers a
+/// developer question using the search result excerpts returned by the AMA tool.
+///
+/// The agent is given the question + source excerpts (path, lines, excerpt,
+/// score) and writes a concise prose answer grounded in those excerpts.
+///
+/// Returns `{ status, run_id, run_key }`. The caller should subscribe to
+/// `GET /api/run/{run_key}/events` to stream the agent output.
+///
+/// Returns 400 if question is empty or sources is empty.
+/// Returns 409 if an answer synthesis is already in flight for this question.
+pub async fn answer_ama(
+    State(app): State<AppState>,
+    Json(body): Json<AmaAnswerRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let question = body.question.trim().to_string();
+    if question.is_empty() {
+        return Err(AppError::bad_request("question must not be empty"));
+    }
+    if body.sources.is_empty() {
+        return Err(AppError::bad_request("sources must not be empty"));
+    }
+
+    // Derive a stable, URL-safe run key from a hash of the question + turn index
+    let hash = short_hash_question(&question);
+    let turn = body.turn_index.unwrap_or(0);
+    let key = format!("ama-answer-{hash}-{turn}");
+
+    // Format sources as labelled context blocks
+    let sources_text: String = body
+        .sources
+        .iter()
+        .map(|s| {
+            let path = s.get("path").and_then(|v| v.as_str()).unwrap_or("?");
+            let lines = s
+                .get("lines")
+                .and_then(|v| v.as_array())
+                .map(|arr| {
+                    let start = arr.first().and_then(|v| v.as_u64()).unwrap_or(0);
+                    let end = arr.last().and_then(|v| v.as_u64()).unwrap_or(0);
+                    format!("{start}-{end}")
+                })
+                .unwrap_or_else(|| "?-?".to_string());
+            let score = s.get("score").and_then(|v| v.as_f64()).unwrap_or(0.0);
+            let score_pct = (score * 100.0) as u64;
+            let excerpt = s.get("excerpt").and_then(|v| v.as_str()).unwrap_or("");
+            format!("--- {path}:{lines} (score: {score_pct}%) ---\n{excerpt}")
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n");
+
+    let n = body.sources.len();
+    let thread_prefix = if let Some(ctx) = &body.thread_context {
+        if !ctx.trim().is_empty() {
+            format!(
+                "[Prior conversation — use for context only]\n\
+                 {ctx}\n\
+                 ---\n\
+                 [Current question]\n\
+                 \n",
+                ctx = ctx.trim()
+            )
+        } else {
+            String::new()
+        }
+    } else {
+        String::new()
+    };
+    let prompt = format!(
+        "{thread_prefix}\
+         You are answering a developer question about this codebase using \
+         search results from the AMA tool.\n\
+         \n\
+         Question: {question}\n\
+         \n\
+         Search results ({n} sources):\n\
+         \n\
+         {sources_text}\n\
+         \n\
+         ---\n\
+         \n\
+         Using ONLY the information in the search results above, write a clear, \
+         concise answer to the question.\n\
+         - If the results are sufficient, explain exactly what the code does and where\n\
+         - If the results are insufficient or seem stale, say so and suggest re-running setup\n\
+         - Reference specific file paths and line numbers in your answer\n\
+         - Do not make up code or behaviors not visible in the excerpts\n\
+         - Be concise — this is a quick developer answer, not an essay\n\
+         \n\
+         Write only the answer. No preamble like \"Based on the search results...\". \
+         Just directly answer the question.",
+        thread_prefix = thread_prefix,
+        question = question,
+        n = n,
+        sources_text = sources_text,
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 5);
+    let label_prefix: String = question.chars().take(40).collect();
+    let label = format!("AMA: {label_prefix}");
+
+    let result =
+        spawn_agent_run(key.clone(), prompt, opts, &app, "ama_answer", &label, None).await?;
+
+    // Inject run_key so the frontend can subscribe to the agent event stream
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+/// POST /api/tools/quality-check/reconfigure — spawn an agent that detects the
+/// project stack and reconfigures `.sdlc/tools/quality-check/config.yaml` with
+/// appropriate quality gates, then reinstalls the pre-commit hook.
+///
+/// Uses the `sdlc-setup-quality-gates` skill workflow:
+///   1. Detect languages (Go, TypeScript, Rust, Python)
+///   2. Update config.yaml checks for detected stack + available tooling
+///   3. Run `sdlc tool setup quality-check` to reinstall the hook
+///
+/// Returns `{ status, run_id, run_key }`. Caller subscribes to
+/// `GET /api/run/{run_key}/events` to stream the agent output.
+pub async fn reconfigure_quality_gates(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let key = "quality-reconfigure".to_string();
+
+    let prompt = "You are reconfiguring quality gates for this project using the two-phase quality-gates approach.\n\
+        \n\
+        ## Step 1 — Detect languages\n\
+        \n\
+        ```bash\n\
+        ls go.mod Cargo.toml package.json pyproject.toml requirements.txt 2>/dev/null\n\
+        ```\n\
+        \n\
+        ## Step 2 — Check available tooling\n\
+        \n\
+        For each detected language, check which tools are installed:\n\
+        ```bash\n\
+        which goimports golangci-lint 2>/dev/null\n\
+        which prettier eslint 2>/dev/null\n\
+        which rustfmt cargo 2>/dev/null\n\
+        which ruff black mypy 2>/dev/null\n\
+        ```\n\
+        \n\
+        ## Step 3 — Write the pre-commit hook (two-phase)\n\
+        \n\
+        Write `.githooks/pre-commit` with the two-phase quality-gates pattern:\n\
+        \n\
+        **Phase 1: Auto-fix** — run formatters on staged files, run linters with --fix, re-stage fixed files.\n\
+        **Phase 2: Verify** — call the quality-check tool for structured check results.\n\
+        \n\
+        ```bash\n\
+        #!/usr/bin/env bash\n\
+        set -euo pipefail\n\
+        ROOT=\"$(git rev-parse --show-toplevel)\"\n\
+        \n\
+        # Get staged files by type\n\
+        staged_by_ext() { git diff --cached --name-only --diff-filter=ACM | grep -E \"$1\" || true; }\n\
+        \n\
+        STAGED_GO=$(staged_by_ext '\\.go$')\n\
+        STAGED_TS=$(staged_by_ext '\\.(ts|tsx)$')\n\
+        STAGED_RS=$(staged_by_ext '\\.rs$')\n\
+        STAGED_PY=$(staged_by_ext '\\.py$')\n\
+        \n\
+        # Phase 1: Auto-fix (only include sections for detected languages)\n\
+        [[ -n \"$STAGED_GO\" ]] && gofmt -w $STAGED_GO && git add $STAGED_GO\n\
+        [[ -n \"$STAGED_TS\" ]] && npx prettier --write $STAGED_TS && git add $STAGED_TS\n\
+        [[ -n \"$STAGED_RS\" ]] && rustfmt $STAGED_RS 2>/dev/null && git add $STAGED_RS\n\
+        [[ -n \"$STAGED_PY\" ]] && ruff format $STAGED_PY && ruff check --fix $STAGED_PY && git add $STAGED_PY\n\
+        \n\
+        # Phase 2: Verify via quality-check tool (structured per-check results)\n\
+        exec bun run \"$ROOT/.sdlc/tools/quality-check/tool.ts\" --run < /dev/null\n\
+        ```\n\
+        \n\
+        Make it executable: `chmod +x .githooks/pre-commit`\n\
+        Configure git: `git config core.hooksPath .githooks`\n\
+        \n\
+        Only include Phase 1 sections for languages that are BOTH detected AND have auto-fix tools available.\n\
+        \n\
+        ## Step 4 — Update config.yaml (Phase 2 verify checks)\n\
+        \n\
+        Write `.sdlc/tools/quality-check/config.yaml` with the verify-phase checks.\n\
+        These are run by Phase 2 (`tool.ts --run`) and shown as structured results in the UI.\n\
+        \n\
+        Rules:\n\
+        - Use single-line scripts only (no YAML block literals — use `&&` chains)\n\
+        - Include: format verification, vet/lint, build, fast tests\n\
+        - Exclude: slow integration tests, coverage reports\n\
+        - Keep total runtime under 30s\n\
+        - For Go: `go vet ./...`, `golangci-lint run ./...`, `go build ./...`, `go test ./... -count=1 -timeout 30s`\n\
+        - For TypeScript: `tsc --noEmit`, `eslint .` (if available)\n\
+        - For Rust: `cargo clippy -- -D warnings`, `cargo build`, `cargo test`\n\
+        - For Python: `ruff check .`, `mypy .` (if available)\n\
+        \n\
+        Format (no block literals):\n\
+        ```yaml\n\
+        name: quality-check\n\
+        version: \"0.2.0\"\n\
+        checks:\n\
+          - name: <check-name>\n\
+            description: <what it does>\n\
+            script: <single-line shell command using && chains>\n\
+        ```\n\
+        \n\
+        ## Step 5 — Report\n\
+        \n\
+        List:\n\
+        - Languages detected\n\
+        - Phase 1 auto-fix tools installed (and any missing)\n\
+        - Phase 2 verify checks configured (name + script)\n\
+        - Hook status (installed at .githooks/pre-commit)\n\
+        ".to_string();
+
+    let opts = sdlc_query_options(app.root.clone(), 10);
+
+    let result = spawn_agent_run(
+        key.clone(),
+        prompt,
+        opts,
+        &app,
+        "quality_reconfigure",
+        "Reconfigure quality gates",
+        None,
+    )
+    .await?;
+
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+#[derive(serde::Deserialize)]
+pub struct QualityFixRequest {
+    /// The failed CheckResult objects from the quality-check tool run.
+    pub failed_checks: Vec<serde_json::Value>,
+}
+
+/// POST /api/tools/quality-check/fix — spawn an agent that reads the failed
+/// check results and applies a fix strategy scaled to the number of failures:
+///
+/// - 1 failure  → fix-forward (targeted patch on root cause)
+/// - 2–5 failures → fix-all (seven-dimension review + fix)
+/// - 6+ failures  → remediate (systemic — enforcement + pattern fix)
+///
+/// Returns `{ status, run_id, run_key }`. Caller subscribes to
+/// `GET /api/run/{run_key}/events` to stream the agent output.
+pub async fn fix_quality_issues(
+    State(app): State<AppState>,
+    Json(body): Json<QualityFixRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    if body.failed_checks.is_empty() {
+        return Err(AppError::bad_request("no failed checks provided"));
+    }
+
+    let key = "quality-fix".to_string();
+    let count = body.failed_checks.len();
+
+    let skill = if count == 1 {
+        "/fix-forward"
+    } else if count <= 5 {
+        "/fix-all"
+    } else {
+        "/remediate"
+    };
+
+    let checks_summary = body
+        .failed_checks
+        .iter()
+        .filter_map(|c| {
+            let name = c.get("name")?.as_str()?;
+            let output = c.get("output")?.as_str()?;
+            let preview: String = output.chars().take(300).collect();
+            Some(format!("**{name}**:\n```\n{preview}\n```"))
+        })
+        .collect::<Vec<_>>()
+        .join("\n\n");
+
+    let prompt = format!(
+        "Quality gate check(s) failed. Fix them using `{skill}`.\n\
+        \n\
+        ## Failed checks ({count})\n\
+        \n\
+        {checks_summary}\n\
+        \n\
+        ## Steps\n\
+        \n\
+        1. Invoke `{skill}` with the failed check names and output above as context.\n\
+        2. After `{skill}` completes, run `sdlc tool run quality-check` to confirm all checks pass.\n\
+        3. Report the result.\n\
+        "
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 20);
+
+    let result = spawn_agent_run(
+        key.clone(),
+        prompt,
+        opts,
+        &app,
+        "quality_fix",
+        "Fix quality gate failures",
+        None,
+    )
+    .await?;
+
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+/// Derive a short URL-safe hex hash from the question string.
+fn short_hash_question(s: &str) -> String {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    s.hash(&mut hasher);
+    format!("{:04x}", hasher.finish() & 0xFFFF)
 }
 
 // ---------------------------------------------------------------------------

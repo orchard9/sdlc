@@ -145,7 +145,7 @@ export function OutputGate({ investigation }: Props) {
           onClick={handleCreateTask}
           disabled={loading}
           className={cn(
-            'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors',
+            'px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap',
             'bg-primary text-primary-foreground hover:bg-primary/90',
             'disabled:opacity-50 disabled:cursor-not-allowed',
           )}
@@ -157,7 +157,7 @@ export function OutputGate({ investigation }: Props) {
         <div className="relative group">
           <button
             disabled
-            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-border/50 text-muted-foreground/50 cursor-not-allowed"
+            className="px-3 py-1.5 text-xs font-medium rounded-lg border border-border/50 text-muted-foreground/50 cursor-not-allowed whitespace-nowrap"
           >
             Start Guideline
           </button>

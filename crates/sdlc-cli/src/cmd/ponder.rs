@@ -58,6 +58,9 @@ pub enum PonderSubcommand {
         /// Add tags (repeatable)
         #[arg(long = "tag")]
         tags: Vec<String>,
+        /// Milestone slugs this ponder was committed to (repeatable)
+        #[arg(long = "committed-to")]
+        committed_to: Vec<String>,
     },
     /// Archive (park) a ponder entry
     Archive { slug: String },
@@ -145,12 +148,14 @@ pub fn run(root: &Path, subcmd: PonderSubcommand, json: bool) -> anyhow::Result<
             status,
             title,
             tags,
+            committed_to,
         } => update(
             root,
             &slug,
             status.as_deref(),
             title.as_deref(),
             &tags,
+            &committed_to,
             json,
         ),
         PonderSubcommand::Archive { slug } => archive(root, &slug, json),
@@ -438,10 +443,11 @@ fn update(
     status: Option<&str>,
     title: Option<&str>,
     tags: &[String],
+    committed_to: &[String],
     json: bool,
 ) -> anyhow::Result<()> {
-    if status.is_none() && title.is_none() && tags.is_empty() {
-        anyhow::bail!("nothing to update: provide --status, --title, or --tag");
+    if status.is_none() && title.is_none() && tags.is_empty() && committed_to.is_empty() {
+        anyhow::bail!("nothing to update: provide --status, --title, --tag, or --committed-to");
     }
 
     let mut entry = PonderEntry::load(root, slug)
@@ -458,6 +464,9 @@ fn update(
     }
     for tag in tags {
         entry.add_tag(tag);
+    }
+    if !committed_to.is_empty() {
+        entry.set_committed_to(committed_to.to_vec());
     }
 
     entry.save(root).context("failed to save ponder entry")?;

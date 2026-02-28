@@ -1,7 +1,10 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
-use tokio::sync::{broadcast, Mutex};
+use tokio::sync::{broadcast, Mutex, RwLock};
+
+use crate::auth::TunnelConfig;
+use crate::tunnel::Tunnel;
 
 /// Entry in the active-runs map: the broadcast sender for SSE subscribers
 /// and an abort handle to cancel the spawned task.
@@ -188,29 +191,69 @@ pub enum SseMessage {
         key: String,
         status: String,
     },
+    /// A vision alignment agent run completed.
+    VisionAlignCompleted,
+    /// An architecture alignment agent run completed.
+    ArchitectureAlignCompleted,
 }
 
 /// Shared application state passed to all route handlers.
 #[derive(Clone)]
 pub struct AppState {
     pub root: PathBuf,
+    /// Local port the server is listening on (0 until known).
+    pub port: u16,
     pub event_tx: broadcast::Sender<SseMessage>,
     /// Active agent runs keyed by feature slug. Each entry holds the broadcast
     /// sender (for SSE subscribers) and an abort handle to cancel the task.
     pub agent_runs: Arc<Mutex<HashMap<String, AgentRunEntry>>>,
     /// Persistent run history (active + completed).
     pub run_history: Arc<Mutex<Vec<RunRecord>>>,
+    /// Live tunnel auth config — updated atomically when tunnel starts/stops.
+    pub tunnel_config: Arc<RwLock<TunnelConfig>>,
+    /// Running cloudflared process, if any.
+    pub tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
+    /// Current tunnel URL, stored alongside the handle for fast reads.
+    pub tunnel_url: Arc<RwLock<Option<String>>>,
+    /// App tunnel: user-configured port to expose (their project dev server).
+    pub app_tunnel_port: Arc<RwLock<Option<u16>>>,
+    /// App tunnel: running cloudflared process, if any.
+    pub app_tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
+    /// App tunnel: current URL, if active.
+    pub app_tunnel_url: Arc<RwLock<Option<String>>>,
+    /// HTTP client for reverse-proxying app tunnel requests.
+    pub http_client: reqwest::Client,
 }
 
 impl AppState {
     pub fn new(root: PathBuf) -> Self {
+        Self::new_with_port(root, 0)
+    }
+
+    pub fn new_with_port(root: PathBuf, port: u16) -> Self {
         let (tx, _) = broadcast::channel(64);
         let history = load_run_history(&root);
+        // Seed the app tunnel port from config.yaml so it survives restarts.
+        let saved_app_port = sdlc_core::config::Config::load(&root)
+            .ok()
+            .and_then(|c| c.app_port);
+        let http_client = reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .expect("infallible: reqwest client construction");
         let state = Self {
-            root,
+            port,
             event_tx: tx.clone(),
             agent_runs: Arc::new(Mutex::new(HashMap::new())),
             run_history: Arc::new(Mutex::new(history)),
+            tunnel_config: Arc::new(RwLock::new(TunnelConfig::none())),
+            tunnel_handle: Arc::new(Mutex::new(None)),
+            tunnel_url: Arc::new(RwLock::new(None)),
+            app_tunnel_port: Arc::new(RwLock::new(saved_app_port)),
+            app_tunnel_handle: Arc::new(Mutex::new(None)),
+            app_tunnel_url: Arc::new(RwLock::new(None)),
+            http_client,
+            root,
         };
 
         // Watch .sdlc/state.yaml mtime and broadcast when it changes.

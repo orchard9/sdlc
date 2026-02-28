@@ -2,12 +2,13 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
+import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Skeleton } from '@/components/shared/Skeleton'
 import { DialoguePanel } from '@/components/ponder/DialoguePanel'
 import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
 import {
-  Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Check,
+  Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Archive,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { PonderSummary, PonderStatus, PonderDetail } from '@/lib/types'
@@ -109,6 +110,8 @@ function NewIdeaForm({ onCreated, onCancel }: { onCreated: (slug: string) => voi
         title: title.trim(),
         brief: brief.trim() || undefined,
       })
+      const seed = brief.trim() ? `${title.trim()}\n\n${brief.trim()}` : title.trim()
+      api.startPonderChat(slug.trim(), seed).catch(() => {})
       onCreated(slug.trim())
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create')
@@ -185,7 +188,9 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState(false)
-  const [commitCopied, setCommitCopied] = useState(false)
+  const { isRunning, focusRun } = useAgentRuns()
+  const commitKey = `ponder-commit:${slug}`
+  const commitRunning = isRunning(commitKey)
 
   const load = useCallback(() => {
     api.getPonderEntry(slug)
@@ -193,6 +198,21 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
       .catch(() => setError('Entry not found'))
       .finally(() => setLoading(false))
   }, [slug])
+
+  const handleCommit = useCallback(async () => {
+    try {
+      await api.commitPonder(slug)
+      focusRun(commitKey)
+    } catch {
+      // conflict (already running) or other error — FAB shows run state
+    }
+  }, [slug, commitKey, focusRun])
+
+  const handleArchive = useCallback(async () => {
+    await api.updatePonderEntry(slug, { status: 'parked' })
+    load()
+    onRefresh()
+  }, [slug, load, onRefresh])
 
   useEffect(() => {
     setLoading(true)
@@ -234,26 +254,32 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
           <p className="text-xs text-muted-foreground/60 font-mono truncate hidden sm:block">{entry.slug}</p>
         </div>
         <StatusBadge status={entry.status} />
-        {entry.sessions > 0 && entry.status !== 'committed' && entry.status !== 'parked' && (
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(`/sdlc-ponder-commit ${entry.slug}`)
-              setCommitCopied(true)
-              setTimeout(() => setCommitCopied(false), 2000)
-            }}
-            className={cn(
-              'shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors',
-              entry.status === 'converging'
-                ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
-                : 'text-muted-foreground/60 border-border/40 hover:text-foreground hover:bg-accent/50',
-            )}
-            title="Copy /sdlc-ponder-commit command"
-          >
-            {commitCopied
-              ? <Check className="w-3 h-3" />
-              : <GitMerge className="w-3 h-3" />}
-            <span className="hidden sm:inline">{commitCopied ? 'Copied!' : 'Commit'}</span>
-          </button>
+        {entry.status !== 'committed' && entry.status !== 'parked' && (
+          <>
+            <button
+              onClick={handleCommit}
+              disabled={commitRunning}
+              className={cn(
+                'shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border transition-colors whitespace-nowrap disabled:opacity-60 disabled:cursor-not-allowed',
+                entry.status === 'converging'
+                  ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                  : 'text-muted-foreground/60 border-border/40 hover:text-foreground hover:bg-accent/50',
+              )}
+              title="Commit this ponder — synthesize milestones and mark committed"
+            >
+              {commitRunning
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <GitMerge className="w-3 h-3" />}
+              <span className="hidden sm:inline">{commitRunning ? 'Committing…' : 'Commit'}</span>
+            </button>
+            <button
+              onClick={handleArchive}
+              className="shrink-0 p-1.5 rounded-lg text-muted-foreground/40 hover:text-foreground hover:bg-accent/50 transition-colors"
+              title="Archive this idea"
+            >
+              <Archive className="w-3.5 h-3.5" />
+            </button>
+          </>
         )}
         <div className="relative shrink-0 md:hidden">
           <button
@@ -280,7 +306,12 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
       {/* Content: dialogue + desktop right sidebar (always visible) */}
       <div className="flex-1 flex min-h-0">
         <div className="flex-1 min-w-0 min-h-0">
-          <DialoguePanel entry={entry} onRefresh={() => { load(); onRefresh() }} />
+          <DialoguePanel
+            entry={entry}
+            onRefresh={() => { load(); onRefresh() }}
+            onCommit={handleCommit}
+            commitRunning={commitRunning}
+          />
         </div>
         {/* Desktop workspace: always open */}
         <div className="hidden md:flex w-64 shrink-0 border-l border-border flex-col min-h-0">
@@ -422,7 +453,7 @@ export function PonderPage() {
                 {activeTab === 'all' && !showForm && (
                   <button
                     onClick={() => setShowForm(true)}
-                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
                   >
                     <Plus className="w-3 h-3" />
                     New Idea

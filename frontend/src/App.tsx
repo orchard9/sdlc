@@ -12,6 +12,12 @@ import { EvolvePage } from '@/pages/EvolvePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { SecretsPage } from '@/pages/SecretsPage'
 import { ToolsPage } from '@/pages/ToolsPage'
+import { FeedbackPage } from '@/pages/FeedbackPage'
+import { NetworkPage } from '@/pages/NetworkPage'
+import { VisionPage } from '@/pages/VisionPage'
+import { ArchitecturePage } from '@/pages/ArchitecturePage'
+import { DocsPage } from '@/pages/DocsPage'
+import { AgentsPage } from '@/pages/AgentsPage'
 
 export default function App() {
   return (
@@ -20,6 +26,8 @@ export default function App() {
         <AppShell>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/vision" element={<VisionPage />} />
+            <Route path="/architecture" element={<ArchitecturePage />} />
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/features/:slug" element={<FeatureDetail />} />
             <Route path="/milestones" element={<MilestonesPage />} />
@@ -33,7 +41,12 @@ export default function App() {
             <Route path="/evolve/:slug" element={<EvolvePage />} />
             <Route path="/secrets" element={<SecretsPage />} />
             <Route path="/tools" element={<ToolsPage />} />
+            <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/network" element={<NetworkPage />} />
+            <Route path="/agents" element={<AgentsPage />} />
             <Route path="/config" element={<SettingsPage />} />
+            <Route path="/docs" element={<DocsPage />} />
+            <Route path="/docs/:section" element={<DocsPage />} />
           </Routes>
         </AppShell>
       </AgentRunProvider>

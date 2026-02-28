@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type React from 'react'
 import { Link } from 'react-router-dom'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { CopyButton } from '@/components/shared/CopyButton'
@@ -11,11 +12,39 @@ interface WavePlanProps {
   blocked: BlockedFeatureItem[]
   nextCommands?: string[]
   showCommands?: boolean
+  milestoneSlug?: string
 }
 
-function WaveSection({ wave, defaultExpanded }: { wave: Wave; defaultExpanded: boolean }) {
+function WaveSection({ wave, defaultExpanded, milestoneSlug, isCurrentWave }: {
+  wave: Wave
+  defaultExpanded: boolean
+  milestoneSlug?: string
+  isCurrentWave?: boolean
+}) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
+
+  const runWaveKey = milestoneSlug ? `milestone-run-wave:${milestoneSlug}` : null
+  const runWaveRunning = runWaveKey ? isRunning(runWaveKey) : false
+  const runWaveActiveRun = runWaveKey ? getRunForKey(runWaveKey) : undefined
+
+  const handleRunWave = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!milestoneSlug) return
+    startRun({
+      key: `milestone-run-wave:${milestoneSlug}`,
+      runType: 'milestone_run_wave',
+      target: milestoneSlug,
+      label: `run-wave: ${milestoneSlug}`,
+      startUrl: `/api/milestone/${milestoneSlug}/run-wave`,
+      stopUrl: `/api/milestone/${milestoneSlug}/run-wave/stop`,
+    })
+  }
+
+  const handleFocusRunWave = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (runWaveActiveRun) focusRun(runWaveActiveRun.id)
+  }
 
   return (
     <div className="border border-border rounded-lg overflow-hidden">
@@ -34,6 +63,25 @@ function WaveSection({ wave, defaultExpanded }: { wave: Wave; defaultExpanded: b
             <GitBranch className="w-3 h-3" />
             worktrees
           </span>
+        )}
+        {isCurrentWave && milestoneSlug && (
+          runWaveRunning ? (
+            <button
+              onClick={handleFocusRunWave}
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground text-[10px] hover:bg-muted/80 transition-colors whitespace-nowrap"
+            >
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Running
+            </button>
+          ) : (
+            <button
+              onClick={handleRunWave}
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary text-[10px] hover:bg-primary/20 transition-colors whitespace-nowrap"
+            >
+              <Play className="w-3 h-3" />
+              Run Wave
+            </button>
+          )
         )}
       </button>
 
@@ -79,7 +127,7 @@ function WaveSection({ wave, defaultExpanded }: { wave: Wave; defaultExpanded: b
                 {running ? (
                   <button
                     onClick={handleFocus}
-                    className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
+                    className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground hover:bg-muted/80 transition-colors whitespace-nowrap"
                   >
                     <Loader2 className="w-3 h-3 animate-spin" />
                     Running
@@ -89,7 +137,7 @@ function WaveSection({ wave, defaultExpanded }: { wave: Wave; defaultExpanded: b
                     <CopyButton text={`/sdlc-run ${item.slug}`} className="shrink-0 p-1 rounded border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" />
                     <button
                       onClick={handleRun}
-                      className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary hover:bg-primary/20 transition-colors whitespace-nowrap"
                     >
                       <Play className="w-3 h-3" />
                       Run
@@ -105,7 +153,7 @@ function WaveSection({ wave, defaultExpanded }: { wave: Wave; defaultExpanded: b
   )
 }
 
-export function WavePlan({ waves, blocked, nextCommands, showCommands = true }: WavePlanProps) {
+export function WavePlan({ waves, blocked, nextCommands, showCommands = true, milestoneSlug }: WavePlanProps) {
   const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
 
   // Derive the command list: prefer next_commands from the API; fall back to
@@ -116,8 +164,8 @@ export function WavePlan({ waves, blocked, nextCommands, showCommands = true }: 
 
   return (
     <div className="space-y-2">
-      {waves.map((wave) => (
-        <WaveSection key={wave.number} wave={wave} defaultExpanded={false} />
+      {waves.map((wave, idx) => (
+        <WaveSection key={wave.number} wave={wave} defaultExpanded={false} milestoneSlug={milestoneSlug} isCurrentWave={idx === 0} />
       ))}
 
       {blocked.length > 0 && (
@@ -165,7 +213,7 @@ export function WavePlan({ waves, blocked, nextCommands, showCommands = true }: 
                   running ? (
                     <button
                       onClick={handleFocus}
-                      className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground text-[10px] hover:bg-muted/80 transition-colors"
+                      className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground text-[10px] hover:bg-muted/80 transition-colors whitespace-nowrap"
                     >
                       <Loader2 className="w-3 h-3 animate-spin" />
                       Running
@@ -173,7 +221,7 @@ export function WavePlan({ waves, blocked, nextCommands, showCommands = true }: 
                   ) : (
                     <button
                       onClick={() => startRun(runOpts)}
-                      className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary text-[10px] hover:bg-primary/20 transition-colors"
+                      className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary text-[10px] hover:bg-primary/20 transition-colors whitespace-nowrap"
                     >
                       <Play className="w-3 h-3" />
                       Run

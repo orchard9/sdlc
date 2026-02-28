@@ -179,6 +179,8 @@ pub struct UpdatePonderBody {
     pub title: Option<String>,
     #[serde(default)]
     pub tags: Option<Vec<String>>,
+    #[serde(default)]
+    pub committed_to: Option<Vec<String>>,
 }
 
 /// PUT /api/roadmap/:slug — update status/title/tags.
@@ -201,14 +203,29 @@ pub async fn update_ponder(
         if let Some(tags) = body.tags {
             entry.set_tags(tags);
         }
+        if let Some(milestones) = body.committed_to {
+            entry.set_committed_to(milestones);
+        }
 
         entry.save(&root)?;
+
+        // Sync active_ponders when committed or parked
+        if matches!(
+            entry.status,
+            sdlc_core::ponder::PonderStatus::Parked | sdlc_core::ponder::PonderStatus::Committed
+        ) {
+            if let Ok(mut state) = sdlc_core::state::State::load(&root) {
+                state.remove_ponder(&slug);
+                let _ = state.save(&root);
+            }
+        }
 
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": entry.slug,
             "title": entry.title,
             "status": entry.status.to_string(),
             "tags": entry.tags,
+            "committed_to": entry.committed_to,
         }))
     })
     .await

@@ -73,6 +73,15 @@ export interface ProjectConfig {
 // Query types
 // ---------------------------------------------------------------------------
 
+export interface DiagnoseResult {
+  title: string
+  problem_statement: string
+  root_cause: string
+  files_affected: string[]
+  /** "high" | "medium" | "low" | "none" — "none" means not a software issue */
+  confidence: string
+}
+
 export interface QuerySearchResult {
   slug: string
   title: string
@@ -400,6 +409,12 @@ export interface PrepareResult {
   next_commands: string[]
 }
 
+export interface FeedbackNote {
+  id: string
+  content: string
+  created_at: string
+}
+
 // ---------------------------------------------------------------------------
 // Ponder / Roadmap types
 // ---------------------------------------------------------------------------
@@ -475,7 +490,7 @@ export interface PonderSseEvent {
 // ---------------------------------------------------------------------------
 
 export type RunStatus = 'running' | 'completed' | 'failed' | 'stopped'
-export type RunType = 'feature' | 'milestone_uat' | 'milestone_prepare' | 'ponder' | 'investigation'
+export type RunType = 'feature' | 'milestone_uat' | 'milestone_prepare' | 'milestone_run_wave' | 'ponder' | 'investigation' | 'vision_align' | 'architecture_align'
 
 export interface RunRecord {
   id: string
@@ -609,6 +624,10 @@ export interface InvestigationSseEvent {
   session?: number
 }
 
+export interface DocsSseEvent {
+  type: 'vision_align_completed' | 'architecture_align_completed'
+}
+
 // ---------------------------------------------------------------------------
 // Tool Suite types
 // ---------------------------------------------------------------------------
@@ -619,6 +638,7 @@ export interface ToolMeta {
   description: string
   version: string
   requires_setup: boolean
+  setup_done?: boolean
   setup_description?: string
   input_schema: Record<string, unknown>
   output_schema: Record<string, unknown>
@@ -655,6 +675,37 @@ export interface AmaSource {
 
 export interface AmaData {
   sources: AmaSource[]
+}
+
+// ---------------------------------------------------------------------------
+// Tunnel types
+// ---------------------------------------------------------------------------
+
+export interface TunnelStatus {
+  active: boolean
+  url: string | null
+  /** Only present in the POST (start) response; null on GET. */
+  token: string | null
+  port: number
+}
+
+export interface AppTunnelStatus {
+  active: boolean
+  url: string | null
+  /** The port of the user's project dev server being tunneled. */
+  configured_port: number | null
+}
+
+// ---------------------------------------------------------------------------
+// Agent types
+// ---------------------------------------------------------------------------
+
+export interface AgentDefinition {
+  name: string
+  description: string
+  model: string
+  tools: string[]
+  content: string
 }
 
 // Area artifact frontmatter — parsed from area-N-*.md files by parseInvestigation.ts

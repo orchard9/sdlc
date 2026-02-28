@@ -6,3 +6,7 @@
 *.lock.tmp
 .DS_Store
 /tmp
+.sdlc/tools/*/index/
+.env
+.env.*
+!.env.example

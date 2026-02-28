@@ -6,6 +6,7 @@ pub mod directive;
 pub mod error;
 pub mod escalation;
 pub mod feature;
+pub mod feedback;
 pub mod focus;
 pub mod investigation;
 pub mod io;

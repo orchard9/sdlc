@@ -56,8 +56,17 @@ export const api = {
   addComment: (slug: string, body: string, flag?: string, by?: string) =>
     request(`/api/features/${slug}/comments`, { method: 'POST', body: JSON.stringify({ body, flag, by }) }),
 
-  startRun: (slug: string) =>
-    request<{ status: string; message: string }>(`/api/run/${slug}`, { method: 'POST' }),
+  diagnose: (description: string) =>
+    request<import('@/lib/types').DiagnoseResult>('/api/diagnose', {
+      method: 'POST',
+      body: JSON.stringify({ description }),
+    }),
+
+  startRun: (slug: string, context?: string) =>
+    request<{ status: string; message: string }>(`/api/run/${slug}`, {
+      method: 'POST',
+      body: context ? JSON.stringify({ context }) : undefined,
+    }),
   stopRun: (slug: string) =>
     request<{ status: string; message: string }>(`/api/run/${slug}/stop`, { method: 'POST' }),
 
@@ -88,13 +97,19 @@ export const api = {
   putVision: (content: string) =>
     request('/api/vision', { method: 'PUT', body: JSON.stringify({ content }) }),
 
+  getArchitecture: () => request<{ content: string; exists: boolean }>('/api/architecture'),
+  putArchitecture: (content: string) =>
+    request('/api/architecture', { method: 'PUT', body: JSON.stringify({ content }) }),
+  runVisionAlign: () => request<{ status: string; run_id: string }>('/api/vision/run', { method: 'POST' }),
+  runArchitectureAlign: () => request<{ status: string; run_id: string }>('/api/architecture/run', { method: 'POST' }),
+
   // Roadmap / Ponder
   getRoadmap: () => request<import('@/lib/types').PonderSummary[]>('/api/roadmap'),
   getPonderEntry: (slug: string) => request<import('@/lib/types').PonderDetail>(`/api/roadmap/${slug}`),
   createPonderEntry: (data: { slug: string; title: string; brief?: string }) =>
     request<{ slug: string; title: string; status: string }>('/api/roadmap', { method: 'POST', body: JSON.stringify(data) }),
-  updatePonderEntry: (slug: string, data: Partial<{ title: string; status: import('@/lib/types').PonderStatus; tags: string[] }>) =>
-    request<{ slug: string; title: string; status: string; tags: string[] }>(`/api/roadmap/${slug}`, { method: 'PUT', body: JSON.stringify(data) }),
+  updatePonderEntry: (slug: string, data: Partial<{ title: string; status: import('@/lib/types').PonderStatus; tags: string[]; committed_to: string[] }>) =>
+    request<{ slug: string; title: string; status: string; tags: string[]; committed_to: string[] }>(`/api/roadmap/${slug}`, { method: 'PUT', body: JSON.stringify(data) }),
   capturePonderArtifact: (slug: string, data: { filename: string; content: string }) =>
     request<void>(`/api/roadmap/${slug}/capture`, { method: 'POST', body: JSON.stringify(data) }),
   getPonderSessions: (slug: string) =>
@@ -110,6 +125,8 @@ export const api = {
     }),
   stopPonderChat: (slug: string) =>
     request<void>(`/api/ponder/${slug}/chat/current`, { method: 'DELETE' }),
+  commitPonder: (slug: string) =>
+    request<{ status: string; run_id: string }>(`/api/ponder/${slug}/commit`, { method: 'POST' }),
 
   // Investigations
   getInvestigations: (kind?: import('@/lib/types').InvestigationKind) =>
@@ -173,6 +190,52 @@ export const api = {
       method: 'POST',
       body: '{}',
     }),
+  answerAma: (question: string, sources: import('@/lib/types').AmaSource[]) =>
+    request<{ status: string; run_id: string; run_key: string }>('/api/tools/ama/answer', {
+      method: 'POST',
+      body: JSON.stringify({ question, sources }),
+    }),
+  reconfigureQualityGates: () =>
+    request<{ status: string; run_id: string; run_key: string }>('/api/tools/quality-check/reconfigure', {
+      method: 'POST',
+    }),
+  fixQualityIssues: (failedChecks: import('@/lib/types').CheckResult[]) =>
+    request<{ status: string; run_id: string; run_key: string }>('/api/tools/quality-check/fix', {
+      method: 'POST',
+      body: JSON.stringify({ failed_checks: failedChecks }),
+    }),
+
+  // Feedback
+  getFeedback: () => request<import('@/lib/types').FeedbackNote[]>('/api/feedback'),
+  addFeedbackNote: (content: string) =>
+    request<import('@/lib/types').FeedbackNote>('/api/feedback', { method: 'POST', body: JSON.stringify({ content }) }),
+  deleteFeedbackNote: (id: string) =>
+    request<{ deleted: boolean }>(`/api/feedback/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  submitFeedbackToPonder: () =>
+    request<{ slug: string; note_count: number }>('/api/feedback/to-ponder', { method: 'POST' }),
+
+  // SDLC tunnel (exposes this UI)
+  getTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel'),
+  startTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel', { method: 'POST' }),
+  stopTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel', { method: 'DELETE' }),
+
+  // App tunnel (exposes user's project dev server on a configurable port)
+  getAppTunnel: () => request<import('@/lib/types').AppTunnelStatus>('/api/app-tunnel'),
+  startAppTunnel: (port: number) =>
+    request<import('@/lib/types').AppTunnelStatus>('/api/app-tunnel', {
+      method: 'POST',
+      body: JSON.stringify({ port }),
+    }),
+  stopAppTunnel: () => request<import('@/lib/types').AppTunnelStatus>('/api/app-tunnel', { method: 'DELETE' }),
+  setAppPort: (port: number) =>
+    request<import('@/lib/types').AppTunnelStatus>('/api/app-tunnel/port', {
+      method: 'PUT',
+      body: JSON.stringify({ port }),
+    }),
+
+  // Agents (Claude agent definitions from ~/.claude/agents/)
+  getAgents: () => request<import('@/lib/types').AgentDefinition[]>('/api/agents'),
+  getAgent: (name: string) => request<import('@/lib/types').AgentDefinition>(`/api/agents/${encodeURIComponent(name)}`),
 
   // Secrets (metadata only — decryption is CLI-only)
   getSecretsStatus: () => request<{ key_count: number; env_count: number }>('/api/secrets/status'),

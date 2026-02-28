@@ -1,3 +1,6 @@
+use std::sync::Arc;
+use tokio::sync::RwLock;
+
 use axum::{
     body::Body,
     extract::{Request, State},
@@ -12,17 +15,34 @@ use axum::{
 #[derive(Clone)]
 pub struct TunnelConfig {
     pub token: Option<String>,
+    /// Hostname of the active app tunnel (e.g. "fancy-rabbit.trycloudflare.com").
+    /// When set, requests arriving with this Host header bypass SDLC auth so the
+    /// reverse-proxy can serve the user's app without auth friction for reviewers.
+    /// `/api/*` paths via the app tunnel host still require auth.
+    pub app_tunnel_host: Option<String>,
 }
 
 impl TunnelConfig {
     /// No tunnel active — middleware passes all requests through.
     pub fn none() -> Self {
-        Self { token: None }
+        Self {
+            token: None,
+            app_tunnel_host: None,
+        }
     }
 
     /// Tunnel is active with the given shared token.
     pub fn with_token(token: String) -> Self {
-        Self { token: Some(token) }
+        Self {
+            token: Some(token),
+            app_tunnel_host: None,
+        }
+    }
+
+    /// Builder: set the app tunnel hostname.
+    pub fn with_app_tunnel_host(mut self, host: String) -> Self {
+        self.app_tunnel_host = Some(host);
+        self
     }
 }
 
@@ -32,22 +52,46 @@ impl TunnelConfig {
 /// Auth flow (evaluated in order):
 /// 1. `token` is `None` → passthrough (tunnel not active)
 /// 2. `Host` header is `localhost` or `127.0.0.1` → passthrough (local always allowed)
-/// 3. Cookie `sdlc_auth` matches token → passthrough
-/// 4. Query param `?auth=TOKEN` matches → set session cookie, 302 to same path without param
-/// 5. None matched → 401 (JSON for `/api/*`, HTML for everything else)
+/// 3. Path starts with `/__sdlc/` → passthrough (feedback widget endpoint, always public)
+/// 4. Host == `app_tunnel_host` AND path does NOT start with `/api/` → passthrough
+///    (proxy requests bypass SDLC auth; `/api/*` via app tunnel still gets normal auth)
+/// 5. Cookie `sdlc_auth` matches token → passthrough
+/// 6. Query param `?auth=TOKEN` matches → set session cookie, 302 to same path without param
+/// 7. None matched → 401 (JSON for `/api/*`, HTML for everything else)
 pub async fn auth_middleware(
-    State(config): State<TunnelConfig>,
+    State(config): State<Arc<RwLock<TunnelConfig>>>,
     req: Request,
     next: Next,
 ) -> Response {
-    let Some(ref token) = config.token else {
+    let cfg = config.read().await;
+    let Some(ref token) = cfg.token else {
+        drop(cfg);
         return next.run(req).await;
     };
+    let token = token.clone();
+    let app_tunnel_host = cfg.app_tunnel_host.clone();
+    drop(cfg);
 
     // Local access is always allowed regardless of token.
-    if let Some(host) = req.headers().get("host").and_then(|h| h.to_str().ok()) {
-        let bare = host.split(':').next().unwrap_or(host);
-        if bare == "localhost" || bare == "127.0.0.1" {
+    let host_value = req
+        .headers()
+        .get("host")
+        .and_then(|h| h.to_str().ok())
+        .unwrap_or("")
+        .to_string();
+    let bare_host = host_value.split(':').next().unwrap_or(&host_value);
+    if bare_host == "localhost" || bare_host == "127.0.0.1" {
+        return next.run(req).await;
+    }
+
+    // Feedback widget endpoint — always public regardless of token or host.
+    if req.uri().path().starts_with("/__sdlc/") {
+        return next.run(req).await;
+    }
+
+    // App tunnel host: proxy requests bypass SDLC auth; /api/* still requires auth.
+    if let Some(ref athost) = app_tunnel_host {
+        if bare_host == athost && !req.uri().path().starts_with("/api/") {
             return next.run(req).await;
         }
     }
@@ -138,10 +182,12 @@ mod tests {
     }
 
     fn test_app(config: TunnelConfig) -> Router {
+        let arc = Arc::new(RwLock::new(config));
         Router::new()
             .route("/", get(ok_handler))
             .route("/api/state", get(ok_handler))
-            .layer(middleware::from_fn_with_state(config, auth_middleware))
+            .route("/__sdlc/feedback", get(ok_handler))
+            .layer(middleware::from_fn_with_state(arc, auth_middleware))
     }
 
     #[tokio::test]
@@ -261,6 +307,55 @@ mod tests {
             .to_str()
             .unwrap();
         assert!(ct.contains("application/json"));
+    }
+
+    #[tokio::test]
+    async fn sdlc_path_bypasses_auth() {
+        let resp = test_app(TunnelConfig::with_token("secret".into()))
+            .oneshot(
+                Request::builder()
+                    .uri("/__sdlc/feedback")
+                    .header("host", "abc.trycloudflare.com")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn app_tunnel_host_bypasses_auth_for_non_api() {
+        let config = TunnelConfig::with_token("secret".into())
+            .with_app_tunnel_host("fancy-rabbit.trycloudflare.com".into());
+        let resp = test_app(config)
+            .oneshot(
+                Request::builder()
+                    .uri("/")
+                    .header("host", "fancy-rabbit.trycloudflare.com")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn app_tunnel_host_still_blocks_api_routes() {
+        let config = TunnelConfig::with_token("secret".into())
+            .with_app_tunnel_host("fancy-rabbit.trycloudflare.com".into());
+        let resp = test_app(config)
+            .oneshot(
+                Request::builder()
+                    .uri("/api/state")
+                    .header("host", "fancy-rabbit.trycloudflare.com")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
     }
 
     #[test]

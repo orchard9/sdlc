@@ -1,4 +1,5 @@
 use axum::extract::State;
+use axum::http::{header, HeaderMap, HeaderValue};
 use axum::response::sse::{Event, KeepAlive, Sse};
 use std::convert::Infallible;
 use tokio_stream::wrappers::BroadcastStream;
@@ -89,7 +90,32 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             .to_string();
             Some(Ok(Event::default().event("run").data(data)))
         }
+        Ok(SseMessage::VisionAlignCompleted) => {
+            let data = serde_json::json!({ "type": "vision_align_completed" }).to_string();
+            Some(Ok(Event::default().event("docs").data(data)))
+        }
+        Ok(SseMessage::ArchitectureAlignCompleted) => {
+            let data = serde_json::json!({ "type": "architecture_align_completed" }).to_string();
+            Some(Ok(Event::default().event("docs").data(data)))
+        }
         Err(_) => None,
     });
-    Sse::new(stream).keep_alive(KeepAlive::default())
+    // Prepend a ~2KB padding comment so the response body exceeds Cloudflare's
+    // initial buffer threshold on first flush. Without this, small SSE events
+    // (100–200 bytes) sit in Cloudflare's buffer and are never forwarded.
+    // x-accel-buffering disables nginx buffering; Cache-Control covers other
+    // proxy layers.
+    let padding = Ok::<Event, Infallible>(Event::default().comment(" ".repeat(2048)));
+    let padded = tokio_stream::iter(std::iter::once(padding)).chain(stream);
+
+    let mut headers = HeaderMap::new();
+    headers.insert(
+        header::CACHE_CONTROL,
+        HeaderValue::from_static("no-cache, no-store"),
+    );
+    headers.insert(
+        header::HeaderName::from_static("x-accel-buffering"),
+        HeaderValue::from_static("no"),
+    );
+    (headers, Sse::new(padded).keep_alive(KeepAlive::default()))
 }

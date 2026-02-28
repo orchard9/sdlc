@@ -201,6 +201,12 @@ impl PonderEntry {
         self.sessions += 1;
         self.updated_at = Utc::now();
     }
+
+    /// Replace the committed_to milestone list.
+    pub fn set_committed_to(&mut self, milestones: Vec<String>) {
+        self.committed_to = milestones;
+        self.updated_at = Utc::now();
+    }
 }
 
 // ---------------------------------------------------------------------------

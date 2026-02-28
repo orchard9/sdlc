@@ -570,8 +570,8 @@ pub fn prepare(root: &Path, milestone_slug: Option<&str>) -> Result<PrepareResul
             if milestone_fresh && uniform_action && wave1.items.len() > 1 {
                 // Not yet started — full prepare first
                 vec![format!("/sdlc-prepare {}", milestone.slug)]
-            } else if milestone.prepared_at.is_some() && parallelizable_count > 1 {
-                // Already prepared with parallel work — run-wave
+            } else if parallelizable_count > 1 {
+                // Multiple parallelizable items — run the wave in parallel
                 vec![format!("/sdlc-run-wave {}", milestone.slug)]
             } else {
                 wave1

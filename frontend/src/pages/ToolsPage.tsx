@@ -2,10 +2,150 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/api/client'
 import { ToolCard } from '@/components/tools/ToolCard'
 import { AmaResultPanel } from '@/components/tools/AmaResultPanel'
+import { AmaAnswerPanel } from '@/components/tools/AmaAnswerPanel'
 import { QualityCheckPanel } from '@/components/tools/QualityCheckPanel'
-import { Loader2, AlertTriangle, Play, Wrench } from 'lucide-react'
+import { CommandBlock } from '@/components/shared/CommandBlock'
+import { Loader2, AlertTriangle, Play, Wrench, RefreshCw, Bot, Terminal, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ToolMeta, ToolResult, AmaData, QualityCheckData } from '@/lib/types'
+import type { ToolMeta, ToolResult, AmaData, QualityCheckData, CheckResult } from '@/lib/types'
+
+// ---------------------------------------------------------------------------
+// CLI help construction from ToolMeta
+// ---------------------------------------------------------------------------
+
+type SchemaProps = Record<string, { type?: string; description?: string }>
+
+function buildCliCommand(tool: ToolMeta): string {
+  const schema = tool.input_schema as { properties?: SchemaProps; required?: string[] }
+  const props = schema?.properties ?? {}
+  const required = schema?.required ?? []
+
+  const flags = Object.entries(props)
+    .filter(([key]) => required.includes(key))
+    .map(([key, prop]) => {
+      if (tool.name === 'ama' && key === 'question') return '--question "..."'
+      return `--${key} <${(prop.type ?? 'value').toUpperCase()}>`
+    })
+
+  const optionals = Object.entries(props)
+    .filter(([key]) => !required.includes(key))
+    .map(([key, prop]) => {
+      if (tool.name === 'quality-check' && key === 'scope') return '[--scope <filter>]'
+      return `[--${key} <${(prop.type ?? 'value').toUpperCase()}>]`
+    })
+
+  const allFlags = [...flags, ...optionals]
+  return `sdlc tool run ${tool.name}${allFlags.length ? ' ' + allFlags.join(' ') : ''}`
+}
+
+function buildCliHelp(tool: ToolMeta): string {
+  const schema = tool.input_schema as { properties?: SchemaProps; required?: string[] }
+  const props = schema?.properties ?? {}
+  const required = (schema?.required ?? []) as string[]
+  const outSchema = tool.output_schema as { properties?: SchemaProps }
+  const outProps = outSchema?.properties ?? {}
+
+  const lines: string[] = []
+
+  lines.push(`sdlc tool run ${tool.name} [OPTIONS]`)
+  lines.push('')
+  lines.push(`  ${tool.description}`)
+  lines.push('')
+
+  if (tool.requires_setup) {
+    lines.push('Setup (required before first use):')
+    lines.push(`  sdlc tool run ${tool.name} --setup`)
+    if (tool.setup_description) {
+      lines.push(`  └ ${tool.setup_description}`)
+    }
+    lines.push('')
+  }
+
+  if (Object.keys(props).length > 0) {
+    lines.push('Options:')
+    for (const [key, prop] of Object.entries(props)) {
+      const req = required.includes(key)
+      const type = (prop.type ?? 'value').toUpperCase()
+      const desc = prop.description ?? ''
+      lines.push(`  --${key} <${type}>${req ? '  (required)' : '  (optional)'}`)
+      if (desc) lines.push(`    ${desc}`)
+    }
+    lines.push('')
+  }
+
+  lines.push('Input:')
+  if (Object.keys(props).length > 0) {
+    const ex: Record<string, string> = {}
+    for (const [key, prop] of Object.entries(props)) {
+      ex[key] = `<${prop.type ?? 'value'}>`
+    }
+    lines.push('  ' + JSON.stringify(ex, null, 2).split('\n').join('\n  '))
+  } else {
+    lines.push('  {}  (no input required)')
+  }
+  lines.push('')
+
+  lines.push('Output:')
+  if (Object.keys(outProps).length > 0) {
+    const ex: Record<string, string> = {}
+    for (const [key, prop] of Object.entries(outProps)) {
+      ex[key] = `<${prop.type ?? 'value'}>`
+    }
+    lines.push('  ' + JSON.stringify({ ok: '<boolean>', data: ex }, null, 2).split('\n').join('\n  '))
+  } else {
+    lines.push('  { "ok": <boolean>, "data": { ... } }')
+  }
+
+  return lines.join('\n')
+}
+
+// ---------------------------------------------------------------------------
+// Usage section component
+// ---------------------------------------------------------------------------
+
+function ToolUsageSection({ tool }: { tool: ToolMeta }) {
+  const [expanded, setExpanded] = useState(false)
+  const agentCmd = `/sdlc-tool-run ${tool.name}`
+  const cliCmd = buildCliCommand(tool)
+
+  return (
+    <div className="rounded-lg border border-border/50 bg-muted/20 overflow-hidden">
+      <div className="px-3 py-2.5 space-y-2">
+        {/* Agent */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Bot className="w-3 h-3 text-muted-foreground/60" />
+            <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">Agent</span>
+          </div>
+          <CommandBlock cmd={agentCmd} />
+        </div>
+        {/* CLI */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-1">
+            <Terminal className="w-3 h-3 text-muted-foreground/60" />
+            <span className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">CLI</span>
+          </div>
+          <CommandBlock cmd={cliCmd} />
+        </div>
+      </div>
+
+      {/* Expandable full reference */}
+      <button
+        onClick={() => setExpanded(v => !v)}
+        className="w-full flex items-center gap-1 px-3 py-1.5 text-[10px] font-medium text-muted-foreground/50 hover:text-muted-foreground border-t border-border/40 transition-colors"
+      >
+        <ChevronDown className={cn('w-3 h-3 transition-transform', expanded && 'rotate-180')} />
+        {expanded ? 'Hide reference' : 'Full reference'}
+      </button>
+
+      {expanded && (
+        <pre className="px-3 pb-3 text-[11px] font-mono text-muted-foreground/70 whitespace-pre overflow-x-auto leading-relaxed border-t border-border/40 bg-muted/10 pt-2">
+          {buildCliHelp(tool)}
+        </pre>
+      )}
+    </div>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Tool run panel (right side)
@@ -21,9 +161,14 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
   const [jsonInput, setJsonInput] = useState('{}')
   const [running, setRunning] = useState(false)
   const [settingUp, setSettingUp] = useState(false)
+  const [reconfiguring, setReconfiguring] = useState(false)
+  const [fixing, setFixing] = useState(false)
   const [result, setResult] = useState<ToolResult | null>(null)
   const [setupResult, setSetupResult] = useState<ToolResult | null>(null)
   const [setupDone, setSetupDone] = useState(false)
+  const [answerRunKey, setAnswerRunKey] = useState<string | null>(null)
+  const [reconfigureRunKey, setReconfigureRunKey] = useState<string | null>(null)
+  const [fixRunKey, setFixRunKey] = useState<string | null>(null)
 
   // Reset state when the selected tool changes
   useEffect(() => {
@@ -33,6 +178,9 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
     setResult(null)
     setSetupResult(null)
     setSetupDone(false)
+    setAnswerRunKey(null)
+    setReconfigureRunKey(null)
+    setFixRunKey(null)
   }, [tool.name])
 
   const handleSetup = async () => {
@@ -52,6 +200,7 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
   const handleRun = async () => {
     setRunning(true)
     setResult(null)
+    setAnswerRunKey(null)
     try {
       let input: unknown
       if (tool.name === 'ama') {
@@ -69,10 +218,49 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
       }
       const res = await api.runTool(tool.name, input)
       setResult(res)
+
+      // Auto-synthesize an answer after AMA returns sources
+      if (tool.name === 'ama' && res.ok && res.data) {
+        const amaData = res.data as AmaData
+        if (amaData.sources.length > 0) {
+          try {
+            const answerResp = await api.answerAma(question.trim(), amaData.sources)
+            setAnswerRunKey(answerResp.run_key)
+          } catch {
+            // synthesis failed to start — non-fatal, sources still visible
+          }
+        }
+      }
     } catch (e) {
       setResult({ ok: false, error: e instanceof Error ? e.message : 'Run failed' })
     } finally {
       setRunning(false)
+    }
+  }
+
+  const handleReconfigure = async () => {
+    setReconfiguring(true)
+    setReconfigureRunKey(null)
+    try {
+      const resp = await api.reconfigureQualityGates()
+      setReconfigureRunKey(resp.run_key)
+    } catch {
+      // non-fatal — show nothing
+    } finally {
+      setReconfiguring(false)
+    }
+  }
+
+  const handleFixIssues = async (failedChecks: CheckResult[]) => {
+    setFixing(true)
+    setFixRunKey(null)
+    try {
+      const resp = await api.fixQualityIssues(failedChecks)
+      setFixRunKey(resp.run_key)
+    } catch {
+      // non-fatal — show nothing
+    } finally {
+      setFixing(false)
     }
   }
 
@@ -96,14 +284,22 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
       </div>
 
       <div className="flex-1 px-5 py-4 space-y-4">
+        {/* Usage: agent hint + CLI command + full reference */}
+        <ToolUsageSection tool={tool} />
+
         {/* Setup banner */}
-        {tool.requires_setup && !setupDone && (
+        {tool.requires_setup && !tool.setup_done && !setupDone && (
           <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
             <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-amber-300">Setup required</p>
               {tool.setup_description && (
                 <p className="text-xs text-amber-400/70 mt-0.5">{tool.setup_description}</p>
+              )}
+              {tool.name === 'quality-check' && (
+                <p className="text-xs text-amber-400/60 mt-1">
+                  Click <span className="font-medium text-amber-400/80">Reconfigure</span> below — detects your stack and installs a two-phase hook: auto-fix first (gofmt, prettier, rustfmt, ruff), then verify.
+                </p>
               )}
               {setupResult && (
                 <p className={cn(
@@ -123,14 +319,16 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
                 </p>
               )}
             </div>
-            <button
-              onClick={handleSetup}
-              disabled={settingUp}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg border border-amber-500/30 transition-colors disabled:opacity-50"
-            >
-              {settingUp && <Loader2 className="w-3 h-3 animate-spin" />}
-              {settingUp ? 'Running…' : 'Run Setup'}
-            </button>
+            {tool.name !== 'quality-check' && (
+              <button
+                onClick={handleSetup}
+                disabled={settingUp}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg border border-amber-500/30 transition-colors disabled:opacity-50"
+              >
+                {settingUp && <Loader2 className="w-3 h-3 animate-spin" />}
+                {settingUp ? 'Running…' : 'Run Setup'}
+              </button>
+            )}
           </div>
         )}
 
@@ -174,31 +372,68 @@ function ToolRunPanel({ tool }: ToolRunPanelProps) {
           )}
         </div>
 
-        {/* Run button */}
-        <button
-          onClick={handleRun}
-          disabled={running || !canRun}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {running
-            ? <Loader2 className="w-4 h-4 animate-spin" />
-            : <Play className="w-4 h-4" />
-          }
-          {running ? 'Running…' : 'Run'}
-        </button>
+        {/* Run button (+ Reconfigure for quality-check) */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleRun}
+            disabled={running || !canRun}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {running
+              ? <Loader2 className="w-4 h-4 animate-spin" />
+              : <Play className="w-4 h-4" />
+            }
+            {running ? 'Running…' : 'Run'}
+          </button>
+          {tool.name === 'quality-check' && (
+            <button
+              onClick={handleReconfigure}
+              disabled={reconfiguring}
+              title="Detect project stack and reconfigure quality gates"
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg border border-border/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {reconfiguring
+                ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                : <RefreshCw className="w-3.5 h-3.5" />
+              }
+              {reconfiguring ? 'Reconfiguring…' : 'Reconfigure'}
+            </button>
+          )}
+        </div>
+
+        {/* Reconfigure streaming output */}
+        {reconfigureRunKey && (
+          <AmaAnswerPanel runKey={reconfigureRunKey} />
+        )}
+
+        {/* Fix Issues streaming output */}
+        {fixRunKey && (
+          <AmaAnswerPanel runKey={fixRunKey} />
+        )}
 
         {/* Results */}
         {result && (
           <div className="mt-2">
-            {!result.ok ? (
+            {tool.name === 'quality-check' && result.data ? (
+              // Show structured check results even when ok:false (checks ran, some failed)
+              <>
+                <QualityCheckPanel
+                  data={result.data as QualityCheckData}
+                  onFixIssues={handleFixIssues}
+                  fixing={fixing}
+                />
+                {fixRunKey && null /* streaming panel shown above */}
+              </>
+            ) : !result.ok ? (
               <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
                 <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
                 <p className="text-sm text-red-300">{result.error}</p>
               </div>
             ) : tool.name === 'ama' ? (
-              <AmaResultPanel data={result.data as AmaData} />
-            ) : tool.name === 'quality-check' ? (
-              <QualityCheckPanel data={result.data as QualityCheckData} />
+              <>
+                <AmaResultPanel data={result.data as AmaData} />
+                {answerRunKey && <AmaAnswerPanel runKey={answerRunKey} />}
+              </>
             ) : (
               <pre className="text-xs font-mono bg-muted/30 border border-border rounded-lg p-3 overflow-x-auto whitespace-pre-wrap text-muted-foreground">
                 {JSON.stringify(result, null, 2)}

@@ -442,7 +442,7 @@ export function EvolvePage() {
                 {activeTab === 'all' && !showForm && (
                   <button
                     onClick={() => setShowForm(true)}
-                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
                   >
                     <Plus className="w-3 h-3" />
                     New Evolution

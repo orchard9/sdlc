@@ -5,6 +5,7 @@ pub mod add_task;
 pub mod approve_artifact;
 pub mod complete_task;
 pub mod get_directive;
+pub mod merge;
 pub mod ponder_chat;
 pub mod prepare;
 pub mod project_phase;
@@ -28,6 +29,7 @@ pub fn all_tools() -> Vec<Box<dyn SdlcTool>> {
         Box::new(add_task::AddTaskTool),
         Box::new(complete_task::CompleteTaskTool),
         Box::new(add_comment::AddCommentTool),
+        Box::new(merge::MergeTool),
         Box::new(project_phase::ProjectPhaseTool),
         Box::new(prepare::PrepareTool),
         Box::new(run_wave::RunWaveTool),

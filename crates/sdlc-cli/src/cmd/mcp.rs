@@ -333,7 +333,7 @@ mod tests {
     }
 
     #[test]
-    fn tools_list_returns_all_eleven() {
+    fn tools_list_returns_all_tools() {
         let dir = TempDir::new().unwrap();
         setup(&dir);
         let tools = tools::all_tools();
@@ -343,7 +343,6 @@ mod tests {
         assert!(resp.error.is_none());
         let result = resp.result.unwrap();
         let tool_list = result["tools"].as_array().unwrap();
-        assert_eq!(tool_list.len(), 11);
 
         let names: Vec<&str> = tool_list
             .iter()
@@ -356,6 +355,10 @@ mod tests {
         assert!(names.contains(&"sdlc_add_task"));
         assert!(names.contains(&"sdlc_complete_task"));
         assert!(names.contains(&"sdlc_add_comment"));
+        assert!(names.contains(&"sdlc_project_phase"));
+        assert!(names.contains(&"sdlc_prepare"));
+        assert!(names.contains(&"sdlc_run_wave"));
+        assert!(names.contains(&"sdlc_ponder_chat"));
     }
 
     #[test]

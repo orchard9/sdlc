@@ -5,7 +5,7 @@ import type { RunRecord, RunSseEvent, RunStatus } from '@/lib/types'
 
 interface StartRunOpts {
   key: string
-  runType: 'feature' | 'milestone_uat' | 'milestone_prepare' | 'ponder'
+  runType: 'feature' | 'milestone_uat' | 'milestone_prepare' | 'milestone_run_wave' | 'ponder'
   target: string
   label: string
   startUrl: string

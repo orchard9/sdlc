@@ -3,6 +3,7 @@ import { Sidebar } from './Sidebar'
 import { AgentPanel } from './AgentPanel'
 import { AgentPanelFab } from './AgentPanelFab'
 import { SearchModal } from '@/components/shared/SearchModal'
+import { FixRightAwayModal } from '@/components/shared/FixRightAwayModal'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { Menu, X, PanelRightOpen } from 'lucide-react'
 
@@ -13,6 +14,7 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [fixOpen, setFixOpen] = useState(false)
   const { panelOpen, setPanelOpen } = useAgentRuns()
 
   useEffect(() => {
@@ -20,6 +22,10 @@ export function AppShell({ children }: AppShellProps) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault()
         setSearchOpen(prev => !prev)
+      }
+      if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'f') {
+        e.preventDefault()
+        setFixOpen(prev => !prev)
       }
     }
     window.addEventListener('keydown', handler)
@@ -45,7 +51,7 @@ export function AppShell({ children }: AppShellProps) {
           md:translate-x-0
         `}
       >
-        <Sidebar onNavigate={() => setSidebarOpen(false)} onSearch={() => setSearchOpen(true)} />
+        <Sidebar onNavigate={() => setSidebarOpen(false)} onSearch={() => setSearchOpen(true)} onFixRightAway={() => setFixOpen(true)} />
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -84,6 +90,7 @@ export function AppShell({ children }: AppShellProps) {
       <AgentPanelFab />
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <FixRightAwayModal open={fixOpen} onClose={() => setFixOpen(false)} />
     </div>
   )
 }

@@ -103,6 +103,7 @@ pub fn run(root: &Path, subcommand: AgentSubcommand, _json: bool) -> Result<()> 
         "mcp__sdlc__sdlc_add_task".into(),
         "mcp__sdlc__sdlc_complete_task".into(),
         "mcp__sdlc__sdlc_add_comment".into(),
+        "mcp__sdlc__sdlc_merge".into(),
         "mcp__sdlc__sdlc_project_phase".into(),
         "mcp__sdlc__sdlc_prepare".into(),
     ];
@@ -166,27 +167,42 @@ fn build_system_prompt() -> String {
     r#"You are an SDLC agent. You drive software features through a deterministic state machine.
 
 You have access to these MCP tools (prefix: mcp__sdlc__):
-- sdlc_get_directive   — Get the current action for a feature slug
-- sdlc_write_artifact  — Write an artifact file and mark it as draft
+- sdlc_get_directive    — Get the current action for a feature slug
+- sdlc_write_artifact   — Write an artifact file and mark it as draft
 - sdlc_approve_artifact — Approve a drafted artifact (advances phase)
 - sdlc_reject_artifact  — Reject an artifact (sends it back for revision)
 - sdlc_add_task         — Add a task to a feature
 - sdlc_complete_task    — Mark a task complete
 - sdlc_add_comment      — Add a comment or blocker to a feature
+- sdlc_merge            — Finalize a feature in the Merge phase (transitions to Released)
 
 ## Rules you must follow
 
 1. After every action, call sdlc_get_directive to confirm state advanced.
 2. Execute exactly one action per loop iteration — never batch artifact writes.
 3. Never call sdlc_approve_artifact without first calling sdlc_write_artifact.
-4. Stop and report clearly when action is `done`, `wait_for_approval`, or `unblock_dependency`.
+4. Stop and report clearly ONLY when action is `done`, `wait_for_approval`, or `unblock_dependency`.
 5. Do not guess or invent actions — the directive is always authoritative.
+6. When action is `merge`, call sdlc_merge immediately — do not stop or ask for confirmation.
+
+## Action handlers
+
+| action            | tool to call                         |
+|-------------------|--------------------------------------|
+| create_*          | sdlc_write_artifact → sdlc_approve_artifact |
+| approve_*         | sdlc_approve_artifact                |
+| implement_task    | sdlc_complete_task (after implementing) |
+| run_qa            | sdlc_approve_artifact (qa_results after running QA) |
+| merge             | sdlc_merge                           |
+| done              | stop and report                      |
+| wait_for_approval | stop and report                      |
+| unblock_dependency| stop and report                      |
 
 ## Artifact types
 spec · design · tasks · qa_plan · review · audit · qa_results
 
 ## Phase flow
-DRAFT → SPECIFIED → PLANNED → READY → IMPLEMENTATION → REVIEW → AUDIT → QA → MERGE → done
+DRAFT → SPECIFIED → PLANNED → READY → IMPLEMENTATION → REVIEW → AUDIT → QA → MERGE → RELEASED
 "#
     .to_string()
 }
@@ -199,6 +215,6 @@ fn build_prompt(slug: &str, classification: &Classification) -> String {
         "Drive feature '{slug}' forward using the sdlc state machine tools.\n\n\
          Current directive:\n{directive_json}\n\n\
          Execute the action, verify state advanced with sdlc_get_directive, then loop \
-         until done or a human gate (wait_for_approval / unblock_dependency)."
+         until done. Only stop early for wait_for_approval or unblock_dependency."
     )
 }

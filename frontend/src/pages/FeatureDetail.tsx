@@ -72,7 +72,7 @@ export function FeatureDetail() {
             {running ? (
               <button
                 onClick={handleFocus}
-                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors"
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors whitespace-nowrap"
               >
                 <Loader2 className="w-3.5 h-3.5 animate-spin" />
                 Running...
@@ -80,7 +80,7 @@ export function FeatureDetail() {
             ) : (
               <button
                 onClick={handleRun}
-                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
               >
                 <Play className="w-3.5 h-3.5" />
                 Run

@@ -101,7 +101,7 @@ function VerifyingPanel({ phase, milestone }: {
           {running ? (
             <button
               onClick={handleFocus}
-              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors"
+              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors whitespace-nowrap"
             >
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
               Running...
@@ -109,7 +109,7 @@ function VerifyingPanel({ phase, milestone }: {
           ) : (
             <button
               onClick={handleStart}
-              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-medium hover:bg-green-500/30 transition-colors"
+              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-medium hover:bg-green-500/30 transition-colors whitespace-nowrap"
             >
               <Play className="w-3.5 h-3.5" />
               Run UAT
@@ -210,7 +210,7 @@ export function PreparePanel() {
       <ProgressBar progress={milestone_progress} waves={waves} />
 
       <div className={`${milestone_progress ? 'mt-2' : ''}`}>
-        <WavePlan waves={waves} blocked={blocked} nextCommands={next_commands} />
+        <WavePlan waves={waves} blocked={blocked} nextCommands={next_commands} milestoneSlug={result.milestone} />
       </div>
     </section>
   )

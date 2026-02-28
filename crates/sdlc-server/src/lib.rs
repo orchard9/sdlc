@@ -1,10 +1,11 @@
 pub mod auth;
 pub mod embed;
 pub mod error;
+pub mod proxy;
 pub mod routes;
 pub mod state;
+pub mod tunnel;
 
-use auth::TunnelConfig;
 use axum::routing::{delete, get, post, put};
 use axum::Router;
 use std::path::PathBuf;
@@ -13,17 +14,45 @@ use tower_http::trace::TraceLayer;
 
 /// Build the axum Router with all API routes and middleware.
 /// Used by `serve()` and available for integration testing.
-pub fn build_router(root: std::path::PathBuf) -> Router {
-    let app_state = state::AppState::new(root);
+///
+/// `port` is the local port the server is listening on (0 in tests).
+pub fn build_router(root: std::path::PathBuf, port: u16) -> Router {
+    build_router_from_state(state::AppState::new_with_port(root, port))
+}
 
+/// Build the axum Router with a pre-configured tunnel token and optional app
+/// tunnel host. Used by integration tests that need to exercise auth middleware.
+pub fn build_router_for_test(
+    root: std::path::PathBuf,
+    tunnel_token: Option<String>,
+    app_tunnel_host: Option<String>,
+) -> Router {
+    let app_state = state::AppState::new_with_port(root, 0);
+    if let Some(token) = tunnel_token {
+        let mut cfg = auth::TunnelConfig::with_token(token);
+        if let Some(host) = app_tunnel_host {
+            cfg = cfg.with_app_tunnel_host(host);
+        }
+        // SAFETY: we're in test setup, no concurrent access yet.
+        *app_state
+            .tunnel_config
+            .try_write()
+            .expect("no contention in test setup") = cfg;
+    }
+    build_router_from_state(app_state)
+}
+
+fn build_router_from_state(app_state: state::AppState) -> Router {
     let cors = CorsLayer::new()
         .allow_origin(Any)
         .allow_methods(Any)
         .allow_headers(Any);
 
     Router::new()
-        // Events (SSE)
+        // Events (SSE) — GET for local, POST for Cloudflare Quick Tunnels
+        // Quick Tunnels intentionally buffer GET streaming responses; POST streaming works.
         .route("/api/events", get(routes::events::sse_events))
+        .route("/api/events", post(routes::events::sse_events))
         // State
         .route("/api/state", get(routes::state::get_state))
         // Features
@@ -85,6 +114,11 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
         .route(
             "/api/ponder/{slug}/chat/current",
             delete(routes::runs::stop_ponder_chat),
+        )
+        // Ponder commit (headless synthesis + close agent)
+        .route(
+            "/api/ponder/{slug}/commit",
+            post(routes::runs::commit_ponder),
         )
         // Investigations
         .route(
@@ -159,6 +193,20 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
         // Vision
         .route("/api/vision", get(routes::vision::get_vision))
         .route("/api/vision", put(routes::vision::put_vision))
+        // Architecture
+        .route(
+            "/api/architecture",
+            get(routes::architecture::get_architecture),
+        )
+        .route(
+            "/api/architecture",
+            put(routes::architecture::put_architecture),
+        )
+        .route("/api/vision/run", post(routes::runs::start_vision_align))
+        .route(
+            "/api/architecture/run",
+            post(routes::runs::start_architecture_align),
+        )
         // Run history
         .route("/api/runs", get(routes::runs::list_runs))
         .route("/api/runs/{id}", get(routes::runs::get_run))
@@ -192,6 +240,19 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
             "/api/milestone/{slug}/prepare/stop",
             post(routes::runs::stop_milestone_prepare),
         )
+        // Milestone run-wave (agent execution)
+        .route(
+            "/api/milestone/{slug}/run-wave",
+            post(routes::runs::start_milestone_run_wave),
+        )
+        .route(
+            "/api/milestone/{slug}/run-wave/events",
+            get(routes::runs::milestone_run_wave_events),
+        )
+        .route(
+            "/api/milestone/{slug}/run-wave/stop",
+            post(routes::runs::stop_milestone_run_wave),
+        )
         // Escalations
         .route(
             "/api/escalations",
@@ -223,6 +284,15 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
             delete(routes::secrets::delete_env),
         )
         // Tools
+        .route("/api/tools/ama/answer", post(routes::runs::answer_ama))
+        .route(
+            "/api/tools/quality-check/reconfigure",
+            post(routes::runs::reconfigure_quality_gates),
+        )
+        .route(
+            "/api/tools/quality-check/fix",
+            post(routes::runs::fix_quality_issues),
+        )
         .route("/api/tools", get(routes::tools::list_tools))
         .route("/api/tools/{name}", get(routes::tools::get_tool_meta))
         .route("/api/tools/{name}/run", post(routes::tools::run_tool))
@@ -244,11 +314,45 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
             "/api/query/needs-approval",
             get(routes::query::needs_approval),
         )
+        // Feedback
+        .route("/api/feedback", get(routes::feedback::list_notes))
+        .route("/api/feedback", post(routes::feedback::add_note))
+        .route("/api/feedback/{id}", delete(routes::feedback::delete_note))
+        .route("/api/feedback/to-ponder", post(routes::feedback::to_ponder))
+        // Public feedback alias — always reachable through the app tunnel (no auth required).
+        .route("/__sdlc/feedback", post(routes::feedback::add_note))
+        // Diagnose (pre-feature triage)
+        .route("/api/diagnose", post(routes::diagnose::diagnose))
         // Init
         .route("/api/init", post(routes::init::init_project))
-        .fallback(embed::static_handler)
+        // SDLC tunnel (exposes this UI publicly)
+        .route("/api/tunnel", get(routes::tunnel::get_tunnel))
+        .route("/api/tunnel", post(routes::tunnel::start_tunnel))
+        .route("/api/tunnel", delete(routes::tunnel::stop_tunnel))
+        // Agents (Claude agent definitions from ~/.claude/agents/)
+        .route("/api/agents", get(routes::agents::list_agents))
+        .route("/api/agents/{name}", get(routes::agents::get_agent))
+        // App tunnel (exposes the user's project dev server)
+        .route("/api/app-tunnel", get(routes::app_tunnel::get_app_tunnel))
+        .route(
+            "/api/app-tunnel",
+            post(routes::app_tunnel::start_app_tunnel),
+        )
+        .route(
+            "/api/app-tunnel",
+            delete(routes::app_tunnel::stop_app_tunnel),
+        )
+        .route(
+            "/api/app-tunnel/port",
+            put(routes::app_tunnel::set_app_port),
+        )
+        .fallback(proxy::proxy_handler)
         .layer(TraceLayer::new_for_http())
         .layer(cors)
+        .layer(axum::middleware::from_fn_with_state(
+            app_state.tunnel_config.clone(),
+            auth::auth_middleware,
+        ))
         .with_state(app_state)
 }
 
@@ -258,30 +362,16 @@ pub fn build_router(root: std::path::PathBuf) -> Router {
 /// to this server on :3141 via vite.config.ts). In release mode, frontend
 /// assets are embedded in the binary via rust-embed.
 ///
-/// Pass [`TunnelConfig::none()`] when no tunnel is active.
+/// Pass `None` for `initial_tunnel` when no tunnel is pre-started.
 pub async fn serve(
     root: PathBuf,
     port: u16,
     open_browser: bool,
-    tunnel: TunnelConfig,
+    initial_tunnel: Option<(tunnel::Tunnel, String)>,
 ) -> anyhow::Result<()> {
     let addr = format!("0.0.0.0:{port}");
     let listener = tokio::net::TcpListener::bind(&addr).await?;
-
-    tracing::info!("SDLC UI server listening on http://localhost:{port}");
-
-    if open_browser {
-        let url = format!("http://localhost:{port}");
-        let _ = open::that(&url);
-    }
-
-    let app = build_router(root).layer(axum::middleware::from_fn_with_state(
-        tunnel,
-        auth::auth_middleware,
-    ));
-
-    axum::serve(listener, app).await?;
-    Ok(())
+    serve_on(root, listener, open_browser, initial_tunnel).await
 }
 
 /// Start the SDLC web UI server on a pre-bound listener.
@@ -290,12 +380,14 @@ pub async fn serve(
 /// caller can read the actual port before starting (useful when `port = 0` and
 /// the OS picks a free port).
 ///
-/// Pass [`TunnelConfig::none()`] when no tunnel is active.
+/// Pass `Some((tunnel, token))` when a cloudflared tunnel was started before
+/// the server (e.g. `sdlc ui --tunnel`). The AppState will be pre-seeded so
+/// the tunnel is immediately reflected in the `/api/tunnel` response.
 pub async fn serve_on(
     root: PathBuf,
     listener: tokio::net::TcpListener,
     open_browser: bool,
-    tunnel: TunnelConfig,
+    initial_tunnel: Option<(tunnel::Tunnel, String)>,
 ) -> anyhow::Result<()> {
     let actual_port = listener.local_addr()?.port();
 
@@ -306,10 +398,16 @@ pub async fn serve_on(
         let _ = open::that(&url);
     }
 
-    let app = build_router(root).layer(axum::middleware::from_fn_with_state(
-        tunnel,
-        auth::auth_middleware,
-    ));
+    let app_state = state::AppState::new_with_port(root, actual_port);
+
+    if let Some((tun, token)) = initial_tunnel {
+        let url = tun.url.clone();
+        *app_state.tunnel_handle.lock().await = Some(tun);
+        *app_state.tunnel_url.write().await = Some(url);
+        *app_state.tunnel_config.write().await = auth::TunnelConfig::with_token(token);
+    }
+
+    let app = build_router_from_state(app_state);
 
     axum::serve(listener, app).await?;
     Ok(())

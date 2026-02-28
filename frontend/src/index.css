@@ -37,9 +37,24 @@
   --color-phase-released: oklch(0.75 0.18 155);
 }
 
+html {
+  /* Prevent double-tap zoom on interactive elements across all browsers */
+  touch-action: manipulation;
+}
+
 body {
   margin: 0;
   background-color: var(--color-background);
   color: var(--color-foreground);
   font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+/* iOS Safari zooms into any focused input with font-size < 16px.
+   Clamp to 16px on mobile so the viewport stays locked. */
+@media (max-width: 768px) {
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1em);
+  }
 }

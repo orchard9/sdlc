@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, X, ChevronDown, ChevronRight } from 'lucide-react'
+import { Check, X, ChevronDown, ChevronRight, Wrench, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { QualityCheckData, CheckResult } from '@/lib/types'
 
@@ -51,16 +51,20 @@ function CheckRow({ check }: CheckRowProps) {
 
 interface QualityCheckPanelProps {
   data: QualityCheckData
+  onFixIssues?: (failedChecks: CheckResult[]) => Promise<void>
+  fixing?: boolean
 }
 
-export function QualityCheckPanel({ data }: QualityCheckPanelProps) {
+export function QualityCheckPanel({ data, onFixIssues, fixing }: QualityCheckPanelProps) {
   if (data.checks.length === 0) {
     return (
       <p className="text-sm text-muted-foreground italic">
-        No checks ran. Add platform commands under <code className="font-mono text-xs">platform.commands</code> in <code className="font-mono text-xs">.sdlc/config.yaml</code>.
+        No checks configured. Add entries to <code className="font-mono text-xs">.sdlc/tools/quality-check/config.yaml</code> or click <strong>Reconfigure</strong> to auto-detect.
       </p>
     )
   }
+
+  const failedChecks = data.checks.filter(c => c.status === 'failed')
 
   return (
     <div className="space-y-2">
@@ -76,6 +80,20 @@ export function QualityCheckPanel({ data }: QualityCheckPanelProps) {
             <X className="w-4 h-4" />
             {data.failed} failed
           </span>
+        )}
+        {data.failed > 0 && onFixIssues && (
+          <button
+            onClick={() => onFixIssues(failedChecks)}
+            disabled={fixing}
+            title="Spawn an agent to diagnose and fix failing checks"
+            className="ml-auto flex items-center gap-1.5 px-3 py-1 text-xs font-medium bg-red-500/15 hover:bg-red-500/25 text-red-300 rounded-lg border border-red-500/30 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {fixing
+              ? <Loader2 className="w-3 h-3 animate-spin" />
+              : <Wrench className="w-3 h-3" />
+            }
+            {fixing ? 'Fixing…' : 'Fix Issues'}
+          </button>
         )}
       </div>
       {data.checks.map((check, i) => (

@@ -92,15 +92,17 @@ QA
 MERGE → merge (released)
 ```
 
-**HITL gates** (`[HITL]` above): `wait_for_approval` (blocker comments only), `unblock_dependency`
-
-All other actions — including all `approve_*` verification steps and `approve_merge` — are executed agentively.
+All actions — including all `approve_*` verification steps and `approve_merge` — are executed agentively.
 
 ## Ethos
 
+**Workspaces are the funnel into the work.** Ponder, root-cause, evolve, and guideline workspaces exist so ideas and problems are explored before they become features. See `workspaces.md`.
+
 **Always forward.** Issues are captured as tasks and addressed in subsequent cycles — features and milestone state are never reverted or reset. When a problem is found, create a task and keep moving unless the blocker makes further progress meaningless.
 
-**Autonomous by default.** Agents execute all actions without pausing for human input except at explicit HITL gates (`wait_for_approval`, `unblock_dependency`). Approval steps (`approve_*`) are agentive — the verifying agent calls `sdlc artifact approve` directly. No unnecessary confirmation loops.
+**Autonomous by default.** Agents execute all actions without pausing for human input. Approval steps (`approve_*`) are agentive — the verifying agent calls `sdlc artifact approve` directly. No confirmation loops. This applies equally to living documents — `VISION.md`, `ARCHITECTURE.md`, and all `.sdlc/` artifacts are written directly by agents without staging for review. Git is the undo button.
+
+**Fire and iterate, not gate and wait.** Never add a review step where an agent can just act. If an action might produce imperfect output, that's fine — wrong is fixable, blocked is not. The cost of a bad write is a second run. The cost of a confirmation loop is friction that compounds across every feature, every milestone, every day.
 
 **Trust the state machine.** The classifier output is always the authoritative source of what to do next. Agents don't guess at phases or decide which artifact to write — they read `sdlc next --for <slug> --json` and execute exactly what it says.
 
@@ -127,7 +129,7 @@ All other actions — including all `approve_*` verification steps and `approve_
 /sdlc-next <slug>
 ```
 
-**Full autonomous run to next human gate:**
+**Full autonomous run to completion:**
 ```bash
 /sdlc-run <slug>
 ```
@@ -137,7 +139,7 @@ All other actions — including all `approve_*` verification steps and `approve_
 /sdlc-pressure-test <milestone-slug>
 ```
 
-The agent reads `sdlc next --for <slug> --json`, executes the action, and loops. It stops only at HITL gates or `done`.
+The agent reads `sdlc next --for <slug> --json`, executes the action, and loops until `done`.
 
 **The contract agents must honor:**
 - Phases advance from artifact state, not direct transition calls. Agents call `sdlc artifact draft` then `sdlc artifact approve` — the machine derives the phase.
@@ -166,7 +168,7 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 | `/sdlc-recruit <role>` | Recruit an expert thought partner as a persistent agent |
 | `/sdlc-empathy <subject>` | Deep user perspective interviews before making decisions |
 | `/sdlc-next <slug>` | Execute one directive step |
-| `/sdlc-run <slug>` | Autonomous run to next HITL gate |
+| `/sdlc-run <slug>` | Autonomous run to completion |
 | `/sdlc-status` | Project overview |
 | `/sdlc-plan` | Distribute a plan into milestones, features, tasks |
 | `/sdlc-prepare <milestone>` | Pre-flight milestone — align features with vision, fix gaps, write wave plan |
@@ -175,6 +177,7 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 | `/sdlc-milestone-uat <milestone>` | Run acceptance test for a milestone |
 | `/sdlc-enterprise-readiness` | Production readiness analysis |
 | `/sdlc-setup-quality-gates` | Set up pre-commit hooks |
+| `/sdlc-quality-fix` | Fix failing quality-check results — triages by failure count and applies fix-forward / fix-all / remediate |
 
 **Adding a command:** Add a `const SDLC_*_COMMAND: &str` (Claude format), `const SDLC_*_PLAYBOOK: &str` (Gemini/OpenCode), and `const SDLC_*_SKILL: &str` (Agents). Register in all four `write_user_*` functions. Add filenames to `migrate_legacy_project_scaffolding()`.
 

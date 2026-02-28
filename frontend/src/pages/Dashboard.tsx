@@ -1,20 +1,15 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProjectState } from '@/hooks/useProjectState'
-import { useSSE } from '@/hooks/useSSE'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Skeleton, SkeletonCard } from '@/components/shared/Skeleton'
-import { CopyButton } from '@/components/shared/CopyButton'
 import { CommandBlock } from '@/components/shared/CommandBlock'
 import { api } from '@/api/client'
 import type { EscalationSummary, ProjectConfig } from '@/lib/types'
 import { PreparePanel } from '@/components/features/PreparePanel'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
-import { AlertTriangle, Clock, ChevronDown, ChevronRight, Lightbulb, FileText, Users, Key, HelpCircle, Target, FlaskConical, Zap, Check } from 'lucide-react'
-import type { PonderSummary } from '@/lib/types'
-import { FullscreenModal } from '@/components/shared/FullscreenModal'
-import { MarkdownContent } from '@/components/shared/MarkdownContent'
+import { AlertTriangle, Clock, ChevronDown, ChevronRight, Key, HelpCircle, Target, FlaskConical, Zap, Check } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // Escalation helpers
@@ -115,7 +110,7 @@ function EscalationCard({ item, onResolved }: EscalationCardProps) {
                 <button
                   onClick={submit}
                   disabled={!note.trim()}
-                  className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center gap-1"
+                  className="text-xs px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40 flex items-center gap-1 whitespace-nowrap"
                 >
                   <Check className="w-3 h-3" />
                   Resolve
@@ -130,52 +125,17 @@ function EscalationCard({ item, onResolved }: EscalationCardProps) {
   )
 }
 
-// ---------------------------------------------------------------------------
-// Vision section
-// ---------------------------------------------------------------------------
-
-function VisionSection({ content }: { content: string }) {
-  const [open, setOpen] = useState(false)
-  const preview = content.replace(/^#+\s*/gm, '').replace(/[*`_~]/g, '').trim()
-  return (
-    <>
-      <div className="mt-3 cursor-pointer group" onClick={() => setOpen(true)}>
-        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2 group-hover:text-foreground/80 transition-colors">
-          {preview}
-        </p>
-        <button className="mt-1 text-xs text-muted-foreground hover:text-foreground transition-colors">
-          View vision →
-        </button>
-      </div>
-      <FullscreenModal open={open} onClose={() => setOpen(false)} title="Vision">
-        <MarkdownContent content={content} />
-      </FullscreenModal>
-    </>
-  )
-}
-
 export function Dashboard() {
   const { state, error, loading } = useProjectState()
   const { isRunning } = useAgentRuns()
   const [config, setConfig] = useState<ProjectConfig | null>(null)
-  const [vision, setVision] = useState<{ content: string; exists: boolean } | null>(null)
-  const [ponders, setPonders] = useState<PonderSummary[]>([])
   const [showArchive, setShowArchive] = useState(false)
 
-  const loadPonders = useCallback(() => {
-    api.getRoadmap()
-      .then(road => setPonders(road))
+  useEffect(() => {
+    api.getConfig()
+      .then(cfg => setConfig(cfg))
       .catch(() => {})
   }, [])
-
-  useEffect(() => {
-    Promise.all([api.getConfig(), api.getVision()])
-      .then(([cfg, vis]) => { setConfig(cfg); setVision(vis) })
-      .catch(() => {})
-    loadPonders()
-  }, [loadPonders])
-
-  useSSE(loadPonders)
 
   if (error) {
     return (
@@ -240,10 +200,6 @@ export function Dashboard() {
           )}
         </div>
 
-        {/* Vision */}
-        {vision?.exists && vision.content && (
-          <VisionSection content={vision.content} />
-        )}
       </div>
 
       {/* Stats bar */}
@@ -271,58 +227,6 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* Pondering */}
-      <section className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-            <Lightbulb className="w-3.5 h-3.5" />
-            Pondering
-          </h3>
-          <Link
-            to="/ponder"
-            className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-          >
-            View all →
-          </Link>
-        </div>
-        {(() => {
-          const activePonders = ponders.filter(p => p.status === 'exploring' || p.status === 'converging')
-          return activePonders.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-            {activePonders.map(p => (
-                <div key={p.slug} className="bg-card border border-border rounded-xl p-3 flex items-start gap-3">
-                  <div className="min-w-0 flex-1">
-                    <Link to={`/ponder/${p.slug}`} className="text-sm font-medium hover:text-primary transition-colors">
-                      {p.title}
-                    </Link>
-                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                      <span className="flex items-center gap-0.5"><FileText className="w-3 h-3" />{p.artifact_count}</span>
-                      <span className="flex items-center gap-0.5"><Users className="w-3 h-3" />{p.team_size}</span>
-                    </div>
-                  </div>
-                  <CopyButton text={`/sdlc-ponder ${p.slug}`} />
-                </div>
-              ))}
-          </div>
-        ) : (
-          <Link
-            to="/ponder"
-            className="block bg-card border border-dashed border-border rounded-xl p-4 text-center hover:border-primary/50 transition-colors group"
-          >
-            <p className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-              Start exploring a new idea
-            </p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">
-              Use the Roadmap to capture and develop ideas before they become features
-            </p>
-          </Link>
-        )
-        })()}
-      </section>
-
-      {/* Wave Plan (replaces What's Next) */}
-      <PreparePanel />
-
       {/* Needs Your Attention — escalations from agents */}
       {state.escalations?.length > 0 && (
         <div className="bg-amber-950/20 border border-amber-500/30 rounded-xl p-4 mb-6">
@@ -347,6 +251,9 @@ export function Dashboard() {
           </div>
         </div>
       )}
+
+      {/* Wave Plan */}
+      <PreparePanel />
 
       {/* HITL / blocked needing human */}
       {hitlFeatures.length > 0 && (
