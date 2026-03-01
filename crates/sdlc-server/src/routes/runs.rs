@@ -1198,15 +1198,19 @@ pub async fn start_architecture_align(
 /// POST /api/team/recruit — recruit 2-5 perspective agents tailored to this project.
 ///
 /// Reads VISION.md, ARCHITECTURE.md, and `.sdlc/config.yaml` to understand the
-/// project, then writes 2-5 agent `.md` files to `~/.claude/agents/` — one per
-/// thought partner. Fires `team_recruit_completed` SSE on finish so the setup
-/// page can fetch and display the new agents.
+/// project, then writes 2-5 agent `.md` files to `.claude/agents/` in the project
+/// root — one per thought partner. Fires `team_recruit_completed` SSE on finish so
+/// the setup page can fetch and display the new agents.
 pub async fn start_team_recruit(
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "team-recruit".to_string();
+    let agents_dir = sdlc_core::paths::project_claude_agents_dir(&app.root)
+        .to_string_lossy()
+        .into_owned();
     let opts = sdlc_query_options(app.root.clone(), 40);
-    let prompt = "You are recruiting a high-impact AI thought-partner team for this project.\n\n\
+    let prompt = format!(
+        "You are recruiting a high-impact AI thought-partner team for this project.\n\n\
         Read context files to understand the project:\n\
         1. Read `.sdlc/config.yaml` for project name and description\n\
         2. Read `VISION.md` if it exists\n\
@@ -1215,9 +1219,9 @@ pub async fn start_team_recruit(
         roles that would provide the most valuable perspectives. Each should cover a \
         different critical dimension — e.g. UX, security, performance, product strategy, \
         domain expertise. Do not create generic roles; make them specific to this project.\n\n\
-        For each role, write a perspective agent file to `~/.claude/agents/<slug>.md` using \
-        the Write tool. The filename should be a kebab-case slug like \
-        `ux-researcher.md` or `security-architect.md`. Use this exact format:\n\n\
+        For each role, write a perspective agent file to `{agents_dir}/<slug>.md` using \
+        the Write tool (create the directory if needed). The filename should be a kebab-case \
+        slug like `ux-researcher.md` or `security-architect.md`. Use this exact format:\n\n\
         ```\n\
         ---\n\
         name: <Full Name or Role Title>\n\
@@ -1231,10 +1235,11 @@ pub async fn start_team_recruit(
         - [distinctive behaviour 3]\n\
         ```\n\n\
         Write exactly 2-5 agents. Quality over quantity — only create roles that will \
-        genuinely shape decisions for this specific project.";
+        genuinely shape decisions for this specific project."
+    );
     spawn_agent_run(
         key,
-        prompt.to_string(),
+        prompt,
         opts,
         &app,
         "team_recruit",

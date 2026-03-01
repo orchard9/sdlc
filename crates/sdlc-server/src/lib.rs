@@ -337,6 +337,11 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         // Agents (Claude agent definitions from ~/.claude/agents/)
         .route("/api/agents", get(routes::agents::list_agents))
         .route("/api/agents/{name}", get(routes::agents::get_agent))
+        // Project agents (from <project_root>/.claude/agents/)
+        .route(
+            "/api/project/agents",
+            get(routes::agents::list_project_agents),
+        )
         // App tunnel (exposes the user's project dev server)
         .route("/api/app-tunnel", get(routes::app_tunnel::get_app_tunnel))
         .route(

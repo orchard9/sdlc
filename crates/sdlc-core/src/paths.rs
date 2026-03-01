@@ -248,6 +248,10 @@ pub fn user_claude_agents_dir() -> Result<PathBuf> {
     Ok(user_home()?.join(".claude").join("agents"))
 }
 
+pub fn project_claude_agents_dir(root: &Path) -> PathBuf {
+    root.join(".claude").join("agents")
+}
+
 pub fn user_sdlc_dir() -> Result<PathBuf> {
     Ok(user_home()?.join(".sdlc"))
 }

@@ -253,6 +253,8 @@ export const api = {
   // Agents (Claude agent definitions from ~/.claude/agents/)
   getAgents: () => request<import('@/lib/types').AgentDefinition[]>('/api/agents'),
   getAgent: (name: string) => request<import('@/lib/types').AgentDefinition>(`/api/agents/${encodeURIComponent(name)}`),
+  // Project agents (from <project_root>/.claude/agents/)
+  getProjectAgents: () => request<import('@/lib/types').AgentDefinition[]>('/api/project/agents'),
 
   // Secrets (metadata only — decryption is CLI-only)
   getSecretsStatus: () => request<{ key_count: number; env_count: number }>('/api/secrets/status'),

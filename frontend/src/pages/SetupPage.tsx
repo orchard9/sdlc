@@ -48,7 +48,7 @@ export function SetupPage() {
       api.getConfig().catch(() => null),
       api.getVision().catch(() => null),
       api.getArchitecture().catch(() => null),
-      api.getAgents().catch(() => [] as AgentDefinition[]),
+      api.getProjectAgents().catch(() => [] as AgentDefinition[]),
     ]).then(([config, vision, arch, existingAgents]) => {
       let descDone = false
       let visDone = false
@@ -105,7 +105,7 @@ export function SetupPage() {
     }
     if (event.type === 'team_recruit_completed') {
       setRecruitingTeam(false)
-      api.getAgents()
+      api.getProjectAgents()
         .then(a => {
           setAgents(a)
           setDone(prev => ({ ...prev, teamDone: true }))
@@ -448,10 +448,10 @@ export function SetupPage() {
 
           <div className="pt-2">
             <Link
-              to="/"
+              to="/ponder"
               className="inline-flex items-center gap-1.5 text-sm px-4 py-1.5 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
-              Go to Dashboard →
+              Open Ponder Workspace →
             </Link>
           </div>
         </div>

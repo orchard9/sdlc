@@ -141,7 +141,7 @@ export function Dashboard() {
       api.getConfig().catch(() => null),
       api.getVision().catch(() => null),
       api.getArchitecture().catch(() => null),
-      api.getAgents().catch((): AgentDefinition[] => []),
+      api.getProjectAgents().catch((): AgentDefinition[] => []),
     ]).then(([cfg, vision, arch, agents]) => {
       if (cfg) setConfig(cfg)
       const noProject = !cfg?.project.description || (!vision?.exists && !arch?.exists)

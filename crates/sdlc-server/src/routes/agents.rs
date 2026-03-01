@@ -1,9 +1,10 @@
-use axum::extract::Path;
+use axum::extract::{Path, State};
 use axum::Json;
 use serde::{Deserialize, Serialize};
 use tracing::warn;
 
 use crate::error::AppError;
+use crate::state::AppState;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -116,6 +117,57 @@ pub async fn list_agents() -> Result<Json<serde_json::Value>, AppError> {
         for entry in entries {
             let path = entry.path();
             // Only process .md files
+            if path.extension().and_then(|e| e.to_str()) != Some("md") {
+                continue;
+            }
+            let stem = match path.file_stem().and_then(|s| s.to_str()) {
+                Some(s) => s.to_string(),
+                None => continue,
+            };
+            match std::fs::read_to_string(&path) {
+                Ok(raw) => {
+                    let agent = parse_agent_file(&stem, &raw);
+                    match serde_json::to_value(&agent) {
+                        Ok(v) => agents.push(v),
+                        Err(e) => warn!(agent = %stem, error = %e, "failed to serialize agent"),
+                    }
+                }
+                Err(e) => warn!(agent = %stem, error = %e, "failed to read agent file"),
+            }
+        }
+
+        Ok(serde_json::json!(agents))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/project/agents — list agents from <project_root>/.claude/agents/
+// ---------------------------------------------------------------------------
+
+pub async fn list_project_agents(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let agents_dir = sdlc_core::paths::project_claude_agents_dir(&root);
+
+        if !agents_dir.is_dir() {
+            return Ok::<_, anyhow::Error>(serde_json::json!([]));
+        }
+
+        let mut agents: Vec<serde_json::Value> = Vec::new();
+
+        let mut entries: Vec<_> = std::fs::read_dir(&agents_dir)?
+            .filter_map(|e| e.ok())
+            .collect();
+        entries.sort_by_key(|e| e.file_name());
+
+        for entry in entries {
+            let path = entry.path();
             if path.extension().and_then(|e| e.to_str()) != Some("md") {
                 continue;
             }
