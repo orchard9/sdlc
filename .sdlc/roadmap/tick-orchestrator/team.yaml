@@ -1,0 +1,16 @@
+partners:
+- name: priya-nair
+  role: Distributed Systems Engineer
+  context: Tick loop correctness, concurrency, embedded DB selection, idempotency at scale
+  agent: .claude/agents/priya-nair.md
+  recruited_at: 2026-03-01T07:36:41.058126Z
+- name: marcus-webb
+  role: Enterprise Platform Architect
+  context: Enterprise reliability requirements, persistence guarantees, action lifecycle for 1000+ services
+  agent: .claude/agents/marcus-webb.md
+  recruited_at: 2026-03-01T07:36:41.065143Z
+- name: dana-cho
+  role: Product Skeptic
+  context: Keeping the MVP scope tight — what's needed for tick rate v1 vs what can wait
+  agent: .claude/agents/dana-cho.md
+  recruited_at: 2026-03-01T07:36:41.072372Z

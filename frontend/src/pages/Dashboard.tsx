@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useProjectState } from '@/hooks/useProjectState'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -130,7 +130,7 @@ export function Dashboard() {
   const { isRunning } = useAgentRuns()
   const [config, setConfig] = useState<ProjectConfig | null>(null)
   const [showArchive, setShowArchive] = useState(false)
-  const navigate = useNavigate()
+  const [setupIncomplete, setSetupIncomplete] = useState(false)
   const hasCheckedSetup = useRef(false)
 
   useEffect(() => {
@@ -145,10 +145,10 @@ export function Dashboard() {
     ]).then(([cfg, vision, arch, agents]) => {
       if (cfg) setConfig(cfg)
       const noProject = !cfg?.project.description || (!vision?.exists && !arch?.exists)
-      const noTeam = agents.length === 0 && !localStorage.getItem('sdlc_setup_ack')
-      if (noProject || noTeam) navigate('/setup')
+      const noTeam = agents.length === 0
+      setSetupIncomplete(noProject || noTeam)
     })
-  }, [navigate])
+  }, [])
 
   if (error) {
     return (
@@ -160,7 +160,7 @@ export function Dashboard() {
 
   if (loading || !state) {
     return (
-      <div className="max-w-5xl mx-auto space-y-6 p-6">
+      <div className="max-w-5xl mx-auto space-y-6 p-4 sm:p-6">
         <div className="space-y-2">
           <Skeleton width="w-48" className="h-7" />
           <Skeleton width="w-64" className="h-4" />
@@ -181,7 +181,7 @@ export function Dashboard() {
   const activeMilestones = state.milestones.filter(m => m.status !== 'released')
   const releasedMilestones = state.milestones.filter(m => m.status === 'released')
   const assignedSlugs = new Set(state.milestones.flatMap(m => m.features))
-  const ungrouped = state.features.filter(f => !assignedSlugs.has(f.slug) && !f.archived)
+  const ungrouped = state.features.filter(f => !assignedSlugs.has(f.slug) && !f.archived && f.phase !== 'released')
 
   // --- What's Next logic ---
   const hitlFeatures = state.features.filter(
@@ -195,7 +195,20 @@ export function Dashboard() {
   const blockedCount = state.blocked.length
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6">
+
+      {/* Setup incomplete notice */}
+      {setupIncomplete && (
+        <div className="flex items-center justify-between gap-3 px-4 py-3 mb-6 rounded-lg border border-amber-500/30 bg-amber-950/20 text-sm">
+          <span className="text-amber-300/80">Project setup is incomplete — agents won't have enough context to work with.</span>
+          <Link
+            to="/setup"
+            className="text-amber-300 hover:text-amber-200 transition-colors whitespace-nowrap font-medium"
+          >
+            Go to Setup →
+          </Link>
+        </div>
+      )}
 
       {/* Project Overview */}
       <div className="mb-6">

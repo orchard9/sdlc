@@ -137,7 +137,11 @@ export function PreparePanel() {
   }, [])
 
   useEffect(load, [load])
-  useSSE(load)
+  useSSE(
+    load,
+    undefined,
+    (event) => { if (event.type === 'run_finished') load() },
+  )
 
   if (err) {
     return (

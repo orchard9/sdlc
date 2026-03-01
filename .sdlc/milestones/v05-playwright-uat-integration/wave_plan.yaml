@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: uat-run-server-routes
+    title: Server routes for UAT run history and MilestoneUatCompleted SSE event
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

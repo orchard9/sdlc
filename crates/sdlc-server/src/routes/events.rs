@@ -106,6 +106,46 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             let data = serde_json::json!({ "type": "tools_changed" }).to_string();
             Some(Ok(Event::default().event("update").data(data)))
         }
+        Ok(SseMessage::ToolPlanCompleted { name }) => {
+            let data =
+                serde_json::json!({ "type": "tool_plan_completed", "name": name }).to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
+        Ok(SseMessage::ToolBuildCompleted { name }) => {
+            let data =
+                serde_json::json!({ "type": "tool_build_completed", "name": name }).to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
+        Ok(SseMessage::AdvisoryRunCompleted) => {
+            let data = serde_json::json!({ "type": "advisory_run_completed" }).to_string();
+            Some(Ok(Event::default().event("advisory").data(data)))
+        }
+        Ok(SseMessage::AdvisoryRunStopped) => {
+            let data = serde_json::json!({ "type": "advisory_run_stopped" }).to_string();
+            Some(Ok(Event::default().event("advisory").data(data)))
+        }
+        Ok(SseMessage::ToolEvolveCompleted { name }) => {
+            let data =
+                serde_json::json!({ "type": "tool_evolve_completed", "name": name }).to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
+        Ok(SseMessage::ToolActCompleted { name, action_index }) => {
+            let data = serde_json::json!({
+                "type": "tool_act_completed",
+                "name": name,
+                "action_index": action_index,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
+        Ok(SseMessage::MilestoneUatCompleted { slug }) => {
+            let data = serde_json::json!({
+                "type": "milestone_uat_completed",
+                "slug": slug,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("milestone_uat").data(data)))
+        }
         Err(_) => None,
     });
     // Prepend a ~2KB padding comment so the response body exceeds Cloudflare's

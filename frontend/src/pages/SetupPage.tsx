@@ -104,7 +104,6 @@ export function SetupPage() {
         .catch(() => {})
     }
     if (event.type === 'team_recruit_completed') {
-      localStorage.setItem('sdlc_setup_ack', '1')
       setRecruitingTeam(false)
       api.getProjectAgents()
         .then(a => {
@@ -177,7 +176,6 @@ export function SetupPage() {
 
   // Step 4 → Step 5: mark team done and advance
   const handleContinueFromTeam = () => {
-    localStorage.setItem('sdlc_setup_ack', '1')
     setDone(prev => ({ ...prev, teamDone: true }))
     setCurrentStep(5)
   }

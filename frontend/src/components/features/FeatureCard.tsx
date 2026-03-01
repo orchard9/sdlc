@@ -46,11 +46,11 @@ export function FeatureCard({ feature, position }: FeatureCardProps) {
                 #{position}
               </span>
             )}
-            <h3 className="text-sm font-medium truncate">{feature.title}</h3>
+            <h3 data-testid="feature-title" className="text-sm font-medium truncate">{feature.title}</h3>
           </div>
           <p className="text-xs text-muted-foreground mt-0.5 font-mono">{feature.slug}</p>
         </div>
-        <StatusBadge status={feature.phase} />
+        <StatusBadge status={feature.phase} testId="phase-badge" />
       </div>
 
       <PhaseProgressBar current={feature.phase} className="mt-3" />
@@ -66,7 +66,7 @@ export function FeatureCard({ feature, position }: FeatureCardProps) {
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5 text-xs text-primary min-w-0">
+        <div data-testid="next-action" className="flex items-center gap-1.5 text-xs text-primary min-w-0">
           <ArrowRight className="w-3 h-3 shrink-0" />
           <span className="truncate">
             {feature.next_action === 'create_spec' ? 'view spec' : feature.next_action.replace(/_/g, ' ')}

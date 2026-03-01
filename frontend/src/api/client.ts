@@ -74,6 +74,10 @@ export const api = {
     request<{ status: string; message: string }>(`/api/milestone/${encodeURIComponent(slug)}/uat`, { method: 'POST' }),
   stopMilestoneUat: (slug: string) =>
     request<{ status: string; message: string }>(`/api/milestone/${encodeURIComponent(slug)}/uat/stop`, { method: 'POST' }),
+  listMilestoneUatRuns: (slug: string) =>
+    request<import('@/lib/types').UatRun[]>(`/api/milestones/${encodeURIComponent(slug)}/uat-runs`),
+  getLatestMilestoneUatRun: (slug: string) =>
+    request<import('@/lib/types').UatRun | null>(`/api/milestones/${encodeURIComponent(slug)}/uat-runs/latest`),
 
   getConfig: () => request<import('@/lib/types').ProjectConfig>('/api/config'),
   updateConfig: (body: { name?: string; description?: string }) =>
@@ -119,6 +123,16 @@ export const api = {
     request<import('@/lib/types').SessionMeta[]>(`/api/roadmap/${slug}/sessions`),
   getPonderSession: (slug: string, n: number) =>
     request<import('@/lib/types').SessionContent>(`/api/roadmap/${slug}/sessions/${n}`),
+
+  // Advisory (maturity-ladder codebase analysis)
+  getAdvisory: () =>
+    request<import('@/lib/types').AdvisoryHistory>('/api/advisory'),
+  updateFinding: (id: string, status: import('@/lib/types').FindingStatus) =>
+    request<import('@/lib/types').Finding>(`/api/advisory/findings/${encodeURIComponent(id)}`, {
+      method: 'PATCH', body: JSON.stringify({ status }),
+    }),
+  startAdvisoryRun: () =>
+    request<{ status: string; run_id: string }>('/api/advisory/run', { method: 'POST' }),
 
   // Ponder chat — start / stop agent sessions
   startPonderChat: (slug: string, message?: string) =>
@@ -201,17 +215,70 @@ export const api = {
   answerAma: (
     question: string,
     sources: import('@/lib/types').AmaSource[],
-    opts?: { turnIndex?: number; threadContext?: string }
+    opts?: { turnIndex?: number; threadContext?: string; threadId?: string }
   ) =>
-    request<{ status: string; run_id: string; run_key: string }>('/api/tools/ama/answer', {
+    request<{ status: string; run_id: string; run_key: string; thread_id?: string }>('/api/tools/ama/answer', {
       method: 'POST',
       body: JSON.stringify({
         question,
         sources,
         turn_index: opts?.turnIndex ?? 0,
         thread_context: opts?.threadContext ?? null,
+        thread_id: opts?.threadId ?? null,
       }),
     }),
+
+  // Tool interaction history
+  listToolInteractions: (name: string, limit = 50) =>
+    request<import('@/lib/types').ToolInteractionRecord[]>(
+      `/api/tools/${encodeURIComponent(name)}/interactions?limit=${limit}`
+    ),
+  getToolInteraction: (name: string, id: string) =>
+    request<import('@/lib/types').ToolInteractionRecord>(
+      `/api/tools/${encodeURIComponent(name)}/interactions/${encodeURIComponent(id)}`
+    ),
+  deleteToolInteraction: (name: string, id: string) =>
+    request<{ deleted: boolean }>(
+      `/api/tools/${encodeURIComponent(name)}/interactions/${encodeURIComponent(id)}`,
+      { method: 'DELETE' }
+    ),
+
+  // Result actions
+  actTool: (name: string, body: { action_index: number; result: unknown; input: unknown; interaction_id?: string }) =>
+    request<{ status: string; run_id: string; run_key: string }>(
+      `/api/tools/${encodeURIComponent(name)}/act`,
+      { method: 'POST', body: JSON.stringify(body) }
+    ),
+
+  // AMA threads
+  listAmaThreads: (limit = 50) =>
+    request<import('@/lib/types').AmaThread[]>(`/api/tools/ama/threads?limit=${limit}`),
+  createAmaThread: (id: string, title: string) =>
+    request<import('@/lib/types').AmaThread>('/api/tools/ama/threads', {
+      method: 'POST',
+      body: JSON.stringify({ id, title }),
+    }),
+  getAmaThread: (id: string) =>
+    request<import('@/lib/types').AmaThreadDetail>(`/api/tools/ama/threads/${encodeURIComponent(id)}`),
+  updateAmaThread: (id: string, patch: { title?: string; tags?: string[]; committed_to?: string }) =>
+    request<import('@/lib/types').AmaThread>(`/api/tools/ama/threads/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+  deleteAmaThread: (id: string) =>
+    request<{ deleted: boolean }>(`/api/tools/ama/threads/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    }),
+  updateAmaThreadTurnSynthesis: (threadId: string, turnIndex: number, synthesis: string) =>
+    request<import('@/lib/types').AmaTurnRecord>(
+      `/api/tools/ama/threads/${encodeURIComponent(threadId)}/turns/${turnIndex}`,
+      { method: 'PATCH', body: JSON.stringify({ synthesis }) }
+    ),
+  addAmaThreadTurn: (threadId: string, body: { question: string; sources: import('@/lib/types').AmaSource[]; run_id?: string }) =>
+    request<import('@/lib/types').AmaTurnRecord>(
+      `/api/tools/ama/threads/${encodeURIComponent(threadId)}/turns`,
+      { method: 'POST', body: JSON.stringify(body) }
+    ),
   reconfigureQualityGates: () =>
     request<{ status: string; run_id: string; run_key: string }>('/api/tools/quality-check/reconfigure', {
       method: 'POST',
@@ -220,6 +287,26 @@ export const api = {
     request<{ status: string; run_id: string; run_key: string }>('/api/tools/quality-check/fix', {
       method: 'POST',
       body: JSON.stringify({ failed_checks: failedChecks }),
+    }),
+  planTool: (body: { name: string; description: string; requirements?: string }) =>
+    request<{ status: string; run_id: string; run_key: string }>('/api/tools/plan', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  buildTool: (body: { name: string; plan: string }) =>
+    request<{ status: string; run_id: string; run_key: string }>('/api/tools/build', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  cloneTool: (name: string, body: { new_name: string }) =>
+    request<{ name: string; status: string }>(`/api/tools/${encodeURIComponent(name)}/clone`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  evolveTool: (name: string, change_request: string) =>
+    request<{ status: string; run_id: string; run_key: string }>(`/api/tools/${encodeURIComponent(name)}/evolve`, {
+      method: 'POST',
+      body: JSON.stringify({ change_request }),
     }),
 
   // Feedback

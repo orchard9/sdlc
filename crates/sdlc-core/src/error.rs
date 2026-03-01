@@ -122,6 +122,9 @@ pub enum SdlcError {
     #[error("Tool exited with error: {0}")]
     ToolFailed(String),
 
+    #[error("orchestrator DB error: {0}")]
+    OrchestratorDb(String),
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 

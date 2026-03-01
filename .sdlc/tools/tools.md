@@ -18,11 +18,11 @@ _Indexes source files for keyword search (run once, then re-run when files chang
 
 ## quality-check — Quality Check
 
-Runs platform shell commands from .sdlc/config.yaml and reports pass/fail.
+Runs checks from .sdlc/tools/quality-check/config.yaml and reports pass/fail.
 
 **Run:** `sdlc tool run quality-check`
 **Setup required:** No
-_Add checks under `platform.commands` in `.sdlc/config.yaml`_
+_Edit `.sdlc/tools/quality-check/config.yaml` to add your project's checks_
 
 ---
 

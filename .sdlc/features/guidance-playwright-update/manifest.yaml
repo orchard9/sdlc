@@ -1,0 +1,100 @@
+slug: guidance-playwright-update
+title: Update .sdlc/guidance.md and CLAUDE.md with Playwright UAT pattern
+description: Update .sdlc/guidance.md §5 (Tests) to reference the three-tier UAT architecture and Playwright as the regression layer. Add a §11 UAT section referencing npx playwright test commands, spec location (frontend/e2e/milestones/), and the docs/uat-enterprise-strategy.md doc. Add uat-enterprise-strategy.md to the Key Files table in CLAUDE.md.
+phase: draft
+created_at: 2026-03-01T06:11:14.789606Z
+updated_at: 2026-03-01T06:11:14.789606Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/guidance-playwright-update/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Update .sdlc/guidance.md §5 (Tests) to reference three-tier UAT pattern and Playwright as regression layer
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:25.523525Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Add §11 UAT to .sdlc/guidance.md: npx playwright test commands, spec location, Mode A/B decision'
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:25.530699Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add docs/uat-enterprise-strategy.md to Key Files table in CLAUDE.md
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:25.536824Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:14.789606Z
+  exited: null
+dependencies: []
+archived: false

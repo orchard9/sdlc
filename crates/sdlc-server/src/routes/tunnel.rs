@@ -28,10 +28,11 @@ pub struct TunnelStatus {
 
 pub async fn get_tunnel(State(app): State<AppState>) -> Json<TunnelStatus> {
     let url = app.tunnel_url.read().await.clone();
+    let token = app.tunnel_config.read().await.token.clone();
     Json(TunnelStatus {
         active: url.is_some(),
         url,
-        token: None,
+        token,
         port: app.port,
     })
 }

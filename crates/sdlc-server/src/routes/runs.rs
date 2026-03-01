@@ -57,7 +57,7 @@ fn validate_slug(slug: &str) -> Result<(), AppError> {
 /// `RunFinished` and after the run is removed from the active map. Used by
 /// ponder and investigation handlers to emit `PonderRunCompleted` /
 /// `InvestigationRunCompleted` without a separate polling task.
-async fn spawn_agent_run(
+pub(crate) async fn spawn_agent_run(
     key: String,
     prompt: String,
     opts: QueryOptions,
@@ -322,8 +322,20 @@ async fn stop_run_by_key(key: &str, app: &AppState) -> Json<serde_json::Value> {
     }
 }
 
+/// Build query options for guideline investigations — extends sdlc_query_options with
+/// WebSearch and WebFetch for the Prior Art Mapper perspective.
+pub(crate) fn sdlc_guideline_query_options(
+    root: std::path::PathBuf,
+    max_turns: u32,
+) -> QueryOptions {
+    let mut opts = sdlc_query_options(root, max_turns);
+    opts.allowed_tools.push("WebSearch".into());
+    opts.allowed_tools.push("WebFetch".into());
+    opts
+}
+
 /// Build the standard sdlc MCP query options.
-fn sdlc_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions {
+pub(crate) fn sdlc_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions {
     QueryOptions {
         permission_mode: PermissionMode::AcceptEdits,
         mcp_servers: vec![McpServerConfig {
@@ -436,7 +448,26 @@ pub async fn start_milestone_uat(
 ) -> Result<Json<serde_json::Value>, AppError> {
     validate_slug(&slug)?;
     let key = format!("milestone-uat:{slug}");
-    let opts = sdlc_query_options(app.root.clone(), 200);
+
+    // Start from the standard sdlc options, then extend with Playwright MCP so the
+    // UAT agent can interact with a real browser during acceptance tests.
+    let mut opts = sdlc_query_options(app.root.clone(), 200);
+    opts.mcp_servers.push(McpServerConfig {
+        name: "playwright".into(),
+        command: "npx".into(),
+        args: vec!["@playwright/mcp@latest".into()],
+        env: HashMap::new(),
+    });
+    opts.allowed_tools.extend([
+        "mcp__playwright__browser_navigate".into(),
+        "mcp__playwright__browser_click".into(),
+        "mcp__playwright__browser_type".into(),
+        "mcp__playwright__browser_snapshot".into(),
+        "mcp__playwright__browser_take_screenshot".into(),
+        "mcp__playwright__browser_console_messages".into(),
+        "mcp__playwright__browser_wait_for".into(),
+    ]);
+
     let prompt = format!(
         "Run the acceptance test for milestone '{slug}'. \
          Call `sdlc milestone info {slug} --json` to load the milestone and acceptance test. \
@@ -445,7 +476,17 @@ pub async fn start_milestone_uat(
          Then call `sdlc milestone complete {slug}` if all steps pass.",
     );
     let label = format!("UAT: {slug}");
-    spawn_agent_run(key, prompt, opts, &app, "milestone_uat", &label, None).await
+    let completion_event = Some(SseMessage::MilestoneUatCompleted { slug: slug.clone() });
+    spawn_agent_run(
+        key,
+        prompt,
+        opts,
+        &app,
+        "milestone_uat",
+        &label,
+        completion_event,
+    )
+    .await
 }
 
 /// GET /api/milestone/{slug}/uat/events — SSE stream of milestone UAT agent messages.
@@ -819,8 +860,29 @@ pub async fn commit_ponder(
     validate_slug(&slug)?;
     let run_key = format!("ponder-commit:{slug}");
 
+    // Mark ponder as committed immediately — status must not depend on the agent
+    // completing its final step. The agent's job is milestone creation only.
+    {
+        let root = &app.root;
+        if let Ok(mut entry) = sdlc_core::ponder::PonderEntry::load(root, &slug) {
+            entry.update_status(sdlc_core::ponder::PonderStatus::Committed);
+            if let Err(e) = entry.save(root) {
+                warn!("commit_ponder: failed to save committed status for {slug}: {e}");
+            }
+            if let Ok(mut state) = sdlc_core::state::State::load(root) {
+                state.remove_ponder(&slug);
+                if let Err(e) = state.save(root) {
+                    warn!("commit_ponder: failed to update state.yaml for {slug}: {e}");
+                }
+            }
+        }
+    }
+
     let prompt = format!(
         "You are running the commit flow for ponder '{slug}' in the sdlc workspace.\n\
+         \n\
+         The ponder status has already been marked committed. Your job is to synthesize\n\
+         the idea into milestones and features.\n\
          \n\
          ## Step 1 — Load context\n\
          \n\
@@ -855,15 +917,12 @@ pub async fn commit_ponder(
          \n\
          Track every milestone slug you create or update.\n\
          \n\
-         ## Step 4 — Mark committed (MANDATORY)\n\
+         ## Step 4 — Link committed-to milestones\n\
          \n\
-         After creating all milestones and features, close the ponder:\n\
+         Record which milestones came from this ponder:\n\
          ```bash\n\
-         sdlc ponder update {slug} --status committed \
-         --committed-to <milestone-slug> [--committed-to <milestone-2> ...]\n\
+         sdlc ponder update {slug} --committed-to <milestone-slug> [--committed-to <milestone-2> ...]\n\
          ```\n\
-         \n\
-         This is not optional. It is the signal that closes the ponder loop.\n\
          \n\
          ## Step 5 — Report\n\
          \n\
@@ -1030,6 +1089,75 @@ pub async fn start_investigation_chat(
          Apply strategic step-back before Roadmap: challenge each path for YAGNI, \
          hidden stakeholders, and execution reality.\n\
          \n\
+         ### Guideline artifact conventions\n\
+         \n\
+         For `guideline` investigations, use these exact artifact filenames at each phase:\n\
+         ```\n\
+         problem      → problem.md              (scope, recurring problem, initial framing)\n\
+         agenda       → research-agenda.md      (4-6 research questions ordered by importance)\n\
+         perspectives → evidence-antipatterns.md (bad examples: file:line citations from codebase)\n\
+                        evidence-exemplars.md    (good implementations: file:line citations)\n\
+                        evidence-priorart.md     (community knowledge — may use WebSearch)\n\
+                        evidence-adjacent.md     (related patterns that interact with this one)\n\
+                        evidence-impact.md       (frequency estimate, blast radius, affected areas)\n\
+         toc          → toc.md                  (ordered table of contents for the final guideline)\n\
+         distillation → guideline-draft.md      (full guideline assembled section-by-section)\n\
+         publish      → .sdlc/guidelines/<slug>.md (final published guideline)\n\
+         ```\n\
+         \n\
+         Guideline phase sequence: `problem` → `agenda` → `perspectives` → `toc` → `distillation` → `publish`\n\
+         Gate artifacts: `problem.md` unlocks `agenda`, `research-agenda.md` unlocks `perspectives`,\n\
+         all five `evidence-*.md` files unlock `toc`, `toc.md` unlocks `distillation`,\n\
+         `guideline-draft.md` unlocks `publish`.\n\
+         \n\
+         After problem phase, record the problem statement:\n\
+         ```bash\n\
+         sdlc investigate update {slug} --problem-statement \"<one-line statement>\"\n\
+         ```\n\
+         \n\
+         The TOC (`toc.md`) must use this exact format — sections ordered by importance:\n\
+         ```markdown\n\
+         # Guideline TOC: <slug>\n\
+         \n\
+         ## Table of Contents\n\
+         1. **<Section title>** — <one-line: what rule or principle this covers>\n\
+         2. **<Section title>** — <one-line description>\n\
+         ...\n\
+         \n\
+         ## Evidence Summary\n\
+         - Anti-patterns found: N\n\
+         - Good examples found: M\n\
+         ```\n\
+         \n\
+         The guideline draft (`guideline-draft.md`) must cite real file:line references for every rule:\n\
+         ```markdown\n\
+         # <Guideline Title>\n\
+         **Scope:** <where this applies>\n\
+         **Problem:** <one-line problem statement>\n\
+         ---\n\
+         ## 1. [Section from TOC]\n\
+         ⚑ **Rule:** <the actual rule>\n\
+         **Why:** <evidence-backed explanation>\n\
+         **Bad:** `path/to/file.rs:42` — <why this is wrong>\n\
+         **Good:** `path/to/file.rs:87` — <why this is right>\n\
+         ---\n\
+         ## Enforcement\n\
+         [grep patterns or lint rules to catch violations]\n\
+         ## Migration\n\
+         [steps to address existing violations]\n\
+         ```\n\
+         \n\
+         When publishing, write the final guideline to `.sdlc/guidelines/<slug>.md` and update:\n\
+         ```bash\n\
+         sdlc investigate update {slug} --output-ref \".sdlc/guidelines/<slug>.md\"\n\
+         sdlc investigate update {slug} --principles-count <N>\n\
+         sdlc investigate update {slug} --status complete\n\
+         ```\n\
+         \n\
+         **WebSearch guidance:** WebSearch is available for the Prior Art Mapper perspective ONLY.\n\
+         Use it to find: named patterns (GoF, DDD), RFC language, style guide conventions,\n\
+         and how similar projects handle the same problem. Label sources: `[from web: URL]`.\n\
+         \n\
          ### Phase advancement\n\
          \n\
          After writing a phase-gate artifact, advance the phase explicitly:\n\
@@ -1081,7 +1209,11 @@ pub async fn start_investigation_chat(
         message_context = message_context,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 100);
+    let opts = if kind_str == "guideline" {
+        sdlc_guideline_query_options(app.root.clone(), 100)
+    } else {
+        sdlc_query_options(app.root.clone(), 100)
+    };
 
     let investigation_label = format!("investigate: {slug}");
     let completion = SseMessage::InvestigationRunCompleted {
@@ -1314,6 +1446,9 @@ pub struct AmaAnswerRequest {
     pub thread_context: Option<String>,
     /// Prevents run key collision when the same question is asked multiple times in a thread.
     pub turn_index: Option<u32>,
+    /// Optional: persist this answer into a specific AMA thread.
+    /// If None a new thread is created transparently and returned in the response.
+    pub thread_id: Option<String>,
 }
 
 /// POST /api/tools/ama/answer — spawn a short synthesis agent that answers a
@@ -1420,10 +1555,64 @@ pub async fn answer_ama(
     let result =
         spawn_agent_run(key.clone(), prompt, opts, &app, "ama_answer", &label, None).await?;
 
-    // Inject run_key so the frontend can subscribe to the agent event stream
+    // Persist turn into a thread (create thread if thread_id is None)
+    let thread_id = {
+        let root = app.root.clone();
+        let question_clone = question.clone();
+        let sources_clone = body.sources.clone();
+        let run_key_clone = key.clone();
+        let provided_thread_id = body.thread_id.clone();
+        let turn_idx = body.turn_index.unwrap_or(0);
+
+        tokio::task::spawn_blocking(move || -> Option<String> {
+            let tid = if let Some(id) = provided_thread_id {
+                // Load existing thread — create if it doesn't exist yet
+                if sdlc_core::ama_thread::load_thread(&root, &id).is_err() {
+                    let title: String = question_clone.chars().take(60).collect();
+                    let _ = sdlc_core::ama_thread::create_thread(&root, &id, &title);
+                }
+                id
+            } else {
+                // Auto-generate a new thread id
+                let id = crate::state::generate_run_id();
+                let title: String = question_clone.chars().take(60).collect();
+                let _ = sdlc_core::ama_thread::create_thread(&root, &id, &title);
+                id
+            };
+
+            let turn = sdlc_core::ama_thread::AmaTurn {
+                turn_index: turn_idx,
+                question: question_clone,
+                sources: sources_clone,
+                synthesis: None,
+                run_id: Some(run_key_clone),
+                created_at: chrono::Utc::now().to_rfc3339(),
+                completed_at: None,
+            };
+            let _ = sdlc_core::ama_thread::save_turn(&root, &tid, &turn);
+
+            // Update thread turn_count + updated_at
+            if let Ok(mut t) = sdlc_core::ama_thread::load_thread(&root, &tid) {
+                t.turn_count = t.turn_count.max(turn_idx + 1);
+                t.updated_at = chrono::Utc::now().to_rfc3339();
+                let _ = sdlc_core::ama_thread::save_thread(&root, &t);
+            }
+
+            Some(tid)
+        })
+        .await
+        .ok()
+        .flatten()
+    };
+
+    // Inject run_key + thread_id so the frontend can subscribe to the agent event stream
+    // and persist synthesis to the correct thread.
     let mut resp = result.0;
     if let Some(obj) = resp.as_object_mut() {
         obj.insert("run_key".to_string(), serde_json::json!(key));
+        if let Some(tid) = thread_id {
+            obj.insert("thread_id".to_string(), serde_json::json!(tid));
+        }
     }
     Ok(Json(resp))
 }
@@ -1639,6 +1828,428 @@ fn short_hash_question(s: &str) -> String {
     let mut hasher = DefaultHasher::new();
     s.hash(&mut hasher);
     format!("{:04x}", hasher.finish() & 0xFFFF)
+}
+
+// ---------------------------------------------------------------------------
+// Tool Plan-Act — POST /api/tools/plan and POST /api/tools/build
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct PlanToolRequest {
+    /// Tool slug — lowercase letters, digits, hyphens.
+    pub name: String,
+    /// One-sentence description of what the tool does.
+    pub description: String,
+    /// Optional freeform requirements or constraints.
+    pub requirements: Option<String>,
+}
+
+/// POST /api/tools/plan — spawn a planning agent that designs the tool's
+/// input/output schema, implementation approach, and dependencies.
+///
+/// Phase 1 of the Plan-Act Pattern (see docs/plan-act-pattern.md).
+/// Returns `{ status, run_id, run_key }`. Caller subscribes to
+/// `GET /api/run/{run_key}/events` to stream the agent output.
+pub async fn plan_tool(
+    State(app): State<AppState>,
+    Json(body): Json<PlanToolRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&body.name)?;
+
+    let name = body.name.clone();
+    let key = format!("tool-plan:{name}");
+
+    let requirements_section = body
+        .requirements
+        .filter(|r| !r.trim().is_empty())
+        .map(|r| format!("\n\n## Additional requirements\n\n{r}"))
+        .unwrap_or_default();
+
+    let prompt = format!(
+        "You are designing a new sdlc tool named `{name}`.\n\
+        \n\
+        **Description:** {desc}\
+        {requirements_section}\n\
+        \n\
+        ## Steps\n\
+        \n\
+        1. Read 1–2 existing tools from `.sdlc/tools/` for structure reference (use `Glob` to find \
+           `tool.ts` files, then `Read` one or two).\n\
+        2. Design the following and write them out in a structured plan:\n\
+           - **input_schema** — JSON Schema object properties the `run()` function receives\n\
+           - **output_schema** — JSON Schema properties the `run()` function returns\n\
+           - **Implementation approach** — how `run()` will work: what commands it runs, what files \
+             it reads, what APIs it calls\n\
+           - **Setup requirements** — does the tool need a `--setup` mode? if yes, what does it do?\n\
+           - **npm/bun dependencies** — any packages needed beyond the standard node/bun APIs\n\
+        3. Format the plan as Markdown so the user can review and adjust it before building.\n\
+        \n\
+        Do not create or modify any files — this is a planning step only.\n\
+        ",
+        name = name,
+        desc = body.description,
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 15);
+
+    let result = spawn_agent_run(
+        key.clone(),
+        prompt,
+        opts,
+        &app,
+        "tool_plan",
+        &format!("Plan tool: {name}"),
+        Some(SseMessage::ToolPlanCompleted { name: name.clone() }),
+    )
+    .await?;
+
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+#[derive(serde::Deserialize)]
+pub struct BuildToolRequest {
+    /// Tool slug — must match an already-planned tool name.
+    pub name: String,
+    /// The plan text from Phase 1, optionally adjusted by the user.
+    pub plan: String,
+}
+
+/// POST /api/tools/build — spawn a build agent that scaffolds and fully
+/// implements the tool using the `/sdlc-tool-build` skill.
+///
+/// Phase 2 of the Plan-Act Pattern (see docs/plan-act-pattern.md).
+/// Returns `{ status, run_id, run_key }`. Caller subscribes to
+/// `GET /api/run/{run_key}/events` to stream the agent output.
+pub async fn build_tool(
+    State(app): State<AppState>,
+    Json(body): Json<BuildToolRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&body.name)?;
+    if body.plan.trim().is_empty() {
+        return Err(AppError::bad_request("plan must not be empty"));
+    }
+
+    let name = body.name.clone();
+    let key = format!("tool-build:{name}");
+
+    let prompt = format!(
+        "Use `/sdlc-tool-build` to implement the tool `{name}`.\n\
+        \n\
+        ## Plan\n\
+        \n\
+        {plan}\n\
+        \n\
+        ## Instructions\n\
+        \n\
+        Follow the `/sdlc-tool-build` steps exactly:\n\
+        1. If `.sdlc/tools/{name}/tool.ts` does not exist, scaffold it first: \
+           `sdlc tool scaffold {name} \"<one-line description from plan>\"`.\n\
+        2. Implement the `run()` function according to the plan above.\n\
+        3. Fill in accurate `meta` (name, display_name, description, version, input_schema, \
+           output_schema).\n\
+        4. Add `--setup` mode if the plan requires it.\n\
+        5. Write `README.md` in `.sdlc/tools/{name}/` with description, setup, usage examples.\n\
+        6. Test `--meta` mode: `bun run .sdlc/tools/{name}/tool.ts --meta | jq .`\n\
+        7. Test `--run` mode with minimal valid input.\n\
+        8. Run `sdlc tool sync` to update `tools.md`.\n\
+        9. Commit the new tool files.\n\
+        ",
+        name = name,
+        plan = body.plan,
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 25);
+
+    let result = spawn_agent_run(
+        key.clone(),
+        prompt,
+        opts,
+        &app,
+        "tool_build",
+        &format!("Build tool: {name}"),
+        Some(SseMessage::ToolBuildCompleted { name: name.clone() }),
+    )
+    .await?;
+
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+// ---------------------------------------------------------------------------
+// Tool evolve endpoint
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct EvolveToolRequest {
+    /// What the user wants changed in the tool.
+    pub change_request: String,
+}
+
+/// POST /api/tools/:name/evolve — spawn an agent that modifies an existing user-created tool.
+///
+/// Reads the current `tool.ts`, injects it into the prompt alongside the user's
+/// change request, and streams the agent output.
+///
+/// Returns 400 if `change_request` is empty or the name is invalid.
+/// Returns 404 if the tool does not exist.
+pub async fn evolve_tool(
+    State(app): State<AppState>,
+    Path(name): Path<String>,
+    Json(body): Json<EvolveToolRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&name)?;
+    if body.change_request.trim().is_empty() {
+        return Err(AppError::bad_request("change_request must not be empty"));
+    }
+
+    let root = app.root.clone();
+    let name_clone = name.clone();
+    let existing_code = tokio::task::spawn_blocking(move || {
+        let script = sdlc_core::paths::tool_script(&root, &name_clone);
+        if !script.exists() {
+            return Err(AppError::not_found(format!(
+                "tool '{name_clone}' not found"
+            )));
+        }
+        std::fs::read_to_string(&script)
+            .map_err(|e| AppError(anyhow::anyhow!("failed to read tool.ts: {e}")))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    let key = format!("tool-evolve:{name}");
+    let change_request = body.change_request.clone();
+
+    let prompt = format!(
+        "The user wants to evolve the tool `{name}`.\n\
+        \n\
+        ## Change request\n\
+        \n\
+        {change_request}\n\
+        \n\
+        ## Current implementation\n\
+        \n\
+        ```typescript\n\
+        {existing_code}\
+        ```\n\
+        \n\
+        ## Instructions\n\
+        \n\
+        Follow `/sdlc-tool-build` guidelines to modify `.sdlc/tools/{name}/tool.ts`:\n\
+        1. Apply the requested changes.\n\
+        2. Update meta fields (version bump, schemas) if needed.\n\
+        3. Test `--meta` mode: `bun run .sdlc/tools/{name}/tool.ts --meta | jq .`\n\
+        4. Test `--run` mode with valid input.\n\
+        5. Update README.md if behavior changed.\n\
+        6. Run `sdlc tool sync`.\n\
+        7. Commit the changes.\n\
+        ",
+        name = name,
+        change_request = change_request,
+        existing_code = existing_code,
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 20);
+
+    let result = spawn_agent_run(
+        key.clone(),
+        prompt,
+        opts,
+        &app,
+        "tool_evolve",
+        &format!("Evolve tool: {name}"),
+        Some(SseMessage::ToolEvolveCompleted { name: name.clone() }),
+    )
+    .await?;
+
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+// ---------------------------------------------------------------------------
+// Tool result action endpoint
+// ---------------------------------------------------------------------------
+
+/// Request body for POST /api/tools/:name/act
+#[derive(serde::Deserialize)]
+pub struct ActToolRequest {
+    /// Index into `tool.result_actions[]` to execute.
+    pub action_index: usize,
+    /// The tool result to evaluate the condition against.
+    pub result: serde_json::Value,
+    /// The tool input used in the triggering run.
+    pub input: serde_json::Value,
+    /// Optional: interaction record ID for linking the action to a specific run.
+    pub interaction_id: Option<String>,
+}
+
+/// POST /api/tools/:name/act — fire a result action declared in the tool's meta.
+///
+/// Evaluates the action's `condition` against `result`. If it passes (or there
+/// is no condition), interpolates `prompt_template` and spawns an agent run.
+///
+/// Returns `{ status, run_id, run_key }`.
+/// Returns 400 if action_index is out of bounds or condition fails.
+/// Returns 404 if the tool is not installed.
+pub async fn act_tool(
+    State(app): State<AppState>,
+    Path(name): Path<String>,
+    Json(body): Json<ActToolRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&name)?;
+
+    let root = app.root.clone();
+    let name_clone = name.clone();
+    let (action, prompt) = tokio::task::spawn_blocking(move || -> Result<_, AppError> {
+        let script = sdlc_core::paths::tool_script(&root, &name_clone);
+        if !script.exists() {
+            return Err(AppError::not_found(format!(
+                "tool '{name_clone}' not found"
+            )));
+        }
+
+        let meta_stdout = sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root, None)
+            .map_err(|e| AppError(e.into()))?;
+        let meta = sdlc_core::tool_runner::parse_tool_meta(&meta_stdout)
+            .map_err(|e| AppError(e.into()))?;
+
+        let actions = meta.result_actions.unwrap_or_default();
+        let action = actions.into_iter().nth(body.action_index).ok_or_else(|| {
+            AppError::bad_request(format!(
+                "action_index {} out of bounds for tool '{name_clone}'",
+                body.action_index
+            ))
+        })?;
+
+        // Evaluate condition if present
+        if let Some(cond) = &action.condition {
+            if !eval_condition(cond, &body.result) {
+                return Err(AppError::bad_request(format!(
+                    "condition '{cond}' evaluated to false"
+                )));
+            }
+        }
+
+        // Interpolate prompt template
+        let result_str =
+            serde_json::to_string_pretty(&body.result).unwrap_or_else(|_| body.result.to_string());
+        let input_str =
+            serde_json::to_string_pretty(&body.input).unwrap_or_else(|_| body.input.to_string());
+        let project_root = root.to_string_lossy().to_string();
+
+        let prompt = action
+            .prompt_template
+            .replace("{{result}}", &result_str)
+            .replace("{{input}}", &input_str)
+            .replace("{{tool}}", &name_clone)
+            .replace("{{project}}", &project_root);
+
+        Ok((action, prompt))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    let action_index = body.action_index;
+    let key = format!("tool-act:{name}:{action_index}");
+    let label = format!("{} ({})", action.label, name);
+
+    let result = spawn_agent_run(
+        key.clone(),
+        prompt,
+        sdlc_query_options(app.root.clone(), 20),
+        &app,
+        "tool_act",
+        &label,
+        Some(SseMessage::ToolActCompleted {
+            name: name.clone(),
+            action_index,
+        }),
+    )
+    .await?;
+
+    let mut resp = result.0;
+    if let Some(obj) = resp.as_object_mut() {
+        obj.insert("run_key".to_string(), serde_json::json!(key));
+    }
+    Ok(Json(resp))
+}
+
+/// Evaluate a simple JSONPath-style condition against a result value.
+///
+/// Supported operators: `==`, `!=`, `>`, `<`, `>=`, `<=`
+/// Supported LHS: `$.field`, `$.nested.field`, etc.
+///
+/// Returns `true` if the condition cannot be parsed (fail-open).
+fn eval_condition(condition: &str, result: &serde_json::Value) -> bool {
+    // Try to parse: `<lhs> <op> <rhs>` where lhs starts with `$`
+    let condition = condition.trim();
+    #[allow(clippy::type_complexity)]
+    let ops: &[(&str, fn(&serde_json::Value, &str) -> bool)] = &[
+        ("==", |lhs_val, rhs| compare_eq(lhs_val, rhs)),
+        ("!=", |lhs_val, rhs| !compare_eq(lhs_val, rhs)),
+        (">=", |lhs_val, rhs| {
+            compare_num(lhs_val, rhs, |a, b| a >= b)
+        }),
+        ("<=", |lhs_val, rhs| {
+            compare_num(lhs_val, rhs, |a, b| a <= b)
+        }),
+        (">", |lhs_val, rhs| compare_num(lhs_val, rhs, |a, b| a > b)),
+        ("<", |lhs_val, rhs| compare_num(lhs_val, rhs, |a, b| a < b)),
+    ];
+
+    for (op, eval_fn) in ops {
+        if let Some(idx) = condition.find(op) {
+            let lhs = condition[..idx].trim();
+            let rhs = condition[idx + op.len()..].trim();
+            if let Some(val) = resolve_path(lhs, result) {
+                return eval_fn(val, rhs);
+            }
+            return true; // path not found → fail open
+        }
+    }
+    true // unparseable → fail open
+}
+
+/// Resolve a `$.a.b.c` path against a JSON value.
+fn resolve_path<'a>(path: &str, value: &'a serde_json::Value) -> Option<&'a serde_json::Value> {
+    let path = path.strip_prefix('$')?;
+    let mut current = value;
+    for segment in path.split('.').filter(|s| !s.is_empty()) {
+        current = current.get(segment)?;
+    }
+    Some(current)
+}
+
+fn compare_eq(val: &serde_json::Value, rhs: &str) -> bool {
+    match val {
+        serde_json::Value::Bool(b) => rhs == "true" && *b || rhs == "false" && !*b,
+        serde_json::Value::Number(n) => rhs
+            .parse::<f64>()
+            .map(|r| n.as_f64() == Some(r))
+            .unwrap_or(false),
+        serde_json::Value::String(s) => s == rhs.trim_matches('"'),
+        serde_json::Value::Null => rhs == "null",
+        _ => false,
+    }
+}
+
+fn compare_num(val: &serde_json::Value, rhs: &str, cmp: impl Fn(f64, f64) -> bool) -> bool {
+    let lhs_n = val.as_f64();
+    let rhs_n = rhs.parse::<f64>().ok();
+    match (lhs_n, rhs_n) {
+        (Some(l), Some(r)) => cmp(l, r),
+        _ => false,
+    }
 }
 
 // ---------------------------------------------------------------------------

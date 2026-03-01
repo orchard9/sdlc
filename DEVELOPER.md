@@ -65,6 +65,8 @@ Open `http://localhost:5173`. Vite proxies `/api` to the Rust backend on port 31
 
 `SDLC_ROOT` points the backend at any project on disk — no need to `cd` into it.
 
+> **Stale server?** If a previous `sdlc ui` process is already bound to port 3141 (check with `sdlc list`), kill it first — it may be pointing at the wrong project or running an old binary.
+
 ## Going Deeper
 
 [`docs/architecture.md`](docs/architecture.md) — codebase layout, data schemas, classifier, REST API, contributing (rules, commands, action types).

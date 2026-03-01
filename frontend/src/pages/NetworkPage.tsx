@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { QRCodeSVG } from 'qrcode.react'
 import { api } from '@/api/client'
 import type { TunnelStatus, AppTunnelStatus } from '@/lib/types'
 import { Wifi, WifiOff, Copy, Check, Loader2, AlertCircle, ExternalLink, MessageSquare } from 'lucide-react'
@@ -73,6 +74,17 @@ function TunnelToggleButton({
   )
 }
 
+function QrDisplay({ url, label }: { url: string; label?: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 pt-1">
+      <div className="bg-white p-3 rounded-xl inline-block">
+        <QRCodeSVG value={url} size={140} />
+      </div>
+      {label && <p className="text-xs text-muted-foreground/70 text-center">{label}</p>}
+    </div>
+  )
+}
+
 function TunnelDisclosure() {
   return (
     <div className="border-t border-border/50 pt-3 space-y-1.5">
@@ -103,7 +115,11 @@ function SdlcTunnelSection() {
     try {
       const s = await api.getTunnel()
       setStatus(s)
-      if (!s.active) setSessionToken(null)
+      if (!s.active) {
+        setSessionToken(null)
+      } else if (s.token) {
+        setSessionToken(s.token)
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load tunnel status')
     } finally {
@@ -179,7 +195,10 @@ function SdlcTunnelSection() {
         <div className="space-y-2 pt-1">
           <UrlRow label="Tunnel URL" value={status.url} />
           {authUrl ? (
-            <UrlRow label="Auth URL" value={authUrl} />
+            <>
+              <UrlRow label="Auth URL" value={authUrl} />
+              <QrDisplay url={authUrl} label="Scan to open — token embedded" />
+            </>
           ) : (
             <p className="text-xs text-muted-foreground/70 italic">
               Auth token not shown after page reload — stop and restart to get a new auth URL.
@@ -345,6 +364,7 @@ function AppTunnelSection() {
             <span className="text-muted-foreground/40">→ sdlc-server → reviewers</span>
           </div>
           <UrlRow label="Tunnel URL" value={status.url} />
+          <QrDisplay url={status.url} label="Share with reviewers" />
           {feedbackCount > 0 && (
             <button
               onClick={() => navigate('/feedback')}
@@ -368,9 +388,9 @@ function AppTunnelSection() {
 
 export function NetworkPage() {
   return (
-    <div className="p-6 max-w-2xl mx-auto space-y-6">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
       <div>
-        <h1 className="text-xl font-semibold">Network</h1>
+        <h2 className="text-xl font-semibold">Network</h2>
         <p className="text-sm text-muted-foreground mt-1">Tunnels and connectivity</p>
       </div>
 

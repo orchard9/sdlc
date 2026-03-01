@@ -1,0 +1,217 @@
+slug: react-testid-attributes
+title: Add data-testid attributes to key React components for stable Playwright selectors
+description: 'Audit all React pages (MilestoneDetail, FeatureDetail, Dashboard, FeatureList) and add data-testid to: phase-badge, directive-panel, artifact-list, approve-button, reject-button, milestone-status, feature-title, task-list. These are the stable anchor points for all Playwright specs — no testid means no reliable spec.'
+phase: released
+created_at: 2026-03-01T06:11:12.982460Z
+updated_at: 2026-03-01T06:45:20.290186Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/react-testid-attributes/spec.md
+  created_at: 2026-03-01T06:40:40.442160Z
+  approved_at: 2026-03-01T06:40:40.449439Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/react-testid-attributes/design.md
+  created_at: 2026-03-01T06:41:04.091582Z
+  approved_at: 2026-03-01T06:41:04.100533Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/react-testid-attributes/tasks.md
+  created_at: 2026-03-01T06:41:22.945552Z
+  approved_at: 2026-03-01T06:41:22.959113Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/react-testid-attributes/qa-plan.md
+  created_at: 2026-03-01T06:41:41.862782Z
+  approved_at: 2026-03-01T06:41:41.869798Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/react-testid-attributes/review.md
+  created_at: 2026-03-01T06:44:27.988503Z
+  approved_at: 2026-03-01T06:44:27.995419Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/react-testid-attributes/audit.md
+  created_at: 2026-03-01T06:44:51.778433Z
+  approved_at: 2026-03-01T06:44:51.790145Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/react-testid-attributes/qa-results.md
+  created_at: 2026-03-01T06:45:16.781956Z
+  approved_at: 2026-03-01T06:45:16.790627Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Audit all page components and identify interactive elements needing data-testid
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:35.577706Z
+  started_at: 2026-03-01T06:42:07.083854Z
+  completed_at: 2026-03-01T06:42:07.090508Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add data-testid to phase-badge, feature-title, artifact-list in FeatureDetail.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:35.661622Z
+  started_at: 2026-03-01T06:42:13.156247Z
+  completed_at: 2026-03-01T06:42:36.135654Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add data-testid to approve-button, reject-button, artifact-status in FeatureDetail.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:35.856291Z
+  started_at: 2026-03-01T06:42:41.904061Z
+  completed_at: 2026-03-01T06:42:46.944237Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add data-testid to milestone-status, milestone-title, start-uat-button in MilestoneDetail
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:36.015787Z
+  started_at: 2026-03-01T06:42:50.929278Z
+  completed_at: 2026-03-01T06:42:57.672554Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add data-testid to directive-panel, next-action, next-action-type in directive/next output views
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:36.127927Z
+  started_at: 2026-03-01T06:43:04.409665Z
+  completed_at: 2026-03-01T06:43:10.160055Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Extend StatusBadge with testId prop
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.246834Z
+  started_at: 2026-03-01T06:43:14.358320Z
+  completed_at: 2026-03-01T06:43:14.366329Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Annotate FeatureCard (feature-title, phase-badge)
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.253852Z
+  started_at: 2026-03-01T06:43:17.872348Z
+  completed_at: 2026-03-01T06:43:24.691189Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Annotate FeatureDetail (feature-title, phase-badge, next-action, artifact-list, task-list)
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.261171Z
+  started_at: 2026-03-01T06:43:29.645889Z
+  completed_at: 2026-03-01T06:43:29.652884Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Annotate ArtifactViewer (artifact-status)
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.268511Z
+  started_at: 2026-03-01T06:43:33.899313Z
+  completed_at: 2026-03-01T06:43:33.905369Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: Annotate MilestoneDetail (milestone-title, milestone-status)
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.276077Z
+  started_at: 2026-03-01T06:43:37.088822Z
+  completed_at: 2026-03-01T06:43:37.096624Z
+  blocker: null
+  depends_on: []
+- id: T11
+  title: Annotate MilestonesPage (milestone-title, milestone-status)
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.282503Z
+  started_at: 2026-03-01T06:43:40.483984Z
+  completed_at: 2026-03-01T06:43:53.397045Z
+  blocker: null
+  depends_on: []
+- id: T12
+  title: TypeScript verification
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:50.289473Z
+  started_at: 2026-03-01T06:43:57.525356Z
+  completed_at: 2026-03-01T06:44:01.764987Z
+  blocker: null
+  depends_on: []
+- id: T13
+  title: 'Update acceptance test step 8: rename directive-panel → next-action (matches actual implementation); approve-button and reject-button do not exist in UI (artifact approval is CLI-only) — add these testids when approve/reject buttons are built in a future milestone'
+  description: null
+  status: pending
+  created_at: 2026-03-01T07:02:01.629281Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:12.982460Z
+  exited: 2026-03-01T06:40:40.450180Z
+- phase: specified
+  entered: 2026-03-01T06:40:40.450180Z
+  exited: 2026-03-01T06:41:41.870781Z
+- phase: planned
+  entered: 2026-03-01T06:41:41.870781Z
+  exited: 2026-03-01T06:41:53.920734Z
+- phase: ready
+  entered: 2026-03-01T06:41:53.920734Z
+  exited: 2026-03-01T06:41:56.944927Z
+- phase: implementation
+  entered: 2026-03-01T06:41:56.944927Z
+  exited: 2026-03-01T06:44:27.996247Z
+- phase: review
+  entered: 2026-03-01T06:44:27.996247Z
+  exited: 2026-03-01T06:44:32.298371Z
+- phase: audit
+  entered: 2026-03-01T06:44:32.298371Z
+  exited: 2026-03-01T06:44:51.791101Z
+- phase: qa
+  entered: 2026-03-01T06:44:51.791101Z
+  exited: 2026-03-01T06:45:16.791955Z
+- phase: merge
+  entered: 2026-03-01T06:45:16.791955Z
+  exited: 2026-03-01T06:45:20.290186Z
+- phase: released
+  entered: 2026-03-01T06:45:20.290186Z
+  exited: null
+dependencies: []
+archived: false

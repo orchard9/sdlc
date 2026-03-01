@@ -5,6 +5,22 @@ active_features:
 - server-remote-state
 - claude-code-consumer
 - vision-docs-update
+- playwright-install-config
+- react-testid-attributes
+- playwright-first-spec
+- playwright-mcp-setup
+- uat-skill-playwright
+- uat-run-persistence
+- uat-run-server-routes
+- milestone-uat-history-panel
+- playwright-github-actions
+- guidance-playwright-update
+- init-rs-skill-update
+- orchestrator-action-model
+- orchestrator-tick-cli
+- orchestrator-integration-test
+- orchestrator-webhook-storage
+- orchestrator-webhook-routing
 active_directives: []
 history:
 - feature: claude-code-consumer
@@ -62,9 +78,165 @@ history:
   phase: released
   timestamp: 2026-02-27T07:46:50.591057Z
   outcome: merged
+- feature: playwright-install-config
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T06:41:17.991167Z
+  outcome: transition
+- feature: playwright-install-config
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T06:41:20.819347Z
+  outcome: transition
+- feature: react-testid-attributes
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T06:41:53.921257Z
+  outcome: transition
+- feature: react-testid-attributes
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T06:41:56.945598Z
+  outcome: transition
+- feature: playwright-install-config
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T06:43:33.708692Z
+  outcome: transition
+- feature: playwright-install-config
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T06:44:30.199826Z
+  outcome: merged
+- feature: react-testid-attributes
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T06:44:32.298990Z
+  outcome: transition
+- feature: react-testid-attributes
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T06:45:20.291272Z
+  outcome: merged
+- feature: playwright-first-spec
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T06:57:21.726957Z
+  outcome: transition
+- feature: playwright-first-spec
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T06:58:01.499706Z
+  outcome: merged
+- feature: uat-run-persistence
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T07:05:48.656575Z
+  outcome: transition
+- feature: uat-run-persistence
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T07:05:51.036557Z
+  outcome: transition
+- feature: playwright-mcp-setup
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T07:05:58.880127Z
+  outcome: transition
+- feature: playwright-mcp-setup
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T07:06:00.572322Z
+  outcome: transition
+- feature: uat-skill-playwright
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T07:06:24.518096Z
+  outcome: transition
+- feature: uat-skill-playwright
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T07:06:28.350903Z
+  outcome: transition
+- feature: playwright-mcp-setup
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T07:08:22.838239Z
+  outcome: transition
+- feature: playwright-mcp-setup
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T07:09:30.855082Z
+  outcome: merged
+- feature: uat-run-persistence
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T07:09:41.989843Z
+  outcome: transition
+- feature: uat-skill-playwright
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T07:10:08.664327Z
+  outcome: transition
+- feature: uat-run-persistence
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T07:10:26.585737Z
+  outcome: merged
+- feature: uat-skill-playwright
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T07:10:54.817899Z
+  outcome: merged
+- feature: uat-run-server-routes
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T07:14:36.834343Z
+  outcome: transition
+- feature: uat-run-server-routes
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T07:14:38.553025Z
+  outcome: transition
+- feature: uat-run-server-routes
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T07:17:28.445963Z
+  outcome: transition
+- feature: uat-run-server-routes
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T07:19:54.933977Z
+  outcome: merged
+- feature: orchestrator-action-model
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-01T07:57:42.634697Z
+  outcome: transition
+- feature: orchestrator-action-model
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-01T07:57:48.977132Z
+  outcome: transition
+- feature: orchestrator-action-model
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-01T08:04:28.353516Z
+  outcome: transition
+- feature: orchestrator-action-model
+  action: merge
+  phase: released
+  timestamp: 2026-03-01T08:05:56.372536Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
 - v02-server-interface
 - v03-consumer-examples
-last_updated: 2026-02-27T07:55:47.372712Z
+- v04-playwright-foundation
+- v05-playwright-uat-integration
+- v06-uat-dashboard-and-ci
+- v07-orchestrator-core
+- v08-orchestrator-webhooks
+active_ponders: []
+last_updated: 2026-03-01T08:05:56.372536Z

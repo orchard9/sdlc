@@ -37,6 +37,22 @@ export type ArtifactStatus = 'missing' | 'draft' | 'approved' | 'rejected' | 'ne
 export type TaskStatus = 'pending' | 'in_progress' | 'completed' | 'blocked'
 export type MilestoneStatus = 'active' | 'verifying' | 'released' | 'skipped'
 
+export type UatVerdict = 'pass' | 'pass_with_tasks' | 'failed'
+
+export interface UatRun {
+  id: string
+  milestone_slug: string
+  started_at: string
+  completed_at: string | null
+  verdict: UatVerdict
+  tests_total: number
+  tests_passed: number
+  tests_failed: number
+  playwright_report_path: string | null
+  tasks_created: string[]
+  summary_path: string
+}
+
 export interface PlatformArg {
   name: string
   required: boolean
@@ -421,6 +437,39 @@ export interface FeedbackNote {
 
 export type PonderStatus = 'exploring' | 'converging' | 'committed' | 'parked'
 
+// ---------------------------------------------------------------------------
+// Advisory types
+// ---------------------------------------------------------------------------
+
+export type MaturityStage = 'health' | 'consistency' | 'refactor' | 'structure' | 'roadmap' | 'advanced'
+export type FindingStatus = 'open' | 'acknowledged' | 'resolved' | 'dismissed'
+
+export interface Finding {
+  id: string
+  stage: MaturityStage
+  title: string
+  description: string
+  status: FindingStatus
+  created_at: string
+  resolved_at: string | null
+}
+
+export interface AdvisoryRun {
+  run_at: string
+  file_count: number | null
+  stage_reached: MaturityStage
+  summary: string
+}
+
+export interface AdvisoryHistory {
+  runs: AdvisoryRun[]
+  findings: Finding[]
+}
+
+export interface AdvisorySseEvent {
+  type: 'advisory_run_completed' | 'advisory_run_stopped'
+}
+
 export interface PonderSummary {
   slug: string
   title: string
@@ -632,6 +681,30 @@ export interface DocsSseEvent {
 // Tool Suite types
 // ---------------------------------------------------------------------------
 
+export interface SecretRef {
+  env_var: string
+  description: string
+  required: boolean
+}
+
+export interface FormField {
+  key: string
+  field_type: string   // "text"|"textarea"|"code"|"select"|"checkbox"|"date_range"
+  label?: string
+  placeholder?: string
+  options?: string[]
+  language?: string
+  default?: unknown
+}
+
+export interface ResultAction {
+  label: string
+  icon?: string
+  condition?: string
+  prompt_template: string
+  confirm?: string
+}
+
 export interface ToolMeta {
   name: string
   display_name: string
@@ -642,6 +715,63 @@ export interface ToolMeta {
   setup_description?: string
   input_schema: Record<string, unknown>
   output_schema: Record<string, unknown>
+  built_in?: boolean   // true for tools managed by sdlc init (ama, quality-check)
+  // Extended optional fields (Phase 1 delivery)
+  secrets?: SecretRef[]
+  form_layout?: FormField[]
+  streaming?: boolean
+  result_actions?: ResultAction[]
+  timeout_seconds?: number
+  tags?: string[]
+  threaded?: boolean
+  persist_interactions?: boolean
+  // Injected by server on 422 when required env vars are missing
+  missing_secrets?: string[]
+}
+
+// ---------------------------------------------------------------------------
+// Tool interaction history
+// ---------------------------------------------------------------------------
+
+export interface ToolInteractionRecord {
+  id: string
+  tool_name: string
+  created_at: string
+  completed_at?: string
+  input: unknown
+  result?: unknown
+  status: 'running' | 'completed' | 'failed'
+  tags: string[]
+  notes?: string
+  streaming_log: boolean
+}
+
+// ---------------------------------------------------------------------------
+// AMA thread types (server-backed)
+// ---------------------------------------------------------------------------
+
+export interface AmaThread {
+  id: string
+  title: string
+  created_at: string
+  updated_at: string
+  turn_count: number
+  tags: string[]
+  committed_to?: string
+}
+
+export interface AmaTurnRecord {
+  turn_index: number
+  question: string
+  sources: AmaSource[]
+  synthesis?: string
+  run_id?: string
+  created_at: string
+  completed_at?: string
+}
+
+export interface AmaThreadDetail extends AmaThread {
+  turns: AmaTurnRecord[]
 }
 
 export interface ToolResult<T = unknown> {
@@ -692,7 +822,7 @@ export interface AmaThreadTurn {
 export interface TunnelStatus {
   active: boolean
   url: string | null
-  /** Only present in the POST (start) response; null on GET. */
+  /** Present whenever a tunnel is active; null otherwise. */
   token: string | null
   port: number
 }

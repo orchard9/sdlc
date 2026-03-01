@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Trash2, Send, Loader2 } from 'lucide-react'
+import { Trash2, Send, Loader2, MessageSquare } from 'lucide-react'
 import { api } from '@/api/client'
 import type { FeedbackNote } from '@/lib/types'
 
@@ -78,12 +78,15 @@ export function FeedbackPage() {
   const hasDraft = draft.trim().length > 0
 
   return (
-    <div className="h-full flex flex-col overflow-hidden">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border shrink-0">
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-lg font-semibold">Feedback</h1>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <div className="flex items-center gap-2.5 mb-1">
+            <MessageSquare className="w-5 h-5 text-muted-foreground" />
+            <h2 className="text-xl font-semibold">Feedback</h2>
+          </div>
+          <p className="text-sm text-muted-foreground">
             Write anything — ideas, issues, observations. Submit when ready to plan.
           </p>
         </div>
@@ -105,7 +108,7 @@ export function FeedbackPage() {
       </div>
 
       {/* Compose area */}
-      <div className="px-6 pt-4 pb-3 shrink-0">
+      <div className="mb-4">
         <div className="relative">
           <textarea
             ref={textareaRef}
@@ -133,7 +136,7 @@ export function FeedbackPage() {
       </div>
 
       {/* Notes list */}
-      <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-2">
+      <div className="space-y-2">
         {notes.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground/40 select-none">
             <p className="text-sm">No notes yet.</p>

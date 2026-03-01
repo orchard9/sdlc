@@ -208,7 +208,7 @@ fn run_tool_cmd(
         );
     }
 
-    let output = sdlc_core::tool_runner::run_tool(&script, mode, input_json, root)
+    let output = sdlc_core::tool_runner::run_tool(&script, mode, input_json, root, None)
         .with_context(|| format!("failed to run tool '{name}'"))?;
 
     // Pretty-print if JSON, otherwise raw
@@ -248,7 +248,7 @@ fn sync_manifest(root: &Path) -> anyhow::Result<()> {
             continue;
         }
 
-        match sdlc_core::tool_runner::run_tool(&script, "--meta", None, root) {
+        match sdlc_core::tool_runner::run_tool(&script, "--meta", None, root, None) {
             Ok(json) => {
                 if let Ok(meta) = serde_json::from_str::<ToolMeta>(&json) {
                     entries.push(ToolEntry {
@@ -293,7 +293,7 @@ fn tool_info(root: &Path, name: &str) -> anyhow::Result<()> {
         );
     }
 
-    let output = sdlc_core::tool_runner::run_tool(&script, "--meta", None, root)
+    let output = sdlc_core::tool_runner::run_tool(&script, "--meta", None, root, None)
         .with_context(|| format!("failed to get metadata for tool '{name}'"))?;
 
     if let Ok(val) = serde_json::from_str::<serde_json::Value>(&output) {

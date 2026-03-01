@@ -199,6 +199,20 @@ pub enum SseMessage {
     TeamRecruitCompleted,
     /// A new tool was scaffolded or an existing tool changed.
     ToolsChanged,
+    /// Tool plan agent completed — schema and approach designed.
+    ToolPlanCompleted { name: String },
+    /// Tool build agent completed — tool fully implemented and tested.
+    ToolBuildCompleted { name: String },
+    /// An advisory analysis agent run completed — advisory.yaml updated.
+    AdvisoryRunCompleted,
+    /// An advisory analysis agent run was stopped.
+    AdvisoryRunStopped,
+    /// Tool evolve agent completed — tool.ts updated.
+    ToolEvolveCompleted { name: String },
+    /// A result-action agent run completed for a tool.
+    ToolActCompleted { name: String, action_index: usize },
+    /// A milestone UAT agent run completed — UatRun record may have been written.
+    MilestoneUatCompleted { slug: String },
 }
 
 /// Shared application state passed to all route handlers.

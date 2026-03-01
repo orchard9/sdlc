@@ -1,0 +1,127 @@
+slug: playwright-mcp-setup
+title: Register @microsoft/playwright-mcp and add to UAT agent tool allowlist
+description: 'Add .mcp.json to project root registering @microsoft/playwright-mcp. Update spawn_agent_run call in crates/sdlc-server/src/routes/runs.rs for milestone-uat runs to include Playwright MCP tools in allowed_tools: browser_navigate, browser_click, browser_type, browser_snapshot, browser_take_screenshot, browser_console_messages, browser_wait_for.'
+phase: released
+created_at: 2026-03-01T06:11:14.115604Z
+updated_at: 2026-03-01T07:09:30.854186Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/spec.md
+  created_at: 2026-03-01T07:04:39.585449Z
+  approved_at: 2026-03-01T07:04:39.607182Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/design.md
+  created_at: 2026-03-01T07:05:16.078539Z
+  approved_at: 2026-03-01T07:05:16.088745Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/tasks.md
+  created_at: 2026-03-01T07:05:31.819041Z
+  approved_at: 2026-03-01T07:05:31.826890Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/qa-plan.md
+  created_at: 2026-03-01T07:05:48.069742Z
+  approved_at: 2026-03-01T07:05:48.076816Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/review.md
+  created_at: 2026-03-01T07:08:16.755406Z
+  approved_at: 2026-03-01T07:08:16.764709Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/audit.md
+  created_at: 2026-03-01T07:08:47.534049Z
+  approved_at: 2026-03-01T07:08:47.550212Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/playwright-mcp-setup/qa-results.md
+  created_at: 2026-03-01T07:09:25.931406Z
+  approved_at: 2026-03-01T07:09:25.943366Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create .mcp.json in project root registering @microsoft/playwright-mcp
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.078424Z
+  started_at: 2026-03-01T07:06:02.592332Z
+  completed_at: 2026-03-01T07:06:08.500752Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update spawn_agent_run call for milestone-uat in routes/runs.rs to include Playwright MCP tools in allowed_tools
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.084936Z
+  started_at: 2026-03-01T07:06:12.299134Z
+  completed_at: 2026-03-01T07:07:36.384576Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Document Playwright MCP tool list in CLAUDE.md or guidance.md
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.091400Z
+  started_at: 2026-03-01T07:07:39.848533Z
+  completed_at: 2026-03-01T07:07:57.658991Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:14.115604Z
+  exited: 2026-03-01T07:04:39.607816Z
+- phase: specified
+  entered: 2026-03-01T07:04:39.607816Z
+  exited: 2026-03-01T07:05:48.077462Z
+- phase: planned
+  entered: 2026-03-01T07:05:48.077462Z
+  exited: 2026-03-01T07:05:58.879501Z
+- phase: ready
+  entered: 2026-03-01T07:05:58.879501Z
+  exited: 2026-03-01T07:06:00.571813Z
+- phase: implementation
+  entered: 2026-03-01T07:06:00.571813Z
+  exited: 2026-03-01T07:08:16.765734Z
+- phase: review
+  entered: 2026-03-01T07:08:16.765734Z
+  exited: 2026-03-01T07:08:22.837245Z
+- phase: audit
+  entered: 2026-03-01T07:08:22.837245Z
+  exited: 2026-03-01T07:08:47.558819Z
+- phase: qa
+  entered: 2026-03-01T07:08:47.558819Z
+  exited: 2026-03-01T07:09:25.944393Z
+- phase: merge
+  entered: 2026-03-01T07:09:25.944393Z
+  exited: 2026-03-01T07:09:30.854186Z
+- phase: released
+  entered: 2026-03-01T07:09:30.854186Z
+  exited: null
+dependencies: []
+archived: false

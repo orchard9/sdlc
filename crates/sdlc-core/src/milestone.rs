@@ -323,6 +323,78 @@ impl Milestone {
 }
 
 // ---------------------------------------------------------------------------
+// UatVerdict / UatRun
+// ---------------------------------------------------------------------------
+
+/// The outcome of a UAT run.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[serde(rename_all = "snake_case")]
+pub enum UatVerdict {
+    Pass,
+    PassWithTasks,
+    Failed,
+}
+
+/// A single recorded UAT execution for a milestone.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UatRun {
+    pub id: String,
+    pub milestone_slug: String,
+    pub started_at: DateTime<Utc>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub completed_at: Option<DateTime<Utc>>,
+    pub verdict: UatVerdict,
+    pub tests_total: u32,
+    pub tests_passed: u32,
+    pub tests_failed: u32,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub playwright_report_path: Option<String>,
+    #[serde(default)]
+    pub tasks_created: Vec<String>,
+    pub summary_path: String,
+}
+
+/// Persist a UAT run to `.sdlc/milestones/<slug>/uat-runs/<id>/run.yaml`.
+///
+/// The parent directory is created automatically by [`crate::io::atomic_write`].
+pub fn save_uat_run(root: &Path, run: &UatRun) -> Result<()> {
+    let path = paths::uat_run_manifest(root, &run.milestone_slug, &run.id);
+    let data = serde_yaml::to_string(run)?;
+    crate::io::atomic_write(&path, data.as_bytes())
+}
+
+/// Return all UAT runs for `milestone_slug`, sorted newest-first by `started_at`.
+///
+/// Returns an empty `Vec` if the `uat-runs/` directory does not exist.
+pub fn list_uat_runs(root: &Path, milestone_slug: &str) -> Result<Vec<UatRun>> {
+    let dir = paths::milestone_uat_runs_dir(root, milestone_slug);
+    if !dir.exists() {
+        return Ok(Vec::new());
+    }
+    let mut runs = Vec::new();
+    for entry in std::fs::read_dir(&dir)? {
+        let entry = entry?;
+        if !entry.file_type()?.is_dir() {
+            continue;
+        }
+        let run_id = entry.file_name().to_string_lossy().into_owned();
+        let manifest = paths::uat_run_manifest(root, milestone_slug, &run_id);
+        if manifest.exists() {
+            let data = std::fs::read_to_string(&manifest)?;
+            let run: UatRun = serde_yaml::from_str(&data)?;
+            runs.push(run);
+        }
+    }
+    runs.sort_by(|a, b| b.started_at.cmp(&a.started_at));
+    Ok(runs)
+}
+
+/// Return the most recent UAT run for `milestone_slug`, or `None` if none exist.
+pub fn latest_uat_run(root: &Path, milestone_slug: &str) -> Result<Option<UatRun>> {
+    Ok(list_uat_runs(root, milestone_slug)?.into_iter().next())
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -611,5 +683,74 @@ mod tests {
 
         // No non-archived features → still Active
         assert_eq!(m.compute_status(&[fa]), MilestoneStatus::Active);
+    }
+
+    // ---------------------------------------------------------------------------
+    // UatRun tests
+    // ---------------------------------------------------------------------------
+
+    fn make_run(milestone_slug: &str, id: &str, started_at: DateTime<Utc>) -> UatRun {
+        UatRun {
+            id: id.to_string(),
+            milestone_slug: milestone_slug.to_string(),
+            started_at,
+            completed_at: None,
+            verdict: UatVerdict::Pass,
+            tests_total: 10,
+            tests_passed: 10,
+            tests_failed: 0,
+            playwright_report_path: None,
+            tasks_created: vec![],
+            summary_path: format!("milestones/{milestone_slug}/uat-runs/{id}/summary.md"),
+        }
+    }
+
+    #[test]
+    fn uat_run_round_trip() {
+        let dir = TempDir::new().unwrap();
+        let run = make_run("v1", "20260228-120000-abc123", Utc::now());
+
+        save_uat_run(dir.path(), &run).unwrap();
+
+        let runs = list_uat_runs(dir.path(), "v1").unwrap();
+        assert_eq!(runs.len(), 1);
+        assert_eq!(runs[0].id, run.id);
+        assert_eq!(runs[0].milestone_slug, run.milestone_slug);
+        assert_eq!(runs[0].verdict, UatVerdict::Pass);
+        assert_eq!(runs[0].tests_total, 10);
+        assert_eq!(runs[0].tests_passed, 10);
+        assert_eq!(runs[0].tests_failed, 0);
+        assert_eq!(runs[0].summary_path, run.summary_path);
+    }
+
+    #[test]
+    fn uat_run_list_sorted_newest_first() {
+        let dir = TempDir::new().unwrap();
+
+        let older = chrono::DateTime::parse_from_rfc3339("2026-02-01T10:00:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+        let newer = chrono::DateTime::parse_from_rfc3339("2026-02-28T14:30:00Z")
+            .unwrap()
+            .with_timezone(&Utc);
+
+        let run_a = make_run("v1", "20260201-100000-aaaaaa", older);
+        let run_b = make_run("v1", "20260228-143000-bbbbbb", newer);
+
+        save_uat_run(dir.path(), &run_a).unwrap();
+        save_uat_run(dir.path(), &run_b).unwrap();
+
+        let runs = list_uat_runs(dir.path(), "v1").unwrap();
+        assert_eq!(runs.len(), 2);
+        // Newest first
+        assert_eq!(runs[0].id, run_b.id);
+        assert_eq!(runs[1].id, run_a.id);
+    }
+
+    #[test]
+    fn uat_run_latest_none_when_empty() {
+        let dir = TempDir::new().unwrap();
+        let result = latest_uat_run(dir.path(), "v1").unwrap();
+        assert!(result.is_none());
     }
 }

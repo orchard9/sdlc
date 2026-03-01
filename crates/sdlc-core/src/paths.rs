@@ -19,11 +19,14 @@ pub const INVESTIGATIONS_DIR: &str = ".sdlc/investigations";
 pub const TOOLS_DIR: &str = ".sdlc/tools";
 pub const TOOLS_MANIFEST: &str = ".sdlc/tools/tools.md";
 pub const TOOLS_SHARED_DIR: &str = ".sdlc/tools/_shared";
+pub const TOOL_INTERACTIONS_DIR: &str = ".sdlc/tool-interactions";
+pub const AMA_THREADS_DIR: &str = ".sdlc/tool-interactions/ama/threads";
 
 pub const SECRETS_DIR: &str = ".sdlc/secrets";
 pub const SECRETS_KEYS_FILE: &str = ".sdlc/secrets/keys.yaml";
 pub const SECRETS_ENVS_DIR: &str = ".sdlc/secrets/envs";
 
+pub const ADVISORY_FILE: &str = ".sdlc/advisory.yaml";
 pub const ESCALATIONS_FILE: &str = ".sdlc/escalations.yaml";
 pub const FEEDBACK_FILE: &str = ".sdlc/feedback.yaml";
 
@@ -74,6 +77,18 @@ pub fn milestone_acceptance_test_path(root: &Path, slug: &str) -> PathBuf {
 
 pub fn milestone_uat_results_path(root: &Path, slug: &str) -> PathBuf {
     milestone_dir(root, slug).join("uat_results.md")
+}
+
+pub fn milestone_uat_runs_dir(root: &Path, slug: &str) -> PathBuf {
+    milestone_dir(root, slug).join("uat-runs")
+}
+
+pub fn uat_run_dir(root: &Path, milestone_slug: &str, run_id: &str) -> PathBuf {
+    milestone_uat_runs_dir(root, milestone_slug).join(run_id)
+}
+
+pub fn uat_run_manifest(root: &Path, milestone_slug: &str, run_id: &str) -> PathBuf {
+    uat_run_dir(root, milestone_slug, run_id).join("run.yaml")
 }
 
 pub fn investigation_dir(root: &Path, slug: &str) -> PathBuf {
@@ -156,6 +171,18 @@ pub fn tools_shared_dir(root: &Path) -> PathBuf {
     root.join(TOOLS_SHARED_DIR)
 }
 
+pub fn tool_interactions_dir(root: &Path, tool_name: &str) -> PathBuf {
+    root.join(TOOL_INTERACTIONS_DIR).join(tool_name)
+}
+
+pub fn ama_threads_dir(root: &Path) -> PathBuf {
+    root.join(AMA_THREADS_DIR)
+}
+
+pub fn ama_thread_dir(root: &Path, id: &str) -> PathBuf {
+    ama_threads_dir(root).join(id)
+}
+
 pub fn secrets_dir(root: &Path) -> PathBuf {
     root.join(SECRETS_DIR)
 }
@@ -174,6 +201,10 @@ pub fn secrets_env_path(root: &Path, env_name: &str) -> PathBuf {
 
 pub fn secrets_env_meta_path(root: &Path, env_name: &str) -> PathBuf {
     secrets_envs_dir(root).join(format!("{env_name}.meta.yaml"))
+}
+
+pub fn advisory_path(root: &Path) -> PathBuf {
+    root.join(ADVISORY_FILE)
 }
 
 pub fn escalations_path(root: &Path) -> PathBuf {

@@ -17,7 +17,7 @@ export function AgentPanelFab() {
       {/* FAB button — mobile only */}
       <button
         onClick={() => setDrawerOpen(true)}
-        className="md:hidden fixed bottom-20 right-4 z-40 w-12 h-12 rounded-full bg-card border border-border shadow-lg flex items-center justify-center hover:bg-muted transition-colors"
+        className="md:hidden fixed bottom-[56px] right-4 z-40 w-12 h-12 rounded-full bg-card border border-border shadow-lg flex items-center justify-center hover:bg-muted transition-colors"
         aria-label="Open agent activity"
       >
         <Activity className="w-5 h-5 text-foreground" />

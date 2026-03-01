@@ -1,0 +1,217 @@
+slug: uat-run-server-routes
+title: Server routes for UAT run history and MilestoneUatCompleted SSE event
+description: 'Add to crates/sdlc-server/src/routes/milestones.rs (or new uat.rs): GET /api/milestones/{slug}/uat-runs returns JSON array of UatRun, GET /api/milestones/{slug}/uat-runs/latest returns most recent UatRun or 404. Add SseMessage::MilestoneUatCompleted { slug } to state.rs. Emit it at end of milestone-uat spawn_agent_run.'
+phase: released
+created_at: 2026-03-01T06:11:14.137046Z
+updated_at: 2026-03-01T07:19:54.933308Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/spec.md
+  created_at: 2026-03-01T07:12:56.494763Z
+  approved_at: 2026-03-01T07:12:56.504298Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/design.md
+  created_at: 2026-03-01T07:13:32.401738Z
+  approved_at: 2026-03-01T07:13:32.412150Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/tasks.md
+  created_at: 2026-03-01T07:13:51.236564Z
+  approved_at: 2026-03-01T07:13:51.244757Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/qa-plan.md
+  created_at: 2026-03-01T07:14:19.689753Z
+  approved_at: 2026-03-01T07:14:19.703520Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/review.md
+  created_at: 2026-03-01T07:17:16.966751Z
+  approved_at: 2026-03-01T07:17:16.973996Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/audit.md
+  created_at: 2026-03-01T07:17:56.228849Z
+  approved_at: 2026-03-01T07:17:56.237637Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/uat-run-server-routes/qa-results.md
+  created_at: 2026-03-01T07:19:50.190575Z
+  approved_at: 2026-03-01T07:19:50.207053Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add GET /api/milestones/{slug}/uat-runs route returning Vec<UatRun> as JSON
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:12:00.171659Z
+  started_at: 2026-03-01T07:15:23.232571Z
+  completed_at: 2026-03-01T07:15:35.684518Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add GET /api/milestones/{slug}/uat-runs/latest returning UatRun or 404
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:12:00.178799Z
+  started_at: 2026-03-01T07:15:23.239976Z
+  completed_at: 2026-03-01T07:15:35.692700Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add SseMessage::MilestoneUatCompleted { slug } variant to state.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:12:00.184642Z
+  started_at: 2026-03-01T07:14:45.129608Z
+  completed_at: 2026-03-01T07:14:51.999260Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Emit MilestoneUatCompleted at end of start_milestone_uat spawn_agent_run
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:12:00.190378Z
+  started_at: 2026-03-01T07:15:08.997430Z
+  completed_at: 2026-03-01T07:15:17.607034Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'Add frontend API client methods: listMilestoneUatRuns(), getLatestMilestoneUatRun()'
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:12:00.196232Z
+  started_at: 2026-03-01T07:15:38.275896Z
+  completed_at: 2026-03-01T07:15:44.625745Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Add MilestoneUatCompleted SSE variant to state.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.710917Z
+  started_at: 2026-03-01T07:14:52.008009Z
+  completed_at: 2026-03-01T07:14:54.023501Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Wire MilestoneUatCompleted serialization in events.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.717502Z
+  started_at: 2026-03-01T07:14:59.305409Z
+  completed_at: 2026-03-01T07:15:05.211329Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Emit MilestoneUatCompleted in start_milestone_uat
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.723742Z
+  started_at: 2026-03-01T07:15:09.005093Z
+  completed_at: 2026-03-01T07:15:17.615056Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Add HTTP route handlers for UAT run history in milestones.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.730903Z
+  started_at: 2026-03-01T07:15:23.247035Z
+  completed_at: 2026-03-01T07:15:35.700493Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: Register new UAT run routes in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.738522Z
+  started_at: 2026-03-01T07:15:38.283045Z
+  completed_at: 2026-03-01T07:15:44.633460Z
+  blocker: null
+  depends_on: []
+- id: T11
+  title: Add UatVerdict and UatRun TypeScript types
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.745265Z
+  started_at: 2026-03-01T07:15:47.091553Z
+  completed_at: 2026-03-01T07:15:56.616441Z
+  blocker: null
+  depends_on: []
+- id: T12
+  title: Add API client methods for UAT run history
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.752440Z
+  started_at: 2026-03-01T07:15:58.671636Z
+  completed_at: 2026-03-01T07:16:06.684486Z
+  blocker: null
+  depends_on: []
+- id: T13
+  title: Verify build quality (Rust and TypeScript)
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:14:29.758754Z
+  started_at: 2026-03-01T07:16:08.603083Z
+  completed_at: 2026-03-01T07:16:38.538405Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:14.137046Z
+  exited: 2026-03-01T07:12:56.504915Z
+- phase: specified
+  entered: 2026-03-01T07:12:56.504915Z
+  exited: 2026-03-01T07:14:19.713874Z
+- phase: planned
+  entered: 2026-03-01T07:14:19.713874Z
+  exited: 2026-03-01T07:14:36.833696Z
+- phase: ready
+  entered: 2026-03-01T07:14:36.833696Z
+  exited: 2026-03-01T07:14:38.552370Z
+- phase: implementation
+  entered: 2026-03-01T07:14:38.552370Z
+  exited: 2026-03-01T07:17:16.974813Z
+- phase: review
+  entered: 2026-03-01T07:17:16.974813Z
+  exited: 2026-03-01T07:17:28.444954Z
+- phase: audit
+  entered: 2026-03-01T07:17:28.444954Z
+  exited: 2026-03-01T07:17:56.238453Z
+- phase: qa
+  entered: 2026-03-01T07:17:56.238453Z
+  exited: 2026-03-01T07:19:50.210518Z
+- phase: merge
+  entered: 2026-03-01T07:19:50.210518Z
+  exited: 2026-03-01T07:19:54.933308Z
+- phase: released
+  entered: 2026-03-01T07:19:54.933308Z
+  exited: null
+dependencies: []
+archived: false

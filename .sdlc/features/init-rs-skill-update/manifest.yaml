@@ -1,0 +1,118 @@
+slug: init-rs-skill-update
+title: Update SDLC_MILESTONE_UAT_COMMAND in init.rs to embed Playwright workflow
+description: Rewrite the SDLC_MILESTONE_UAT_COMMAND, SDLC_MILESTONE_UAT_PLAYBOOK, and SDLC_MILESTONE_UAT_SKILL const strings in crates/sdlc-cli/src/cmd/init.rs to include the Mode A / Mode B Playwright workflow. Update all four write_user_* functions. Run sdlc update to verify the updated skill is installed correctly at ~/.claude/commands/sdlc-milestone-uat.md.
+phase: draft
+created_at: 2026-03-01T06:11:14.796407Z
+updated_at: 2026-03-01T06:11:14.796407Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/init-rs-skill-update/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Rewrite SDLC_MILESTONE_UAT_COMMAND const in init.rs with Mode A / Mode B Playwright workflow
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:26.140914Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update SDLC_MILESTONE_UAT_PLAYBOOK const (Gemini/OpenCode variant) with Playwright steps
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:26.147782Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update SDLC_MILESTONE_UAT_SKILL const (Agents variant) with Playwright steps
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:26.153458Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify all four write_user_* functions reference updated skill filenames
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:26.158871Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Run sdlc update in consumer test project and verify ~/.claude/commands/sdlc-milestone-uat.md is updated
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:26.164144Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:14.796407Z
+  exited: null
+dependencies: []
+archived: false

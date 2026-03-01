@@ -1,0 +1,109 @@
+slug: playwright-github-actions
+title: .github/workflows/uat.yml — Playwright CI gate on PRs
+description: 'Create .github/workflows/uat.yml that triggers on push to main and pull_request touching frontend/** or crates/**. Steps: checkout, setup-node 20, npm ci, cargo build --bin sdlc-server --release, npx playwright install --with-deps chromium, start sdlc-server in background, run npx playwright test --reporter=list,html,json, upload playwright-report/ as artifact (30-day retention) on always(), upload test-results/ (traces) on failure() with 7-day retention.'
+phase: draft
+created_at: 2026-03-01T06:11:14.782670Z
+updated_at: 2026-03-01T06:11:14.782670Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/playwright-github-actions/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/playwright-github-actions/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/playwright-github-actions/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/playwright-github-actions/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/playwright-github-actions/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/playwright-github-actions/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/playwright-github-actions/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create .github/workflows/uat.yml with trigger on push/main and pull_request for frontend/** and crates/**
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:24.040950Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Add build steps: checkout, setup-node 20, npm ci, cargo build --release, playwright install chromium'
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:24.049873Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Add test step: start sdlc-server in background, wait for health check, run npx playwright test'
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:24.058928Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Add artifact upload: playwright-report/ on always() with 30-day retention; test-results/ on failure() with 7-day retention'
+  description: null
+  status: pending
+  created_at: 2026-03-01T06:12:24.068659Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:14.782670Z
+  exited: null
+dependencies: []
+archived: false

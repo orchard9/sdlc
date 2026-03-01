@@ -1,0 +1,181 @@
+slug: uat-skill-playwright
+title: Update sdlc-milestone-uat skill with Mode A (run existing spec) and Mode B (generate spec from checklist)
+description: 'Rewrite the SDLC_MILESTONE_UAT_COMMAND const in crates/sdlc-cli/src/cmd/init.rs. Mode A: if e2e/milestones/<slug>.spec.ts exists, run npx playwright test --reporter=json, parse results, synthesize. Mode B: if no spec, use Playwright MCP browser tools to walk each acceptance_test.md checklist item, write the spec, verify it passes, then proceed to Mode A synthesis. Agent writes summary.md with verdict and tasks.'
+phase: released
+created_at: 2026-03-01T06:11:14.122488Z
+updated_at: 2026-03-01T07:10:54.816999Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/spec.md
+  created_at: 2026-03-01T07:05:13.578151Z
+  approved_at: 2026-03-01T07:05:16.463307Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/design.md
+  created_at: 2026-03-01T07:05:46.480647Z
+  approved_at: 2026-03-01T07:05:46.487876Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/tasks.md
+  created_at: 2026-03-01T07:06:02.653994Z
+  approved_at: 2026-03-01T07:06:02.661989Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/qa-plan.md
+  created_at: 2026-03-01T07:06:19.313925Z
+  approved_at: 2026-03-01T07:06:19.321452Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/review.md
+  created_at: 2026-03-01T07:10:04.899623Z
+  approved_at: 2026-03-01T07:10:04.907486Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/audit.md
+  created_at: 2026-03-01T07:10:27.571444Z
+  approved_at: 2026-03-01T07:10:27.580486Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/uat-skill-playwright/qa-results.md
+  created_at: 2026-03-01T07:10:51.146064Z
+  approved_at: 2026-03-01T07:10:51.155177Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Design Mode A prompt: detect spec, run npx playwright test --reporter=json, parse results.json, cross-reference with checklist'
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.903919Z
+  started_at: 2026-03-01T07:09:38.932310Z
+  completed_at: 2026-03-01T07:09:38.942940Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Design Mode B prompt: walk checklist via Playwright MCP browser tools, write spec, verify it passes, then proceed to Mode A'
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.911042Z
+  started_at: 2026-03-01T07:09:38.954430Z
+  completed_at: 2026-03-01T07:09:38.964413Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Write summary.md format: verdict, test counts, tasks created, playwright report path'
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.917359Z
+  started_at: 2026-03-01T07:09:38.973506Z
+  completed_at: 2026-03-01T07:09:38.981561Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update SDLC_MILESTONE_UAT_COMMAND const in init.rs with new Playwright-aware prompt
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.923531Z
+  started_at: 2026-03-01T07:09:38.990560Z
+  completed_at: 2026-03-01T07:09:38.999978Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update Gemini, OpenCode, and Agents skill variants (PLAYBOOK and SKILL consts)
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:51.935487Z
+  started_at: 2026-03-01T07:09:39.008257Z
+  completed_at: 2026-03-01T07:09:39.017858Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Rewrite SDLC_MILESTONE_UAT_COMMAND with Mode A/B logic
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:06:34.564652Z
+  started_at: 2026-03-01T07:06:36.281890Z
+  completed_at: 2026-03-01T07:07:34.812573Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Rewrite SDLC_MILESTONE_UAT_PLAYBOOK (Gemini/OpenCode variant)
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:06:34.571511Z
+  started_at: 2026-03-01T07:07:38.081651Z
+  completed_at: 2026-03-01T07:08:01.242945Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Rewrite SDLC_MILESTONE_UAT_SKILL (Agents SKILL.md variant)
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:06:34.578376Z
+  started_at: 2026-03-01T07:08:01.279250Z
+  completed_at: 2026-03-01T07:08:15.772289Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Verify build and install updated skill
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:06:34.585054Z
+  started_at: 2026-03-01T07:08:15.801145Z
+  completed_at: 2026-03-01T07:09:30.164150Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:14.122488Z
+  exited: 2026-03-01T07:05:16.464490Z
+- phase: specified
+  entered: 2026-03-01T07:05:16.464490Z
+  exited: 2026-03-01T07:06:19.322244Z
+- phase: planned
+  entered: 2026-03-01T07:06:19.322244Z
+  exited: 2026-03-01T07:06:24.517467Z
+- phase: ready
+  entered: 2026-03-01T07:06:24.517467Z
+  exited: 2026-03-01T07:06:28.350235Z
+- phase: implementation
+  entered: 2026-03-01T07:06:28.350235Z
+  exited: 2026-03-01T07:10:04.908534Z
+- phase: review
+  entered: 2026-03-01T07:10:04.908534Z
+  exited: 2026-03-01T07:10:08.649459Z
+- phase: audit
+  entered: 2026-03-01T07:10:08.649459Z
+  exited: 2026-03-01T07:10:27.581932Z
+- phase: qa
+  entered: 2026-03-01T07:10:27.581932Z
+  exited: 2026-03-01T07:10:51.156023Z
+- phase: merge
+  entered: 2026-03-01T07:10:51.156023Z
+  exited: 2026-03-01T07:10:54.816999Z
+- phase: released
+  entered: 2026-03-01T07:10:54.816999Z
+  exited: null
+dependencies: []
+archived: false

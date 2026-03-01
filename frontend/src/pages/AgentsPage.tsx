@@ -110,12 +110,12 @@ export function AgentsPage() {
   useSSE(load)
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-8 space-y-6">
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
       {/* Header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
           <Bot className="w-5 h-5 text-muted-foreground" />
-          <h1 className="text-xl font-semibold">Agents</h1>
+          <h2 className="text-xl font-semibold">Agents</h2>
         </div>
         <p className="text-sm text-muted-foreground">
           Claude agents available in <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">~/.claude/agents/</code>. Use <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">/sdlc-recruit</code> to add thought partners.

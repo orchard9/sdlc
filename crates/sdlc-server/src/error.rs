@@ -32,6 +32,18 @@ impl std::fmt::Display for NotFoundError {
 
 impl std::error::Error for NotFoundError {}
 
+/// Private sentinel for 422 Unprocessable Entity with a custom JSON body.
+#[derive(Debug)]
+struct UnprocessableJsonError(serde_json::Value);
+
+impl std::fmt::Display for UnprocessableJsonError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for UnprocessableJsonError {}
+
 // ---------------------------------------------------------------------------
 // AppError — unified error type for HTTP responses
 // ---------------------------------------------------------------------------
@@ -55,6 +67,11 @@ impl AppError {
     pub fn not_found(msg: impl Into<String>) -> Self {
         Self(NotFoundError(msg.into()).into())
     }
+
+    /// Construct a 422 Unprocessable Entity error with a custom JSON body.
+    pub fn unprocessable_json(body: serde_json::Value) -> Self {
+        Self(UnprocessableJsonError(body).into())
+    }
 }
 
 impl IntoResponse for AppError {
@@ -67,6 +84,9 @@ impl IntoResponse for AppError {
         if let Some(n) = self.0.downcast_ref::<NotFoundError>() {
             let body = serde_json::json!({ "error": n.0.clone() });
             return (StatusCode::NOT_FOUND, axum::Json(body)).into_response();
+        }
+        if let Some(u) = self.0.downcast_ref::<UnprocessableJsonError>() {
+            return (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(u.0.clone())).into_response();
         }
 
         let status = if let Some(e) = self.0.downcast_ref::<SdlcError>() {
@@ -111,7 +131,8 @@ impl IntoResponse for AppError {
                 | SdlcError::ToolSpawnFailed(_)
                 | SdlcError::AgeNotInstalled
                 | SdlcError::AgeDecryptFailed(_)
-                | SdlcError::AgeEncryptFailed(_) => StatusCode::INTERNAL_SERVER_ERROR,
+                | SdlcError::AgeEncryptFailed(_)
+                | SdlcError::OrchestratorDb(_) => StatusCode::INTERNAL_SERVER_ERROR,
             }
         } else {
             StatusCode::INTERNAL_SERVER_ERROR

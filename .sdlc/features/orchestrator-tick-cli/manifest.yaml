@@ -1,0 +1,76 @@
+slug: orchestrator-tick-cli
+title: sdlc orchestrate daemon — tick loop and add/list subcommands
+description: 'Add crates/sdlc-cli/src/cmd/orchestrate.rs. sdlc orchestrate [--tick-rate <secs, default 60>] [--db <path>]: tick loop daemon. On start: startup_recovery(2*tick_rate). Loop: range_due() -> for each: set Running -> run_tool(''--run'', tool_input) -> set Completed{result}|Failed{reason} -> reschedule if recurrence set. Sleep max(0, tick_rate - elapsed). sdlc orchestrate add <label> --tool <name> --input <json> [--at <rfc3339|now+Ns>] [--every <secs>]: insert Pending action. sdlc orchestrate list: print table of all actions. Add .sdlc/orchestrator.db to .gitignore.'
+phase: specified
+created_at: 2026-03-01T07:45:38.379600Z
+updated_at: 2026-03-01T08:17:46.878262Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/orchestrator-tick-cli/spec.md
+  created_at: 2026-03-01T08:17:46.868816Z
+  approved_at: 2026-03-01T08:17:46.877464Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/orchestrator-tick-cli/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/orchestrator-tick-cli/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/orchestrator-tick-cli/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/orchestrator-tick-cli/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/orchestrator-tick-cli/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/orchestrator-tick-cli/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T07:45:38.379600Z
+  exited: 2026-03-01T08:17:46.878262Z
+- phase: specified
+  entered: 2026-03-01T08:17:46.878262Z
+  exited: null
+dependencies: []
+archived: false

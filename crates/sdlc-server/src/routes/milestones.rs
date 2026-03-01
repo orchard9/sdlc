@@ -180,6 +180,37 @@ pub struct AddFeatureBody {
     pub feature_slug: String,
 }
 
+/// GET /api/milestones/:slug/uat-runs — list all UAT runs for a milestone, newest-first.
+pub async fn list_milestone_uat_runs(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<Vec<sdlc_core::milestone::UatRun>>, AppError> {
+    let root = app.root.clone();
+    let runs =
+        tokio::task::spawn_blocking(move || sdlc_core::milestone::list_uat_runs(&root, &slug))
+            .await
+            .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(runs))
+}
+
+/// GET /api/milestones/:slug/uat-runs/latest — most recent UAT run, or 404 if none.
+pub async fn get_latest_milestone_uat_run(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<sdlc_core::milestone::UatRun>, AppError> {
+    let root = app.root.clone();
+    let run =
+        tokio::task::spawn_blocking(move || sdlc_core::milestone::latest_uat_run(&root, &slug))
+            .await
+            .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    match run {
+        Some(r) => Ok(Json(r)),
+        None => Err(AppError::not_found(
+            "no UAT runs recorded for this milestone",
+        )),
+    }
+}
+
 /// POST /api/milestones/:slug/features — add a feature to a milestone.
 pub async fn add_feature_to_milestone(
     State(app): State<AppState>,

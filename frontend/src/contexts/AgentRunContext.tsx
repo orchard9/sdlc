@@ -18,7 +18,7 @@ interface AgentRunContextValue {
   isRunning: (key: string) => boolean
   getRunForKey: (key: string) => RunRecord | undefined
   startRun: (opts: StartRunOpts) => Promise<void>
-  stopRun: (key: string, stopUrl: string) => Promise<void>
+  stopRun: (key: string, stopUrl: string, method?: 'POST' | 'DELETE') => Promise<void>
   panelOpen: boolean
   setPanelOpen: (open: boolean) => void
   expandedRunIds: Set<string>
@@ -114,9 +114,9 @@ export function AgentRunProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const stopRun = useCallback(async (_key: string, stopUrl: string) => {
+  const stopRun = useCallback(async (_key: string, stopUrl: string, method: 'POST' | 'DELETE' = 'POST') => {
     try {
-      await fetch(stopUrl, { method: 'POST' })
+      await fetch(stopUrl, { method })
       // SSE will handle updating the run status
     } catch {
       // ignore

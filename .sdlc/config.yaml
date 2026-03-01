@@ -1,7 +1,7 @@
 version: 1
 project:
   name: sdlc
-  description: null
+  description: "Deterministic lifecycle governance for enterprise-scale autonomous services"
 phases:
   enabled:
   - draft

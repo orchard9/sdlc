@@ -1,11 +1,41 @@
 import { useState, useEffect, type ReactNode } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { AgentPanel } from './AgentPanel'
 import { AgentPanelFab } from './AgentPanelFab'
+import { BottomTabBar } from './BottomTabBar'
 import { SearchModal } from '@/components/shared/SearchModal'
 import { FixRightAwayModal } from '@/components/shared/FixRightAwayModal'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
-import { Menu, X, PanelRightOpen } from 'lucide-react'
+import { PanelRightOpen, ChevronLeft, MoreHorizontal } from 'lucide-react'
+
+const DETAIL_BASES = ['/ponder/', '/investigations/', '/evolve/']
+
+const PATH_LABELS: Record<string, string> = {
+  '/': 'Dashboard',
+  '/milestones': 'Milestones',
+  '/features': 'Features',
+  '/milestones/archive': 'Archive',
+  '/feedback': 'Feedback',
+  '/ponder': 'Ponder',
+  '/investigations': 'Root Cause',
+  '/evolve': 'Evolve',
+  '/tools': 'Tools',
+  '/secrets': 'Secrets',
+  '/agents': 'Agents',
+  '/network': 'Network',
+  '/vision': 'Vision',
+  '/architecture': 'Architecture',
+}
+
+function titleFromPath(pathname: string): string {
+  if (PATH_LABELS[pathname]) return PATH_LABELS[pathname]
+  // Match prefix for detail pages
+  for (const [path, label] of Object.entries(PATH_LABELS)) {
+    if (path !== '/' && pathname.startsWith(path + '/')) return label
+  }
+  return 'SDLC'
+}
 
 interface AppShellProps {
   children: ReactNode
@@ -16,6 +46,10 @@ export function AppShell({ children }: AppShellProps) {
   const [searchOpen, setSearchOpen] = useState(false)
   const [fixOpen, setFixOpen] = useState(false)
   const { panelOpen, setPanelOpen } = useAgentRuns()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  const isDetailView = DETAIL_BASES.some(base => location.pathname.startsWith(base))
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -55,19 +89,29 @@ export function AppShell({ children }: AppShellProps) {
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Mobile header with hamburger */}
+        {/* Mobile header */}
         <header className="flex items-center gap-3 px-4 py-3 border-b border-border md:hidden">
-          <button
-            onClick={() => setSidebarOpen(prev => !prev)}
-            className="p-1.5 rounded-lg hover:bg-accent transition-colors"
-            aria-label={sidebarOpen ? 'Close menu' : 'Open menu'}
-          >
-            {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-          <span className="text-sm font-semibold tracking-tight">SDLC</span>
+          {isDetailView ? (
+            <button
+              onClick={() => navigate(-1)}
+              className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+              aria-label="Go back"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          ) : (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-1.5 rounded-lg hover:bg-accent transition-colors"
+              aria-label="Open menu"
+            >
+              <MoreHorizontal className="w-5 h-5" />
+            </button>
+          )}
+          <span className="text-sm font-semibold tracking-tight">{titleFromPath(location.pathname)}</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto pb-11 md:pb-0">
           {children}
         </main>
       </div>
@@ -88,6 +132,9 @@ export function AppShell({ children }: AppShellProps) {
 
       {/* Mobile FAB + drawer */}
       <AgentPanelFab />
+
+      {/* Mobile bottom tab bar */}
+      <BottomTabBar onMore={() => setSidebarOpen(true)} />
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <FixRightAwayModal open={fixOpen} onClose={() => setFixOpen(false)} />

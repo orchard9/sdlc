@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils'
 interface StatusBadgeProps {
   status: string
   className?: string
+  testId?: string
 }
 
 const statusColors: Record<string, string> = {
@@ -41,10 +42,13 @@ const statusColors: Record<string, string> = {
   parked: 'bg-neutral-600 text-neutral-300',
 }
 
-export function StatusBadge({ status, className }: StatusBadgeProps) {
+export function StatusBadge({ status, className, testId }: StatusBadgeProps) {
   const color = statusColors[status] ?? 'bg-neutral-600 text-neutral-200'
   return (
-    <span className={cn('inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium', color, className)}>
+    <span
+      data-testid={testId}
+      className={cn('inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium', color, className)}
+    >
       {status.replace(/_/g, ' ')}
     </span>
   )

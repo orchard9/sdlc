@@ -1,0 +1,163 @@
+slug: orchestrator-action-model
+title: Action struct and ActionDb in sdlc-core with redb backing
+description: 'Add crates/sdlc-core/src/orchestrator/ with mod.rs, action.rs, db.rs. Action struct: id (Uuid), tool_name, tool_input (serde_json::Value), trigger (ActionTrigger), status (ActionStatus), recurrence (Option<Duration>), timestamps. ActionTrigger: Scheduled { next_tick_at } | Webhook { raw_payload, received_at }. ActionStatus: Pending | Running | Completed { result } | Failed { reason }. ActionDb: redb::Database wrapper. Table key = [u8; 24] (timestamp_ms u64 be ++ uuid 16 bytes) — enables range scan for due actions. Methods: insert, set_status, range_due, startup_recovery. Unit tests for key ordering, range query, recovery. Add redb to workspace deps.'
+phase: released
+created_at: 2026-03-01T07:45:38.233426Z
+updated_at: 2026-03-01T08:05:56.371866Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/spec.md
+  created_at: 2026-03-01T07:56:16.427438Z
+  approved_at: 2026-03-01T07:56:16.435759Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/design.md
+  created_at: 2026-03-01T07:57:04.263914Z
+  approved_at: 2026-03-01T07:57:04.270479Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/tasks.md
+  created_at: 2026-03-01T07:57:26.613220Z
+  approved_at: 2026-03-01T07:57:26.620299Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/qa-plan.md
+  created_at: 2026-03-01T07:57:39.498264Z
+  approved_at: 2026-03-01T07:57:39.505500Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/review.md
+  created_at: 2026-03-01T08:04:10.976920Z
+  approved_at: 2026-03-01T08:04:10.997584Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/audit.md
+  created_at: 2026-03-01T08:05:26.982687Z
+  approved_at: 2026-03-01T08:05:26.990372Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/orchestrator-action-model/qa-results.md
+  created_at: 2026-03-01T08:05:52.118903Z
+  approved_at: 2026-03-01T08:05:52.127334Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add redb dep to workspace and sdlc-core
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:48.985739Z
+  started_at: 2026-03-01T07:57:52.882878Z
+  completed_at: 2026-03-01T07:58:20.763666Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add OrchestratorDb error variant
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:48.992706Z
+  started_at: 2026-03-01T07:58:20.771327Z
+  completed_at: 2026-03-01T07:58:33.700058Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create orchestrator/action.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:48.998927Z
+  started_at: 2026-03-01T07:58:33.709266Z
+  completed_at: 2026-03-01T07:59:02.782921Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create orchestrator/db.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:49.004717Z
+  started_at: 2026-03-01T07:59:02.789954Z
+  completed_at: 2026-03-01T08:00:00.526598Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Create orchestrator/mod.rs and register in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:49.011947Z
+  started_at: 2026-03-01T08:00:00.534228Z
+  completed_at: 2026-03-01T08:00:49.761057Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Write unit tests in db.rs
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:49.017876Z
+  started_at: null
+  completed_at: 2026-03-01T08:00:49.769556Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Verify build and tests pass
+  description: null
+  status: completed
+  created_at: 2026-03-01T07:57:49.025074Z
+  started_at: 2026-03-01T08:00:49.777619Z
+  completed_at: 2026-03-01T08:03:25.824574Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T07:45:38.233426Z
+  exited: 2026-03-01T07:56:16.436405Z
+- phase: specified
+  entered: 2026-03-01T07:56:16.436405Z
+  exited: 2026-03-01T07:57:39.506123Z
+- phase: planned
+  entered: 2026-03-01T07:57:39.506123Z
+  exited: 2026-03-01T07:57:42.620779Z
+- phase: ready
+  entered: 2026-03-01T07:57:42.620779Z
+  exited: 2026-03-01T07:57:48.976339Z
+- phase: implementation
+  entered: 2026-03-01T07:57:48.976339Z
+  exited: 2026-03-01T08:04:10.998412Z
+- phase: review
+  entered: 2026-03-01T08:04:10.998412Z
+  exited: 2026-03-01T08:04:28.352846Z
+- phase: audit
+  entered: 2026-03-01T08:04:28.352846Z
+  exited: 2026-03-01T08:05:26.991130Z
+- phase: qa
+  entered: 2026-03-01T08:05:26.991130Z
+  exited: 2026-03-01T08:05:52.129173Z
+- phase: merge
+  entered: 2026-03-01T08:05:52.129173Z
+  exited: 2026-03-01T08:05:56.371866Z
+- phase: released
+  entered: 2026-03-01T08:05:56.371866Z
+  exited: null
+dependencies: []
+archived: false

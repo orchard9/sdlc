@@ -1,8 +1,26 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Loader2, CheckCircle2, XCircle, StopCircle, ChevronDown, ChevronRight } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, StopCircle, ChevronDown, ChevronRight, Square } from 'lucide-react'
 import { AgentLog } from '@/components/shared/AgentLog'
+import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { api } from '@/api/client'
-import type { AgentEvent, RunRecord } from '@/lib/types'
+import type { AgentEvent, RunRecord, RunType } from '@/lib/types'
+
+function getStopDetails(run: RunRecord): { url: string; method: 'POST' | 'DELETE' } {
+  switch (run.run_type as RunType) {
+    case 'milestone_uat':
+      return { url: `/api/milestone/${encodeURIComponent(run.target)}/uat/stop`, method: 'POST' }
+    case 'milestone_prepare':
+      return { url: `/api/milestone/${encodeURIComponent(run.target)}/prepare/stop`, method: 'POST' }
+    case 'milestone_run_wave':
+      return { url: `/api/milestone/${encodeURIComponent(run.target)}/run-wave/stop`, method: 'POST' }
+    case 'ponder':
+      return { url: `/api/ponder/${encodeURIComponent(run.target)}/chat/current`, method: 'DELETE' }
+    case 'investigation':
+      return { url: `/api/investigation/${encodeURIComponent(run.target)}/chat/current`, method: 'DELETE' }
+    default:
+      return { url: `/api/run/${encodeURIComponent(run.key)}/stop`, method: 'POST' }
+  }
+}
 
 interface RunCardProps {
   run: RunRecord
@@ -34,8 +52,10 @@ function formatTime(iso: string) {
 }
 
 export function RunCard({ run, expanded, onToggle }: RunCardProps) {
+  const { stopRun } = useAgentRuns()
   const [events, setEvents] = useState<AgentEvent[]>([])
   const [loadedEvents, setLoadedEvents] = useState(false)
+  const [stopping, setStopping] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
   // For active runs: open EventSource when expanded
@@ -103,31 +123,58 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
     onToggle()
   }, [expanded, onToggle])
 
+  const handleStop = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    setStopping(true)
+    const { url, method } = getStopDetails(run)
+    await stopRun(run.key, url, method)
+    setStopping(false)
+  }, [run, stopRun])
+
   const isActive = run.status === 'running'
   const isPonder = run.run_type === 'ponder'
 
   return (
     <div className={`rounded-lg border ${isActive ? 'border-primary/30 bg-primary/5' : 'border-border/50 bg-card/50'}`}>
-      <button
-        onClick={handleToggle}
-        className="w-full flex items-start gap-2 px-3 py-2 text-left hover:bg-muted/30 transition-colors rounded-lg"
-      >
-        <StatusIcon status={run.status} />
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium truncate">{run.label}</p>
-          <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
-            <span>{formatTime(run.started_at)}</span>
-            {run.cost_usd != null && <span>· ${run.cost_usd.toFixed(2)}</span>}
-            {run.turns != null && <span>· {run.turns} turns</span>}
-            {run.error && <span className="text-red-400 truncate">· {run.error.slice(0, 40)}</span>}
+      <div className="flex items-start gap-2 px-3 py-2 hover:bg-muted/30 transition-colors rounded-lg">
+        <button
+          onClick={handleToggle}
+          className="flex items-start gap-2 flex-1 min-w-0 text-left"
+        >
+          <StatusIcon status={run.status} />
+          <div className="min-w-0 flex-1">
+            <p className="text-xs font-medium truncate">{run.label}</p>
+            <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground mt-0.5">
+              <span>{formatTime(run.started_at)}</span>
+              {run.cost_usd != null && <span>· ${run.cost_usd.toFixed(2)}</span>}
+              {run.turns != null && <span>· {run.turns} turns</span>}
+              {run.error && <span className="text-red-400 truncate">· {run.error.slice(0, 40)}</span>}
+            </div>
           </div>
-        </div>
-        {!isPonder && (
-          expanded
-            ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
-            : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground shrink-0 mt-0.5" />
+        </button>
+        {isActive && (
+          <button
+            onClick={handleStop}
+            disabled={stopping}
+            className="p-0.5 rounded text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors shrink-0 disabled:opacity-40 mt-0.5"
+            aria-label="Stop run"
+            title="Stop"
+          >
+            {stopping
+              ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              : <Square className="w-3.5 h-3.5" />
+            }
+          </button>
         )}
-      </button>
+        {!isPonder && (
+          <button onClick={handleToggle} className="mt-0.5 shrink-0">
+            {expanded
+              ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+              : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+            }
+          </button>
+        )}
+      </div>
 
       {expanded && !isPonder && (
         <div className="px-3 pb-3">

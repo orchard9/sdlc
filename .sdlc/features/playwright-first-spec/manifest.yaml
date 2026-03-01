@@ -1,0 +1,143 @@
+slug: playwright-first-spec
+title: Write and verify first milestone e2e spec
+description: Write frontend/e2e/milestones/v01-directive-core.spec.ts covering the acceptance test checklist for the v01-directive-core milestone. Use getByRole and getByTestId locators only. Verify it passes against a running sdlc-server with npx playwright test. Produce a passing HTML report.
+phase: released
+created_at: 2026-03-01T06:11:12.990080Z
+updated_at: 2026-03-01T06:58:01.498357Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/playwright-first-spec/spec.md
+  created_at: 2026-03-01T06:47:23.834354Z
+  approved_at: 2026-03-01T06:47:23.842680Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/playwright-first-spec/design.md
+  created_at: 2026-03-01T06:47:44.529528Z
+  approved_at: 2026-03-01T06:47:44.536665Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/playwright-first-spec/tasks.md
+  created_at: 2026-03-01T06:47:54.243093Z
+  approved_at: 2026-03-01T06:47:54.250989Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/playwright-first-spec/qa-plan.md
+  created_at: 2026-03-01T06:48:12.311769Z
+  approved_at: 2026-03-01T06:48:12.319772Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/playwright-first-spec/review.md
+  created_at: 2026-03-01T06:57:08.378155Z
+  approved_at: 2026-03-01T06:57:08.387720Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/playwright-first-spec/audit.md
+  created_at: 2026-03-01T06:57:36.906672Z
+  approved_at: 2026-03-01T06:57:36.914899Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/playwright-first-spec/qa-results.md
+  created_at: 2026-03-01T06:57:56.823322Z
+  approved_at: 2026-03-01T06:57:56.832703Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Read v01-directive-core acceptance_test.md and map each checklist item to a test scenario
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:37.734365Z
+  started_at: 2026-03-01T06:48:19.257675Z
+  completed_at: 2026-03-01T06:48:22.655022Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Write frontend/e2e/milestones/v01-directive-core.spec.ts using getByRole/getByTestId locators
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:37.811098Z
+  started_at: 2026-03-01T06:48:22.664040Z
+  completed_at: 2026-03-01T06:56:28.292861Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Run npx playwright test against live sdlc-server and iterate until all tests pass
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:37.956890Z
+  started_at: 2026-03-01T06:56:32.674844Z
+  completed_at: 2026-03-01T06:56:32.681380Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify HTML report is generated and trace viewer works on first-retry failure
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:38.044482Z
+  started_at: 2026-03-01T06:56:41.492765Z
+  completed_at: 2026-03-01T06:56:41.500107Z
+  blocker: null
+  depends_on: []
+comments:
+- id: C1
+  author: null
+  body: 'Sequencing dependency: this feature must run AFTER playwright-install-config (Playwright installed + playwright.config.ts written) AND react-testid-attributes (data-testid attributes on React components). Schedule in Wave 2. Wave 1 is playwright-install-config + react-testid-attributes in parallel.'
+  flag: null
+  target:
+    kind: feature
+  created_at: 2026-03-01T06:37:13.176701Z
+next_comment_seq: 1
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:12.990080Z
+  exited: 2026-03-01T06:47:23.843345Z
+- phase: specified
+  entered: 2026-03-01T06:47:23.843345Z
+  exited: 2026-03-01T06:48:12.320520Z
+- phase: planned
+  entered: 2026-03-01T06:48:12.320520Z
+  exited: 2026-03-01T06:48:22.655803Z
+- phase: ready
+  entered: 2026-03-01T06:48:22.655803Z
+  exited: 2026-03-01T06:56:28.295260Z
+- phase: implementation
+  entered: 2026-03-01T06:56:28.295260Z
+  exited: 2026-03-01T06:57:08.388659Z
+- phase: review
+  entered: 2026-03-01T06:57:08.388659Z
+  exited: 2026-03-01T06:57:21.726316Z
+- phase: audit
+  entered: 2026-03-01T06:57:21.726316Z
+  exited: 2026-03-01T06:57:36.915587Z
+- phase: qa
+  entered: 2026-03-01T06:57:36.915587Z
+  exited: 2026-03-01T06:57:56.834088Z
+- phase: merge
+  entered: 2026-03-01T06:57:56.834088Z
+  exited: 2026-03-01T06:58:01.498357Z
+- phase: released
+  entered: 2026-03-01T06:58:01.498357Z
+  exited: null
+dependencies: []
+archived: false

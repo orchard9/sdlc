@@ -1,0 +1,73 @@
+slug: orchestrator-integration-test
+title: Integration test — two scheduled actions fire and complete in one tick
+description: 'Integration test in crates/sdlc-cli/tests/ or crates/sdlc-core/tests/. Setup: TempDir, write minimal tool stub (prints {ok:true}, exits 0), insert two Pending actions at now+100ms and now+200ms. Run tick loop (tick_rate=500ms). Assert: both actions Completed within 600ms. Second test: insert Running action with updated_at=now-10min, call startup_recovery(2min), assert Failed. Gate: SDLC_NO_NPM=1 cargo test --all passes.'
+phase: draft
+created_at: 2026-03-01T07:45:38.408653Z
+updated_at: 2026-03-01T07:52:08.281885Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/orchestrator-integration-test/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T07:45:38.408653Z
+  exited: null
+dependencies: []
+archived: false

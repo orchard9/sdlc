@@ -19,7 +19,7 @@ export function ArtifactViewer({ artifact }: ArtifactViewerProps) {
           <div className="flex items-center gap-2">
             <FileText className="w-3.5 h-3.5 text-muted-foreground" />
             <span className="text-sm font-medium">{artifact.artifact_type.replace(/_/g, ' ')}</span>
-            <StatusBadge status={artifact.status} />
+            <StatusBadge status={artifact.status} testId="artifact-status" />
           </div>
           {artifact.content && (
             <button

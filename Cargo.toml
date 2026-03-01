@@ -35,6 +35,7 @@ uuid = { version = "1", features = ["v4"] }
 mime_guess = "2"
 home = "0.5"
 which = "6"
+redb = "2"
 
 # Config for 'dist'
 [workspace.metadata.dist]

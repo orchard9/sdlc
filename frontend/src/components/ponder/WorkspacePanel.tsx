@@ -7,6 +7,8 @@ import { OutputGate } from '@/components/investigation/OutputGate'
 import { SynthesisCard } from '@/components/investigation/SynthesisCard'
 import { LensCards } from '@/components/investigation/LensCards'
 import { EvolveOutputGate } from '@/components/investigation/EvolveOutputGate'
+import { GuidelineEvidenceCards } from '@/components/investigation/GuidelineEvidenceCards'
+import { GuidelineOutputGate } from '@/components/investigation/GuidelineOutputGate'
 import { cn } from '@/lib/utils'
 import type { PonderArtifact, InvestigationArtifact, InvestigationDetail } from '@/lib/types'
 
@@ -128,6 +130,25 @@ export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation 
       {kind === 'evolve' && phase === 'output' && investigation && (
         <div className="shrink-0 border-b border-border/40">
           <EvolveOutputGate investigation={investigation} />
+        </div>
+      )}
+      {kind === 'guideline' && phase === 'evidence' && investigation && (
+        <div className="shrink-0 border-b border-border/40 px-0 py-0">
+          <GuidelineEvidenceCards evidenceCounts={investigation.evidence_counts} />
+        </div>
+      )}
+      {kind === 'guideline' && (phase === 'principles' || phase === 'draft') && (() => {
+        const filename = phase === 'principles' ? 'toc.md' : 'guideline-draft.md'
+        const artifact = artifacts.find(a => a.filename === filename)
+        return artifact?.content ? (
+          <div className="shrink-0 border-b border-border/40 overflow-auto max-h-48 px-3 py-2">
+            <ArtifactContent filename={filename} content={artifact.content} />
+          </div>
+        ) : null
+      })()}
+      {kind === 'guideline' && phase === 'publish' && investigation && (
+        <div className="shrink-0 border-b border-border/40">
+          <GuidelineOutputGate investigation={investigation} />
         </div>
       )}
 

@@ -152,6 +152,8 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 
 ## Agentive Template System
 
+> **All cross-agent skill/command/agent templates live in `crates/sdlc-cli/src/cmd/init.rs`** as Rust `const &str` constants (e.g. `SDLC_MILESTONE_UAT_COMMAND`). Edit them there; `sdlc init` / `sdlc update` installs them.
+
 `sdlc init` and `sdlc update` install slash commands to user home directories for four AI coding CLIs. Commands are embedded as Rust `const &str` in `crates/sdlc-cli/src/cmd/init.rs` and written by `install_user_scaffolding()`.
 
 | Platform | Location | Format |
@@ -165,6 +167,7 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 
 | Command | Purpose |
 |---|---|
+| `/sdlc-init` | Interview to bootstrap vision, architecture, config, and team for a new project |
 | `/sdlc-ponder [slug]` | Open ideation workspace — explore ideas, capture artifacts, recruit thought partners |
 | `/sdlc-ponder-commit <slug>` | Crystallize pondered idea into milestones/features via `/sdlc-plan` |
 | `/sdlc-recruit <role>` | Recruit an expert thought partner as a persistent agent |
@@ -204,6 +207,65 @@ If adding a new `ActionType`, update `ActionType::all()` in `types.rs` — tests
 - JSON output via `print_json()`, table output via `print_table()` in `sdlc-cli/src/output.rs`
 - Integration tests use `tempfile::TempDir` for isolated `.sdlc/` directories
 - No refresh buttons in the UI — state updates automatically via SSE (`/api/events`); add SSE to any hook that fetches project/feature state
+
+## Architecture Principle: Rust = Data, Skills = Logic
+
+**Rust code is a dumb data layer.** It holds structs and does load/save. It does not make decisions.
+
+Agent decision logic — heuristics, stage-advancement rules, what to check next, how to interpret history — lives in skill instruction text (`init.rs` command templates), not in Rust code. The skill *encourages* patterns; the Rust layer *stores* state.
+
+When building a new agent-driven feature:
+1. Define the data shape (structs + serde) in `sdlc-core`
+2. Implement load/save only — no progression logic, no rule evaluation, no heuristics
+3. Expose GET (read history) and PATCH (update a field) endpoints — nothing smarter
+4. Write the decision logic as instructions in the skill template
+
+If you find yourself writing `fn should_advance_to_next_stage()` in Rust — stop. That's a skill instruction.
+
+## Server Pattern: All Agent Runs Use `spawn_agent_run`
+
+Every server endpoint that invokes a Claude agent **must** use `spawn_agent_run` from `crates/sdlc-server/src/routes/runs.rs`. This is the single pattern for agent-driven features. It provides:
+- Async task spawn (no blocking the HTTP response)
+- SSE event streaming to the frontend via `/api/events`
+- RunRecord persistence and lifecycle (running → completed/failed)
+- Domain-specific completion events (`PonderRunCompleted`, `InvestigationRunCompleted`, etc.)
+
+**Never** use `max_turns: 1` with no tools for a feature that needs to read files or make decisions. That pattern (`suggest.rs`) predates the SSE infrastructure and is a known legacy exception. Do not copy it.
+
+For a new agent endpoint:
+```rust
+spawn_agent_run(
+    format!("advisory:{slug}"),
+    prompt,
+    QueryOptions { max_turns: Some(20), allowed_tools: tools, .. },
+    &app,
+    "advisory",
+    "Advisory analysis",
+    Some(SseMessage::AdvisoryRunCompleted { slug }),
+).await
+```
+
+Two-phase agent workflows (plan → act) follow the **Plan-Act Pattern** — see `docs/plan-act-pattern.md`.
+
+## Playwright MCP for Milestone UAT
+
+The UAT agent (`start_milestone_uat` in `runs.rs`) has browser automation available via Playwright MCP. The Playwright MCP server is registered in `.mcp.json` at the project root and injected into `QueryOptions` only for UAT runs.
+
+Available Playwright tools in UAT agent runs:
+- `mcp__playwright__browser_navigate` — navigate to a URL
+- `mcp__playwright__browser_click` — click an element
+- `mcp__playwright__browser_type` — type text into an input
+- `mcp__playwright__browser_snapshot` — read the DOM accessibility tree
+- `mcp__playwright__browser_take_screenshot` — capture a screenshot
+- `mcp__playwright__browser_console_messages` — read browser console output
+- `mcp__playwright__browser_wait_for` — wait for a condition or selector
+
+**Prerequisite:** Playwright browsers must be installed: `npx playwright install`. This is a one-time developer setup step, not a build-time requirement.
+
+**Extending UAT tool access:** Follow the same pattern as `sdlc_guideline_query_options` — call `sdlc_query_options` and push additional entries to `opts.allowed_tools` and `opts.mcp_servers`. Never add Playwright tools to the base `sdlc_query_options`; they are UAT-only.
+
+## More Coding Conventions
+
 - Utility copy buttons (clipboard) are always present on command code blocks so agents can copy `/sdlc-run` and `/sdlc-next` commands in one click
 - All `/sdlc-*` commands end output with `**Next:** <command>` — one concrete next command, always present
 - `/sdlc-*` commands must orchestrate real work (multiple steps, decisions, synthesis) — a command that wraps a single CLI call is not a command, it's noise; delete it and fold the call into the preceding command's `**Next:**` output

@@ -1,0 +1,181 @@
+slug: playwright-install-config
+title: Install @playwright/test and configure with webServer, reporters, and artifact capture
+description: 'Add @playwright/test to frontend/package.json devDependencies. Create frontend/playwright.config.ts with: webServer pointing at sdlc-server binary, trace on-first-retry, screenshot only-on-failure, video retain-on-failure, HTML and JSON reporters, fullyParallel true, retries 2 in CI. Add frontend/e2e/ directory structure and update .gitignore to exclude playwright-report/ and test-results/.'
+phase: released
+created_at: 2026-03-01T06:11:12.974962Z
+updated_at: 2026-03-01T06:44:30.198970Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/playwright-install-config/spec.md
+  created_at: 2026-03-01T06:40:19.465496Z
+  approved_at: 2026-03-01T06:40:19.473406Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/playwright-install-config/design.md
+  created_at: 2026-03-01T06:40:41.701658Z
+  approved_at: 2026-03-01T06:40:41.708256Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/playwright-install-config/tasks.md
+  created_at: 2026-03-01T06:40:47.890351Z
+  approved_at: 2026-03-01T06:40:47.897427Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/playwright-install-config/qa-plan.md
+  created_at: 2026-03-01T06:41:04.346309Z
+  approved_at: 2026-03-01T06:41:04.358907Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/playwright-install-config/review.md
+  created_at: 2026-03-01T06:43:30.191119Z
+  approved_at: 2026-03-01T06:43:30.199345Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/playwright-install-config/audit.md
+  created_at: 2026-03-01T06:43:56.845687Z
+  approved_at: 2026-03-01T06:43:56.853319Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/playwright-install-config/qa-results.md
+  created_at: 2026-03-01T06:44:26.331655Z
+  approved_at: 2026-03-01T06:44:26.339171Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add @playwright/test to frontend/package.json devDependencies
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:30.241188Z
+  started_at: 2026-03-01T06:41:26.997120Z
+  completed_at: 2026-03-01T06:41:32.904914Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create frontend/playwright.config.ts with webServer, trace/screenshot/video capture, HTML+JSON reporters, fullyParallel, retries in CI
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:30.279133Z
+  started_at: 2026-03-01T06:41:37.231064Z
+  completed_at: 2026-03-01T06:42:10.376420Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create frontend/e2e/milestones/ and frontend/e2e/shared/ directory scaffolding
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:30.322767Z
+  started_at: 2026-03-01T06:42:14.070839Z
+  completed_at: 2026-03-01T06:42:20.948898Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Update .gitignore: exclude playwright-report/, test-results/, *.zip traces'
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:30.340905Z
+  started_at: 2026-03-01T06:42:24.241049Z
+  completed_at: 2026-03-01T06:42:29.360575Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'Add playwright test scripts to frontend/package.json: test:e2e, test:e2e:ui, test:e2e:report'
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:11:30.382303Z
+  started_at: 2026-03-01T06:42:32.967109Z
+  completed_at: 2026-03-01T06:42:42.816417Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Add @playwright/test to frontend/package.json devDependencies and add test:e2e scripts
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:10.348485Z
+  started_at: 2026-03-01T06:42:47.519728Z
+  completed_at: 2026-03-01T06:42:47.526262Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Create frontend/playwright.config.ts with webServer, reporters, and artifact capture settings
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:13.024900Z
+  started_at: 2026-03-01T06:42:52.953135Z
+  completed_at: 2026-03-01T06:42:52.960064Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Create frontend/e2e/milestones/ and frontend/e2e/shared/ directory scaffold with .gitkeep files
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:13.032088Z
+  started_at: 2026-03-01T06:42:52.966924Z
+  completed_at: 2026-03-01T06:42:52.973353Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Update .gitignore to exclude playwright-report/, test-results/, and blob-report/
+  description: null
+  status: completed
+  created_at: 2026-03-01T06:41:13.039688Z
+  started_at: 2026-03-01T06:42:52.979704Z
+  completed_at: 2026-03-01T06:42:52.985487Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T06:11:12.974962Z
+  exited: 2026-03-01T06:40:19.474096Z
+- phase: specified
+  entered: 2026-03-01T06:40:19.474096Z
+  exited: 2026-03-01T06:41:04.359597Z
+- phase: planned
+  entered: 2026-03-01T06:41:04.359597Z
+  exited: 2026-03-01T06:41:17.990010Z
+- phase: ready
+  entered: 2026-03-01T06:41:17.990010Z
+  exited: 2026-03-01T06:41:20.818624Z
+- phase: implementation
+  entered: 2026-03-01T06:41:20.818624Z
+  exited: 2026-03-01T06:43:30.200233Z
+- phase: review
+  entered: 2026-03-01T06:43:30.200233Z
+  exited: 2026-03-01T06:43:33.707903Z
+- phase: audit
+  entered: 2026-03-01T06:43:33.707903Z
+  exited: 2026-03-01T06:43:56.854238Z
+- phase: qa
+  entered: 2026-03-01T06:43:56.854238Z
+  exited: 2026-03-01T06:44:26.339954Z
+- phase: merge
+  entered: 2026-03-01T06:44:26.339954Z
+  exited: 2026-03-01T06:44:30.198970Z
+- phase: released
+  entered: 2026-03-01T06:44:30.198970Z
+  exited: null
+dependencies: []
+archived: false

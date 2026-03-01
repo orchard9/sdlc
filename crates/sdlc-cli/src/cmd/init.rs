@@ -261,7 +261,8 @@ fn masquerade_platform_config() -> PlatformConfig {
 pub fn write_guidance_md(root: &Path) -> anyhow::Result<()> {
     let path = paths::guidance_md_path(root);
     let existed = path.exists();
-    io::atomic_write(&path, GUIDANCE_MD_CONTENT.as_bytes())?;
+    io::atomic_write(&path, GUIDANCE_MD_CONTENT.as_bytes())
+        .with_context(|| format!("cannot write {}", path.display()))?;
     if existed {
         println!("  updated: .sdlc/guidance.md");
     } else {
@@ -283,12 +284,18 @@ pub fn write_agents_md(root: &Path, project_name: &str) -> anyhow::Result<()> {
     if !agents_path.exists() {
         let content =
             format!("# AGENTS.md\n\nAgent instructions for {project_name}.\n\n{marked_section}\n");
-        io::atomic_write(&agents_path, content.as_bytes())?;
+        io::atomic_write(&agents_path, content.as_bytes()).with_context(|| {
+            format!(
+                "cannot create AGENTS.md at {} — check file permissions (try: chmod u+w AGENTS.md)",
+                agents_path.display()
+            )
+        })?;
         println!("  created: AGENTS.md");
         return Ok(());
     }
 
-    let existing = std::fs::read_to_string(&agents_path)?;
+    let existing = std::fs::read_to_string(&agents_path)
+        .with_context(|| format!("cannot read AGENTS.md at {}", agents_path.display()))?;
 
     if existing.contains(SDLC_SECTION_START) {
         // Markers present — replace in-place
@@ -297,19 +304,35 @@ pub fn write_agents_md(root: &Path, project_name: &str) -> anyhow::Result<()> {
             SDLC_SECTION_START,
             SDLC_SECTION_END,
             &marked_section,
-        )? {
+        )
+        .with_context(|| {
+            format!(
+                "cannot update AGENTS.md at {} — check file permissions (try: chmod u+w AGENTS.md)",
+                agents_path.display()
+            )
+        })? {
             println!("  updated: AGENTS.md (SDLC section refreshed)");
         } else {
-            println!("  warning: AGENTS.md has sdlc:start but no sdlc:end marker — skipped");
+            println!("  warning: AGENTS.md has sdlc:start but no sdlc:end marker — skipped (add the closing <!-- sdlc:end --> marker to re-enable auto-updates)");
         }
     } else if existing.contains("## SDLC") {
         // Legacy format without markers — migrate
         let new_content = replace_legacy_sdlc_section(&existing, &marked_section);
-        io::atomic_write(&agents_path, new_content.as_bytes())?;
+        io::atomic_write(&agents_path, new_content.as_bytes()).with_context(|| {
+            format!(
+                "cannot update AGENTS.md at {} — check file permissions (try: chmod u+w AGENTS.md)",
+                agents_path.display()
+            )
+        })?;
         println!("  updated: AGENTS.md (SDLC section converted to markers)");
     } else {
         // No SDLC section at all — append
-        io::append_text(&agents_path, &format!("\n\n{marked_section}\n"))?;
+        io::append_text(&agents_path, &format!("\n\n{marked_section}\n")).with_context(|| {
+            format!(
+                "cannot update AGENTS.md at {} — check file permissions (try: chmod u+w AGENTS.md)",
+                agents_path.display()
+            )
+        })?;
         println!("  updated: AGENTS.md (SDLC section added)");
     }
 
@@ -369,6 +392,8 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         - `/sdlc-cookbook-run <milestone-slug>` — execute cookbook recipes and record results\n\
         - `/sdlc-ponder [slug]` — open the ideation workspace for exploring and committing ideas\n\
         - `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features\n\
+        - `/sdlc-guideline <slug-or-problem>` — build an evidence-backed guideline through five research perspectives and TOC-first distillation\n\
+        - `/sdlc-suggest` — analyze project state and suggest 3-5 ponder topics to explore next\n\
         - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent\n\
         - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions\n\n\
         ### Tool Suite\n\n\
@@ -421,12 +446,14 @@ fn write_user_command_scaffold(
     display_prefix: &str,
     commands: &[(&str, &str)],
 ) -> anyhow::Result<()> {
-    io::ensure_dir(commands_dir)?;
+    io::ensure_dir(commands_dir)
+        .with_context(|| format!("cannot create directory {}", commands_dir.display()))?;
 
     for (filename, content) in commands {
         let path = commands_dir.join(filename);
         let existed = path.exists();
-        io::atomic_write(&path, content.as_bytes())?;
+        io::atomic_write(&path, content.as_bytes())
+            .with_context(|| format!("cannot write {display_prefix}/{filename}"))?;
         if existed {
             println!("  updated: {display_prefix}/{filename}");
         } else {
@@ -443,12 +470,14 @@ fn write_user_command_scaffold_owned(
     display_prefix: &str,
     commands: &[(&str, String)],
 ) -> anyhow::Result<()> {
-    io::ensure_dir(commands_dir)?;
+    io::ensure_dir(commands_dir)
+        .with_context(|| format!("cannot create directory {}", commands_dir.display()))?;
 
     for (filename, content) in commands {
         let path = commands_dir.join(filename);
         let existed = path.exists();
-        io::atomic_write(&path, content.as_bytes())?;
+        io::atomic_write(&path, content.as_bytes())
+            .with_context(|| format!("cannot write {display_prefix}/{filename}"))?;
         if existed {
             println!("  updated: {display_prefix}/{filename}");
         } else {
@@ -465,14 +494,17 @@ fn write_user_skill_scaffold(
     display_prefix: &str,
     skills: &[(&str, &str)],
 ) -> anyhow::Result<()> {
-    io::ensure_dir(skills_dir)?;
+    io::ensure_dir(skills_dir)
+        .with_context(|| format!("cannot create directory {}", skills_dir.display()))?;
 
     for (skill_name, content) in skills {
         let skill_dir = skills_dir.join(skill_name);
-        io::ensure_dir(&skill_dir)?;
+        io::ensure_dir(&skill_dir)
+            .with_context(|| format!("cannot create directory {}", skill_dir.display()))?;
         let path = skill_dir.join("SKILL.md");
         let existed = path.exists();
-        io::atomic_write(&path, content.as_bytes())?;
+        io::atomic_write(&path, content.as_bytes())
+            .with_context(|| format!("cannot write {display_prefix}/{skill_name}/SKILL.md"))?;
         if existed {
             println!("  updated: {display_prefix}/{skill_name}/SKILL.md");
         } else {
@@ -491,7 +523,8 @@ fn remove_if_exists(dir: &Path, filenames: &[&str]) -> anyhow::Result<()> {
     for filename in filenames {
         let path = dir.join(filename);
         if path.exists() {
-            std::fs::remove_file(&path)?;
+            std::fs::remove_file(&path)
+                .with_context(|| format!("cannot remove {}", path.display()))?;
         }
     }
 
@@ -547,6 +580,7 @@ fn write_user_claude_commands() -> anyhow::Result<()> {
             ("sdlc-cookbook-run.md", SDLC_COOKBOOK_RUN_COMMAND),
             ("sdlc-ponder.md", SDLC_PONDER_COMMAND),
             ("sdlc-ponder-commit.md", SDLC_PONDER_COMMIT_COMMAND),
+            ("sdlc-suggest.md", SDLC_SUGGEST_COMMAND),
             ("sdlc-recruit.md", SDLC_RECRUIT_COMMAND),
             ("sdlc-empathy.md", SDLC_EMPATHY_COMMAND),
             ("sdlc-prepare.md", SDLC_PREPARE_COMMAND),
@@ -561,6 +595,8 @@ fn write_user_claude_commands() -> anyhow::Result<()> {
                 "sdlc-architecture-adjustment.md",
                 SDLC_ARCHITECTURE_ADJUSTMENT_COMMAND,
             ),
+            ("sdlc-guideline.md", SDLC_GUIDELINE_COMMAND),
+            ("sdlc-init.md", SDLC_INIT_COMMAND),
         ],
     )
 }
@@ -663,6 +699,13 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
             ),
         ),
         (
+            "sdlc-suggest.toml",
+            gemini_command_toml(
+                "Suggest what to ponder next based on current project state",
+                SDLC_SUGGEST_PLAYBOOK,
+            ),
+        ),
+        (
             "sdlc-recruit.toml",
             gemini_command_toml(
                 "Recruit an expert thought partner as a persistent agent",
@@ -734,6 +777,20 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
             gemini_command_toml(
                 "Align all project docs, code, and sdlc state to an architecture change",
                 SDLC_ARCHITECTURE_ADJUSTMENT_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-guideline.toml",
+            gemini_command_toml(
+                "Build an evidence-backed guideline through perspective research and TOC-first distillation",
+                SDLC_GUIDELINE_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-init.toml",
+            gemini_command_toml(
+                "Interview to bootstrap vision, architecture, config, and team for a new project",
+                SDLC_INIT_PLAYBOOK,
             ),
         ),
     ];
@@ -860,6 +917,14 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
             ),
         ),
         (
+            "sdlc-suggest.md",
+            opencode_command_md(
+                "Suggest what to ponder next based on current project state",
+                "",
+                SDLC_SUGGEST_PLAYBOOK,
+            ),
+        ),
+        (
             "sdlc-recruit.md",
             opencode_command_md(
                 "Recruit an expert thought partner as a persistent agent",
@@ -947,6 +1012,22 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
                 SDLC_ARCHITECTURE_ADJUSTMENT_PLAYBOOK,
             ),
         ),
+        (
+            "sdlc-guideline.md",
+            opencode_command_md(
+                "Build an evidence-backed guideline through perspective research and TOC-first distillation",
+                "<slug-or-problem-description>",
+                SDLC_GUIDELINE_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-init.md",
+            opencode_command_md(
+                "Interview to bootstrap vision, architecture, config, and team for a new project",
+                "[brief project description]",
+                SDLC_INIT_PLAYBOOK,
+            ),
+        ),
     ];
 
     write_user_command_scaffold_owned(
@@ -975,6 +1056,7 @@ fn write_user_agents_skills() -> anyhow::Result<()> {
             ("sdlc-cookbook-run", SDLC_COOKBOOK_RUN_SKILL),
             ("sdlc-ponder", SDLC_PONDER_SKILL),
             ("sdlc-ponder-commit", SDLC_PONDER_COMMIT_SKILL),
+            ("sdlc-suggest", SDLC_SUGGEST_SKILL),
             ("sdlc-recruit", SDLC_RECRUIT_SKILL),
             ("sdlc-empathy", SDLC_EMPATHY_SKILL),
             ("sdlc-prepare", SDLC_PREPARE_SKILL),
@@ -989,6 +1071,8 @@ fn write_user_agents_skills() -> anyhow::Result<()> {
                 "sdlc-architecture-adjustment",
                 SDLC_ARCHITECTURE_ADJUSTMENT_SKILL,
             ),
+            ("sdlc-guideline", SDLC_GUIDELINE_SKILL),
+            ("sdlc-init", SDLC_INIT_SKILL),
         ],
     )
 }
@@ -1010,6 +1094,7 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-cookbook-run.md",
         "sdlc-ponder.md",
         "sdlc-ponder-commit.md",
+        "sdlc-suggest.md",
         "sdlc-recruit.md",
         "sdlc-empathy.md",
         "sdlc-prepare.md",
@@ -1021,6 +1106,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-quality-fix.md",
         "sdlc-vision-adjustment.md",
         "sdlc-architecture-adjustment.md",
+        "sdlc-guideline.md",
+        "sdlc-init.md",
     ];
 
     remove_if_exists(&paths::claude_commands_dir(root), sdlc_files)?;
@@ -1041,6 +1128,7 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-cookbook-run.toml",
             "sdlc-ponder.toml",
             "sdlc-ponder-commit.toml",
+            "sdlc-suggest.toml",
             "sdlc-recruit.toml",
             "sdlc-empathy.toml",
             "sdlc-prepare.toml",
@@ -1052,6 +1140,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-quality-fix.toml",
             "sdlc-vision-adjustment.toml",
             "sdlc-architecture-adjustment.toml",
+            "sdlc-guideline.toml",
+            "sdlc-init.toml",
             "sdlc-next.md",
             "sdlc-status.md",
             "sdlc-approve.md",
@@ -1066,6 +1156,7 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-cookbook-run.md",
             "sdlc-ponder.md",
             "sdlc-ponder-commit.md",
+            "sdlc-suggest.md",
             "sdlc-recruit.md",
             "sdlc-empathy.md",
             "sdlc-prepare.md",
@@ -1077,6 +1168,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-quality-fix.md",
             "sdlc-vision-adjustment.md",
             "sdlc-architecture-adjustment.md",
+            "sdlc-guideline.md",
+            "sdlc-init.md",
         ],
     )?;
     remove_if_exists(&paths::opencode_commands_dir(root), sdlc_files)?;
@@ -1098,6 +1191,7 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-cookbook-run/SKILL.md",
             "sdlc-ponder/SKILL.md",
             "sdlc-ponder-commit/SKILL.md",
+            "sdlc-suggest/SKILL.md",
             "sdlc-recruit/SKILL.md",
             "sdlc-empathy/SKILL.md",
             "sdlc-prepare/SKILL.md",
@@ -1109,6 +1203,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-quality-fix/SKILL.md",
             "sdlc-vision-adjustment/SKILL.md",
             "sdlc-architecture-adjustment/SKILL.md",
+            "sdlc-guideline/SKILL.md",
+            "sdlc-init/SKILL.md",
         ],
     )?;
     remove_if_exists(&root.join(".codex/commands"), sdlc_files)?;
@@ -2163,29 +2259,27 @@ Print results: milestones created/updated, features created/updated, tasks added
 // ---------------------------------------------------------------------------
 
 const SDLC_MILESTONE_UAT_COMMAND: &str = r#"---
-description: Run the acceptance test for a milestone — execute every step, sign the checklist, fix issues or create tasks, never pause
+description: Run the acceptance test for a milestone — Mode A runs an existing Playwright spec, Mode B generates one from the checklist; never pause
 argument-hint: <milestone-slug>
-allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, mcp__playwright__navigate, mcp__playwright__click, mcp__playwright__fill, mcp__playwright__screenshot, mcp__playwright__evaluate, mcp__playwright__select_option, mcp__playwright__hover, mcp__playwright__get_visible_text, mcp__playwright__get_visible_html
 ---
 
 # sdlc-milestone-uat
 
-Run a milestone's acceptance test end-to-end. Executes every checklist item, signs each one as it passes, and for failures either fixes immediately, creates a task and continues, or creates a task and halts. Writes a signed `uat_results.md` to the milestone directory.
+Run a milestone's acceptance test using Playwright. Detects whether an e2e spec already exists and routes to Mode A (run it) or Mode B (generate it from the checklist). Both modes parse Playwright results, create tasks for real failures, fix selector breaks, and write `summary.md` plus `uat_results.md`.
 
 > **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
 
 ## Ethos
 
-- **Be the user.** UAT means running the product as a real user would — start the server, open the UI, run the CLI commands, follow the flow. Not reading code. Actually doing it.
+- **Playwright is the user.** UAT means exercising the product through its real UI — not reading code.
 - **Never pause.** Decide and act on every failure without asking.
-- **Always forward.** Create tasks for issues; never revert state.
-- **Everything in git.** `uat_results.md` is committed alongside the code it validates.
+- **Always forward.** Create tasks for code bugs; fix selector breaks inline and rerun.
+- **Everything in git.** `summary.md` and `uat_results.md` are committed alongside the code they validate.
 
 ---
 
-## Steps
-
-### 1. Load the milestone
+## Step 1 — Load the milestone
 
 ```bash
 sdlc milestone info <slug> --json
@@ -2193,37 +2287,158 @@ sdlc milestone info <slug> --json
 
 Extract `title`, `vision`, and `acceptance_test` content. If no acceptance test, stop.
 
-### 2. Parse checklist items
+## Step 2 — Mode detection
 
-Collect every `- [ ]` line as an ordered list of steps.
-
-### 3. Execute each step
-
-For each checklist item:
-- **Execute** the command or check described
-- **Evaluate** actual output against expected outcome
-- **Track** result: PASS → `[x]` with timestamp, FAIL → assess severity
-
-### 4. Failure response
-
-#### FIX immediately
-Localized, low blast radius, completable in this session. Fix, re-run, record as `[x] (fixed: <what changed>)`.
-
-#### TASK + CONTINUE
-Real issue but doesn't block remaining steps. Create a task on the feature that owns the failing behavior, record as failed, continue:
+Check whether the e2e spec exists:
 
 ```bash
-sdlc task add <feature-slug> "<one-line description of the failure>"
+ls frontend/e2e/milestones/<slug>.spec.ts 2>/dev/null && echo "MODE_A" || echo "MODE_B"
 ```
 
-Where `<feature-slug>` is the feature in the milestone responsible for the broken behavior. If multiple features could own it, pick the most relevant. If genuinely ambiguous, pick the first feature in the milestone.
+- **File exists** → proceed to **Mode A**.
+- **File absent** → proceed to **Mode B**, then return to Mode A synthesis.
 
-#### TASK + HALT
-Failure makes remaining steps meaningless. Create a task (same `sdlc task add <feature-slug> "..."` pattern), record as failed, stop execution.
+---
 
-### 5. Write `uat_results.md`
+## Mode A — Run existing Playwright spec
 
-Write signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
+### A1. Run the spec
+
+```bash
+cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json
+```
+
+Output is written to `playwright-report/results.json`.
+
+### A2. Parse results
+
+Read `frontend/playwright-report/results.json`. Extract:
+- Total test count
+- Passed count, failed count
+- Per-failure: test title, error message, stack trace excerpt
+
+### A3. Cross-reference failures with checklist
+
+For each failed test:
+1. Match the test title against the checklist items in `acceptance_test.md`.
+2. Examine the error message:
+   - **Selector break** — error mentions `locator`, `getByRole`, `getByTestId`, element not found, timeout waiting for element → fix the spec selector and rerun once.
+   - **Code bug** — assertion failure, unexpected value, missing route, 4xx/5xx response, etc. → create a task:
+
+```bash
+sdlc task add <feature-slug> "UAT: <test title> — <one-line failure description>"
+```
+
+Where `<feature-slug>` is the feature in the milestone responsible for the broken behavior. If ambiguous, pick the first feature in the milestone.
+
+### A4. Rerun after selector fixes
+
+If any selector fixes were applied, rerun the spec once:
+
+```bash
+cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json
+```
+
+Re-parse `results.json` for the final counts.
+
+---
+
+## Mode B — Generate spec from checklist
+
+### B1. Parse checklist
+
+Collect every `- [ ]` line from `acceptance_test.md` as an ordered list of steps.
+
+### B2. Navigate each checklist item
+
+For each step, use Playwright MCP browser tools to exercise it:
+- `mcp__playwright__navigate` — open URLs
+- `mcp__playwright__click` — click buttons, links, tabs
+- `mcp__playwright__fill` — type into inputs
+- `mcp__playwright__get_visible_text` — read page content for assertions
+- `mcp__playwright__screenshot` — capture state for verification
+
+Identify the DOM elements exercised. Prefer locator strategies in this order:
+1. `getByRole('button', { name: '...' })` — ARIA roles and accessible names
+2. `getByTestId('...')` — `data-testid` attributes
+3. `getByText('...')` — visible text (last resort)
+
+### B3. Write the spec file
+
+As you exercise each step, accumulate a `test('...')` block. Write the complete file when all steps are done:
+
+```typescript
+// frontend/e2e/milestones/<slug>.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('<Milestone Title> — Acceptance Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    // navigate to the app base URL
+    await page.goto('/');
+  });
+
+  test('<checklist item 1>', async ({ page }) => {
+    // steps exercised via Playwright MCP
+  });
+
+  // ... one test per checklist item
+});
+```
+
+Write to `frontend/e2e/milestones/<slug>.spec.ts`.
+
+### B4. Run the generated spec
+
+```bash
+cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json
+```
+
+### B5. Fix selector issues
+
+If failures occur:
+1. Read the error for each failing test.
+2. Update the locator in the spec file.
+3. Rerun.
+4. Repeat up to 3 times until the spec passes or remaining failures are genuine code bugs.
+
+### B6. Continue to Mode A synthesis
+
+Once the spec runs (passing or with stable failures), proceed to **Mode A Step A2** to parse results and create tasks.
+
+---
+
+## Step 3 — Write summary.md
+
+Create the run directory and write the summary:
+
+```bash
+mkdir -p .sdlc/milestones/<slug>/uat-runs/<YYYY-MM-DD>-<run-id>/
+```
+
+Write `.sdlc/milestones/<slug>/uat-runs/<YYYY-MM-DD>-<run-id>/summary.md`:
+
+```markdown
+# UAT Run — <milestone-title>
+**Date:** <ISO-8601 timestamp>
+**Verdict:** Pass | PassWithTasks | Failed
+**Tests:** <passed>/<total>
+**Tasks created:** <feature>#<id>, ... | none
+
+## Results
+Suite: <suite name>
+Duration: <ms>ms
+Passed: <n> | Failed: <n> | Skipped: <n>
+
+## Failures
+| Test | Classification | Resolution |
+|---|---|---|
+| <test title> | Code bug | Task <feature>#<id> created |
+| <test title> | Selector break | Fixed locator — rerun passed |
+```
+
+## Step 4 — Write uat_results.md
+
+Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 
 ```markdown
 # UAT Run — <milestone-title>
@@ -2243,25 +2458,28 @@ Write signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 **<N>/<total> steps passed**
 ```
 
-### 6. Flip milestone state
+## Step 5 — Flip milestone state
 
-**On PASS or PASS WITH TASKS:** mark the milestone Released immediately after writing results:
+**Verdict rules:**
+- All tests pass → **Pass**
+- Some tests fail but only tasks created, none blocking → **PassWithTasks**
+- Blocking failures remain after task creation → **Failed**
+
+**On Pass or PassWithTasks:**
 
 ```bash
 sdlc milestone complete <slug>
 ```
 
-This sets `released_at` and transitions the milestone from `Verifying` → `Released`. For PASS WITH TASKS the milestone is still Released — the outstanding tasks are tracked inside their features and addressed in a future cycle.
+**On Failed:** do NOT call `milestone complete`. The milestone stays in `Verifying`. Fix the feature tasks, then re-run this command.
 
-**On FAILED:** do NOT call `milestone complete`. The milestone stays in `Verifying`. The tasks created in Step 4 are already attached to the appropriate features. The agent will drive those features to fix the gaps, then re-run this UAT.
-
-### 7. Final report
+## Step 6 — Final report
 
 | Verdict | State after | Next |
 |---|---|---|
-| PASS | `Released` | Commit `uat_results.md` |
-| PASS WITH TASKS | `Released` | Commit `uat_results.md` |
-| FAILED | `Verifying` (unchanged) | `/sdlc-run <first-blocking-feature-slug>` — fix, then re-run `/sdlc-milestone-uat <slug>` |
+| Pass | `Released` | Commit `summary.md` and `uat_results.md` |
+| PassWithTasks | `Released` | Commit results; `/sdlc-run <task-owning-feature-slug>` next cycle |
+| Failed | `Verifying` (unchanged) | `/sdlc-run <first-blocking-feature-slug>` — fix, then re-run `/sdlc-milestone-uat <slug>` |
 
 Always end output with exactly one **Next:** line showing the command to run.
 "#;
@@ -2532,26 +2750,31 @@ Use this playbook to distribute a plan into sdlc milestones, features, and tasks
 
 const SDLC_MILESTONE_UAT_PLAYBOOK: &str = r#"# sdlc-milestone-uat
 
-Use this playbook to run a milestone's acceptance test end-to-end.
+Use this playbook to run a milestone's acceptance test using Playwright — Mode A runs an existing spec, Mode B generates one from the checklist.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Steps
 
-1. Load the milestone: `sdlc milestone info <slug> --json`. Extract acceptance_test.
-2. Parse every `- [ ]` line as an ordered list of test steps.
-3. Execute each step as a real user would (run commands, check output).
-4. For each step:
-   - PASS → record `[x]` with timestamp.
-   - FAIL (fixable) → fix inline, re-run, record as `[x] (fixed: <what>)`.
-   - FAIL (non-blocking) → create task with `sdlc task add`, continue.
-   - FAIL (blocking) → create task, halt execution.
-5. Write `uat_results.md` to `.sdlc/milestones/<slug>/uat_results.md`.
-6. Report verdict: PASS, PASS WITH TASKS, or FAILED.
+1. Load the milestone: `sdlc milestone info <slug> --json`. Extract acceptance_test and title.
+2. **Mode detection** — check `frontend/e2e/milestones/<slug>.spec.ts`:
+   - **Mode A** (file exists): run `cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json`. Parse `playwright-report/results.json`.
+   - **Mode B** (no file): read acceptance_test.md checklist, navigate each item using Playwright MCP browser tools (`mcp__playwright__navigate`, `mcp__playwright__click`, `mcp__playwright__fill`, etc.), write `frontend/e2e/milestones/<slug>.spec.ts` using `getByRole`/`getByTestId` locators, run the spec, fix selector issues until passing, then proceed to Mode A synthesis.
+3. For each Playwright test failure:
+   - **Selector break** (element not found, locator timeout) → fix spec locator and rerun once.
+   - **Code bug** (assertion failure, bad response) → `sdlc task add <feature-slug> "UAT: <test> — <reason>"`, continue.
+4. Write `summary.md` to `.sdlc/milestones/<slug>/uat-runs/<date>-<id>/`:
+   - Verdict: Pass | PassWithTasks | Failed
+   - Tests: `<passed>/<total>`
+   - Tasks created: list or none
+   - Results: Playwright JSON summary
+5. Write `uat_results.md` to `.sdlc/milestones/<slug>/uat_results.md` (signed checklist).
+6. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On Failed: leave in Verifying.
 
 ## Key Rules
 
-- Be the user: run the product, don't read code.
+- Playwright is the user: exercise the real UI, don't read code.
+- Selector breaks are spec bugs — fix them; code bugs become tasks.
 - Never pause to ask — decide and act on every failure.
 - Always forward: create tasks for issues, never revert state.
 "#;
@@ -2666,23 +2889,23 @@ Idempotent — re-running refines what exists, never duplicates.
 
 const SDLC_MILESTONE_UAT_SKILL: &str = r#"---
 name: sdlc-milestone-uat
-description: Run the acceptance test for a milestone end-to-end. Use when validating that a milestone meets its definition of done.
+description: Run the acceptance test for a milestone using Playwright. Mode A runs an existing spec; Mode B generates one from the checklist. Use when validating that a milestone meets its definition of done.
 ---
 
 # SDLC Milestone UAT Skill
 
-Use this skill to run a milestone's acceptance test end-to-end.
+Use this skill to run a milestone's acceptance test via Playwright.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
 1. Load milestone: `sdlc milestone info <slug> --json`.
-2. Parse `- [ ]` checklist items from the acceptance test.
-3. Execute each step as a real user would.
-4. On failure: fix inline, or create a task and continue/halt.
-5. Write `uat_results.md` to `.sdlc/milestones/<slug>/`.
-6. Report verdict: PASS, PASS WITH TASKS, or FAILED.
+2. **Mode A** — if `frontend/e2e/milestones/<slug>.spec.ts` exists: run `cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json`, parse `playwright-report/results.json`.
+3. **Mode B** — if no spec: navigate each `acceptance_test.md` checklist item via Playwright MCP browser tools, write `frontend/e2e/milestones/<slug>.spec.ts` using `getByRole`/`getByTestId` locators, run and fix until passing, then continue to Mode A synthesis.
+4. For each failure: selector break → fix spec + rerun; code bug → `sdlc task add <feature-slug> "..."`.
+5. Write `summary.md` to `.sdlc/milestones/<slug>/uat-runs/<date>-<id>/` with Verdict (Pass/PassWithTasks/Failed), test counts, tasks created, and Playwright results.
+6. Write `uat_results.md` to `.sdlc/milestones/<slug>/`. On Pass or PassWithTasks: `sdlc milestone complete <slug>`.
 "#;
 
 const SDLC_PRESSURE_TEST_SKILL: &str = r#"---
@@ -3754,6 +3977,130 @@ Show what was created: milestones, features, tasks. Link back to the scrapbook.
 "#;
 
 // ---------------------------------------------------------------------------
+// sdlc-suggest — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_SUGGEST_COMMAND: &str = r#"---
+description: Suggest what to ponder next — analyzes project state using a maturity ladder and advisory history to recommend the right next thing
+argument-hint: (no arguments)
+allowed-tools: Bash, Read, Glob, Grep
+---
+
+# sdlc-suggest
+
+Analyze the project state — using advisory history and the maturity ladder — and recommend
+3-5 specific, actionable ponder topics. Work through basics before roadmap. Use history
+to avoid re-scanning what you already know.
+
+> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Read advisory history and project state
+
+```bash
+cat .sdlc/advisory.yaml 2>/dev/null || echo "no advisory history"
+sdlc feature list --json
+sdlc milestone list --json
+sdlc ponder list --json
+```
+
+Also read (if they exist): `VISION.md`, `ARCHITECTURE.md`
+
+The advisory history tells you:
+- What stage the project was at last time
+- What findings were open, addressed, or dismissed
+- When the last analysis was run and how many files the project had
+
+Use this to decide: can you reuse previous findings, or does the project state suggest a fresh look?
+
+### 2. Orient to the maturity ladder
+
+Work through stages in order. Only advance to the next stage when the current one is clean enough.
+Use your judgement — don't be pedantic, but don't skip a broken foundation to jump to roadmap ideas.
+
+| Stage | What to check |
+|---|---|
+| **Health** | Does it build? Do tests pass? Is there dead code or circular dependencies? Lint clean? |
+| **Consistency** | One logging pattern, not three? Config access DRY? Error shapes consistent? Naming uniform? |
+| **Refactor** | Duplicated logic extracted? Files/functions over threshold broken up? Missing abstractions? |
+| **Structure** | Common UI components identified and DRY'd? Module boundaries respected? No architectural drift? |
+| **Roadmap** | Obvious gaps in the feature set? Near-term user-facing improvements? Unfinished work visible? |
+| **Advanced** | Strategic bets, ecosystem integrations, speculative improvements? |
+
+**Decision logic (your call):**
+- If health findings exist and are recent → start there, don't skip to roadmap
+- If history is old (>2 weeks) or project has grown significantly → re-check current stage
+- If a stage is clean → move to the next one without dwelling
+- If history shows a finding was dismissed/wont-fix → don't resurface it
+
+### 3. Run stage-appropriate checks
+
+Read files. Look for the patterns that belong to the current stage. Don't re-examine stages
+the history shows are already clean.
+
+### 4. Write findings back to advisory history
+
+Update `.sdlc/advisory.yaml` with your assessment. The schema:
+
+```yaml
+runs:
+  - run_at: "2026-02-28T12:00:00Z"    # ISO 8601
+    file_count: 42                      # optional: approximate file count
+    stage_reached: health               # health | consistency | refactor | structure | roadmap | advanced
+    summary: "One sentence describing what you found at this stage"
+findings:
+  - id: adv-a1b2c3                     # adv- + 6 alphanum chars (stable across runs)
+    stage: health
+    title: "Short title (5-8 words)"
+    description: "Specific finding with file reference if applicable"
+    status: open                        # open | acknowledged | resolved | dismissed
+    created_at: "2026-02-28T12:00:00Z"
+    resolved_at: null                   # omit or set when resolved
+```
+
+Create the file if it doesn't exist. Append to `runs` (never overwrite history).
+For `findings`, merge — not replace:
+- If a previous finding is no longer present in the code → mark it `resolved`
+- Add new findings with `open` status
+- Preserve findings marked `acknowledged` or `dismissed` — do not re-open them
+
+### 5. Present suggestions
+
+Based on where the project is in the maturity ladder, return 3-5 suggestions:
+
+---
+
+## Suggested Ponder Topics
+
+**Current stage:** [Stage name] — [one-line reason why you're at this stage]
+
+### 1. [Title]
+**Slug:** `slug-here`
+**Why now:** One sentence — why this is the right next thing given the project state and advisory history.
+**What to explore:** 2-3 sentences on what the ponder session would investigate.
+
+---
+
+### 6. Next
+
+**Next:** `/sdlc-ponder <suggested-slug>` — pick the most compelling one and start exploring
+"#;
+
+const SDLC_SUGGEST_PLAYBOOK: &str = "\
+Analyze the project state using the maturity ladder and advisory history. Work through basics before roadmap.\n\
+\n\
+Steps:\n\
+1. Read: `.sdlc/advisory.yaml`, `sdlc feature list --json`, `sdlc milestone list --json`, `sdlc ponder list --json`, VISION.md, ARCHITECTURE.md\n\
+2. Orient to the maturity ladder: Health → Consistency → Refactor → Structure → Roadmap → Advanced\n\
+3. Start at the current stage (from advisory history). Check if previous findings still apply.\n\
+4. Run stage-appropriate analysis (read files; look for the patterns that belong to this stage).\n\
+5. Write findings back to `.sdlc/advisory.yaml`. Schema: top-level `runs` (append-only) and `findings` (merged). Status values: open | acknowledged | resolved | dismissed.\n\
+6. Return 3-5 suggestions scoped to where the project actually is. Show current stage.\n\
+7. End with **Next:** `/sdlc-ponder <slug>`\n\
+";
+
+// ---------------------------------------------------------------------------
 // sdlc-recruit — Claude command
 // ---------------------------------------------------------------------------
 
@@ -4093,6 +4440,30 @@ Use this skill to commit a pondered idea into the state machine.
 "#;
 
 // ---------------------------------------------------------------------------
+// sdlc-suggest — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_SUGGEST_SKILL: &str = r#"---
+name: sdlc-suggest
+description: Suggest what to ponder next. Uses the maturity ladder and advisory history to recommend the right next thing. Use when starting a new project or unsure what to explore.
+---
+
+# SDLC Suggest Skill
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Read `.sdlc/advisory.yaml` (may not exist yet). Read project state: `sdlc feature list --json`, milestones, ponders, VISION.md, ARCHITECTURE.md.
+2. Orient to the maturity ladder: **Health → Consistency → Refactor → Structure → Roadmap → Advanced**. Start at the stage from advisory history; if no history, start at Health.
+3. Use advisory history to skip what's already clean. Re-check open findings. Mark addressed findings.
+4. Run stage-appropriate analysis: read files, look for patterns specific to that stage. You decide the depth based on how old the history is and how much the project has changed.
+5. Write findings back to `.sdlc/advisory.yaml` (append, never overwrite history).
+6. Present 3-5 suggestions scoped to the current stage. Show stage name in the output.
+7. **Next:** `/sdlc-ponder <suggested-slug>`
+"#;
+
+// ---------------------------------------------------------------------------
 // sdlc-recruit — Skill (Agents)
 // ---------------------------------------------------------------------------
 
@@ -4405,13 +4776,7 @@ Check the result:
 
 ### 8. Run UAT automatically when all waves are done
 
-When prepare returns no remaining waves and the milestone is `Verifying`, invoke the acceptance test immediately — do not stop and print a Next suggestion:
-
-```
-/sdlc-milestone-uat <slug>
-```
-
-The UAT command will write results, call `sdlc milestone complete` on pass, and end with its own `**Next:**` line.
+When prepare returns no remaining waves and the milestone is `Verifying`, use the `Skill` tool to execute `sdlc-milestone-uat` with args `<slug>` — do **not** print a Next suggestion or stop here. The UAT skill will write results, call `sdlc milestone complete` on pass, and end with its own `**Next:**` line.
 
 ### 9. Next
 
@@ -4440,7 +4805,7 @@ Execute the current wave of a milestone in parallel, then advance to the next wa
 4. For features with `needs_worktrees: true`: print manual step instructions; skip from parallel batch.
 5. Execute remaining Wave 1 features in parallel (spawn concurrent `/sdlc-run <slug>` calls).
 6. After all complete, re-run `sdlc project prepare --milestone <slug> --json`.
-7. If waves remain, loop back to step 3. If no waves remain (milestone `Verifying`), invoke `/sdlc-milestone-uat <slug>` immediately — do not stop and print a Next suggestion. If blockers surfaced, end: `**Next:** Resolve blockers, then /sdlc-run-wave <slug>`.
+7. If waves remain, loop back to step 3. If no waves remain (milestone `Verifying`), **execute the `sdlc-milestone-uat <slug>` slash command now** — do not print a Next suggestion or pause. If blockers surfaced, end: `**Next:** Resolve blockers, then /sdlc-run-wave <slug>`.
 "#;
 
 // ---------------------------------------------------------------------------
@@ -4464,7 +4829,7 @@ Execute the current milestone wave in parallel and advance.
 2. Check `.sdlc/milestones/<slug>/wave_plan.yaml` exists — if not, tell user to run `/sdlc-prepare <slug>`.
 3. Run `sdlc project prepare --milestone <slug> --json`. Wave 1 is the current wave.
 4. Skip features needing worktrees (print manual instructions). Execute the rest in parallel via `/sdlc-run <slug>`.
-5. After all complete, re-run prepare. If waves remain, loop to step 3. If no waves (milestone `Verifying`), invoke `/sdlc-milestone-uat <slug>` directly. If blockers: `**Next:** Resolve blockers, then /sdlc-run-wave <slug>`.
+5. After all complete, re-run prepare. If waves remain, loop to step 3. If no waves (milestone `Verifying`), **execute `sdlc-milestone-uat <slug>` now** — do not pause or print a Next suggestion. If blockers: `**Next:** Resolve blockers, then /sdlc-run-wave <slug>`.
 "#;
 
 // ---------------------------------------------------------------------------
@@ -5717,6 +6082,784 @@ NEVER modify any file before Gate 6 approval.
 | Architecture change aligned | `**Next:** /sdlc-run <feature-slug>` (if features were created) |
 | Major restructuring | `**Next:** /sdlc-plan` with revised plan |
 | Audit only, no changes needed | `**Next:** /sdlc-pressure-test <milestone-slug>` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-guideline — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_GUIDELINE_COMMAND: &str = r#"---
+description: Build an evidence-backed guideline through perspective research and TOC-first distillation. Researches from five lenses (including web search for prior art), constructs a Table of Contents, then distills each section from real codebase evidence.
+argument-hint: <slug-or-problem-description>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, WebSearch, WebFetch, Task, AskUserQuestion
+---
+
+# sdlc-guideline
+
+Build a guideline from evidence, not opinion. Five research perspectives feed a Table of Contents.
+The TOC is the structural contract — it commits to scope and ordering before any writing happens.
+Then each section is distilled from the evidence, not invented.
+
+Phase sequence: **problem → agenda → perspectives → toc → distillation → publish**
+
+> **Before acting:** read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+---
+
+## Entering the workspace
+
+### If $ARGUMENTS is an existing slug
+
+```bash
+sdlc investigate show <slug>
+sdlc investigate session list <slug>
+```
+
+Read the manifest and all artifacts. If sessions exist, read the most recent:
+
+```bash
+sdlc investigate session read <slug> <N>
+```
+
+Orient from the orientation strip (WHERE WE ARE / NEXT MOVE / COMMIT SIGNAL).
+Summarize what phase we're in, what's been captured, and what comes next. Then run the next phase.
+
+### If $ARGUMENTS describes a new problem
+
+1. Derive a slug (lowercase, hyphens, max 40 chars).
+2. Create the investigation:
+```bash
+sdlc investigate create <slug> --title "<problem title>" --kind guideline \
+  --context "<brief problem description>"
+sdlc investigate update <slug> --scope "<where this applies: language/layer/subsystem>"
+```
+
+---
+
+## Phase: problem
+
+**Goal:** Frame the recurring problem with precision.
+
+Capture the initial problem framing:
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as problem.md
+```
+
+`problem.md` must answer:
+- **Scope:** where does this apply? (language, layer, subsystem, team)
+- **Pattern:** what is the recurring behavior that causes harm?
+- **Harm:** what goes wrong when this pattern appears? What's the blast radius?
+- **Current state:** is this partially addressed? Are there existing conventions?
+
+After capturing, record the problem statement:
+```bash
+sdlc investigate update <slug> --problem-statement "<one-line: the pattern and why it matters>"
+sdlc investigate update <slug> --phase agenda
+```
+
+---
+
+## Phase: agenda
+
+**Goal:** Define 4-6 questions the guideline must answer.
+
+Read `problem.md`. Derive targeted research questions. These anchor the entire investigation —
+specific enough to drive evidence gathering, not generic.
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as research-agenda.md
+```
+
+`research-agenda.md` format:
+```markdown
+# Research Agenda: <slug>
+
+## Questions
+1. <question> — why this matters to the final guideline
+2. <question> — why this matters
+...
+
+## Not in scope
+- <what we are explicitly not researching and why>
+```
+
+Advance:
+```bash
+sdlc investigate update <slug> --phase perspectives
+```
+
+---
+
+## Phase: perspectives
+
+**Goal:** Gather evidence from five distinct research lenses.
+
+Run all five lenses in sequence. Each writes a separate evidence artifact.
+Evidence quality determines guideline quality — do not rush.
+
+### Lens 1: Anti-pattern Archaeologist
+
+Search the codebase for real occurrences of the problem. Use Grep, Glob, Read.
+Cite actual file:line references. Note the context — why did it happen here?
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as evidence-antipatterns.md
+```
+
+Format:
+```markdown
+# Anti-patterns Found
+
+## [Instance title]
+**File:** `path/to/file.rs:42`
+**Pattern:** <what is wrong>
+**Why:** <why this is the problematic form>
+```code snippet```
+
+## Summary
+Found N instances across M files. Most concentrated in: <areas>.
+```
+
+### Lens 2: Exemplar Scout
+
+Find the best existing implementations of the right approach in this codebase.
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as evidence-exemplars.md
+```
+
+Same format — positive examples with file:line citations. What does doing it right look like here?
+
+### Lens 3: Prior Art Mapper
+
+Research how the broader community addresses this problem.
+**Use WebSearch** to find named patterns, RFC language, style guide conventions, linter rules,
+and how similar projects handle the same tradeoff.
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as evidence-priorart.md
+```
+
+Label each source: `[from training knowledge]` or `[from web: URL]`.
+
+### Lens 4: Adjacent Pattern Analyst
+
+Find related patterns that interact with this one. What else breaks or benefits when this
+guideline is followed? What adjacent rules exist that developers already know?
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as evidence-adjacent.md
+```
+
+### Lens 5: Impact Assessor
+
+Estimate blast radius and priority:
+- How many occurrences exist right now?
+- Which areas are most exposed?
+- Typical failure mode when violated?
+- Is this "always fails" or "occasionally fails"?
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as evidence-impact.md
+```
+
+Advance after all five lenses:
+```bash
+sdlc investigate update <slug> --phase toc
+```
+
+---
+
+## Phase: toc
+
+**Goal:** Commit to structure before writing.
+
+Read ALL five evidence artifacts. Group findings by theme. Draft a Table of Contents that:
+- Starts with the core rule (the one thing someone must never/always do)
+- Orders sections by importance — most evidence density first
+- Includes edge cases and exceptions after the main rules
+- Ends with enforcement and migration guidance
+
+```bash
+sdlc investigate capture <slug> --content "<markdown>" --as toc.md
+```
+
+`toc.md` format:
+```markdown
+# Guideline TOC: <slug>
+
+## Table of Contents
+1. **<Section title>** — <one-line: what rule or principle this section establishes>
+2. **<Section title>** — <one-line description>
+...
+
+## Rationale
+<Why section 1 is first. What groupings emerged. What was left out and why.>
+
+## Evidence Summary
+- Anti-patterns found: N
+- Good examples found: M
+- Prior art sources: P
+- Adjacent patterns: Q
+```
+
+The TOC is the structural contract. Once captured, it defines exactly what gets written.
+
+Advance:
+```bash
+sdlc investigate update <slug> --phase distillation
+```
+
+---
+
+## Phase: distillation
+
+**Goal:** Write each TOC section from evidence, not from opinion.
+
+Read `toc.md` to know the sections. Read the relevant evidence artifacts for each.
+Distill what the evidence shows — do not invent rules.
+
+**Distillation principles:**
+- Every rule must be backed by at least one real example (file:line) from this project
+- Rules from prior art are labeled `[community practice]`
+- If evidence is thin for a section, say so — write what you know, note the gap
+- Use `⚑ Rule:` for the actual rule statement
+- Use `✓ Good:` and `✗ Bad:` for concrete examples
+
+Write the full guideline as `guideline-draft.md`:
+
+```bash
+sdlc investigate capture <slug> --content "<full markdown>" --as guideline-draft.md
+```
+
+`guideline-draft.md` structure:
+```markdown
+# <Guideline Title>
+
+**Scope:** <where this applies>
+**Problem:** <one-line problem statement>
+**Confidence:** <High | Medium — based on evidence density>
+
+---
+
+## 1. [First TOC section]
+
+⚑ **Rule:** <the actual rule>
+
+**Why:** <evidence-backed explanation — cite the impact assessor findings>
+
+✗ **Bad:** `path/to/file.rs:42` — <why this is wrong>
+```bad snippet```
+
+✓ **Good:** `path/to/file.rs:87` — <why this is right>
+```good snippet```
+
+---
+
+## 2. [Second section — repeat pattern]
+
+---
+
+## Enforcement
+
+[Grep patterns, lint rules, or PR checklist items that catch violations]
+
+## Migration
+
+[How to address existing violations — scope estimate, remediation steps]
+```
+
+After capturing:
+```bash
+sdlc investigate update <slug> --principles-count <N-sections>
+sdlc investigate update <slug> --phase publish
+```
+
+---
+
+## Phase: publish
+
+**Goal:** Finalize and publish.
+
+Read `guideline-draft.md`. Review:
+- All TOC sections present and backed by evidence
+- Enforcement section complete
+- Migration guidance actionable
+
+Publish to the project guidelines directory:
+```bash
+mkdir -p .sdlc/guidelines
+```
+
+Write the final guideline to `.sdlc/guidelines/<slug>.md`.
+
+Update the manifest:
+```bash
+sdlc investigate update <slug> --output-ref ".sdlc/guidelines/<slug>.md"
+sdlc investigate update <slug> --status complete
+```
+
+If violations require remediation, create a tracking feature:
+```bash
+sdlc feature create guideline-<slug>-enforcement --title "Enforce: <guideline title>"
+```
+
+---
+
+## Session logging (MANDATORY)
+
+Every session MUST end with:
+1. Write the complete session Markdown to `/tmp/guideline-session-<slug>.md` using the Write tool
+2. Run: `sdlc investigate session log <slug> --file /tmp/guideline-session-<slug>.md`
+
+Session frontmatter:
+```yaml
+---
+session: <N>
+timestamp: <ISO-8601 UTC>
+orientation:
+  current: "<phase we're in and what was accomplished this session>"
+  next: "<concrete next action>"
+  commit: "<condition that unlocks the next phase>"
+---
+```
+
+---
+
+## Phase transition reference
+
+| Phase | Gate artifact | Command to advance |
+|---|---|---|
+| problem | `problem.md` | `sdlc investigate update <slug> --phase agenda` |
+| agenda | `research-agenda.md` | `sdlc investigate update <slug> --phase perspectives` |
+| perspectives | all 5 `evidence-*.md` files | `sdlc investigate update <slug> --phase toc` |
+| toc | `toc.md` | `sdlc investigate update <slug> --phase distillation` |
+| distillation | `guideline-draft.md` | `sdlc investigate update <slug> --phase publish` |
+| publish | `.sdlc/guidelines/<slug>.md` | `sdlc investigate update <slug> --status complete` |
+
+---
+
+## Next steps by state
+
+| State | Next |
+|---|---|
+| New slug created | `**Next:** /sdlc-guideline <slug>` (run problem phase) |
+| problem phase complete | `**Next:** /sdlc-guideline <slug>` (run agenda phase) |
+| agenda written | `**Next:** /sdlc-guideline <slug>` (run perspectives — all 5 lenses) |
+| perspectives complete | `**Next:** /sdlc-guideline <slug>` (run toc phase) |
+| toc written | `**Next:** /sdlc-guideline <slug>` (run distillation) |
+| draft complete | `**Next:** /sdlc-guideline <slug>` (run publish) |
+| published | `**Next:** /sdlc-ponder` or `/sdlc-run <feature-slug>` |
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-guideline — Playbook (Gemini/OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_GUIDELINE_PLAYBOOK: &str = r#"# sdlc-guideline
+
+Build an evidence-backed guideline through five research perspectives and TOC-first distillation.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Phase sequence
+
+`problem → agenda → perspectives → toc → distillation → publish`
+
+## Steps
+
+1. **Load or create:** If slug exists, `sdlc investigate show <slug>` + read sessions/artifacts. If new, `sdlc investigate create <slug> --kind guideline --title "..." --context "..."`.
+2. **problem phase:** Write `problem.md` (scope, pattern, harm, current state). `sdlc investigate update <slug> --problem-statement "..." --phase agenda`.
+3. **agenda phase:** Derive 4-6 research questions. Write `research-agenda.md`. `sdlc investigate update <slug> --phase perspectives`.
+4. **perspectives phase — run all 5 lenses:**
+   - Lens 1 (Anti-pattern Archaeologist): grep codebase, write `evidence-antipatterns.md` with file:line citations.
+   - Lens 2 (Exemplar Scout): find good implementations, write `evidence-exemplars.md` with file:line citations.
+   - Lens 3 (Prior Art Mapper): research community knowledge and named patterns — use WebSearch — write `evidence-priorart.md`.
+   - Lens 4 (Adjacent Pattern Analyst): find related patterns, write `evidence-adjacent.md`.
+   - Lens 5 (Impact Assessor): estimate frequency and blast radius, write `evidence-impact.md`.
+   - `sdlc investigate update <slug> --phase toc`.
+5. **toc phase:** Read all evidence artifacts. Group by theme. Order by importance. Write `toc.md` (numbered sections, rationale, evidence summary). `sdlc investigate update <slug> --phase distillation`.
+6. **distillation phase:** For each TOC section, read relevant evidence and distill. Write `guideline-draft.md` with `⚑ Rule:`, `✓ Good:`, `✗ Bad:` markers and file:line citations. `sdlc investigate update <slug> --principles-count <N> --phase publish`.
+7. **publish phase:** Write final guideline to `.sdlc/guidelines/<slug>.md`. `sdlc investigate update <slug> --output-ref ".sdlc/guidelines/<slug>.md" --status complete`.
+8. **Session log (MANDATORY):** Write session to `/tmp/guideline-session-<slug>.md`, then `sdlc investigate session log <slug> --file /tmp/guideline-session-<slug>.md`.
+9. **Next:** `/sdlc-guideline <slug>` to continue, or report completion.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-guideline — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_GUIDELINE_SKILL: &str = r#"---
+name: sdlc-guideline
+description: Build an evidence-backed guideline through perspective research and TOC-first distillation. Researches from five lenses (including web search for prior art), constructs a Table of Contents, then distills each section from real codebase evidence.
+---
+
+# SDLC Guideline Skill
+
+Build a guideline from evidence, not opinion.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Phase sequence
+
+`problem → agenda → perspectives → toc → distillation → publish`
+
+## Workflow
+
+1. Load or create investigation: `sdlc investigate show <slug>` or `sdlc investigate create <slug> --kind guideline`.
+2. Read all sessions and artifacts to orient.
+3. Run the current phase to completion, writing the gate artifact.
+4. Advance: `sdlc investigate update <slug> --phase <next>`.
+5. Five perspectives in the `perspectives` phase: anti-patterns (codebase grep), exemplars (good examples), prior art (community knowledge + web search), adjacent patterns, impact assessment.
+6. TOC (`toc.md`) commits to structure before writing — ordered by evidence density.
+7. Distillation writes each TOC section from evidence — every rule cites a real file:line.
+8. Publish to `.sdlc/guidelines/<slug>.md`. Update manifest with output-ref and status complete.
+9. Log session (MANDATORY): Write to `/tmp/guideline-session-<slug>.md`, then `sdlc investigate session log <slug> --file /tmp/...`.
+10. **Next:** `/sdlc-guideline <slug>` to continue next phase.
+"#;
+
+const SDLC_INIT_COMMAND: &str = r#"---
+description: Interview to bootstrap vision, architecture, config, and team — conversational, efficient, complete
+argument-hint: [optional: one-line description of what you're building]
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, AskUserQuestion
+---
+
+# sdlc-init
+
+You are a principal engineer and technical program manager who has onboarded dozens of projects onto structured development lifecycles. Your job: extract exactly what you need to bootstrap this project correctly — vision, architecture, config, and team — through a natural conversation that feels fast and easy, not like filling out a form.
+
+> **Before starting:** Check whether `.sdlc/` exists. If not, run `sdlc init` first to scaffold the directory structure.
+
+```bash
+ls .sdlc/ 2>/dev/null || sdlc init
+```
+
+## Ethos
+
+- **Infer first, ask second.** Read existing files before asking anything. If README.md answers a question, don't ask it.
+- **One opener, targeted follow-ups.** Never lead with a list of questions. Elicit freely, fill gaps with precision.
+- **Draft before writing.** Always show Vision and Architecture as drafts and gate before writing to disk.
+- **Recruit by domain.** Design agents from what the project actually needs — never a generic roster.
+
+---
+
+## Phase 1: Orient
+
+Before talking to the user, read what already exists:
+
+```bash
+cat README.md 2>/dev/null || true
+cat VISION.md 2>/dev/null || true
+cat ARCHITECTURE.md 2>/dev/null || true
+cat .sdlc/config.yaml 2>/dev/null || true
+ls -la 2>/dev/null || true
+```
+
+Note what's already answered. Do not ask for what you already know.
+
+---
+
+## Phase 2: Quick Capture
+
+### 2a: The opener
+
+If an argument was provided, use it as the seed and proceed to targeted follow-ups.
+
+Otherwise, ask one open question:
+
+> "Tell me what we're building — the problem it solves, who it's for, and what the tech stack looks like. One paragraph is plenty."
+
+From the answer, infer: domain, users, stack, scale, whether it's greenfield or existing, and any constraints.
+
+### 2b: Targeted follow-ups
+
+Ask only what you couldn't infer. Maximum 3 follow-up exchanges. Pick from:
+
+- **Stack** (if unclear): "What's the primary language and key frameworks?"
+- **Greenfield vs existing** (if ambiguous): Use AskUserQuestion — options: Greenfield project / Existing codebase
+- **Hardest constraint** (if hinted at): "What's the one constraint that shapes every decision — latency, security, simplicity, cost?"
+- **Success** (if not captured): "What does success look like in 6 months? What would failure look like?"
+- **Quality bar** (only if mentioned): "Any phases to skip or specific quality thresholds?"
+
+Cap at 3 exchanges. If still missing critical info, pick the most reasonable default and note it in the draft.
+
+---
+
+## Phase 3: Vision
+
+### 3a: Draft VISION.md
+
+Synthesize the interview into a vision document with this structure:
+
+```markdown
+# [Project Name] Vision
+
+[One-sentence operating philosophy — the core bet this project is making.]
+
+> **[Key principle stated as a concrete design constraint.]**
+
+---
+
+## The Problem
+
+[2-3 paragraphs. What's broken, who suffers from it, what makes it hard to fix? Be specific about the user and their situation.]
+
+## The Answer
+
+[What this project does. The key insight. What makes it different from the obvious approach.]
+
+## Core Design Principles
+
+[3-5 principles. Each must be opinionated — able to resolve a tradeoff, not just state a value.]
+
+### 1. [Principle Name]
+
+[1-sentence explanation. 1-2 sentences of rationale — what does this prevent or enable?]
+
+...
+
+## What This Is Not
+
+[2-3 explicit non-goals. These prevent scope creep and set expectations.]
+
+## Success Criteria
+
+[3-5 items in the form: "A [specific persona] can [specific action], which matters because [specific value]."]
+```
+
+### 3b: Gate — Vision Approval
+
+Present the full draft. Ask:
+> "Does this capture your direction? What's off or missing?"
+
+Apply edits. Write `VISION.md` only after the user approves the substance.
+
+---
+
+## Phase 4: Architecture
+
+### 4a: Draft ARCHITECTURE.md
+
+Structure based on what you know. Mark gaps as `[TBD — fill in as architecture solidifies]`:
+
+```markdown
+# [Project Name] Architecture
+
+Technical reference for contributors and integrators.
+
+---
+
+## Stack
+
+| Layer | Technology | Notes |
+|---|---|---|
+| Language | ... | ... |
+| Framework | ... | ... |
+| Storage | ... | ... |
+| Infrastructure | ... | ... |
+
+## Workspace Layout
+
+```
+project/
+├── [key directory]    — [what lives here]
+├── [key directory]    — [what lives here]
+└── [key directory]    — [what lives here]
+```
+
+## Key Components
+
+**[Component Name]** — [What it does. What interfaces it exposes. What it depends on.]
+
+...
+
+## Data Flow
+
+[How data moves through the system — prose or ASCII diagram. Focus on the happy path first.]
+
+## Key Decisions
+
+| Decision | Choice | Rationale |
+|---|---|---|
+| [What was decided] | [What was chosen] | [Why — what alternatives were considered] |
+
+## What to Read First
+
+If you're new to this project, start here:
+1. `[file path]` — [why this file first]
+2. `[file path]` — [what it reveals]
+3. `[file path]` — [what it completes]
+```
+
+### 4b: Gate — Architecture Approval
+
+Present the full draft. Ask:
+> "Does this match your mental model? What's missing or wrong?"
+
+Apply edits. Write `ARCHITECTURE.md` after approval.
+
+---
+
+## Phase 5: Config
+
+Read the current config:
+
+```bash
+cat .sdlc/config.yaml
+```
+
+Patch only:
+- `project.name` — from the interview
+- `project.description` — 1-sentence summary
+
+If the user explicitly mentioned quality standards, also patch:
+- `quality.min_score_to_advance` (default: 70 — only change if stated)
+- `quality.min_score_to_release` (default: 80 — only change if stated)
+
+If the user said a phase is irrelevant (e.g., "we don't do formal QA"), remove it from `phases.enabled`.
+
+Do not touch fields that are already correctly set. Write the updated config.
+
+---
+
+## Phase 6: Team
+
+### 6a: Design the roster
+
+Based on the project's domain and stack, design 2-4 specialist agents. Rules:
+- Always include: one expert in the core domain + one pragmatic skeptic who challenges assumptions
+- Backend/API → backend architect, data modeler
+- Frontend → UI engineer, UX critic
+- Infra/platform → reliability engineer, platform engineer
+- AI/ML → ML systems engineer, eval specialist
+- Security-sensitive → security engineer
+
+For each agent, decide:
+- **First Last name** — a real-sounding, specific person
+- **Role** — one clear domain they own
+- **Model** — `claude-opus-4-6` for senior strategists and architects; `claude-sonnet-4-6` for implementers
+- **Career background** — 2-3 named companies, 1 notable project or achievement
+
+### 6b: Gate — Roster Approval
+
+Present as a table:
+
+| Name | Role | Owns | Model |
+|---|---|---|---|
+| ... | ... | ... | ... |
+
+Ask: "Does this team cover your needs? Any roles to add or swap?"
+
+### 6c: Create agents
+
+For each approved agent, write `.claude/agents/<first-last>.md`:
+
+```markdown
+---
+name: First Last
+description: [1-sentence trigger — when to invoke this agent, what they're best for]
+model: [claude-opus-4-6 | claude-sonnet-4-6]
+---
+
+First Last is a [role] with [N] years of experience across [Company1], [Company2], and [Company3], where they [specific achievement in 1 sentence]. They believe [core technical philosophy — opinionated, not generic].
+
+## Principles
+
+1. **[Principle]** — [1-sentence explanation of what this means in practice]
+2. ...
+
+## This Project
+
+- **[Domain area]** (`path/to/key/files`) — [what they care about and how they think about it]
+- ...
+
+## ALWAYS
+
+- [Specific, concrete rule — not generic advice]
+- ...
+
+## NEVER
+
+- [Anti-pattern to avoid — specific to this domain]
+- ...
+
+## When You're Stuck
+
+- **[Specific failure mode]**: [Specific diagnostic — what to read, what command to run, what to look for]
+- ...
+```
+
+### 6d: Update AGENTS.md
+
+Add or update a **Team** section in AGENTS.md listing all agents with role and invocation trigger.
+
+---
+
+## Finish
+
+Summarize what was produced:
+
+```
+✓ VISION.md
+✓ ARCHITECTURE.md
+✓ .sdlc/config.yaml (project.name, project.description[, quality thresholds])
+✓ Agents: [Name — Role], [Name — Role], ...
+✓ AGENTS.md updated
+```
+
+**Next:** `/sdlc-ponder` to explore your first idea — or `/sdlc-plan` if you already know what to build.
+"#;
+
+const SDLC_INIT_PLAYBOOK: &str = r#"# sdlc-init
+
+Interview to bootstrap VISION.md, ARCHITECTURE.md, .sdlc/config.yaml, and a recruited agent team for a new project.
+
+## Steps
+
+1. **Ensure scaffolding** — Run `sdlc init` if `.sdlc/` doesn't exist.
+2. **Orient** — Read README.md, VISION.md, ARCHITECTURE.md, .sdlc/config.yaml. Note what's already answered.
+3. **Open question** — "Tell me what we're building — the problem, the users, the tech stack." Infer max from the response.
+4. **Targeted follow-ups** — Ask only what you couldn't infer (max 3): stack, constraints, success criteria, quality bar.
+5. **Draft VISION.md** — Problem → Answer → Principles (opinionated) → Non-Goals → Success Criteria. Gate: show draft, get approval, then write.
+6. **Draft ARCHITECTURE.md** — Stack table → Layout → Components → Data Flow → Key Decisions → What to Read First. Gate: show draft, get approval, then write.
+7. **Patch config.yaml** — Update project.name, project.description. Adjust quality thresholds only if stated by user.
+8. **Design team** — 2-4 agents matched to domain (always: core domain expert + pragmatic skeptic). Present roster as table, gate approval.
+9. **Create agents** — Write `.claude/agents/<first-last>.md` with: background, Principles, This Project, ALWAYS, NEVER, When You're Stuck.
+10. **Update AGENTS.md** — Add Team section listing names, roles, invocation triggers.
+11. **Finish** — Summarize what was produced.
+
+**Next:** `/sdlc-ponder` to explore your first idea — or `/sdlc-plan` if you already know what to build.
+"#;
+
+const SDLC_INIT_SKILL: &str = r#"---
+name: sdlc-init
+description: Interview to bootstrap vision, architecture, config, and team for a new project. Use at the start of any new project after running `sdlc init`.
+---
+
+# SDLC Init Skill
+
+Interview the user to produce VISION.md, ARCHITECTURE.md, .sdlc/config.yaml updates, and a recruited agent team.
+
+> Read `.sdlc/guidance.md` for engineering principles. <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Ensure `.sdlc/` exists — run `sdlc init` if not.
+2. Read existing files (README, VISION, ARCHITECTURE, config.yaml) before asking anything.
+3. Open question: "Tell me what we're building — problem, users, tech stack." Infer maximum from response.
+4. Targeted follow-ups only (max 3): stack, constraints, success criteria.
+5. Draft VISION.md: Problem → Answer → Principles (opinionated) → Non-Goals → Success Criteria. Gate: approval before writing.
+6. Draft ARCHITECTURE.md: Stack → Layout → Components → Data Flow → Key Decisions → What to Read First. Gate: approval before writing.
+7. Patch `.sdlc/config.yaml`: project.name, project.description, quality thresholds if stated.
+8. Design 2-4 agents by domain (always: core expert + pragmatic skeptic). Gate: roster approval before creating files.
+9. Create `.claude/agents/<first-last>.md` for each agent.
+10. Update AGENTS.md with Team section.
+
+| Outcome | Next |
+|---|---|
+| Bootstrapped, no plan yet | `**Next:** /sdlc-ponder` (explore first idea) |
+| Plan ready to distribute | `**Next:** /sdlc-plan` (distribute into milestones) |
 "#;
 
 // ---------------------------------------------------------------------------

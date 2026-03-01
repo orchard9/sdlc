@@ -1,4 +1,6 @@
+pub mod advisory;
 pub mod agents;
+pub mod ama_threads;
 pub mod app_tunnel;
 pub mod architecture;
 pub mod artifacts;

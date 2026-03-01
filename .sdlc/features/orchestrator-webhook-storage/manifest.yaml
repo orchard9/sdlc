@@ -1,0 +1,73 @@
+slug: orchestrator-webhook-storage
+title: HTTP webhook receiver and raw payload storage in redb
+description: 'Add webhooks redb table to ActionDb (key: uuid bytes, value: raw body + metadata). Add POST /webhooks/:route to sdlc-server — accepts any body, stores raw bytes + received_at + route_path. Add WebhookPayload struct to sdlc-core. ActionDb gains: insert_webhook(payload), all_pending_webhooks(), delete_webhook(id). No transformation on ingress — store exactly what arrived.'
+phase: draft
+created_at: 2026-03-01T07:52:17.068368Z
+updated_at: 2026-03-01T07:52:30.662062Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/orchestrator-webhook-storage/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-01T07:52:17.068368Z
+  exited: null
+dependencies: []
+archived: false

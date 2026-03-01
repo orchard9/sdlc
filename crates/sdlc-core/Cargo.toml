@@ -16,3 +16,5 @@ home = { workspace = true }
 which = { workspace = true }
 tantivy = "0.22"
 tempfile = { workspace = true }
+redb = { workspace = true }
+uuid = { workspace = true }

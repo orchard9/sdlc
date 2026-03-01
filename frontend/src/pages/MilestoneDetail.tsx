@@ -78,7 +78,7 @@ export function MilestoneDetail() {
 
       <div className="flex items-start justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-xl font-semibold">{milestone.title}</h2>
+          <h2 data-testid="milestone-title" className="text-xl font-semibold">{milestone.title}</h2>
           <p className="text-sm text-muted-foreground font-mono">{milestone.slug}</p>
           {milestone.description && (
             <p className="text-sm text-muted-foreground mt-1">{milestone.description}</p>
@@ -88,7 +88,7 @@ export function MilestoneDetail() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          <StatusBadge status={milestone.status} />
+          <StatusBadge status={milestone.status} testId="milestone-status" />
           <span className="text-xs text-muted-foreground">
             {milestone.features.length} feature{milestone.features.length !== 1 ? 's' : ''}
           </span>

@@ -89,6 +89,14 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/milestones/{slug}/features/order",
             put(routes::milestones::reorder_milestone_features),
         )
+        .route(
+            "/api/milestones/{slug}/uat-runs",
+            get(routes::milestones::list_milestone_uat_runs),
+        )
+        .route(
+            "/api/milestones/{slug}/uat-runs/latest",
+            get(routes::milestones::get_latest_milestone_uat_run),
+        )
         // Roadmap (Ponder Space)
         .route("/api/roadmap", get(routes::roadmap::list_ponders))
         .route("/api/roadmap", post(routes::roadmap::create_ponder))
@@ -105,6 +113,16 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/roadmap/{slug}/sessions/{n}",
             get(routes::roadmap::get_ponder_session),
+        )
+        // Advisory (maturity-ladder codebase analysis)
+        .route("/api/advisory", get(routes::advisory::get_advisory))
+        .route(
+            "/api/advisory/findings/{id}",
+            patch(routes::advisory::update_finding),
+        )
+        .route(
+            "/api/advisory/run",
+            post(routes::advisory::start_advisory_run),
         )
         // Ponder chat (agent-driven sessions)
         .route(
@@ -284,6 +302,25 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/secrets/envs/{name}",
             delete(routes::secrets::delete_env),
         )
+        // AMA threads (must be before /api/tools/{name} wildcard)
+        .route(
+            "/api/tools/ama/threads",
+            get(routes::ama_threads::list_ama_threads).post(routes::ama_threads::create_ama_thread),
+        )
+        .route(
+            "/api/tools/ama/threads/{id}",
+            get(routes::ama_threads::get_ama_thread)
+                .patch(routes::ama_threads::update_ama_thread)
+                .delete(routes::ama_threads::delete_ama_thread),
+        )
+        .route(
+            "/api/tools/ama/threads/{id}/turns",
+            post(routes::ama_threads::add_ama_turn),
+        )
+        .route(
+            "/api/tools/ama/threads/{id}/turns/{n}",
+            patch(routes::ama_threads::update_ama_turn_synthesis),
+        )
         // Tools
         .route("/api/tools/ama/answer", post(routes::runs::answer_ama))
         .route(
@@ -294,13 +331,27 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/tools/quality-check/fix",
             post(routes::runs::fix_quality_issues),
         )
+        // Plan-Act pattern for tool creation (must be before {name} wildcard)
+        .route("/api/tools/plan", post(routes::runs::plan_tool))
+        .route("/api/tools/build", post(routes::runs::build_tool))
         .route(
             "/api/tools",
             get(routes::tools::list_tools).post(routes::tools::create_tool),
         )
         .route("/api/tools/{name}", get(routes::tools::get_tool_meta))
+        .route("/api/tools/{name}/clone", post(routes::tools::clone_tool))
+        .route("/api/tools/{name}/evolve", post(routes::runs::evolve_tool))
+        .route("/api/tools/{name}/act", post(routes::runs::act_tool))
         .route("/api/tools/{name}/run", post(routes::tools::run_tool))
         .route("/api/tools/{name}/setup", post(routes::tools::setup_tool))
+        .route(
+            "/api/tools/{name}/interactions",
+            get(routes::tools::list_tool_interactions),
+        )
+        .route(
+            "/api/tools/{name}/interactions/{id}",
+            get(routes::tools::get_tool_interaction).delete(routes::tools::delete_tool_interaction),
+        )
         // Config
         .route("/api/config", get(routes::config::get_config))
         .route("/api/config", patch(routes::config::update_config))

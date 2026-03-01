@@ -14,11 +14,88 @@
 //! 2. deno — built-in TypeScript, good permissions model
 //! 3. node — fallback via `npx --yes tsx` for TypeScript support
 
+use std::collections::HashMap;
 use std::io::Write;
 use std::path::Path;
 use std::process::{Command, Stdio};
 
 use crate::error::{Result, SdlcError};
+
+// ---------------------------------------------------------------------------
+// ToolMeta and related types
+// ---------------------------------------------------------------------------
+
+/// A secret that the tool requires to be injected as an environment variable.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct SecretRef {
+    pub env_var: String,
+    pub description: String,
+    #[serde(default = "default_true")]
+    pub required: bool,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+/// A form field descriptor for building rendered input UIs.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct FormField {
+    pub key: String,
+    /// "text" | "textarea" | "code" | "select" | "checkbox" | "date_range"
+    pub field_type: String,
+    pub label: Option<String>,
+    pub placeholder: Option<String>,
+    pub options: Option<Vec<String>>,
+    pub language: Option<String>,
+    pub default: Option<serde_json::Value>,
+}
+
+/// A follow-up agent action that can be triggered from a tool result.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
+pub struct ResultAction {
+    pub label: String,
+    pub icon: Option<String>,
+    /// JSONPath-style condition: `"$.ok == false"`, `"$.data.failed > 0"` etc.
+    pub condition: Option<String>,
+    /// Prompt template — supports `{{result}}`, `{{input}}`, `{{tool}}`, `{{project}}`.
+    pub prompt_template: String,
+    pub confirm: Option<String>,
+}
+
+/// Metadata returned by a tool's `--meta` mode.
+/// All fields beyond the core set are optional for backward compatibility
+/// with tools that pre-date the extended schema.
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, Default)]
+pub struct ToolMeta {
+    pub name: String,
+    pub display_name: String,
+    pub description: String,
+    pub version: String,
+    #[serde(default)]
+    pub requires_setup: bool,
+    pub setup_done: Option<bool>,
+    pub setup_description: Option<String>,
+    #[serde(default)]
+    pub input_schema: serde_json::Value,
+    #[serde(default)]
+    pub output_schema: serde_json::Value,
+    // --- Extended optional fields ---
+    pub secrets: Option<Vec<SecretRef>>,
+    pub form_layout: Option<Vec<FormField>>,
+    pub streaming: Option<bool>,
+    pub result_actions: Option<Vec<ResultAction>>,
+    pub timeout_seconds: Option<u64>,
+    pub tags: Option<Vec<String>>,
+    pub threaded: Option<bool>,
+    pub persist_interactions: Option<bool>,
+}
+
+/// Parse ToolMeta from `--meta` stdout. Returns an error if the JSON is invalid
+/// or missing required fields.
+pub fn parse_tool_meta(stdout: &str) -> Result<ToolMeta> {
+    serde_json::from_str(stdout).map_err(SdlcError::Json)
+}
 
 /// The available JavaScript runtimes, in priority order.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -53,6 +130,14 @@ pub fn detect_runtime() -> Option<Runtime> {
     None
 }
 
+/// Tools installed and always overwritten by `sdlc init`. Cannot be durably edited.
+pub const MANAGED_TOOLS: &[&str] = &["ama", "quality-check"];
+
+/// Returns true if this tool is managed by `sdlc init`.
+pub fn is_managed_tool(name: &str) -> bool {
+    MANAGED_TOOLS.contains(&name)
+}
+
 /// Run a tool script in the given mode, optionally feeding JSON to stdin.
 ///
 /// # Arguments
@@ -60,6 +145,7 @@ pub fn detect_runtime() -> Option<Runtime> {
 /// - `mode`: One of `--meta`, `--run`, `--setup`
 /// - `stdin_json`: JSON string to feed to the tool's stdin (for `--run` mode)
 /// - `root`: Project root (set as `SDLC_ROOT` env var for the subprocess)
+/// - `extra_env`: Additional environment variables to inject (e.g. secrets)
 ///
 /// # Returns
 /// The tool's stdout as a String (expected to be JSON).
@@ -69,6 +155,7 @@ pub fn run_tool(
     mode: &str,
     stdin_json: Option<&str>,
     root: &Path,
+    extra_env: Option<&HashMap<String, String>>,
 ) -> Result<String> {
     let runtime = detect_runtime().ok_or(SdlcError::NoToolRuntime)?;
 
@@ -81,6 +168,13 @@ pub fn run_tool(
     // Set SDLC_ROOT so tools know the project root
     cmd.env("SDLC_ROOT", root);
     cmd.current_dir(root);
+
+    // Inject extra env vars (e.g. secrets declared in tool meta)
+    if let Some(env) = extra_env {
+        for (k, v) in env {
+            cmd.env(k, v);
+        }
+    }
 
     // stdin: piped if we have JSON to send, null otherwise
     if stdin_json.is_some() {

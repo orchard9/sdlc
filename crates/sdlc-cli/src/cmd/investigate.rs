@@ -59,6 +59,20 @@ pub enum InvestigateSubcommand {
         /// Update confidence score 0–100 (root-cause)
         #[arg(long)]
         confidence: Option<u32>,
+        /// Set a lens score for evolve investigations: key=value (e.g. pit_of_success=medium)
+        /// Valid keys: pit_of_success, coupling, growth_readiness, self_documenting, failure_modes
+        /// Valid values: low, medium, high, excellent
+        #[arg(long = "lens")]
+        lens: Option<String>,
+        /// Set the problem statement for guideline investigations
+        #[arg(long)]
+        problem_statement: Option<String>,
+        /// Set the number of principles/TOC sections extracted (guideline)
+        #[arg(long)]
+        principles_count: Option<u32>,
+        /// Set the output reference path (guideline publish path or root-cause output ref)
+        #[arg(long)]
+        output_ref: Option<String>,
     },
     /// List artifacts in the investigation workspace
     Artifacts { slug: String },
@@ -122,6 +136,10 @@ pub fn run(root: &Path, subcmd: InvestigateSubcommand, json: bool) -> anyhow::Re
             status,
             scope,
             confidence,
+            lens,
+            problem_statement,
+            principles_count,
+            output_ref,
         } => update(
             root,
             &slug,
@@ -129,6 +147,10 @@ pub fn run(root: &Path, subcmd: InvestigateSubcommand, json: bool) -> anyhow::Re
             status.as_deref(),
             scope.as_deref(),
             confidence,
+            lens.as_deref(),
+            problem_statement.as_deref(),
+            principles_count,
+            output_ref.as_deref(),
             json,
         ),
         InvestigateSubcommand::Artifacts { slug } => artifacts(root, &slug, json),
@@ -322,6 +344,7 @@ fn capture(
     Ok(())
 }
 
+#[allow(clippy::too_many_arguments)]
 fn update(
     root: &Path,
     slug: &str,
@@ -329,10 +352,25 @@ fn update(
     status_str: Option<&str>,
     scope: Option<&str>,
     confidence: Option<u32>,
+    lens: Option<&str>,
+    problem_statement: Option<&str>,
+    principles_count: Option<u32>,
+    output_ref: Option<&str>,
     json: bool,
 ) -> anyhow::Result<()> {
-    if phase.is_none() && status_str.is_none() && scope.is_none() && confidence.is_none() {
-        anyhow::bail!("nothing to update: provide --phase, --status, --scope, or --confidence");
+    if phase.is_none()
+        && status_str.is_none()
+        && scope.is_none()
+        && confidence.is_none()
+        && lens.is_none()
+        && problem_statement.is_none()
+        && principles_count.is_none()
+        && output_ref.is_none()
+    {
+        anyhow::bail!(
+            "nothing to update: provide --phase, --status, --scope, --confidence, --lens, \
+             --problem-statement, --principles-count, or --output-ref"
+        );
     }
 
     let mut entry = investigation::load(root, slug)
@@ -361,6 +399,52 @@ fn update(
             anyhow::bail!("--confidence is only valid for root-cause investigations");
         }
         entry.confidence = Some(c);
+        entry.updated_at = chrono::Utc::now();
+    }
+    if let Some(kv) = lens {
+        if entry.kind != InvestigationKind::Evolve {
+            anyhow::bail!("--lens is only valid for evolve investigations");
+        }
+        let (key, val) = kv.split_once('=').ok_or_else(|| {
+            anyhow::anyhow!("--lens requires key=value format (e.g. coupling=medium)")
+        })?;
+        let scores = entry.lens_scores.get_or_insert_with(Default::default);
+        let val_str = Some(val.to_string());
+        match key {
+            "pit_of_success" => scores.pit_of_success = val_str,
+            "coupling" => scores.coupling = val_str,
+            "growth_readiness" => scores.growth_readiness = val_str,
+            "self_documenting" => scores.self_documenting = val_str,
+            "failure_modes" => scores.failure_modes = val_str,
+            other => anyhow::bail!(
+                "unknown lens key '{other}': valid keys are pit_of_success, coupling, \
+                 growth_readiness, self_documenting, failure_modes"
+            ),
+        }
+        entry.updated_at = chrono::Utc::now();
+    }
+    if let Some(ps) = problem_statement {
+        if entry.kind != InvestigationKind::Guideline {
+            anyhow::bail!("--problem-statement is only valid for guideline investigations");
+        }
+        entry.problem_statement = Some(ps.to_string());
+        entry.updated_at = chrono::Utc::now();
+    }
+    if let Some(pc) = principles_count {
+        if entry.kind != InvestigationKind::Guideline {
+            anyhow::bail!("--principles-count is only valid for guideline investigations");
+        }
+        entry.principles_count = Some(pc);
+        entry.updated_at = chrono::Utc::now();
+    }
+    if let Some(oref) = output_ref {
+        match entry.kind {
+            InvestigationKind::Guideline => entry.publish_path = Some(oref.to_string()),
+            InvestigationKind::RootCause => entry.output_ref = Some(oref.to_string()),
+            InvestigationKind::Evolve => {
+                anyhow::bail!("--output-ref is not valid for evolve investigations; use the feature/milestone system")
+            }
+        }
         entry.updated_at = chrono::Utc::now();
     }
 

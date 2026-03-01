@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: playwright-first-spec
+    title: Write and verify first milestone e2e spec
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

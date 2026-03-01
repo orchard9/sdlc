@@ -95,20 +95,20 @@ export function FeatureDetail() {
 
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
-          <h2 className="text-xl font-semibold">{feature.title}</h2>
+          <h2 data-testid="feature-title" className="text-xl font-semibold">{feature.title}</h2>
           <p className="text-sm text-muted-foreground font-mono">{feature.slug}</p>
           {feature.description && (
             <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
           )}
         </div>
-        <StatusBadge status={feature.phase} />
+        <StatusBadge status={feature.phase} testId="phase-badge" />
       </div>
 
       <PhaseProgressBar current={feature.phase} className="mb-6" />
 
       {/* Next action */}
       {classification && classification.action !== 'done' && (
-        <div className="bg-card border border-border rounded-xl p-4 mb-6">
+        <div data-testid="next-action" className="bg-card border border-border rounded-xl p-4 mb-6">
           <div className="flex items-start justify-between gap-3 mb-3">
             <div>
               <p className="text-sm font-medium mb-1">
@@ -159,7 +159,7 @@ export function FeatureDetail() {
       )}
 
       {/* Artifacts */}
-      <section className="mb-6">
+      <section data-testid="artifact-list" className="mb-6">
         <h3 className="text-sm font-semibold mb-3">Artifacts</h3>
         <div className="space-y-3">
           {ARTIFACT_TYPES.map(type => {
@@ -175,7 +175,7 @@ export function FeatureDetail() {
       </section>
 
       {/* Tasks */}
-      <section className="mb-6">
+      <section data-testid="task-list" className="mb-6">
         <h3 className="text-sm font-semibold mb-3">Tasks</h3>
         {feature.tasks.length === 0 ? (
           <p className="text-xs text-muted-foreground">No tasks yet</p>

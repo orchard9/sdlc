@@ -1,0 +1,10 @@
+slug: v06-uat-dashboard-and-ci
+title: UAT run history dashboard, CI gate, and full guidance update
+vision: Product managers see UAT run history in the milestone detail page with verdicts and artifact links; PRs are blocked by failing Playwright tests; every agent reads updated guidance and knows the Playwright-first UAT pattern.
+features:
+- milestone-uat-history-panel
+- playwright-github-actions
+- guidance-playwright-update
+- init-rs-skill-update
+created_at: 2026-03-01T06:09:33.850793Z
+updated_at: 2026-03-01T06:11:23.325419Z

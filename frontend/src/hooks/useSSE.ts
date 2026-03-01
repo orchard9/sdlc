@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
+import type { AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
 
 /** Subscribe to /api/events and call onUpdate whenever state changes.
  *  Uses POST (not EventSource GET) so that SSE works through Cloudflare Quick
@@ -22,12 +22,14 @@ export function useSSE(
   onRunEvent?: (event: RunSseEvent) => void,
   onInvestigationEvent?: (event: InvestigationSseEvent) => void,
   onDocsEvent?: (event: DocsSseEvent) => void,
+  onAdvisoryEvent?: (event: AdvisorySseEvent) => void,
 ) {
   const onUpdateRef = useRef(onUpdate)
   const onPonderRef = useRef(onPonderEvent)
   const onRunRef = useRef(onRunEvent)
   const onInvestigationRef = useRef(onInvestigationEvent)
   const onDocsRef = useRef(onDocsEvent)
+  const onAdvisoryRef = useRef(onAdvisoryEvent)
 
   // Keep refs current on every render without triggering the effect
   useEffect(() => {
@@ -36,6 +38,7 @@ export function useSSE(
     onRunRef.current = onRunEvent
     onInvestigationRef.current = onInvestigationEvent
     onDocsRef.current = onDocsEvent
+    onAdvisoryRef.current = onAdvisoryEvent
   })
 
   useEffect(() => {
@@ -55,6 +58,8 @@ export function useSSE(
         try { onInvestigationRef.current(JSON.parse(data) as InvestigationSseEvent) } catch { /* malformed */ }
       } else if (type === 'docs' && onDocsRef.current) {
         try { onDocsRef.current(JSON.parse(data) as DocsSseEvent) } catch { /* malformed */ }
+      } else if (type === 'advisory' && onAdvisoryRef.current) {
+        try { onAdvisoryRef.current(JSON.parse(data) as AdvisorySseEvent) } catch { /* malformed */ }
       }
     }
 

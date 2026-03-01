@@ -1,9 +1,10 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::Json;
+use std::collections::HashMap;
 use tracing::warn;
 
 use crate::error::AppError;
-use crate::state::AppState;
+use crate::state::{generate_run_id, AppState};
 
 // ---------------------------------------------------------------------------
 // GET /api/tools — list all installed tools with their metadata
@@ -44,9 +45,17 @@ pub async fn list_tools(State(app): State<AppState>) -> Result<Json<serde_json::
                 continue;
             }
 
-            match sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root) {
+            match sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root, None) {
                 Ok(stdout) => match serde_json::from_str::<serde_json::Value>(&stdout) {
-                    Ok(meta) => metas.push(meta),
+                    Ok(mut meta) => {
+                        if let Some(obj) = meta.as_object_mut() {
+                            obj.insert(
+                                "built_in".into(),
+                                serde_json::json!(sdlc_core::tool_runner::is_managed_tool(&name)),
+                            );
+                        }
+                        metas.push(meta)
+                    }
                     Err(e) => warn!(tool = %name, error = %e, "tool --meta returned invalid JSON"),
                 },
                 Err(e) => warn!(tool = %name, error = %e, "tool --meta failed"),
@@ -83,9 +92,15 @@ pub async fn get_tool_meta(
             return Err(AppError::not_found(format!("tool '{name}' not found")));
         }
 
-        let stdout = sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root)?;
-        let meta: serde_json::Value = serde_json::from_str(&stdout)
+        let stdout = sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root, None)?;
+        let mut meta: serde_json::Value = serde_json::from_str(&stdout)
             .map_err(|e| AppError(anyhow::anyhow!("tool --meta returned invalid JSON: {e}")))?;
+        if let Some(obj) = meta.as_object_mut() {
+            obj.insert(
+                "built_in".into(),
+                serde_json::json!(sdlc_core::tool_runner::is_managed_tool(&name)),
+            );
+        }
         Ok(meta)
     })
     .await
@@ -106,8 +121,8 @@ pub async fn get_tool_meta(
 ///
 /// Returns 400 if the name is invalid.
 /// Returns 404 if the tool is not installed.
+/// Returns 422 with `{ missing_secrets: [...] }` if required env vars are absent.
 /// Returns 503 if no JavaScript runtime is available.
-/// Returns 422 if the tool exits non-zero (tool-level error; inspect `error` field).
 pub async fn run_tool(
     State(app): State<AppState>,
     Path(name): Path<String>,
@@ -124,17 +139,136 @@ pub async fn run_tool(
             return Err(AppError::not_found(format!("tool '{name}' not found")));
         }
 
+        // Fetch tool meta to resolve secrets declarations
+        let extra_env = match sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root, None)
+        {
+            Ok(meta_stdout) => match sdlc_core::tool_runner::parse_tool_meta(&meta_stdout) {
+                Ok(meta) => resolve_secrets(&name, &meta)?,
+                Err(_) => HashMap::new(),
+            },
+            Err(_) => HashMap::new(),
+        };
+
+        // Create interaction record (status: running)
+        let interaction_id = generate_run_id();
+        let created_at = chrono::Utc::now().to_rfc3339();
+        let mut record = sdlc_core::tool_interaction::ToolInteractionRecord {
+            id: interaction_id.clone(),
+            tool_name: name.clone(),
+            created_at: created_at.clone(),
+            completed_at: None,
+            input: input.clone(),
+            result: None,
+            status: "running".to_string(),
+            tags: Vec::new(),
+            notes: None,
+            streaming_log: false,
+        };
+        // Best-effort — don't fail the run if persistence fails
+        let _ = sdlc_core::tool_interaction::save_interaction(&root, &record);
+
+        // Run the tool
         let stdin_json = serde_json::to_string(&input)
             .map_err(|e| AppError(anyhow::anyhow!("failed to serialize tool input: {e}")))?;
-        let stdout = sdlc_core::tool_runner::run_tool(&script, "--run", Some(&stdin_json), &root)?;
-        let output: serde_json::Value = serde_json::from_str(&stdout)
-            .map_err(|e| AppError(anyhow::anyhow!("tool --run returned invalid JSON: {e}")))?;
+        let run_result = sdlc_core::tool_runner::run_tool(
+            &script,
+            "--run",
+            Some(&stdin_json),
+            &root,
+            Some(&extra_env),
+        );
+
+        // Update interaction record with result
+        let (output, status) = match run_result {
+            Ok(stdout) => match serde_json::from_str::<serde_json::Value>(&stdout) {
+                Ok(val) => (val, "completed"),
+                Err(e) => {
+                    return Err(AppError(anyhow::anyhow!(
+                        "tool --run returned invalid JSON: {e}"
+                    )));
+                }
+            },
+            Err(e) => return Err(AppError(e.into())),
+        };
+
+        record.status = status.to_string();
+        record.completed_at = Some(chrono::Utc::now().to_rfc3339());
+        record.result = Some(output.clone());
+        let _ = sdlc_core::tool_interaction::save_interaction(&root, &record);
+        sdlc_core::tool_interaction::enforce_interaction_retention(&root, &name, 200);
+
         Ok(output)
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
 
     Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/tools/:name/interactions — list tool run history
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize, Default)]
+pub struct InteractionListParams {
+    limit: Option<usize>,
+}
+
+/// GET /api/tools/:name/interactions?limit=50 — list recent run records for a tool.
+pub async fn list_tool_interactions(
+    State(app): State<AppState>,
+    Path(name): Path<String>,
+    Query(params): Query<InteractionListParams>,
+) -> Result<Json<Vec<sdlc_core::tool_interaction::ToolInteractionRecord>>, AppError> {
+    validate_tool_name(&name)?;
+
+    let root = app.root.clone();
+    let limit = params.limit.unwrap_or(50);
+    let result = tokio::task::spawn_blocking(move || {
+        sdlc_core::tool_interaction::list_interactions(&root, &name, limit)
+            .map_err(|e| AppError(e.into()))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
+/// GET /api/tools/:name/interactions/:id — single interaction record.
+pub async fn get_tool_interaction(
+    State(app): State<AppState>,
+    Path((name, id)): Path<(String, String)>,
+) -> Result<Json<sdlc_core::tool_interaction::ToolInteractionRecord>, AppError> {
+    validate_tool_name(&name)?;
+
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        sdlc_core::tool_interaction::load_interaction(&root, &name, &id).map_err(|_| {
+            AppError::not_found(format!("interaction '{id}' not found for tool '{name}'"))
+        })
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
+/// DELETE /api/tools/:name/interactions/:id — delete an interaction record.
+pub async fn delete_tool_interaction(
+    State(app): State<AppState>,
+    Path((name, id)): Path<(String, String)>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_tool_name(&name)?;
+
+    let root = app.root.clone();
+    tokio::task::spawn_blocking(move || {
+        sdlc_core::tool_interaction::delete_interaction(&root, &name, &id)
+            .map_err(|_| AppError::not_found(format!("interaction '{id}' not found")))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(serde_json::json!({ "deleted": true })))
 }
 
 // ---------------------------------------------------------------------------
@@ -163,7 +297,7 @@ pub async fn setup_tool(
             return Err(AppError::not_found(format!("tool '{name}' not found")));
         }
 
-        let stdout = sdlc_core::tool_runner::run_tool(&script, "--setup", None, &root)?;
+        let stdout = sdlc_core::tool_runner::run_tool(&script, "--setup", None, &root, None)?;
         let output: serde_json::Value = serde_json::from_str(&stdout)
             .map_err(|e| AppError(anyhow::anyhow!("tool --setup returned invalid JSON: {e}")))?;
         Ok(output)
@@ -220,6 +354,77 @@ pub async fn create_tool(
 }
 
 // ---------------------------------------------------------------------------
+// POST /api/tools/:name/clone — copy a tool to a new user-owned name
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct CloneToolBody {
+    new_name: String,
+}
+
+/// POST /api/tools/:name/clone — copy `.sdlc/tools/<name>/` to `.sdlc/tools/<new_name>/`.
+///
+/// Intended for cloning built-in (managed) tools into a user-editable copy.
+///
+/// Returns 400 if either name is invalid.
+/// Returns 404 if the source tool does not exist.
+/// Returns 409 if the destination already exists.
+pub async fn clone_tool(
+    State(app): State<AppState>,
+    Path(name): Path<String>,
+    Json(body): Json<CloneToolBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_tool_name(&name)?;
+    validate_tool_name(&body.new_name)?;
+
+    let root = app.root.clone();
+    let new_name = body.new_name.clone();
+
+    tokio::task::spawn_blocking(move || {
+        let tools_dir = sdlc_core::paths::tools_dir(&root);
+        let src_dir = tools_dir.join(&name);
+        let dst_dir = tools_dir.join(&new_name);
+
+        if !src_dir.is_dir() {
+            return Err(AppError::not_found(format!("tool '{name}' not found")));
+        }
+        if dst_dir.exists() {
+            return Err(AppError::conflict(format!(
+                "tool '{new_name}' already exists"
+            )));
+        }
+
+        std::fs::create_dir_all(&dst_dir).map_err(|e| {
+            AppError(anyhow::anyhow!(
+                "failed to create destination directory: {e}"
+            ))
+        })?;
+
+        for entry in std::fs::read_dir(&src_dir)
+            .map_err(|e| AppError(anyhow::anyhow!("failed to read source directory: {e}")))?
+        {
+            let entry =
+                entry.map_err(|e| AppError(anyhow::anyhow!("directory read error: {e}")))?;
+            // Only copy flat files — tools are single-level directories.
+            if entry.path().is_file() {
+                let dst = dst_dir.join(entry.file_name());
+                std::fs::copy(entry.path(), dst)
+                    .map_err(|e| AppError(anyhow::anyhow!("failed to copy file: {e}")))?;
+            }
+        }
+
+        Ok(serde_json::json!({
+            "name": new_name,
+            "cloned_from": name,
+            "status": "cloned"
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .map(Json)
+}
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
@@ -236,6 +441,51 @@ fn validate_tool_name(name: &str) -> Result<(), AppError> {
         )));
     }
     Ok(())
+}
+
+/// Resolve environment variable secrets declared in tool meta.
+///
+/// Checks `std::env::var` for each declared secret. If any required secrets
+/// are missing, returns a 422 AppError with `missing_secrets` in the body.
+/// Collected values are returned as a HashMap for injection into the subprocess.
+fn resolve_secrets(
+    tool_name: &str,
+    meta: &sdlc_core::tool_runner::ToolMeta,
+) -> Result<HashMap<String, String>, AppError> {
+    let Some(secrets) = &meta.secrets else {
+        return Ok(HashMap::new());
+    };
+
+    let mut env_map = HashMap::new();
+    let mut missing: Vec<String> = Vec::new();
+
+    for secret in secrets {
+        match std::env::var(&secret.env_var) {
+            Ok(val) => {
+                env_map.insert(secret.env_var.clone(), val);
+            }
+            Err(_) => {
+                if secret.required {
+                    missing.push(secret.env_var.clone());
+                }
+            }
+        }
+    }
+
+    if !missing.is_empty() {
+        let body = serde_json::json!({
+            "error": format!(
+                "Tool '{}' requires environment variable(s) that are not set: {}. \
+                 Export them in your shell before running the tool.",
+                tool_name,
+                missing.join(", ")
+            ),
+            "missing_secrets": missing,
+        });
+        return Err(AppError::unprocessable_json(body));
+    }
+
+    Ok(env_map)
 }
 
 // ---------------------------------------------------------------------------

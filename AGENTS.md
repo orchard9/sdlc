@@ -2,6 +2,16 @@
 
 Agent instructions for sdlc.
 
+## Team
+
+| Name | Role | Best for | Model |
+|---|---|---|---|
+| Marcus Webb | Enterprise Platform Architect | Fortune 500 governance story, orchestrator model, compliance, onboarding at scale | opus-4-6 |
+| Priya Nair | Distributed Systems Engineer | Next-tick orchestrator design, concurrent writes, classifier correctness, stuck-service detection | sonnet-4-6 |
+| Dana Cho | Product Skeptic | Scope decisions, milestone sizing, enterprise narrative, "do we actually need this?" | opus-4-6 |
+
+Agents live in `.claude/agents/`. Invoke with `@marcus-webb`, `@priya-nair`, or `@dana-cho`.
+
 <!-- sdlc:start -->
 
 ## SDLC
@@ -56,6 +66,8 @@ Use `sdlc next --for <slug> --json` to get the next directive. The JSON output t
 - `/sdlc-cookbook-run <milestone-slug>` — execute cookbook recipes and record results
 - `/sdlc-ponder [slug]` — open the ideation workspace for exploring and committing ideas
 - `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features
+- `/sdlc-guideline <slug-or-problem>` — build an evidence-backed guideline through five research perspectives and TOC-first distillation
+- `/sdlc-suggest` — analyze project state and suggest 3-5 ponder topics to explore next
 - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent
 - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions
 
@@ -76,8 +88,6 @@ Use `/sdlc-tool-run`, `/sdlc-tool-build`, `/sdlc-tool-audit`, `/sdlc-tool-uat` i
 <!-- /sdlc:tools -->
 
 Project: sdlc
-
-**Contributing to sdlc itself:** See `DEVELOPER.md` — build, run, test, first steps.
 
 <!-- sdlc:end -->
 
