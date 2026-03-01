@@ -1,0 +1,9 @@
+milestone: v06-uat-dashboard-and-ci
+waves:
+  - number: 1
+    label: Implementation
+    slugs:
+      - guidance-playwright-update
+      - init-rs-skill-update
+      - milestone-uat-history-panel
+      - playwright-github-actions

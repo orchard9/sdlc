@@ -3,6 +3,7 @@
 /frontend/dist
 /frontend/playwright-report/
 /frontend/test-results/
+/test-results/
 /frontend/blob-report/
 /packages/sdlc-agent/node_modules
 /packages/sdlc-agent/dist

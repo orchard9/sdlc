@@ -1,63 +1,63 @@
 slug: milestone-uat-history-panel
 title: UatHistoryPanel React component in MilestoneDetail page
 description: 'Build UatHistoryPanel component that calls GET /api/milestones/{slug}/uat-runs. Displays a table: date, verdict badge (green PASS / yellow PASS+TASKS / red FAILED), test count (passed/total), tasks created count. Subscribe to MilestoneUatCompleted SSE event via useSSE to refresh automatically. Place below the existing milestone features list in MilestoneDetail.'
-phase: draft
+phase: released
 created_at: 2026-03-01T06:11:14.775640Z
-updated_at: 2026-03-01T06:11:14.775640Z
+updated_at: 2026-03-01T08:29:14.729645Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:24.504352Z
+  approved_at: 2026-03-01T08:24:28.857299Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:57.469640Z
+  approved_at: 2026-03-01T08:24:57.477091Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:12.080034Z
+  approved_at: 2026-03-01T08:25:12.087216Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:31.122160Z
+  approved_at: 2026-03-01T08:25:31.130235Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:27:49.323064Z
+  approved_at: 2026-03-01T08:27:49.332862Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:28:18.418440Z
+  approved_at: 2026-03-01T08:28:18.426655Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/milestone-uat-history-panel/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:29:08.082504Z
+  approved_at: 2026-03-01T08:29:08.090618Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,44 +65,53 @@ tasks:
 - id: T1
   title: Create UatHistoryPanel component with run history table (date, verdict badge, test counts, tasks)
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:07.401787Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:01.490025Z
+  completed_at: 2026-03-01T08:26:29.250784Z
   blocker: null
   depends_on: []
 - id: T2
   title: Wire GET /api/milestones/{slug}/uat-runs into UatHistoryPanel data fetch
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:07.408276Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:29.257981Z
+  completed_at: 2026-03-01T08:26:33.503058Z
   blocker: null
   depends_on: []
 - id: T3
   title: Subscribe to MilestoneUatCompleted SSE event in useSSE hook for auto-refresh
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:07.415011Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:38.384873Z
+  completed_at: 2026-03-01T08:26:44.074651Z
   blocker: null
   depends_on: []
 - id: T4
   title: Place UatHistoryPanel in MilestoneDetail page below features list
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:07.422012Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:46.954192Z
+  completed_at: 2026-03-01T08:27:13.093781Z
   blocker: null
   depends_on: []
 - id: T5
   title: 'Add verdict badge component: green PASS, yellow PASS+TASKS, red FAILED'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:07.428783Z
+  started_at: 2026-03-01T08:26:33.510873Z
+  completed_at: 2026-03-01T08:26:33.517289Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: 'UAT: useSSE hook does not handle milestone_uat events — UatHistoryPanel has no SSE-triggered refresh'
+  description: null
+  status: pending
+  created_at: 2026-03-01T08:42:24.038185Z
   started_at: null
   completed_at: null
   blocker: null
@@ -113,6 +122,33 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-01T06:11:14.775640Z
+  exited: 2026-03-01T08:24:28.858220Z
+- phase: specified
+  entered: 2026-03-01T08:24:28.858220Z
+  exited: 2026-03-01T08:25:31.130970Z
+- phase: planned
+  entered: 2026-03-01T08:25:31.130970Z
+  exited: 2026-03-01T08:25:42.293919Z
+- phase: ready
+  entered: 2026-03-01T08:25:42.293919Z
+  exited: 2026-03-01T08:25:48.481306Z
+- phase: implementation
+  entered: 2026-03-01T08:25:48.481306Z
+  exited: 2026-03-01T08:27:49.333657Z
+- phase: review
+  entered: 2026-03-01T08:27:49.333657Z
+  exited: 2026-03-01T08:27:55.404846Z
+- phase: audit
+  entered: 2026-03-01T08:27:55.404846Z
+  exited: 2026-03-01T08:28:18.427556Z
+- phase: qa
+  entered: 2026-03-01T08:28:18.427556Z
+  exited: 2026-03-01T08:29:08.091437Z
+- phase: merge
+  entered: 2026-03-01T08:29:08.091437Z
+  exited: 2026-03-01T08:29:14.729645Z
+- phase: released
+  entered: 2026-03-01T08:29:14.729645Z
   exited: null
 dependencies: []
 archived: false

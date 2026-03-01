@@ -1,63 +1,65 @@
 slug: guidance-playwright-update
 title: Update .sdlc/guidance.md and CLAUDE.md with Playwright UAT pattern
 description: Update .sdlc/guidance.md §5 (Tests) to reference the three-tier UAT architecture and Playwright as the regression layer. Add a §11 UAT section referencing npx playwright test commands, spec location (frontend/e2e/milestones/), and the docs/uat-enterprise-strategy.md doc. Add uat-enterprise-strategy.md to the Key Files table in CLAUDE.md.
-phase: draft
+phase: released
 created_at: 2026-03-01T06:11:14.789606Z
-updated_at: 2026-03-01T06:11:14.789606Z
+updated_at: 2026-03-01T08:27:09.440811Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/guidance-playwright-update/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:05.829401Z
+  approved_at: 2026-03-01T08:24:08.378747Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/guidance-playwright-update/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:27.363207Z
+  approved_at: 2026-03-01T08:24:27.370725Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/guidance-playwright-update/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:37.831156Z
+  approved_at: 2026-03-01T08:24:37.840183Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/guidance-playwright-update/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:50.084269Z
+  approved_at: 2026-03-01T08:24:50.091968Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/guidance-playwright-update/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:26:28.891534Z
+  approved_at: 2026-03-01T08:26:28.899418Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: waived
   path: .sdlc/features/guidance-playwright-update/audit.md
   created_at: null
   approved_at: null
   rejected_at: null
   rejection_reason: null
   approved_by: null
+  waived_at: 2026-03-01T08:26:41.229053Z
+  waive_reason: Documentation-only change — no code, no new API surface, no secrets, no security implications
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/guidance-playwright-update/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:27:04.124136Z
+  approved_at: 2026-03-01T08:27:04.140704Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,26 +67,35 @@ tasks:
 - id: T1
   title: Update .sdlc/guidance.md §5 (Tests) to reference three-tier UAT pattern and Playwright as regression layer
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:25.523525Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:25:18.089060Z
+  completed_at: 2026-03-01T08:25:32.332339Z
   blocker: null
   depends_on: []
 - id: T2
   title: 'Add §11 UAT to .sdlc/guidance.md: npx playwright test commands, spec location, Mode A/B decision'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:25.530699Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:25:35.120291Z
+  completed_at: 2026-03-01T08:25:58.507037Z
   blocker: null
   depends_on: []
 - id: T3
   title: Add docs/uat-enterprise-strategy.md to Key Files table in CLAUDE.md
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:25.536824Z
+  started_at: 2026-03-01T08:26:00.819382Z
+  completed_at: 2026-03-01T08:26:12.551677Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'UAT: .sdlc/guidance.md §5 not updated — Playwright and three-tier UAT pattern not mentioned'
+  description: null
+  status: pending
+  created_at: 2026-03-01T08:42:32.961370Z
   started_at: null
   completed_at: null
   blocker: null
@@ -95,6 +106,33 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-01T06:11:14.789606Z
+  exited: 2026-03-01T08:24:08.379507Z
+- phase: specified
+  entered: 2026-03-01T08:24:08.379507Z
+  exited: 2026-03-01T08:24:50.092659Z
+- phase: planned
+  entered: 2026-03-01T08:24:50.092659Z
+  exited: 2026-03-01T08:24:55.703795Z
+- phase: ready
+  entered: 2026-03-01T08:24:55.703795Z
+  exited: 2026-03-01T08:25:02.646766Z
+- phase: implementation
+  entered: 2026-03-01T08:25:02.646766Z
+  exited: 2026-03-01T08:26:28.900268Z
+- phase: review
+  entered: 2026-03-01T08:26:28.900268Z
+  exited: 2026-03-01T08:26:34.920622Z
+- phase: audit
+  entered: 2026-03-01T08:26:34.920622Z
+  exited: 2026-03-01T08:26:41.229811Z
+- phase: qa
+  entered: 2026-03-01T08:26:41.229811Z
+  exited: 2026-03-01T08:27:04.142123Z
+- phase: merge
+  entered: 2026-03-01T08:27:04.142123Z
+  exited: 2026-03-01T08:27:09.440811Z
+- phase: released
+  entered: 2026-03-01T08:27:09.440811Z
   exited: null
 dependencies: []
 archived: false

@@ -49,6 +49,7 @@ cd frontend && npm ci && npm run build
 | `.sdlc/config.yaml` | Gates, platform commands, quality thresholds |
 | `.sdlc/features/<slug>/` | Per-feature artifact Markdown files |
 | `.sdlc/roadmap/<slug>/` | Ponder entry: `manifest.yaml`, `team.yaml`, scrapbook Markdown files |
+| `docs/uat-enterprise-strategy.md` | Three-tier UAT architecture — Playwright regression layer, Playwright MCP agent integration, CI setup |
 
 ## The State Machine Flow
 

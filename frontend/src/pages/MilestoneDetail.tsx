@@ -5,6 +5,7 @@ import { useSSE } from '@/hooks/useSSE'
 import { useProjectState } from '@/hooks/useProjectState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { FeatureCard } from '@/components/features/FeatureCard'
+import { UatHistoryPanel } from '@/components/milestones/UatHistoryPanel'
 import { ArrowLeft, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import type { MilestoneDetail as MilestoneDetailType } from '@/lib/types'
 
@@ -142,6 +143,11 @@ export function MilestoneDetail() {
             })}
           </div>
         )}
+      </section>
+
+      <section className="mt-8">
+        <h3 className="text-sm font-semibold mb-3">UAT History</h3>
+        <UatHistoryPanel milestoneSlug={slug} />
       </section>
     </div>
   )

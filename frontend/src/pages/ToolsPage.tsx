@@ -593,6 +593,142 @@ function InteractionRow({ record, onDelete }: InteractionRowProps) {
 // Tool run panel (right side)
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// SchemaForm — auto-renders form fields from input_schema.properties
+// ---------------------------------------------------------------------------
+
+interface SchemaProperty {
+  type?: string
+  enum?: string[]
+  description?: string
+  default?: unknown
+}
+
+interface SchemaFormProps {
+  schema: Record<string, unknown>
+  values: Record<string, string | number | boolean>
+  onChange: (values: Record<string, string | number | boolean>) => void
+}
+
+function SchemaForm({ schema, values, onChange }: SchemaFormProps) {
+  const properties = (schema.properties ?? {}) as Record<string, SchemaProperty>
+  const required = (schema.required ?? []) as string[]
+  const keys = Object.keys(properties)
+
+  const set = (key: string, val: string | number | boolean) =>
+    onChange({ ...values, [key]: val })
+
+  return (
+    <div className="space-y-3">
+      {keys.map(key => {
+        const prop = properties[key]
+        const isRequired = required.includes(key)
+        const label = (
+          <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            {key.replace(/_/g, ' ')}
+            {isRequired && <span className="ml-1 text-primary/70 normal-case">*</span>}
+            {prop.description && (
+              <span className="ml-2 normal-case font-normal text-muted-foreground/50">
+                — {prop.description}
+              </span>
+            )}
+          </label>
+        )
+        const baseClass = 'w-full px-3 py-2 text-sm bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50'
+
+        if (prop.type === 'boolean') {
+          return (
+            <div key={key} className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id={`field-${key}`}
+                checked={!!values[key]}
+                onChange={e => set(key, e.target.checked)}
+                className="rounded border-border bg-muted/40 accent-primary w-4 h-4"
+              />
+              <label htmlFor={`field-${key}`} className="text-sm text-muted-foreground cursor-pointer">
+                {key.replace(/_/g, ' ')}
+                {prop.description && <span className="ml-1 text-muted-foreground/50">— {prop.description}</span>}
+              </label>
+            </div>
+          )
+        }
+
+        if (prop.enum) {
+          return (
+            <div key={key} className="space-y-1">
+              {label}
+              <select
+                value={(values[key] as string) ?? ''}
+                onChange={e => set(key, e.target.value)}
+                className={baseClass}
+              >
+                {!isRequired && <option value="">— optional —</option>}
+                {prop.enum.map(opt => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+          )
+        }
+
+        if (prop.type === 'number') {
+          return (
+            <div key={key} className="space-y-1">
+              {label}
+              <input
+                type="number"
+                value={(values[key] as number) ?? ''}
+                onChange={e => set(key, e.target.value === '' ? '' as unknown as number : Number(e.target.value))}
+                placeholder={prop.default != null ? String(prop.default) : undefined}
+                className={baseClass}
+              />
+            </div>
+          )
+        }
+
+        // default: text
+        return (
+          <div key={key} className="space-y-1">
+            {label}
+            <input
+              type="text"
+              value={(values[key] as string) ?? ''}
+              onChange={e => set(key, e.target.value)}
+              placeholder={prop.default != null ? String(prop.default) : undefined}
+              className={baseClass}
+            />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function schemaHasProperties(schema: Record<string, unknown>): boolean {
+  return !!schema.properties && Object.keys(schema.properties as object).length > 0
+}
+
+function defaultSchemaValues(schema: Record<string, unknown>): Record<string, string | number | boolean> {
+  const properties = (schema.properties ?? {}) as Record<string, SchemaProperty>
+  const required = (schema.required ?? []) as string[]
+  const vals: Record<string, string | number | boolean> = {}
+  for (const [key, prop] of Object.entries(properties)) {
+    if (prop.default != null) {
+      vals[key] = prop.default as string | number | boolean
+    } else if (prop.type === 'boolean') {
+      vals[key] = false
+    } else if (prop.enum && required.includes(key)) {
+      vals[key] = prop.enum[0]
+    }
+  }
+  return vals
+}
+
+// ---------------------------------------------------------------------------
+// ToolRunPanel
+// ---------------------------------------------------------------------------
+
 interface ToolRunPanelProps {
   tool: ToolMeta
   onReload: (selectName?: string) => void
@@ -601,6 +737,9 @@ interface ToolRunPanelProps {
 function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
   const [scope, setScope] = useState('')
   const [jsonInput, setJsonInput] = useState('{}')
+  const [schemaValues, setSchemaValues] = useState<Record<string, string | number | boolean>>(
+    () => defaultSchemaValues(tool.input_schema),
+  )
   const [running, setRunning] = useState(false)
   const [settingUp, setSettingUp] = useState(false)
   const [reconfiguring, setReconfiguring] = useState(false)
@@ -622,6 +761,7 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
   useEffect(() => {
     setScope('')
     setJsonInput('{}')
+    setSchemaValues(defaultSchemaValues(tool.input_schema))
     setResult(null)
     setSetupResult(null)
     setSetupDone(false)
@@ -669,6 +809,14 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
       let input: unknown
       if (tool.name === 'quality-check') {
         input = scope.trim() ? { scope: scope.trim() } : {}
+      } else if (schemaHasProperties(tool.input_schema)) {
+        // Strip empty optional strings so they don't get sent as ""
+        const required = (tool.input_schema.required ?? []) as string[]
+        const obj: Record<string, unknown> = {}
+        for (const [k, v] of Object.entries(schemaValues)) {
+          if (v !== '' || required.includes(k)) obj[k] = v
+        }
+        input = obj
       } else {
         try {
           input = JSON.parse(jsonInput || '{}')
@@ -854,7 +1002,14 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
                       />
                     </>
                   )}
-                  {tool.name !== 'quality-check' && (
+                  {tool.name !== 'quality-check' && schemaHasProperties(tool.input_schema) && (
+                    <SchemaForm
+                      schema={tool.input_schema}
+                      values={schemaValues}
+                      onChange={setSchemaValues}
+                    />
+                  )}
+                  {tool.name !== 'quality-check' && !schemaHasProperties(tool.input_schema) && (
                     <>
                       <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">JSON Input</label>
                       <textarea

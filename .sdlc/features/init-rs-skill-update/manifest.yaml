@@ -1,63 +1,63 @@
 slug: init-rs-skill-update
 title: Update SDLC_MILESTONE_UAT_COMMAND in init.rs to embed Playwright workflow
 description: Rewrite the SDLC_MILESTONE_UAT_COMMAND, SDLC_MILESTONE_UAT_PLAYBOOK, and SDLC_MILESTONE_UAT_SKILL const strings in crates/sdlc-cli/src/cmd/init.rs to include the Mode A / Mode B Playwright workflow. Update all four write_user_* functions. Run sdlc update to verify the updated skill is installed correctly at ~/.claude/commands/sdlc-milestone-uat.md.
-phase: draft
+phase: released
 created_at: 2026-03-01T06:11:14.796407Z
-updated_at: 2026-03-01T06:11:14.796407Z
+updated_at: 2026-03-01T08:30:14.454608Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:37.543743Z
+  approved_at: 2026-03-01T08:24:39.610234Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:03.508190Z
+  approved_at: 2026-03-01T08:25:03.516336Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:31.317234Z
+  approved_at: 2026-03-01T08:25:31.323964Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:51.860838Z
+  approved_at: 2026-03-01T08:25:51.870418Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:28:38.541486Z
+  approved_at: 2026-03-01T08:28:38.551580Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:29:02.059835Z
+  approved_at: 2026-03-01T08:29:02.067188Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/init-rs-skill-update/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:29:51.161629Z
+  approved_at: 2026-03-01T08:29:51.170279Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,46 +65,46 @@ tasks:
 - id: T1
   title: Rewrite SDLC_MILESTONE_UAT_COMMAND const in init.rs with Mode A / Mode B Playwright workflow
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:26.140914Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:21.054617Z
+  completed_at: 2026-03-01T08:26:40.689275Z
   blocker: null
   depends_on: []
 - id: T2
   title: Update SDLC_MILESTONE_UAT_PLAYBOOK const (Gemini/OpenCode variant) with Playwright steps
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:26.147782Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:46.258621Z
+  completed_at: 2026-03-01T08:26:46.265702Z
   blocker: null
   depends_on: []
 - id: T3
   title: Update SDLC_MILESTONE_UAT_SKILL const (Agents variant) with Playwright steps
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:26.153458Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:56.694182Z
+  completed_at: 2026-03-01T08:26:56.701339Z
   blocker: null
   depends_on: []
 - id: T4
   title: Verify all four write_user_* functions reference updated skill filenames
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:26.158871Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:27:02.969755Z
+  completed_at: 2026-03-01T08:27:19.076858Z
   blocker: null
   depends_on: []
 - id: T5
   title: Run sdlc update in consumer test project and verify ~/.claude/commands/sdlc-milestone-uat.md is updated
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:26.164144Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:27:25.228371Z
+  completed_at: 2026-03-01T08:28:12.102863Z
   blocker: null
   depends_on: []
 comments: []
@@ -113,6 +113,33 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-01T06:11:14.796407Z
+  exited: 2026-03-01T08:24:39.611189Z
+- phase: specified
+  entered: 2026-03-01T08:24:39.611189Z
+  exited: 2026-03-01T08:25:51.871367Z
+- phase: planned
+  entered: 2026-03-01T08:25:51.871367Z
+  exited: 2026-03-01T08:26:00.936427Z
+- phase: ready
+  entered: 2026-03-01T08:26:00.936427Z
+  exited: 2026-03-01T08:26:13.593928Z
+- phase: implementation
+  entered: 2026-03-01T08:26:13.593928Z
+  exited: 2026-03-01T08:28:38.552485Z
+- phase: review
+  entered: 2026-03-01T08:28:38.552485Z
+  exited: 2026-03-01T08:28:44.929576Z
+- phase: audit
+  entered: 2026-03-01T08:28:44.929576Z
+  exited: 2026-03-01T08:29:02.068111Z
+- phase: qa
+  entered: 2026-03-01T08:29:02.068111Z
+  exited: 2026-03-01T08:29:51.171316Z
+- phase: merge
+  entered: 2026-03-01T08:29:51.171316Z
+  exited: 2026-03-01T08:30:14.454608Z
+- phase: released
+  entered: 2026-03-01T08:30:14.454608Z
   exited: null
 dependencies: []
 archived: false

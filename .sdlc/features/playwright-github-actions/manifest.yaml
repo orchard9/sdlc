@@ -1,63 +1,63 @@
 slug: playwright-github-actions
 title: .github/workflows/uat.yml — Playwright CI gate on PRs
 description: 'Create .github/workflows/uat.yml that triggers on push to main and pull_request touching frontend/** or crates/**. Steps: checkout, setup-node 20, npm ci, cargo build --bin sdlc-server --release, npx playwright install --with-deps chromium, start sdlc-server in background, run npx playwright test --reporter=list,html,json, upload playwright-report/ as artifact (30-day retention) on always(), upload test-results/ (traces) on failure() with 7-day retention.'
-phase: draft
+phase: released
 created_at: 2026-03-01T06:11:14.782670Z
-updated_at: 2026-03-01T06:11:14.782670Z
+updated_at: 2026-03-01T08:28:17.149085Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:24:50.042260Z
+  approved_at: 2026-03-01T08:24:53.561061Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:26.102035Z
+  approved_at: 2026-03-01T08:25:26.110282Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:40.679041Z
+  approved_at: 2026-03-01T08:25:40.709160Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:25:58.204567Z
+  approved_at: 2026-03-01T08:25:58.216789Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:27:08.594275Z
+  approved_at: 2026-03-01T08:27:08.613574Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:27:32.951625Z
+  approved_at: 2026-03-01T08:27:33.000465Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/playwright-github-actions/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-01T08:28:11.251741Z
+  approved_at: 2026-03-01T08:28:11.260599Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,35 +65,44 @@ tasks:
 - id: T1
   title: Create .github/workflows/uat.yml with trigger on push/main and pull_request for frontend/** and crates/**
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:24.040950Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:28.964015Z
+  completed_at: 2026-03-01T08:26:42.424101Z
   blocker: null
   depends_on: []
 - id: T2
   title: 'Add build steps: checkout, setup-node 20, npm ci, cargo build --release, playwright install chromium'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:24.049873Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:42.431575Z
+  completed_at: 2026-03-01T08:26:42.438631Z
   blocker: null
   depends_on: []
 - id: T3
   title: 'Add test step: start sdlc-server in background, wait for health check, run npx playwright test'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:24.058928Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-01T08:26:42.445794Z
+  completed_at: 2026-03-01T08:26:42.453270Z
   blocker: null
   depends_on: []
 - id: T4
   title: 'Add artifact upload: playwright-report/ on always() with 30-day retention; test-results/ on failure() with 7-day retention'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-01T06:12:24.068659Z
+  started_at: 2026-03-01T08:26:42.460556Z
+  completed_at: 2026-03-01T08:26:42.466988Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'UAT: uat.yml missing push-to-main trigger and pull_request path filters for frontend/** and crates/**'
+  description: null
+  status: pending
+  created_at: 2026-03-01T08:42:29.372930Z
   started_at: null
   completed_at: null
   blocker: null
@@ -104,6 +113,33 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-01T06:11:14.782670Z
+  exited: 2026-03-01T08:24:53.561788Z
+- phase: specified
+  entered: 2026-03-01T08:24:53.561788Z
+  exited: 2026-03-01T08:25:58.218124Z
+- phase: planned
+  entered: 2026-03-01T08:25:58.218124Z
+  exited: 2026-03-01T08:26:05.127980Z
+- phase: ready
+  entered: 2026-03-01T08:26:05.127980Z
+  exited: 2026-03-01T08:26:15.616346Z
+- phase: implementation
+  entered: 2026-03-01T08:26:15.616346Z
+  exited: 2026-03-01T08:27:08.615327Z
+- phase: review
+  entered: 2026-03-01T08:27:08.615327Z
+  exited: 2026-03-01T08:27:13.496660Z
+- phase: audit
+  entered: 2026-03-01T08:27:13.496660Z
+  exited: 2026-03-01T08:27:33.005855Z
+- phase: qa
+  entered: 2026-03-01T08:27:33.005855Z
+  exited: 2026-03-01T08:28:11.261548Z
+- phase: merge
+  entered: 2026-03-01T08:28:11.261548Z
+  exited: 2026-03-01T08:28:17.149085Z
+- phase: released
+  entered: 2026-03-01T08:28:17.149085Z
   exited: null
 dependencies: []
 archived: false

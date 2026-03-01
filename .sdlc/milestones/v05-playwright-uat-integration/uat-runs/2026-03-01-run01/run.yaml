@@ -1,0 +1,10 @@
+id: 2026-03-01-run01
+milestone_slug: v05-playwright-uat-integration
+started_at: 2026-03-01T07:24:08Z
+completed_at: 2026-03-01T07:26:00Z
+verdict: pass
+tests_total: 11
+tests_passed: 10
+tests_failed: 0
+tasks_created: []
+summary_path: .sdlc/milestones/v05-playwright-uat-integration/uat-runs/2026-03-01-run01/summary.md
