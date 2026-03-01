@@ -152,6 +152,126 @@ fn build_command(runtime: Runtime, script: &str, mode: &str) -> Command {
     }
 }
 
+/// Scaffold a new tool skeleton in `.sdlc/tools/<name>/`.
+///
+/// Creates `tool.ts`, `config.yaml`, and `README.md`.
+/// Returns `SdlcError::ToolExists` if the tool directory already exists.
+/// Returns `SdlcError::InvalidSlug` if `name` contains invalid characters.
+pub fn scaffold_tool(root: &Path, name: &str, description: &str) -> Result<()> {
+    crate::paths::validate_slug(name)?;
+
+    let tool_dir = crate::paths::tool_dir(root, name);
+    if tool_dir.exists() {
+        return Err(crate::error::SdlcError::ToolExists(name.to_string()));
+    }
+
+    crate::io::ensure_dir(&tool_dir)?;
+
+    // tool.ts — scaffold skeleton
+    let script_content = build_scaffold_ts(name, description);
+    let script_path = crate::paths::tool_script(root, name);
+    crate::io::atomic_write(&script_path, script_content.as_bytes())?;
+
+    // config.yaml
+    let config_content = format!(
+        "name: {name}\nversion: \"0.1.0\"\ndescription: {description:?}\n# Add tool-specific config here\n"
+    );
+    let config_path = crate::paths::tool_config(root, name);
+    crate::io::atomic_write(&config_path, config_content.as_bytes())?;
+
+    // README.md
+    let readme_content = build_scaffold_readme(name, description);
+    let readme_path = crate::paths::tool_readme(root, name);
+    crate::io::atomic_write(&readme_path, readme_content.as_bytes())?;
+
+    Ok(())
+}
+
+fn build_scaffold_ts(name: &str, description: &str) -> String {
+    let display_name = to_display_name(name);
+    let underline = "=".repeat(display_name.len());
+    format!(
+        r#"/**
+ * {display_name}
+ * {underline}
+ * {description}
+ *
+ * WHAT IT DOES
+ * ------------
+ * --run:   Reads JSON from stdin: {{ ... }}
+ *          Returns JSON to stdout: {{ ... }}
+ * --meta:  Writes ToolMeta JSON to stdout. Used by `sdlc tool sync`.
+ */
+
+import type {{ ToolMeta, ToolResult }} from '../_shared/types.ts'
+import {{ makeLogger }} from '../_shared/log.ts'
+import {{ getArgs, readStdin, exit }} from '../_shared/runtime.ts'
+
+const log = makeLogger('{name}')
+
+export const meta: ToolMeta = {{
+  name: '{name}',
+  display_name: '{display_name}',
+  description: '{description}',
+  version: '0.1.0',
+  requires_setup: false,
+  input_schema: {{
+    type: 'object',
+    required: [],
+    properties: {{}}
+  }},
+  output_schema: {{
+    type: 'object',
+    properties: {{}}
+  }},
+}}
+
+// TODO: implement run()
+export async function run(
+  input: Record<string, unknown>,
+  _root: string,
+): Promise<ToolResult<Record<string, unknown>>> {{
+  log.info('running {name}')
+  return {{ ok: true, data: {{ result: 'TODO: implement run()' }} }}
+}}
+
+const mode = getArgs()[0] ?? '--run'
+const root = process.env.SDLC_ROOT ?? process.cwd()
+
+if (mode === '--meta') {{
+  console.log(JSON.stringify(meta))
+  exit(0)
+}} else if (mode === '--run') {{
+  readStdin()
+    .then(raw => run(JSON.parse(raw || '{{}}') as Record<string, unknown>, root))
+    .then(result => {{ console.log(JSON.stringify(result)); exit(result.ok ? 0 : 1) }})
+    .catch(e => {{ console.log(JSON.stringify({{ ok: false, error: String(e) }})); exit(1) }})
+}} else {{
+  console.error(`Unknown mode: ${{mode}}. Use --meta or --run.`)
+  exit(1)
+}}
+"#
+    )
+}
+
+fn build_scaffold_readme(name: &str, description: &str) -> String {
+    let display_name = to_display_name(name);
+    format!("# {display_name}\n\n{description}\n\n## Usage\n\n```bash\nsdlc tool run {name}\n```\n")
+}
+
+fn to_display_name(slug: &str) -> String {
+    slug.split('-')
+        .map(|word| {
+            let mut chars = word.chars();
+            match chars.next() {
+                None => String::new(),
+                Some(c) => c.to_uppercase().collect::<String>() + chars.as_str(),
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(" ")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -167,5 +287,36 @@ mod tests {
         assert_eq!(Runtime::Bun.name(), "bun");
         assert_eq!(Runtime::Deno.name(), "deno");
         assert_eq!(Runtime::Node.name(), "node (via npx tsx)");
+    }
+
+    #[test]
+    fn to_display_name_capitalizes_each_word() {
+        assert_eq!(to_display_name("my-tool"), "My Tool");
+        assert_eq!(to_display_name("quality-check"), "Quality Check");
+        assert_eq!(to_display_name("ama"), "Ama");
+    }
+
+    #[test]
+    fn scaffold_tool_creates_files() {
+        let dir = tempfile::TempDir::new().unwrap();
+        scaffold_tool(dir.path(), "my-tool", "A test tool").unwrap();
+        assert!(crate::paths::tool_script(dir.path(), "my-tool").exists());
+        assert!(crate::paths::tool_config(dir.path(), "my-tool").exists());
+        assert!(crate::paths::tool_readme(dir.path(), "my-tool").exists());
+    }
+
+    #[test]
+    fn scaffold_tool_returns_tool_exists_for_duplicate() {
+        let dir = tempfile::TempDir::new().unwrap();
+        scaffold_tool(dir.path(), "my-tool", "First").unwrap();
+        let err = scaffold_tool(dir.path(), "my-tool", "Second").unwrap_err();
+        assert!(matches!(err, crate::error::SdlcError::ToolExists(_)));
+    }
+
+    #[test]
+    fn scaffold_tool_returns_invalid_slug_for_bad_name() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let err = scaffold_tool(dir.path(), "BAD NAME", "desc").unwrap_err();
+        assert!(matches!(err, crate::error::SdlcError::InvalidSlug(_)));
     }
 }

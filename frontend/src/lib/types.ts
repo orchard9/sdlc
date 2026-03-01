@@ -625,7 +625,7 @@ export interface InvestigationSseEvent {
 }
 
 export interface DocsSseEvent {
-  type: 'vision_align_completed' | 'architecture_align_completed'
+  type: 'vision_align_completed' | 'architecture_align_completed' | 'team_recruit_completed'
 }
 
 // ---------------------------------------------------------------------------

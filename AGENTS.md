@@ -77,6 +77,8 @@ Use `/sdlc-tool-run`, `/sdlc-tool-build`, `/sdlc-tool-audit`, `/sdlc-tool-uat` i
 
 Project: sdlc
 
+**Contributing to sdlc itself:** See `DEVELOPER.md` — build, run, test, first steps.
+
 <!-- sdlc:end -->
 
 ## Mental Model

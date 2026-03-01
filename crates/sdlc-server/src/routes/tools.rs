@@ -175,6 +175,51 @@ pub async fn setup_tool(
 }
 
 // ---------------------------------------------------------------------------
+// POST /api/tools — scaffold a new tool skeleton
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct CreateToolBody {
+    name: String,
+    description: String,
+}
+
+/// POST /api/tools — scaffold a new tool skeleton in `.sdlc/tools/<name>/`.
+///
+/// Creates `tool.ts`, `config.yaml`, and `README.md` from built-in templates.
+///
+/// Returns 400 if the name is an invalid slug.
+/// Returns 409 Conflict if a tool with that name already exists.
+pub async fn create_tool(
+    State(app): State<AppState>,
+    Json(body): Json<CreateToolBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_tool_name(&body.name)?;
+
+    let root = app.root.clone();
+    let name = body.name.clone();
+    let desc = body.description.clone();
+
+    tokio::task::spawn_blocking(move || sdlc_core::tool_runner::scaffold_tool(&root, &name, &desc))
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+        .map_err(|e| match e {
+            sdlc_core::error::SdlcError::ToolExists(ref n) => {
+                AppError::conflict(format!("tool '{n}' already exists"))
+            }
+            sdlc_core::error::SdlcError::InvalidSlug(ref s) => {
+                AppError::bad_request(format!("invalid tool name '{s}'"))
+            }
+            other => AppError(other.into()),
+        })?;
+
+    Ok(Json(serde_json::json!({
+        "name": body.name,
+        "status": "scaffolded"
+    })))
+}
+
+// ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
 
@@ -307,6 +352,62 @@ mod tests {
         let dir = tempfile::TempDir::new().unwrap();
         let app = AppState::new(dir.path().to_path_buf());
         let result = setup_tool(State(app), Path("../traversal".to_string())).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let response = axum::response::IntoResponse::into_response(err);
+        assert_eq!(response.status(), axum::http::StatusCode::BAD_REQUEST);
+    }
+
+    // -----------------------------------------------------------------
+    // create_tool
+    // -----------------------------------------------------------------
+
+    #[tokio::test]
+    async fn create_tool_returns_scaffolded_on_success() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = CreateToolBody {
+            name: "my-new-tool".to_string(),
+            description: "A test tool".to_string(),
+        };
+        let result = create_tool(State(app), Json(body)).await.unwrap();
+        assert_eq!(result.0["name"], "my-new-tool");
+        assert_eq!(result.0["status"], "scaffolded");
+        // Verify files were created
+        assert!(sdlc_core::paths::tool_script(dir.path(), "my-new-tool").exists());
+    }
+
+    #[tokio::test]
+    async fn create_tool_returns_409_for_existing_tool() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        // Scaffold once
+        let body1 = CreateToolBody {
+            name: "existing-tool".to_string(),
+            description: "First".to_string(),
+        };
+        let _ = create_tool(State(app.clone()), Json(body1)).await.unwrap();
+        // Try again
+        let body2 = CreateToolBody {
+            name: "existing-tool".to_string(),
+            description: "Second".to_string(),
+        };
+        let result = create_tool(State(app), Json(body2)).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let response = axum::response::IntoResponse::into_response(err);
+        assert_eq!(response.status(), axum::http::StatusCode::CONFLICT);
+    }
+
+    #[tokio::test]
+    async fn create_tool_returns_400_for_invalid_name() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = CreateToolBody {
+            name: "INVALID NAME".to_string(),
+            description: "desc".to_string(),
+        };
+        let result = create_tool(State(app), Json(body)).await;
         assert!(result.is_err());
         let err = result.unwrap_err();
         let response = axum::response::IntoResponse::into_response(err);

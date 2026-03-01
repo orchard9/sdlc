@@ -1,13 +1,138 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/api/client'
 import { ToolCard } from '@/components/tools/ToolCard'
 import { AmaThreadPanel } from '@/components/tools/AmaThreadPanel'
 import { AmaAnswerPanel } from '@/components/tools/AmaAnswerPanel'
 import { QualityCheckPanel } from '@/components/tools/QualityCheckPanel'
 import { ToolUsageSection } from '@/components/tools/ToolUsageSection'
-import { Loader2, AlertTriangle, Play, Wrench, RefreshCw } from 'lucide-react'
+import { Loader2, AlertTriangle, Play, Plus, Wrench, RefreshCw, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { ToolMeta, ToolResult, QualityCheckData, CheckResult } from '@/lib/types'
+
+// ---------------------------------------------------------------------------
+// CreateToolModal
+// ---------------------------------------------------------------------------
+
+interface CreateToolModalProps {
+  onClose: () => void
+  onCreated: () => void
+}
+
+const TOOL_NAME_RE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/
+
+function CreateToolModal({ onClose, onCreated }: CreateToolModalProps) {
+  const [name, setName] = useState('')
+  const [description, setDescription] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const nameRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    nameRef.current?.focus()
+  }, [])
+
+  const nameInvalid = name.length > 0 && !TOOL_NAME_RE.test(name)
+  const canSubmit = name.length > 0 && description.trim().length > 0 && !nameInvalid && !submitting
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!canSubmit) return
+    setSubmitting(true)
+    setError(null)
+    try {
+      await api.createTool({ name: name.trim(), description: description.trim() })
+      onCreated()
+      onClose()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create tool')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="w-full max-w-md bg-card border border-border rounded-xl shadow-2xl p-6">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-base font-semibold">New Tool</h2>
+          <button
+            onClick={onClose}
+            className="p-1 rounded hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Name */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Name <span className="normal-case text-muted-foreground/50">(slug — lowercase letters, numbers, hyphens)</span>
+            </label>
+            <input
+              ref={nameRef}
+              type="text"
+              value={name}
+              onChange={e => setName(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+              placeholder="my-tool"
+              className={cn(
+                'w-full px-3 py-2 text-sm bg-muted/40 border rounded-lg outline-none transition-colors placeholder:text-muted-foreground/50',
+                nameInvalid
+                  ? 'border-red-500/50 focus:border-red-500'
+                  : 'border-border focus:border-primary/50',
+              )}
+            />
+            {nameInvalid && (
+              <p className="text-xs text-red-400">Must start and end with a letter or digit</p>
+            )}
+          </div>
+
+          {/* Description */}
+          <div className="space-y-1.5">
+            <label className="block text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              Description
+            </label>
+            <input
+              type="text"
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="What does this tool do?"
+              className="w-full px-3 py-2 text-sm bg-muted/40 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground/50"
+            />
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="flex items-start gap-2 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/20">
+              <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+              <p className="text-sm text-red-300">{error}</p>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 text-sm font-medium bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg border border-border/50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {submitting ? 'Creating…' : 'Create Tool'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Tool run panel (right side)
@@ -287,6 +412,7 @@ export function ToolsPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedName, setSelectedName] = useState<string | null>(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
 
   const load = useCallback(() => {
     api.listTools()
@@ -321,6 +447,17 @@ export function ToolsPage() {
   }
 
   return (
+    <>
+      {showCreateModal && (
+        <CreateToolModal
+          onClose={() => setShowCreateModal(false)}
+          onCreated={() => {
+            setLoading(true)
+            load()
+          }}
+        />
+      )}
+
     <div className="h-full flex overflow-hidden">
       {/* Left pane: tool list */}
       <div className={cn(
@@ -332,6 +469,13 @@ export function ToolsPage() {
             <Wrench className="w-4 h-4 text-muted-foreground" />
             <h2 className="text-base font-semibold">Tools</h2>
             <span className="ml-auto text-xs text-muted-foreground">{tools.length}</span>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              title="Scaffold a new tool"
+              className="p-1 rounded hover:bg-muted/60 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
@@ -369,5 +513,6 @@ export function ToolsPage() {
         )}
       </div>
     </div>
+    </>
   )
 }

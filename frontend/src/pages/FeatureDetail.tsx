@@ -6,18 +6,65 @@ import { PhaseProgressBar } from '@/components/shared/PhaseProgressBar'
 import { ArtifactViewer } from '@/components/features/ArtifactViewer'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
 import { CopyButton } from '@/components/shared/CopyButton'
-import { ArrowLeft, Play, Loader2 } from 'lucide-react'
+import { ArrowLeft, Play, Loader2, AlertTriangle } from 'lucide-react'
 
 const ARTIFACT_TYPES = ['spec', 'design', 'tasks', 'qa_plan', 'review', 'audit', 'qa_results']
 
 export function FeatureDetail() {
   const { slug } = useParams<{ slug: string }>()
-  const { feature, classification, loading } = useFeature(slug ?? '')
+  const { feature, classification, error, loading } = useFeature(slug ?? '')
   const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
 
   if (!slug) return null
 
-  if (loading || !feature) {
+  if (loading) {
+    return <div className="p-6"><SkeletonFeatureDetail /></div>
+  }
+
+  if (error) {
+    // Extract artifact type from serde error like: artifacts[1].status: unknown variant `waived`...
+    const artifactMatch = error.match(/artifacts\[\d+\]\.status[^`]*`([^`]+)`/)
+    const corruptStatus = artifactMatch?.[1]
+
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" />
+          Back
+        </Link>
+        <div className="bg-destructive/10 border border-destructive/30 rounded-xl p-5 space-y-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-semibold text-destructive mb-1">Feature data is corrupt</p>
+              <p className="text-xs text-muted-foreground font-mono break-all">{error}</p>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground">
+              The feature manifest contains an unrecognized value{corruptStatus ? ` ('${corruptStatus}')` : ''}.
+              Use the <code className="font-mono bg-muted/60 px-1 rounded">sdlc_repair_artifact</code> MCP tool to reset it:
+            </p>
+            <div className="flex items-center gap-1">
+              <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-2 py-1.5 rounded text-muted-foreground break-all select-all">
+                {`sdlc_repair_artifact({ "slug": "${slug}", "artifact_type": "<type>", "set_status": "missing" })`}
+              </code>
+              <CopyButton
+                text={`sdlc_repair_artifact({ "slug": "${slug}", "artifact_type": "<type>", "set_status": "missing" })`}
+                className="shrink-0 p-1 rounded border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+              />
+            </div>
+            <p className="text-xs text-muted-foreground">
+              After repairing, call <code className="font-mono bg-muted/60 px-1 rounded">sdlc_get_directive</code> to re-enter the normal flow.
+              Valid statuses: <span className="font-mono">missing, draft, approved, rejected, needs_fix, passed, failed, waived</span>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!feature) {
     return <div className="p-6"><SkeletonFeatureDetail /></div>
   }
 

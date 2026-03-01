@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 ///
 /// Priority:
 /// 1. `--root` flag / `SDLC_ROOT` env var (passed in as `explicit`)
-/// 2. Walk upward from `cwd` looking for `.sdlc/`
+/// 2. Walk upward from `cwd` looking for `.sdlc/` (stops before home dir)
 /// 3. Walk upward from `cwd` looking for `.git/`
 /// 4. Fall back to `cwd`
 pub fn resolve_root(explicit: Option<&Path>) -> PathBuf {
@@ -13,11 +13,14 @@ pub fn resolve_root(explicit: Option<&Path>) -> PathBuf {
     }
 
     let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let home = std::env::var("HOME").ok().map(PathBuf::from);
 
-    // Walk upward looking for .sdlc/
+    // Walk upward looking for .sdlc/, but never claim the home directory as a
+    // project root — ~/.sdlc/ would silently hijack every uninitialized project.
     let mut dir = cwd.clone();
     loop {
-        if dir.join(".sdlc").is_dir() {
+        let is_home = home.as_deref().is_some_and(|h| dir == h);
+        if !is_home && dir.join(".sdlc").is_dir() {
             return dir;
         }
         match dir.parent() {

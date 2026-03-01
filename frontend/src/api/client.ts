@@ -76,6 +76,8 @@ export const api = {
     request<{ status: string; message: string }>(`/api/milestone/${encodeURIComponent(slug)}/uat/stop`, { method: 'POST' }),
 
   getConfig: () => request<import('@/lib/types').ProjectConfig>('/api/config'),
+  updateConfig: (body: { name?: string; description?: string }) =>
+    request<import('@/lib/types').ProjectConfig>('/api/config', { method: 'PATCH', body: JSON.stringify(body) }),
 
   querySearch: (q: string, limit = 10) =>
     request<import('@/lib/types').QuerySearchResponse>(`/api/query/search?q=${encodeURIComponent(q)}&limit=${limit}`),
@@ -102,6 +104,7 @@ export const api = {
     request('/api/architecture', { method: 'PUT', body: JSON.stringify({ content }) }),
   runVisionAlign: () => request<{ status: string; run_id: string }>('/api/vision/run', { method: 'POST' }),
   runArchitectureAlign: () => request<{ status: string; run_id: string }>('/api/architecture/run', { method: 'POST' }),
+  runTeamRecruit: () => request<{ status: string; run_id: string }>('/api/team/recruit', { method: 'POST' }),
 
   // Roadmap / Ponder
   getRoadmap: () => request<import('@/lib/types').PonderSummary[]>('/api/roadmap'),
@@ -179,6 +182,11 @@ export const api = {
 
   // Tools
   listTools: () => request<import('@/lib/types').ToolMeta[]>('/api/tools'),
+  createTool: (body: { name: string; description: string }) =>
+    request<{ name: string; status: string }>('/api/tools', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
   getTool: (name: string) => request<import('@/lib/types').ToolMeta>(`/api/tools/${encodeURIComponent(name)}`),
   runTool: (name: string, input: unknown) =>
     request<import('@/lib/types').ToolResult>(`/api/tools/${encodeURIComponent(name)}/run`, {

@@ -15,6 +15,8 @@
 
 ## Build & Test
 
+> See `DEVELOPER.md` for prerequisites, build modes, test invocation, and first-steps orientation.
+
 ```bash
 # Build (requires pre-built frontend or Node.js ≥ 18 in PATH)
 cargo build --all

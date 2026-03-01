@@ -6,7 +6,7 @@ pub mod routes;
 pub mod state;
 pub mod tunnel;
 
-use axum::routing::{delete, get, post, put};
+use axum::routing::{delete, get, patch, post, put};
 use axum::Router;
 use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
@@ -207,6 +207,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/architecture/run",
             post(routes::runs::start_architecture_align),
         )
+        .route("/api/team/recruit", post(routes::runs::start_team_recruit))
         // Run history
         .route("/api/runs", get(routes::runs::list_runs))
         .route("/api/runs/{id}", get(routes::runs::get_run))
@@ -293,12 +294,16 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/tools/quality-check/fix",
             post(routes::runs::fix_quality_issues),
         )
-        .route("/api/tools", get(routes::tools::list_tools))
+        .route(
+            "/api/tools",
+            get(routes::tools::list_tools).post(routes::tools::create_tool),
+        )
         .route("/api/tools/{name}", get(routes::tools::get_tool_meta))
         .route("/api/tools/{name}/run", post(routes::tools::run_tool))
         .route("/api/tools/{name}/setup", post(routes::tools::setup_tool))
         // Config
         .route("/api/config", get(routes::config::get_config))
+        .route("/api/config", patch(routes::config::update_config))
         // Project (prepare / phase)
         .route(
             "/api/project/phase",

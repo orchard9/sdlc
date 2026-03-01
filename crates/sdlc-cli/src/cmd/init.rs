@@ -483,7 +483,7 @@ fn write_user_skill_scaffold(
     Ok(())
 }
 
-fn remove_if_exists(dir: &Path, display_prefix: &str, filenames: &[&str]) -> anyhow::Result<()> {
+fn remove_if_exists(dir: &Path, filenames: &[&str]) -> anyhow::Result<()> {
     if !dir.exists() {
         return Ok(());
     }
@@ -492,7 +492,6 @@ fn remove_if_exists(dir: &Path, display_prefix: &str, filenames: &[&str]) -> any
         let path = dir.join(filename);
         if path.exists() {
             std::fs::remove_file(&path)?;
-            println!("  removed: {display_prefix}/{filename} (deprecated)");
         }
     }
 
@@ -1024,14 +1023,9 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-architecture-adjustment.md",
     ];
 
-    remove_if_exists(
-        &paths::claude_commands_dir(root),
-        ".claude/commands",
-        sdlc_files,
-    )?;
+    remove_if_exists(&paths::claude_commands_dir(root), sdlc_files)?;
     remove_if_exists(
         &paths::gemini_commands_dir(root),
-        ".gemini/commands",
         &[
             "sdlc-next.toml",
             "sdlc-status.toml",
@@ -1085,19 +1079,10 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-architecture-adjustment.md",
         ],
     )?;
-    remove_if_exists(
-        &paths::opencode_commands_dir(root),
-        ".opencode/command",
-        sdlc_files,
-    )?;
-    remove_if_exists(
-        &root.join(".opencode/commands"),
-        ".opencode/commands",
-        sdlc_files,
-    )?;
+    remove_if_exists(&paths::opencode_commands_dir(root), sdlc_files)?;
+    remove_if_exists(&root.join(".opencode/commands"), sdlc_files)?;
     remove_if_exists(
         &paths::codex_skills_dir(root),
-        ".agents/skills",
         &[
             "sdlc-next/SKILL.md",
             "sdlc-status/SKILL.md",
@@ -1126,7 +1111,7 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-architecture-adjustment/SKILL.md",
         ],
     )?;
-    remove_if_exists(&root.join(".codex/commands"), ".codex/commands", sdlc_files)?;
+    remove_if_exists(&root.join(".codex/commands"), sdlc_files)?;
 
     Ok(())
 }
@@ -6507,17 +6492,17 @@ or to adjust chunk size, overlap, and result count.
 Re-run `--setup` after significant file changes. It's fast and safe to run any time.
 "#;
 
-/// Quality-Check tool implementation — runs platform shell commands from .sdlc/config.yaml.
+/// Quality-Check tool implementation — runs checks from .sdlc/tools/quality-check/config.yaml.
 const TOOL_QUALITY_CHECK_TS: &str = r#"/**
  * Quality Check
  * =============
- * Runs platform shell commands from .sdlc/config.yaml and reports pass/fail.
+ * Runs checks defined in .sdlc/tools/quality-check/config.yaml and reports pass/fail.
  *
  * WHAT IT DOES
  * ------------
  * --run:   Reads JSON from stdin: { "scope"?: "string" }
- *          Loads platform.commands from .sdlc/config.yaml via `sdlc config show --json`.
- *          Runs each command's script as a shell command, records pass/fail + output.
+ *          Loads checks from .sdlc/tools/quality-check/config.yaml.
+ *          Runs each check's script as a shell command, records pass/fail + output.
  *          If scope is provided, only runs checks whose name matches the filter string.
  *          Returns ToolResult<{ passed, failed, checks[] }>.
  *
@@ -6525,9 +6510,8 @@ const TOOL_QUALITY_CHECK_TS: &str = r#"/**
  *
  * WHAT IT READS
  * -------------
- * - .sdlc/config.yaml (via `sdlc config show --json`)
- *   → platform.commands[]: { name, description, script }
- * - .sdlc/tools/quality-check/config.yaml (tool-level config, currently unused)
+ * - .sdlc/tools/quality-check/config.yaml
+ *   → checks[]: { name, description, script }
  *
  * WHAT IT WRITES
  * --------------
@@ -6536,37 +6520,22 @@ const TOOL_QUALITY_CHECK_TS: &str = r#"/**
  *
  * EXTENDING
  * ---------
- * Add checks under platform.commands in .sdlc/config.yaml:
- *   platform:
- *     commands:
- *       - name: test
- *         description: Run unit tests
- *         script: cargo test --all
+ * Add or edit checks in .sdlc/tools/quality-check/config.yaml:
+ *   checks:
+ *     - name: test
+ *       description: Run unit tests
+ *       script: cargo test --all
  * The quality-check tool picks them up automatically — no code changes needed.
  */
 
 import type { ToolMeta, ToolResult } from '../_shared/types.ts'
 import { makeLogger } from '../_shared/log.ts'
-import { loadToolConfig } from '../_shared/config.ts'
 import { getArgs, readStdin, exit } from '../_shared/runtime.ts'
 import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const log = makeLogger('quality-check')
-
-// ---------------------------------------------------------------------------
-// Config (tool-level — currently no per-tool settings)
-// ---------------------------------------------------------------------------
-
-interface QualityCheckConfig {
-  name: string
-  version: string
-}
-
-const DEFAULT_CONFIG: QualityCheckConfig = {
-  name: 'quality-check',
-  version: '0.1.0',
-}
 
 // ---------------------------------------------------------------------------
 // Tool metadata
@@ -6575,8 +6544,8 @@ const DEFAULT_CONFIG: QualityCheckConfig = {
 export const meta: ToolMeta = {
   name: 'quality-check',
   display_name: 'Quality Check',
-  description: 'Runs platform shell commands from .sdlc/config.yaml and reports pass/fail',
-  version: '0.1.0',
+  description: 'Runs checks from .sdlc/tools/quality-check/config.yaml and reports pass/fail',
+  version: '0.3.0',
   requires_setup: false,
   input_schema: {
     type: 'object',
@@ -6620,12 +6589,6 @@ interface PlatformCommand {
   script: string
 }
 
-interface SdlcConfig {
-  platform?: {
-    commands?: PlatformCommand[]
-  }
-}
-
 interface CheckResult {
   name: string
   description: string
@@ -6642,6 +6605,87 @@ interface QualityCheckOutput {
 }
 
 // ---------------------------------------------------------------------------
+// Config YAML parser — reads checks[] from tool-local config.yaml
+// ---------------------------------------------------------------------------
+
+/**
+ * Parse the `checks:` array from the tool's config.yaml.
+ * Handles the specific YAML shape used by quality-check:
+ *   checks:
+ *     - name: <string>
+ *       description: <string>
+ *       script: <single-quoted or bare string>
+ */
+function parseChecksFromYaml(content: string): PlatformCommand[] {
+  const checks: PlatformCommand[] = []
+  const lines = content.split('\n')
+
+  let inChecks = false
+  let current: Partial<PlatformCommand> | null = null
+
+  for (const line of lines) {
+    // Top-level `checks:` section header
+    if (/^checks:/.test(line)) {
+      inChecks = true
+      continue
+    }
+    // Any other top-level key ends the checks section
+    if (/^\S/.test(line) && !/^checks:/.test(line)) {
+      inChecks = false
+    }
+
+    if (!inChecks) continue
+
+    // New item: `  - name: <value>`
+    const itemMatch = line.match(/^\s{2}-\s+name:\s*(.*)$/)
+    if (itemMatch) {
+      if (current?.name && current?.script) {
+        checks.push(current as PlatformCommand)
+      }
+      current = { name: unquoteYaml(itemMatch[1].trim()), description: '', script: '' }
+      continue
+    }
+
+    if (!current) continue
+
+    const descMatch = line.match(/^\s+description:\s*(.*)$/)
+    if (descMatch) {
+      current.description = unquoteYaml(descMatch[1].trim())
+      continue
+    }
+
+    const scriptMatch = line.match(/^\s+script:\s*(.*)$/)
+    if (scriptMatch) {
+      current.script = unquoteYaml(scriptMatch[1].trim())
+      continue
+    }
+  }
+
+  if (current?.name && current?.script) {
+    checks.push(current as PlatformCommand)
+  }
+
+  return checks
+}
+
+/** Strip surrounding single or double quotes from a YAML scalar value. */
+function unquoteYaml(s: string): string {
+  return s.replace(/^'([\s\S]*)'$/, '$1').replace(/^"([\s\S]*)"$/, '$1')
+}
+
+/** Load checks from the tool's own config.yaml. Returns [] on any error. */
+function loadChecks(root: string): PlatformCommand[] {
+  const configPath = join(root, '.sdlc', 'tools', 'quality-check', 'config.yaml')
+  try {
+    const raw = readFileSync(configPath, 'utf8')
+    return parseChecksFromYaml(raw)
+  } catch (e) {
+    log.warn(`Could not read tool config at ${configPath}: ${e}`)
+    return []
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Run — execute platform checks
 // ---------------------------------------------------------------------------
 
@@ -6650,25 +6694,11 @@ export async function run(
   root: string,
 ): Promise<ToolResult<QualityCheckOutput>> {
   const start = Date.now()
-  loadToolConfig(root, 'quality-check', DEFAULT_CONFIG)
 
-  // Load sdlc config via CLI to avoid YAML parsing dependency
-  let sdlcConfig: SdlcConfig = {}
-  try {
-    const raw = execSync('sdlc config show --json', {
-      cwd: root,
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
-    sdlcConfig = JSON.parse(raw) as SdlcConfig
-  } catch (e) {
-    log.warn(`Could not load sdlc config: ${e}`)
-  }
-
-  const commands = sdlcConfig?.platform?.commands ?? []
+  const commands = loadChecks(root)
 
   if (commands.length === 0) {
-    log.warn('No platform commands configured in .sdlc/config.yaml — nothing to check')
+    log.warn('No checks configured in .sdlc/tools/quality-check/config.yaml — nothing to run')
     const duration_ms = Date.now() - start
     return {
       ok: true,
@@ -6760,14 +6790,22 @@ if (mode === '--meta') {
 "#;
 
 const TOOL_QUALITY_CHECK_CONFIG_YAML: &str = r#"# quality-check tool configuration
-# No tool-specific settings yet — all inputs come from .sdlc/config.yaml platform.commands
+# Add your project's quality checks below.
+# Each check runs its `script` as a shell command in the project root.
+#
+# Example:
+#   checks:
+#     - name: test
+#       description: Run unit tests
+#       script: cargo test --all
 name: quality-check
-version: "0.1.0"
+version: "0.3.0"
+checks:
 "#;
 
 const TOOL_QUALITY_CHECK_README_MD: &str = r#"# Quality Check
 
-Runs platform shell commands from `.sdlc/config.yaml` and reports pass/fail.
+Runs checks defined in `.sdlc/tools/quality-check/config.yaml` and reports pass/fail.
 
 ## Usage
 
@@ -6781,22 +6819,21 @@ sdlc tool run quality-check --scope test
 
 ## How it works
 
-Reads `platform.commands` from `.sdlc/config.yaml`, runs each script as a shell command,
-and reports pass/fail with the last 500 characters of output.
+Reads `checks` from `.sdlc/tools/quality-check/config.yaml`, runs each script as a shell
+command in the project root, and reports pass/fail with the last 500 characters of output.
 
 ## Adding checks
 
-Add entries under `platform:` → `commands:` in `.sdlc/config.yaml`:
+Edit `.sdlc/tools/quality-check/config.yaml`:
 
 ```yaml
-platform:
-  commands:
-    - name: test
-      description: Run unit tests
-      script: cargo test --all
-    - name: lint
-      description: Run linter
-      script: cargo clippy --all -- -D warnings
+checks:
+  - name: test
+    description: Run unit tests
+    script: cargo test --all
+  - name: lint
+    description: Run linter
+    script: cargo clippy --all -- -D warnings
 ```
 
 The quality-check tool picks them up automatically — no code changes needed.
@@ -6823,11 +6860,11 @@ _Indexes source files for keyword search (run once, then re-run when files chang
 
 ## quality-check — Quality Check
 
-Runs platform shell commands from .sdlc/config.yaml and reports pass/fail.
+Runs checks from .sdlc/tools/quality-check/config.yaml and reports pass/fail.
 
 **Run:** `sdlc tool run quality-check`
 **Setup required:** No
-_Add checks under `platform.commands` in `.sdlc/config.yaml`_
+_Edit `.sdlc/tools/quality-check/config.yaml` to add your project's checks_
 
 ---
 

@@ -87,7 +87,8 @@ impl IntoResponse for AppError {
                 | SdlcError::MilestoneExists(_)
                 | SdlcError::PonderExists(_)
                 | SdlcError::InvestigationExists(_)
-                | SdlcError::SecretKeyExists(_) => StatusCode::CONFLICT,
+                | SdlcError::SecretKeyExists(_)
+                | SdlcError::ToolExists(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidSlug(_)
                 | SdlcError::InvalidPhase(_)
                 | SdlcError::InvalidPonderStatus(_)
@@ -309,6 +310,13 @@ mod tests {
     #[test]
     fn conflict_constructor_maps_to_409() {
         let err = AppError::conflict("Agent already running for 'my-feat'");
+        let response = err.into_response();
+        assert_eq!(response.status(), StatusCode::CONFLICT);
+    }
+
+    #[test]
+    fn tool_exists_maps_to_409() {
+        let err = AppError(SdlcError::ToolExists("my-tool".into()).into());
         let response = err.into_response();
         assert_eq!(response.status(), StatusCode::CONFLICT);
     }

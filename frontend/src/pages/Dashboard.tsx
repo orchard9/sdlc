@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useProjectState } from '@/hooks/useProjectState'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Skeleton, SkeletonCard } from '@/components/shared/Skeleton'
 import { CommandBlock } from '@/components/shared/CommandBlock'
 import { api } from '@/api/client'
-import type { EscalationSummary, ProjectConfig } from '@/lib/types'
+import type { AgentDefinition, EscalationSummary, ProjectConfig } from '@/lib/types'
 import { PreparePanel } from '@/components/features/PreparePanel'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { AlertTriangle, Clock, ChevronDown, ChevronRight, Key, HelpCircle, Target, FlaskConical, Zap, Check } from 'lucide-react'
@@ -130,12 +130,25 @@ export function Dashboard() {
   const { isRunning } = useAgentRuns()
   const [config, setConfig] = useState<ProjectConfig | null>(null)
   const [showArchive, setShowArchive] = useState(false)
+  const navigate = useNavigate()
+  const hasCheckedSetup = useRef(false)
 
   useEffect(() => {
-    api.getConfig()
-      .then(cfg => setConfig(cfg))
-      .catch(() => {})
-  }, [])
+    if (hasCheckedSetup.current) return
+    hasCheckedSetup.current = true
+
+    Promise.all([
+      api.getConfig().catch(() => null),
+      api.getVision().catch(() => null),
+      api.getArchitecture().catch(() => null),
+      api.getAgents().catch((): AgentDefinition[] => []),
+    ]).then(([cfg, vision, arch, agents]) => {
+      if (cfg) setConfig(cfg)
+      const noProject = !cfg?.project.description || (!vision?.exists && !arch?.exists)
+      const noTeam = agents.length === 0
+      if (noProject || noTeam) navigate('/setup')
+    })
+  }, [navigate])
 
   if (error) {
     return (

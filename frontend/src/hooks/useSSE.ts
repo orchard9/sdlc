@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import type { DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
 
 /** Subscribe to /api/events and call onUpdate whenever state changes.
@@ -11,6 +11,10 @@ import type { DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent }
  *
  *  Optionally pass onPonderEvent / onRunEvent / onInvestigationEvent to receive
  *  typed lifecycle events. These are NOT debounced.
+ *
+ *  Callbacks are held in refs so the connection is established once on mount
+ *  and never restarted due to callback identity changes. Callers do not need
+ *  to wrap callbacks in useCallback.
  */
 export function useSSE(
   onUpdate: () => void,
@@ -19,6 +23,21 @@ export function useSSE(
   onInvestigationEvent?: (event: InvestigationSseEvent) => void,
   onDocsEvent?: (event: DocsSseEvent) => void,
 ) {
+  const onUpdateRef = useRef(onUpdate)
+  const onPonderRef = useRef(onPonderEvent)
+  const onRunRef = useRef(onRunEvent)
+  const onInvestigationRef = useRef(onInvestigationEvent)
+  const onDocsRef = useRef(onDocsEvent)
+
+  // Keep refs current on every render without triggering the effect
+  useEffect(() => {
+    onUpdateRef.current = onUpdate
+    onPonderRef.current = onPonderEvent
+    onRunRef.current = onRunEvent
+    onInvestigationRef.current = onInvestigationEvent
+    onDocsRef.current = onDocsEvent
+  })
+
   useEffect(() => {
     const controller = new AbortController()
     let timer: ReturnType<typeof setTimeout> | null = null
@@ -27,15 +46,15 @@ export function useSSE(
     function dispatch(type: string, data: string) {
       if (type === 'update') {
         if (timer) clearTimeout(timer)
-        timer = setTimeout(onUpdate, 500)
-      } else if (type === 'ponder' && onPonderEvent) {
-        try { onPonderEvent(JSON.parse(data) as PonderSseEvent) } catch { /* malformed */ }
-      } else if (type === 'run' && onRunEvent) {
-        try { onRunEvent(JSON.parse(data) as RunSseEvent) } catch { /* malformed */ }
-      } else if (type === 'investigation' && onInvestigationEvent) {
-        try { onInvestigationEvent(JSON.parse(data) as InvestigationSseEvent) } catch { /* malformed */ }
-      } else if (type === 'docs' && onDocsEvent) {
-        try { onDocsEvent(JSON.parse(data) as DocsSseEvent) } catch { /* malformed */ }
+        timer = setTimeout(() => onUpdateRef.current(), 500)
+      } else if (type === 'ponder' && onPonderRef.current) {
+        try { onPonderRef.current(JSON.parse(data) as PonderSseEvent) } catch { /* malformed */ }
+      } else if (type === 'run' && onRunRef.current) {
+        try { onRunRef.current(JSON.parse(data) as RunSseEvent) } catch { /* malformed */ }
+      } else if (type === 'investigation' && onInvestigationRef.current) {
+        try { onInvestigationRef.current(JSON.parse(data) as InvestigationSseEvent) } catch { /* malformed */ }
+      } else if (type === 'docs' && onDocsRef.current) {
+        try { onDocsRef.current(JSON.parse(data) as DocsSseEvent) } catch { /* malformed */ }
       }
     }
 
@@ -61,7 +80,12 @@ export function useSSE(
 
           while (active) {
             const { done, value } = await reader.read()
-            if (done) break
+            if (done) {
+              // Server closed the stream cleanly — wait before reconnecting
+              // to avoid a tight reconnect loop.
+              await new Promise(r => setTimeout(r, 2000))
+              break
+            }
 
             buffer += decoder.decode(value, { stream: true })
             const lines = buffer.split('\n')
@@ -95,5 +119,5 @@ export function useSSE(
       if (timer) clearTimeout(timer)
       controller.abort()
     }
-  }, [onUpdate, onPonderEvent, onRunEvent, onInvestigationEvent, onDocsEvent])
+  }, []) // empty deps — connect once on mount, never restart due to callback changes
 }

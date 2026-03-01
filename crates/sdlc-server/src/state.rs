@@ -195,6 +195,10 @@ pub enum SseMessage {
     VisionAlignCompleted,
     /// An architecture alignment agent run completed.
     ArchitectureAlignCompleted,
+    /// Team recruitment completed — perspective agents written to ~/.claude/agents/.
+    TeamRecruitCompleted,
+    /// A new tool was scaffolded or an existing tool changed.
+    ToolsChanged,
 }
 
 /// Shared application state passed to all route handlers.
@@ -327,6 +331,22 @@ impl AppState {
                     }
                 }
             });
+
+            // Watch .sdlc/tools/ for new tool directories (scaffolding via POST /api/tools or CLI).
+            // We scan for subdirectories that contain a tool.ts file and watch their count/mtime.
+            let tools_dir = state.root.join(".sdlc").join("tools");
+            let tx_tools = tx.clone();
+            tokio::spawn(async move {
+                let mut last_snapshot: Option<(usize, std::time::SystemTime)> = None;
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                    let snapshot = scan_tools_snapshot(&tools_dir).await;
+                    if snapshot != last_snapshot {
+                        last_snapshot = snapshot;
+                        let _ = tx_tools.send(SseMessage::ToolsChanged);
+                    }
+                }
+            });
         }
 
         state
@@ -371,6 +391,42 @@ async fn scan_dir_mtime(roadmap_dir: &std::path::Path) -> Option<std::time::Syst
     }
 
     latest
+}
+
+/// Scan `.sdlc/tools/` for non-underscore subdirectories that contain `tool.ts`.
+/// Returns a snapshot of (count, latest_mtime) so the watcher can detect changes.
+async fn scan_tools_snapshot(
+    tools_dir: &std::path::Path,
+) -> Option<(usize, std::time::SystemTime)> {
+    let mut dir = match tokio::fs::read_dir(tools_dir).await {
+        Ok(d) => d,
+        Err(_) => return None,
+    };
+
+    let mut count = 0usize;
+    let mut latest: Option<std::time::SystemTime> = None;
+
+    while let Ok(Some(entry)) = dir.next_entry().await {
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name.starts_with('_') || !entry.path().is_dir() {
+            continue;
+        }
+        let script = entry.path().join("tool.ts");
+        if let Ok(meta) = tokio::fs::metadata(&script).await {
+            count += 1;
+            if let Ok(mtime) = meta.modified() {
+                if latest.is_none_or(|l| mtime > l) {
+                    latest = Some(mtime);
+                }
+            }
+        }
+    }
+
+    if count == 0 {
+        None
+    } else {
+        latest.map(|mtime| (count, mtime))
+    }
 }
 
 #[cfg(test)]

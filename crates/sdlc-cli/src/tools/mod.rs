@@ -10,6 +10,7 @@ pub mod ponder_chat;
 pub mod prepare;
 pub mod project_phase;
 pub mod reject_artifact;
+pub mod repair_artifact;
 pub mod run_wave;
 pub mod write_artifact;
 
@@ -26,6 +27,7 @@ pub fn all_tools() -> Vec<Box<dyn SdlcTool>> {
         Box::new(write_artifact::WriteArtifactTool),
         Box::new(approve_artifact::ApproveArtifactTool),
         Box::new(reject_artifact::RejectArtifactTool),
+        Box::new(repair_artifact::RepairArtifactTool),
         Box::new(add_task::AddTaskTool),
         Box::new(complete_task::CompleteTaskTool),
         Box::new(add_comment::AddCommentTool),

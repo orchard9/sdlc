@@ -98,6 +98,14 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             let data = serde_json::json!({ "type": "architecture_align_completed" }).to_string();
             Some(Ok(Event::default().event("docs").data(data)))
         }
+        Ok(SseMessage::TeamRecruitCompleted) => {
+            let data = serde_json::json!({ "type": "team_recruit_completed" }).to_string();
+            Some(Ok(Event::default().event("docs").data(data)))
+        }
+        Ok(SseMessage::ToolsChanged) => {
+            let data = serde_json::json!({ "type": "tools_changed" }).to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
         Err(_) => None,
     });
     // Prepend a ~2KB padding comment so the response body exceeds Cloudflare's

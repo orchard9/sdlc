@@ -18,6 +18,7 @@ import { VisionPage } from '@/pages/VisionPage'
 import { ArchitecturePage } from '@/pages/ArchitecturePage'
 import { DocsPage } from '@/pages/DocsPage'
 import { AgentsPage } from '@/pages/AgentsPage'
+import { SetupPage } from '@/pages/SetupPage'
 
 export default function App() {
   return (
@@ -26,6 +27,7 @@ export default function App() {
         <AppShell>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/setup" element={<SetupPage />} />
             <Route path="/vision" element={<VisionPage />} />
             <Route path="/architecture" element={<ArchitecturePage />} />
             <Route path="/features" element={<FeaturesPage />} />

@@ -1123,25 +1123,30 @@ pub async fn stop_investigation_chat(
 // Doc alignment handlers
 // ---------------------------------------------------------------------------
 
-/// POST /api/vision/run — align VISION.md with current project state.
+/// POST /api/vision/run — generate or align VISION.md.
 ///
-/// Spawns an agent that reads the current VISION.md and project state, then
-/// updates the document to reflect what was actually learned through building.
+/// For fresh projects (no VISION.md): reads `.sdlc/config.yaml` for the project
+/// name and description and writes VISION.md from scratch.
+/// For existing projects: aligns the document with current feature/milestone state.
 /// Fires `vision_align_completed` SSE on finish so the page re-fetches.
 pub async fn start_vision_align(
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "vision-align".to_string();
     let opts = sdlc_query_options(app.root.clone(), 40);
-    let prompt = "Read the current VISION.md in the project root and the current project \
-        state — active features, milestones, and their artifact content — using the \
-        available sdlc and filesystem tools.\n\n\
-        Identify where the project's trajectory has refined or extended the vision through \
-        implementation: assumptions validated or invalidated, scope that became clearer, \
-        direction that evolved through building. Update VISION.md to capture what was \
-        actually learned while preserving strategic intent and aspirational language. \
-        Do not water down ambition — sharpen it with what we now know.\n\n\
-        Write the updated VISION.md directly to the project root using the Write tool.";
+    let prompt = "Check whether VISION.md exists in the project root.\n\n\
+        If VISION.md does NOT exist: read `.sdlc/config.yaml` to get the project name \
+        and description. Write VISION.md from scratch — what this project is, who it is \
+        for, what problem it solves, and what success looks like. Ground every claim in \
+        the project name and description. Be specific, aspirational, and concise.\n\n\
+        If VISION.md DOES exist: read it along with the current project state — active \
+        features, milestones, and their artifact content — using the available sdlc and \
+        filesystem tools. Identify where the project's trajectory has refined or extended \
+        the vision through implementation: assumptions validated or invalidated, scope \
+        that became clearer, direction that evolved through building. Update VISION.md to \
+        capture what was actually learned while preserving strategic intent and \
+        aspirational language. Do not water down ambition — sharpen it with what we now know.\n\n\
+        Write the result directly to VISION.md in the project root using the Write tool.";
     spawn_agent_run(
         key,
         prompt.to_string(),
@@ -1154,25 +1159,30 @@ pub async fn start_vision_align(
     .await
 }
 
-/// POST /api/architecture/run — align ARCHITECTURE.md with the real codebase.
+/// POST /api/architecture/run — generate or align ARCHITECTURE.md.
 ///
-/// Spawns an agent that scans the actual code structure and updates the
-/// architecture document to reflect the real system. Fires
-/// `architecture_align_completed` SSE on finish so the page re-fetches.
+/// For fresh projects (no ARCHITECTURE.md): reads `.sdlc/config.yaml` and scans
+/// the codebase to write ARCHITECTURE.md from scratch.
+/// For existing projects: aligns the document with what was actually built.
+/// Fires `architecture_align_completed` SSE on finish so the page re-fetches.
 pub async fn start_architecture_align(
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "architecture-align".to_string();
     let opts = sdlc_query_options(app.root.clone(), 40);
-    let prompt = "Read the current ARCHITECTURE.md in the project root and scan the actual \
-        codebase — key source files, module structure, interfaces, data flows, and \
-        component boundaries — using filesystem tools (Read, Glob, Grep).\n\n\
+    let prompt = "Check whether ARCHITECTURE.md exists in the project root.\n\n\
+        If ARCHITECTURE.md does NOT exist: read `.sdlc/config.yaml` for the project name \
+        and description, then scan the codebase — key source files, directory structure, \
+        frameworks, and dependencies — using filesystem tools (Read, Glob, Grep). \
+        Write ARCHITECTURE.md from scratch: tech stack, key components, interfaces, \
+        data flows, and design decisions based on what you find.\n\n\
+        If ARCHITECTURE.md DOES exist: read it and scan the actual codebase — key source \
+        files, module structure, interfaces, data flows, and component boundaries. \
         Identify where the documented architecture has drifted from what was actually \
         built: renamed components, new modules, changed interfaces, evolved data flows, \
         or patterns that emerged during implementation. Update ARCHITECTURE.md to \
-        accurately describe the real system as it exists today — components, interfaces, \
-        data flows, and sequence diagrams that match the code.\n\n\
-        Write the updated ARCHITECTURE.md directly to the project root using the Write tool.";
+        accurately describe the real system as it exists today.\n\n\
+        Write the result directly to ARCHITECTURE.md in the project root using the Write tool.";
     spawn_agent_run(
         key,
         prompt.to_string(),
@@ -1181,6 +1191,55 @@ pub async fn start_architecture_align(
         "architecture_align",
         "align: architecture",
         Some(SseMessage::ArchitectureAlignCompleted),
+    )
+    .await
+}
+
+/// POST /api/team/recruit — recruit 2-5 perspective agents tailored to this project.
+///
+/// Reads VISION.md, ARCHITECTURE.md, and `.sdlc/config.yaml` to understand the
+/// project, then writes 2-5 agent `.md` files to `~/.claude/agents/` — one per
+/// thought partner. Fires `team_recruit_completed` SSE on finish so the setup
+/// page can fetch and display the new agents.
+pub async fn start_team_recruit(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let key = "team-recruit".to_string();
+    let opts = sdlc_query_options(app.root.clone(), 40);
+    let prompt = "You are recruiting a high-impact AI thought-partner team for this project.\n\n\
+        Read context files to understand the project:\n\
+        1. Read `.sdlc/config.yaml` for project name and description\n\
+        2. Read `VISION.md` if it exists\n\
+        3. Read `ARCHITECTURE.md` if it exists\n\n\
+        Based on the project domain, tech stack, and goals, identify 2-5 distinct expert \
+        roles that would provide the most valuable perspectives. Each should cover a \
+        different critical dimension — e.g. UX, security, performance, product strategy, \
+        domain expertise. Do not create generic roles; make them specific to this project.\n\n\
+        For each role, write a perspective agent file to `~/.claude/agents/<slug>.md` using \
+        the Write tool. The filename should be a kebab-case slug like \
+        `ux-researcher.md` or `security-architect.md`. Use this exact format:\n\n\
+        ```\n\
+        ---\n\
+        name: <Full Name or Role Title>\n\
+        description: <one sentence — when to use this agent>\n\
+        ---\n\n\
+        You are <Name>, a <role> with deep expertise in <domain>. \
+        [2-3 sentences establishing background and perspective.]\n\n\
+        When consulted, you:\n\
+        - [distinctive behaviour 1]\n\
+        - [distinctive behaviour 2]\n\
+        - [distinctive behaviour 3]\n\
+        ```\n\n\
+        Write exactly 2-5 agents. Quality over quantity — only create roles that will \
+        genuinely shape decisions for this specific project.";
+    spawn_agent_run(
+        key,
+        prompt.to_string(),
+        opts,
+        &app,
+        "team_recruit",
+        "recruit: team",
+        Some(SseMessage::TeamRecruitCompleted),
     )
     .await
 }

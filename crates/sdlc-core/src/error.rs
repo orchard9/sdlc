@@ -51,6 +51,9 @@ pub enum SdlcError {
     #[error("ponder entry already exists: {0}")]
     PonderExists(String),
 
+    #[error("tool already exists: {0}")]
+    ToolExists(String),
+
     #[error("invalid ponder status: {0}")]
     InvalidPonderStatus(String),
 

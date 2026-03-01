@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useSSE } from '@/hooks/useSSE'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { api } from '@/api/client'
@@ -170,7 +171,10 @@ export function PreparePanel() {
           </div>
           <div className="bg-card border border-dashed border-border rounded-xl p-4 text-center">
             <p className="text-sm text-muted-foreground">Nothing planned yet</p>
-            <p className="text-xs text-muted-foreground/60 mt-0.5">Use /sdlc-ponder to start exploring ideas</p>
+            <p className="text-xs text-muted-foreground/60 mt-0.5">
+              Use /sdlc-ponder to start exploring ideas, or{' '}
+              <Link to="/ponder" className="text-primary hover:underline">open the ponder workspace</Link>
+            </p>
           </div>
         </section>
       )
