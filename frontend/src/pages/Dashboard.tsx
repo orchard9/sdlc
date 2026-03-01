@@ -145,7 +145,7 @@ export function Dashboard() {
     ]).then(([cfg, vision, arch, agents]) => {
       if (cfg) setConfig(cfg)
       const noProject = !cfg?.project.description || (!vision?.exists && !arch?.exists)
-      const noTeam = agents.length === 0
+      const noTeam = agents.length === 0 && !localStorage.getItem('sdlc_setup_ack')
       if (noProject || noTeam) navigate('/setup')
     })
   }, [navigate])
