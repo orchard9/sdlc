@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AgentRunProvider } from '@/contexts/AgentRunContext'
+import { SseProvider } from '@/contexts/SseContext'
 import { AppShell } from '@/components/layout/AppShell'
 import { Dashboard } from '@/pages/Dashboard'
 import { FeatureDetail } from '@/pages/FeatureDetail'
@@ -24,6 +25,7 @@ import { SetupPage } from '@/pages/SetupPage'
 export default function App() {
   return (
     <BrowserRouter>
+      <SseProvider>
       <AgentRunProvider>
         <AppShell>
           <Routes>
@@ -55,6 +57,7 @@ export default function App() {
           </Routes>
         </AppShell>
       </AgentRunProvider>
+      </SseProvider>
     </BrowserRouter>
   )
 }

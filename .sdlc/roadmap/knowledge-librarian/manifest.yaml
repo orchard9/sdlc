@@ -1,0 +1,10 @@
+slug: knowledge-librarian
+title: 'Knowledge librarian: a maintained, curated knowledge base'
+status: exploring
+created_at: 2026-03-01T17:29:03.770549Z
+updated_at: 2026-03-01T17:31:45.349018Z
+sessions: 1
+orientation:
+  current: Core design decided — librarian is a project-generated agent with two modes (maintain + query) and a harvest hook that forces maintenance on investigation completion
+  next: 'Refine the spec: add librarian to the knowledge base spec, define the librarian init flow and the harvest hook protocol in detail'
+  commit: When the updated spec covers librarian init, harvest hooks, query mode CLI, and updated entry data model — ready to commit to a feature

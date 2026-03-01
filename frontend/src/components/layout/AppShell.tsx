@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { AgentPanel } from './AgentPanel'
 import { AgentPanelFab } from './AgentPanelFab'
-import { BottomTabBar } from './BottomTabBar'
 import { SearchModal } from '@/components/shared/SearchModal'
 import { FixRightAwayModal } from '@/components/shared/FixRightAwayModal'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
@@ -111,7 +110,7 @@ export function AppShell({ children }: AppShellProps) {
           <span className="text-sm font-semibold tracking-tight">{titleFromPath(location.pathname)}</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto pb-11 md:pb-0">
+        <main className="flex-1 overflow-y-auto">
           {children}
         </main>
       </div>
@@ -133,10 +132,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Mobile FAB + drawer */}
       <AgentPanelFab />
 
-      {/* Mobile bottom tab bar */}
-      <BottomTabBar onMore={() => setSidebarOpen(true)} />
-
-      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+<SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <FixRightAwayModal open={fixOpen} onClose={() => setFixOpen(false)} />
     </div>
   )

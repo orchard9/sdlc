@@ -1,0 +1,1 @@
+The knowledge base should be constantly maintained for the specific use case by a librarian template. Rather than static storage, the knowledge system has a dedicated agent persona — a librarian — that actively curates, classifies, cross-references, and keeps knowledge current. The librarian is tailored to the project's domain and catalog, not generic.

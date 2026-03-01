@@ -596,6 +596,11 @@ fn write_user_claude_commands() -> anyhow::Result<()> {
                 SDLC_ARCHITECTURE_ADJUSTMENT_COMMAND,
             ),
             ("sdlc-guideline.md", SDLC_GUIDELINE_COMMAND),
+            (
+                "sdlc-hypothetical-planning.md",
+                SDLC_HYPOTHETICAL_PLANNING_COMMAND,
+            ),
+            ("sdlc-hypothetical-do.md", SDLC_HYPOTHETICAL_DO_COMMAND),
             ("sdlc-init.md", SDLC_INIT_COMMAND),
         ],
     )
@@ -784,6 +789,20 @@ fn write_user_gemini_commands() -> anyhow::Result<()> {
             gemini_command_toml(
                 "Build an evidence-backed guideline through perspective research and TOC-first distillation",
                 SDLC_GUIDELINE_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-hypothetical-planning.toml",
+            gemini_command_toml(
+                "Build a hypothetical implementation plan with architecture, file manifest, and READY/BLOCKED verdict",
+                SDLC_HYPOTHETICAL_PLANNING_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-hypothetical-do.toml",
+            gemini_command_toml(
+                "Execute a READY hypothetical plan — gate-check, orient, execute in order, verify, log completion",
+                SDLC_HYPOTHETICAL_DO_PLAYBOOK,
             ),
         ),
         (
@@ -1021,6 +1040,22 @@ fn write_user_opencode_commands() -> anyhow::Result<()> {
             ),
         ),
         (
+            "sdlc-hypothetical-planning.md",
+            opencode_command_md(
+                "Build a hypothetical implementation plan with architecture, file manifest, and READY/BLOCKED verdict",
+                "<feature-or-milestone-slug>",
+                SDLC_HYPOTHETICAL_PLANNING_PLAYBOOK,
+            ),
+        ),
+        (
+            "sdlc-hypothetical-do.md",
+            opencode_command_md(
+                "Execute a READY hypothetical plan — gate-check, orient, execute in order, verify, log completion",
+                "<slug>",
+                SDLC_HYPOTHETICAL_DO_PLAYBOOK,
+            ),
+        ),
+        (
             "sdlc-init.md",
             opencode_command_md(
                 "Interview to bootstrap vision, architecture, config, and team for a new project",
@@ -1072,6 +1107,11 @@ fn write_user_agents_skills() -> anyhow::Result<()> {
                 SDLC_ARCHITECTURE_ADJUSTMENT_SKILL,
             ),
             ("sdlc-guideline", SDLC_GUIDELINE_SKILL),
+            (
+                "sdlc-hypothetical-planning",
+                SDLC_HYPOTHETICAL_PLANNING_SKILL,
+            ),
+            ("sdlc-hypothetical-do", SDLC_HYPOTHETICAL_DO_SKILL),
             ("sdlc-init", SDLC_INIT_SKILL),
         ],
     )
@@ -1107,6 +1147,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
         "sdlc-vision-adjustment.md",
         "sdlc-architecture-adjustment.md",
         "sdlc-guideline.md",
+        "sdlc-hypothetical-planning.md",
+        "sdlc-hypothetical-do.md",
         "sdlc-init.md",
     ];
 
@@ -1141,6 +1183,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-vision-adjustment.toml",
             "sdlc-architecture-adjustment.toml",
             "sdlc-guideline.toml",
+            "sdlc-hypothetical-planning.toml",
+            "sdlc-hypothetical-do.toml",
             "sdlc-init.toml",
             "sdlc-next.md",
             "sdlc-status.md",
@@ -1169,6 +1213,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-vision-adjustment.md",
             "sdlc-architecture-adjustment.md",
             "sdlc-guideline.md",
+            "sdlc-hypothetical-planning.md",
+            "sdlc-hypothetical-do.md",
             "sdlc-init.md",
         ],
     )?;
@@ -1204,6 +1250,8 @@ pub fn migrate_legacy_project_scaffolding(root: &Path) -> anyhow::Result<()> {
             "sdlc-vision-adjustment/SKILL.md",
             "sdlc-architecture-adjustment/SKILL.md",
             "sdlc-guideline/SKILL.md",
+            "sdlc-hypothetical-planning/SKILL.md",
+            "sdlc-hypothetical-do/SKILL.md",
             "sdlc-init/SKILL.md",
         ],
     )?;
@@ -1489,6 +1537,22 @@ requests in development and the address is wrong in production.
 
 When fixing a CORS error or adding a new API client, apply this pattern instead of
 adding CORS headers or introducing environment-specific URLs.
+
+## 11. Project Guidelines
+
+Before writing implementation code, check if `.sdlc/guidelines/index.yaml` exists.
+If it does, read it and load any guidelines whose `scope` overlaps with the work at hand.
+
+```bash
+# Check
+ls .sdlc/guidelines/index.yaml 2>/dev/null && cat .sdlc/guidelines/index.yaml
+```
+
+Guidelines contain `⚑ Rule:` statements with `✓ Good:` and `✗ Bad:` code examples derived
+from this codebase. They are authoritative — if your implementation would violate a rule,
+fix the approach before proceeding, not after review catches it.
+
+If no index exists, no guidelines have been published yet. Proceed normally.
 "#;
 
 const SDLC_NEXT_COMMAND: &str = r#"---
@@ -6400,6 +6464,18 @@ sdlc investigate update <slug> --output-ref ".sdlc/guidelines/<slug>.md"
 sdlc investigate update <slug> --status complete
 ```
 
+Update the guidelines index at `.sdlc/guidelines/index.yaml`. Read the file if it exists,
+add or update the entry for this guideline, and write it back:
+```yaml
+guidelines:
+  - slug: <slug>
+    title: "<title from manifest>"
+    scope: "<guideline_scope from manifest>"
+    path: .sdlc/guidelines/<slug>.md
+    created: <today's date>
+```
+Preserve all existing entries. If the slug already exists in the index, update it in place.
+
 If violations require remediation, create a tracking feature:
 ```bash
 sdlc feature create guideline-<slug>-enforcement --title "Enforce: <guideline title>"
@@ -6481,7 +6557,7 @@ Build an evidence-backed guideline through five research perspectives and TOC-fi
    - `sdlc investigate update <slug> --phase toc`.
 5. **toc phase:** Read all evidence artifacts. Group by theme. Order by importance. Write `toc.md` (numbered sections, rationale, evidence summary). `sdlc investigate update <slug> --phase distillation`.
 6. **distillation phase:** For each TOC section, read relevant evidence and distill. Write `guideline-draft.md` with `⚑ Rule:`, `✓ Good:`, `✗ Bad:` markers and file:line citations. `sdlc investigate update <slug> --principles-count <N> --phase publish`.
-7. **publish phase:** Write final guideline to `.sdlc/guidelines/<slug>.md`. `sdlc investigate update <slug> --output-ref ".sdlc/guidelines/<slug>.md" --status complete`.
+7. **publish phase:** Write final guideline to `.sdlc/guidelines/<slug>.md`. `sdlc investigate update <slug> --output-ref ".sdlc/guidelines/<slug>.md" --status complete`. Read `.sdlc/guidelines/index.yaml` (or create it), add/update this entry (`slug`, `title`, `scope`, `path`, `created`), write it back — preserving all other entries.
 8. **Session log (MANDATORY):** Write session to `/tmp/guideline-session-<slug>.md`, then `sdlc investigate session log <slug> --file /tmp/guideline-session-<slug>.md`.
 9. **Next:** `/sdlc-guideline <slug>` to continue, or report completion.
 "#;
@@ -6514,9 +6590,283 @@ Build a guideline from evidence, not opinion.
 5. Five perspectives in the `perspectives` phase: anti-patterns (codebase grep), exemplars (good examples), prior art (community knowledge + web search), adjacent patterns, impact assessment.
 6. TOC (`toc.md`) commits to structure before writing — ordered by evidence density.
 7. Distillation writes each TOC section from evidence — every rule cites a real file:line.
-8. Publish to `.sdlc/guidelines/<slug>.md`. Update manifest with output-ref and status complete.
+8. Publish to `.sdlc/guidelines/<slug>.md`. Update manifest with output-ref and status complete. Update `.sdlc/guidelines/index.yaml` — read existing (or create), add/update entry (`slug`, `title`, `scope`, `path`, `created`), write back preserving all other entries.
 9. Log session (MANDATORY): Write to `/tmp/guideline-session-<slug>.md`, then `sdlc investigate session log <slug> --file /tmp/...`.
 10. **Next:** `/sdlc-guideline <slug>` to continue next phase.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-hypothetical-planning — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_HYPOTHETICAL_PLANNING_COMMAND: &str = r#"---
+description: Build a hypothetical implementation plan in .sdlc/ — architecture, file manifest, perspective review, and READY/BLOCKED verdict
+argument-hint: <feature-or-milestone-slug>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep, Agent
+---
+
+# sdlc-hypothetical-planning
+
+Build a complete hypothetical plan for implementing a feature or milestone before writing a single line of production code. Produces a structured set of artifacts in `.sdlc/hypotheticals/<slug>/` and ends with a binary confidence verdict: READY (pass to `/sdlc-hypothetical-do`) or BLOCKED (list of unknowns to resolve).
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Resolve the slug
+
+Use `$ARGUMENTS`. If it refers to a feature: `sdlc feature show <slug> --json`. If a milestone: `sdlc milestone info <slug> --json`.
+
+Read all existing artifacts: `.sdlc/features/<slug>/spec.md`, `design.md`, `tasks.md`.
+
+Create `.sdlc/hypotheticals/<slug>/` and write `manifest.yaml`:
+```yaml
+slug: <slug>
+subject: <one-line description from spec or title>
+status: in_progress
+created_at: <ISO timestamp>
+```
+
+### 2. Architecture layer
+
+Write `.sdlc/hypotheticals/<slug>/architecture.md`.
+
+Cover:
+- What changes at the system level (new subsystems, removed abstractions, boundary shifts)
+- Central components (3–7 load-bearing pieces): what each owns, why it must change
+- Interaction model after the change (data flows, API contracts, event sequences)
+- What explicitly does NOT change (grounds scope)
+
+Do not name individual files yet — reason about shapes and ownership.
+
+### 3. Component breakdown
+
+Write `.sdlc/hypotheticals/<slug>/components.md`.
+
+For each central component: current state, required change, rationale for scope, downstream effects. Work inside-out: change the core, trace outward.
+
+### 4. File manifest
+
+Write `.sdlc/hypotheticals/<slug>/file-manifest.md`.
+
+Sections: **Added** | **Modified** | **Removed** | **Unchanged (notable)**.
+
+For each file: path, what changes, why. Include test files, migration files, config files — not just source. Every component from step 3 must map to at least one file.
+
+### 5. Perspective review
+
+Write `.sdlc/hypotheticals/<slug>/perspective-review.md`.
+
+Review through four lenses:
+1. **Correctness** — does architecture handle edge cases and failure modes? Missing or orphaned files?
+2. **Coherence** — consistent scope, naming, no full rewrites disguised as edits?
+3. **Completeness** — tests, migrations, config, docs accounted for?
+4. **Risk** — highest-risk 2–3 files, hardest problem, silent-failure scenarios?
+
+Resolve all issues found by updating earlier artifacts before proceeding.
+
+### 6. Step back — confidence check
+
+Before writing the verdict, challenge:
+- Is this the right scope? Should it be smaller?
+- Are there files I know exist but haven't read?
+- What assumption in the architecture is least verified?
+- What fact discovered during implementation would invalidate the plan?
+
+### 7. Confidence verdict
+
+Write `.sdlc/hypotheticals/<slug>/confidence.md`.
+
+Verdict is **READY** or **BLOCKED** — binary, no middle ground.
+
+**If READY:** confirm architecture is consistent, manifest covers all components, perspective review is clean, no unknowns.
+
+**If BLOCKED:** produce a blocker table:
+| # | Question | Why It Blocks | How to Resolve |
+
+Always include: highest-risk file, hardest problem, silent-failure risk.
+
+Update `manifest.yaml` status to `ready` or `blocked`.
+
+### 8. Report
+
+Print a summary: subject, verdict, file count (added/modified/removed), key risks.
+
+**Next:**
+- READY: `**Next:** /sdlc-hypothetical-do <slug>`
+- BLOCKED: `**Next:** resolve blockers above, then /sdlc-hypothetical-planning <slug>`
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-hypothetical-planning — Playbook (Gemini / OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_HYPOTHETICAL_PLANNING_PLAYBOOK: &str = r#"# sdlc-hypothetical-planning
+
+Build a hypothetical implementation plan in `.sdlc/hypotheticals/<slug>/` before writing production code.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Resolve slug from arguments. Read `sdlc feature show <slug> --json` or `sdlc milestone info <slug> --json`. Read existing artifacts (spec.md, design.md, tasks.md).
+2. Create `.sdlc/hypotheticals/<slug>/`. Write `manifest.yaml` with `status: in_progress`.
+3. Write `architecture.md` — system-level changes, central components (3–7), interaction model, what doesn't change. No individual files yet.
+4. Write `components.md` — for each component: current state, required change, scope rationale, downstream effects.
+5. Write `file-manifest.md` — every file: Added / Modified / Removed / Unchanged. Include tests, migrations, configs. Every component must map to at least one file.
+6. Write `perspective-review.md` — four lenses: Correctness, Coherence, Completeness, Risk. Resolve all issues found before continuing.
+7. Step back: Is scope right? Any unread files? What assumption is least verified?
+8. Write `confidence.md` — verdict is READY or BLOCKED (binary). BLOCKED requires a blocker table with question / why-it-blocks / how-to-resolve.
+9. Update `manifest.yaml` status to `ready` or `blocked`.
+10. End: READY → `**Next:** /sdlc-hypothetical-do <slug>` | BLOCKED → `**Next:** resolve blockers, then /sdlc-hypothetical-planning <slug>`
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-hypothetical-planning — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_HYPOTHETICAL_PLANNING_SKILL: &str = r#"---
+name: sdlc-hypothetical-planning
+description: Build a hypothetical implementation plan in .sdlc/ — architecture, file manifest, perspective review, READY/BLOCKED verdict. Use before committing to implementation.
+---
+
+# SDLC Hypothetical Planning Skill
+
+Pre-implementation confidence check: build the full picture before writing production code.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Read feature/milestone: `sdlc feature show <slug> --json` or `sdlc milestone info <slug> --json`. Read spec/design/tasks artifacts.
+2. Create `.sdlc/hypotheticals/<slug>/`, write `manifest.yaml` (`status: in_progress`).
+3. Write `architecture.md` — system changes, 3–7 central components, interaction model, explicit scope boundary.
+4. Write `components.md` — each component: current state, change, rationale, effects.
+5. Write `file-manifest.md` — every file added/modified/removed/unchanged. Include tests, migrations, configs.
+6. Write `perspective-review.md` — Correctness, Coherence, Completeness, Risk. Resolve issues before proceeding.
+7. Write `confidence.md` — binary READY or BLOCKED. BLOCKED requires blocker table.
+8. Update `manifest.yaml` status. End: READY → `/sdlc-hypothetical-do <slug>` | BLOCKED → resolve then re-run.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-hypothetical-do — Claude command
+// ---------------------------------------------------------------------------
+
+const SDLC_HYPOTHETICAL_DO_COMMAND: &str = r#"---
+description: Execute a READY hypothetical plan — gate-check the verdict, orient on architecture, execute in component order, verify every file, log completion
+argument-hint: <slug>
+allowed-tools: Bash, Read, Write, Edit, Glob, Grep
+---
+
+# sdlc-hypothetical-do
+
+Execute the hypothetical plan at `.sdlc/hypotheticals/<slug>/`. This command is execution-only — the plan was decided during `/sdlc-hypothetical-planning`. Do not redesign; execute and verify.
+
+> **Before acting:** read `.sdlc/guidance.md` — especially §6 "Using sdlc". Never edit `.sdlc/` YAML directly. <!-- sdlc:guidance -->
+
+## Steps
+
+### 1. Gate check
+
+Read `.sdlc/hypotheticals/<slug>/manifest.yaml`. If `status != ready`, print the confidence verdict and blockers, then stop with: `**Blocked:** /sdlc-hypothetical-planning <slug>`
+
+### 2. Orient — read ALL artifacts before touching any file
+
+1. `confidence.md` — implementation notes: highest-risk file, hardest problem, silent-failure risks
+2. `architecture.md` — system-level shape, what changes and what doesn't
+3. `components.md` — per-component breakdown, execution order (inside-out)
+4. `file-manifest.md` — the contract: Added, Modified, Removed, Unchanged
+
+State out loud before proceeding:
+- "Execution order: [components in dependency order]"
+- "Highest-risk file: [file] because [reason]"
+- "Silent-failure risk: [risk]"
+
+### 3. Execute in order
+
+Order: core/foundation components first → consumers → edges. Within manifest: Added first, Modified second, Removed last (only after replacements are written).
+
+For each file:
+- **Added:** create at exact path, implement what `components.md` specifies
+- **Modified:** read existing file first, apply only the listed changes
+- **Removed:** verify replacement is in place, then delete
+
+### 4. Step back before declaring done
+
+- Go through the manifest line by line: Added exists? Modified has the change? Removed is gone?
+- Did I write anything not in the manifest? If structural: halt and flag. If minor implied (import, barrel): log it.
+- Did I apply every safeguard from `confidence.md` implementation notes?
+- Run build/type-check if available.
+
+### 5. Verify — manifest check
+
+Print an explicit check for every listed file. Fix any failures before proceeding.
+
+### 6. Complete
+
+Write `.sdlc/hypotheticals/<slug>/execution-log.md`: timestamp, files changed, deviations (if any), safeguards applied, build result.
+
+Update `manifest.yaml` status to `completed`.
+
+### 7. Report
+
+```
+✓ <subject>
+  Added: N | Modified: N | Removed: N
+  Deviations: N (all logged)
+  Build: passed
+```
+
+**Next:** commit changes and continue with the next step in the workflow.
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-hypothetical-do — Playbook (Gemini / OpenCode)
+// ---------------------------------------------------------------------------
+
+const SDLC_HYPOTHETICAL_DO_PLAYBOOK: &str = r#"# sdlc-hypothetical-do
+
+Execute a READY hypothetical plan from `.sdlc/hypotheticals/<slug>/`.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Steps
+
+1. Read `manifest.yaml`. If `status != ready`, print blockers and stop: `**Blocked:** /sdlc-hypothetical-planning <slug>`
+2. Read ALL artifacts before touching files: `confidence.md` (implementation notes) → `architecture.md` → `components.md` → `file-manifest.md`.
+3. State execution order (from components.md, inside-out), highest-risk file, and silent-failure risk before starting.
+4. Execute: Added first (create), Modified second (read-then-change), Removed last (after replacements written).
+5. Step back: line-by-line manifest check. Any unplanned structural changes? Halt and re-plan. Minor implied additions? Log them.
+6. Apply all safeguards from `confidence.md` implementation notes.
+7. Run build/type-check if available. Fix failures before completing.
+8. Write `execution-log.md` (timestamp, changed files, deviations, build result). Update `manifest.yaml` to `completed`.
+9. End: `**Next:** commit changes`
+"#;
+
+// ---------------------------------------------------------------------------
+// sdlc-hypothetical-do — Skill (Agents)
+// ---------------------------------------------------------------------------
+
+const SDLC_HYPOTHETICAL_DO_SKILL: &str = r#"---
+name: sdlc-hypothetical-do
+description: Execute a READY hypothetical plan — gate-check verdict, orient on architecture, execute in component order, verify every file, log completion. Use after /sdlc-hypothetical-planning returns READY.
+---
+
+# SDLC Hypothetical Do Skill
+
+Execute the plan; do not redesign it.
+
+> Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
+
+## Workflow
+
+1. Read `manifest.yaml`. Abort if `status != ready`. Print blockers from `confidence.md` and end with `/sdlc-hypothetical-planning <slug>`.
+2. Read all artifacts: `confidence.md`, `architecture.md`, `components.md`, `file-manifest.md`. State execution order and risks before writing any file.
+3. Execute inside-out (core → consumers → edges). Added first, Modified second, Removed last.
+4. Step back: explicit manifest check (every listed file), deviation audit, safeguards applied.
+5. Run build/type-check. Fix failures.
+6. Write `execution-log.md`, update `manifest.yaml` to `completed`.
+7. End: `**Next:** commit changes`
 "#;
 
 const SDLC_INIT_COMMAND: &str = r#"---

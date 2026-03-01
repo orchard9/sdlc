@@ -318,5 +318,6 @@ milestones:
 - v06-uat-dashboard-and-ci
 - v07-orchestrator-core
 - v08-orchestrator-webhooks
-active_ponders: []
-last_updated: 2026-03-01T08:30:14.455471Z
+active_ponders:
+- knowledge-librarian
+last_updated: 2026-03-01T17:29:03.771253Z

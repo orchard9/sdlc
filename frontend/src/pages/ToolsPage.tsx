@@ -1198,6 +1198,8 @@ export function ToolsPage() {
   const [error, setError] = useState<string | null>(null)
   const [selectedName, setSelectedName] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const selectedNameRef = useRef(selectedName)
+  selectedNameRef.current = selectedName
 
   const load = useCallback((selectAfterLoad?: string) => {
     api.listTools()
@@ -1205,13 +1207,13 @@ export function ToolsPage() {
         setTools(data)
         if (selectAfterLoad) {
           setSelectedName(selectAfterLoad)
-        } else if (data.length > 0 && !selectedName) {
+        } else if (data.length > 0 && !selectedNameRef.current) {
           setSelectedName(data[0].name)
         }
       })
       .catch(err => setError(err.message))
       .finally(() => setLoading(false))
-  }, [selectedName])
+  }, [])
 
   useEffect(() => { load() }, [load])
 

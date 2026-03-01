@@ -1,0 +1,16 @@
+partners:
+- name: Yuki Tanaka
+  role: Information Architect & PKM Systems Designer
+  context: Expert in knowledge graph design and taxonomy emergence; will challenge upfront classification assumptions
+  agent: .claude/agents/yuki-tanaka.md
+  recruited_at: 2026-03-01T17:29:53.555468Z
+- name: Remi Okonkwo
+  role: Senior Engineer & Institutional Memory Advocate
+  context: Developer who lives in the moment-of-need — will push for queryability over archival beauty
+  agent: .claude/agents/remi-okonkwo.md
+  recruited_at: 2026-03-01T17:29:53.562393Z
+- name: Lars Andersen
+  role: Engineering Manager & Knowledge System Skeptic
+  context: Has watched three knowledge systems die; will force us to solve the maintenance economics problem
+  agent: .claude/agents/lars-andersen.md
+  recruited_at: 2026-03-01T17:29:53.569207Z
