@@ -1,0 +1,10 @@
+slug: we-need-a-way-to-add-images-to-ponder-id
+title: we need a way to add images to ponder ideas
+status: converging
+created_at: 2026-03-02T18:39:43.950390Z
+updated_at: 2026-03-02T18:51:50.908581Z
+sessions: 1
+orientation:
+  current: 'Four distinct asks: bigger creation modal, artifact attachment, URL references, ponder agent tools (web search + playwright). Item 4 is the most technically consequential — it changes what the ponder agent can *do*, not just what users can input.'
+  next: Build the creation modal first (1-day win, highest UX leverage). Then add WebSearch/WebFetch to ponder agent (2 lines). Then URL reference field. Then design binary attachment strategy.
+  commit: When we have clear scope boundaries on binary attachment storage and a concrete spec for the expanded creation modal.

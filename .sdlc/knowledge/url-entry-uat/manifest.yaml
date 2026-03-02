@@ -1,0 +1,11 @@
+slug: url-entry-uat
+title: URL Entry UAT
+code: uncategorized
+status: draft
+sources:
+- type: web
+  url: https://example.com
+  captured_at: 2026-03-02T18:28:48.455890Z
+origin: web
+created_at: 2026-03-02T18:28:48.428312Z
+updated_at: 2026-03-02T18:28:48.428312Z

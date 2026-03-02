@@ -486,6 +486,16 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/feedback/to-ponder", post(routes::feedback::to_ponder))
         // Public feedback alias — always reachable through the app tunnel (no auth required).
         .route("/__sdlc/feedback", post(routes::feedback::add_note))
+        // Feedback threads — contextual, append-only comment logs
+        .route(
+            "/api/threads",
+            get(routes::threads::list_threads).post(routes::threads::create_thread),
+        )
+        .route(
+            "/api/threads/{id}",
+            get(routes::threads::get_thread).delete(routes::threads::delete_thread),
+        )
+        .route("/api/threads/{id}/posts", post(routes::threads::add_post))
         // Webhook ingestion — accepts raw payloads from external senders and stores in redb.
         .route("/webhooks/{route}", post(routes::webhooks::receive_webhook))
         // Orchestrator webhook event history

@@ -1,17 +1,70 @@
 # QA Plan: Document sdlc update as Update Mechanism
 
-## Checks
+## Scope
 
-### T1: README.md Updating section
-- "Updating" section exists in `README.md` immediately after the Install section
-- Section contains `sdlc update` command in a code block
-- Section explains that this refreshes AI command scaffolding in `~/.claude/commands/`, `~/.gemini/commands/`, etc.
-- Section mentions running after every binary upgrade
+Two file changes:
+1. `README.md` — new "Updating" section
+2. `crates/sdlc-cli/src/cmd/init/mod.rs` — init completion message
 
-### T2: `sdlc init` completion message
-- `crates/sdlc-cli/src/cmd/init/mod.rs` no longer prints `sdlc feature create` as the next step
-- Completion message now points to `sdlc ui` with instruction to visit `/setup`
+## Test Cases
 
-### Regression
-- `SDLC_NO_NPM=1 cargo test --all` passes with no failures
-- `cargo clippy --all -- -D warnings` reports no new warnings
+### QA-1: README contains Updating section
+
+**Steps:**
+1. Open `README.md`
+2. Search for `## Updating`
+
+**Expected:** Section exists, contains `sdlc update` command, mentions `~/.claude/commands/`, and explains the purpose of running after every upgrade.
+
+---
+
+### QA-2: README section is placed correctly
+
+**Steps:**
+1. Locate the `## Install` section in `README.md`
+2. Verify `## Updating` appears immediately after it (before the next major section)
+
+**Expected:** Logical reading order — Install → Updating.
+
+---
+
+### QA-3: init completion message is correct
+
+**Steps:**
+1. Open `crates/sdlc-cli/src/cmd/init/mod.rs`
+2. Search for the "Next:" println in the init completion block
+
+**Expected:** Message reads `Next: sdlc ui    # then visit /setup to define Vision and Architecture` (not the old `sdlc feature create` message).
+
+---
+
+### QA-4: Build succeeds
+
+**Steps:**
+```bash
+SDLC_NO_NPM=1 cargo build --all
+```
+
+**Expected:** Clean build with no errors or warnings that weren't present before.
+
+---
+
+### QA-5: Clippy passes
+
+**Steps:**
+```bash
+SDLC_NO_NPM=1 cargo clippy --all -- -D warnings
+```
+
+**Expected:** Zero new warnings or errors.
+
+---
+
+### QA-6: Tests pass
+
+**Steps:**
+```bash
+SDLC_NO_NPM=1 cargo test --all
+```
+
+**Expected:** All tests pass (no new failures).

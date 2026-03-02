@@ -1,48 +1,47 @@
 # Review: Document sdlc update as Update Mechanism
 
-## Changes Implemented
+## Summary
 
-### T1: README.md — "Updating" section
+Two targeted changes to address undocumented `sdlc update` command and a misleading `sdlc init` completion message.
 
-Added immediately after the Install section:
+## Changes Reviewed
 
-```markdown
-## Updating
+### 1. README.md — `### Updating` section
 
-To upgrade the sdlc binary, re-run your install command (or `brew upgrade sdlc` if installed via Homebrew).
+**Location:** `README.md` line 58, inserted after the `### Install` subsection within `## Quickstart`
 
-After upgrading the binary, run:
+**Change:** Added an 11-line "Updating" section with:
+- Instructions to re-run the install command or `brew upgrade sdlc`
+- The `sdlc update` command
+- Explanation of what `sdlc update` does (refreshes AI command scaffolding in `~/.claude/commands/`, etc.)
+- Reminder to run after every binary upgrade
 
-```bash
-sdlc update
-```
+**Assessment:** Correct placement, accurate content, appropriate scope. The section is concise and actionable. No redundancy with existing CLI reference (line 324 lists `sdlc update` without explanation — the new section provides the upgrade context that makes `update` discoverable).
 
-This refreshes your AI command scaffolding — the `/sdlc-*` slash commands installed in `~/.claude/commands/`, `~/.gemini/commands/`, etc. Run this after every sdlc binary upgrade to keep your AI tools in sync.
-```
+**Finding:** None.
 
-Section is correctly placed between Install and "Initialize a project".
+### 2. `crates/sdlc-cli/src/cmd/init/mod.rs` line 127 — Completion message
 
-### T2: `sdlc init` completion message — `crates/sdlc-cli/src/cmd/init/mod.rs` line 124
-
-Before:
+**Before:**
 ```rust
 println!("Next: sdlc feature create <slug> --title \"...\"");
 ```
 
-After:
+**After:**
 ```rust
 println!("Next: sdlc ui    # then visit /setup to define Vision and Architecture");
 ```
 
-Directs first-time users to the correct first step: opening the UI and configuring Vision/Architecture in Setup before creating features.
+**Assessment:** Correct fix. The old message sent first-time users directly to feature creation, skipping the Vision and Architecture setup that makes the AI agent tools useful. The new message directs users to `sdlc ui` and `/setup`, which is the right first step for a new project.
 
-## Verification
+**Finding:** None.
 
-- `SDLC_NO_NPM=1 cargo test --all` — all tests pass
-- `cargo clippy --all -- -D warnings` — no new warnings
-- README.md diff is additive only (8 lines added)
-- init/mod.rs change is a single line, no logic changes
+## Quality Checks
 
-## Findings
+- `SDLC_NO_NPM=1 cargo build --all` — **passed** (clean, no new warnings)
+- `SDLC_NO_NPM=1 cargo clippy --all -- -D warnings` — **passed** (zero new warnings)
+- `SDLC_NO_NPM=1 cargo test --all` — **passed** (all tests pass, none broken)
 
-None. Both changes are minimal and low-risk. No test changes required.
+## Verdict
+
+**APPROVED.** Both changes are correct, minimal, and well-scoped. The documentation gap is filled and the init UX flows to the right first step.

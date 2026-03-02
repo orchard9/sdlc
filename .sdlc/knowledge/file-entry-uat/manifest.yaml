@@ -1,0 +1,11 @@
+slug: file-entry-uat
+title: File Entry UAT
+code: uncategorized
+status: draft
+sources:
+- type: local_file
+  path: README.md
+  captured_at: 2026-03-02T18:28:52.139845Z
+origin: manual
+created_at: 2026-03-02T18:28:52.139341Z
+updated_at: 2026-03-02T18:28:52.139341Z

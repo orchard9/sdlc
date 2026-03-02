@@ -8,4 +8,4 @@ summary: 'Three UI state bugs sharing a root cause: SSE state not authoritative 
 origin: harvested
 harvested_from: ponder/sse-state-reliability
 created_at: 2026-03-02T04:22:56.139744Z
-updated_at: 2026-03-02T09:54:33.140783Z
+updated_at: 2026-03-02T18:28:27.490232Z

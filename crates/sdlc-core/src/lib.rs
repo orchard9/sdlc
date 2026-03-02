@@ -10,6 +10,7 @@ pub mod error;
 pub mod escalation;
 pub mod feature;
 pub mod feedback;
+pub mod feedback_thread;
 pub mod focus;
 pub mod investigation;
 pub mod io;

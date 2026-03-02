@@ -40,7 +40,7 @@ Describe how the system works — key components, tech stack, and constraints.{'
 tells agents what's in scope. Edit the generated draft or write your own.
 ```
 
-**TC4/TC5/TC6 — Dashboard condition (line 150):**
+**TC4/TC5/TC6 — Dashboard condition (line 147):**
 ```tsx
 setMissingVisionOrArch(!vision?.exists || !arch?.exists)
 ```

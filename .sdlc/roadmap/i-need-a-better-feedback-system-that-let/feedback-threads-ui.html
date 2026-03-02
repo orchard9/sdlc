@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feedback Threads — sdlc</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:          oklch(0.145 0 0);
+    --fg:          oklch(0.985 0 0);
+    --card:        oklch(0.178 0 0);
+    --card-fg:     oklch(0.985 0 0);
+    --muted:       oklch(0.25 0 0);
+    --muted-fg:    oklch(0.65 0 0);
+    --accent:      oklch(0.25 0 0);
+    --accent-fg:   oklch(0.985 0 0);
+    --border:      oklch(0.3 0 0);
+    --primary:     oklch(0.75 0.18 155);
+    --primary-fg:  oklch(0.145 0 0);
+    --destructive: oklch(0.55 0.2 25);
+    --ring:        oklch(0.75 0.18 155);
+    --radius:      0.5rem;
+    --sidebar-w:   220px;
+    --left-pane-w: 280px;
+  }
+
+  html, body { height: 100%; background: var(--bg); color: var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, sans-serif; font-size: 14px; line-height: 1.5; }
+
+  /* ── LAYOUT ── */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    flex-shrink: 0;
+    background: oklch(0.13 0 0);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .sidebar-logo {
+    padding: 14px 16px 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 8px;
+  }
+  .sidebar-logo-mark {
+    width: 22px; height: 22px;
+    background: var(--primary);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: var(--primary-fg);
+  }
+  .sidebar-section { padding: 4px 8px 2px; }
+  .sidebar-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted-fg);
+    padding: 2px 8px 4px;
+    opacity: 0.6;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--muted-fg);
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.12s, color 0.12s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: var(--accent); color: var(--fg); }
+  .nav-item.active { background: var(--accent); color: var(--fg); }
+  .nav-icon { width: 15px; height: 15px; opacity: 0.7; flex-shrink: 0; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  /* ── MAIN CONTENT AREA ── */
+  .main { flex: 1; display: flex; overflow: hidden; }
+
+  /* ── LEFT PANE (thread list) ── */
+  .left-pane {
+    width: var(--left-pane-w);
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .left-pane-header {
+    padding: 16px 14px 10px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .left-pane-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .left-pane-title svg { opacity: 0.7; }
+
+  .btn-new {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 7px;
+    background: var(--primary);
+    color: var(--primary-fg);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+  .btn-new:hover { opacity: 0.85; }
+
+  .thread-list { flex: 1; overflow-y: auto; padding: 8px 6px; }
+  .thread-item {
+    padding: 9px 10px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.1s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .thread-item:hover { background: var(--accent); }
+  .thread-item.selected {
+    background: var(--accent);
+    border-color: oklch(0.35 0 0);
+  }
+  .thread-item-title {
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .thread-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted-fg);
+    opacity: 0.7;
+  }
+  .thread-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 1px 6px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+  .badge-open { background: oklch(0.2 0.05 155); color: var(--primary); }
+  .badge-synthesized { background: oklch(0.2 0.05 250); color: oklch(0.7 0.15 250); }
+  .badge-promoted { background: oklch(0.2 0 0); color: var(--muted-fg); }
+
+  /* ── RIGHT PANE (thread detail) ── */
+  .right-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .thread-header {
+    padding: 16px 24px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .thread-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .thread-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .thread-title { font-size: 18px; font-weight: 600; }
+  .thread-meta {
+    font-size: 12px;
+    color: var(--muted-fg);
+    opacity: 0.6;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .thread-actions { display: flex; gap: 6px; }
+  .btn-secondary {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--muted);
+    color: var(--fg);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.12s;
+  }
+  .btn-secondary:hover { opacity: 1; }
+  .btn-synthesize {
+    background: oklch(0.2 0.04 250);
+    color: oklch(0.75 0.15 250);
+  }
+  .btn-promote {
+    background: oklch(0.2 0.04 155);
+    color: var(--primary);
+  }
+
+  /* ── SCROLL AREA ── */
+  .thread-body-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  /* ── CORE ELEMENT (body) ── */
+  .core-element {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    overflow: hidden;
+  }
+  .core-element-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 8px;
+    border-bottom: 1px solid var(--border);
+    background: oklch(0.16 0 0);
+  }
+  .core-element-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted-fg);
+    opacity: 0.7;
+  }
+  .core-version {
+    font-size: 10px;
+    color: var(--muted-fg);
+    opacity: 0.5;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .version-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--primary);
+    opacity: 0.6;
+  }
+  .core-element-body {
+    padding: 14px 16px;
+    font-size: 13.5px;
+    line-height: 1.7;
+    color: var(--fg);
+    opacity: 0.9;
+  }
+  .core-element-body p + p { margin-top: 10px; }
+
+  /* version history strip */
+  .version-strip {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border-top: 1px solid var(--border);
+    background: oklch(0.16 0 0);
+  }
+  .version-chip {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 500;
+    background: var(--muted);
+    color: var(--muted-fg);
+    cursor: pointer;
+    transition: background 0.1s;
+    opacity: 0.6;
+  }
+  .version-chip.current {
+    background: oklch(0.2 0.05 155);
+    color: var(--primary);
+    opacity: 1;
+  }
+  .version-chip:hover { opacity: 1; }
+  .version-strip-label {
+    font-size: 10px;
+    color: var(--muted-fg);
+    opacity: 0.4;
+    margin-right: 4px;
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted-fg);
+    opacity: 0.4;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .section-divider::before,
+  .section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ── COMMENTS ── */
+  .comments-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .comment-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    position: relative;
+  }
+  .comment-card.incorporated {
+    opacity: 0.55;
+    border-style: dashed;
+  }
+  .comment-author-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 7px;
+  }
+  .avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+  .avatar-human { background: oklch(0.3 0.08 155); color: var(--primary); }
+  .avatar-agent { background: oklch(0.3 0.08 250); color: oklch(0.75 0.15 250); }
+  .comment-author { font-size: 12px; font-weight: 600; }
+  .comment-time { font-size: 11px; color: var(--muted-fg); opacity: 0.5; }
+  .comment-incorporated-tag {
+    margin-left: auto;
+    font-size: 10px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: oklch(0.2 0.05 155);
+    color: var(--primary);
+    opacity: 0.7;
+  }
+  .comment-body {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--fg);
+    opacity: 0.85;
+    white-space: pre-wrap;
+  }
+
+  /* ── COMPOSE ── */
+  .compose-area {
+    border-top: 1px solid var(--border);
+    padding: 14px 24px 16px;
+    flex-shrink: 0;
+    background: oklch(0.155 0 0);
+  }
+  .compose-author-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--muted-fg);
+    opacity: 0.7;
+  }
+  .compose-input-wrap {
+    position: relative;
+  }
+  .compose-textarea {
+    width: 100%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 100px 10px 12px;
+    color: var(--fg);
+    font-size: 13px;
+    font-family: inherit;
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s;
+    line-height: 1.5;
+  }
+  .compose-textarea:focus { border-color: var(--ring); }
+  .compose-textarea::placeholder { color: var(--muted-fg); opacity: 0.4; }
+  .compose-actions {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .compose-hint { font-size: 11px; color: var(--muted-fg); opacity: 0.35; }
+  .btn-send {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    background: var(--primary);
+    color: var(--primary-fg);
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+  .btn-send:hover { opacity: 0.85; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--muted-fg);
+    opacity: 0.4;
+    gap: 8px;
+    padding: 40px;
+  }
+  .empty-icon { width: 36px; height: 36px; opacity: 0.5; }
+
+  /* ── CREATE THREAD MODAL (inline overlay) ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: oklch(0 0 0 / 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    width: 520px;
+    padding: 24px;
+    box-shadow: 0 20px 60px oklch(0 0 0 / 0.5);
+  }
+  .modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted-fg); opacity: 0.7; margin-bottom: 5px; }
+  .form-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+    color: var(--fg);
+    font-size: 13px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--ring); }
+  .form-input::placeholder { color: var(--muted-fg); opacity: 0.4; }
+  .form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+  .form-hint { font-size: 11px; color: var(--muted-fg); opacity: 0.45; margin-top: 4px; }
+  .modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .btn-ghost {
+    padding: 7px 14px;
+    border-radius: 7px;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted-fg);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.1s;
+  }
+  .btn-ghost:hover { background: var(--muted); }
+  .btn-primary {
+    padding: 7px 16px;
+    border-radius: 7px;
+    background: var(--primary);
+    color: var(--primary-fg);
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: opacity 0.12s;
+  }
+  .btn-primary:hover { opacity: 0.85; }
+
+  /* ── SVG ICONS (inline) ── */
+  svg { vertical-align: middle; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">s</div>
+      sdlc
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Plan</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+        Dashboard
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        Ponder
+      </a>
+      <a class="nav-item active" href="#">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Threads
+      </a>
+    </div>
+
+    <div class="sidebar-section" style="margin-top:8px">
+      <div class="sidebar-label">Build</div>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+        Features
+      </a>
+      <a class="nav-item" href="#">
+        <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        Milestones
+      </a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- LEFT PANE: Thread list -->
+    <div class="left-pane">
+      <div class="left-pane-header">
+        <div class="left-pane-title">
+          <svg width="16" height="16" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.7"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Threads
+        </div>
+        <button class="btn-new" onclick="showModal()">
+          <svg width="12" height="12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          New thread
+        </button>
+      </div>
+
+      <div class="thread-list">
+
+        <!-- Thread 1 — selected -->
+        <div class="thread-item selected" onclick="selectThread(0)">
+          <div class="thread-item-title">Need a better feedback system for collaborating on ideas</div>
+          <div class="thread-item-meta">
+            <span class="thread-badge badge-open">open</span>
+            <span>3 comments</span>
+            <span>jordan</span>
+          </div>
+        </div>
+
+        <!-- Thread 2 -->
+        <div class="thread-item" onclick="selectThread(1)">
+          <div class="thread-item-title">Actions page loads too slowly on mobile</div>
+          <div class="thread-item-meta">
+            <span class="thread-badge badge-synthesized">synthesized</span>
+            <span>7 comments</span>
+          </div>
+        </div>
+
+        <!-- Thread 3 -->
+        <div class="thread-item" onclick="selectThread(2)">
+          <div class="thread-item-title">SSE reconnect on network drop feels too aggressive</div>
+          <div class="thread-item-meta">
+            <span class="thread-badge badge-open">open</span>
+            <span>1 comment</span>
+          </div>
+        </div>
+
+        <!-- Thread 4 -->
+        <div class="thread-item" onclick="selectThread(3)">
+          <div class="thread-item-title">The ponder list doesn't show session count for new entries</div>
+          <div class="thread-item-meta">
+            <span class="thread-badge badge-promoted">→ ponder</span>
+            <span>5 comments</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- RIGHT PANE: Thread detail -->
+    <div class="right-pane" id="thread-detail">
+
+      <!-- Thread header -->
+      <div class="thread-header">
+        <div class="thread-header-top">
+          <div>
+            <div class="thread-title-row" style="margin-bottom:5px">
+              <h1 class="thread-title">Need a better feedback system for collaborating on ideas</h1>
+              <span class="thread-badge badge-open" style="flex-shrink:0">open</span>
+            </div>
+            <div class="thread-meta">
+              <span>opened by <strong style="color:var(--fg);opacity:.8">jordan</strong></span>
+              <span>·</span>
+              <span>Mar 2 at 18:15</span>
+              <span>·</span>
+              <span>3 comments</span>
+            </div>
+          </div>
+          <div class="thread-actions">
+            <button class="btn-secondary btn-synthesize" title="Run synthesis agent — updates core element from unincorporated comments">
+              <svg width="12" height="12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9"/><path d="M12 7v5l2.5 2.5"/><path d="M16 3 19 6 16 9"/><path d="M19 3v6"/></svg>
+              Synthesize
+            </button>
+            <button class="btn-secondary btn-promote" title="Promote this thread to a full Ponder workspace">
+              <svg width="12" height="12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636-.707.707M21 12h-1M4 12H3m3.343-5.657-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+              Promote to Ponder
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scrollable body -->
+      <div class="thread-body-area">
+
+        <!-- Core element -->
+        <div class="core-element">
+          <div class="core-element-header">
+            <div class="core-element-label">
+              <svg width="12" height="12" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Core element
+            </div>
+            <div class="core-version">
+              <div class="version-dot"></div>
+              v1 · original
+            </div>
+          </div>
+
+          <div class="core-element-body">
+            <p>The current feedback system (<code style="font-family:monospace;background:oklch(0.22 0 0);padding:1px 5px;border-radius:3px;font-size:12px">feedback.yaml</code>) is a global capture queue — notes have no context, no author, and no persistence. When you hit "Submit to Ponder" it destroys the queue.</p>
+            <p>What's needed: a lightweight feedback thread where multiple people can contribute. The thread has a <strong>core element</strong> (a living summary that evolves) and a flat list of comments. An agent can synthesize comments back into the core element. When an idea is big enough, the thread promotes into a full Ponder workspace.</p>
+          </div>
+
+          <!-- Version history -->
+          <div class="version-strip">
+            <span class="version-strip-label">History:</span>
+            <span class="version-chip current">v1</span>
+            <span style="font-size:10px;color:var(--muted-fg);opacity:.35;margin-left:4px">Next synthesis → v2</span>
+          </div>
+        </div>
+
+        <!-- Comments divider -->
+        <div class="section-divider">3 comments</div>
+
+        <!-- Comments -->
+        <div class="comments-list">
+
+          <!-- Comment 1 — human, incorporated -->
+          <div class="comment-card incorporated">
+            <div class="comment-author-row">
+              <div class="avatar avatar-human">J</div>
+              <span class="comment-author">jordan</span>
+              <span class="comment-time">Mar 2 · 18:15</span>
+              <span class="comment-incorporated-tag">absorbed into v1</span>
+            </div>
+            <div class="comment-body">I think that idea is fine but I need the actual feedback experience to improve. When I start a feedback it should become a thread that has a core element that can update, then when other people comment it synthesizes it and adds it to the thread and then you can turn the thread into a ponder experience.</div>
+          </div>
+
+          <!-- Comment 2 — human, open -->
+          <div class="comment-card">
+            <div class="comment-author-row">
+              <div class="avatar avatar-human">J</div>
+              <span class="comment-author">jordan</span>
+              <span class="comment-time">Mar 2 · 18:30</span>
+            </div>
+            <div class="comment-body">Create an html design so I can see what the new feedback page will look like.</div>
+          </div>
+
+          <!-- Comment 3 — agent -->
+          <div class="comment-card">
+            <div class="comment-author-row">
+              <div class="avatar avatar-agent" style="font-size:9px">ai</div>
+              <span class="comment-author" style="color:oklch(0.75 0.15 250)">agent:facilitator</span>
+              <span class="comment-time">Mar 2 · 18:45</span>
+            </div>
+            <div class="comment-body">Two open questions before I spec this: (1) Should threads be a standalone nav item or embedded inside Ponder? (2) Can a thread be created with no body — just a title — as a quick-capture mechanism? These affect both the navigation structure and the create-thread flow.</div>
+          </div>
+
+        </div>
+
+        <!-- Spacer so compose doesn't cover last comment -->
+        <div style="height:8px"></div>
+      </div>
+
+      <!-- Compose -->
+      <div class="compose-area">
+        <div class="compose-author-row">
+          <div class="avatar avatar-human" style="width:18px;height:18px;font-size:9px">J</div>
+          Replying as <strong style="color:var(--fg)">jordan</strong>
+        </div>
+        <div class="compose-input-wrap">
+          <textarea class="compose-textarea" rows="3" placeholder="Add a comment… ⌘↵ to send"></textarea>
+          <div class="compose-actions">
+            <span class="compose-hint">⌘↵</span>
+            <button class="btn-send">
+              <svg width="11" height="11" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <!-- /right-pane -->
+
+  </main>
+  <!-- /main -->
+
+</div>
+<!-- /app -->
+
+
+<!-- CREATE THREAD MODAL -->
+<div class="modal-overlay" id="modal" style="display:none" onclick="hideModalIfBg(event)">
+  <div class="modal">
+    <div class="modal-title">
+      <svg width="15" height="15" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      New thread
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Title</label>
+      <input class="form-input" type="text" placeholder="What's on your mind?" autofocus />
+      <div class="form-hint">Short, scannable. You can always edit later.</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Core element <span style="font-weight:400;opacity:.5">(optional)</span></label>
+      <textarea class="form-input form-textarea" placeholder="Describe the idea, issue, or question in detail. You can leave this blank and fill it in later."></textarea>
+      <div class="form-hint">This becomes the living summary — the thing synthesis updates over time.</div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="hideModal()">Cancel</button>
+      <button class="btn-primary" onclick="hideModal()">Create thread</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showModal() { document.getElementById('modal').style.display = 'flex'; }
+  function hideModal() { document.getElementById('modal').style.display = 'none'; }
+  function hideModalIfBg(e) { if (e.target === document.getElementById('modal')) hideModal(); }
+  function selectThread(idx) {
+    document.querySelectorAll('.thread-item').forEach((el, i) => {
+      el.classList.toggle('selected', i === idx);
+    });
+  }
+  // ESC to close modal
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') hideModal(); });
+</script>
+</body>
+</html>

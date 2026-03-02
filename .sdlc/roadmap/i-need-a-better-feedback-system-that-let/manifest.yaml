@@ -1,0 +1,13 @@
+slug: i-need-a-better-feedback-system-that-let
+title: i need a better feedback system that lets multiple people collaborate on a living idea through an artifact
+status: committed
+created_at: 2026-03-02T18:05:13.704583Z
+updated_at: 2026-03-02T18:35:14.276305Z
+committed_at: 2026-03-02T18:33:21.665271Z
+committed_to:
+- v20-feedback-threads
+sessions: 3
+orientation:
+  current: 'HTML design prototype created for the FeedbackThread UI. Shows: sidebar with Threads nav item, two-pane layout (thread list + thread detail), core element with version history strip, comment thread with agent/human attribution and incorporated badges, compose box, New Thread modal, and V2 action buttons (Synthesize + Promote to Ponder). Design matches existing dark sdlc aesthetic.'
+  next: Jordan reviews the design. Confirm nav placement (standalone Threads vs embedded in Ponder) and title-only quick capture. Then spec uat-feedback-threads as a new feature and commit.
+  commit: Design approved → spec uat-feedback-threads feature → /sdlc-ponder-commit

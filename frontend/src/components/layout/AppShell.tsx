@@ -8,7 +8,7 @@ import { FixRightAwayModal } from '@/components/shared/FixRightAwayModal'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { PanelRightOpen, ChevronLeft, MoreHorizontal } from 'lucide-react'
 
-const DETAIL_BASES = ['/ponder/', '/investigations/', '/evolve/']
+const DETAIL_BASES = ['/ponder/', '/investigations/', '/evolve/', '/threads/']
 
 const PATH_LABELS: Record<string, string> = {
   '/': 'Dashboard',
@@ -16,6 +16,7 @@ const PATH_LABELS: Record<string, string> = {
   '/features': 'Features',
   '/milestones/archive': 'Archive',
   '/feedback': 'Feedback',
+  '/threads': 'Threads',
   '/ponder': 'Ponder',
   '/investigations': 'Root Cause',
   '/evolve': 'Evolve',
@@ -25,6 +26,9 @@ const PATH_LABELS: Record<string, string> = {
   '/network': 'Network',
   '/vision': 'Vision',
   '/architecture': 'Architecture',
+  '/actions': 'Actions',
+  '/knowledge': 'Knowledge',
+  '/guidelines': 'Guidelines',
 }
 
 function titleFromPath(pathname: string): string {

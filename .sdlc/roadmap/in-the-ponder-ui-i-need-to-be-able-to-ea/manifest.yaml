@@ -1,0 +1,13 @@
+slug: in-the-ponder-ui-i-need-to-be-able-to-ea
+title: in the ponder ui i need to be able to easily navigate user messages
+status: committed
+created_at: 2026-03-02T18:06:29.634416Z
+updated_at: 2026-03-02T18:14:06.432086Z
+committed_at: 2026-03-02T18:12:20.401046Z
+committed_to:
+- ponder-ux-polish
+sessions: 1
+orientation:
+  current: 'Root problem identified: owner messages in completed sessions have no visual distinction + no navigation. Two issues, not one. Spec for minimal fix is clear.'
+  next: 'Implement: (1) store owner_name in PonderEntry manifest, (2) expose via API/types, (3) pass to all SessionBlocks, (4) add floating prev/next jump nav.'
+  commit: When we have a concrete implementation spec and agree it covers the full pain. ✓ Met — ready to build.

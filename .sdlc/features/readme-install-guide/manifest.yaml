@@ -1,8 +1,8 @@
 slug: readme-install-guide
 title: SSH and make install in README
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:00.552672Z
-updated_at: 2026-03-02T09:26:31.789904Z
+updated_at: 2026-03-02T19:12:11.662129Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -21,46 +21,73 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/readme-install-guide/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:07:34.374278Z
+  approved_at: 2026-03-02T19:07:43.982512Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/readme-install-guide/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:08:02.385472Z
+  approved_at: 2026-03-02T19:08:07.560497Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/readme-install-guide/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:10:53.388818Z
+  approved_at: 2026-03-02T19:10:56.263893Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/readme-install-guide/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:11:20.387550Z
+  approved_at: 2026-03-02T19:11:23.679946Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/readme-install-guide/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:11:46.482442Z
+  approved_at: 2026-03-02T19:11:52.517287Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add SSH URL option to cargo install block in README.md
+  description: null
+  status: completed
+  created_at: 2026-03-02T19:10:06.029448Z
+  started_at: null
+  completed_at: 2026-03-02T19:10:18.267263Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add Build from source subsection with git clone + make install to README.md
+  description: null
+  status: completed
+  created_at: 2026-03-02T19:10:13.022792Z
+  started_at: null
+  completed_at: 2026-03-02T19:10:21.018094Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add DEVELOPER.md callout at end of install section in README.md
+  description: null
+  status: completed
+  created_at: 2026-03-02T19:10:15.313592Z
+  started_at: null
+  completed_at: 2026-03-02T19:10:23.904504Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +97,30 @@ phase_history:
   exited: 2026-03-02T03:17:04.150002Z
 - phase: specified
   entered: 2026-03-02T03:17:04.150002Z
+  exited: 2026-03-02T19:08:07.564047Z
+- phase: planned
+  entered: 2026-03-02T19:08:07.564047Z
+  exited: 2026-03-02T19:08:16.413124Z
+- phase: ready
+  entered: 2026-03-02T19:08:16.413124Z
+  exited: 2026-03-02T19:08:22.711435Z
+- phase: implementation
+  entered: 2026-03-02T19:08:22.711435Z
+  exited: 2026-03-02T19:10:56.276225Z
+- phase: review
+  entered: 2026-03-02T19:10:56.276225Z
+  exited: 2026-03-02T19:11:08.922129Z
+- phase: audit
+  entered: 2026-03-02T19:11:08.922129Z
+  exited: 2026-03-02T19:11:23.681404Z
+- phase: qa
+  entered: 2026-03-02T19:11:23.681404Z
+  exited: 2026-03-02T19:11:52.519119Z
+- phase: merge
+  entered: 2026-03-02T19:11:52.519119Z
+  exited: 2026-03-02T19:12:11.662129Z
+- phase: released
+  entered: 2026-03-02T19:12:11.662129Z
   exited: null
 dependencies: []
 archived: false

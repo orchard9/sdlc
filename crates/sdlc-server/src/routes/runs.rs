@@ -380,7 +380,7 @@ pub(crate) fn sdlc_guideline_query_options(
 /// Build the standard sdlc MCP query options.
 pub(crate) fn sdlc_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions {
     QueryOptions {
-        permission_mode: PermissionMode::AcceptEdits,
+        permission_mode: PermissionMode::BypassPermissions,
         mcp_servers: vec![McpServerConfig {
             name: "sdlc".into(),
             command: std::env::current_exe()

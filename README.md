@@ -27,16 +27,45 @@ brew install orchard9/tap/sdlc
 **From source** (requires [Rust](https://rustup.rs) and [Node.js ≥ 18](https://nodejs.org)):
 
 ```bash
+# Multi-SSH-key setups, corporate proxies — use SSH URL:
+cargo install --git ssh://git@github.com/orchard9/sdlc sdlc-cli
+
+# Or if HTTPS works in your environment:
 cargo install --git https://github.com/orchard9/sdlc sdlc-cli
 ```
 
 The build script automatically compiles the frontend — no manual npm step needed.
+
+**Build from source** (after cloning):
+
+```bash
+git clone git@github.com:orchard9/sdlc.git
+cd sdlc
+make install
+```
+
+`make install` builds the frontend and installs the binary in one step.
+See [DEVELOPER.md](DEVELOPER.md) for the full contributor setup.
+
+> For the full contributor development setup (hot reload, tests, build targets), see [DEVELOPER.md](DEVELOPER.md).
 
 Verify:
 
 ```bash
 sdlc --version
 ```
+
+### Updating
+
+To upgrade the sdlc binary, re-run your install command (or `brew upgrade sdlc` if installed via Homebrew).
+
+After upgrading the binary, run:
+
+```bash
+sdlc update
+```
+
+This refreshes your AI command scaffolding — the `/sdlc-*` slash commands installed in `~/.claude/commands/`, `~/.gemini/commands/`, etc. Run this after every sdlc binary upgrade to keep your AI tools in sync.
 
 ### Initialize a project
 
@@ -54,6 +83,21 @@ This creates:
 - `.gemini/commands/` — Gemini CLI native command TOML files
 - `.opencode/command/` — OpenCode native command files
 - `.agents/skills/` — Codex native skills
+
+### First steps
+
+After running `sdlc init`, open the UI:
+
+```bash
+sdlc ui
+```
+
+Navigate to **Setup** (`/setup`) to define your project's Vision and Architecture:
+
+- **Vision** — why the project exists and who it serves. AI agents use this to make decisions aligned with your goals.
+- **Architecture** — how the system works, the key components, and technical constraints. Agents use this to understand boundaries.
+
+Once Vision and Architecture are defined, you're ready to create features.
 
 ### Create a feature
 

@@ -1,0 +1,8 @@
+slug: v20-feedback-threads
+title: FeedbackThread — persistent, contextual, collaborative idea threads
+vision: Replace the global feedback queue with a lightweight thread primitive. Every idea gets a live comment thread that humans and agents both read and write — contextual, identified, append-only, and always visible per slug.
+features:
+- feedback-thread-core
+- feedback-thread-ui
+created_at: 2026-03-02T18:34:41.521960Z
+updated_at: 2026-03-02T18:34:51.569663Z

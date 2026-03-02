@@ -1,0 +1,72 @@
+slug: uat-artifacts-ui
+title: UAT artifact UI — screenshot filmstrip in UatHistoryPanel and hero thumbnail on dashboard
+phase: draft
+created_at: 2026-03-02T18:07:59.851614Z
+updated_at: 2026-03-02T18:07:59.851614Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/uat-artifacts-ui/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T18:07:59.851614Z
+  exited: null
+dependencies: []
+archived: false

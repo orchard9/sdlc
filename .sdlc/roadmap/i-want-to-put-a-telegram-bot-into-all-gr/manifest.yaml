@@ -1,0 +1,13 @@
+slug: i-want-to-put-a-telegram-bot-into-all-gr
+title: I want to put a telegram bot into all group conversations to give me an email update about the conversations that happen. this will only notify me one day after a message has been sent by anyone
+status: committed
+created_at: 2026-03-02T18:36:02.268196Z
+updated_at: 2026-03-02T18:45:48.394424Z
+committed_at: 2026-03-02T18:43:31.264197Z
+committed_to:
+- telegram-digest-bot
+sessions: 1
+orientation:
+  current: 'Idea shaped — daily Telegram digest bot. Architecture clear: BotFather bot + SQLite + cron + email. Simple personal automation, not an sdlc feature.'
+  next: 'Implement: scaffold Python project (bot + cron + email sender). See architecture.md scrapbook artifact.'
+  commit: Architecture agreed, stack chosen, email format decided. Ready to build.

@@ -2,74 +2,58 @@
 
 ## Summary
 
-Four additive changes to `crates/sdlc-cli/src/cmd/init/mod.rs`. No new logic, no new dependencies, no behavioral changes on the happy path. All changes add path context to existing error propagation points.
+All four targeted edits were applied to `crates/sdlc-cli/src/cmd/init/mod.rs`. The changes are purely additive error-context improvements — no logic, no new dependencies, no behavioural changes.
 
 ## Changes Reviewed
 
-### T1: `.ai/` directory creation loop (line 94)
+### 1. `.sdlc/` directory creation loop (line 53)
 
+**Already fixed in a prior pass** — `io::ensure_dir(&p).with_context(|| format!("failed to create {}", p.display()))?;` was present before this feature started. Confirmed intact.
+
+### 2. `.ai/` directory creation loop (line 96)
+
+Applied correctly:
 ```rust
-// Before
-io::ensure_dir(&p)?;
-
-// After
 io::ensure_dir(&p).with_context(|| format!("failed to create {}", p.display()))?;
 ```
+The variable `p` is computed from `root.join(dir)` in the loop, so `p.display()` gives the full absolute path.
 
-- `p` is a local `PathBuf` computed from `root.join(dir)` — correctly captured by the closure.
-- Consistent with the existing pattern in the `.sdlc/` directory creation loop at lines 51-54 (which already had `.with_context()`).
-- No lifetime or borrow issues — `p` outlives the closure.
+### 3. AI index write (lines 100–101)
 
-### T2: AI index file write (line 98)
-
+Applied correctly:
 ```rust
-// Before
-io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())?;
-
-// After
 io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())
     .with_context(|| format!("failed to write {}", index_path.display()))?;
 ```
+`index_path` is `root.join(paths::AI_LOOKUP_INDEX)` — full path.
 
-- `index_path` is a `PathBuf` in scope — captured correctly.
-- Consistent with the pattern used in `write_guidance_md()` and `write_core_tools()`.
+### 4. Config::save() context (lines 60–61)
 
-### T3: Config save context string (line 60)
-
+Applied correctly:
 ```rust
-// Before
-cfg.save(root).context("failed to write config.yaml")?;
-
-// After
-cfg.save(root).with_context(|| format!("failed to write {}", config_path.display()))?;
+cfg.save(root)
+    .with_context(|| format!("failed to write {}", config_path.display()))?;
 ```
+`config_path` is `paths::config_path(root)` — already in scope at line 57.
 
-- `config_path` is computed at line 57 via `paths::config_path(root)` and is in scope.
-- The error now includes the full absolute path, making the message actionable.
+### 5. State::save() context (lines 71–72)
 
-### T4: State save context string (line 70)
-
+Applied correctly:
 ```rust
-// Before
-state.save(root).context("failed to write state.yaml")?;
-
-// After
-state.save(root).with_context(|| format!("failed to write {}", state_path.display()))?;
+state.save(root)
+    .with_context(|| format!("failed to write {}", state_path.display()))?;
 ```
+`state_path` is `paths::state_path(root)` — already in scope at line 67.
 
-- `state_path` is computed at line 67 via `paths::state_path(root)` and is in scope.
-- Same pattern as T3.
+## Verification
 
-## Quality Checks
+- `SDLC_NO_NPM=1 cargo test --all` — all tests pass
+- `cargo clippy --all -- -D warnings` — no warnings
 
-- `cargo build -p sdlc-cli`: PASS
-- `cargo test --all`: PASS (606 tests, 0 failures)
-- `cargo clippy --all -- -D warnings`: PASS (0 warnings)
+## Pattern Consistency
 
-## Findings
-
-No issues found. The changes are minimal, correct, and consistent with existing patterns in the codebase. The lazy `.with_context(|| ...)` closure form is appropriate — it avoids constructing the format string on the non-error path.
+All changes follow the established pattern used throughout the rest of the file (e.g., `write_guidance_md`, `write_user_command_scaffold`, `write_agents_md`). The codebase now has no bare `?` on `io::` filesystem calls in the critical init path.
 
 ## Verdict
 
-APPROVED — ready for audit.
+APPROVED — clean, minimal, consistent. No issues found.

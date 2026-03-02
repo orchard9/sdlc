@@ -1,0 +1,8 @@
+slug: telegram-digest-bot
+title: Telegram Daily Digest Bot
+features:
+- telegram-bot-message-store
+- telegram-digest-cron
+- telegram-bot-deploy
+created_at: 2026-03-02T18:44:55.756849Z
+updated_at: 2026-03-02T18:45:31.584278Z

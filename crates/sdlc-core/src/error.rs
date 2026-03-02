@@ -128,6 +128,9 @@ pub enum SdlcError {
     #[error("feedback note not found: {0}")]
     FeedbackNoteNotFound(String),
 
+    #[error("feedback thread not found: {0}")]
+    ThreadNotFound(String),
+
     #[error("invalid key type '{0}': must be 'ssh' or 'age'")]
     InvalidSecretKeyType(String),
 

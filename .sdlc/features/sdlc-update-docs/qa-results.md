@@ -1,23 +1,22 @@
 # QA Results: Document sdlc update as Update Mechanism
 
-## T1: README.md Updating section
+## Run Date
 
-- PASS: `## Updating` section exists at line 58 of `README.md`
-- PASS: Section is placed immediately after the Install section (before "Initialize a project")
-- PASS: `sdlc update` appears in a code block within the section
-- PASS: Section explains refreshing AI scaffolding in `~/.claude/commands/`, `~/.gemini/commands/`, etc.
-- PASS: Section mentions running after every binary upgrade
+2026-03-02
 
-## T2: `sdlc init` completion message
+## Results
 
-- PASS: `crates/sdlc-cli/src/cmd/init/mod.rs` line 125 prints `"Next: sdlc ui    # then visit /setup to define Vision and Architecture"`
-- PASS: Old `"Next: sdlc feature create <slug> --title \"...\""` message is absent
+| Test | Status | Notes |
+|---|---|---|
+| QA-1: README contains Updating section | PASS | `### Updating` at line 58; contains `sdlc update` and `~/.claude/commands/` |
+| QA-2: README section placed after Install | PASS | `### Install` at line 7 → `### Updating` at line 58 (next subsection after Install) |
+| QA-3: init completion message correct | PASS | `Next: sdlc ui    # then visit /setup to define Vision and Architecture` at line 127 |
+| QA-4: Build succeeds | PASS | `SDLC_NO_NPM=1 cargo build --all` — finished with no errors |
+| QA-5: Clippy passes | PASS | `SDLC_NO_NPM=1 cargo clippy --all -- -D warnings` — zero warnings |
+| QA-6: Tests pass | PASS | `SDLC_NO_NPM=1 cargo test --all` — all tests passed |
 
-## Regression
+## Summary
 
-- PASS: `SDLC_NO_NPM=1 cargo test --all` — all tests pass, no failures
-- PASS: `cargo clippy --all -- -D warnings` — no new warnings, clean build
+All 6 QA checks passed. No regressions. Both changes are exactly as specified.
 
-## Verdict
-
-All checks pass. Ready for merge.
+**Verdict: PASS — ready to merge.**

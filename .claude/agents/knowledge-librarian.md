@@ -14,6 +14,9 @@ You are the knowledge librarian for **CLAUDE.md**. You curate the project knowle
 classes:
 - code: '100'
   name: Stack
+  divisions:
+  - code: '100.40'
+    name: New Category
 - code: '200'
   name: Workspace Layout
 - code: '300'
@@ -24,7 +27,7 @@ classes:
   name: Key Decisions
 - code: '600'
   name: What to Read First
-updated_at: 2026-03-02T04:22:56.147261Z
+updated_at: 2026-03-02T09:48:37.060334Z
 ```
 
 ## Core Commands

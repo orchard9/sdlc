@@ -1,8 +1,8 @@
 slug: setup-vision-arch-guidance
 title: Vision and Architecture Guidance in Setup
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:00.564361Z
-updated_at: 2026-03-02T03:17:39.828478Z
+updated_at: 2026-03-02T19:13:18.089480Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,50 +13,50 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/setup-vision-arch-guidance/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:07:45.909683Z
+  approved_at: 2026-03-02T19:08:00.965273Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/setup-vision-arch-guidance/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:08:12.178926Z
+  approved_at: 2026-03-02T19:08:14.301262Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/setup-vision-arch-guidance/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:08:36.698915Z
+  approved_at: 2026-03-02T19:08:42.570141Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/setup-vision-arch-guidance/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:11:18.202519Z
+  approved_at: 2026-03-02T19:11:29.694465Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/setup-vision-arch-guidance/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:11:56.930075Z
+  approved_at: 2026-03-02T19:12:19.195920Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/setup-vision-arch-guidance/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:13:05.031426Z
+  approved_at: 2026-03-02T19:13:08.878827Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -70,6 +70,30 @@ phase_history:
   exited: 2026-03-02T03:17:39.828478Z
 - phase: specified
   entered: 2026-03-02T03:17:39.828478Z
+  exited: 2026-03-02T19:08:42.573010Z
+- phase: planned
+  entered: 2026-03-02T19:08:42.573010Z
+  exited: 2026-03-02T19:08:50.777588Z
+- phase: ready
+  entered: 2026-03-02T19:08:50.777588Z
+  exited: 2026-03-02T19:08:56.104641Z
+- phase: implementation
+  entered: 2026-03-02T19:08:56.104641Z
+  exited: 2026-03-02T19:11:29.695828Z
+- phase: review
+  entered: 2026-03-02T19:11:29.695828Z
+  exited: 2026-03-02T19:11:40.611930Z
+- phase: audit
+  entered: 2026-03-02T19:11:40.611930Z
+  exited: 2026-03-02T19:12:19.197363Z
+- phase: qa
+  entered: 2026-03-02T19:12:19.197363Z
+  exited: 2026-03-02T19:13:08.881307Z
+- phase: merge
+  entered: 2026-03-02T19:13:08.881307Z
+  exited: 2026-03-02T19:13:18.089480Z
+- phase: released
+  entered: 2026-03-02T19:13:18.089480Z
   exited: null
 dependencies: []
 archived: false

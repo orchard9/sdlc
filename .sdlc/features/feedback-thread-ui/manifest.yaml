@@ -1,0 +1,210 @@
+slug: feedback-thread-ui
+title: 'FeedbackThread UI: thread list, detail view, and sidebar nav'
+phase: qa
+created_at: 2026-03-02T18:34:48.279472Z
+updated_at: 2026-03-02T18:48:47.475305Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/feedback-thread-ui/spec.md
+  created_at: 2026-03-02T18:38:36.971441Z
+  approved_at: 2026-03-02T18:38:39.417132Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/feedback-thread-ui/design.md
+  created_at: 2026-03-02T18:39:17.560584Z
+  approved_at: 2026-03-02T18:39:19.814882Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/feedback-thread-ui/tasks.md
+  created_at: 2026-03-02T18:39:52.067055Z
+  approved_at: 2026-03-02T18:39:54.627449Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/feedback-thread-ui/qa-plan.md
+  created_at: 2026-03-02T18:40:34.907490Z
+  approved_at: 2026-03-02T18:40:37.021591Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/feedback-thread-ui/review.md
+  created_at: 2026-03-02T18:47:53.954230Z
+  approved_at: 2026-03-02T18:47:58.486360Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/feedback-thread-ui/audit.md
+  created_at: 2026-03-02T18:48:42.266669Z
+  approved_at: 2026-03-02T18:48:47.472367Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/feedback-thread-ui/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add TypeScript types for FeedbackThread (ThreadSummary, ThreadDetail, ThreadComment, ThreadStatus)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:51.346578Z
+  started_at: null
+  completed_at: 2026-03-02T18:41:46.628631Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add thread API methods to api/client.ts (listThreads, getThread, createThread, addThreadComment, resolveThreadComment)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:53.989450Z
+  started_at: null
+  completed_at: 2026-03-02T18:42:05.633731Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create ThreadsPage with routing and two-pane layout
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:57.785596Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:16.226073Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create ThreadListPane component
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:06.231233Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:16.564529Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Create ThreadDetailPane component with header, scrollable body, and compose footer
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:09.027290Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:20.922618Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Create CoreElement component with version display
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:11.941705Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:21.081309Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Create CommentCard component with agent/human avatar distinction and incorporated state
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:14.516912Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:24.216664Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Create NewThreadModal component
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:17.019069Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:24.684697Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Wire up compose area with send comment and Cmd+Enter shortcut
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:20.315876Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:24.747326Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: Update Sidebar nav (replace Feedback with Threads)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:24.287185Z
+  started_at: null
+  completed_at: 2026-03-02T18:45:52.776739Z
+  blocker: null
+  depends_on: []
+- id: T11
+  title: Update AppShell PATH_LABELS and DETAIL_BASES for /threads
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:27.619282Z
+  started_at: null
+  completed_at: 2026-03-02T18:46:04.427685Z
+  blocker: null
+  depends_on: []
+- id: T12
+  title: Register ThreadsPage routes in App.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:29.717570Z
+  started_at: null
+  completed_at: 2026-03-02T18:46:24.246161Z
+  blocker: null
+  depends_on: []
+- id: T13
+  title: Verify TypeScript build compiles cleanly
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:41:32.919361Z
+  started_at: null
+  completed_at: 2026-03-02T18:46:54.699844Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T18:34:48.279472Z
+  exited: 2026-03-02T18:38:39.418875Z
+- phase: specified
+  entered: 2026-03-02T18:38:39.418875Z
+  exited: 2026-03-02T18:40:37.024792Z
+- phase: planned
+  entered: 2026-03-02T18:40:37.024792Z
+  exited: 2026-03-02T18:40:42.308259Z
+- phase: ready
+  entered: 2026-03-02T18:40:42.308259Z
+  exited: 2026-03-02T18:40:48.155988Z
+- phase: implementation
+  entered: 2026-03-02T18:40:48.155988Z
+  exited: 2026-03-02T18:47:58.488209Z
+- phase: review
+  entered: 2026-03-02T18:47:58.488209Z
+  exited: 2026-03-02T18:48:11.587928Z
+- phase: audit
+  entered: 2026-03-02T18:48:11.587928Z
+  exited: 2026-03-02T18:48:47.475305Z
+- phase: qa
+  entered: 2026-03-02T18:48:47.475305Z
+  exited: null
+dependencies: []
+archived: false

@@ -57,7 +57,8 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     let config_path = paths::config_path(root);
     if !config_path.exists() {
         let cfg = Config::new(&project_name);
-        cfg.save(root).context("failed to write config.yaml")?;
+        cfg.save(root)
+            .with_context(|| format!("failed to write {}", config_path.display()))?;
         println!("  created: .sdlc/config.yaml");
     } else {
         println!("  exists:  .sdlc/config.yaml");
@@ -67,7 +68,9 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     let state_path = paths::state_path(root);
     if !state_path.exists() {
         let state = State::new(&project_name);
-        state.save(root).context("failed to write state.yaml")?;
+        state
+            .save(root)
+            .with_context(|| format!("failed to write {}", state_path.display()))?;
         println!("  created: .sdlc/state.yaml");
     } else {
         println!("  exists:  .sdlc/state.yaml");
@@ -91,11 +94,12 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     ];
     for dir in ai_lookup_dirs {
         let p = root.join(dir);
-        io::ensure_dir(&p)?;
+        io::ensure_dir(&p).with_context(|| format!("failed to create {}", p.display()))?;
     }
 
     let index_path = root.join(paths::AI_LOOKUP_INDEX);
-    io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())?;
+    io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())
+        .with_context(|| format!("failed to write {}", index_path.display()))?;
 
     // 6. Write / refresh AGENTS.md SDLC section
     write_agents_md(root, &project_name)?;
@@ -121,7 +125,7 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     }
 
     println!("\nSDLC initialized successfully.");
-    println!("Next: sdlc feature create <slug> --title \"...\"");
+    println!("Next: sdlc ui    # then visit /setup to define Vision and Architecture");
 
     Ok(())
 }

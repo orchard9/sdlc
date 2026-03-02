@@ -1,0 +1,13 @@
+slug: ponder-conversations-need-to-be-more-acc
+title: ponder conversations need to be more accessible
+status: committed
+created_at: 2026-03-02T18:31:17.910652Z
+updated_at: 2026-03-02T19:06:48.811258Z
+committed_at: 2026-03-02T19:05:59.754416Z
+committed_to:
+- ponder-ux-polish
+sessions: 1
+orientation:
+  current: 'Problem reframed: session logs are event logs, product people need structured documents. Solution is an authoring convention — every session ends with a structured `## Product Summary` block with 4 stable H3 subsections.'
+  next: Update the /sdlc-ponder skill instruction to require the Product Summary format contract. Plan UI extraction (session card preview) for a future ponder-ux milestone.
+  commit: Met — idea is concrete enough to act on. Format contract is defined, implementation path is clear.

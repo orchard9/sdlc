@@ -1,0 +1,135 @@
+slug: fix-theactionspageactionsisa
+title: Fix Theactionspageactionsisa
+description: |-
+  Root cause: Could not automatically determine root cause.
+
+  Problem: the actions page "/actions" is a black screen when navigate to it - this is probably a bug on web
+
+  Original report:
+  the actions page "/actions" is a black screen when navigate to it - this is probably a bug on web
+phase: released
+created_at: 2026-03-02T18:25:08.398290Z
+updated_at: 2026-03-02T18:40:14.472481Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-theactionspageactionsisa/spec.md
+  created_at: 2026-03-02T18:30:48.679527Z
+  approved_at: 2026-03-02T18:30:50.990097Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-theactionspageactionsisa/design.md
+  created_at: 2026-03-02T18:31:13.443810Z
+  approved_at: 2026-03-02T18:31:17.785549Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-theactionspageactionsisa/tasks.md
+  created_at: 2026-03-02T18:31:30.673449Z
+  approved_at: 2026-03-02T18:31:41.000634Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-theactionspageactionsisa/qa-plan.md
+  created_at: 2026-03-02T18:31:57.045040Z
+  approved_at: 2026-03-02T18:31:59.325321Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-theactionspageactionsisa/review.md
+  created_at: 2026-03-02T18:39:10.087150Z
+  approved_at: 2026-03-02T18:39:12.737659Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-theactionspageactionsisa/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-02T18:39:32.777498Z
+  waive_reason: 'Purely cosmetic fix: adds string entries to a PATH_LABELS map and rebuilds frontend dist. No new code paths, no security surface, no data access changes.'
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-theactionspageactionsisa/qa-results.md
+  created_at: 2026-03-02T18:39:58.713234Z
+  approved_at: 2026-03-02T18:40:05.495650Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add /actions, /knowledge, /guidelines to PATH_LABELS in AppShell.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:32:29.418366Z
+  started_at: null
+  completed_at: 2026-03-02T18:32:35.937033Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Rebuild frontend dist (npm run build)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:33:06.822160Z
+  started_at: null
+  completed_at: 2026-03-02T18:33:09.074174Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Verify fix: /actions renders in new binary (sidebar link visible, spinner shown)'
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:38:43.174183Z
+  started_at: null
+  completed_at: 2026-03-02T18:38:46.344427Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T18:25:08.398290Z
+  exited: 2026-03-02T18:30:50.992421Z
+- phase: specified
+  entered: 2026-03-02T18:30:50.992421Z
+  exited: 2026-03-02T18:31:59.336178Z
+- phase: planned
+  entered: 2026-03-02T18:31:59.336178Z
+  exited: 2026-03-02T18:32:05.338181Z
+- phase: ready
+  entered: 2026-03-02T18:32:05.338181Z
+  exited: 2026-03-02T18:32:13.652610Z
+- phase: implementation
+  entered: 2026-03-02T18:32:13.652610Z
+  exited: 2026-03-02T18:39:12.739678Z
+- phase: review
+  entered: 2026-03-02T18:39:12.739678Z
+  exited: 2026-03-02T18:39:17.979002Z
+- phase: audit
+  entered: 2026-03-02T18:39:17.979002Z
+  exited: 2026-03-02T18:39:32.779200Z
+- phase: qa
+  entered: 2026-03-02T18:39:32.779200Z
+  exited: 2026-03-02T18:40:05.497174Z
+- phase: merge
+  entered: 2026-03-02T18:40:05.497174Z
+  exited: 2026-03-02T18:40:14.472481Z
+- phase: released
+  entered: 2026-03-02T18:40:14.472481Z
+  exited: null
+dependencies: []
+archived: false

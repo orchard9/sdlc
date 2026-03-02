@@ -4,13 +4,8 @@
 
 **File:** `crates/sdlc-cli/src/cmd/init/mod.rs`
 
-Change the bare `?` on `io::ensure_dir(&p)` to include the path in the error message:
-
+Replace bare `io::ensure_dir(&p)?;` with:
 ```rust
-// Before
-io::ensure_dir(&p)?;
-
-// After
 io::ensure_dir(&p).with_context(|| format!("failed to create {}", p.display()))?;
 ```
 
@@ -18,50 +13,41 @@ io::ensure_dir(&p).with_context(|| format!("failed to create {}", p.display()))?
 
 **File:** `crates/sdlc-cli/src/cmd/init/mod.rs`
 
-Change the bare `?` on `io::write_if_missing(&index_path, ...)` to include the path:
-
+Replace bare `io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())?;` with:
 ```rust
-// Before
-io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())?;
-
-// After
 io::write_if_missing(&index_path, AI_LOOKUP_INDEX_CONTENT.as_bytes())
     .with_context(|| format!("failed to write {}", index_path.display()))?;
 ```
 
-## T3: Improve Config save context string to include full path
+## T3: Improve context string on `Config::save()` call
 
 **File:** `crates/sdlc-cli/src/cmd/init/mod.rs`
 
-Replace static string context with dynamic path-based context:
-
+Replace:
 ```rust
-// Before
 cfg.save(root).context("failed to write config.yaml")?;
-
-// After
+```
+With (using the already-computed `config_path` variable for a full path):
+```rust
 cfg.save(root).with_context(|| format!("failed to write {}", config_path.display()))?;
 ```
 
-## T4: Improve State save context string to include full path
+## T4: Improve context string on `State::save()` call
 
 **File:** `crates/sdlc-cli/src/cmd/init/mod.rs`
 
-Replace static string context with dynamic path-based context:
-
+Replace:
 ```rust
-// Before
 state.save(root).context("failed to write state.yaml")?;
-
-// After
+```
+With (using the already-computed `state_path` variable for a full path):
+```rust
 state.save(root).with_context(|| format!("failed to write {}", state_path.display()))?;
 ```
 
-## T5: Verify `config_path` and `state_path` variables are in scope
+## T5: Verify build and tests pass
 
-Before T3 and T4, confirm that `config_path` and `state_path` are already computed variables in scope at the point of the save calls, or compute them if needed. If not in scope, derive them:
-
-```rust
-let config_path = root.join("config.yaml"); // already exists or add
-let state_path = root.join("state.yaml");   // already exists or add
+```bash
+SDLC_NO_NPM=1 cargo test --all
+cargo clippy --all -- -D warnings
 ```

@@ -39,3 +39,11 @@ items:
   promoted_to: new-feature
   created_at: 2026-03-02T09:48:55.383638Z
   updated_at: 2026-03-02T09:49:37.745255Z
+- id: B6
+  title: Validate thread IDs against safe-character regex before filesystem access in feedback_thread.rs
+  kind: concern
+  status: open
+  evidence: 'crates/sdlc-core/src/feedback_thread.rs: load_thread, delete_thread, add_post, list_posts pass id directly to paths::feedback_thread_dir'
+  source_feature: telegram-bot-deploy
+  created_at: 2026-03-02T18:48:54.740026Z
+  updated_at: 2026-03-02T18:48:54.740026Z

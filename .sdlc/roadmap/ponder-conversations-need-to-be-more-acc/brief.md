@@ -1,0 +1,1 @@
+the conversations that are had during the ponder sessions are good, but after each one we need a roll up for product people that contains less jargon

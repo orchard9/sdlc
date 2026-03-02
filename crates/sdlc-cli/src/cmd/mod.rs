@@ -23,6 +23,7 @@ pub mod score;
 pub mod secrets;
 pub mod state;
 pub mod task;
+pub mod thread;
 pub mod tool;
 pub mod tunnel;
 pub mod ui;

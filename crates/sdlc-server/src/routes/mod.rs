@@ -25,6 +25,7 @@ pub mod secrets;
 pub mod state;
 pub mod tasks;
 pub mod telemetry;
+pub mod threads;
 pub mod tools;
 pub mod tunnel;
 pub mod vision;

@@ -104,7 +104,8 @@ impl IntoResponse for AppError {
                 | SdlcError::SecretEnvKeyNotFound(_, _)
                 | SdlcError::SecretKeyNotFound(_)
                 | SdlcError::EscalationNotFound(_)
-                | SdlcError::FeedbackNoteNotFound(_) => StatusCode::NOT_FOUND,
+                | SdlcError::FeedbackNoteNotFound(_)
+                | SdlcError::ThreadNotFound(_) => StatusCode::NOT_FOUND,
                 SdlcError::FeatureExists(_)
                 | SdlcError::MilestoneExists(_)
                 | SdlcError::PonderExists(_)

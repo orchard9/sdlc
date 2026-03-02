@@ -10,7 +10,7 @@
   - slug: readme-install-guide
     title: SSH and make install in README
     phase: specified
-    action: create_design
+    action: create_tasks
     needs_worktree: false
     blocked_by: []
   - slug: sdlc-update-docs

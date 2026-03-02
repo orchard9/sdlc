@@ -1,42 +1,29 @@
 # Tasks: SSH and make install in README
 
-## T1: Add SSH URL option to `cargo install --git` block
+## T1 — Add SSH URL option to cargo install block
 
 **File:** `README.md`
 
-In the "From source" install block, add the SSH URL as the primary labeled option with HTTPS as a secondary fallback. The SSH URL (`ssh://git@github.com/orchard9/sdlc`) works for users with multi-SSH-key setups, corporate SSL proxies, and firewalls that block HTTPS to GitHub.
+In the install section, locate the `cargo install --git https://github.com/orchard9/sdlc sdlc-cli` line (or block) and replace/expand it to present SSH URL as the primary labeled option and HTTPS as a secondary option:
 
-**Before:**
 ```markdown
-**From source** (requires [Rust](https://rustup.rs) and [Node.js ≥ 18](https://nodejs.org)):
-
-```bash
-cargo install --git https://github.com/orchard9/sdlc sdlc-cli
-```
-```
-
-**After:**
-```markdown
-**From source** (requires [Rust](https://rustup.rs) and [Node.js ≥ 18](https://nodejs.org)):
-
-```bash
 # Multi-SSH-key setups, corporate proxies — use SSH URL:
 cargo install --git ssh://git@github.com/orchard9/sdlc sdlc-cli
 
 # Or if HTTPS works in your environment:
 cargo install --git https://github.com/orchard9/sdlc sdlc-cli
 ```
-```
+
+**Done when:** Both SSH and HTTPS variants appear, SSH first, with comments labeling each.
 
 ---
 
-## T2: Add `make install` as the primary clone-and-build path
+## T2 — Add "Build from source" subsection
 
 **File:** `README.md`
 
-After the "From source" cargo install block, add a "Build from source" subsection documenting `git clone` + `make install` as the recommended path for users who clone the repo. `make install` is the correct command — it builds the frontend and installs the binary in one step.
+After the `cargo install` block in the install section, add a new "Build from source" subsection:
 
-**Add after the existing "From source" block:**
 ```markdown
 **Build from source** (after cloning):
 
@@ -50,15 +37,18 @@ make install
 See [DEVELOPER.md](DEVELOPER.md) for the full contributor setup.
 ```
 
+**Done when:** The `git clone` + `make install` block is present and `DEVELOPER.md` is linked.
+
 ---
 
-## T3: Add link from README install section to DEVELOPER.md
+## T3 — Add DEVELOPER.md callout at end of install section
 
 **File:** `README.md`
 
-At the end of the install section (before "Initialize a project"), add a one-sentence callout linking to DEVELOPER.md for users who want the full contributor development setup.
+At the end of the install section (after the new subsections added in T1 and T2), add:
 
-**Add at the end of the Install section:**
 ```markdown
 > For the full contributor development setup (hot reload, tests, build targets), see [DEVELOPER.md](DEVELOPER.md).
 ```
+
+**Done when:** The callout blockquote linking to DEVELOPER.md appears at the end of the install section.

@@ -1,0 +1,10 @@
+slug: i-want-a-bot-for-whats-app-to-send-me-no
+title: i want a bot for whats app to send me notifications when a UAT is done and send me any videos and screenshots
+status: converging
+created_at: 2026-03-02T18:19:17.061336Z
+updated_at: 2026-03-02T18:23:19.960568Z
+sessions: 1
+orientation:
+  current: Architecture is clear. sdlc-server needs one new primitive (outbound webhook on UAT completion). WhatsApp bot is a standalone script consuming that webhook via Twilio. Depends on uat-artifacts-storage (v19) for media and cloudflare tunnel for public artifact URLs.
+  next: 'Spawn two features: (1) outbound-uat-webhook — add notify_webhooks config + POST on MilestoneUatCompleted; (2) whatsapp-notify-bot — scaffold the Twilio consumer script + setup guide.'
+  commit: Scope is clear, dependencies mapped, architecture decided. Commit signal met.

@@ -131,10 +131,20 @@ export function Dashboard() {
   const { isRunning } = useAgentRuns()
   const [config, setConfig] = useState<ProjectConfig | null>(null)
   const [showArchive, setShowArchive] = useState(false)
+  const [missingVisionOrArch, setMissingVisionOrArch] = useState(false)
 
   useEffect(() => {
     api.getConfig().catch(() => null).then(cfg => {
       if (cfg) setConfig(cfg)
+    })
+  }, [])
+
+  useEffect(() => {
+    Promise.all([
+      api.getVision().catch(() => null),
+      api.getArchitecture().catch(() => null),
+    ]).then(([vision, arch]) => {
+      setMissingVisionOrArch(!vision?.exists || !arch?.exists)
     })
   }, [])
 
@@ -184,6 +194,24 @@ export function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-6">
+
+      {/* Vision/Architecture missing banner */}
+      {missingVisionOrArch && (
+        <div className="bg-amber-950/20 border border-amber-500/30 rounded-xl px-4 py-3 mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <p className="text-sm text-amber-200/90">
+              Vision or Architecture not defined — agents use these to make aligned decisions.
+            </p>
+          </div>
+          <Link
+            to="/setup"
+            className="text-sm text-amber-400 hover:text-amber-300 transition-colors whitespace-nowrap shrink-0"
+          >
+            Go to Setup →
+          </Link>
+        </div>
+      )}
 
       {/* Project Overview */}
       <div className="mb-6">

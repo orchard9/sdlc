@@ -2,46 +2,39 @@
 
 ## Scope
 
-Four additive `.with_context()` calls in `crates/sdlc-cli/src/cmd/init/mod.rs`. No new logic, no new I/O operations, no new dependencies.
+Single file: `crates/sdlc-cli/src/cmd/init/mod.rs`
+
+Four changes, all of the form: add `.with_context(|| format!("...", path.display()))` to error-path `?` operators.
 
 ## Security Analysis
 
-### Information Disclosure via Error Messages
+### Information Disclosure
 
-**Finding:** Error messages now include filesystem paths (e.g., `/Users/xist/p4ws/project/.ai/patterns`).
+Error messages now include absolute filesystem paths (e.g., `/Users/xist/p4ws/project/.ai/patterns`). This is expected and safe for a local CLI tool that:
 
-**Assessment:** Acceptable. This is a CLI tool running under the user's own account. The paths exposed are:
-- The `.ai/` subdirectory paths the user explicitly asked `sdlc init` to create
-- The `.sdlc/config.yaml` and `.sdlc/state.yaml` paths in the project root
+- Runs on the developer's own machine
+- Operates in the current working directory the developer chose
+- Outputs errors to stderr for the invoking user
+- Has no network surface — no HTTP endpoints, no JSON API, no logs shipped remotely
 
-The user already knows these paths — they are in the directory they invoked the command in. There is no cross-user boundary, no server context, and no log forwarding. The path information is printed to stderr only when an error occurs (the error propagates up through `anyhow` and is printed by the CLI's error handler), which is exactly the user who ran the command.
+The developer already knows the path they ran `sdlc init` in. Surfacing the path in an error is strictly more useful than hiding it.
 
-**Action:** Accept — no change needed.
+### Path Traversal
 
-### Path Traversal or Injection
+No new path construction is introduced. All paths are derived from `root` (the CWD passed to `run()`) combined with compile-time constant path segments from `paths::*`. The `.display()` call is for error message formatting only — it does not affect what path is opened or written.
 
-**Finding:** Paths are constructed from `root` (the current working directory or explicitly supplied root) plus known static string suffixes (`.ai/patterns`, etc.) or via `paths::config_path(root)`.
+### Error Message Injection
 
-**Assessment:** No user-controlled input enters the path construction for the four changed call sites. The `root` value is derived from the current directory or a CLI flag already present before this feature. No new attack surface introduced.
+`p.display()` and `index_path.display()` format a `Path` into a human-readable string. There is no user-supplied data in these paths beyond the CWD, which is already trusted input. No injection risk.
 
-**Action:** Accept.
+### Supply Chain / Dependencies
 
-### Closure Capture Safety
+No new dependencies. `anyhow::Context` (already in scope via `use anyhow::Context`) is the only library involved.
 
-**Finding:** The `.with_context(|| ...)` closures capture `PathBuf` values by reference-equivalent (the closures capture owned `PathBuf` or references in scope).
+## Findings
 
-**Assessment:** All captured values (`p`, `index_path`, `config_path`, `state_path`) are owned `PathBuf` values in the enclosing scope that outlive the closure. No use-after-free or lifetime unsoundness possible. Rust's borrow checker enforces this at compile time (confirmed — `cargo build` passes).
-
-**Action:** Accept.
-
-## Findings Summary
-
-| # | Finding | Severity | Action |
-|---|---|---|---|
-| 1 | Paths in error messages | INFO | Accept — CLI-only, same-user context |
-| 2 | Path traversal surface | INFO | Accept — no new user input in path construction |
-| 3 | Closure capture safety | INFO | Accept — verified by compiler |
+None. This change has no meaningful security surface.
 
 ## Verdict
 
-No security concerns. The change is purely additive error context for a local CLI tool. All findings accepted with rationale documented above.
+APPROVED — no security concerns.

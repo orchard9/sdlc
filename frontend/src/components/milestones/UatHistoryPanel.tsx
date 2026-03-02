@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/api/client'
 import { Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { UatRun, UatVerdict } from '@/lib/types'
+import { useSSE } from '@/hooks/useSSE'
 
 interface UatHistoryPanelProps {
   milestoneSlug: string
@@ -40,12 +41,24 @@ export function UatHistoryPanel({ milestoneSlug }: UatHistoryPanelProps) {
   const [runs, setRuns] = useState<UatRun[]>([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+  const load = useCallback(() => {
     api.listMilestoneUatRuns(milestoneSlug)
       .then(data => setRuns(sortRunsDescending(data)))
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [milestoneSlug])
+
+  useEffect(() => { load() }, [load])
+
+  useSSE(
+    () => {},
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    undefined,
+    (event) => { if (event.slug === milestoneSlug) load() },
+  )
 
   if (loading) {
     return (

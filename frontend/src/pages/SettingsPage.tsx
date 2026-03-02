@@ -10,8 +10,9 @@ export function SettingsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const refresh = useCallback(() => {
+    setError(null)
     api.getConfig()
-      .then(setConfig)
+      .then(data => { setConfig(data); setError(null) })
       .catch(err => setError(err.message))
   }, [])
 

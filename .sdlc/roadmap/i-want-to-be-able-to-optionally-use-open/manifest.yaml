@@ -1,0 +1,10 @@
+slug: i-want-to-be-able-to-optionally-use-open
+title: i want to be able to optionally use open code for different milestones - and then choose the model. currently we default to claude sonnet. it can be scoped to a milestone
+status: converging
+created_at: 2026-03-02T18:50:51.130388Z
+updated_at: 2026-03-02T18:55:07.510024Z
+sessions: 1
+orientation:
+  current: 'Two-concern request: (1) model selection per milestone — clearly implementable via milestone manifest + spawn_agent_run lookup; (2) OpenCode executor switching — architecturally harder due to protocol mismatch. Minimum viable path is model selection only.'
+  next: 'Decide scope: model-only v1 vs model+executor. If model-only, design the `agent` field in Milestone struct and wire spawn_agent_run to read it.'
+  commit: Agreement on scope boundary (model vs executor), config location (milestone manifest), and the lookup mechanism in spawn_agent_run.

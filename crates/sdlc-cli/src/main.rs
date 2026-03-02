@@ -11,7 +11,7 @@ use cmd::{
     milestone::MilestoneSubcommand, orchestrate::OrchestrateSubcommand,
     platform::PlatformSubcommand, ponder::PonderSubcommand, project::ProjectSubcommand,
     query::QuerySubcommand, score::ScoreSubcommand, secrets::SecretsSubcommand,
-    task::TaskSubcommand, tool::ToolCommand, ui::UiSubcommand,
+    task::TaskSubcommand, thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -153,6 +153,12 @@ enum Commands {
         subcommand: EscalateSubcommand,
     },
 
+    /// Manage feedback threads (contextual, append-only comment logs)
+    Thread {
+        #[command(subcommand)]
+        subcommand: ThreadSubcommand,
+    },
+
     /// Manage SDLC tool scripts (.sdlc/tools/)
     Tool {
         #[command(subcommand)]
@@ -255,6 +261,7 @@ fn main() {
         Commands::Score { subcommand } => cmd::score::run(&root, subcommand, cli.json),
         Commands::Secrets { subcommand } => cmd::secrets::run(&root, subcommand, cli.json),
         Commands::Escalate { subcommand } => cmd::escalate::run(&root, subcommand, cli.json),
+        Commands::Thread { subcommand } => cmd::thread::run(&root, subcommand, cli.json),
         Commands::Tool { cmd } => cmd::tool::run(cmd, &root),
         Commands::Orchestrate {
             tick_rate,

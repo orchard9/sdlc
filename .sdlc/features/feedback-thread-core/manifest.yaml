@@ -1,0 +1,174 @@
+slug: feedback-thread-core
+title: 'FeedbackThread core: data model, CLI, and REST API'
+phase: qa
+created_at: 2026-03-02T18:34:48.271847Z
+updated_at: 2026-03-02T18:48:57.675469Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/feedback-thread-core/spec.md
+  created_at: 2026-03-02T18:37:52.690360Z
+  approved_at: 2026-03-02T18:38:01.240673Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/feedback-thread-core/design.md
+  created_at: 2026-03-02T18:38:34.563852Z
+  approved_at: 2026-03-02T18:38:37.180665Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/feedback-thread-core/tasks.md
+  created_at: 2026-03-02T18:39:10.892895Z
+  approved_at: 2026-03-02T18:39:13.041512Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/feedback-thread-core/qa-plan.md
+  created_at: 2026-03-02T18:39:37.863268Z
+  approved_at: 2026-03-02T18:39:39.918219Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/feedback-thread-core/review.md
+  created_at: 2026-03-02T18:48:04.760194Z
+  approved_at: 2026-03-02T18:48:06.993696Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/feedback-thread-core/audit.md
+  created_at: 2026-03-02T18:48:48.203983Z
+  approved_at: 2026-03-02T18:48:57.673778Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/feedback-thread-core/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add path constants and helpers to paths.rs (T1)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:00.015950Z
+  started_at: null
+  completed_at: 2026-03-02T18:46:52.480656Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add ThreadNotFound error variant (T2)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:10.370503Z
+  started_at: null
+  completed_at: 2026-03-02T18:46:57.077692Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement feedback_thread.rs core data module (T3)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:14.024540Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:01.557620Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register module in sdlc-core lib.rs (T4)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:16.826931Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:04.588606Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Implement sdlc-cli thread subcommand (T5)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:20.240391Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:08.486471Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Register thread subcommand in CLI mod.rs and main.rs (T6)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:23.184395Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:14.425924Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Implement sdlc-server routes/threads.rs (T7)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:25.575892Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:17.804966Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Register routes in server mod.rs and lib.rs (T8)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:28.582920Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:22.009422Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Verify build and tests pass (T9)
+  description: null
+  status: completed
+  created_at: 2026-03-02T18:40:32.222247Z
+  started_at: null
+  completed_at: 2026-03-02T18:47:25.622042Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T18:34:48.271847Z
+  exited: 2026-03-02T18:38:01.242183Z
+- phase: specified
+  entered: 2026-03-02T18:38:01.242183Z
+  exited: 2026-03-02T18:39:39.919832Z
+- phase: planned
+  entered: 2026-03-02T18:39:39.919832Z
+  exited: 2026-03-02T18:39:50.434305Z
+- phase: ready
+  entered: 2026-03-02T18:39:50.434305Z
+  exited: 2026-03-02T18:39:57.175266Z
+- phase: implementation
+  entered: 2026-03-02T18:39:57.175266Z
+  exited: 2026-03-02T18:48:06.997282Z
+- phase: review
+  entered: 2026-03-02T18:48:06.997282Z
+  exited: 2026-03-02T18:48:13.710970Z
+- phase: audit
+  entered: 2026-03-02T18:48:13.710970Z
+  exited: 2026-03-02T18:48:57.675469Z
+- phase: qa
+  entered: 2026-03-02T18:48:57.675469Z
+  exited: null
+dependencies: []
+archived: false

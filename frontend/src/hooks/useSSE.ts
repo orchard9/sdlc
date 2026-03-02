@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useSseContext } from '@/contexts/SseContext'
-import type { AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
+import type { AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, MilestoneUatSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
 
 /** Subscribe to /api/events and call handlers whenever events arrive.
  *
@@ -22,6 +22,7 @@ export function useSSE(
   onInvestigationEvent?: (event: InvestigationSseEvent) => void,
   onDocsEvent?: (event: DocsSseEvent) => void,
   onAdvisoryEvent?: (event: AdvisorySseEvent) => void,
+  onMilestoneUatEvent?: (event: MilestoneUatSseEvent) => void,
 ) {
   const { subscribe } = useSseContext()
 
@@ -31,6 +32,7 @@ export function useSSE(
   const onInvestigationRef = useRef(onInvestigationEvent)
   const onDocsRef = useRef(onDocsEvent)
   const onAdvisoryRef = useRef(onAdvisoryEvent)
+  const onMilestoneUatRef = useRef(onMilestoneUatEvent)
 
   // Keep refs current on every render without triggering the subscription effect
   useEffect(() => {
@@ -40,6 +42,7 @@ export function useSSE(
     onInvestigationRef.current = onInvestigationEvent
     onDocsRef.current = onDocsEvent
     onAdvisoryRef.current = onAdvisoryEvent
+    onMilestoneUatRef.current = onMilestoneUatEvent
   })
 
   // Register with the shared SSE context — runs once on mount, cleans up on unmount.
@@ -52,6 +55,7 @@ export function useSSE(
       onInvestigationEvent: (e) => onInvestigationRef.current?.(e),
       onDocsEvent: (e) => onDocsRef.current?.(e),
       onAdvisoryEvent: (e) => onAdvisoryRef.current?.(e),
+      onMilestoneUatEvent: (e) => onMilestoneUatRef.current?.(e),
     })
   }, [subscribe])
 }

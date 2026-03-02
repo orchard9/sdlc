@@ -23,6 +23,7 @@ import { DocsPage } from '@/pages/DocsPage'
 import { AgentsPage } from '@/pages/AgentsPage'
 import { SetupPage } from '@/pages/SetupPage'
 import { ActionsPage } from '@/pages/ActionsPage'
+import { ThreadsPage } from '@/pages/ThreadsPage'
 
 export default function App() {
   return (
@@ -52,6 +53,8 @@ export default function App() {
             <Route path="/secrets" element={<SecretsPage />} />
             <Route path="/tools" element={<ToolsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
+            <Route path="/threads" element={<ThreadsPage />} />
+            <Route path="/threads/:slug" element={<ThreadsPage />} />
             <Route path="/network" element={<NetworkPage />} />
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/actions" element={<ActionsPage />} />

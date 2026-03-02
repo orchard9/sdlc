@@ -1,8 +1,8 @@
 slug: sdlc-update-docs
 title: Document sdlc update as Update Mechanism
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:00.558281Z
-updated_at: 2026-03-02T03:17:18.168958Z
+updated_at: 2026-03-02T19:12:31.439585Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,74 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: waived
   path: .sdlc/features/sdlc-update-docs/design.md
   created_at: null
   approved_at: null
   rejected_at: null
   rejection_reason: null
   approved_by: null
+  waived_at: 2026-03-02T19:07:39.825169Z
+  waive_reason: Feature is purely documentation and a single-line message change — no architecture, UI, or system design decisions needed.
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/sdlc-update-docs/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:08:02.228303Z
+  approved_at: 2026-03-02T19:08:04.232099Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/sdlc-update-docs/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:08:25.852074Z
+  approved_at: 2026-03-02T19:08:27.912523Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/sdlc-update-docs/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:11:20.831319Z
+  approved_at: 2026-03-02T19:11:23.361305Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/sdlc-update-docs/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:11:49.654085Z
+  approved_at: 2026-03-02T19:11:54.464969Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/sdlc-update-docs/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T19:12:18.635543Z
+  approved_at: 2026-03-02T19:12:23.238916Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add Updating section to README.md
+  description: null
+  status: completed
+  created_at: 2026-03-02T19:08:58.402839Z
+  started_at: null
+  completed_at: 2026-03-02T19:09:23.119309Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Fix sdlc init completion message
+  description: null
+  status: completed
+  created_at: 2026-03-02T19:08:58.408934Z
+  started_at: null
+  completed_at: 2026-03-02T19:09:52.640300Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +90,30 @@ phase_history:
   exited: 2026-03-02T03:17:18.168958Z
 - phase: specified
   entered: 2026-03-02T03:17:18.168958Z
+  exited: 2026-03-02T19:08:27.914415Z
+- phase: planned
+  entered: 2026-03-02T19:08:27.914415Z
+  exited: 2026-03-02T19:08:43.898473Z
+- phase: ready
+  entered: 2026-03-02T19:08:43.898473Z
+  exited: 2026-03-02T19:08:54.293463Z
+- phase: implementation
+  entered: 2026-03-02T19:08:54.293463Z
+  exited: 2026-03-02T19:11:23.362841Z
+- phase: review
+  entered: 2026-03-02T19:11:23.362841Z
+  exited: 2026-03-02T19:11:35.726691Z
+- phase: audit
+  entered: 2026-03-02T19:11:35.726691Z
+  exited: 2026-03-02T19:11:54.466702Z
+- phase: qa
+  entered: 2026-03-02T19:11:54.466702Z
+  exited: 2026-03-02T19:12:23.241729Z
+- phase: merge
+  entered: 2026-03-02T19:12:23.241729Z
+  exited: 2026-03-02T19:12:31.439585Z
+- phase: released
+  entered: 2026-03-02T19:12:31.439585Z
   exited: null
 dependencies: []
 archived: false

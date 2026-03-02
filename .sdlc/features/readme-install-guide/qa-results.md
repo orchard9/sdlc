@@ -1,39 +1,53 @@
 # QA Results: SSH and make install in README
 
-## Result: PASSED
+## Run: 2026-03-02
 
-## Checks
+### Check 1 — SSH URL option present and correctly formatted
 
-### 1. Content accuracy
+- [x] `cargo install --git ssh://git@github.com/orchard9/sdlc sdlc-cli` — present at line 31
+- [x] SSH URL labeled with `# Multi-SSH-key setups, corporate proxies — use SSH URL:` — present at line 30
+- [x] HTTPS URL present with `# Or if HTTPS works in your environment:` comment — present at lines 33–34
+- [x] SSH URL appears before HTTPS URL — confirmed (line 31 before line 34)
 
-- [x] SSH URL `ssh://git@github.com/orchard9/sdlc` present at README line 31
-- [x] HTTPS URL `https://github.com/orchard9/sdlc` preserved at README line 34
-- [x] `make install` target exists in `Makefile` line 4 — runs `frontend` then `cargo install --path crates/sdlc-cli` (accurate to doc)
-- [x] `git clone git@github.com:orchard9/sdlc.git` at README line 42 — correct SSH clone syntax
-- [x] `DEVELOPER.md` exists at repo root — relative link resolves correctly
+**PASS**
 
-### 2. Formatting
+### Check 2 — Build from source subsection present
 
-- [x] Code blocks properly triple-backtick fenced (bash shell blocks)
-- [x] Comment lines inside bash blocks use `#` prefix
-- [x] DEVELOPER.md blockquote uses `>` prefix at README line 50
-- [x] Bold `**...**` heading style consistent with existing install sub-options
+- [x] `**Build from source** (after cloning):` label — present at line 39
+- [x] `git clone git@github.com:orchard9/sdlc.git` — present at line 42
+- [x] `cd sdlc` and `make install` — present at lines 43–44
+- [x] Description sentence "`make install` builds the frontend and installs the binary in one step." — present at line 47
+- [x] `[DEVELOPER.md](DEVELOPER.md)` link — present at line 48
 
-### 3. No regressions
+**PASS**
 
-- [x] prebuilt binary (macOS/Linux) install block unchanged (lines 9-13)
-- [x] Windows PowerShell install block unchanged (lines 15-19)
-- [x] Homebrew install block unchanged (lines 21-25)
-- [x] `sdlc --version` verify step present at line 55
-- [x] "Building from Source" section at bottom of README (line 426+) untouched
-- [x] All sections after "Initialize a project" unchanged
+### Check 3 — DEVELOPER.md callout at end of install section
 
-### 4. Markdown rendering
+- [x] Blockquote callout `> For the full contributor development setup...` — present at line 50
+- [x] Text matches spec exactly — confirmed
+- [x] Link `[DEVELOPER.md](DEVELOPER.md)` present in callout — confirmed
 
-- [x] DEVELOPER.md link relative path resolves — file exists
-- [x] No broken fences or unclosed backtick blocks
-- [x] New subsection fits naturally in the install flow with correct heading hierarchy
+**PASS**
 
-## Summary
+### Check 4 — No regressions
 
-All 4 QA categories passed. The three changes (T1: SSH URL, T2: `make install` subsection, T3: DEVELOPER.md blockquote) are present, accurate, and introduce no regressions.
+- [x] macOS/Linux prebuilt installer line unchanged (line 12)
+- [x] Windows prebuilt installer line unchanged (line 18)
+- [x] Homebrew line unchanged (line 24)
+- [x] HTTPS `cargo install` line preserved (line 34)
+- [x] `The build script automatically compiles the frontend — no manual npm step needed.` preserved (line 37)
+- [x] No other sections of README.md modified — confirmed
+
+**PASS**
+
+### Check 5 — Links resolve
+
+- [x] `DEVELOPER.md` exists at `/Users/jordanwashburn/Workspace/orchard9/sdlc/DEVELOPER.md` — confirmed
+
+**PASS**
+
+## Result
+
+All 5 check groups: **PASS**
+
+Ready for merge.

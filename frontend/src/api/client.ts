@@ -310,6 +310,25 @@ export const api = {
       body: JSON.stringify({ change_request }),
     }),
 
+  // FeedbackThreads
+  listThreads: () =>
+    request<import('@/lib/types').ThreadSummary[]>('/api/threads'),
+  getThread: (slug: string) =>
+    request<import('@/lib/types').ThreadDetail>(`/api/threads/${encodeURIComponent(slug)}`),
+  createThread: (body: { title: string; body?: string }) =>
+    request<import('@/lib/types').ThreadSummary>('/api/threads', {
+      method: 'POST', body: JSON.stringify(body),
+    }),
+  addThreadComment: (slug: string, data: { author?: string; body: string }) =>
+    request<import('@/lib/types').ThreadComment>(`/api/threads/${encodeURIComponent(slug)}/comments`, {
+      method: 'POST', body: JSON.stringify(data),
+    }),
+  resolveThreadComment: (slug: string, commentId: string) =>
+    request<import('@/lib/types').ThreadComment>(
+      `/api/threads/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}`,
+      { method: 'PATCH', body: JSON.stringify({ resolved: true }) }
+    ),
+
   // Feedback
   getFeedback: () => request<import('@/lib/types').FeedbackNote[]>('/api/feedback'),
   addFeedbackNote: (content: string) =>

@@ -473,6 +473,11 @@ export interface AdvisorySseEvent {
   type: 'advisory_run_completed' | 'advisory_run_stopped'
 }
 
+export interface MilestoneUatSseEvent {
+  type: 'milestone_uat_completed'
+  slug: string
+}
+
 export interface PonderSummary {
   slug: string
   title: string
@@ -1006,6 +1011,37 @@ export interface KnowledgeEntryDetail extends KnowledgeEntrySummary {
 export interface KnowledgeSseEvent {
   type: 'knowledge_query_started' | 'knowledge_query_completed'
   slug?: string
+}
+
+// ---------------------------------------------------------------------------
+// FeedbackThread types
+// ---------------------------------------------------------------------------
+
+export type ThreadStatus = 'open' | 'synthesized' | 'promoted'
+
+export interface ThreadSummary {
+  slug: string
+  title: string
+  author: string
+  status: ThreadStatus
+  comment_count: number
+  created_at: string
+  updated_at: string
+  promoted_to: string | null
+}
+
+export interface ThreadComment {
+  id: string
+  author: string
+  body: string
+  incorporated: boolean
+  created_at: string
+}
+
+export interface ThreadDetail extends ThreadSummary {
+  body: string | null
+  body_version: number
+  comments: ThreadComment[]
 }
 
 // ---------------------------------------------------------------------------

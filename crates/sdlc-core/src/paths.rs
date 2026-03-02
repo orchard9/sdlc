@@ -33,6 +33,7 @@ pub const ADVISORY_FILE: &str = ".sdlc/advisory.yaml";
 pub const BACKLOG_FILE: &str = ".sdlc/backlog.yaml";
 pub const ESCALATIONS_FILE: &str = ".sdlc/escalations.yaml";
 pub const FEEDBACK_FILE: &str = ".sdlc/feedback.yaml";
+pub const FEEDBACK_THREADS_DIR: &str = ".sdlc/feedback-threads";
 
 pub const CONFIG_FILE: &str = ".sdlc/config.yaml";
 pub const STATE_FILE: &str = ".sdlc/state.yaml";
@@ -241,6 +242,26 @@ pub fn escalations_path(root: &Path) -> PathBuf {
 
 pub fn feedback_path(root: &Path) -> PathBuf {
     root.join(FEEDBACK_FILE)
+}
+
+pub fn feedback_threads_dir(root: &Path) -> PathBuf {
+    root.join(FEEDBACK_THREADS_DIR)
+}
+
+pub fn feedback_thread_dir(root: &Path, id: &str) -> PathBuf {
+    feedback_threads_dir(root).join(id)
+}
+
+pub fn feedback_thread_manifest(root: &Path, id: &str) -> PathBuf {
+    feedback_thread_dir(root, id).join("manifest.yaml")
+}
+
+pub fn feedback_thread_posts_dir(root: &Path, id: &str) -> PathBuf {
+    feedback_thread_dir(root, id).join("posts")
+}
+
+pub fn feedback_thread_post_path(root: &Path, id: &str, seq: u32) -> PathBuf {
+    feedback_thread_posts_dir(root, id).join(format!("post-{seq:03}.yaml"))
 }
 
 pub fn ai_lookup_dir(root: &Path) -> PathBuf {
@@ -466,6 +487,41 @@ mod tests {
         assert_eq!(
             user_agents_skills_dir().unwrap(),
             PathBuf::from("/tmp/fakehome/.agents/skills")
+        );
+    }
+
+    #[test]
+    fn feedback_thread_path_helpers() {
+        let root = Path::new("/tmp/proj");
+        assert_eq!(
+            feedback_threads_dir(root),
+            PathBuf::from("/tmp/proj/.sdlc/feedback-threads")
+        );
+        assert_eq!(
+            feedback_thread_dir(root, "20260302-feature-my-slug"),
+            PathBuf::from("/tmp/proj/.sdlc/feedback-threads/20260302-feature-my-slug")
+        );
+        assert_eq!(
+            feedback_thread_manifest(root, "20260302-feature-my-slug"),
+            PathBuf::from(
+                "/tmp/proj/.sdlc/feedback-threads/20260302-feature-my-slug/manifest.yaml"
+            )
+        );
+        assert_eq!(
+            feedback_thread_posts_dir(root, "20260302-feature-my-slug"),
+            PathBuf::from("/tmp/proj/.sdlc/feedback-threads/20260302-feature-my-slug/posts")
+        );
+        assert_eq!(
+            feedback_thread_post_path(root, "20260302-feature-my-slug", 1),
+            PathBuf::from(
+                "/tmp/proj/.sdlc/feedback-threads/20260302-feature-my-slug/posts/post-001.yaml"
+            )
+        );
+        assert_eq!(
+            feedback_thread_post_path(root, "20260302-feature-my-slug", 42),
+            PathBuf::from(
+                "/tmp/proj/.sdlc/feedback-threads/20260302-feature-my-slug/posts/post-042.yaml"
+            )
         );
     }
 }

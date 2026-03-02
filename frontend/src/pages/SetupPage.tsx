@@ -288,8 +288,9 @@ export function SetupPage() {
           ) : (
             <>
               <p className="text-xs text-muted-foreground">
-                Edit the generated vision or write your own.{' '}
-                <code className="text-primary">VISION.md</code> tells agents what you're building and why.
+                Explain why this project exists and who it serves.{' '}
+                <code className="text-primary">VISION.md</code>{' '}
+                is read by every AI agent to make decisions that stay aligned with your goals. Edit the generated draft or write your own.
               </p>
               <textarea
                 value={visionContent}
@@ -331,8 +332,9 @@ export function SetupPage() {
           ) : (
             <>
               <p className="text-xs text-muted-foreground">
-                Edit the generated architecture or write your own.{' '}
-                <code className="text-primary">ARCHITECTURE.md</code> maps your tech stack and key components.
+                Describe how the system works — key components, tech stack, and constraints.{' '}
+                <code className="text-primary">ARCHITECTURE.md</code>{' '}
+                tells agents what's in scope. Edit the generated draft or write your own.
               </p>
               <textarea
                 value={architectureContent}
