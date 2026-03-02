@@ -1,54 +1,54 @@
 slug: feedback-enrich
 title: 'Enrichments: attach research context to feedback notes'
-phase: draft
+phase: qa
 created_at: 2026-03-02T04:17:29.436114Z
-updated_at: 2026-03-02T04:17:29.436114Z
+updated_at: 2026-03-02T09:20:40.643966Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-enrich/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:18:03.832158Z
+  approved_at: 2026-03-02T09:18:09.626239Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-enrich/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:18:31.144583Z
+  approved_at: 2026-03-02T09:18:33.034507Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-enrich/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:18:41.789672Z
+  approved_at: 2026-03-02T09:18:43.656869Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-enrich/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:18:53.406020Z
+  approved_at: 2026-03-02T09:18:55.478198Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-enrich/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:13.625162Z
+  approved_at: 2026-03-02T09:20:15.781022Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-enrich/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:38.163432Z
+  approved_at: 2026-03-02T09:20:40.360477Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -60,13 +60,97 @@ artifacts:
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add Enrichment struct and enrichments field to FeedbackNote
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:07.077412Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:26.694076Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement feedback::enrich() function
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:09.407026Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:29.032258Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update to_markdown to include enrichment blocks
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:11.599030Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:31.984045Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add SdlcError::FeedbackNoteNotFound and server error mapping
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:15.126208Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:34.094031Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add enrich_note handler and register POST /api/feedback/:id/enrich route
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:17.783599Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:36.195302Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Update frontend TypeScript types and API client
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:20.132798Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:38.973931Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Update FeedbackPage NoteCard UI with enrichment affordance and rendering
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:19:24.065757Z
+  started_at: null
+  completed_at: 2026-03-02T09:19:43.095837Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T04:17:29.436114Z
+  exited: 2026-03-02T09:18:09.627224Z
+- phase: specified
+  entered: 2026-03-02T09:18:09.627224Z
+  exited: 2026-03-02T09:18:55.479311Z
+- phase: planned
+  entered: 2026-03-02T09:18:55.479311Z
+  exited: 2026-03-02T09:18:59.793160Z
+- phase: ready
+  entered: 2026-03-02T09:18:59.793160Z
+  exited: 2026-03-02T09:19:03.831981Z
+- phase: implementation
+  entered: 2026-03-02T09:19:03.831981Z
+  exited: 2026-03-02T09:20:15.951684Z
+- phase: review
+  entered: 2026-03-02T09:20:15.951684Z
+  exited: 2026-03-02T09:20:20.574373Z
+- phase: audit
+  entered: 2026-03-02T09:20:20.574373Z
+  exited: 2026-03-02T09:20:40.643966Z
+- phase: qa
+  entered: 2026-03-02T09:20:40.643966Z
   exited: null
 dependencies: []
 archived: false

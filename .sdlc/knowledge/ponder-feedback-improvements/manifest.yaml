@@ -1,0 +1,11 @@
+slug: ponder-feedback-improvements
+title: feedback improvements
+code: uncategorized
+status: draft
+tags:
+- ponder
+summary: 'Scoped two feedback improvements with clear implementation paths: inline edit via PATCH endpoint and MCP-driven note enrichment for automatic context augmentation'
+origin: harvested
+harvested_from: ponder/feedback-improvements
+created_at: 2026-03-02T09:46:42.577128Z
+updated_at: 2026-03-02T09:53:56.601015Z

@@ -25,7 +25,7 @@ export default defineConfig({
   webServer: {
     command: 'sdlc ui start --port 7777 --no-open',
     url: 'http://localhost:7777/api/health',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
     stdout: 'pipe',
     stderr: 'pipe',
     timeout: 120_000,

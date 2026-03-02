@@ -1,0 +1,10 @@
+slug: uat-test-entry
+title: UAT Test Entry
+code: '100.20'
+status: draft
+summary: 'orphan: UAT fixture — test entry created during v10-knowledge-capture UAT run, no real content'
+related:
+- investigation-uat-test-inv
+origin: manual
+created_at: 2026-03-02T09:47:59.343233Z
+updated_at: 2026-03-02T09:52:33.635930Z

@@ -6,7 +6,7 @@
 //!
 //! IDs are sequential: F1, F2, F3, …
 
-use crate::error::Result;
+use crate::error::{Result, SdlcError};
 use crate::{io, paths};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
@@ -16,11 +16,28 @@ use std::path::Path;
 // Types
 // ---------------------------------------------------------------------------
 
+/// A piece of contextual enrichment attached to a FeedbackNote.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Enrichment {
+    /// Source identifier (e.g. "ux-review", "agent:advisor").
+    pub source: String,
+    /// The enrichment content.
+    pub content: String,
+    /// When this enrichment was added.
+    pub added_at: DateTime<Utc>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeedbackNote {
     pub id: String,
     pub content: String,
     pub created_at: DateTime<Utc>,
+    /// When this note was last updated (content change).
+    #[serde(default = "Utc::now")]
+    pub updated_at: DateTime<Utc>,
+    /// Contextual enrichments attached to this note.
+    #[serde(default)]
+    pub enrichments: Vec<Enrichment>,
 }
 
 // ---------------------------------------------------------------------------
@@ -64,10 +81,13 @@ pub fn add(root: &Path, content: impl Into<String>) -> Result<FeedbackNote> {
     let content = content.into();
     let mut notes = load_all(root)?;
     let id = next_id(&notes);
+    let now = Utc::now();
     let note = FeedbackNote {
         id,
         content,
-        created_at: Utc::now(),
+        created_at: now,
+        updated_at: now,
+        enrichments: Vec::new(),
     };
     notes.push(note.clone());
     save_all(root, &notes)?;
@@ -96,16 +116,87 @@ pub fn clear(root: &Path) -> Result<()> {
     save_all(root, &[])
 }
 
+/// Update the content of an existing note. Returns the updated note, or `None`
+/// if the ID was not found.
+pub fn update(
+    root: &Path,
+    id: &str,
+    new_content: impl Into<String>,
+) -> Result<Option<FeedbackNote>> {
+    let mut notes = load_all(root)?;
+    let new_content = new_content.into();
+    let mut updated = None;
+    for note in notes.iter_mut() {
+        if note.id == id {
+            note.content = new_content.clone();
+            note.updated_at = Utc::now();
+            updated = Some(note.clone());
+            break;
+        }
+    }
+    if updated.is_some() {
+        save_all(root, &notes)?;
+    }
+    Ok(updated)
+}
+
+/// Attach an enrichment to an existing note. Returns the updated note.
+///
+/// Returns `Err(SdlcError::FeedbackNoteNotFound)` when `id` does not match
+/// any note.
+pub fn enrich(
+    root: &Path,
+    id: &str,
+    source: impl Into<String>,
+    content: impl Into<String>,
+) -> Result<FeedbackNote> {
+    let mut notes = load_all(root)?;
+    let enrichment = Enrichment {
+        source: source.into(),
+        content: content.into(),
+        added_at: Utc::now(),
+    };
+    let mut found = false;
+    let mut result = None;
+    for note in notes.iter_mut() {
+        if note.id == id {
+            note.enrichments.push(enrichment.clone());
+            note.updated_at = Utc::now();
+            result = Some(note.clone());
+            found = true;
+            break;
+        }
+    }
+    if !found {
+        return Err(SdlcError::FeedbackNoteNotFound(id.to_string()));
+    }
+    save_all(root, &notes)?;
+    Ok(result.unwrap())
+}
+
 /// Bundle all notes into a markdown document suitable as ponder context.
 pub fn to_markdown(notes: &[FeedbackNote]) -> String {
     let mut out = String::from("# Feedback Notes\n\n");
     for note in notes {
         out.push_str(&format!(
-            "**{}** — _{}_\n\n{}\n\n---\n\n",
+            "**{}** — _{}_\n\n{}\n\n",
             note.id,
             note.created_at.format("%Y-%m-%d %H:%M UTC"),
             note.content
         ));
+        if !note.enrichments.is_empty() {
+            out.push_str("**Enrichments:**\n\n");
+            for e in &note.enrichments {
+                out.push_str(&format!(
+                    "- *{}* ({}): {}\n",
+                    e.source,
+                    e.added_at.format("%Y-%m-%d %H:%M UTC"),
+                    e.content
+                ));
+            }
+            out.push('\n');
+        }
+        out.push_str("---\n\n");
     }
     out
 }
@@ -193,5 +284,108 @@ mod tests {
         assert!(md.contains("# Feedback Notes"));
         assert!(md.contains("F1"));
         assert!(md.contains("Some idea"));
+    }
+
+    // --- enrichment tests ---
+
+    #[test]
+    fn update_content() {
+        let dir = init_dir();
+        add(dir.path(), "Original content").unwrap();
+        let updated = update(dir.path(), "F1", "Updated content").unwrap();
+        assert!(updated.is_some());
+        let note = updated.unwrap();
+        assert_eq!(note.content, "Updated content");
+        assert_eq!(note.id, "F1");
+
+        // Verify persisted
+        let notes = list(dir.path()).unwrap();
+        assert_eq!(notes[0].content, "Updated content");
+    }
+
+    #[test]
+    fn update_missing_returns_none() {
+        let dir = init_dir();
+        let result = update(dir.path(), "F99", "New content").unwrap();
+        assert!(result.is_none());
+    }
+
+    #[test]
+    fn enrich_adds_enrichment() {
+        let dir = init_dir();
+        add(dir.path(), "Needs context").unwrap();
+        let note = enrich(dir.path(), "F1", "ux-review", "Users find this confusing").unwrap();
+        assert_eq!(note.enrichments.len(), 1);
+        assert_eq!(note.enrichments[0].source, "ux-review");
+        assert_eq!(note.enrichments[0].content, "Users find this confusing");
+
+        // Verify persisted
+        let notes = list(dir.path()).unwrap();
+        assert_eq!(notes[0].enrichments.len(), 1);
+    }
+
+    #[test]
+    fn enrich_missing_returns_error() {
+        let dir = init_dir();
+        let result = enrich(dir.path(), "F99", "src", "ctx");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(
+            matches!(err, SdlcError::FeedbackNoteNotFound(_)),
+            "expected FeedbackNoteNotFound, got {err:?}"
+        );
+    }
+
+    #[test]
+    fn enrich_multiple_accumulates() {
+        let dir = init_dir();
+        add(dir.path(), "Multi").unwrap();
+        enrich(dir.path(), "F1", "src-a", "First enrichment").unwrap();
+        let note = enrich(dir.path(), "F1", "src-b", "Second enrichment").unwrap();
+        assert_eq!(note.enrichments.len(), 2);
+
+        let notes = list(dir.path()).unwrap();
+        assert_eq!(notes[0].enrichments.len(), 2);
+    }
+
+    #[test]
+    fn old_yaml_backward_compat_no_enrichments() {
+        let dir = init_dir();
+        // Write a YAML that looks like old-format (no updated_at, no enrichments)
+        let old_yaml = "- id: F1\n  content: Old note\n  created_at: \"2024-01-01T00:00:00Z\"\n";
+        let path = dir.path().join(".sdlc").join("feedback.yaml");
+        std::fs::write(&path, old_yaml).unwrap();
+
+        let notes = list(dir.path()).unwrap();
+        assert_eq!(notes.len(), 1);
+        assert_eq!(notes[0].id, "F1");
+        assert!(
+            notes[0].enrichments.is_empty(),
+            "old notes default to empty enrichments"
+        );
+    }
+
+    #[test]
+    fn to_markdown_includes_enrichments() {
+        let dir = init_dir();
+        add(dir.path(), "Main point").unwrap();
+        enrich(dir.path(), "F1", "research", "Supporting evidence here").unwrap();
+        let notes = list(dir.path()).unwrap();
+        let md = to_markdown(&notes);
+        assert!(md.contains("Enrichments"));
+        assert!(md.contains("research"));
+        assert!(md.contains("Supporting evidence here"));
+    }
+
+    #[test]
+    fn to_markdown_no_enrichment_section_when_empty() {
+        let dir = init_dir();
+        add(dir.path(), "Plain note").unwrap();
+        let notes = list(dir.path()).unwrap();
+        let md = to_markdown(&notes);
+        assert!(
+            !md.contains("Enrichments"),
+            "no enrichments section when empty"
+        );
     }
 }

@@ -1,0 +1,12 @@
+slug: file-entry
+title: File Entry
+code: uncategorized
+status: draft
+summary: sdlc project README — overview, quickstart, CLI reference, installation guide, and architecture documentation for the sdlc Rust workspace
+sources:
+- type: local_file
+  path: README.md
+  captured_at: 2026-03-02T09:48:10.388889Z
+origin: manual
+created_at: 2026-03-02T09:48:10.388024Z
+updated_at: 2026-03-02T09:53:31.992916Z

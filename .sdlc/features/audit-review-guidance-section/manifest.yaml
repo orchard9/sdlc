@@ -1,0 +1,108 @@
+slug: audit-review-guidance-section
+title: Add §12 Audit & Review Findings to .sdlc/guidance.md
+phase: released
+created_at: 2026-03-02T06:54:33.445550Z
+updated_at: 2026-03-02T08:48:55.029111Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/spec.md
+  created_at: 2026-03-02T08:45:58.300955Z
+  approved_at: 2026-03-02T08:46:06.755115Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/design.md
+  created_at: 2026-03-02T08:46:30.731018Z
+  approved_at: 2026-03-02T08:46:30.736143Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/tasks.md
+  created_at: 2026-03-02T08:46:42.910441Z
+  approved_at: 2026-03-02T08:46:42.916284Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/qa-plan.md
+  created_at: 2026-03-02T08:46:58.020400Z
+  approved_at: 2026-03-02T08:46:58.040863Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/review.md
+  created_at: 2026-03-02T08:47:52.991611Z
+  approved_at: 2026-03-02T08:47:52.996825Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/audit.md
+  created_at: 2026-03-02T08:48:22.151392Z
+  approved_at: 2026-03-02T08:48:22.156124Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/audit-review-guidance-section/qa-results.md
+  created_at: 2026-03-02T08:48:47.697205Z
+  approved_at: 2026-03-02T08:48:51.638392Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Append §12 Audit & Review Findings to .sdlc/guidance.md
+  description: null
+  status: completed
+  created_at: 2026-03-02T08:47:10.767630Z
+  started_at: 2026-03-02T08:47:12.582372Z
+  completed_at: 2026-03-02T08:47:27.655289Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T06:54:33.445550Z
+  exited: 2026-03-02T08:46:06.756101Z
+- phase: specified
+  entered: 2026-03-02T08:46:06.756101Z
+  exited: 2026-03-02T08:46:58.063007Z
+- phase: planned
+  entered: 2026-03-02T08:46:58.063007Z
+  exited: 2026-03-02T08:47:01.556472Z
+- phase: ready
+  entered: 2026-03-02T08:47:01.556472Z
+  exited: 2026-03-02T08:47:05.731905Z
+- phase: implementation
+  entered: 2026-03-02T08:47:05.731905Z
+  exited: 2026-03-02T08:47:52.997899Z
+- phase: review
+  entered: 2026-03-02T08:47:52.997899Z
+  exited: 2026-03-02T08:47:56.111810Z
+- phase: audit
+  entered: 2026-03-02T08:47:56.111810Z
+  exited: 2026-03-02T08:48:22.157100Z
+- phase: qa
+  entered: 2026-03-02T08:48:22.157100Z
+  exited: 2026-03-02T08:48:51.639962Z
+- phase: merge
+  entered: 2026-03-02T08:48:51.639962Z
+  exited: 2026-03-02T08:48:55.029111Z
+- phase: released
+  entered: 2026-03-02T08:48:55.029111Z
+  exited: null
+dependencies: []
+archived: false

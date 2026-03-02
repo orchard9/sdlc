@@ -1,0 +1,41 @@
+items:
+- id: B1
+  title: 'AuthMiddleware in auth.rs: token validation has a race condition under concurrent requests'
+  kind: concern
+  status: promoted
+  evidence: crates/sdlc-server/src/auth.rs:42
+  source_feature: server-remote-state
+  promoted_to: auth-race-fix
+  created_at: 2026-03-02T09:46:28.895497Z
+  updated_at: 2026-03-02T09:48:08.424949Z
+- id: B2
+  title: Consider extracting redb retry logic into a shared utility
+  kind: idea
+  status: parked
+  source_feature: run-events-api
+  park_reason: Revisit after v14 ships
+  created_at: 2026-03-02T09:46:45.060527Z
+  updated_at: 2026-03-02T09:47:34.717436Z
+- id: B3
+  title: Middleware session store grows unbounded without eviction
+  kind: debt
+  status: parked
+  evidence: crates/sdlc-server/src/routes/runs.rs
+  source_feature: backlog-server
+  park_reason: low priority
+  created_at: 2026-03-02T09:46:46.117605Z
+  updated_at: 2026-03-02T09:48:58.241139Z
+- id: B4
+  title: Something noticed
+  kind: concern
+  status: open
+  source_feature: dashboard-empty-states
+  created_at: 2026-03-02T09:47:02.683837Z
+  updated_at: 2026-03-02T09:47:02.683837Z
+- id: B5
+  title: Test concern
+  kind: concern
+  status: promoted
+  promoted_to: new-feature
+  created_at: 2026-03-02T09:48:55.383638Z
+  updated_at: 2026-03-02T09:49:37.745255Z

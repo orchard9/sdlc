@@ -1,0 +1,11 @@
+slug: rethink-the-dashboard
+title: rethink the dashboard
+status: committed
+created_at: 2026-03-02T08:48:16.637068Z
+updated_at: 2026-03-02T09:10:06.629958Z
+committed_at: 2026-03-02T09:10:06.629958Z
+sessions: 3
+orientation:
+  current: Design is complete. All open questions resolved. Jordan has issued the commit signal.
+  next: Run /sdlc-ponder-commit rethink-the-dashboard to crystallize into milestones and features.
+  commit: DONE — commit signal issued by jordan.

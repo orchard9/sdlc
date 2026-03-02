@@ -1,0 +1,101 @@
+slug: milestones-unified-page
+title: Milestones page — unified view with archive section and run wave button
+phase: released
+created_at: 2026-03-02T06:56:06.999400Z
+updated_at: 2026-03-02T06:59:10.520039Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/milestones-unified-page/spec.md
+  created_at: 2026-03-02T06:56:34.227738Z
+  approved_at: 2026-03-02T06:56:34.233633Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/milestones-unified-page/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-02T06:56:41.259409Z
+  waive_reason: Pure UI refactor of an existing page — no new data models, no new API endpoints, no architectural decisions. The ponder scrapbook (design.md) already covers all design decisions.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/milestones-unified-page/tasks.md
+  created_at: 2026-03-02T06:56:58.754395Z
+  approved_at: 2026-03-02T06:56:58.761648Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/milestones-unified-page/qa-plan.md
+  created_at: 2026-03-02T06:57:14.397478Z
+  approved_at: 2026-03-02T06:57:14.403202Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/milestones-unified-page/review.md
+  created_at: 2026-03-02T06:58:37.020022Z
+  approved_at: 2026-03-02T06:58:37.058146Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/milestones-unified-page/audit.md
+  created_at: 2026-03-02T06:58:51.048801Z
+  approved_at: 2026-03-02T06:58:51.053965Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/milestones-unified-page/qa-results.md
+  created_at: 2026-03-02T06:59:05.489362Z
+  approved_at: 2026-03-02T06:59:05.495395Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T06:56:06.999400Z
+  exited: 2026-03-02T06:56:34.234679Z
+- phase: specified
+  entered: 2026-03-02T06:56:34.234679Z
+  exited: 2026-03-02T06:57:14.404196Z
+- phase: planned
+  entered: 2026-03-02T06:57:14.404196Z
+  exited: 2026-03-02T06:57:18.436158Z
+- phase: ready
+  entered: 2026-03-02T06:57:18.436158Z
+  exited: 2026-03-02T06:57:18.457792Z
+- phase: implementation
+  entered: 2026-03-02T06:57:18.457792Z
+  exited: 2026-03-02T06:58:37.059064Z
+- phase: review
+  entered: 2026-03-02T06:58:37.059064Z
+  exited: 2026-03-02T06:58:41.073932Z
+- phase: audit
+  entered: 2026-03-02T06:58:41.073932Z
+  exited: 2026-03-02T06:58:51.054774Z
+- phase: qa
+  entered: 2026-03-02T06:58:51.054774Z
+  exited: 2026-03-02T06:59:05.496321Z
+- phase: merge
+  entered: 2026-03-02T06:59:05.496321Z
+  exited: 2026-03-02T06:59:10.520039Z
+- phase: released
+  entered: 2026-03-02T06:59:10.520039Z
+  exited: null
+dependencies: []
+archived: false

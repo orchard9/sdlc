@@ -1,13 +1,28 @@
-milestone: v13-backlog
-waves:
-  - wave: 1
-    rationale: "Core value — the CLI and data model. This is the minimum needed for agents to start capturing backlog items."
-    features:
-      - backlog-core
-      - backlog-cli
-      - backlog-guidance
-  - wave: 2
-    rationale: "Visibility — server routes and dashboard section. Adds web UI access and REST API for frontend consumers."
-    features:
-      - backlog-server
-      - backlog-dashboard
+- number: 1
+  label: Planning
+  items:
+  - slug: backlog-cli
+    title: sdlc backlog CLI commands
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: backlog-dashboard
+    title: Backlog section in Dashboard frontend
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: backlog-guidance
+    title: Guidance and agent command template updates for backlog
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: backlog-server
+    title: REST API routes for backlog in sdlc-server
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

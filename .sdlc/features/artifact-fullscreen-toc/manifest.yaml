@@ -1,8 +1,8 @@
 slug: artifact-fullscreen-toc
 title: Fullscreen View with Sticky TOC Navigation
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:06.366206Z
-updated_at: 2026-03-02T03:18:06.987838Z
+updated_at: 2026-03-02T09:12:00.079253Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,108 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-fullscreen-toc/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:10:06.241934Z
+  approved_at: 2026-03-02T09:10:07.885194Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-fullscreen-toc/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:10:17.896632Z
+  approved_at: 2026-03-02T09:10:22.846753Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-fullscreen-toc/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:10:36.666755Z
+  approved_at: 2026-03-02T09:10:38.456184Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-fullscreen-toc/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:11:14.517769Z
+  approved_at: 2026-03-02T09:11:16.263373Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-fullscreen-toc/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:11:36.038443Z
+  approved_at: 2026-03-02T09:11:37.925434Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-fullscreen-toc/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:11:56.441317Z
+  approved_at: 2026-03-02T09:11:58.522825Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add slugify utility and extractHeadings function to MarkdownContent.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:10:43.320460Z
+  started_at: null
+  completed_at: 2026-03-02T09:10:55.331049Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add showToc prop and override heading components with slug IDs
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:10:45.636622Z
+  started_at: null
+  completed_at: 2026-03-02T09:10:55.337795Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Render sticky TOC rail (desktop) and Jump to dropdown (mobile)
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:10:47.896511Z
+  started_at: null
+  completed_at: 2026-03-02T09:10:55.343467Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add hasToc prop to FullscreenModal.tsx and widen container
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:10:50.756497Z
+  started_at: null
+  completed_at: 2026-03-02T09:10:55.349176Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Wire showToc and hasToc at the artifact fullscreen call site in ArtifactViewer.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:10:52.916698Z
+  started_at: null
+  completed_at: 2026-03-02T09:10:55.355376Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: 'UAT: MarkdownContent.tsx has no showToc prop and FullscreenModal.tsx has no hasToc prop — TOC extraction, heading IDs, and nav rail are all missing'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:06.546677Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +124,30 @@ phase_history:
   exited: 2026-03-02T03:18:06.987838Z
 - phase: specified
   entered: 2026-03-02T03:18:06.987838Z
+  exited: 2026-03-02T09:10:38.457462Z
+- phase: planned
+  entered: 2026-03-02T09:10:38.457462Z
+  exited: 2026-03-02T09:10:40.788386Z
+- phase: ready
+  entered: 2026-03-02T09:10:40.788386Z
+  exited: 2026-03-02T09:10:40.798488Z
+- phase: implementation
+  entered: 2026-03-02T09:10:40.798488Z
+  exited: 2026-03-02T09:11:16.264426Z
+- phase: review
+  entered: 2026-03-02T09:11:16.264426Z
+  exited: 2026-03-02T09:11:18.626676Z
+- phase: audit
+  entered: 2026-03-02T09:11:18.626676Z
+  exited: 2026-03-02T09:11:37.926738Z
+- phase: qa
+  entered: 2026-03-02T09:11:37.926738Z
+  exited: 2026-03-02T09:11:58.523894Z
+- phase: merge
+  entered: 2026-03-02T09:11:58.523894Z
+  exited: 2026-03-02T09:12:00.079253Z
+- phase: released
+  entered: 2026-03-02T09:12:00.079253Z
   exited: null
 dependencies: []
 archived: false

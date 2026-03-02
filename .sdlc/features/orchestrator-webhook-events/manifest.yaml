@@ -1,0 +1,144 @@
+slug: orchestrator-webhook-events
+title: Webhook Event History — WEBHOOK_EVENTS redb table, WebhookEvent struct, ring buffer (500), GET route
+phase: released
+created_at: 2026-03-02T06:53:33.983562Z
+updated_at: 2026-03-02T09:27:55.701614Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/spec.md
+  created_at: 2026-03-02T08:46:48.967472Z
+  approved_at: 2026-03-02T08:46:50.859972Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/design.md
+  created_at: 2026-03-02T08:47:40.378762Z
+  approved_at: 2026-03-02T08:47:44.667553Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/tasks.md
+  created_at: 2026-03-02T08:48:16.312977Z
+  approved_at: 2026-03-02T08:48:18.095101Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/qa-plan.md
+  created_at: 2026-03-02T08:48:49.249646Z
+  approved_at: 2026-03-02T08:48:51.394735Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/review.md
+  created_at: 2026-03-02T09:24:31.553078Z
+  approved_at: 2026-03-02T09:24:34.048884Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/audit.md
+  created_at: 2026-03-02T09:25:18.184237Z
+  approved_at: 2026-03-02T09:25:21.181547Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/orchestrator-webhook-events/qa-results.md
+  created_at: 2026-03-02T09:27:47.910940Z
+  approved_at: 2026-03-02T09:27:50.897715Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'T1: Add WebhookEvent and WebhookEventOutcome types to webhook.rs'
+  description: null
+  status: completed
+  created_at: 2026-03-02T08:49:03.561954Z
+  started_at: null
+  completed_at: 2026-03-02T09:21:29.509281Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'T2: Add WEBHOOK_EVENTS table and ring-buffer methods to db.rs'
+  description: null
+  status: completed
+  created_at: 2026-03-02T08:49:05.166092Z
+  started_at: null
+  completed_at: 2026-03-02T09:21:29.635394Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'T3: Emit WebhookEvent from receive_webhook handler'
+  description: null
+  status: completed
+  created_at: 2026-03-02T08:49:06.992629Z
+  started_at: null
+  completed_at: 2026-03-02T09:21:29.711826Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'T4: Add GET /api/orchestrator/webhooks/events handler and register route'
+  description: null
+  status: completed
+  created_at: 2026-03-02T08:49:08.803341Z
+  started_at: null
+  completed_at: 2026-03-02T09:23:18.654474Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'T5: Integration tests and full test suite pass'
+  description: null
+  status: completed
+  created_at: 2026-03-02T08:49:10.634044Z
+  started_at: null
+  completed_at: 2026-03-02T09:23:18.688613Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T06:53:33.983562Z
+  exited: 2026-03-02T08:46:50.860916Z
+- phase: specified
+  entered: 2026-03-02T08:46:50.860916Z
+  exited: 2026-03-02T08:48:51.395866Z
+- phase: planned
+  entered: 2026-03-02T08:48:51.395866Z
+  exited: 2026-03-02T08:48:55.293138Z
+- phase: ready
+  entered: 2026-03-02T08:48:55.293138Z
+  exited: 2026-03-02T08:48:58.999836Z
+- phase: implementation
+  entered: 2026-03-02T08:48:58.999836Z
+  exited: 2026-03-02T09:24:34.199443Z
+- phase: review
+  entered: 2026-03-02T09:24:34.199443Z
+  exited: 2026-03-02T09:24:40.182273Z
+- phase: audit
+  entered: 2026-03-02T09:24:40.182273Z
+  exited: 2026-03-02T09:25:21.720983Z
+- phase: qa
+  entered: 2026-03-02T09:25:21.720983Z
+  exited: 2026-03-02T09:27:50.911930Z
+- phase: merge
+  entered: 2026-03-02T09:27:50.911930Z
+  exited: 2026-03-02T09:27:55.701614Z
+- phase: released
+  entered: 2026-03-02T09:27:55.701614Z
+  exited: null
+dependencies: []
+archived: false

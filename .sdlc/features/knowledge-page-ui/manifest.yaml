@@ -1,73 +1,253 @@
 slug: knowledge-page-ui
 title: KnowledgePage — three-pane catalog browser in the sdlc UI
 description: 'frontend/src/pages/KnowledgePage.tsx — three-pane layout. Left pane: catalog tree (expandable classes/divisions, click to filter) + search bar for full-text filter. Center pane: entry list for selected class/division showing title, code badge, staleness badges (url_404, aged_out, code_ref_gone), last_updated. Right pane: entry detail — content.md rendered as markdown, source provenance footer (type+url/path+captured_at per source), related entry links clickable by code, [Research More] action button that triggers POST /api/knowledge/:slug/research. Sidebar: Library icon (lucide), below Guidelines in Plan group. Bottom tab bar: Knowledge in Plan tab roots. Routes: /knowledge and /knowledge/:slug. No PhaseStrip — entries have no phases. SSE listener for KnowledgeResearchCompleted and KnowledgeMaintenanceCompleted to trigger entry list refresh.'
-phase: draft
+phase: released
 created_at: 2026-03-02T02:12:48.397957Z
-updated_at: 2026-03-02T02:12:48.397957Z
+updated_at: 2026-03-02T09:27:32.243879Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:02.871193Z
+  approved_at: 2026-03-02T09:14:05.198547Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:59.120174Z
+  approved_at: 2026-03-02T09:15:02.451560Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:15:37.941194Z
+  approved_at: 2026-03-02T09:15:40.898858Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:16:10.156015Z
+  approved_at: 2026-03-02T09:16:13.440316Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:24:18.841819Z
+  approved_at: 2026-03-02T09:24:21.428375Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:24:54.740200Z
+  approved_at: 2026-03-02T09:25:42.722814Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-page-ui/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:13.271376Z
+  approved_at: 2026-03-02T09:27:26.869018Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: T1 — Add types to types.ts
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:25.604394Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:27.497025Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: T2 — Add API client methods
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:29.807941Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:32.027977Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: T3 — Add sidebar nav item
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:35.141338Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:36.770844Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: T4 — Add bottom tab bar route
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:39.126507Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:41.085347Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: T5 — Register routes in App.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:43.185534Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:45.314135Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: T6 — Implement CatalogPane component
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:47.293020Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:50.006600Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: T7 — Implement EntryListPane component
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:52.081564Z
+  started_at: null
+  completed_at: 2026-03-02T09:16:54.850556Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: T8 — Implement EntryDetailPane component
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:16:56.784489Z
+  started_at: null
+  completed_at: 2026-03-02T09:17:00.242556Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: T9 — Implement KnowledgePage root component
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:17:02.500033Z
+  started_at: null
+  completed_at: 2026-03-02T09:17:04.297910Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: T10 — Smoke test
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:23:39.442776Z
+  started_at: null
+  completed_at: 2026-03-02T09:23:41.320396Z
+  blocker: null
+  depends_on: []
+- id: T11
+  title: Add search text input to CatalogPane with debounced client-side filtering of entry list by title and summary
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:27:17.521769Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T12
+  title: Add staleness_flags to KnowledgeEntrySummary backend response so EntryListPane can show per-flag colored badges (url_404/aged_out/code_ref_gone)
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:27:23.998058Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T13
+  title: 'UAT: Search bar missing from left pane — add text input to filter the entry list by title/summary'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:59:42.964795Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T14
+  title: 'UAT: Staleness badges missing from center entry list — KnowledgeEntrySummary needs staleness_flags field and API must include it'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:59:42.972163Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T15
+  title: 'UAT: Entry content rendered as raw pre-formatted text not Markdown — replace <pre> with react-markdown component'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:59:42.977433Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T16
+  title: 'UAT: Related entries shown as non-clickable span badges — convert to button/link elements that navigate to /knowledge/:slug'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:59:42.982719Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T17
+  title: 'UAT: Source provenance missing captured_at timestamp display in detail pane'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:59:42.988760Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T02:12:48.397957Z
+  exited: 2026-03-02T09:14:05.200001Z
+- phase: specified
+  entered: 2026-03-02T09:14:05.200001Z
+  exited: 2026-03-02T09:16:13.441240Z
+- phase: planned
+  entered: 2026-03-02T09:16:13.441240Z
+  exited: 2026-03-02T09:16:17.722644Z
+- phase: ready
+  entered: 2026-03-02T09:16:17.722644Z
+  exited: 2026-03-02T09:16:22.331592Z
+- phase: implementation
+  entered: 2026-03-02T09:16:22.331592Z
+  exited: 2026-03-02T09:24:21.476238Z
+- phase: review
+  entered: 2026-03-02T09:24:21.476238Z
+  exited: 2026-03-02T09:24:26.184866Z
+- phase: audit
+  entered: 2026-03-02T09:24:26.184866Z
+  exited: 2026-03-02T09:25:42.734550Z
+- phase: qa
+  entered: 2026-03-02T09:25:42.734550Z
+  exited: 2026-03-02T09:27:26.897230Z
+- phase: merge
+  entered: 2026-03-02T09:27:26.897230Z
+  exited: 2026-03-02T09:27:32.243879Z
+- phase: released
+  entered: 2026-03-02T09:27:32.243879Z
   exited: null
 dependencies: []
 archived: false

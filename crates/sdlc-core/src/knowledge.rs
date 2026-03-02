@@ -487,6 +487,34 @@ pub fn full_text_search(root: &Path, query: &str) -> Result<Vec<SearchResult>> {
 }
 
 // ---------------------------------------------------------------------------
+// Relevance query
+// ---------------------------------------------------------------------------
+
+/// Return up to `limit` published entries most relevant to `tags`.
+///
+/// Relevance = number of query tags present in the entry's tags.
+/// Ties are broken by `updated_at` descending (most recently updated first).
+/// Entries with zero tag overlap are excluded.
+/// Returns `[]` if the knowledge directory is absent or the base is empty.
+pub fn relevant_entries(root: &Path, tags: &[String], limit: usize) -> Result<Vec<KnowledgeEntry>> {
+    let all = list(root)?;
+    let mut scored: Vec<(usize, KnowledgeEntry)> = all
+        .into_iter()
+        .filter(|e| e.status == KnowledgeStatus::Published)
+        .map(|e| {
+            let score = tags.iter().filter(|t| e.tags.contains(*t)).count();
+            (score, e)
+        })
+        .filter(|(score, _)| *score > 0)
+        .collect();
+    scored.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then_with(|| b.1.updated_at.cmp(&a.1.updated_at))
+    });
+    Ok(scored.into_iter().take(limit).map(|(_, e)| e).collect())
+}
+
+// ---------------------------------------------------------------------------
 // Session wrappers (delegate to workspace.rs)
 // ---------------------------------------------------------------------------
 
@@ -666,6 +694,13 @@ pub struct HarvestResult {
     pub source: String,
 }
 
+impl HarvestResult {
+    /// Alias for `slug` -- the knowledge base entry slug that was created/updated.
+    pub fn entry_slug(&self) -> &str {
+        &self.slug
+    }
+}
+
 /// Summary report returned by `librarian_init`.
 #[derive(Debug)]
 pub struct LibrarianInitReport {
@@ -721,6 +756,97 @@ When adding new knowledge from a workspace:
 - Write durable insights only — decisions, conclusions, patterns. Not raw dialogue.
 - Start with `status: draft`; publish when the content is solid
 "###;
+
+/// Harvest a single workspace entry (investigation or ponder) into the knowledge base.
+///
+/// Creates a new knowledge entry if none exists for the workspace, or appends a
+/// refresh section to the existing entry. Returns a `HarvestResult` so callers
+/// can report whether the entry was created or updated.
+///
+/// This is the building block used by the auto-harvest hooks wired into
+/// `sdlc investigate update --status complete` and `sdlc ponder update --status committed`.
+pub fn librarian_harvest_workspace(
+    root: &Path,
+    workspace_type: &str,
+    workspace_slug: &str,
+) -> Result<HarvestResult> {
+    let source = format!("{workspace_type}/{workspace_slug}");
+    let knowledge_slug = format!("{workspace_type}-{workspace_slug}");
+
+    let (title, summary, tags, content) = match workspace_type {
+        "investigation" => {
+            let inv = crate::investigation::load(root, workspace_slug)?;
+            let tags = vec![inv.kind.to_string(), "investigation".to_string()];
+            let summary: String = inv
+                .context
+                .as_deref()
+                .unwrap_or("")
+                .chars()
+                .take(200)
+                .collect();
+            let mut content = if let Some(ctx) = &inv.context {
+                format!("# {}\n\n{}", inv.title, ctx)
+            } else {
+                format!("# {}", inv.title)
+            };
+            if let Ok(sessions) = crate::investigation::list_sessions(root, workspace_slug) {
+                if let Some(first) = sessions.first() {
+                    if let Ok(body) =
+                        crate::investigation::read_session(root, workspace_slug, first.session)
+                    {
+                        content.push_str("\n\n## Session\n\n");
+                        content.push_str(&body);
+                    }
+                }
+            }
+            (inv.title, summary, tags, content)
+        }
+        "ponder" => {
+            let entry = crate::ponder::PonderEntry::load(root, workspace_slug)
+                .map_err(|e| SdlcError::KnowledgeNotFound(e.to_string()))?;
+            let tags = vec!["ponder".to_string()];
+            let summary: String = entry.title.chars().take(200).collect();
+            let content = read_ponder_content(root, workspace_slug);
+            (entry.title, summary, tags, content)
+        }
+        other => {
+            return Err(SdlcError::KnowledgeNotFound(format!(
+                "unsupported workspace type '{other}'; must be 'investigation' or 'ponder'"
+            )));
+        }
+    };
+
+    let created = upsert_knowledge_entry(
+        root,
+        &knowledge_slug,
+        &title,
+        &summary,
+        &tags,
+        OriginKind::Harvested,
+        &source,
+        &content,
+    )?;
+
+    append_maintenance_action(
+        root,
+        MaintenanceAction {
+            timestamp: Utc::now(),
+            action_type: if created {
+                "harvest_create".to_string()
+            } else {
+                "harvest_update".to_string()
+            },
+            slug: Some(knowledge_slug.clone()),
+            detail: format!("harvested from {source}"),
+        },
+    )?;
+
+    Ok(HarvestResult {
+        slug: knowledge_slug,
+        created,
+        source,
+    })
+}
 
 /// Bootstrap the knowledge base for a project (idempotent, 9-step).
 ///
@@ -1113,6 +1239,84 @@ fn extract_project_name(root: &Path) -> String {
 
 #[cfg(test)]
 mod tests {
+    // -----------------------------------------------------------------------
+    // relevant_entries tests
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn relevant_entries_scores_by_tag_overlap() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+        let mut e1 = create(root, "alpha", "Alpha", "100").unwrap();
+        e1.tags = vec!["advisory".to_string(), "pattern".to_string()];
+        e1.status = KnowledgeStatus::Published;
+        save(root, &e1).unwrap();
+
+        let mut e2 = create(root, "beta", "Beta", "100").unwrap();
+        e2.tags = vec!["advisory".to_string()];
+        e2.status = KnowledgeStatus::Published;
+        save(root, &e2).unwrap();
+
+        let tags: Vec<String> = vec!["advisory".to_string(), "pattern".to_string()];
+        let results = relevant_entries(root, &tags, 10).unwrap();
+        assert_eq!(results.len(), 2);
+        assert_eq!(results[0].slug, "alpha"); // 2 tag matches vs 1
+    }
+
+    #[test]
+    fn relevant_entries_excludes_drafts() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+        let mut e1 = create(root, "published-entry", "Published", "100").unwrap();
+        e1.tags = vec!["advisory".to_string()];
+        e1.status = KnowledgeStatus::Published;
+        save(root, &e1).unwrap();
+
+        let mut e2 = create(root, "draft-entry", "Draft", "100").unwrap();
+        e2.tags = vec!["advisory".to_string()];
+        e2.status = KnowledgeStatus::Draft;
+        save(root, &e2).unwrap();
+
+        let tags: Vec<String> = vec!["advisory".to_string()];
+        let results = relevant_entries(root, &tags, 10).unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].slug, "published-entry");
+    }
+
+    #[test]
+    fn relevant_entries_respects_limit() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+        for i in 0..5 {
+            let slug = format!("entry-{i}");
+            let mut e = create(root, &slug, &slug, "100").unwrap();
+            e.tags = vec!["advisory".to_string()];
+            e.status = KnowledgeStatus::Published;
+            save(root, &e).unwrap();
+        }
+
+        let tags: Vec<String> = vec!["advisory".to_string()];
+        let results = relevant_entries(root, &tags, 3).unwrap();
+        assert_eq!(results.len(), 3);
+    }
+
+    #[test]
+    fn relevant_entries_empty_knowledge_base() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let root = dir.path();
+        std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+        let tags: Vec<String> = vec!["advisory".to_string()];
+        let results = relevant_entries(root, &tags, 10).unwrap();
+        assert!(results.is_empty());
+    }
+
     use super::*;
     use std::path::PathBuf;
     use tempfile::TempDir;
@@ -1592,5 +1796,114 @@ mod tests {
         // Should have exactly one reference to entry-b, not two
         let b_count = a.related.iter().filter(|r| *r == "entry-b").count();
         assert_eq!(b_count, 1);
+    }
+
+    #[test]
+    fn librarian_init_idempotent_full() {
+        let (_d, root) = tmp();
+
+        // --- Seed one completed investigation ---
+        std::fs::create_dir_all(root.join(".sdlc/investigations")).unwrap();
+        let mut inv = crate::investigation::create(
+            &root,
+            "perf-issue",
+            "Perf Issue",
+            crate::investigation::InvestigationKind::RootCause,
+            Some("Slow query root cause".to_string()),
+        )
+        .unwrap();
+        inv.status = crate::investigation::InvestigationStatus::Complete;
+        crate::investigation::save(&root, &inv).unwrap();
+
+        // --- Seed one committed ponder ---
+        std::fs::create_dir_all(root.join(".sdlc/roadmap")).unwrap();
+        let mut ponder =
+            crate::ponder::PonderEntry::create(&root, "caching-strategy", "Caching Strategy")
+                .unwrap();
+        ponder.update_status(crate::ponder::PonderStatus::Committed);
+        ponder.save(&root).unwrap();
+
+        // --- Seed one published guideline ---
+        let guideline_path = root.join("error-handling-guide.md");
+        std::fs::write(
+            &guideline_path,
+            "# Error Handling Guideline\n\nUse ? operator everywhere.",
+        )
+        .unwrap();
+        let mut guideline_inv = crate::investigation::create(
+            &root,
+            "error-handling-guide",
+            "Error Handling Guide",
+            crate::investigation::InvestigationKind::Guideline,
+            None,
+        )
+        .unwrap();
+        guideline_inv.publish_path = Some(guideline_path.to_string_lossy().to_string());
+        crate::investigation::save(&root, &guideline_inv).unwrap();
+
+        // --- First run: all three should be created ---
+        let report1 = librarian_init(&root).unwrap();
+        assert_eq!(report1.investigation_results.len(), 1);
+        assert!(
+            report1.investigation_results[0].created,
+            "investigation should be created on first run"
+        );
+        assert_eq!(report1.ponder_results.len(), 1);
+        assert!(
+            report1.ponder_results[0].created,
+            "ponder should be created on first run"
+        );
+        assert_eq!(report1.guideline_results.len(), 1);
+        assert!(
+            report1.guideline_results[0].created,
+            "guideline should be created on first run"
+        );
+
+        // Verify exactly 3 entries exist after first run
+        let entries_after_run1 = list(&root).unwrap();
+        assert_eq!(
+            entries_after_run1.len(),
+            3,
+            "should have exactly 3 entries after first run"
+        );
+
+        // --- Second run: none should be created (idempotency) ---
+        let report2 = librarian_init(&root).unwrap();
+        assert_eq!(report2.investigation_results.len(), 1);
+        assert!(
+            !report2.investigation_results[0].created,
+            "investigation should NOT be created on second run"
+        );
+        assert_eq!(report2.ponder_results.len(), 1);
+        assert!(
+            !report2.ponder_results[0].created,
+            "ponder should NOT be created on second run"
+        );
+        assert_eq!(report2.guideline_results.len(), 1);
+        assert!(
+            !report2.guideline_results[0].created,
+            "guideline should NOT be created on second run"
+        );
+
+        // Verify still exactly 3 entries (no duplicates created)
+        let entries_after_run2 = list(&root).unwrap();
+        assert_eq!(
+            entries_after_run2.len(),
+            3,
+            "should still have exactly 3 entries after second run (no duplicates)"
+        );
+
+        // Verify no duplicate slugs in any entry's related[] list
+        for entry in &entries_after_run2 {
+            let mut seen = std::collections::HashSet::new();
+            for slug in &entry.related {
+                assert!(
+                    seen.insert(slug.clone()),
+                    "entry '{}' has duplicate slug '{}' in related[]",
+                    entry.slug,
+                    slug
+                );
+            }
+        }
     }
 }

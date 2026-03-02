@@ -12,25 +12,31 @@
 //! Because the timestamp occupies the high bytes in big-endian encoding,
 //! byte ordering equals timestamp ordering. A single range scan
 //! `..=due_upper_bound(now)` returns all actions due by `now` without
-//! any post-filtering for timestamp — only `Pending` status filtering
+//! any post-filtering for timestamp -- only `Pending` status filtering
 //! is needed in application code.
 //!
 //! ## WEBHOOKS table
 //!
 //! A 16-byte UUID key (raw bytes). Webhook payloads do not need ordered range
-//! scans — they need O(1) lookup by ID for delete-after-dispatch. Full scan
+//! scans -- they need O(1) lookup by ID for delete-after-dispatch. Full scan
 //! via `all_pending_webhooks()` is sorted by `received_at` in application code.
+//!
+//! ## WEBHOOK_EVENTS table
+//!
+//! A 24-byte composite key: `[ seq: u64 big-endian (8 bytes) | uuid: 16 bytes ]`.
+//! Big-endian seq means byte order == seq order. Forward scan yields oldest-first;
+//! reversed gives newest-first. Ring buffer capped at `WEBHOOK_EVENTS_CAP` (500).
 
 use std::{path::Path, time::Duration};
 
 use chrono::{DateTime, Utc};
-use redb::{Database, ReadableTable, TableDefinition};
+use redb::{Database, ReadableTable, ReadableTableMetadata, TableDefinition};
 use uuid::Uuid;
 
 use crate::error::{Result, SdlcError};
 
 use super::action::{Action, ActionStatus};
-use super::webhook::{WebhookPayload, WebhookRoute};
+use super::webhook::{WebhookEvent, WebhookPayload, WebhookRoute};
 
 // ---------------------------------------------------------------------------
 // Table definitions
@@ -48,6 +54,13 @@ const WEBHOOKS: TableDefinition<&[u8], &[u8]> = TableDefinition::new("webhooks")
 /// Value: JSON-encoded WebhookRoute
 const WEBHOOK_ROUTES: TableDefinition<&[u8], &[u8]> = TableDefinition::new("webhook_routes");
 
+/// Key: 24-byte composite (seq u64 big-endian ++ uuid 16 bytes)
+/// Value: JSON-encoded WebhookEvent (audit ring buffer -- max 500 entries)
+const WEBHOOK_EVENTS: TableDefinition<&[u8], &[u8]> = TableDefinition::new("webhook_events");
+
+/// Maximum number of events retained in the `WEBHOOK_EVENTS` ring buffer.
+const WEBHOOK_EVENTS_CAP: u64 = 500;
+
 // ---------------------------------------------------------------------------
 // Key helpers
 // ---------------------------------------------------------------------------
@@ -60,9 +73,20 @@ fn action_key(ts: DateTime<Utc>, id: Uuid) -> [u8; 24] {
     key
 }
 
+/// Composite key for `WEBHOOK_EVENTS`: 8-byte seq (big-endian) ++ 16-byte UUID.
+///
+/// Big-endian ordering means byte ordering == seq ordering, so a forward table
+/// scan yields events in insertion order (oldest first).
+fn event_key(seq: u64, id: Uuid) -> [u8; 24] {
+    let mut key = [0u8; 24];
+    key[..8].copy_from_slice(&seq.to_be_bytes());
+    key[8..].copy_from_slice(id.as_bytes());
+    key
+}
+
 /// Upper bound for a range scan returning all actions due by `now`.
 ///
-/// The UUID suffix is `0xff` × 16, which is greater than any valid UUID,
+/// The UUID suffix is `0xff` x 16, which is greater than any valid UUID,
 /// so all actions with `timestamp_ms <= now_ms` are included.
 fn due_upper_bound(now: DateTime<Utc>) -> [u8; 24] {
     let mut key = [0u8; 24];
@@ -84,9 +108,9 @@ pub struct ActionDb {
 impl ActionDb {
     /// Open or create the redb database at `path`.
     ///
-    /// Creates the `ACTIONS`, `WEBHOOKS`, and `WEBHOOK_ROUTES` tables if they
-    /// don't already exist. Safe to call on an existing database — redb creates
-    /// missing tables in place without affecting existing data.
+    /// Creates the `ACTIONS`, `WEBHOOKS`, `WEBHOOK_ROUTES`, and `WEBHOOK_EVENTS`
+    /// tables if they don't already exist. Safe to call on an existing database --
+    /// redb creates missing tables in place without affecting existing data.
     pub fn open(path: &Path) -> Result<Self> {
         let db = Database::create(path).map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
         // Ensure all tables exist before any reads
@@ -98,6 +122,8 @@ impl ActionDb {
         wt.open_table(WEBHOOKS)
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
         wt.open_table(WEBHOOK_ROUTES)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        wt.open_table(WEBHOOK_EVENTS)
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
         wt.commit()
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
@@ -239,6 +265,89 @@ impl ActionDb {
         }
         result.sort_by(|a, b| b.created_at.cmp(&a.created_at));
         Ok(result)
+    }
+
+    // -----------------------------------------------------------------------
+    // Action mutations
+    // -----------------------------------------------------------------------
+
+    /// Delete an action by UUID.
+    ///
+    /// Silently succeeds if the ID does not exist (idempotent).
+    pub fn delete(&self, id: Uuid) -> Result<()> {
+        let all = self.list_all()?;
+        let action = match all.into_iter().find(|a| a.id == id) {
+            Some(a) => a,
+            None => return Ok(()), // idempotent
+        };
+        let key = action_key(action.trigger.key_ts(), action.id);
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(ACTIONS)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .remove(key.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(())
+    }
+
+    /// Update the `label` and/or `recurrence` of an action identified by `id`.
+    ///
+    /// - `label`: if `Some`, the label is replaced; if `None`, it is unchanged.
+    /// - `recurrence`: if `Some(Some(dur))`, sets recurrence; `Some(None)` clears it;
+    ///   `None` leaves the current value unchanged.
+    ///
+    /// Returns the updated `Action`, or an error if not found.
+    pub fn update_label_and_recurrence(
+        &self,
+        id: Uuid,
+        label: Option<String>,
+        recurrence: Option<Option<std::time::Duration>>,
+    ) -> Result<Action> {
+        let all = self.list_all()?;
+        let mut action = all
+            .into_iter()
+            .find(|a| a.id == id)
+            .ok_or_else(|| SdlcError::OrchestratorDb(format!("action not found: {id}")))?;
+
+        let key = action_key(action.trigger.key_ts(), action.id);
+
+        if let Some(new_label) = label {
+            action.label = new_label;
+        }
+        if let Some(new_recurrence) = recurrence {
+            action.recurrence = new_recurrence;
+        }
+        action.updated_at = Utc::now();
+
+        let new_value =
+            serde_json::to_vec(&action).map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(ACTIONS)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .remove(key.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .insert(key.as_slice(), new_value.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(action)
     }
 
     // -----------------------------------------------------------------------
@@ -407,6 +516,135 @@ impl ActionDb {
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
         Ok(())
     }
+
+    // -----------------------------------------------------------------------
+    // Webhook events (audit ring buffer)
+    // -----------------------------------------------------------------------
+
+    /// Insert a `WebhookEvent` into the audit ring buffer.
+    ///
+    /// Assigns a monotonically increasing `seq` number to the event, then
+    /// stores it under the 24-byte composite key `event_key(seq, id)`. When
+    /// the table reaches `WEBHOOK_EVENTS_CAP` entries the oldest entry (lowest
+    /// seq) is deleted before the new entry is written.
+    ///
+    /// Best-effort -- callers should ignore errors from this method so that
+    /// event logging failures never block the main webhook flow.
+    pub fn insert_webhook_event(&self, event: &WebhookEvent) -> Result<()> {
+        // Phase 1: read the current last key and count in a read transaction.
+        let (next_seq, count) = {
+            let rt = self
+                .db
+                .begin_read()
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            let table = rt
+                .open_table(WEBHOOK_EVENTS)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+            let seq = match table
+                .last()
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?
+            {
+                Some((k, _)) => {
+                    let key_bytes = k.value();
+                    if key_bytes.len() >= 8 {
+                        let mut buf = [0u8; 8];
+                        buf.copy_from_slice(&key_bytes[..8]);
+                        u64::from_be_bytes(buf).saturating_add(1)
+                    } else {
+                        1
+                    }
+                }
+                None => 1,
+            };
+
+            let count = table
+                .len()
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+            (seq, count)
+        };
+
+        // Phase 2: write the new event (and evict if at cap) in a write transaction.
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(WEBHOOK_EVENTS)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+            // Evict the oldest entry if at cap.
+            if count >= WEBHOOK_EVENTS_CAP {
+                let oldest_key: Option<Vec<u8>> = table
+                    .first()
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?
+                    .map(|(k, _)| k.value().to_vec());
+                if let Some(owned) = oldest_key {
+                    table
+                        .remove(owned.as_slice())
+                        .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                }
+            }
+
+            // Write the event with assigned seq.
+            let mut event_with_seq = event.clone();
+            event_with_seq.seq = next_seq;
+            let key = event_key(next_seq, event_with_seq.id);
+            let value = serde_json::to_vec(&event_with_seq)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .insert(key.as_slice(), value.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(())
+    }
+
+    /// Return all stored webhook events, newest first (highest seq first).
+    ///
+    /// Up to `WEBHOOK_EVENTS_CAP` (500) entries are returned. The table scan
+    /// yields entries in ascending seq order; we reverse to produce
+    /// newest-first output.
+    pub fn list_webhook_events(&self) -> Result<Vec<WebhookEvent>> {
+        let rt = self
+            .db
+            .begin_read()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let table = rt
+            .open_table(WEBHOOK_EVENTS)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+        let mut result = Vec::new();
+        for entry in table
+            .iter()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?
+        {
+            let (_, v) = entry.map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            let event: WebhookEvent = serde_json::from_slice(v.value())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            result.push(event);
+        }
+        // Reverse: table scan is ascending (oldest first); we want newest first.
+        result.reverse();
+        Ok(result)
+    }
+
+    /// Return the number of events currently stored in the ring buffer.
+    pub fn webhook_event_count(&self) -> Result<u64> {
+        let rt = self
+            .db
+            .begin_read()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let table = rt
+            .open_table(WEBHOOK_EVENTS)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        table
+            .len()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -525,7 +763,7 @@ mod tests {
         db.insert(&action).unwrap();
         db.set_status(action.id, ActionStatus::Running).unwrap();
 
-        // max_age = 2 minutes, action was updated 5 seconds ago → should NOT recover
+        // max_age = 2 minutes, action was updated 5 seconds ago -> should NOT recover
         let recovered = db.startup_recovery(Duration::from_secs(120)).unwrap();
         assert_eq!(recovered, 0);
 
@@ -546,6 +784,75 @@ mod tests {
         let (_dir, db) = open_tmp();
         let n = db.startup_recovery(Duration::from_secs(60)).unwrap();
         assert_eq!(n, 0);
+    }
+
+    // -----------------------------------------------------------------------
+    // Action mutation tests
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn action_delete_removes_record() {
+        let (_dir, db) = open_tmp();
+        let action = scheduled_at("to-delete", Utc::now() + CDur::seconds(60));
+        db.insert(&action).unwrap();
+        assert_eq!(db.list_all().unwrap().len(), 1);
+
+        db.delete(action.id).unwrap();
+        assert!(db.list_all().unwrap().is_empty());
+    }
+
+    #[test]
+    fn action_delete_nonexistent_is_idempotent() {
+        let (_dir, db) = open_tmp();
+        let id = Uuid::new_v4();
+        db.delete(id).unwrap(); // should not error
+    }
+
+    #[test]
+    fn update_label_changes_label() {
+        let (_dir, db) = open_tmp();
+        let action = scheduled_at("original-label", Utc::now() + CDur::seconds(60));
+        db.insert(&action).unwrap();
+
+        let updated = db
+            .update_label_and_recurrence(action.id, Some("new-label".to_string()), None)
+            .unwrap();
+        assert_eq!(updated.label, "new-label");
+
+        let all = db.list_all().unwrap();
+        assert_eq!(all[0].label, "new-label");
+    }
+
+    #[test]
+    fn update_recurrence_sets_and_clears() {
+        let (_dir, db) = open_tmp();
+        let action = scheduled_at("recur-test", Utc::now() + CDur::seconds(60));
+        db.insert(&action).unwrap();
+
+        // Set recurrence to 1 hour
+        let updated = db
+            .update_label_and_recurrence(action.id, None, Some(Some(Duration::from_secs(3600))))
+            .unwrap();
+        assert_eq!(updated.recurrence, Some(Duration::from_secs(3600)));
+
+        // Clear recurrence
+        let updated = db
+            .update_label_and_recurrence(action.id, None, Some(None))
+            .unwrap();
+        assert_eq!(updated.recurrence, None);
+    }
+
+    #[test]
+    fn update_not_found_returns_error() {
+        let (_dir, db) = open_tmp();
+        let id = Uuid::new_v4();
+        let err = db
+            .update_label_and_recurrence(id, Some("label".to_string()), None)
+            .unwrap_err();
+        assert!(
+            matches!(err, SdlcError::OrchestratorDb(_)),
+            "expected OrchestratorDb error for missing action"
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -621,14 +928,14 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let db_path = dir.path().join("test.db");
 
-        // First open — creates ACTIONS and WEBHOOKS tables
+        // First open -- creates ACTIONS and WEBHOOKS tables
         {
             let db = ActionDb::open(&db_path).unwrap();
             let payload = make_webhook("test", b"hello");
             db.insert_webhook(&payload).unwrap();
         }
 
-        // Second open — WEBHOOKS table already exists; must not fail
+        // Second open -- WEBHOOKS table already exists; must not fail
         {
             let db = ActionDb::open(&db_path).unwrap();
             let all = db.all_pending_webhooks().unwrap();
@@ -744,6 +1051,134 @@ mod tests {
             let routes = db.list_routes().unwrap();
             assert_eq!(routes.len(), 1);
             assert_eq!(routes[0].path, "/hooks/init");
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // Webhook event ring-buffer tests
+    // -----------------------------------------------------------------------
+
+    use super::super::webhook::{WebhookEvent, WebhookEventOutcome};
+
+    fn make_event(path: &str) -> WebhookEvent {
+        WebhookEvent::new(
+            path,
+            Some("application/json".to_string()),
+            64,
+            WebhookEventOutcome::Received,
+        )
+    }
+
+    #[test]
+    fn webhook_event_insert_and_list_round_trip() {
+        let (_dir, db) = open_tmp();
+        let ev = make_event("/hooks/test");
+        db.insert_webhook_event(&ev).unwrap();
+
+        let events = db.list_webhook_events().unwrap();
+        assert_eq!(events.len(), 1);
+        assert_eq!(events[0].route_path, "/hooks/test");
+        assert_eq!(events[0].body_bytes, 64);
+        assert!(matches!(events[0].outcome, WebhookEventOutcome::Received));
+    }
+
+    #[test]
+    fn webhook_event_list_empty_returns_empty() {
+        let (_dir, db) = open_tmp();
+        let events = db.list_webhook_events().unwrap();
+        assert!(events.is_empty());
+    }
+
+    #[test]
+    fn webhook_event_seq_ordering_newest_first() {
+        let (_dir, db) = open_tmp();
+
+        db.insert_webhook_event(&make_event("/first")).unwrap();
+        db.insert_webhook_event(&make_event("/second")).unwrap();
+        db.insert_webhook_event(&make_event("/third")).unwrap();
+
+        let events = db.list_webhook_events().unwrap();
+        assert_eq!(events.len(), 3);
+        // Newest first: /third has the highest seq
+        assert_eq!(events[0].route_path, "/third");
+        assert_eq!(events[1].route_path, "/second");
+        assert_eq!(events[2].route_path, "/first");
+        // Seq values should be monotonically increasing (newest has largest seq)
+        assert!(events[0].seq > events[1].seq);
+        assert!(events[1].seq > events[2].seq);
+    }
+
+    #[test]
+    fn webhook_event_count_tracks_correctly() {
+        let (_dir, db) = open_tmp();
+
+        assert_eq!(db.webhook_event_count().unwrap(), 0);
+        db.insert_webhook_event(&make_event("/a")).unwrap();
+        assert_eq!(db.webhook_event_count().unwrap(), 1);
+        db.insert_webhook_event(&make_event("/b")).unwrap();
+        assert_eq!(db.webhook_event_count().unwrap(), 2);
+    }
+
+    #[test]
+    fn webhook_event_ring_buffer_evicts_oldest_at_501() {
+        let (_dir, db) = open_tmp();
+
+        // Fill the ring buffer to exactly WEBHOOK_EVENTS_CAP (500)
+        for i in 0..WEBHOOK_EVENTS_CAP {
+            let ev = make_event(&format!("/slot/{i}"));
+            db.insert_webhook_event(&ev).unwrap();
+        }
+        assert_eq!(db.webhook_event_count().unwrap(), WEBHOOK_EVENTS_CAP);
+
+        // Insert the 501st -- should evict the oldest (/slot/0)
+        db.insert_webhook_event(&make_event("/slot/overflow"))
+            .unwrap();
+        assert_eq!(db.webhook_event_count().unwrap(), WEBHOOK_EVENTS_CAP);
+
+        let events = db.list_webhook_events().unwrap();
+        // Newest entry is first
+        assert_eq!(events[0].route_path, "/slot/overflow");
+        // Oldest entry (/slot/0) must be gone
+        assert!(
+            events.iter().all(|e| e.route_path != "/slot/0"),
+            "/slot/0 should have been evicted"
+        );
+    }
+
+    #[test]
+    fn webhook_event_seq_assigned_by_db_not_caller() {
+        let (_dir, db) = open_tmp();
+
+        // Constructor sets seq=0; the DB should assign 1
+        let ev = make_event("/hooks/seq-test");
+        assert_eq!(ev.seq, 0, "constructor must set seq=0");
+
+        db.insert_webhook_event(&ev).unwrap();
+
+        let events = db.list_webhook_events().unwrap();
+        assert_eq!(events.len(), 1);
+        assert_ne!(events[0].seq, 0, "DB must assign a nonzero seq");
+        assert_eq!(events[0].seq, 1);
+    }
+
+    #[test]
+    fn existing_db_open_adds_webhook_events_table() {
+        let dir = TempDir::new().unwrap();
+        let db_path = dir.path().join("test3.db");
+
+        // First open: create the DB with some events
+        {
+            let db = ActionDb::open(&db_path).unwrap();
+            db.insert_webhook_event(&make_event("/hooks/pre-existing"))
+                .unwrap();
+        }
+
+        // Second open: WEBHOOK_EVENTS table already exists; data survives
+        {
+            let db = ActionDb::open(&db_path).unwrap();
+            let events = db.list_webhook_events().unwrap();
+            assert_eq!(events.len(), 1);
+            assert_eq!(events[0].route_path, "/hooks/pre-existing");
         }
     }
 }

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, type ReactNode } from 'react'
-import type { AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
+import type { ActionSseEvent, AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
 
 export interface SseCallbacks {
   onUpdate?: () => void
@@ -8,6 +8,7 @@ export interface SseCallbacks {
   onInvestigationEvent?: (event: InvestigationSseEvent) => void
   onDocsEvent?: (event: DocsSseEvent) => void
   onAdvisoryEvent?: (event: AdvisorySseEvent) => void
+  onActionEvent?: (event: ActionSseEvent) => void
 }
 
 interface SseContextValue {
@@ -63,6 +64,11 @@ export function SseProvider({ children }: { children: ReactNode }) {
         try {
           const event = JSON.parse(data) as AdvisorySseEvent
           for (const sub of subs) sub.onAdvisoryEvent?.(event)
+        } catch { /* malformed */ }
+      } else if (type === 'action') {
+        try {
+          const event = JSON.parse(data) as import('@/lib/types').ActionSseEvent
+          for (const sub of subs) sub.onActionEvent?.(event)
         } catch { /* malformed */ }
       }
     }

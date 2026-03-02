@@ -1,8 +1,8 @@
 slug: artifact-viewer-height-fix
 title: Remove Artifact Height Cap
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:06.347749Z
-updated_at: 2026-03-02T03:18:06.968072Z
+updated_at: 2026-03-02T09:14:02.450552Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,72 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-viewer-height-fix/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:13:48.907096Z
+  approved_at: 2026-03-02T09:13:51.720540Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-viewer-height-fix/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:13:51.724962Z
+  approved_at: 2026-03-02T09:13:51.729874Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-viewer-height-fix/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:13:51.734180Z
+  approved_at: 2026-03-02T09:13:51.738266Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-viewer-height-fix/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:13:59.175Z
+  approved_at: 2026-03-02T09:13:59.180116Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-viewer-height-fix/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:13:59.190239Z
+  approved_at: 2026-03-02T09:13:59.194524Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-viewer-height-fix/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:13:59.198989Z
+  approved_at: 2026-03-02T09:13:59.203375Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Remove max-h-96 overflow-y-auto from ArtifactViewer content div
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:13:59.167143Z
+  started_at: null
+  completed_at: 2026-03-02T09:13:59.170737Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'UAT: ArtifactViewer.tsx still has max-h-96 overflow-y-auto on line 36 — height cap was never removed; code change from spec was not applied'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:29:58.665385Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +88,30 @@ phase_history:
   exited: 2026-03-02T03:18:06.968072Z
 - phase: specified
   entered: 2026-03-02T03:18:06.968072Z
+  exited: 2026-03-02T09:13:51.739034Z
+- phase: planned
+  entered: 2026-03-02T09:13:51.739034Z
+  exited: 2026-03-02T09:13:59.157093Z
+- phase: ready
+  entered: 2026-03-02T09:13:59.157093Z
+  exited: 2026-03-02T09:13:59.162617Z
+- phase: implementation
+  entered: 2026-03-02T09:13:59.162617Z
+  exited: 2026-03-02T09:13:59.181118Z
+- phase: review
+  entered: 2026-03-02T09:13:59.181118Z
+  exited: 2026-03-02T09:13:59.185202Z
+- phase: audit
+  entered: 2026-03-02T09:13:59.185202Z
+  exited: 2026-03-02T09:13:59.195456Z
+- phase: qa
+  entered: 2026-03-02T09:13:59.195456Z
+  exited: 2026-03-02T09:13:59.204303Z
+- phase: merge
+  entered: 2026-03-02T09:13:59.204303Z
+  exited: 2026-03-02T09:14:02.450552Z
+- phase: released
+  entered: 2026-03-02T09:14:02.450552Z
   exited: null
 dependencies: []
 archived: false

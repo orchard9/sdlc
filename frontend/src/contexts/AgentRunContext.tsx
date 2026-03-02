@@ -10,6 +10,7 @@ interface StartRunOpts {
   label: string
   startUrl: string
   stopUrl: string
+  context?: string
 }
 
 interface AgentRunContextValue {
@@ -107,6 +108,7 @@ export function AgentRunProvider({ children }: { children: ReactNode }) {
       await fetch(opts.startUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        body: opts.context != null ? JSON.stringify({ context: opts.context }) : undefined,
       })
       // SSE will handle adding the run to the list
     } catch {

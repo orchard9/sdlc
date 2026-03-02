@@ -1,8 +1,8 @@
 slug: artifact-file-links
 title: Auto-detect File Paths as IDE Links
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:06.354207Z
-updated_at: 2026-03-02T03:18:06.975516Z
+updated_at: 2026-03-02T09:14:20.730882Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,117 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-file-links/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:05.278835Z
+  approved_at: 2026-03-02T09:14:05.285039Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-file-links/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:05.290132Z
+  approved_at: 2026-03-02T09:14:05.295217Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-file-links/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:05.299922Z
+  approved_at: 2026-03-02T09:14:05.305379Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-file-links/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:20.690273Z
+  approved_at: 2026-03-02T09:14:20.695741Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-file-links/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:20.708310Z
+  approved_at: 2026-03-02T09:14:20.713677Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/artifact-file-links/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:14:20.719524Z
+  approved_at: 2026-03-02T09:14:20.724893Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add ide_uri_scheme to Config in sdlc-core/src/config.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:14:15.516464Z
+  started_at: null
+  completed_at: 2026-03-02T09:14:17.661470Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Expose project_root in GET /api/config response
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:14:15.521217Z
+  started_at: null
+  completed_at: 2026-03-02T09:14:17.666873Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add Settings interface and project_root to ProjectConfig in frontend/src/lib/types.ts
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:14:15.525488Z
+  started_at: null
+  completed_at: 2026-03-02T09:14:17.672307Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create ProjectSettingsContext.tsx with projectRoot and ideUriScheme hook
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:14:15.529205Z
+  started_at: null
+  completed_at: 2026-03-02T09:14:17.677227Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Fetch /api/config at startup and provide ProjectSettingsContext in App.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:14:15.532917Z
+  started_at: null
+  completed_at: 2026-03-02T09:14:17.682370Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Add FILE_PATH_PATTERN and IDE link rendering to MarkdownContent.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:14:15.536674Z
+  started_at: null
+  completed_at: 2026-03-02T09:14:17.687575Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: 'UAT: MarkdownContent.tsx has no file path detection — FILE_PATH_PATTERN, IDE link rendering, and projectRoot prop are all missing from the implementation'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:06.416681Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +133,30 @@ phase_history:
   exited: 2026-03-02T03:18:06.975516Z
 - phase: specified
   entered: 2026-03-02T03:18:06.975516Z
+  exited: 2026-03-02T09:14:05.306358Z
+- phase: planned
+  entered: 2026-03-02T09:14:05.306358Z
+  exited: 2026-03-02T09:14:08.812847Z
+- phase: ready
+  entered: 2026-03-02T09:14:08.812847Z
+  exited: 2026-03-02T09:14:08.818732Z
+- phase: implementation
+  entered: 2026-03-02T09:14:08.818732Z
+  exited: 2026-03-02T09:14:20.696854Z
+- phase: review
+  entered: 2026-03-02T09:14:20.696854Z
+  exited: 2026-03-02T09:14:20.701946Z
+- phase: audit
+  entered: 2026-03-02T09:14:20.701946Z
+  exited: 2026-03-02T09:14:20.714828Z
+- phase: qa
+  entered: 2026-03-02T09:14:20.714828Z
+  exited: 2026-03-02T09:14:20.726096Z
+- phase: merge
+  entered: 2026-03-02T09:14:20.726096Z
+  exited: 2026-03-02T09:14:20.730882Z
+- phase: released
+  entered: 2026-03-02T09:14:20.730882Z
   exited: null
 dependencies: []
 archived: false

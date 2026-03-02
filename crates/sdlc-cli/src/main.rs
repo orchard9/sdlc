@@ -5,9 +5,9 @@ mod tools;
 
 use clap::{Parser, Subcommand};
 use cmd::{
-    agent::AgentSubcommand, artifact::ArtifactSubcommand, comment::CommentSubcommand,
-    config::ConfigSubcommand, escalate::EscalateSubcommand, feature::FeatureSubcommand,
-    investigate::InvestigateSubcommand, knowledge::KnowledgeSubcommand,
+    agent::AgentSubcommand, artifact::ArtifactSubcommand, backlog::BacklogSubcommand,
+    comment::CommentSubcommand, config::ConfigSubcommand, escalate::EscalateSubcommand,
+    feature::FeatureSubcommand, investigate::InvestigateSubcommand, knowledge::KnowledgeSubcommand,
     milestone::MilestoneSubcommand, orchestrate::OrchestrateSubcommand,
     platform::PlatformSubcommand, ponder::PonderSubcommand, project::ProjectSubcommand,
     query::QuerySubcommand, score::ScoreSubcommand, secrets::SecretsSubcommand,
@@ -61,6 +61,12 @@ enum Commands {
     Feature {
         #[command(subcommand)]
         subcommand: FeatureSubcommand,
+    },
+
+    /// Capture and manage out-of-scope concerns, ideas, and debt discovered during agent runs
+    Backlog {
+        #[command(subcommand)]
+        subcommand: BacklogSubcommand,
     },
 
     /// Manage artifacts
@@ -234,6 +240,7 @@ fn main() {
         Commands::Next { feature } => cmd::next::run(&root, feature.as_deref(), cli.json),
         Commands::Focus => cmd::focus::run(&root, cli.json),
         Commands::Feature { subcommand } => cmd::feature::run(&root, subcommand, cli.json),
+        Commands::Backlog { subcommand } => cmd::backlog::run(&root, subcommand, cli.json),
         Commands::Artifact { subcommand } => cmd::artifact::run(&root, subcommand, cli.json),
         Commands::Task { subcommand } => cmd::task::run(&root, subcommand, cli.json),
         Commands::Comment { subcommand } => cmd::comment::run(&root, subcommand, cli.json),

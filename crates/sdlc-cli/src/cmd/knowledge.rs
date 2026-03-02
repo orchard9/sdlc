@@ -1,13 +1,35 @@
 use crate::output::{print_json, print_table};
-use anyhow::Context;
+use anyhow::{anyhow, Context};
 use clap::Subcommand;
 use sdlc_core::knowledge::{self, KnowledgeEntry, KnowledgeStatus, OriginKind, Source, SourceType};
+use sdlc_core::ui_registry;
 use std::path::{Path, PathBuf};
 
 #[derive(Subcommand)]
 pub enum KnowledgeLibrarianSubcommand {
     /// Initialize the knowledge base by harvesting completed workspaces (idempotent)
     Init,
+    /// Run a maintenance pass or harvest a specific workspace
+    Run {
+        /// Mode: "maintain" (default) or "harvest"
+        #[arg(long, default_value = "maintain")]
+        mode: String,
+        /// Workspace type for harvest mode: "investigation" or "ponder"
+        #[arg(long)]
+        r#type: Option<String>,
+        /// Workspace slug for harvest mode
+        #[arg(long)]
+        slug: Option<String>,
+    },
+    /// Harvest a specific workspace into the knowledge base
+    Harvest {
+        /// Workspace type: "investigation" or "ponder"
+        #[arg(long)]
+        r#type: String,
+        /// Workspace slug
+        #[arg(long)]
+        slug: String,
+    },
 }
 
 const EMPTY_STATE_MSG: &str =
@@ -92,6 +114,21 @@ pub enum KnowledgeSubcommand {
     Librarian {
         #[command(subcommand)]
         subcommand: KnowledgeLibrarianSubcommand,
+    },
+
+    /// Spawn an agent research run for a topic (requires the sdlc UI server to be running)
+    Research {
+        /// Topic to research
+        topic: String,
+        /// Classification code (e.g. 100.20); used to create entry if it doesn't exist
+        #[arg(long)]
+        code: Option<String>,
+    },
+
+    /// Ask the knowledge librarian a question (requires the sdlc UI server to be running)
+    Ask {
+        /// The question to ask
+        question: String,
     },
 }
 
@@ -199,6 +236,10 @@ pub fn run(root: &Path, subcmd: KnowledgeSubcommand, json: bool) -> anyhow::Resu
             }
         },
         KnowledgeSubcommand::Librarian { subcommand } => run_librarian(root, subcommand, json),
+        KnowledgeSubcommand::Research { topic, code } => {
+            research(root, &topic, code.as_deref(), json)
+        }
+        KnowledgeSubcommand::Ask { question } => ask(root, &question, json),
     }
 }
 
@@ -683,12 +724,89 @@ fn session_read(root: &Path, slug: &str, number: u32, json: bool) -> anyhow::Res
     Ok(())
 }
 
+fn run_harvest(
+    root: &Path,
+    workspace_type: &str,
+    workspace_slug: &str,
+    json: bool,
+) -> anyhow::Result<()> {
+    let result = knowledge::librarian_harvest_workspace(root, workspace_type, workspace_slug)
+        .with_context(|| {
+            format!("failed to harvest {workspace_type}/{workspace_slug} into knowledge base")
+        })?;
+
+    if json {
+        print_json(&serde_json::json!({
+            "type": workspace_type,
+            "slug": workspace_slug,
+            "created": result.created,
+            "entry_slug": result.slug,
+        }))?;
+    } else if result.created {
+        println!(
+            "Harvested {workspace_type}/{workspace_slug} → created knowledge entry '{}'.",
+            result.slug
+        );
+    } else {
+        println!(
+            "Harvested {workspace_type}/{workspace_slug} → updated knowledge entry '{}'.",
+            result.slug
+        );
+    }
+    Ok(())
+}
+
 fn run_librarian(
     root: &Path,
     subcmd: KnowledgeLibrarianSubcommand,
     json: bool,
 ) -> anyhow::Result<()> {
     match subcmd {
+        KnowledgeLibrarianSubcommand::Run { mode, r#type, slug } => match mode.as_str() {
+            "maintain" => {
+                let msg = "\
+Knowledge base maintenance pass — run the following checks in order:
+
+1. URL health: for each entry with a web source, fetch the URL and flag 404/5xx
+   responses by adding \"url_404\" to staleness_flags via `sdlc knowledge update <slug>`.
+
+2. Code ref health: for entries tagged \"code-ref\", grep the codebase for the
+   referenced symbol. If not found, add \"code_ref_gone\" to staleness_flags.
+
+3. Duplication: entries sharing the same code prefix, tag set, and similar title
+   should be flagged with \"duplicate_candidate\" in staleness_flags.
+
+4. Catalog fitness: log a catalog_update action for classes with >10 entries
+   (suggest subdivision) or empty classes (suggest removal).
+
+5. Cross-ref suggestions: entries sharing 2+ tags that don't reference each other
+   should be updated with mutual `related` entries via `sdlc knowledge update --related`.
+
+6. Harvest pending: list all investigations and ponders; for each with
+   status=complete that has no corresponding knowledge entry, run:
+   `sdlc knowledge librarian harvest --type <type> --slug <slug>`
+
+All changes are logged to .sdlc/knowledge/maintenance-log.yaml automatically.
+";
+                print!("{msg}");
+                Ok(())
+            }
+            "harvest" => {
+                let workspace_type = r#type.ok_or_else(|| {
+                    anyhow::anyhow!("--type is required when --mode harvest is used")
+                })?;
+                let workspace_slug = slug.ok_or_else(|| {
+                    anyhow::anyhow!("--slug is required when --mode harvest is used")
+                })?;
+                run_harvest(root, &workspace_type, &workspace_slug, json)
+            }
+            other => Err(anyhow::anyhow!(
+                "unknown mode '{other}'; valid modes are 'maintain' and 'harvest'"
+            )),
+        },
+        KnowledgeLibrarianSubcommand::Harvest { r#type, slug } => {
+            run_harvest(root, &r#type, &slug, json)
+        }
         KnowledgeLibrarianSubcommand::Init => {
             let report = knowledge::librarian_init(root).context("librarian init failed")?;
 
@@ -786,6 +904,133 @@ fn fetch_page_title(url: &str) -> Option<String> {
     } else {
         Some(title)
     }
+}
+
+// ---------------------------------------------------------------------------
+// Research (agent run via server)
+// ---------------------------------------------------------------------------
+
+fn research(_root: &Path, topic: &str, _code: Option<&str>, json: bool) -> anyhow::Result<()> {
+    // Derive slug from topic
+    let slug = slugify_topic(topic);
+
+    // Find the running server URL via the ui_registry.
+    let records = ui_registry::read_all().map_err(|e| anyhow!("{e}"))?;
+    let active: Vec<_> = records
+        .into_iter()
+        .filter(|r| ui_registry::is_pid_alive(r.pid))
+        .collect();
+
+    if active.is_empty() {
+        return Err(anyhow!(
+            "No running sdlc UI server found. Start one with `sdlc ui` first."
+        ));
+    }
+
+    let base_url = active[0].url.trim_end_matches('/').to_string();
+    let url = format!("{base_url}/api/knowledge/{slug}/research");
+
+    let body = serde_json::json!({ "topic": topic });
+    let response = ureq::post(&url)
+        .set("Content-Type", "application/json")
+        .send_string(&body.to_string())
+        .map_err(|e| anyhow!("HTTP request failed: {e}"))?;
+
+    let status = response.status();
+    if status != 202 {
+        let body_text = response.into_string().unwrap_or_default();
+        return Err(anyhow!("Server returned {status}: {body_text}"));
+    }
+
+    let resp_body = response
+        .into_string()
+        .map_err(|e| anyhow!("Failed to read response: {e}"))?;
+    let resp_json: serde_json::Value =
+        serde_json::from_str(&resp_body).map_err(|e| anyhow!("Failed to parse response: {e}"))?;
+
+    if json {
+        print_json(&resp_json)?;
+    } else {
+        println!(
+            "Research started for '{}' (slug: {slug}). Watch the Activity feed for progress.",
+            topic
+        );
+    }
+
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Ask (agent query via server)
+// ---------------------------------------------------------------------------
+
+fn ask(root: &Path, question: &str, json: bool) -> anyhow::Result<()> {
+    let _ = root; // root is used for context but server handles the query
+
+    // Find the running server URL via the ui_registry.
+    let records = ui_registry::read_all().map_err(|e| anyhow!("{e}"))?;
+    let active: Vec<_> = records
+        .into_iter()
+        .filter(|r| ui_registry::is_pid_alive(r.pid))
+        .collect();
+
+    if active.is_empty() {
+        return Err(anyhow!(
+            "No running sdlc UI server found. Start one with `sdlc ui` first."
+        ));
+    }
+
+    let base_url = active[0].url.trim_end_matches('/').to_string();
+    let url = format!("{base_url}/api/knowledge/ask");
+
+    let body = serde_json::json!({ "question": question });
+    let response = ureq::post(&url)
+        .set("Content-Type", "application/json")
+        .send_string(&body.to_string())
+        .map_err(|e| anyhow!("HTTP request failed: {e}"))?;
+
+    let status = response.status();
+    if status == 400 {
+        let body_text = response.into_string().unwrap_or_default();
+        return Err(anyhow!("Bad request: {body_text}"));
+    }
+    if status != 200 && status != 202 {
+        let body_text = response.into_string().unwrap_or_default();
+        return Err(anyhow!("Server returned {status}: {body_text}"));
+    }
+
+    let resp_body = response
+        .into_string()
+        .map_err(|e| anyhow!("Failed to read response: {e}"))?;
+    let resp_json: serde_json::Value =
+        serde_json::from_str(&resp_body).map_err(|e| anyhow!("Failed to parse response: {e}"))?;
+
+    if json {
+        print_json(&resp_json)?;
+    } else {
+        println!("Knowledge query started. Watch the Activity feed in the UI for the answer.");
+    }
+
+    Ok(())
+}
+
+fn slugify_topic(topic: &str) -> String {
+    let lower = topic.to_lowercase();
+    let mut result = String::new();
+    let mut last_was_dash = false;
+    for c in lower.chars() {
+        if c.is_ascii_alphanumeric() {
+            result.push(c);
+            last_was_dash = false;
+        } else if !last_was_dash && !result.is_empty() {
+            result.push('-');
+            last_was_dash = true;
+        }
+    }
+    while result.ends_with('-') {
+        result.pop();
+    }
+    result.chars().take(40).collect()
 }
 
 // ---------------------------------------------------------------------------

@@ -1,39 +1,39 @@
 slug: backlog-cli
 title: sdlc backlog CLI commands
 description: 'Create crates/sdlc-cli/src/cmd/backlog.rs with BacklogSubcommand enum (Add, List, Park, Promote, Show) and run() dispatch. Add to cmd/mod.rs and main.rs Commands enum. Commands: add <title...> [--description] [--kind concern|idea|debt] [--evidence] [--source-feature]; if --source-feature omitted, auto-infer from most recently active feature in .sdlc/state.yaml (warn if not found, never block). Confirmation output MUST include: ''Backlog item <ID> recorded: "<title>" [<source_feature>]'' — the ID and source are required for agent transcript auditability. list [--all | --status <s>] [--source-feature <slug>] — filter by feature origin. park <id> --reason <reason> — park_reason is required. promote <id> [--slug <feature-slug>] [--milestone <milestone-slug>] — creates feature, optionally links to milestone via sdlc milestone add-feature, outputs new feature slug. show <id>.'
-phase: draft
+phase: ready
 created_at: 2026-03-02T02:49:56.876232Z
-updated_at: 2026-03-02T03:01:14.148644Z
+updated_at: 2026-03-02T09:26:36.442547Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/backlog-cli/spec.md
   created_at: null
-  approved_at: null
+  approved_at: 2026-03-02T09:26:11.775826Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/backlog-cli/design.md
   created_at: null
-  approved_at: null
+  approved_at: 2026-03-02T09:26:18.517025Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/backlog-cli/tasks.md
   created_at: null
-  approved_at: null
+  approved_at: 2026-03-02T09:26:26.197146Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/backlog-cli/qa-plan.md
   created_at: null
-  approved_at: null
+  approved_at: 2026-03-02T09:26:32.203809Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -152,12 +152,39 @@ tasks:
   completed_at: null
   blocker: null
   depends_on: []
+- id: T11
+  title: 'UAT: auto-infer scenario missing stderr/stdout notice — output should include ''No source feature provided — inferred from state.yaml: <slug>'' when auto-inferring source_feature'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:47:20.114024Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T12
+  title: 'UAT: backlog list --all should show park_reason column for parked items'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:48:04.034702Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T02:49:56.876232Z
+  exited: 2026-03-02T09:26:11.901252Z
+- phase: specified
+  entered: 2026-03-02T09:26:11.901252Z
+  exited: 2026-03-02T09:26:32.248326Z
+- phase: planned
+  entered: 2026-03-02T09:26:32.248326Z
+  exited: 2026-03-02T09:26:36.442547Z
+- phase: ready
+  entered: 2026-03-02T09:26:36.442547Z
   exited: null
 dependencies: []
 archived: false

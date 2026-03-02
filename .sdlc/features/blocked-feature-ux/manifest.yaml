@@ -1,72 +1,135 @@
 slug: blocked-feature-ux
 title: Blocked Feature UX — BlockedPanel with Remove and Run-with-Direction
-phase: draft
+phase: released
 created_at: 2026-03-02T04:09:27.624863Z
-updated_at: 2026-03-02T04:09:27.624863Z
+updated_at: 2026-03-02T09:17:55.863946Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:16:51.703092Z
+  approved_at: 2026-03-02T09:16:51.710991Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:16:55.999084Z
+  approved_at: 2026-03-02T09:16:56.005128Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:16:58.243379Z
+  approved_at: 2026-03-02T09:16:58.249062Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:00.229801Z
+  approved_at: 2026-03-02T09:17:00.235859Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:18.406102Z
+  approved_at: 2026-03-02T09:17:18.412085Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:23.432679Z
+  approved_at: 2026-03-02T09:17:23.446016Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/blocked-feature-ux/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:50.428596Z
+  approved_at: 2026-03-02T09:17:50.434451Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: 'T1: add remove_blocker method to sdlc-core Feature struct'
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:17:09.315789Z
+  started_at: null
+  completed_at: 2026-03-02T09:17:12.774703Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'T2: add DELETE /api/features/:slug/blockers/:idx route to sdlc-server'
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:17:09.321942Z
+  started_at: null
+  completed_at: 2026-03-02T09:17:12.779681Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'T3: create BlockedPanel.tsx React component'
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:17:09.327087Z
+  started_at: null
+  completed_at: 2026-03-02T09:17:12.784998Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'T4: integrate BlockedPanel into FeatureDetail.tsx'
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:17:09.332064Z
+  started_at: null
+  completed_at: 2026-03-02T09:17:12.789325Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T04:09:27.624863Z
+  exited: 2026-03-02T09:16:51.712243Z
+- phase: specified
+  entered: 2026-03-02T09:16:51.712243Z
+  exited: 2026-03-02T09:17:00.236954Z
+- phase: planned
+  entered: 2026-03-02T09:17:00.236954Z
+  exited: 2026-03-02T09:17:03.540228Z
+- phase: ready
+  entered: 2026-03-02T09:17:03.540228Z
+  exited: 2026-03-02T09:17:03.554590Z
+- phase: implementation
+  entered: 2026-03-02T09:17:03.554590Z
+  exited: 2026-03-02T09:17:18.413055Z
+- phase: review
+  entered: 2026-03-02T09:17:18.413055Z
+  exited: 2026-03-02T09:17:23.434187Z
+- phase: audit
+  entered: 2026-03-02T09:17:23.434187Z
+  exited: 2026-03-02T09:17:23.452565Z
+- phase: qa
+  entered: 2026-03-02T09:17:23.452565Z
+  exited: 2026-03-02T09:17:50.435872Z
+- phase: merge
+  entered: 2026-03-02T09:17:50.435872Z
+  exited: 2026-03-02T09:17:55.863946Z
+- phase: released
+  entered: 2026-03-02T09:17:55.863946Z
   exited: null
 dependencies: []
 archived: false

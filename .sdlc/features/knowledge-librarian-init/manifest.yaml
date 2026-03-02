@@ -1,47 +1,47 @@
 slug: knowledge-librarian-init
 title: sdlc knowledge librarian init — project scan, catalog gen, agent file, hooks
 description: 'sdlc knowledge librarian init command. IDEMPOTENT — safe to run multiple times; each step is a no-op if already complete. 9-step flow: (1) project scan — read VISION.md, ARCHITECTURE.md, CLAUDE.md, .sdlc/config.yaml; (2) workspace harvest — for each completed investigation and committed ponder, extract durable insights (root cause hypotheses, decided constraints, evolution paths) and create draft knowledge entries; (3) guideline linking — for each published guideline, create a knowledge entry with origin:guideline; (4) domain extraction — identify 5-7 knowledge domains from harvested entries and existing docs; (5) catalog generation — write .sdlc/knowledge/catalog.yaml with derived categories (no-op if catalog already exists); (6) librarian agent generation — write .claude/agents/knowledge-librarian.md with project name, full catalog, and key architectural context baked in (overwrites to pick up catalog changes); (7) hook registration — document harvest hooks in .sdlc/config.yaml; (8) cross-ref pass — suggest related[] links between newly seeded entries with matching tags; (9) report — N entries created, M entries updated, catalog categories, librarian agent written. Failure handling: each step reports success/failure independently; partial init is recoverable by re-running the command. Harvest protocol: for each durable insight, check for existing matching entry by slug (same title normalized), append to content.md if exists, create new entry if not, record harvested_from, log to maintenance-log.yaml. Durable insight extraction rules: from root-cause (hypothesis + fix approach), from evolve (lens scores + chosen paths), from ponder (Decided: entries + surfaced constraints). NOT harvested: transient symptom details, specific file paths, raw exploratory dialogue.'
-phase: draft
+phase: review
 created_at: 2026-03-02T02:12:15.977972Z
-updated_at: 2026-03-02T02:28:42.979740Z
+updated_at: 2026-03-02T09:32:13.305121Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:10.607793Z
+  approved_at: 2026-03-02T09:27:13.719558Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:28:18.775526Z
+  approved_at: 2026-03-02T09:28:23.269140Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:28:46.544781Z
+  approved_at: 2026-03-02T09:28:49.372301Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:29:20.846386Z
+  approved_at: 2026-03-02T09:29:24.287205Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:32:11.227233Z
+  approved_at: 2026-03-02T09:32:13.303370Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,10 +65,10 @@ tasks:
 - id: T1
   title: '[user-gap] idempotency test: running init twice produces same result as running once'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-02T02:28:50.491954Z
   started_at: null
-  completed_at: null
+  completed_at: 2026-03-02T09:31:28.106885Z
   blocker: null
   depends_on: []
 comments: []
@@ -77,6 +77,21 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T02:12:15.977972Z
+  exited: 2026-03-02T09:27:13.954195Z
+- phase: specified
+  entered: 2026-03-02T09:27:13.954195Z
+  exited: 2026-03-02T09:29:24.383723Z
+- phase: planned
+  entered: 2026-03-02T09:29:24.383723Z
+  exited: 2026-03-02T09:29:29.346161Z
+- phase: ready
+  entered: 2026-03-02T09:29:29.346161Z
+  exited: 2026-03-02T09:29:33.144371Z
+- phase: implementation
+  entered: 2026-03-02T09:29:33.144371Z
+  exited: 2026-03-02T09:32:13.305121Z
+- phase: review
+  entered: 2026-03-02T09:32:13.305121Z
   exited: null
 dependencies: []
 archived: false

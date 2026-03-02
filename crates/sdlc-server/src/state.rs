@@ -216,6 +216,34 @@ pub enum SseMessage {
     ToolActCompleted { name: String, action_index: usize },
     /// A milestone UAT agent run completed — UatRun record may have been written.
     MilestoneUatCompleted { slug: String },
+    /// The orchestrator daemon completed a tick — action states may have changed.
+    /// Frontend should re-fetch the orchestrator actions list.
+    ActionStateChanged,
+    /// A knowledge research agent run has started.
+    KnowledgeResearchStarted { slug: String },
+    /// A knowledge research agent run completed — content and session written.
+    KnowledgeResearchCompleted { slug: String },
+    /// A knowledge base maintenance agent run has started.
+    KnowledgeMaintenanceStarted,
+    /// A knowledge base maintenance agent run completed.
+    KnowledgeMaintenanceCompleted { actions_taken: usize },
+    /// A knowledge query (ask) agent run has started.
+    KnowledgeQueryStarted { question: String },
+    /// A knowledge query (ask) agent run completed — answer ready.
+    KnowledgeQueryCompleted {
+        answer: String,
+        cited_entries: Vec<CitedEntry>,
+        gap_detected: bool,
+        gap_suggestion: Option<String>,
+    },
+}
+
+/// A knowledge entry cited in a librarian answer.
+#[derive(Clone, Debug, serde::Serialize, serde::Deserialize)]
+pub struct CitedEntry {
+    pub slug: String,
+    pub code: String,
+    pub title: String,
 }
 
 /// Shared application state passed to all route handlers.
@@ -368,6 +396,26 @@ impl AppState {
                     if snapshot != last_snapshot {
                         last_snapshot = snapshot;
                         let _ = tx_tools.send(SseMessage::ToolsChanged);
+                    }
+                }
+            });
+
+            // Watch .sdlc/.orchestrator.state — written by the orchestrator daemon
+            // after each tick. Fires ActionStateChanged so the frontend can
+            // refresh the actions list without polling.
+            let sentinel = state.root.join(".sdlc").join(".orchestrator.state");
+            let tx_orch = tx.clone();
+            tokio::spawn(async move {
+                let mut last_mtime = None::<std::time::SystemTime>;
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                    if let Ok(meta) = tokio::fs::metadata(&sentinel).await {
+                        if let Ok(mtime) = meta.modified() {
+                            if last_mtime != Some(mtime) {
+                                last_mtime = Some(mtime);
+                                let _ = tx_orch.send(SseMessage::ActionStateChanged);
+                            }
+                        }
                     }
                 }
             });

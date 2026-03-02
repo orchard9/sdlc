@@ -146,6 +146,72 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             .to_string();
             Some(Ok(Event::default().event("milestone_uat").data(data)))
         }
+        Ok(SseMessage::ActionStateChanged) => {
+            let data = serde_json::json!({ "type": "action_state_changed" }).to_string();
+            Some(Ok(Event::default().event("orchestrator").data(data)))
+        }
+        Ok(SseMessage::KnowledgeResearchStarted { slug }) => {
+            let data = serde_json::json!({
+                "type": "KnowledgeResearchStarted",
+                "slug": slug,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("knowledge").data(data)))
+        }
+        Ok(SseMessage::KnowledgeResearchCompleted { slug }) => {
+            let data = serde_json::json!({
+                "type": "KnowledgeResearchCompleted",
+                "slug": slug,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("knowledge").data(data)))
+        }
+        Ok(SseMessage::KnowledgeMaintenanceStarted) => {
+            let data = serde_json::json!({ "type": "KnowledgeMaintenanceStarted" }).to_string();
+            Some(Ok(Event::default().event("knowledge").data(data)))
+        }
+        Ok(SseMessage::KnowledgeMaintenanceCompleted { actions_taken }) => {
+            let data = serde_json::json!({
+                "type": "KnowledgeMaintenanceCompleted",
+                "actions_taken": actions_taken,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("knowledge").data(data)))
+        }
+        Ok(SseMessage::KnowledgeQueryStarted { question }) => {
+            let data = serde_json::json!({
+                "type": "KnowledgeQueryStarted",
+                "question": question,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("knowledge").data(data)))
+        }
+        Ok(SseMessage::KnowledgeQueryCompleted {
+            answer,
+            cited_entries,
+            gap_detected,
+            gap_suggestion,
+        }) => {
+            let entries: Vec<serde_json::Value> = cited_entries
+                .iter()
+                .map(|e| {
+                    serde_json::json!({
+                        "slug": e.slug,
+                        "code": e.code,
+                        "title": e.title,
+                    })
+                })
+                .collect();
+            let data = serde_json::json!({
+                "type": "KnowledgeQueryCompleted",
+                "answer": answer,
+                "cited_entries": entries,
+                "gap_detected": gap_detected,
+                "gap_suggestion": gap_suggestion,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("knowledge").data(data)))
+        }
         Err(_) => None,
     });
     // Prepend a ~2KB padding comment so the response body exceeds Cloudflare's

@@ -1,0 +1,99 @@
+slug: orchestrator-sse-bridge
+title: Orchestrator SSE Bridge — ActionStateChanged variant, daemon sentinel file, server directory watcher
+phase: released
+created_at: 2026-03-02T06:53:35.897003Z
+updated_at: 2026-03-02T09:40:54.330323Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/spec.md
+  created_at: 2026-03-02T08:46:37.122207Z
+  approved_at: 2026-03-02T08:46:40.246327Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/design.md
+  created_at: 2026-03-02T08:47:27.470421Z
+  approved_at: 2026-03-02T08:47:29.460557Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/tasks.md
+  created_at: 2026-03-02T08:47:54.743973Z
+  approved_at: 2026-03-02T08:47:56.809131Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/qa-plan.md
+  created_at: 2026-03-02T08:48:23.107919Z
+  approved_at: 2026-03-02T08:48:25.131081Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/review.md
+  created_at: 2026-03-02T09:34:37.666800Z
+  approved_at: 2026-03-02T09:34:40.957619Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/audit.md
+  created_at: 2026-03-02T09:35:12.369585Z
+  approved_at: 2026-03-02T09:35:14.513766Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/orchestrator-sse-bridge/qa-results.md
+  created_at: 2026-03-02T09:40:47.701854Z
+  approved_at: 2026-03-02T09:40:50.179230Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T06:53:35.897003Z
+  exited: 2026-03-02T08:46:40.255771Z
+- phase: specified
+  entered: 2026-03-02T08:46:40.255771Z
+  exited: 2026-03-02T08:48:25.132172Z
+- phase: planned
+  entered: 2026-03-02T08:48:25.132172Z
+  exited: 2026-03-02T08:48:29.321352Z
+- phase: ready
+  entered: 2026-03-02T08:48:29.321352Z
+  exited: 2026-03-02T08:48:32.189255Z
+- phase: implementation
+  entered: 2026-03-02T08:48:32.189255Z
+  exited: 2026-03-02T09:34:40.959626Z
+- phase: review
+  entered: 2026-03-02T09:34:40.959626Z
+  exited: 2026-03-02T09:34:47.728257Z
+- phase: audit
+  entered: 2026-03-02T09:34:47.728257Z
+  exited: 2026-03-02T09:35:14.515371Z
+- phase: qa
+  entered: 2026-03-02T09:35:14.515371Z
+  exited: 2026-03-02T09:40:50.180421Z
+- phase: merge
+  entered: 2026-03-02T09:40:50.180421Z
+  exited: 2026-03-02T09:40:54.330323Z
+- phase: released
+  entered: 2026-03-02T09:40:54.330323Z
+  exited: null
+dependencies: []
+archived: false

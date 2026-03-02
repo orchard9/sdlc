@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useProjectState } from '@/hooks/useProjectState'
 import { FeatureCard } from '@/components/features/FeatureCard'
@@ -6,9 +6,10 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Skeleton, SkeletonCard } from '@/components/shared/Skeleton'
 import { CommandBlock } from '@/components/shared/CommandBlock'
 import { api } from '@/api/client'
-import type { AgentDefinition, EscalationSummary, ProjectConfig } from '@/lib/types'
+import type { EscalationSummary, ProjectConfig } from '@/lib/types'
 import { PreparePanel } from '@/components/features/PreparePanel'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
+import { DashboardEmptyState } from '@/components/dashboard/DashboardEmptyState'
 import { AlertTriangle, Clock, ChevronDown, ChevronRight, Key, HelpCircle, Target, FlaskConical, Zap, Check } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -130,23 +131,10 @@ export function Dashboard() {
   const { isRunning } = useAgentRuns()
   const [config, setConfig] = useState<ProjectConfig | null>(null)
   const [showArchive, setShowArchive] = useState(false)
-  const [setupIncomplete, setSetupIncomplete] = useState(false)
-  const hasCheckedSetup = useRef(false)
 
   useEffect(() => {
-    if (hasCheckedSetup.current) return
-    hasCheckedSetup.current = true
-
-    Promise.all([
-      api.getConfig().catch(() => null),
-      api.getVision().catch(() => null),
-      api.getArchitecture().catch(() => null),
-      api.getProjectAgents().catch((): AgentDefinition[] => []),
-    ]).then(([cfg, vision, arch, agents]) => {
+    api.getConfig().catch(() => null).then(cfg => {
       if (cfg) setConfig(cfg)
-      const noProject = !cfg?.project.description || (!vision?.exists && !arch?.exists)
-      const noTeam = agents.length === 0
-      setSetupIncomplete(noProject || noTeam)
     })
   }, [])
 
@@ -196,19 +184,6 @@ export function Dashboard() {
 
   return (
     <div className="max-w-5xl mx-auto p-4 sm:p-6">
-
-      {/* Setup incomplete notice */}
-      {setupIncomplete && (
-        <div className="flex items-center justify-between gap-3 px-4 py-3 mb-6 rounded-lg border border-amber-500/30 bg-amber-950/20 text-sm">
-          <span className="text-amber-300/80">Project setup is incomplete — agents won't have enough context to work with.</span>
-          <Link
-            to="/setup"
-            className="text-amber-300 hover:text-amber-200 transition-colors whitespace-nowrap font-medium"
-          >
-            Go to Setup →
-          </Link>
-        </div>
-      )}
 
       {/* Project Overview */}
       <div className="mb-6">
@@ -399,13 +374,8 @@ export function Dashboard() {
         </section>
       )}
 
-      {state.features.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-muted-foreground text-sm">No features yet.</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Use <code className="text-primary">sdlc feature create</code> to get started.
-          </p>
-        </div>
+      {state.milestones.length === 0 && state.features.length === 0 && (
+        <DashboardEmptyState />
       )}
     </div>
   )

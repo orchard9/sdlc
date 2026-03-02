@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: dashboard-empty-states
+    title: Orchestrator-aware empty states — suggestion chips replace generic empty state
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: dashboard-horizon-zone
+    title: Horizon zone — unified forward-looking surface for milestones and ponders
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: dashboard-zone-layout
+    title: Dashboard four-zone layout — milestone-level digest replaces feature card grid
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

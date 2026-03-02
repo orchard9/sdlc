@@ -1,0 +1,14 @@
+{
+  "id": "20260302-092541-aaa",
+  "key": "milestone-run-wave:v10-knowledge-capture",
+  "run_type": "milestone_run_wave",
+  "target": "v10-knowledge-capture",
+  "label": "run-wave: v10-knowledge-capture",
+  "status": "completed",
+  "started_at": "2026-03-02T09:25:41.835270+00:00",
+  "completed_at": "2026-03-02T09:32:27.604070+00:00",
+  "cost_usd": 3.866335,
+  "turns": 5,
+  "error": null,
+  "prompt": "Execute the current wave of milestone 'v10-knowledge-capture' in parallel. Run `sdlc project prepare --milestone v10-knowledge-capture --json` to get the live wave plan. Wave 1 of the output is the current wave. For each feature in Wave 1 that does not need a worktree, spawn a parallel Agent call running `/sdlc-run <feature-slug>`. Wait for all agents to complete, then re-run prepare and report the updated wave plan."
+}

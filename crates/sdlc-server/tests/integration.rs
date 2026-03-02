@@ -50,6 +50,39 @@ async fn post_json(
     (status, json)
 }
 
+/// Send a DELETE request via `oneshot` and return (status, parsed JSON body).
+async fn delete_req(app: axum::Router, uri: &str) -> (StatusCode, serde_json::Value) {
+    let req = axum::http::Request::builder()
+        .method("DELETE")
+        .uri(uri)
+        .body(axum::body::Body::empty())
+        .unwrap();
+    let response = app.oneshot(req).await.unwrap();
+    let status = response.status();
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap_or(serde_json::Value::Null);
+    (status, json)
+}
+
+/// Send a PATCH request with a JSON body via `oneshot` and return (status, parsed JSON body).
+async fn patch_json(
+    app: axum::Router,
+    uri: &str,
+    body: serde_json::Value,
+) -> (StatusCode, serde_json::Value) {
+    let req = axum::http::Request::builder()
+        .method("PATCH")
+        .uri(uri)
+        .header("content-type", "application/json")
+        .body(axum::body::Body::from(serde_json::to_vec(&body).unwrap()))
+        .unwrap();
+    let response = app.oneshot(req).await.unwrap();
+    let status = response.status();
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let json: serde_json::Value = serde_json::from_slice(&body).unwrap_or(serde_json::Value::Null);
+    (status, json)
+}
+
 /// Send a POST request with a JSON body and a custom Host header.
 async fn post_json_with_host(
     app: axum::Router,
@@ -671,4 +704,401 @@ async fn post_webhook_preserves_raw_body_bytes() {
         payloads[0].content_type,
         Some("application/octet-stream".to_string())
     );
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge research endpoint tests
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn test_knowledge_research_returns_202() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Pre-create the knowledge entry so the handler finds it.
+    sdlc_core::knowledge::create(dir.path(), "test-topic", "Test Topic", "uncategorized").unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+
+    let req = axum::http::Request::builder()
+        .method("POST")
+        .uri("/api/knowledge/test-topic/research")
+        .header("content-type", "application/json")
+        .body(axum::body::Body::from(r#"{"topic":"test"}"#))
+        .unwrap();
+
+    let response = app.oneshot(req).await.unwrap();
+    let status = response.status();
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let json: serde_json::Value =
+        serde_json::from_slice(&body).expect("response should be valid JSON");
+
+    assert_eq!(
+        status,
+        StatusCode::ACCEPTED,
+        "expected 202 Accepted, got {status}: {json}"
+    );
+}
+
+#[tokio::test]
+async fn test_knowledge_research_creates_entry_if_missing() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+
+    let req = axum::http::Request::builder()
+        .method("POST")
+        .uri("/api/knowledge/brand-new-topic/research")
+        .header("content-type", "application/json")
+        .body(axum::body::Body::from(r#"{"topic":"brand new topic"}"#))
+        .unwrap();
+
+    let response = app.oneshot(req).await.unwrap();
+    let status = response.status();
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let json: serde_json::Value =
+        serde_json::from_slice(&body).expect("response should be valid JSON");
+
+    assert_eq!(
+        status,
+        StatusCode::ACCEPTED,
+        "expected 202 Accepted, got {status}: {json}"
+    );
+
+    // Verify entry was created on disk.
+    let entry_dir = dir.path().join(".sdlc/knowledge/brand-new-topic");
+    assert!(
+        entry_dir.exists(),
+        "knowledge entry directory should have been created"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Webhook events endpoint tests
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn get_webhook_events_empty_db_returns_empty_array() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app, "/api/orchestrator/webhooks/events").await;
+
+    assert_eq!(status, StatusCode::OK, "expected 200 OK");
+    assert!(
+        json.as_array().map(|a| a.is_empty()).unwrap_or(false),
+        "expected empty JSON array, got: {json}"
+    );
+}
+
+#[tokio::test]
+async fn receive_webhook_records_event() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // POST a webhook to trigger event recording.
+    let app1 = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let req = axum::http::Request::builder()
+        .method("POST")
+        .uri("/webhooks/test")
+        .header("content-type", "application/json")
+        .body(axum::body::Body::from(b"{}".to_vec()))
+        .unwrap();
+    let resp = app1.oneshot(req).await.unwrap();
+    assert_eq!(resp.status(), StatusCode::ACCEPTED);
+
+    // GET the events and verify one event was recorded.
+    let app2 = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app2, "/api/orchestrator/webhooks/events").await;
+
+    assert_eq!(status, StatusCode::OK, "expected 200 OK");
+    let events = json.as_array().expect("expected JSON array");
+    assert_eq!(events.len(), 1, "expected exactly one event");
+
+    let ev = &events[0];
+    assert_eq!(ev["route_path"].as_str(), Some("/test"));
+
+    let outcome = &ev["outcome"];
+    assert_eq!(
+        outcome["kind"].as_str(),
+        Some("received"),
+        "outcome.kind should be 'received'"
+    );
+}
+
+/// QC-4: Sentinel file watcher fires ActionStateChanged when .sdlc/.orchestrator.state is written.
+///
+/// Construct an AppState directly (so we can subscribe to its event channel), write the sentinel
+/// file, and assert that ActionStateChanged arrives within 2 seconds.
+#[tokio::test]
+async fn sentinel_watcher_fires_action_state_changed() {
+    use sdlc_server::state::{AppState, SseMessage};
+
+    let dir = TempDir::new().unwrap();
+    std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
+
+    // Construct AppState — this spawns the watcher tasks (we are inside a tokio runtime).
+    let state = AppState::new(dir.path().to_path_buf());
+    let mut rx = state.event_tx.subscribe();
+
+    // Give the watcher task a moment to start its first poll.
+    tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
+    // Write the sentinel file (simulating the orchestrator daemon tick).
+    let sentinel = dir.path().join(".sdlc/.orchestrator.state");
+    std::fs::write(
+        &sentinel,
+        r#"{"last_tick_at":"2026-01-01T00:00:00Z","actions_dispatched":0,"webhooks_dispatched":0}"#,
+    )
+    .unwrap();
+
+    // Wait up to 2 seconds for ActionStateChanged.
+    let deadline = tokio::time::Instant::now() + tokio::time::Duration::from_secs(2);
+    let mut got_signal = false;
+    while tokio::time::Instant::now() < deadline {
+        match tokio::time::timeout(tokio::time::Duration::from_millis(900), rx.recv()).await {
+            Ok(Ok(SseMessage::ActionStateChanged)) => {
+                got_signal = true;
+                break;
+            }
+            Ok(Ok(_)) => {} // other messages — keep waiting
+            Ok(Err(_)) | Err(_) => break,
+        }
+    }
+
+    assert!(
+        got_signal,
+        "ActionStateChanged must be received within 2s of sentinel write"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Orchestrator actions CRUD integration tests
+// ---------------------------------------------------------------------------
+
+fn action_body() -> serde_json::Value {
+    serde_json::json!({
+        "label": "nightly-audit",
+        "tool_name": "quality-check",
+        "tool_input": {},
+        "next_tick_at": "2099-01-01T00:00:00Z"
+    })
+}
+
+#[tokio::test]
+async fn list_actions_empty() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app, "/api/orchestrator/actions").await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json.as_array().unwrap().len(), 0);
+}
+
+#[tokio::test]
+async fn create_action_success() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = post_json(app, "/api/orchestrator/actions", action_body()).await;
+    assert_eq!(status, StatusCode::CREATED);
+    assert_eq!(json["label"], "nightly-audit");
+    assert_eq!(json["tool_name"], "quality-check");
+    assert_eq!(json["trigger_type"], "scheduled");
+    assert_eq!(json["status"], "pending");
+    assert!(json["id"].is_string());
+}
+
+#[tokio::test]
+async fn list_actions_returns_created() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create one action
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _) = post_json(app, "/api/orchestrator/actions", action_body()).await;
+    assert_eq!(status, StatusCode::CREATED);
+
+    // List should now have one entry
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app, "/api/orchestrator/actions").await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json.as_array().unwrap().len(), 1);
+    assert_eq!(json[0]["label"], "nightly-audit");
+}
+
+#[tokio::test]
+async fn create_action_empty_label() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let body = serde_json::json!({
+        "label": "",
+        "tool_name": "quality-check",
+        "tool_input": {},
+        "next_tick_at": "2099-01-01T00:00:00Z"
+    });
+    let (status, _) = post_json(app, "/api/orchestrator/actions", body).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn create_action_invalid_tool_name() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let body = serde_json::json!({
+        "label": "test",
+        "tool_name": "../evil",
+        "tool_input": {},
+        "next_tick_at": "2099-01-01T00:00:00Z"
+    });
+    let (status, _) = post_json(app, "/api/orchestrator/actions", body).await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn delete_action_success() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create an action
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (_, json) = post_json(app, "/api/orchestrator/actions", action_body()).await;
+    let id = json["id"].as_str().unwrap().to_string();
+
+    // Delete it
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _) = delete_req(app, &format!("/api/orchestrator/actions/{id}")).await;
+    assert_eq!(status, StatusCode::NO_CONTENT);
+
+    // List should be empty
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app, "/api/orchestrator/actions").await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json.as_array().unwrap().len(), 0);
+}
+
+#[tokio::test]
+async fn delete_action_idempotent() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    // Delete with a random UUID that doesn't exist — must return 204
+    let (status, _) = delete_req(
+        app,
+        "/api/orchestrator/actions/00000000-0000-0000-0000-000000000001",
+    )
+    .await;
+    assert_eq!(status, StatusCode::NO_CONTENT);
+}
+
+#[tokio::test]
+async fn delete_action_invalid_uuid() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _) = delete_req(app, "/api/orchestrator/actions/not-a-uuid").await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn patch_action_label() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (_, json) = post_json(app, "/api/orchestrator/actions", action_body()).await;
+    let id = json["id"].as_str().unwrap().to_string();
+
+    // Patch label
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = patch_json(
+        app,
+        &format!("/api/orchestrator/actions/{id}"),
+        serde_json::json!({ "label": "renamed-audit" }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json["label"], "renamed-audit");
+}
+
+#[tokio::test]
+async fn patch_action_recurrence_set() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (_, json) = post_json(app, "/api/orchestrator/actions", action_body()).await;
+    let id = json["id"].as_str().unwrap().to_string();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = patch_json(
+        app,
+        &format!("/api/orchestrator/actions/{id}"),
+        serde_json::json!({ "recurrence_secs": 3600 }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json["recurrence_secs"], 3600);
+}
+
+#[tokio::test]
+async fn patch_action_recurrence_clear() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create with recurrence
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let mut body = action_body();
+    body["recurrence_secs"] = serde_json::json!(86400);
+    let (_, json) = post_json(app, "/api/orchestrator/actions", body).await;
+    let id = json["id"].as_str().unwrap().to_string();
+
+    // Clear recurrence
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = patch_json(
+        app,
+        &format!("/api/orchestrator/actions/{id}"),
+        serde_json::json!({ "recurrence_secs": null }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+    assert!(json["recurrence_secs"].is_null());
+}
+
+#[tokio::test]
+async fn patch_action_not_found() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _) = patch_json(
+        app,
+        "/api/orchestrator/actions/00000000-0000-0000-0000-000000000099",
+        serde_json::json!({ "label": "new-label" }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn patch_action_empty_label() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (_, json) = post_json(app, "/api/orchestrator/actions", action_body()).await;
+    let id = json["id"].as_str().unwrap().to_string();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _) = patch_json(
+        app,
+        &format!("/api/orchestrator/actions/{id}"),
+        serde_json::json!({ "label": "" }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::BAD_REQUEST);
 }

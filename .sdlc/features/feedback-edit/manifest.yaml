@@ -1,22 +1,22 @@
 slug: feedback-edit
 title: Edit feedback notes inline
-phase: draft
+phase: specified
 created_at: 2026-03-02T04:17:27.468405Z
-updated_at: 2026-03-02T04:17:27.468405Z
+updated_at: 2026-03-02T09:28:55.414655Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:28.588700Z
+  approved_at: 2026-03-02T09:27:49.452397Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:28:37.805024Z
+  approved_at: 2026-03-02T09:28:55.414654Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +67,9 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T04:17:27.468405Z
+  exited: 2026-03-02T09:27:49.468610Z
+- phase: specified
+  entered: 2026-03-02T09:27:49.468610Z
   exited: null
 dependencies: []
 archived: false

@@ -114,6 +114,7 @@ pub fn run_one_tick(root: &Path, db: &ActionDb) -> Result<()> {
     // Phase 1: scheduled actions
     let now = Utc::now();
     let due = db.range_due(now).context("range_due failed")?;
+    let actions_dispatched = due.len();
     for action in due {
         dispatch(root, db, action)?;
     }
@@ -122,11 +123,30 @@ pub fn run_one_tick(root: &Path, db: &ActionDb) -> Result<()> {
     let webhooks = db
         .all_pending_webhooks()
         .context("all_pending_webhooks failed")?;
+    let webhooks_dispatched = webhooks.len();
     for payload in webhooks {
         dispatch_webhook(root, db, payload)?;
     }
 
+    // Write sentinel file so the server watcher can broadcast ActionStateChanged.
+    write_tick_sentinel(root, actions_dispatched, webhooks_dispatched);
+
     Ok(())
+}
+
+/// Write `.sdlc/.orchestrator.state` with tick metadata so the server's mtime
+/// watcher can detect the tick and broadcast `ActionStateChanged` to SSE clients.
+/// This is best-effort — failures are logged to stderr and do not abort the tick.
+fn write_tick_sentinel(root: &Path, actions: usize, webhooks: usize) {
+    let path = root.join(".sdlc").join(".orchestrator.state");
+    let data = serde_json::json!({
+        "last_tick_at": chrono::Utc::now().to_rfc3339(),
+        "actions_dispatched": actions,
+        "webhooks_dispatched": webhooks,
+    });
+    if let Err(e) = std::fs::write(&path, data.to_string()) {
+        eprintln!("orchestrate: failed to write sentinel: {e}");
+    }
 }
 
 fn dispatch_webhook(root: &Path, db: &ActionDb, payload: WebhookPayload) -> Result<()> {

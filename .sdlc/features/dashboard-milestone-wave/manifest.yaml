@@ -1,8 +1,8 @@
 slug: dashboard-milestone-wave
 title: Active Milestones and Run Wave on Dashboard
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:32.341360Z
-updated_at: 2026-03-02T03:17:30.469112Z
+updated_at: 2026-03-02T09:20:57.059190Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,50 +13,50 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-milestone-wave/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:47.434532Z
+  approved_at: 2026-03-02T09:19:49.548390Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-milestone-wave/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:57.358839Z
+  approved_at: 2026-03-02T09:19:57.364735Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-milestone-wave/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:04.832464Z
+  approved_at: 2026-03-02T09:20:04.837825Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-milestone-wave/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:29.872969Z
+  approved_at: 2026-03-02T09:20:29.879110Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-milestone-wave/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:41.910241Z
+  approved_at: 2026-03-02T09:20:41.933620Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-milestone-wave/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:49.917392Z
+  approved_at: 2026-03-02T09:20:49.950828Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -70,6 +70,30 @@ phase_history:
   exited: 2026-03-02T03:17:30.469112Z
 - phase: specified
   entered: 2026-03-02T03:17:30.469112Z
+  exited: 2026-03-02T09:20:04.838883Z
+- phase: planned
+  entered: 2026-03-02T09:20:04.838883Z
+  exited: 2026-03-02T09:20:15.961167Z
+- phase: ready
+  entered: 2026-03-02T09:20:15.961167Z
+  exited: 2026-03-02T09:20:21.322296Z
+- phase: implementation
+  entered: 2026-03-02T09:20:21.322296Z
+  exited: 2026-03-02T09:20:29.880751Z
+- phase: review
+  entered: 2026-03-02T09:20:29.880751Z
+  exited: 2026-03-02T09:20:34.665579Z
+- phase: audit
+  entered: 2026-03-02T09:20:34.665579Z
+  exited: 2026-03-02T09:20:41.963272Z
+- phase: qa
+  entered: 2026-03-02T09:20:41.963272Z
+  exited: 2026-03-02T09:20:49.985655Z
+- phase: merge
+  entered: 2026-03-02T09:20:49.985655Z
+  exited: 2026-03-02T09:20:57.059190Z
+- phase: released
+  entered: 2026-03-02T09:20:57.059190Z
   exited: null
 dependencies: []
 archived: false

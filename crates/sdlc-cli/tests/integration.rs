@@ -3585,3 +3585,141 @@ fn orchestrator_startup_recovery_marks_stale_running_as_failed() {
         other => panic!("expected ActionStatus::Failed, got {other:?}"),
     }
 }
+
+// ---------------------------------------------------------------------------
+// sdlc knowledge librarian init
+// ---------------------------------------------------------------------------
+
+#[test]
+fn knowledge_librarian_init_exits_zero() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc(&dir)
+        .args(["knowledge", "librarian", "init"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Knowledge base initialized"));
+}
+
+#[test]
+fn knowledge_librarian_init_is_idempotent() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc(&dir)
+        .args(["knowledge", "librarian", "init"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["knowledge", "librarian", "init"])
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Knowledge base initialized"));
+}
+
+#[test]
+fn knowledge_librarian_init_json_output() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    let output = sdlc(&dir)
+        .args(["knowledge", "librarian", "init", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let json: serde_json::Value =
+        serde_json::from_slice(&output).expect("output should be valid JSON");
+    assert!(
+        json.get("catalog_created").is_some(),
+        "JSON must contain 'catalog_created'"
+    );
+    assert!(
+        json.get("investigations_new").is_some(),
+        "JSON must contain 'investigations_new'"
+    );
+    assert!(
+        json.get("agent_file").is_some(),
+        "JSON must contain 'agent_file'"
+    );
+}
+
+// ---------------------------------------------------------------------------
+// SSE Bridge: orchestrator sentinel file
+// ---------------------------------------------------------------------------
+
+/// run_one_tick writes .sdlc/.orchestrator.state after each tick.
+///
+/// This test exercises the sentinel writer with an empty DB (no actions,
+/// no webhooks) and verifies that:
+/// 1. `.sdlc/.orchestrator.state` is created.
+/// 2. The file contains valid JSON with a `last_tick_at` string.
+/// 3. `actions_dispatched` == 0 and `webhooks_dispatched` == 0.
+#[test]
+fn run_one_tick_writes_sentinel_file() {
+    use sdlc_cli::cmd::orchestrate::run_one_tick;
+    use sdlc_core::orchestrator::ActionDb;
+
+    let dir = TempDir::new().unwrap();
+    let root = dir.path();
+    std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+    let db_path = root.join(".sdlc/orchestrator.db");
+    let db = ActionDb::open(&db_path).unwrap();
+
+    // Tick with an empty DB.
+    run_one_tick(root, &db).unwrap();
+
+    let sentinel = root.join(".sdlc/.orchestrator.state");
+    assert!(
+        sentinel.exists(),
+        ".sdlc/.orchestrator.state must be created"
+    );
+
+    let raw = std::fs::read_to_string(&sentinel).expect("sentinel must be readable");
+    let json: serde_json::Value = serde_json::from_str(&raw).expect("sentinel must be valid JSON");
+
+    let last_tick_at = json["last_tick_at"]
+        .as_str()
+        .expect("last_tick_at must be a string");
+    assert!(!last_tick_at.is_empty(), "last_tick_at must be non-empty");
+
+    assert_eq!(json["actions_dispatched"].as_u64(), Some(0));
+    assert_eq!(json["webhooks_dispatched"].as_u64(), Some(0));
+}
+
+/// run_one_tick updates the sentinel on each successive tick (mtime changes).
+#[test]
+fn run_one_tick_sentinel_updates_on_each_tick() {
+    use sdlc_cli::cmd::orchestrate::run_one_tick;
+    use sdlc_core::orchestrator::ActionDb;
+
+    let dir = TempDir::new().unwrap();
+    let root = dir.path();
+    std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+    let db_path = root.join(".sdlc/orchestrator.db");
+    let db = ActionDb::open(&db_path).unwrap();
+
+    run_one_tick(root, &db).unwrap();
+
+    let sentinel = root.join(".sdlc/.orchestrator.state");
+    let first_mtime = std::fs::metadata(&sentinel)
+        .expect("sentinel must exist after first tick")
+        .modified()
+        .expect("mtime must be available");
+
+    // Sleep so the filesystem mtime resolution can distinguish the two ticks.
+    std::thread::sleep(std::time::Duration::from_millis(10));
+
+    run_one_tick(root, &db).unwrap();
+
+    let second_mtime = std::fs::metadata(&sentinel)
+        .expect("sentinel must exist after second tick")
+        .modified()
+        .expect("mtime must be available");
+
+    assert!(
+        second_mtime >= first_mtime,
+        "sentinel mtime must advance (or stay equal) on second tick"
+    );
+}

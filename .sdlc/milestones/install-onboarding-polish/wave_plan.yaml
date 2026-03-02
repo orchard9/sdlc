@@ -1,0 +1,34 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: init-error-filenames
+    title: Add File Paths to Init Error Messages
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: readme-install-guide
+    title: SSH and make install in README
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: sdlc-update-docs
+    title: Document sdlc update as Update Mechanism
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: setup-vision-arch-guidance
+    title: Vision and Architecture Guidance in Setup
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: sse-state-consistency
+    title: SSE State Consistency — UatHistoryPanel and SettingsPage gaps
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

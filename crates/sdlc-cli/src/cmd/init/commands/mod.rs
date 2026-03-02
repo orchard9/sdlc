@@ -9,6 +9,7 @@ mod sdlc_guideline;
 mod sdlc_hypothetical_do;
 mod sdlc_hypothetical_planning;
 mod sdlc_init;
+mod sdlc_knowledge;
 mod sdlc_milestone_uat;
 mod sdlc_next;
 mod sdlc_plan;
@@ -64,6 +65,7 @@ pub static ALL_COMMANDS: &[&CommandDef] = &[
     &sdlc_vision_adjustment::SDLC_VISION_ADJUSTMENT,
     &sdlc_architecture_adjustment::SDLC_ARCHITECTURE_ADJUSTMENT,
     &sdlc_guideline::SDLC_GUIDELINE,
+    &sdlc_knowledge::SDLC_KNOWLEDGE,
     &sdlc_hypothetical_planning::SDLC_HYPOTHETICAL_PLANNING,
     &sdlc_hypothetical_do::SDLC_HYPOTHETICAL_DO,
     &sdlc_spike::SDLC_SPIKE,

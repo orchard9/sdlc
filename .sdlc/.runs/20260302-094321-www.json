@@ -1,0 +1,14 @@
+{
+  "id": "20260302-094321-www",
+  "key": "milestone-uat:v11-knowledge-librarian",
+  "run_type": "milestone_uat",
+  "target": "v11-knowledge-librarian",
+  "label": "UAT: v11-knowledge-librarian",
+  "status": "stopped",
+  "started_at": "2026-03-02T09:43:21.220975+00:00",
+  "completed_at": "2026-03-02T09:46:00.875189+00:00",
+  "cost_usd": null,
+  "turns": null,
+  "error": null,
+  "prompt": "Run the acceptance test for milestone 'v11-knowledge-librarian'. Call `sdlc milestone info v11-knowledge-librarian --json` to load the milestone and acceptance test. Execute every checklist step. Write signed checklist results to `.sdlc/milestones/v11-knowledge-librarian/uat_results.md`. Then call `sdlc milestone complete v11-knowledge-librarian` if all steps pass."
+}

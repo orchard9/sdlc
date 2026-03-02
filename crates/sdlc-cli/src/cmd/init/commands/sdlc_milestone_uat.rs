@@ -19,6 +19,10 @@ Run a milestone's acceptance test using Playwright. Detects whether an e2e spec 
 - **Always forward.** Create tasks for code bugs; fix selector breaks inline and rerun.
 - **Everything in git.** `summary.md` and `uat_results.md` are committed alongside the code they validate.
 
+## Server lifecycle rule (CRITICAL)
+
+**Never stop, restart, kill, or re-spawn the sdlc server.** When UAT runs from the UI, the agent runs *inside* the server process at `http://localhost:7777`. The server is already up. If `localhost:7777` is unreachable, report it as a hard blocker and stop immediately — never attempt to start or restart the server. Do not call any UAT stop or start endpoints to reset state.
+
 ---
 
 ## Step 1 — Load the milestone

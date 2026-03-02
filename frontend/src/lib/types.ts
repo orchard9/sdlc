@@ -83,6 +83,9 @@ export interface ProjectConfig {
   phases: PhaseConfig
   platform: { commands: Record<string, PlatformCommand> } | null
   quality: QualityConfig | null
+  observability?: {
+    daily_budget_usd?: number
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -562,7 +565,11 @@ export interface RunRecord {
 
 /** Raw event as stored in the events sidecar — matches message_to_event output */
 export interface RawRunEvent {
-  type: 'init' | 'assistant' | 'tool_progress' | 'tool_summary' | 'result' | 'error' | 'status' | 'system' | 'user' | 'stream_event' | 'auth_status'
+  type: 'init' | 'assistant' | 'tool_progress' | 'tool_summary' | 'result' | 'error' | 'status' | 'system' | 'user' | 'stream_event' | 'auth_status' | 'subagent_started' | 'subagent_completed' | 'subagent_progress'
+  // Wall-clock timestamp (ISO-8601) — added by telemetry-wallclock-timestamps feature
+  ts?: string
+  // Subagent correlation id — present on subagent_started / subagent_completed / subagent_progress
+  task_id?: string
   // init
   model?: string
   tools_count?: number
@@ -570,6 +577,9 @@ export interface RawRunEvent {
   // assistant
   text?: string
   tools?: { name: string; input: unknown }[]
+  // Correlated tool ids (for pairing tool calls with results)
+  tool_use_id?: string
+  tool_use_ids?: string[]
   // tool_progress
   tool?: string
   elapsed_seconds?: number
@@ -579,9 +589,14 @@ export interface RawRunEvent {
   is_error?: boolean
   cost_usd?: number
   turns?: number
+  total_tokens?: number
+  duration_ms?: number
   // error / status
   message?: string
   status?: string
+  // subagent fields
+  description?: string
+  last_tool_name?: string
 }
 
 export interface RunTelemetry {
@@ -926,4 +941,120 @@ export interface AreaArtifactMeta {
   status: 'pending' | 'investigating' | 'finding' | 'hypothesis'
   confidence?: number
   finding?: string   // first non-empty line after frontmatter
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge base types
+// ---------------------------------------------------------------------------
+
+export type KnowledgeStatus = 'draft' | 'published' | 'archived'
+
+export interface KnowledgeCatalogDivision {
+  code: string
+  name: string
+  description: string | null
+}
+
+export interface KnowledgeCatalogClass {
+  code: string
+  name: string
+  description: string | null
+  divisions: KnowledgeCatalogDivision[]
+}
+
+export interface KnowledgeCatalog {
+  classes: KnowledgeCatalogClass[]
+  updated_at: string | null
+}
+
+export interface KnowledgeSource {
+  type: string          // "url" | "file" | "workspace" | "manual"
+  url: string | null
+  path: string | null
+  workspace: string | null
+  captured_at: string
+}
+
+export interface KnowledgeArtifact {
+  filename: string
+  size_bytes: number
+  modified_at: string
+}
+
+export interface KnowledgeEntrySummary {
+  slug: string
+  title: string
+  code: string
+  status: KnowledgeStatus
+  summary: string | null
+  tags: string[]
+  created_at: string
+  updated_at: string
+}
+
+export interface KnowledgeEntryDetail extends KnowledgeEntrySummary {
+  sources: KnowledgeSource[]
+  related: string[]
+  origin: string          // "manual" | "harvest" | "research" | "import"
+  harvested_from: string | null
+  last_verified_at: string | null
+  staleness_flags: string[]
+  content: string
+  artifacts: KnowledgeArtifact[]
+}
+
+export interface KnowledgeSseEvent {
+  type: 'knowledge_query_started' | 'knowledge_query_completed'
+  slug?: string
+}
+
+// ---------------------------------------------------------------------------
+// Orchestrator / Actions types
+// ---------------------------------------------------------------------------
+
+export interface OrchestratorActionStatus {
+  type: 'pending' | 'running' | 'completed' | 'failed'
+  started_at?: string
+  completed_at?: string
+  error?: string
+}
+
+export interface OrchestratorActionTrigger {
+  type: 'scheduled' | 'webhook'
+  next_tick_at: string
+}
+
+export interface OrchestratorAction {
+  id: string
+  label: string
+  tool_name: string
+  tool_input: unknown
+  scheduled_at: string
+  recurrence_secs: number | null
+  status: OrchestratorActionStatus
+  trigger: OrchestratorActionTrigger
+  created_at: string
+}
+
+export interface OrchestratorWebhookEvent {
+  id: string
+  received_at: string
+  path: string
+  action_id: string | null
+  outcome: {
+    type: 'dispatched' | 'no_route_matched' | 'rejected'
+    error?: string
+  }
+}
+
+export interface OrchestratorWebhookRoute {
+  id: string
+  path: string
+  tool_name: string
+  input_template: string
+  created_at: string
+}
+
+export interface ActionSseEvent {
+  type: 'action_state_changed'
 }

@@ -4,6 +4,7 @@ pub mod ama_threads;
 pub mod app_tunnel;
 pub mod architecture;
 pub mod artifacts;
+pub mod backlog;
 pub mod comments;
 pub mod config;
 pub mod diagnose;

@@ -1,8 +1,8 @@
 slug: pipeline-visibility
 title: Pipeline Visibility Indicator
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:32.351815Z
-updated_at: 2026-03-02T03:18:36.742029Z
+updated_at: 2026-03-02T09:21:14.515152Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,63 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/pipeline-visibility/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:28.784168Z
+  approved_at: 2026-03-02T09:19:34.966343Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/pipeline-visibility/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:43.884819Z
+  approved_at: 2026-03-02T09:19:49.707108Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/pipeline-visibility/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:56.643476Z
+  approved_at: 2026-03-02T09:20:02.006621Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/pipeline-visibility/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:25.423485Z
+  approved_at: 2026-03-02T09:20:30.035534Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/pipeline-visibility/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:44.988840Z
+  approved_at: 2026-03-02T09:20:49.523786Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/pipeline-visibility/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:21:03.302976Z
+  approved_at: 2026-03-02T09:21:08.786543Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: 'UAT: PipelineIndicator component not rendered on Dashboard — built but not imported/used in Dashboard.tsx'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:09.691759Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +79,30 @@ phase_history:
   exited: 2026-03-02T03:18:36.742029Z
 - phase: specified
   entered: 2026-03-02T03:18:36.742029Z
+  exited: 2026-03-02T09:20:02.008Z
+- phase: planned
+  entered: 2026-03-02T09:20:02.008Z
+  exited: 2026-03-02T09:20:05.827024Z
+- phase: ready
+  entered: 2026-03-02T09:20:05.827024Z
+  exited: 2026-03-02T09:20:10.017522Z
+- phase: implementation
+  entered: 2026-03-02T09:20:10.017522Z
+  exited: 2026-03-02T09:20:30.049982Z
+- phase: review
+  entered: 2026-03-02T09:20:30.049982Z
+  exited: 2026-03-02T09:20:33.962318Z
+- phase: audit
+  entered: 2026-03-02T09:20:33.962318Z
+  exited: 2026-03-02T09:20:49.561394Z
+- phase: qa
+  entered: 2026-03-02T09:20:49.561394Z
+  exited: 2026-03-02T09:21:09.120275Z
+- phase: merge
+  entered: 2026-03-02T09:21:09.120275Z
+  exited: 2026-03-02T09:21:14.515152Z
+- phase: released
+  entered: 2026-03-02T09:21:14.515152Z
   exited: null
 dependencies: []
 archived: false

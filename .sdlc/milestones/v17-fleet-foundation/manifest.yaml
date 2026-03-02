@@ -1,0 +1,13 @@
+slug: v17-fleet-foundation
+title: 'sdlc-cluster: Fleet deployment foundation'
+vision: >
+  One sdlc-server pod per orchard9 project, zero Longhorn PVCs, managed by Woodpecker —
+  deploy the fleet without touching the sdlc Rust codebase. A developer runs one Woodpecker
+  pipeline and gets a live sdlc UI at <slug>.sdlc.threesix.ai.
+features:
+- fleet-repo-scaffold
+- fleet-helm-chart
+- fleet-secrets-infra
+- fleet-deploy-pipeline
+created_at: 2026-03-02T09:08:03.359395Z
+updated_at: 2026-03-02T09:08:03.470982Z

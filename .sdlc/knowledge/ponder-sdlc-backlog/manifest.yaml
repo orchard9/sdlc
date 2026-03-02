@@ -4,7 +4,10 @@ code: uncategorized
 status: draft
 tags:
 - ponder
+summary: 'Committed plan for sdlc backlog feature: project-level capture path for out-of-scope concerns discovered during autonomous runs; fills gap where sdlc task add and sdlc comment are too feature-local'
+related:
+- ponder-signal-watch
 origin: harvested
 harvested_from: ponder/sdlc-backlog
 created_at: 2026-03-02T04:22:56.133994Z
-updated_at: 2026-03-02T04:25:48.485572Z
+updated_at: 2026-03-02T09:53:56.588981Z

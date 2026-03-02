@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: artifact-file-links
+    title: Auto-detect File Paths as IDE Links
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: artifact-viewer-height-fix
+    title: Remove Artifact Height Cap
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

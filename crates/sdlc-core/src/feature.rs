@@ -348,6 +348,20 @@ impl Feature {
         !self.blockers.is_empty()
     }
 
+    /// Remove the blocker at the given index. Returns an error if `idx` is out of range.
+    pub fn remove_blocker(&mut self, idx: usize) -> Result<()> {
+        if idx >= self.blockers.len() {
+            return Err(SdlcError::InvalidPhase(format!(
+                "blocker index {} out of range (len={})",
+                idx,
+                self.blockers.len()
+            )));
+        }
+        self.blockers.remove(idx);
+        self.updated_at = Utc::now();
+        Ok(())
+    }
+
     pub fn all_artifacts_approved_for(&self, phase: Phase, cfg: &Config) -> bool {
         cfg.phases
             .required_for(phase)
@@ -570,6 +584,27 @@ mod tests {
         assert_eq!(parsed.scores.len(), 1);
         assert_eq!(parsed.scores[0].lens, "product_fit");
         assert_eq!(parsed.scores[0].score, 85);
+    }
+
+    #[test]
+    fn remove_blocker_removes_correct_element() {
+        let mut feature = Feature::new("test", "Test");
+        feature.blockers = vec!["a".to_string(), "b".to_string(), "c".to_string()];
+        feature.remove_blocker(1).unwrap();
+        assert_eq!(feature.blockers, vec!["a", "c"]);
+    }
+
+    #[test]
+    fn remove_blocker_out_of_range_returns_err() {
+        let mut feature = Feature::new("test", "Test");
+        feature.blockers = vec!["a".to_string()];
+        assert!(feature.remove_blocker(1).is_err());
+    }
+
+    #[test]
+    fn remove_blocker_empty_list_returns_err() {
+        let mut feature = Feature::new("test", "Test");
+        assert!(feature.remove_blocker(0).is_err());
     }
 
     #[test]

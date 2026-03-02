@@ -1,0 +1,40 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: commands-docs-page
+    title: Commands Catalog — browseable /docs/commands page with all 34 sdlc-* commands categorized
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: dashboard-empty-state
+    title: Dashboard Empty State Redesign
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: dashboard-milestone-wave
+    title: Active Milestones and Run Wave on Dashboard
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: pipeline-visibility
+    title: Pipeline Visibility Indicator
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: ponder-first-onboarding
+    title: Ponder-First Entry Path for New Users
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  - slug: wave-running-context
+    title: Wave Running Context and Recovery Path
+    phase: specified
+    action: create_design
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

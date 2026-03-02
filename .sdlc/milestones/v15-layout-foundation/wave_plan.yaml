@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: layout-appshell-panels
+    title: AppShell Panels — NAV icon rail collapse and AgentPanel resize
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

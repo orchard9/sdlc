@@ -1,5 +1,6 @@
 pub mod agent;
 pub mod artifact;
+pub mod backlog;
 pub mod comment;
 pub mod config;
 pub mod escalate;

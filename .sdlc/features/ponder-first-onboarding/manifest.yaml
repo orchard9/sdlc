@@ -1,8 +1,8 @@
 slug: ponder-first-onboarding
 title: Ponder-First Entry Path for New Users
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:32.346419Z
-updated_at: 2026-03-02T03:18:08.269536Z
+updated_at: 2026-03-02T09:21:07.990303Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,81 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-first-onboarding/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:32.166769Z
+  approved_at: 2026-03-02T09:19:40.636811Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-first-onboarding/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:52.831020Z
+  approved_at: 2026-03-02T09:19:52.836104Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-first-onboarding/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:05.408190Z
+  approved_at: 2026-03-02T09:20:05.413449Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-first-onboarding/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:37.049815Z
+  approved_at: 2026-03-02T09:20:37.136633Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-first-onboarding/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:52.262893Z
+  approved_at: 2026-03-02T09:20:52.309390Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-first-onboarding/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:21:03.228334Z
+  approved_at: 2026-03-02T09:21:03.302450Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: 'UAT: Vision page missing subtitle text ''What you''re building and why — agents use this to make the right tradeoffs.'''
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:09.709632Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'UAT: Architecture page missing subtitle text ''How it''s built — agents use this to write code that fits the system.'''
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:09.720418Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'UAT: Ponder page does not handle ?new=1 query param — NewIdeaForm not auto-opened on navigation from DashboardEmptyState'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:09.735049Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +97,30 @@ phase_history:
   exited: 2026-03-02T03:18:08.269536Z
 - phase: specified
   entered: 2026-03-02T03:18:08.269536Z
+  exited: 2026-03-02T09:20:05.414695Z
+- phase: planned
+  entered: 2026-03-02T09:20:05.414695Z
+  exited: 2026-03-02T09:20:15.434850Z
+- phase: ready
+  entered: 2026-03-02T09:20:15.434850Z
+  exited: 2026-03-02T09:20:21.818189Z
+- phase: implementation
+  entered: 2026-03-02T09:20:21.818189Z
+  exited: 2026-03-02T09:20:37.209016Z
+- phase: review
+  entered: 2026-03-02T09:20:37.209016Z
+  exited: 2026-03-02T09:20:41.777419Z
+- phase: audit
+  entered: 2026-03-02T09:20:41.777419Z
+  exited: 2026-03-02T09:20:52.340864Z
+- phase: qa
+  entered: 2026-03-02T09:20:52.340864Z
+  exited: 2026-03-02T09:21:03.342839Z
+- phase: merge
+  entered: 2026-03-02T09:21:03.342839Z
+  exited: 2026-03-02T09:21:07.990303Z
+- phase: released
+  entered: 2026-03-02T09:21:07.990303Z
   exited: null
 dependencies: []
 archived: false

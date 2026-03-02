@@ -1,8 +1,11 @@
 slug: audits-reviews-fix-all-and-remediate
 title: audits-reviews-fix-all-and-remediate
-status: converging
+status: committed
 created_at: 2026-03-02T05:54:33.383035Z
-updated_at: 2026-03-02T05:59:30.915721Z
+updated_at: 2026-03-02T09:25:59.089852Z
+committed_at: 2026-03-02T09:25:25.377776Z
+committed_to:
+- finding-closure-protocol
 sessions: 1
 orientation:
   current: Protocol defined and implemented — finding-closure for approve_audit/approve_review is now in templates, CLAUDE.md, and guidance.md

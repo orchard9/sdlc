@@ -10,7 +10,7 @@ use crate::state::AppState;
 // List
 // ---------------------------------------------------------------------------
 
-/// GET /api/feedback — list all pending feedback notes
+/// GET /api/feedback -- list all pending feedback notes
 pub async fn list_notes(State(app): State<AppState>) -> Result<Json<serde_json::Value>, AppError> {
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
@@ -32,7 +32,7 @@ pub struct AddBody {
     pub content: String,
 }
 
-/// POST /api/feedback — add a new feedback note
+/// POST /api/feedback -- add a new feedback note
 pub async fn add_note(
     State(app): State<AppState>,
     Json(body): Json<AddBody>,
@@ -51,7 +51,7 @@ pub async fn add_note(
 // Delete
 // ---------------------------------------------------------------------------
 
-/// DELETE /api/feedback/:id — delete a feedback note by ID
+/// DELETE /api/feedback/:id -- delete a feedback note by ID
 pub async fn delete_note(
     State(app): State<AppState>,
     Path(id): Path<String>,
@@ -74,11 +74,71 @@ pub async fn delete_note(
 }
 
 // ---------------------------------------------------------------------------
+// Update (feedback-edit)
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct UpdateBody {
+    pub content: String,
+}
+
+/// PATCH /api/feedback/:id -- update a feedback note's content
+pub async fn update_note(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+    Json(body): Json<UpdateBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    if body.content.trim().is_empty() {
+        return Err(AppError::bad_request("content cannot be empty"));
+    }
+    let root = app.root.clone();
+    let id_clone = id.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        sdlc_core::feedback::update(&root, &id_clone, &body.content)
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    match result {
+        Some(note) => Ok(Json(note_to_json(&note))),
+        None => Err(AppError::not_found(format!(
+            "feedback note '{id}' not found"
+        ))),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Enrich (feedback-enrich)
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct EnrichBody {
+    pub content: String,
+    pub source: String,
+}
+
+/// POST /api/feedback/:id/enrich -- append an enrichment block to a note
+pub async fn enrich_note(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+    Json(body): Json<EnrichBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let id_clone = id.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let note = sdlc_core::feedback::enrich(&root, &id_clone, &body.source, &body.content)?;
+        Ok::<_, sdlc_core::SdlcError>(note_to_json(&note))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
 // Submit to Ponder
 // ---------------------------------------------------------------------------
 
-/// POST /api/feedback/to-ponder — bundle all notes into a new ponder entry.
-/// Returns `{ slug }` so the caller can navigate to the ponder workspace.
+/// POST /api/feedback/to-ponder -- bundle all notes into a new ponder entry.
 pub async fn to_ponder(State(app): State<AppState>) -> Result<Json<serde_json::Value>, AppError> {
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
@@ -88,22 +148,16 @@ pub async fn to_ponder(State(app): State<AppState>) -> Result<Json<serde_json::V
                 "no feedback notes to submit".to_string(),
             ));
         }
-
-        // Generate a unique slug based on the current timestamp.
         let base = chrono::Utc::now().format("feedback-%Y%m%d").to_string();
         let slug = unique_ponder_slug(&root, &base);
-
-        // Create the ponder entry.
-        let title = format!("Feedback — {}", chrono::Utc::now().format("%B %d, %Y"));
+        let title = format!(
+            "Feedback \u{2014} {}",
+            chrono::Utc::now().format("%B %d, %Y")
+        );
         sdlc_core::ponder::PonderEntry::create(&root, &slug, &title)?;
-
-        // Capture the notes as a single markdown artifact.
         let md = sdlc_core::feedback::to_markdown(&notes);
         sdlc_core::ponder::capture_content(&root, &slug, "notes.md", &md)?;
-
-        // Clear feedback now that it's been submitted.
         sdlc_core::feedback::clear(&root)?;
-
         Ok::<_, sdlc_core::SdlcError>(
             serde_json::json!({ "slug": slug, "note_count": notes.len() }),
         )
@@ -118,14 +172,26 @@ pub async fn to_ponder(State(app): State<AppState>) -> Result<Json<serde_json::V
 // ---------------------------------------------------------------------------
 
 fn note_to_json(n: &sdlc_core::feedback::FeedbackNote) -> serde_json::Value {
+    let enrichments: Vec<serde_json::Value> = n
+        .enrichments
+        .iter()
+        .map(|e| {
+            serde_json::json!({
+                "source": e.source,
+                "content": e.content,
+                "added_at": e.added_at,
+            })
+        })
+        .collect();
     serde_json::json!({
         "id": n.id,
         "content": n.content,
         "created_at": n.created_at,
+        "updated_at": n.updated_at,
+        "enrichments": enrichments,
     })
 }
 
-/// Find the first unused ponder slug of the form `<base>`, `<base>-2`, etc.
 fn unique_ponder_slug(root: &std::path::Path, base: &str) -> String {
     let first = base.to_string();
     if !sdlc_core::paths::ponder_dir(root, &first).exists() {
@@ -163,12 +229,10 @@ mod tests {
         let dir = tempfile::TempDir::new().unwrap();
         std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
         let app = AppState::new(dir.path().to_path_buf());
-
         let body = AddBody {
             content: "This is a test note".to_string(),
         };
         let _ = add_note(State(app.clone()), Json(body)).await.unwrap();
-
         let result = list_notes(State(app)).await.unwrap();
         let arr = result.0.as_array().unwrap();
         assert_eq!(arr.len(), 1);
@@ -190,9 +254,111 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn update_existing_note_returns_200() {
+        let dir = tempfile::TempDir::new().unwrap();
+        std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = AddBody {
+            content: "Original".to_string(),
+        };
+        let _ = add_note(State(app.clone()), Json(body)).await.unwrap();
+        let update_body = UpdateBody {
+            content: "Updated".to_string(),
+        };
+        let result = update_note(
+            State(app.clone()),
+            Path("F1".to_string()),
+            Json(update_body),
+        )
+        .await
+        .unwrap();
+        assert_eq!(result.0["content"], "Updated");
+        assert!(!result.0["updated_at"].is_null());
+    }
+
+    #[tokio::test]
+    async fn update_missing_note_returns_404() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = UpdateBody {
+            content: "Whatever".to_string(),
+        };
+        let err = update_note(State(app), Path("F99".to_string()), Json(body))
+            .await
+            .unwrap_err();
+        use axum::response::IntoResponse;
+        assert_eq!(
+            err.into_response().status(),
+            axum::http::StatusCode::NOT_FOUND
+        );
+    }
+
+    #[tokio::test]
+    async fn update_with_empty_content_returns_400() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = UpdateBody {
+            content: "".to_string(),
+        };
+        let err = update_note(State(app), Path("F1".to_string()), Json(body))
+            .await
+            .unwrap_err();
+        use axum::response::IntoResponse;
+        assert_eq!(
+            err.into_response().status(),
+            axum::http::StatusCode::BAD_REQUEST
+        );
+    }
+
+    #[tokio::test]
     async fn to_ponder_empty_returns_error() {
         let dir = tempfile::TempDir::new().unwrap();
         let app = AppState::new(dir.path().to_path_buf());
         assert!(to_ponder(State(app)).await.is_err());
+    }
+
+    #[tokio::test]
+    async fn enrich_note_returns_updated_note() {
+        let dir = tempfile::TempDir::new().unwrap();
+        std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = AddBody {
+            content: "Original note".to_string(),
+        };
+        let _ = add_note(State(app.clone()), Json(body)).await.unwrap();
+        let enrich_body = EnrichBody {
+            content: "Some context".to_string(),
+            source: "user".to_string(),
+        };
+        let result = enrich_note(
+            State(app.clone()),
+            Path("F1".to_string()),
+            Json(enrich_body),
+        )
+        .await
+        .unwrap();
+        let enrichments = result.0["enrichments"].as_array().unwrap();
+        assert_eq!(enrichments.len(), 1);
+        assert_eq!(enrichments[0]["source"], "user");
+        assert_eq!(enrichments[0]["content"], "Some context");
+    }
+
+    #[tokio::test]
+    async fn enrich_note_missing_returns_404() {
+        let dir = tempfile::TempDir::new().unwrap();
+        std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let enrich_body = EnrichBody {
+            content: "context".to_string(),
+            source: "user".to_string(),
+        };
+        let err = enrich_note(State(app), Path("F99".to_string()), Json(enrich_body))
+            .await
+            .unwrap_err();
+        use axum::response::IntoResponse;
+        assert_eq!(
+            err.into_response().status(),
+            axum::http::StatusCode::NOT_FOUND
+        );
     }
 }

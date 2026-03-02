@@ -1,0 +1,8 @@
+slug: uat-test-inv
+title: uat-test-inv
+code: uncategorized
+status: draft
+summary: The spawn_agent_run pattern is the single mandatory mechanism for all server endpoints that invoke Claude agents, providing async spawn, SSE streaming, RunRecord persistence, duplicate prevention, and lifecycle events
+origin: manual
+created_at: 2026-03-02T09:49:29.369486Z
+updated_at: 2026-03-02T09:52:50.050618Z

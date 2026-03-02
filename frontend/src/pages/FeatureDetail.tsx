@@ -7,6 +7,9 @@ import { ArtifactViewer } from '@/components/features/ArtifactViewer'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
 import { CopyButton } from '@/components/shared/CopyButton'
 import { ArrowLeft, Play, Loader2, AlertTriangle } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { api } from '@/api/client'
+import { BlockedPanel } from '@/components/features/BlockedPanel'
 
 const ARTIFACT_TYPES = ['spec', 'design', 'tasks', 'qa_plan', 'review', 'audit', 'qa_results']
 
@@ -70,6 +73,11 @@ export function FeatureDetail() {
 
   const running = isRunning(slug)
   const activeRun = getRunForKey(slug)
+  const [allSlugs, setAllSlugs] = useState<string[]>([])
+
+  useEffect(() => {
+    api.getFeatures().then(features => setAllSlugs(features.map((f: { slug: string }) => f.slug))).catch(() => {})
+  }, [])
 
   const handleRun = () => {
     startRun({
@@ -105,6 +113,27 @@ export function FeatureDetail() {
       </div>
 
       <PhaseProgressBar current={feature.phase} className="mb-6" />
+
+      {/* Blocked panel */}
+      {feature.blocked && feature.blockers && (
+        <BlockedPanel
+          slug={slug}
+          blockers={feature.blockers}
+          allSlugs={allSlugs}
+          isRunning={running}
+          onRunWithDirection={(direction) => {
+            startRun({
+              key: slug,
+              runType: 'feature',
+              target: slug,
+              label: slug,
+              startUrl: `/api/run/${slug}`,
+              stopUrl: `/api/run/${slug}/stop`,
+              context: direction,
+            })
+          }}
+        />
+      )}
 
       {/* Next action */}
       {classification && classification.action !== 'done' && (

@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: knowledge-librarian-maintain
+    title: sdlc knowledge librarian run — maintenance pass + harvest hooks wired
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: knowledge-query-mode
+    title: sdlc knowledge ask — librarian query mode via spawn_agent_run
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

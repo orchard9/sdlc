@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, FolderKanban, Milestone, Search, Archive, Lightbulb, Microscope, Lock, Wrench, TrendingUp, MessageSquarePlus, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText, Zap, Bot, BookMarked } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, Milestone, Search, Archive, Lightbulb, Microscope, Lock, Wrench, TrendingUp, MessageSquarePlus, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText, Zap, Bot, BookMarked, Library } from 'lucide-react'
 
 const navGroups = [
   {
@@ -20,6 +20,7 @@ const navGroups = [
       { path: '/investigations', label: 'Root Cause', icon: Microscope, exact: false },
       { path: '/evolve', label: 'Evolve', icon: TrendingUp, exact: false },
       { path: '/guidelines', label: 'Guidelines', icon: BookMarked, exact: false },
+      { path: '/knowledge', label: 'Knowledge', icon: Library, exact: false },
     ],
   },
   {

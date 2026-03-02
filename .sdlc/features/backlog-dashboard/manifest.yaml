@@ -143,6 +143,15 @@ tasks:
   completed_at: null
   blocker: null
   depends_on: []
+- id: T10
+  title: 'UAT: full dashboard UI not implemented — missing BacklogPage in frontend with empty state, item cards, park modal, promote button+toast, staleness indicator, and source_feature filter'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:50:04.885112Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []

@@ -2,7 +2,7 @@ slug: readme-install-guide
 title: SSH and make install in README
 phase: specified
 created_at: 2026-03-02T03:16:00.552672Z
-updated_at: 2026-03-02T03:17:04.150002Z
+updated_at: 2026-03-02T09:26:31.789904Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,10 +13,10 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/readme-install-guide/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:30.377082Z
+  approved_at: 2026-03-02T09:26:31.789904Z
   rejected_at: null
   rejection_reason: null
   approved_by: null

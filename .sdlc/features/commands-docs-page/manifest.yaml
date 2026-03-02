@@ -1,72 +1,108 @@
 slug: commands-docs-page
 title: Commands Catalog — browseable /docs/commands page with all 34 sdlc-* commands categorized
-phase: draft
+phase: released
 created_at: 2026-03-02T04:09:29.200495Z
-updated_at: 2026-03-02T04:09:29.200495Z
+updated_at: 2026-03-02T09:20:43.180022Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:45.743165Z
+  approved_at: 2026-03-02T09:19:47.715191Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:52.921906Z
+  approved_at: 2026-03-02T09:19:52.928244Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:58.732620Z
+  approved_at: 2026-03-02T09:19:58.738468Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:04.221884Z
+  approved_at: 2026-03-02T09:20:04.226860Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:19.779682Z
+  approved_at: 2026-03-02T09:20:19.789504Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:28.418304Z
+  approved_at: 2026-03-02T09:20:28.588559Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/commands-docs-page/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:35.914267Z
+  approved_at: 2026-03-02T09:20:36.002419Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: 'UAT: DocsPage renders placeholder stub instead of CommandsCatalog — 34-command catalog with search not connected to /docs/commands route'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:30:09.742289Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T04:09:29.200495Z
+  exited: 2026-03-02T09:19:47.716473Z
+- phase: specified
+  entered: 2026-03-02T09:19:47.716473Z
+  exited: 2026-03-02T09:20:04.227821Z
+- phase: planned
+  entered: 2026-03-02T09:20:04.227821Z
+  exited: 2026-03-02T09:20:08.110101Z
+- phase: ready
+  entered: 2026-03-02T09:20:08.110101Z
+  exited: 2026-03-02T09:20:11.741784Z
+- phase: implementation
+  entered: 2026-03-02T09:20:11.741784Z
+  exited: 2026-03-02T09:20:19.790854Z
+- phase: review
+  entered: 2026-03-02T09:20:19.790854Z
+  exited: 2026-03-02T09:20:23.328031Z
+- phase: audit
+  entered: 2026-03-02T09:20:23.328031Z
+  exited: 2026-03-02T09:20:28.734508Z
+- phase: qa
+  entered: 2026-03-02T09:20:28.734508Z
+  exited: 2026-03-02T09:20:36.039967Z
+- phase: merge
+  entered: 2026-03-02T09:20:36.039967Z
+  exited: 2026-03-02T09:20:43.180022Z
+- phase: released
+  entered: 2026-03-02T09:20:43.180022Z
   exited: null
 dependencies: []
 archived: false

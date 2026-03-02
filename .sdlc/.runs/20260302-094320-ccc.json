@@ -1,0 +1,14 @@
+{
+  "id": "20260302-094320-ccc",
+  "key": "milestone-uat:v10-knowledge-capture",
+  "run_type": "milestone_uat",
+  "target": "v10-knowledge-capture",
+  "label": "UAT: v10-knowledge-capture",
+  "status": "stopped",
+  "started_at": "2026-03-02T09:43:20.083354+00:00",
+  "completed_at": "2026-03-02T09:46:00.889498+00:00",
+  "cost_usd": null,
+  "turns": null,
+  "error": null,
+  "prompt": "Run the acceptance test for milestone 'v10-knowledge-capture'. Call `sdlc milestone info v10-knowledge-capture --json` to load the milestone and acceptance test. Execute every checklist step. Write signed checklist results to `.sdlc/milestones/v10-knowledge-capture/uat_results.md`. Then call `sdlc milestone complete v10-knowledge-capture` if all steps pass."
+}

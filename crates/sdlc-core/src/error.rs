@@ -125,6 +125,9 @@ pub enum SdlcError {
     #[error("escalation not found: {0}")]
     EscalationNotFound(String),
 
+    #[error("feedback note not found: {0}")]
+    FeedbackNoteNotFound(String),
+
     #[error("invalid key type '{0}': must be 'ssh' or 'age'")]
     InvalidSecretKeyType(String),
 

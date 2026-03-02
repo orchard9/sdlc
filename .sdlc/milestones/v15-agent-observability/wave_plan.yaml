@@ -1,0 +1,28 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: activity-time-series
+    title: Time-series chart of agent activity with LLM/tool/subagent wait-type breakdown
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: concurrency-heatmap
+    title: 'Concurrency heatmap: cross-run view of idle vs. active agents to surface parallelism opportunities'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: quota-visibility-panel
+    title: 'Quota panel: translate token cost to % of daily API limit and estimated remaining calls'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: telemetry-wallclock-timestamps
+    title: Add wall-clock timestamp to every telemetry event
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

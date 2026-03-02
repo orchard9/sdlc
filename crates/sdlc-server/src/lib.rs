@@ -50,12 +50,31 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .allow_headers(Any);
 
     Router::new()
+        // Health — used by Playwright webServer health check and load balancers.
+        // Must respond 200 before any auth middleware so `reuseExistingServer` works.
+        .route(
+            "/api/health",
+            get(|| async { axum::Json(serde_json::json!({"status": "ok"})) }),
+        )
         // Events (SSE) — GET for local, POST for Cloudflare Quick Tunnels
         // Quick Tunnels intentionally buffer GET streaming responses; POST streaming works.
         .route("/api/events", get(routes::events::sse_events))
         .route("/api/events", post(routes::events::sse_events))
         // State
         .route("/api/state", get(routes::state::get_state))
+        // Backlog
+        .route(
+            "/api/backlog",
+            get(routes::backlog::list_backlog).post(routes::backlog::create_backlog_item),
+        )
+        .route(
+            "/api/backlog/{id}/park",
+            post(routes::backlog::park_backlog_item),
+        )
+        .route(
+            "/api/backlog/{id}/promote",
+            post(routes::backlog::promote_backlog_item),
+        )
         // Features
         .route("/api/features", get(routes::features::list_features))
         .route("/api/features", post(routes::features::create_feature))
@@ -75,6 +94,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/features/{slug}/merge",
             post(routes::features::merge_feature),
+        )
+        .route(
+            "/api/features/{slug}/blockers/{idx}",
+            delete(routes::features::remove_blocker),
         )
         // Milestones
         .route("/api/milestones", get(routes::milestones::list_milestones))
@@ -152,9 +175,26 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/knowledge/catalog",
             get(routes::knowledge::get_catalog),
         )
+        // NOTE: static /api/knowledge/* segments must appear before /api/knowledge/{slug}
+        // so Axum resolves them before the slug wildcard.
+        .route("/api/knowledge/ask", post(routes::knowledge::ask_knowledge))
+        .route(
+            "/api/knowledge/maintain",
+            post(routes::knowledge::maintain_knowledge),
+        )
+        .route(
+            "/api/knowledge/harvest",
+            post(routes::knowledge::harvest_knowledge_workspace),
+        )
         .route(
             "/api/knowledge",
             get(routes::knowledge::list_knowledge).post(routes::knowledge::create_knowledge),
+        )
+        // NOTE: /api/knowledge/relevant must appear before /api/knowledge/{slug}
+        // so Axum resolves the static "relevant" segment before the slug wildcard.
+        .route(
+            "/api/knowledge/relevant",
+            get(routes::knowledge::get_relevant_knowledge),
         )
         .route(
             "/api/knowledge/{slug}",
@@ -171,6 +211,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/knowledge/{slug}/sessions/{n}",
             get(routes::knowledge::get_knowledge_session),
+        )
+        .route(
+            "/api/knowledge/{slug}/research",
+            post(routes::knowledge::research_knowledge),
         )
         // Investigations
         .route(
@@ -426,10 +470,24 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/__sdlc/feedback", post(routes::feedback::add_note))
         // Webhook ingestion — accepts raw payloads from external senders and stores in redb.
         .route("/webhooks/{route}", post(routes::webhooks::receive_webhook))
+        // Orchestrator webhook event history
+        .route(
+            "/api/orchestrator/webhooks/events",
+            get(routes::orchestrator::list_webhook_events),
+        )
         // Orchestrator webhook route management (must be before webhook ingestion wildcard)
         .route(
             "/api/orchestrator/webhooks/routes",
             get(routes::orchestrator::list_routes).post(routes::orchestrator::register_route),
+        )
+        // Orchestrator actions CRUD
+        .route(
+            "/api/orchestrator/actions",
+            get(routes::orchestrator::list_actions).post(routes::orchestrator::create_action),
+        )
+        .route(
+            "/api/orchestrator/actions/{id}",
+            delete(routes::orchestrator::delete_action).patch(routes::orchestrator::patch_action),
         )
         // Diagnose (pre-feature triage)
         .route("/api/diagnose", post(routes::diagnose::diagnose))

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Loader2, CheckCircle2, XCircle, StopCircle, ChevronDown, ChevronRight, Square } from 'lucide-react'
 import { AgentLog } from '@/components/shared/AgentLog'
 import { RunActivityFeed } from '@/components/runs/RunActivityFeed'
+import { ActivityTimeSeries } from '@/components/runs/ActivityTimeSeries'
+import { useRunTelemetry } from '@/hooks/useRunTelemetry'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import type { AgentEvent, RunRecord, RunType } from '@/lib/types'
 
@@ -164,14 +166,31 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
 
       {expanded && !isPonder && (
         <div className="px-3 pb-3">
-          {/* Active runs: live SSE log; completed/failed/stopped: rich telemetry feed */}
+          {/* Active runs: live SSE log; completed/failed/stopped: rich telemetry feed with chart */}
           {isActive ? (
             <AgentLog running={isActive} events={liveEvents} />
           ) : (
-            <RunActivityFeed runId={run.id} isRunning={false} />
+            <CompletedRunPanel runId={run.id} />
           )}
         </div>
       )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// CompletedRunPanel — owns useRunTelemetry and renders chart + feed together
+// ---------------------------------------------------------------------------
+
+function CompletedRunPanel({ runId }: { runId: string }) {
+  const { telemetry } = useRunTelemetry(runId, false)
+  const events = telemetry?.events ?? []
+  const prompt = telemetry?.prompt ?? null
+
+  return (
+    <div className="space-y-3">
+      <ActivityTimeSeries events={events} isRunning={false} />
+      <RunActivityFeed runId={runId} isRunning={false} events={events} prompt={prompt} />
     </div>
   )
 }

@@ -1,0 +1,14 @@
+{
+  "id": "20260302-094838-kuu",
+  "key": "knowledge:maintain",
+  "run_type": "knowledge_maintain",
+  "target": "maintain",
+  "label": "Knowledge maintenance",
+  "status": "stopped",
+  "started_at": "2026-03-02T09:48:38.500082+00:00",
+  "completed_at": "2026-03-02T09:57:03.938925+00:00",
+  "cost_usd": null,
+  "turns": null,
+  "error": null,
+  "prompt": "You are a knowledge librarian agent running a maintenance pass on the project knowledge base.\n\nProject root: /Users/jordanwashburn/Workspace/orchard9/sdlc\n\n## Maintenance checklist\n\nRun all six checks in order:\n\n1. **Stale entries** — Run `sdlc knowledge list` and for each entry older than 30 days, run\n   `sdlc knowledge update <slug> --summary \"<updated summary>\"` to refresh the summary.\n\n2. **Broken cross-references** — Scan `.sdlc/knowledge/*/content.md` with Grep for\n   `[[` cross-reference links; verify that referenced slugs exist with `sdlc knowledge show <slug>`.\n   Log any broken references as a note in the source entry.\n\n3. **Duplicate detection** — Compare entry titles and tags; if two entries cover the same topic,\n   add a `see_also` note in both and flag for consolidation.\n\n4. **Tag consistency** — Run `sdlc knowledge list` and check that tags follow lowercase-hyphen\n   convention. Rename inconsistent tags with `sdlc knowledge update <slug> --tags \"<new tags>\"`.\n\n5. **Orphan cleanup** — Identify entries with no sessions and no content beyond the default\n   template. Mark them with `sdlc knowledge update <slug> --summary \"orphan: no content yet\"`.\n\n6. **Log completion** — Write a maintenance session log to `/tmp/knowledge-maintenance.md`\n   summarising what was found and fixed, then run:\n   `sdlc knowledge session log maintenance --file /tmp/knowledge-maintenance.md`\n\nReport the number of actions taken in a final line: `ACTIONS_TAKEN: <n>`\n"
+}

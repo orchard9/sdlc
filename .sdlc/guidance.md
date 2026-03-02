@@ -75,6 +75,13 @@ Direct edits cause deserialization failures and corrupt state.
 | Escalate to human | `sdlc escalate create --kind <kind> --title "…" --context "…" [--feature <slug>]` |
 | List escalations | `sdlc escalate list` |
 | Resolve escalation | `sdlc escalate resolve <id> "resolution note"` |
+| Knowledge base status | `sdlc knowledge status` |
+| List knowledge entries | `sdlc knowledge list [--code-prefix <code>]` |
+| Search knowledge base | `sdlc knowledge search <query>` |
+| Show knowledge entry | `sdlc knowledge show <slug>` |
+| Add knowledge entry | `sdlc knowledge add --title "..." --code <code> --content "..."` |
+| Show catalog taxonomy | `sdlc knowledge catalog show` |
+| Seed from workspaces | `sdlc knowledge librarian init` |
 
 Phases advance automatically from artifact approvals — never call `sdlc feature transition`.
 The only files you write directly are Markdown artifacts to `output_path`.

@@ -344,6 +344,57 @@ export const api = {
   // Project agents (from <project_root>/.claude/agents/)
   getProjectAgents: () => request<import('@/lib/types').AgentDefinition[]>('/api/project/agents'),
 
+  // Knowledge base
+  getKnowledgeCatalog: () =>
+    request<import('@/lib/types').KnowledgeCatalog>('/api/knowledge/catalog'),
+  listKnowledge: (params?: { code?: string; tag?: string }) => {
+    const qs = new URLSearchParams()
+    if (params?.code) qs.set('code', params.code)
+    if (params?.tag) qs.set('tag', params.tag)
+    const q = qs.toString()
+    return request<import('@/lib/types').KnowledgeEntrySummary[]>(`/api/knowledge${q ? `?${q}` : ''}`)
+  },
+  getKnowledgeEntry: (slug: string) =>
+    request<import('@/lib/types').KnowledgeEntryDetail>(`/api/knowledge/${encodeURIComponent(slug)}`),
+  researchKnowledge: (slug: string, topic?: string) =>
+    request<{ status: string; run_id: string }>(`/api/knowledge/${encodeURIComponent(slug)}/research`, {
+      method: 'POST',
+      body: JSON.stringify({ topic: topic ?? null }),
+    }),
+
+  // Orchestrator actions + webhook routes
+  listActions: () =>
+    request<import('@/lib/types').OrchestratorAction[]>('/api/orchestrator/actions'),
+  createAction: (body: {
+    label: string
+    tool_name: string
+    tool_input: unknown
+    scheduled_at: string
+    recurrence_secs: number | null
+  }) =>
+    request<import('@/lib/types').OrchestratorAction>('/api/orchestrator/actions', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  updateAction: (id: string, patch: { label?: string; recurrence_secs?: number | null }) =>
+    request<import('@/lib/types').OrchestratorAction>(`/api/orchestrator/actions/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify(patch),
+    }),
+  deleteAction: (id: string) =>
+    request<{ deleted: boolean }>(`/api/orchestrator/actions/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  listWebhookRoutes: () =>
+    request<import('@/lib/types').OrchestratorWebhookRoute[]>('/api/orchestrator/webhook-routes'),
+  createWebhookRoute: (body: { path: string; tool_name: string; input_template: string }) =>
+    request<import('@/lib/types').OrchestratorWebhookRoute>('/api/orchestrator/webhook-routes', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  deleteWebhookRoute: (id: string) =>
+    request<{ deleted: boolean }>(`/api/orchestrator/webhook-routes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+  listWebhookEvents: (limit = 20) =>
+    request<import('@/lib/types').OrchestratorWebhookEvent[]>(`/api/orchestrator/webhook-events?limit=${limit}`),
+
   // Secrets (metadata only — decryption is CLI-only)
   getSecretsStatus: () => request<{ key_count: number; env_count: number }>('/api/secrets/status'),
   getSecretsKeys: () => request<import('@/lib/types').SecretsKey[]>('/api/secrets/keys'),

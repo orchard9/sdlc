@@ -1,0 +1,75 @@
+slug: fleet-helm-chart
+title: 'Helm chart: sdlc-server + git-sync sidecar Deployment, Service, Ingress, ExternalSecret'
+phase: specified
+created_at: 2026-03-02T09:07:44.188500Z
+updated_at: 2026-03-02T09:27:20.500796Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-helm-chart/spec.md
+  created_at: 2026-03-02T09:27:15.165343Z
+  approved_at: 2026-03-02T09:27:17.889818Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/fleet-helm-chart/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/fleet-helm-chart/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/fleet-helm-chart/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fleet-helm-chart/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fleet-helm-chart/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fleet-helm-chart/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T09:07:44.188500Z
+  exited: 2026-03-02T09:27:20.500796Z
+- phase: specified
+  entered: 2026-03-02T09:27:20.500796Z
+  exited: null
+dependencies: []
+archived: false

@@ -4,7 +4,8 @@ code: uncategorized
 status: draft
 tags:
 - ponder
+summary: 'Committed plan for tick-rate orchestrator (v07-v08): game-loop daemon firing tools on schedule or webhook triggers, backed by redb embedded DB; two-milestone delivery'
 origin: harvested
 harvested_from: ponder/tick-orchestrator
 created_at: 2026-03-02T04:22:56.130319Z
-updated_at: 2026-03-02T04:25:48.484273Z
+updated_at: 2026-03-02T09:53:39.584176Z

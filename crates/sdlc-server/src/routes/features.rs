@@ -3,6 +3,7 @@ use axum::Json;
 
 use crate::error::AppError;
 use crate::state::AppState;
+use sdlc_core::comment::{add_comment, CommentFlag, CommentTarget};
 use sdlc_core::types::{ActionType, Phase};
 
 /// GET /api/features — list all features.
@@ -233,6 +234,42 @@ pub async fn merge_feature(
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
 
+    Ok(Json(result))
+}
+
+#[derive(serde::Deserialize, Default)]
+pub struct RemoveBlockerBody {
+    #[serde(default)]
+    pub reason: Option<String>,
+}
+
+/// DELETE /api/features/:slug/blockers/:idx — remove a blocker by index.
+pub async fn remove_blocker(
+    State(app): State<AppState>,
+    Path((slug, idx)): Path<(String, usize)>,
+    body: Option<Json<RemoveBlockerBody>>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let reason = body.and_then(|b| b.0.reason);
+    let result = tokio::task::spawn_blocking(move || {
+        let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
+        let blocker_text = feature.blockers.get(idx).cloned().unwrap_or_default();
+        feature.remove_blocker(idx)?;
+        if let Some(r) = reason.filter(|r| !r.trim().is_empty()) {
+            add_comment(
+                &mut feature.comments,
+                &mut feature.next_comment_seq,
+                format!("Blocker removed: '{blocker_text}'. Reason: {r}"),
+                Some(CommentFlag::Decision),
+                CommentTarget::Feature,
+                None,
+            );
+        }
+        feature.save(&root)?;
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({ "ok": true }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
     Ok(Json(result))
 }
 

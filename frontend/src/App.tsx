@@ -11,6 +11,7 @@ import { PonderPage } from '@/pages/PonderPage'
 import { InvestigationPage } from '@/pages/InvestigationPage'
 import { EvolvePage } from '@/pages/EvolvePage'
 import { GuidelinePage } from '@/pages/GuidelinePage'
+import { KnowledgePage } from '@/pages/KnowledgePage'
 import { SettingsPage } from '@/pages/SettingsPage'
 import { SecretsPage } from '@/pages/SecretsPage'
 import { ToolsPage } from '@/pages/ToolsPage'
@@ -46,6 +47,8 @@ export default function App() {
             <Route path="/evolve/:slug" element={<EvolvePage />} />
             <Route path="/guidelines" element={<GuidelinePage />} />
             <Route path="/guidelines/:slug" element={<GuidelinePage />} />
+            <Route path="/knowledge" element={<KnowledgePage />} />
+            <Route path="/knowledge/:slug" element={<KnowledgePage />} />
             <Route path="/secrets" element={<SecretsPage />} />
             <Route path="/tools" element={<ToolsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />

@@ -1,0 +1,12 @@
+slug: url-entry
+title: URL Entry
+code: uncategorized
+status: draft
+summary: UAT fixture demonstrating web-origin (--from-url) knowledge entries; documents SourceType::Web, OriginKind::Web, fetch_page_title, and Source provenance struct
+sources:
+- type: web
+  url: https://example.com
+  captured_at: 2026-03-02T09:48:03.658971Z
+origin: web
+created_at: 2026-03-02T09:48:03.622948Z
+updated_at: 2026-03-02T09:59:38.336878Z

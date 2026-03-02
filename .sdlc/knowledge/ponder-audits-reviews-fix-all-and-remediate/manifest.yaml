@@ -1,0 +1,11 @@
+slug: ponder-audits-reviews-fix-all-and-remediate
+title: audits-reviews-fix-all-and-remediate
+code: uncategorized
+status: draft
+tags:
+- ponder
+summary: 'Decision: finding-closure protocol for approve audit/review — three concrete changes ensuring every finding is explicitly resolved (fix now, track as task, or accept with rationale) before approval'
+origin: harvested
+harvested_from: ponder/audits-reviews-fix-all-and-remediate
+created_at: 2026-03-02T09:46:42.578241Z
+updated_at: 2026-03-02T09:54:33.136614Z

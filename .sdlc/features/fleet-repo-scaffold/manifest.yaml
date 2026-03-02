@@ -1,0 +1,75 @@
+slug: fleet-repo-scaffold
+title: Scaffold orchard9/sdlc-cluster repo with base directory structure and .woodpecker.yml
+phase: specified
+created_at: 2026-03-02T09:07:43.801494Z
+updated_at: 2026-03-02T09:27:33.900927Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-repo-scaffold/spec.md
+  created_at: 2026-03-02T09:27:29.335837Z
+  approved_at: 2026-03-02T09:27:33.878303Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/fleet-repo-scaffold/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/fleet-repo-scaffold/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/fleet-repo-scaffold/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fleet-repo-scaffold/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fleet-repo-scaffold/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fleet-repo-scaffold/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T09:07:43.801494Z
+  exited: 2026-03-02T09:27:33.900927Z
+- phase: specified
+  entered: 2026-03-02T09:27:33.900927Z
+  exited: null
+dependencies: []
+archived: false

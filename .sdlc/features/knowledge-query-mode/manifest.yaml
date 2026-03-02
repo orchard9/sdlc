@@ -1,55 +1,55 @@
 slug: knowledge-query-mode
 title: sdlc knowledge ask — librarian query mode via spawn_agent_run
 description: 'CLI: sdlc knowledge ask ''<question>'' — invokes librarian agent via spawn_agent_run with question plus full knowledge base catalog and entry summaries as context. Returns synthesized answer with cited entry codes. If a gap is detected, suggests sdlc knowledge research <topic>. Server: POST /api/knowledge/ask body:{question} spawns agent run and streams via SSE. SSE events: KnowledgeQueryStarted {question}, KnowledgeQueryCompleted {answer, cited_entries:[{slug,code,title}]}. Add SseMessage variants to state.rs. QueryOptions: max_turns 10, web search tools allowed for librarian to pull recent context.'
-phase: draft
+phase: qa
 created_at: 2026-03-02T02:12:23.885278Z
-updated_at: 2026-03-02T02:12:23.885278Z
+updated_at: 2026-03-02T09:31:42.981081Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-query-mode/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:34.549008Z
+  approved_at: 2026-03-02T09:26:40.356265Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-query-mode/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:44.767308Z
+  approved_at: 2026-03-02T09:26:50.622909Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-query-mode/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:54.612972Z
+  approved_at: 2026-03-02T09:27:04.413419Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-query-mode/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:08.957318Z
+  approved_at: 2026-03-02T09:27:16.036590Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-query-mode/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:30:56.427855Z
+  approved_at: 2026-03-02T09:30:59.741412Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-query-mode/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:31:40.311454Z
+  approved_at: 2026-03-02T09:31:42.967883Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -68,6 +68,27 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T02:12:23.885278Z
+  exited: 2026-03-02T09:26:40.367082Z
+- phase: specified
+  entered: 2026-03-02T09:26:40.367082Z
+  exited: 2026-03-02T09:27:16.235764Z
+- phase: planned
+  entered: 2026-03-02T09:27:16.235764Z
+  exited: 2026-03-02T09:27:20.675966Z
+- phase: ready
+  entered: 2026-03-02T09:27:20.675966Z
+  exited: 2026-03-02T09:27:22.767970Z
+- phase: implementation
+  entered: 2026-03-02T09:27:22.767970Z
+  exited: 2026-03-02T09:30:59.821437Z
+- phase: review
+  entered: 2026-03-02T09:30:59.821437Z
+  exited: 2026-03-02T09:31:07.927873Z
+- phase: audit
+  entered: 2026-03-02T09:31:07.927873Z
+  exited: 2026-03-02T09:31:42.981081Z
+- phase: qa
+  entered: 2026-03-02T09:31:42.981081Z
   exited: null
 dependencies: []
 archived: false

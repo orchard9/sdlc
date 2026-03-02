@@ -134,6 +134,15 @@ tasks:
   completed_at: null
   blocker: null
   depends_on: []
+- id: T9
+  title: 'UAT: sdlc-run template missing immediate capture instruction and backlog example; guidance.md missing §12 Session Close Protocol with backlog vocabulary table'
+  description: null
+  status: pending
+  created_at: 2026-03-02T09:51:10.284582Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []

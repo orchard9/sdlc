@@ -482,6 +482,25 @@ fn update(
         }
     }
 
+    // Auto-harvest into the knowledge base when a ponder is committed.
+    if entry.status == sdlc_core::ponder::PonderStatus::Committed {
+        match sdlc_core::knowledge::librarian_harvest_workspace(root, "ponder", slug) {
+            Ok(result) => {
+                if !json {
+                    if result.created {
+                        println!("Knowledge entry created: {}", result.slug);
+                    } else {
+                        println!("Knowledge entry updated: {}", result.slug);
+                    }
+                }
+            }
+            Err(e) => {
+                // Non-fatal: log but don't fail the update.
+                eprintln!("Warning: knowledge harvest failed: {e}");
+            }
+        }
+    }
+
     if json {
         print_json(&serde_json::json!({
             "slug": entry.slug,

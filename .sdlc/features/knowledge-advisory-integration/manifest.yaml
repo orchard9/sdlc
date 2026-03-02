@@ -1,63 +1,63 @@
 slug: knowledge-advisory-integration
 title: Advisory runs draw from knowledge base — inject relevant entries as context
 description: 'Modify crates/sdlc-server/src/routes/advisory.rs: before building the advisory agent prompt, query the knowledge base for relevant entries (top-N by tag intersection + recency, N=10). Inject as a ''Project Knowledge'' context block in the advisory prompt: each entry shows its code, title, and summary. This prevents the advisory system from re-discovering patterns already captured. The advisory output should cite relevant knowledge entries when they inform findings. Add GET /api/knowledge/relevant?tags=a,b&limit=10 server endpoint to support this query pattern.'
-phase: draft
+phase: released
 created_at: 2026-03-02T02:12:53.589906Z
-updated_at: 2026-03-02T02:12:53.589906Z
+updated_at: 2026-03-02T09:17:56.864851Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:42.435030Z
+  approved_at: 2026-03-02T09:17:42.443318Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:42.458043Z
+  approved_at: 2026-03-02T09:17:42.464982Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:42.471578Z
+  approved_at: 2026-03-02T09:17:42.479072Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:42.486311Z
+  approved_at: 2026-03-02T09:17:42.504805Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:46.363346Z
+  approved_at: 2026-03-02T09:17:46.369510Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:46.377584Z
+  approved_at: 2026-03-02T09:17:46.385130Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-advisory-integration/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:17:26.326471Z
+  approved_at: 2026-03-02T09:17:28.454557Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -68,6 +68,33 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T02:12:53.589906Z
+  exited: 2026-03-02T09:17:42.445011Z
+- phase: specified
+  entered: 2026-03-02T09:17:42.445011Z
+  exited: 2026-03-02T09:17:42.507743Z
+- phase: planned
+  entered: 2026-03-02T09:17:42.507743Z
+  exited: 2026-03-02T09:17:46.347793Z
+- phase: ready
+  entered: 2026-03-02T09:17:46.347793Z
+  exited: 2026-03-02T09:17:46.355603Z
+- phase: implementation
+  entered: 2026-03-02T09:17:46.355603Z
+  exited: 2026-03-02T09:17:46.371397Z
+- phase: review
+  entered: 2026-03-02T09:17:46.371397Z
+  exited: 2026-03-02T09:17:46.379198Z
+- phase: audit
+  entered: 2026-03-02T09:17:46.379198Z
+  exited: 2026-03-02T09:17:46.387405Z
+- phase: qa
+  entered: 2026-03-02T09:17:46.387405Z
+  exited: 2026-03-02T09:17:54.971266Z
+- phase: merge
+  entered: 2026-03-02T09:17:54.971266Z
+  exited: 2026-03-02T09:17:56.864851Z
+- phase: released
+  entered: 2026-03-02T09:17:56.864851Z
   exited: null
 dependencies: []
 archived: false

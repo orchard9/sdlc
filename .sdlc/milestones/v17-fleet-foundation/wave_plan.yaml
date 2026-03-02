@@ -1,0 +1,28 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: fleet-deploy-pipeline
+    title: 'Woodpecker deploy-project.yaml: on-demand idempotent helm install for one project slug'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: fleet-helm-chart
+    title: 'Helm chart: sdlc-server + git-sync sidecar Deployment, Service, Ingress, ExternalSecret'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: fleet-repo-scaffold
+    title: Scaffold orchard9/sdlc-cluster repo with base directory structure and .woodpecker.yml
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: fleet-secrets-infra
+    title: GCP Secret Manager sdlc-fleet-gitea entry and ESO ClusterSecretStore manifest
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

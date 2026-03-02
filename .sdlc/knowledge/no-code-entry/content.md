@@ -1,0 +1,1 @@
+Entry without a code should default to uncategorized

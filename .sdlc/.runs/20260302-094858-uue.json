@@ -1,0 +1,14 @@
+{
+  "id": "20260302-094858-uue",
+  "key": "knowledge:harvest:agent-observability",
+  "run_type": "knowledge_harvest",
+  "target": "agent-observability",
+  "label": "Harvest ponder/agent-observability",
+  "status": "completed",
+  "started_at": "2026-03-02T09:48:58.442532+00:00",
+  "completed_at": "2026-03-02T09:49:28.737209+00:00",
+  "cost_usd": 0.33655,
+  "turns": 5,
+  "error": null,
+  "prompt": "You are a knowledge librarian agent harvesting a workspace into the knowledge base.\n\nWorkspace type: ponder\nWorkspace slug: agent-observability\nProject root: /Users/jordanwashburn/Workspace/orchard9/sdlc\n\n## Steps\n\n1. Run `sdlc knowledge librarian harvest --type ponder --slug agent-observability`\n   to create or update the knowledge entry for this workspace.\n\n2. If the command reports `created: true`, add a brief summary:\n   `sdlc knowledge update ponder-agent-observability --summary \"<one-sentence summary>\"`\n\n3. Log the harvest session:\n   a. Write `/tmp/knowledge-harvest-agent-observability.md` with: what was harvested, whether it was\n      new or updated, and any notable content.\n   b. Run: `sdlc knowledge session log ponder-agent-observability --file /tmp/knowledge-harvest-agent-observability.md`\n\n4. Output a final line: `HARVEST_COMPLETE: ponder/agent-observability`\n"
+}

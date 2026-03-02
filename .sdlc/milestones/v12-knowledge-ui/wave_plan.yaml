@@ -1,0 +1,16 @@
+- number: 1
+  label: Review
+  items:
+  - slug: knowledge-page-ui
+    title: KnowledgePage — three-pane catalog browser in the sdlc UI
+    phase: qa
+    action: run_qa
+    needs_worktree: true
+    blocked_by: []
+  - slug: knowledge-slash-command
+    title: /sdlc-knowledge slash command in init.rs — all four AI CLI platforms
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: true

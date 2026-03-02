@@ -2,8 +2,13 @@
 //!
 //! `POST /webhooks/{route}` accepts any HTTP body, stores the raw bytes in the
 //! orchestrator's redb `WEBHOOKS` table, and returns `202 Accepted` with the
-//! assigned UUID. No payload transformation on ingress — store exactly what
+//! assigned UUID. No payload transformation on ingress -- store exactly what
 //! arrived.
+//!
+//! After a successful `insert_webhook`, a `WebhookEvent` with
+//! `outcome: Received` is written to the `WEBHOOK_EVENTS` ring buffer. Event
+//! logging is best-effort -- a failure to write the event does not affect the
+//! 202 response returned to the sender.
 
 use axum::{
     body::Bytes,
@@ -12,7 +17,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use sdlc_core::orchestrator::{ActionDb, WebhookPayload};
+use sdlc_core::orchestrator::{ActionDb, WebhookEvent, WebhookEventOutcome, WebhookPayload};
 use sdlc_core::paths::orchestrator_db_path;
 
 use crate::state::AppState;
@@ -24,8 +29,11 @@ use crate::state::AppState;
 /// `WEBHOOKS` table. Returns `202 Accepted` with `{ "id": "<uuid>" }`.
 ///
 /// The `route_path` stored in the DB is normalized to always start with `/`
-/// (e.g. URL `/webhooks/github` → stored as `/github`). This matches the
+/// (e.g. URL `/webhooks/github` -> stored as `/github`). This matches the
 /// format expected by `WebhookRoute.path` in the route registry.
+///
+/// Also writes a `WebhookEvent` with `outcome: Received` to the ring-buffered
+/// `WEBHOOK_EVENTS` table for audit/history purposes.
 pub async fn receive_webhook(
     State(app): State<AppState>,
     Path(route): Path<String>,
@@ -44,13 +52,27 @@ pub async fn receive_webhook(
         format!("/{route}")
     };
 
-    let payload = WebhookPayload::new(route_path, body.to_vec(), content_type);
+    let body_bytes = body.len();
+    let payload = WebhookPayload::new(route_path.clone(), body.to_vec(), content_type.clone());
     let id = payload.id;
 
     let db_path = orchestrator_db_path(&app.root);
     let result = tokio::task::spawn_blocking(move || {
         let db = ActionDb::open(&db_path)?;
         db.insert_webhook(&payload)?;
+
+        // Best-effort: record a WebhookEvent for the arrival. Do not fail the
+        // request if event logging fails -- the payload is already stored safely.
+        let event = WebhookEvent::new(
+            &route_path,
+            content_type,
+            body_bytes,
+            WebhookEventOutcome::Received,
+        );
+        if let Err(e) = db.insert_webhook_event(&event) {
+            tracing::warn!("webhook_events: failed to record arrival event: {e}");
+        }
+
         Ok::<_, sdlc_core::SdlcError>(())
     })
     .await;

@@ -4,7 +4,10 @@ code: uncategorized
 status: draft
 tags:
 - ponder
+summary: 'Weak signals parking lot from first real-user session: patterns and observations needing more conversation context before promotion to features; see also ponder-sdlc-backlog'
+related:
+- ponder-sdlc-backlog
 origin: harvested
 harvested_from: ponder/signal-watch
 created_at: 2026-03-02T04:22:56.145197Z
-updated_at: 2026-03-02T04:25:48.491246Z
+updated_at: 2026-03-02T09:54:53.590918Z

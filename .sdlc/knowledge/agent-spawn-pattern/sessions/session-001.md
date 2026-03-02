@@ -1,0 +1,1 @@
+Initial research session: traced spawn_agent_run in routes/runs.rs (lines 88-279), reviewed state.rs RunRecord and SseMessage types, read plan-act-pattern.md, reviewed advisory.rs and knowledge.rs usages. Documented full pattern including signature, key naming conventions, query option builders, SSE architecture, RunRecord schema, and the Plan-Act two-phase variant.

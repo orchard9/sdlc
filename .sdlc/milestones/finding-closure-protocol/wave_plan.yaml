@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: audit-review-approval-protocol
+    title: 'Finding-Closure Protocol: sdlc-next template + CLAUDE.md ethos'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

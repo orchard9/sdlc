@@ -6,11 +6,15 @@ import { RunInitCard } from './RunInitCard'
 import { ToolCallCard } from './ToolCallCard'
 import { AssistantTextBlock } from './AssistantTextBlock'
 import { RunResultCard } from './RunResultCard'
-import type { PairedEvent } from '@/lib/types'
+import type { PairedEvent, RawRunEvent } from '@/lib/types'
 
 interface RunActivityFeedProps {
   runId: string
   isRunning: boolean
+  /** If provided, skip the internal useRunTelemetry call and use these events directly */
+  events?: RawRunEvent[]
+  /** Prompt for the run (used in the init card), forwarded from caller when events are provided */
+  prompt?: string | null
 }
 
 function PairedEventRow({ event }: { event: PairedEvent }) {
@@ -28,13 +32,18 @@ function PairedEventRow({ event }: { event: PairedEvent }) {
   }
 }
 
-export function RunActivityFeed({ runId, isRunning }: RunActivityFeedProps) {
-  const { telemetry, isLoading, error } = useRunTelemetry(runId, isRunning)
+export function RunActivityFeed({ runId, isRunning, events: eventsProp, prompt: promptProp }: RunActivityFeedProps) {
+  // If caller provides events directly, skip the internal fetch
+  const skipFetch = eventsProp != null
+  const { telemetry, isLoading, error } = useRunTelemetry(skipFetch ? '' : runId, isRunning)
 
   const pairedEvents = useMemo(() => {
+    if (skipFetch) {
+      return pairEvents(eventsProp ?? [], promptProp ?? null)
+    }
     if (!telemetry) return []
     return pairEvents(telemetry.events, telemetry.prompt)
-  }, [telemetry])
+  }, [skipFetch, eventsProp, promptProp, telemetry])
 
   if (isLoading && !telemetry) {
     return (

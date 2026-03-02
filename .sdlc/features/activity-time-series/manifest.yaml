@@ -1,61 +1,61 @@
 slug: activity-time-series
 title: Time-series chart of agent activity with LLM/tool/subagent wait-type breakdown
-phase: draft
+phase: qa
 created_at: 2026-03-02T04:09:31.206709Z
-updated_at: 2026-03-02T04:09:31.206709Z
+updated_at: 2026-03-02T09:30:04.556716Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/activity-time-series/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:25.717104Z
+  approved_at: 2026-03-02T09:26:30.636247Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/activity-time-series/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:39.109606Z
+  approved_at: 2026-03-02T09:26:39.182337Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/activity-time-series/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:47.440706Z
+  approved_at: 2026-03-02T09:26:47.505214Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/activity-time-series/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:26:56.924427Z
+  approved_at: 2026-03-02T09:26:56.977573Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/activity-time-series/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:29:25.085039Z
+  approved_at: 2026-03-02T09:29:41.662833Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/activity-time-series/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:29:55.836738Z
+  approved_at: 2026-03-02T09:29:55.842607Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: draft
   path: .sdlc/features/activity-time-series/qa-results.md
-  created_at: null
+  created_at: 2026-03-02T09:30:04.556716Z
   approved_at: null
   rejected_at: null
   rejection_reason: null
@@ -67,6 +67,27 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T04:09:31.206709Z
+  exited: 2026-03-02T09:26:30.647736Z
+- phase: specified
+  entered: 2026-03-02T09:26:30.647736Z
+  exited: 2026-03-02T09:26:57.018558Z
+- phase: planned
+  entered: 2026-03-02T09:26:57.018558Z
+  exited: 2026-03-02T09:27:04.400830Z
+- phase: ready
+  entered: 2026-03-02T09:27:04.400830Z
+  exited: 2026-03-02T09:27:09.505009Z
+- phase: implementation
+  entered: 2026-03-02T09:27:09.505009Z
+  exited: 2026-03-02T09:29:41.667140Z
+- phase: review
+  entered: 2026-03-02T09:29:41.667140Z
+  exited: 2026-03-02T09:29:45.692516Z
+- phase: audit
+  entered: 2026-03-02T09:29:45.692516Z
+  exited: 2026-03-02T09:29:55.843860Z
+- phase: qa
+  entered: 2026-03-02T09:29:55.843860Z
   exited: null
 dependencies: []
 archived: false

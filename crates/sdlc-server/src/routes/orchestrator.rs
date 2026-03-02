@@ -4,7 +4,11 @@
 //! - `POST /api/orchestrator/webhooks/routes` — register a new webhook route
 //! - `GET  /api/orchestrator/webhooks/routes` — list all registered webhook routes
 
-use axum::{extract::State, http::StatusCode, Json};
+use axum::{
+    extract::{Path, State},
+    http::StatusCode,
+    Json,
+};
 use serde::Deserialize;
 
 use crate::error::AppError;
@@ -122,6 +126,311 @@ pub async fn list_routes(State(app): State<AppState>) -> Result<Json<serde_json:
                     "tool_name": r.tool_name,
                     "input_template": r.input_template,
                     "created_at": r.created_at.to_rfc3339(),
+                })
+            })
+            .collect();
+        Ok::<_, anyhow::Error>(serde_json::json!(json))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .map_err(AppError)?;
+
+    Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
+// Action CRUD helpers
+// ---------------------------------------------------------------------------
+
+/// Serialize an `Action` to the API response shape.
+fn action_to_json(action: &sdlc_core::orchestrator::Action) -> serde_json::Value {
+    use sdlc_core::orchestrator::action::{ActionStatus, ActionTrigger};
+
+    let (trigger_type, next_tick_at) = match &action.trigger {
+        ActionTrigger::Scheduled { next_tick_at } => ("scheduled", Some(next_tick_at.to_rfc3339())),
+        ActionTrigger::Webhook { .. } => ("webhook", None),
+    };
+
+    let status = match &action.status {
+        ActionStatus::Pending => "pending".to_string(),
+        ActionStatus::Running => "running".to_string(),
+        ActionStatus::Completed { .. } => "completed".to_string(),
+        ActionStatus::Failed { .. } => "failed".to_string(),
+    };
+
+    let recurrence_secs: serde_json::Value = match action.recurrence {
+        Some(dur) => serde_json::json!(dur.as_secs()),
+        None => serde_json::Value::Null,
+    };
+
+    let mut obj = serde_json::json!({
+        "id": action.id.to_string(),
+        "label": action.label,
+        "tool_name": action.tool_name,
+        "tool_input": action.tool_input,
+        "trigger_type": trigger_type,
+        "status": status,
+        "recurrence_secs": recurrence_secs,
+        "created_at": action.created_at.to_rfc3339(),
+        "updated_at": action.updated_at.to_rfc3339(),
+    });
+
+    if let Some(ts) = next_tick_at {
+        obj["next_tick_at"] = serde_json::json!(ts);
+    }
+
+    obj
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/orchestrator/actions — list all actions
+// ---------------------------------------------------------------------------
+
+/// `GET /api/orchestrator/actions`
+///
+/// Returns all actions sorted by `created_at` descending (newest first).
+pub async fn list_actions(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
+            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
+        let actions = db.list_all().map_err(|e| anyhow::anyhow!("{e}"))?;
+        let json: Vec<serde_json::Value> = actions.iter().map(action_to_json).collect();
+        Ok::<_, anyhow::Error>(serde_json::json!(json))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .map_err(AppError)?;
+
+    Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
+// POST /api/orchestrator/actions — create a scheduled action
+// ---------------------------------------------------------------------------
+
+#[derive(Deserialize)]
+pub struct CreateActionBody {
+    pub label: String,
+    pub tool_name: String,
+    pub tool_input: serde_json::Value,
+    pub next_tick_at: chrono::DateTime<chrono::Utc>,
+    pub recurrence_secs: Option<u64>,
+}
+
+/// `POST /api/orchestrator/actions`
+///
+/// Create a new scheduled action. Returns `201 Created` with the action object.
+///
+/// Errors:
+/// - `400` if `label` is empty
+/// - `400` if `tool_name` is empty or fails slug validation
+/// - `400` if `tool_input` is not a JSON object
+pub async fn create_action(
+    State(app): State<AppState>,
+    Json(body): Json<CreateActionBody>,
+) -> Result<(StatusCode, Json<serde_json::Value>), AppError> {
+    // Validate inputs
+    if body.label.is_empty() {
+        return Err(AppError::bad_request("label must be non-empty"));
+    }
+    if body.tool_name.is_empty() {
+        return Err(AppError::bad_request("tool_name must be non-empty"));
+    }
+    if let Err(e) = sdlc_core::paths::validate_slug(&body.tool_name) {
+        return Err(AppError::bad_request(format!("tool_name: {e}")));
+    }
+    if !body.tool_input.is_object() {
+        return Err(AppError::bad_request("tool_input must be a JSON object"));
+    }
+
+    let root = app.root.clone();
+    let label = body.label.clone();
+    let tool_name = body.tool_name.clone();
+    let tool_input = body.tool_input.clone();
+    let next_tick_at = body.next_tick_at;
+    let recurrence = body.recurrence_secs.map(std::time::Duration::from_secs);
+
+    let result = tokio::task::spawn_blocking(move || {
+        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
+            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
+        let action = sdlc_core::orchestrator::Action::new_scheduled(
+            label,
+            tool_name,
+            tool_input,
+            next_tick_at,
+            recurrence,
+        );
+        db.insert(&action).map_err(|e| anyhow::anyhow!("{e}"))?;
+        Ok::<_, anyhow::Error>(action_to_json(&action))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .map_err(AppError)?;
+
+    Ok((StatusCode::CREATED, Json(result)))
+}
+
+// ---------------------------------------------------------------------------
+// DELETE /api/orchestrator/actions/{id}
+// ---------------------------------------------------------------------------
+
+/// `DELETE /api/orchestrator/actions/{id}`
+///
+/// Delete an action by UUID. Returns `204 No Content` (idempotent — succeeds
+/// even if the action does not exist).
+///
+/// Returns `400` if `id` is not a valid UUID.
+pub async fn delete_action(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    let uuid = id
+        .parse::<uuid::Uuid>()
+        .map_err(|_| AppError::bad_request(format!("'{id}' is not a valid UUID")))?;
+
+    let root = app.root.clone();
+    tokio::task::spawn_blocking(move || {
+        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
+            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
+        db.delete(uuid).map_err(|e| anyhow::anyhow!("{e}"))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .map_err(AppError)?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+// ---------------------------------------------------------------------------
+// PATCH /api/orchestrator/actions/{id}
+// ---------------------------------------------------------------------------
+
+/// Newtype wrapper that distinguishes "field absent" from "field = null".
+///
+/// - Absent field (key not in JSON object)  → `MaybeAbsent::Absent`
+/// - `null` value                           → `MaybeAbsent::Present(None)`
+/// - Non-null value                         → `MaybeAbsent::Present(Some(v))`
+#[derive(Debug, Default)]
+pub(crate) enum MaybeAbsent<T> {
+    #[default]
+    Absent,
+    Present(Option<T>),
+}
+
+impl<'de, T: serde::Deserialize<'de>> serde::Deserialize<'de> for MaybeAbsent<T> {
+    fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        // When the key is present (even if null), this is called.
+        // serde calls the inner Option::deserialize for us.
+        Option::<T>::deserialize(d).map(MaybeAbsent::Present)
+    }
+}
+
+#[derive(Deserialize)]
+pub struct PatchActionBody {
+    pub label: Option<String>,
+    /// Use `MaybeAbsent` to distinguish absent (no change) from null (clear).
+    #[serde(default)]
+    pub(crate) recurrence_secs: MaybeAbsent<u64>,
+}
+
+/// `PATCH /api/orchestrator/actions/{id}`
+///
+/// Update `label` and/or `recurrence_secs` on an existing action.
+///
+/// - `label`: optional non-empty string
+/// - `recurrence_secs`: `null` clears it; a positive integer sets it; absent → no change
+///
+/// Returns `200 OK` with the updated action, `404` if not found, `400` for
+/// validation errors.
+pub async fn patch_action(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+    Json(body): Json<PatchActionBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let uuid = id
+        .parse::<uuid::Uuid>()
+        .map_err(|_| AppError::bad_request(format!("'{id}' is not a valid UUID")))?;
+
+    // Validate label if provided
+    if let Some(ref lbl) = body.label {
+        if lbl.is_empty() {
+            return Err(AppError::bad_request("label must be non-empty"));
+        }
+    }
+
+    // Parse recurrence_secs field:
+    //   MaybeAbsent::Absent         → None           (no change)
+    //   MaybeAbsent::Present(None)  → Some(None)      (clear recurrence)
+    //   MaybeAbsent::Present(Some(n))→ Some(Some(dur)) (set recurrence)
+    let recurrence: Option<Option<std::time::Duration>> = match body.recurrence_secs {
+        MaybeAbsent::Absent => None,
+        MaybeAbsent::Present(None) => Some(None),
+        MaybeAbsent::Present(Some(secs)) => Some(Some(std::time::Duration::from_secs(secs))),
+    };
+
+    let root = app.root.clone();
+    let label = body.label.clone();
+
+    let result = tokio::task::spawn_blocking(move || {
+        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+        let db = sdlc_core::orchestrator::ActionDb::open(&db_path).map_err(|e| {
+            (
+                false,
+                anyhow::anyhow!("failed to open orchestrator DB: {e}"),
+            )
+        })?;
+        db.update_label_and_recurrence(uuid, label, recurrence)
+            .map_err(|e| {
+                let not_found = e.to_string().contains("not found");
+                (not_found, anyhow::anyhow!("{e}"))
+            })
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?;
+
+    match result {
+        Ok(action) => Ok(Json(action_to_json(&action))),
+        Err((true, e)) => Err(AppError::not_found(e.to_string())),
+        Err((false, e)) => Err(AppError(e)),
+    }
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/orchestrator/webhooks/events — list webhook event audit log
+// ---------------------------------------------------------------------------
+
+/// `GET /api/orchestrator/webhooks/events`
+///
+/// Returns stored webhook events from the ring buffer, sorted by `received_at`
+/// descending (most recent first).
+pub async fn list_webhook_events(
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
+            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
+        let events = db
+            .list_webhook_events()
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
+        let json: Vec<serde_json::Value> = events
+            .iter()
+            .map(|e| {
+                serde_json::json!({
+                    "id": e.id.to_string(),
+                    "seq": e.seq,
+                    "route_path": e.route_path,
+                    "content_type": e.content_type,
+                    "body_bytes": e.body_bytes,
+                    "received_at": e.received_at.to_rfc3339(),
+                    "outcome": e.outcome,
                 })
             })
             .collect();

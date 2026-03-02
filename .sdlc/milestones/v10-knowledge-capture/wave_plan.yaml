@@ -1,0 +1,10 @@
+- number: 1
+  label: Review
+  items:
+  - slug: knowledge-librarian-init
+    title: sdlc knowledge librarian init — project scan, catalog gen, agent file, hooks
+    phase: review
+    action: create_audit
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

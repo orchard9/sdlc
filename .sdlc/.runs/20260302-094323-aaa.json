@@ -1,0 +1,14 @@
+{
+  "id": "20260302-094323-aaa",
+  "key": "milestone-uat:v13-backlog",
+  "run_type": "milestone_uat",
+  "target": "v13-backlog",
+  "label": "UAT: v13-backlog",
+  "status": "stopped",
+  "started_at": "2026-03-02T09:43:23.543307+00:00",
+  "completed_at": "2026-03-02T09:46:00.886297+00:00",
+  "cost_usd": null,
+  "turns": null,
+  "error": null,
+  "prompt": "Run the acceptance test for milestone 'v13-backlog'. Call `sdlc milestone info v13-backlog --json` to load the milestone and acceptance test. Execute every checklist step. Write signed checklist results to `.sdlc/milestones/v13-backlog/uat_results.md`. Then call `sdlc milestone complete v13-backlog` if all steps pass."
+}

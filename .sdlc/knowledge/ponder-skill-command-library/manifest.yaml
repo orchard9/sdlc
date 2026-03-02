@@ -4,7 +4,8 @@ code: uncategorized
 status: draft
 tags:
 - ponder
+summary: 'Ponder on command and skill discoverability: first real user immediately hit this gap; design for a browsable library of slash commands and skills with intent descriptions'
 origin: harvested
 harvested_from: ponder/skill-command-library
 created_at: 2026-03-02T04:22:56.143711Z
-updated_at: 2026-03-02T04:25:48.490460Z
+updated_at: 2026-03-02T09:54:53.586820Z

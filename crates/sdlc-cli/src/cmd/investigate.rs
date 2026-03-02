@@ -450,6 +450,25 @@ fn update(
 
     investigation::save(root, &entry).context("failed to save investigation")?;
 
+    // Auto-harvest into the knowledge base when an investigation is marked complete.
+    if entry.status == sdlc_core::investigation::InvestigationStatus::Complete {
+        match sdlc_core::knowledge::librarian_harvest_workspace(root, "investigation", slug) {
+            Ok(result) => {
+                if !json {
+                    if result.created {
+                        println!("Knowledge entry created: {}", result.slug);
+                    } else {
+                        println!("Knowledge entry updated: {}", result.slug);
+                    }
+                }
+            }
+            Err(e) => {
+                // Non-fatal: log but don't fail the update.
+                eprintln!("Warning: knowledge harvest failed: {e}");
+            }
+        }
+    }
+
     if json {
         print_json(&entry_to_json_summary(&entry))?;
     } else {

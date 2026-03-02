@@ -1,8 +1,8 @@
 slug: wave-running-context
 title: Wave Running Context and Recovery Path
-phase: specified
+phase: released
 created_at: 2026-03-02T03:16:32.357199Z
-updated_at: 2026-03-02T03:19:13.574104Z
+updated_at: 2026-03-02T09:20:43.723117Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,50 +13,50 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/wave-running-context/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:43.521114Z
+  approved_at: 2026-03-02T09:19:45.258996Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/wave-running-context/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:52.603252Z
+  approved_at: 2026-03-02T09:19:52.608652Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/wave-running-context/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:19:59.253032Z
+  approved_at: 2026-03-02T09:19:59.258Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/wave-running-context/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:15.548637Z
+  approved_at: 2026-03-02T09:20:15.785444Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/wave-running-context/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:29.377805Z
+  approved_at: 2026-03-02T09:20:29.383041Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/wave-running-context/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:20:39.304945Z
+  approved_at: 2026-03-02T09:20:39.344690Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -70,6 +70,30 @@ phase_history:
   exited: 2026-03-02T03:19:13.574104Z
 - phase: specified
   entered: 2026-03-02T03:19:13.574104Z
+  exited: 2026-03-02T09:19:59.258950Z
+- phase: planned
+  entered: 2026-03-02T09:19:59.258950Z
+  exited: 2026-03-02T09:20:02.813841Z
+- phase: ready
+  entered: 2026-03-02T09:20:02.813841Z
+  exited: 2026-03-02T09:20:07.269375Z
+- phase: implementation
+  entered: 2026-03-02T09:20:07.269375Z
+  exited: 2026-03-02T09:20:16.005485Z
+- phase: review
+  entered: 2026-03-02T09:20:16.005485Z
+  exited: 2026-03-02T09:20:20.352414Z
+- phase: audit
+  entered: 2026-03-02T09:20:20.352414Z
+  exited: 2026-03-02T09:20:29.384093Z
+- phase: qa
+  entered: 2026-03-02T09:20:29.384093Z
+  exited: 2026-03-02T09:20:39.360716Z
+- phase: merge
+  entered: 2026-03-02T09:20:39.360716Z
+  exited: 2026-03-02T09:20:43.723117Z
+- phase: released
+  entered: 2026-03-02T09:20:43.723117Z
   exited: null
 dependencies: []
 archived: false

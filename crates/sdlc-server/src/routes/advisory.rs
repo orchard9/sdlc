@@ -62,6 +62,18 @@ pub async fn update_finding(
     }
 }
 
+/// Tags used to find relevant knowledge base entries for advisory runs.
+const ADVISORY_TAGS: &[&str] = &[
+    "advisory",
+    "architecture",
+    "pattern",
+    "anti-pattern",
+    "best-practice",
+    "refactor",
+    "testing",
+    "security",
+];
+
 // ---------------------------------------------------------------------------
 // POST /api/advisory/run
 // ---------------------------------------------------------------------------
@@ -100,10 +112,42 @@ pub async fn start_advisory_run(
         )
     };
 
+    // Query knowledge base for relevant entries. Errors are silently ignored —
+    // advisory runs must never fail due to knowledge base issues.
+    let root_kb = app.root.clone();
+    let advisory_tags: Vec<String> = ADVISORY_TAGS.iter().map(|s| s.to_string()).collect();
+    let kb_entries = spawn_blocking(move || {
+        sdlc_core::knowledge::relevant_entries(&root_kb, &advisory_tags, 10)
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .unwrap_or_default();
+
+    let kb_block = if kb_entries.is_empty() {
+        String::new()
+    } else {
+        let rows: String = kb_entries
+            .iter()
+            .map(|e| {
+                let summary = e.summary.as_deref().unwrap_or("\u{2014}");
+                format!("| `{}` | {} | {} |\n", e.slug, e.title, summary)
+            })
+            .collect();
+        format!(
+            "\n## Project Knowledge\n\n\
+             The following entries from the project knowledge base are relevant to this advisory run.\n\
+             Cite the slug (e.g. `[kb: <slug>]`) in findings where this knowledge informed your analysis.\n\n\
+             | Slug | Title | Summary |\n\
+             |------|-------|---------|\n\
+             {rows}"
+        )
+    };
+
     let prompt = format!(
         r#"You are an expert engineering advisor. Analyze this project's codebase and update the advisory history.
 
 Context from previous runs: {history_context}
+{kb_block}
 
 ## Steps
 

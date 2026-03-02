@@ -1,0 +1,10 @@
+slug: playwright-artifacts
+title: playwright artifacts
+status: converging
+created_at: 2026-03-02T09:23:42.759910Z
+updated_at: 2026-03-02T09:27:59.473678Z
+sessions: 1
+orientation:
+  current: 'Core storage shape decided. Video via MCP --video flag is viable. Binary serving route needed. Dashboard surface: screenshot thumbnails inline in UatHistoryPanel, video link on verdict row.'
+  next: 'Create features: uat-artifacts-storage (Rust data model + binary serving), uat-artifacts-ui (UatHistoryPanel thumbnails + video link, dashboard latest-run card with screenshot)'
+  commit: Two features scoped and ready to spec. Commit signal met.

@@ -513,6 +513,11 @@ pub async fn start_milestone_uat(
 
     let prompt = format!(
         "Run the acceptance test for milestone '{slug}'. \
+         IMPORTANT: You are running INSIDE the sdlc server process at http://localhost:7777. \
+         The server is already running — do NOT stop, restart, kill, or re-spawn it. \
+         Do NOT call any UAT stop or start endpoints. \
+         If localhost:7777 is unreachable, report it as a hard blocker and stop immediately — \
+         never attempt to start or restart the server. \
          Call `sdlc milestone info {slug} --json` to load the milestone and acceptance test. \
          Execute every checklist step. Write signed checklist results to \
          `.sdlc/milestones/{slug}/uat_results.md`. \

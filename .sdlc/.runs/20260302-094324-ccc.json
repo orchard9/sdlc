@@ -1,0 +1,14 @@
+{
+  "id": "20260302-094324-ccc",
+  "key": "milestone-uat:install-onboarding-polish",
+  "run_type": "milestone_uat",
+  "target": "install-onboarding-polish",
+  "label": "UAT: install-onboarding-polish",
+  "status": "stopped",
+  "started_at": "2026-03-02T09:43:24.645234+00:00",
+  "completed_at": "2026-03-02T09:46:00.868403+00:00",
+  "cost_usd": null,
+  "turns": null,
+  "error": null,
+  "prompt": "Run the acceptance test for milestone 'install-onboarding-polish'. Call `sdlc milestone info install-onboarding-polish --json` to load the milestone and acceptance test. Execute every checklist step. Write signed checklist results to `.sdlc/milestones/install-onboarding-polish/uat_results.md`. Then call `sdlc milestone complete install-onboarding-polish` if all steps pass."
+}

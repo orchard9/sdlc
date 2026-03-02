@@ -1,55 +1,55 @@
 slug: knowledge-slash-command
 title: /sdlc-knowledge slash command in init.rs — all four AI CLI platforms
 description: 'Add SDLC_KNOWLEDGE_COMMAND (Claude Code markdown with frontmatter), SDLC_KNOWLEDGE_PLAYBOOK (Gemini/OpenCode TOML), and SDLC_KNOWLEDGE_SKILL (agents SKILL.md) constants to crates/sdlc-cli/src/cmd/init.rs. Command behavior: no arg shows catalog overview and entry count by category; <topic> invokes query mode and returns synthesized answer with citations; ''init'' runs knowledge librarian init; ''research <topic>'' runs active research+index; ''maintain'' runs maintenance pass. Register in all four write_user_* functions (Claude, Gemini, OpenCode, Agents). Add ''knowledge-slash-command'' filenames to migrate_legacy_project_scaffolding(). Update GUIDANCE_MD_CONTENT in init.rs: add sdlc knowledge * commands to the CLI reference table in section 6 ''Using sdlc''.'
-phase: draft
+phase: qa
 created_at: 2026-03-02T02:13:01.490341Z
-updated_at: 2026-03-02T02:13:01.490341Z
+updated_at: 2026-03-02T09:35:35.966847Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-slash-command/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:09.468248Z
+  approved_at: 2026-03-02T09:27:12.615903Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-slash-command/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:16.833338Z
+  approved_at: 2026-03-02T09:27:16.851580Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-slash-command/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:19.526648Z
+  approved_at: 2026-03-02T09:27:20.522214Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-slash-command/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:22.833984Z
+  approved_at: 2026-03-02T09:27:23.143760Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-slash-command/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:35:06.214547Z
+  approved_at: 2026-03-02T09:35:06.219910Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-slash-command/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:35:35.959705Z
+  approved_at: 2026-03-02T09:35:35.965439Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -61,13 +61,70 @@ artifacts:
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Create sdlc_knowledge.rs command file
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:27:38.267714Z
+  started_at: null
+  completed_at: 2026-03-02T09:34:32.894523Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Register command in commands/mod.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:27:38.661295Z
+  started_at: null
+  completed_at: 2026-03-02T09:34:32.901067Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update GUIDANCE_MD_CONTENT in templates.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:27:38.813203Z
+  started_at: null
+  completed_at: 2026-03-02T09:34:32.906821Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Build and test (cargo build + test + clippy)
+  description: null
+  status: completed
+  created_at: 2026-03-02T09:27:38.881400Z
+  started_at: null
+  completed_at: 2026-03-02T09:34:32.911599Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T02:13:01.490341Z
+  exited: 2026-03-02T09:27:12.824662Z
+- phase: specified
+  entered: 2026-03-02T09:27:12.824662Z
+  exited: 2026-03-02T09:27:23.964915Z
+- phase: planned
+  entered: 2026-03-02T09:27:23.964915Z
+  exited: 2026-03-02T09:27:29.080111Z
+- phase: ready
+  entered: 2026-03-02T09:27:29.080111Z
+  exited: 2026-03-02T09:27:32.589880Z
+- phase: implementation
+  entered: 2026-03-02T09:27:32.589880Z
+  exited: 2026-03-02T09:35:06.221229Z
+- phase: review
+  entered: 2026-03-02T09:35:06.221229Z
+  exited: 2026-03-02T09:35:09.769582Z
+- phase: audit
+  entered: 2026-03-02T09:35:09.769582Z
+  exited: 2026-03-02T09:35:35.966847Z
+- phase: qa
+  entered: 2026-03-02T09:35:35.966847Z
   exited: null
 dependencies: []
 archived: false

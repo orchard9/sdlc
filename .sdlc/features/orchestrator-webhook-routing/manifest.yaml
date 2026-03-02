@@ -1,9 +1,9 @@
 slug: orchestrator-webhook-routing
 title: WebhookRoute registration and tick dispatch
 description: 'Add WebhookRoute struct: id, path (String), tool_name (String), input_template (String). POST /api/orchestrator/webhooks/routes — register a route. GET /api/orchestrator/webhooks/routes — list routes. Tick loop extended: after scheduled actions, read all_pending_webhooks(), match against routes, render template ({{payload}} -> raw JSON string), run_tool(), delete webhook from DB. Routes stored in a separate redb table.'
-phase: audit
+phase: released
 created_at: 2026-03-01T07:52:17.078943Z
-updated_at: 2026-03-02T04:44:26.624970Z
+updated_at: 2026-03-02T09:27:15.495081Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -46,18 +46,18 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: draft
+  status: approved
   path: .sdlc/features/orchestrator-webhook-routing/audit.md
   created_at: 2026-03-02T04:44:26.624969Z
-  approved_at: null
+  approved_at: 2026-03-02T09:26:34.396289Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-routing/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T09:27:06.911512Z
+  approved_at: 2026-03-02T09:27:09.947634Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -86,6 +86,15 @@ phase_history:
   exited: 2026-03-02T04:43:41.175081Z
 - phase: audit
   entered: 2026-03-02T04:43:41.175081Z
+  exited: 2026-03-02T09:26:34.456267Z
+- phase: qa
+  entered: 2026-03-02T09:26:34.456267Z
+  exited: 2026-03-02T09:27:10.125534Z
+- phase: merge
+  entered: 2026-03-02T09:27:10.125534Z
+  exited: 2026-03-02T09:27:15.495081Z
+- phase: released
+  entered: 2026-03-02T09:27:15.495081Z
   exited: null
 dependencies: []
 archived: false
