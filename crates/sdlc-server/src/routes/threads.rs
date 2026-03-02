@@ -21,21 +21,30 @@ use crate::state::AppState;
 
 fn thread_to_json(t: &sdlc_core::feedback_thread::FeedbackThread) -> serde_json::Value {
     serde_json::json!({
-        "id":         t.id,
-        "title":      t.title,
-        "context":    t.context,
-        "created_at": t.created_at,
-        "updated_at": t.updated_at,
-        "post_count": t.post_count,
+        // Server-native fields
+        "id":            t.id,
+        "context":       t.context,
+        // Frontend-compat aliases
+        "slug":          t.id,
+        "title":         t.title,
+        "status":        "open",
+        "author":        "",
+        "promoted_to":   serde_json::Value::Null,
+        "comment_count": t.post_count,
+        "created_at":    t.created_at,
+        "updated_at":    t.updated_at,
     })
 }
 
-fn post_to_json(p: &sdlc_core::feedback_thread::ThreadPost) -> serde_json::Value {
+fn post_to_comment_json(p: &sdlc_core::feedback_thread::ThreadPost) -> serde_json::Value {
     serde_json::json!({
-        "seq":        p.seq,
-        "author":     p.author,
-        "content":    p.content,
-        "created_at": p.created_at,
+        "id":           p.seq.to_string(),
+        "seq":          p.seq,
+        "author":       p.author,
+        "body":         p.content,
+        "content":      p.content,
+        "incorporated": false,
+        "created_at":   p.created_at,
     })
 }
 
@@ -70,7 +79,8 @@ pub async fn list_threads(
 
 #[derive(Deserialize)]
 pub struct CreateBody {
-    pub context: String,
+    /// Namespaced anchor string, e.g. "feature:my-slug". Defaults to "general".
+    pub context: Option<String>,
     pub title: Option<String>,
 }
 
@@ -79,13 +89,17 @@ pub async fn create_thread(
     State(app): State<AppState>,
     Json(body): Json<CreateBody>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    if body.context.trim().is_empty() {
-        return Err(AppError::bad_request("context cannot be empty"));
-    }
+    let context = body
+        .context
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .unwrap_or("general")
+        .to_string();
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let title = body.title.as_deref().unwrap_or("");
-        let thread = sdlc_core::feedback_thread::create_thread(&root, &body.context, title)?;
+        let thread = sdlc_core::feedback_thread::create_thread(&root, &context, title)?;
         Ok::<_, sdlc_core::SdlcError>(thread_to_json(&thread))
     })
     .await
@@ -108,7 +122,11 @@ pub async fn get_thread(
         let thread = sdlc_core::feedback_thread::load_thread(&root, &id_clone)?;
         let posts = sdlc_core::feedback_thread::list_posts(&root, &id_clone)?;
         let mut value = thread_to_json(&thread);
-        value["posts"] = serde_json::json!(posts.iter().map(post_to_json).collect::<Vec<_>>());
+        // Frontend expects `comments` (with body/incorporated shape) and `body`/`body_version`
+        value["comments"] =
+            serde_json::json!(posts.iter().map(post_to_comment_json).collect::<Vec<_>>());
+        value["body"] = serde_json::Value::Null;
+        value["body_version"] = serde_json::json!(0u32);
         Ok::<_, sdlc_core::SdlcError>(value)
     })
     .await
@@ -117,7 +135,7 @@ pub async fn get_thread(
 }
 
 // ---------------------------------------------------------------------------
-// Add post
+// Add post / comment
 // ---------------------------------------------------------------------------
 
 #[derive(Deserialize)]
@@ -126,7 +144,7 @@ pub struct PostBody {
     pub content: String,
 }
 
-/// POST /api/threads/:id/posts — append a post to a thread
+/// POST /api/threads/:id/posts — append a post (raw server format)
 pub async fn add_post(
     State(app): State<AppState>,
     Path(id): Path<String>,
@@ -138,17 +156,65 @@ pub async fn add_post(
     if body.content.trim().is_empty() {
         return Err(AppError::bad_request("content cannot be empty"));
     }
+    append_post(app, id, &body.author, &body.content).await
+}
+
+#[derive(Deserialize)]
+pub struct CommentBody {
+    /// Who is posting. Defaults to "human" when absent.
+    pub author: Option<String>,
+    /// Comment text (called "body" in the frontend).
+    pub body: String,
+}
+
+/// POST /api/threads/:id/comments — append a comment (frontend-compat shape)
+///
+/// Returns a `ThreadComment`-shaped JSON object the frontend can insert
+/// directly into its local state without a full page refresh.
+pub async fn add_comment(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+    Json(body): Json<CommentBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    if body.body.trim().is_empty() {
+        return Err(AppError::bad_request("body cannot be empty"));
+    }
+    let author = body
+        .author
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .unwrap_or("human")
+        .to_string();
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let post = sdlc_core::feedback_thread::add_post(&root, &id, &author, body.body.trim())?;
+        Ok::<_, sdlc_core::SdlcError>(post_to_comment_json(&post))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(result))
+}
+
+/// Shared helper: append a post and return the full thread + all posts.
+async fn append_post(
+    app: AppState,
+    id: String,
+    author: &str,
+    content: &str,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let author = author.to_string();
+    let content = content.to_string();
     let root = app.root.clone();
     let id_clone = id.clone();
     let result = tokio::task::spawn_blocking(move || {
-        let post =
-            sdlc_core::feedback_thread::add_post(&root, &id_clone, &body.author, &body.content)?;
-        // Return the updated thread + all posts
+        let post = sdlc_core::feedback_thread::add_post(&root, &id_clone, &author, &content)?;
         let thread = sdlc_core::feedback_thread::load_thread(&root, &id_clone)?;
         let posts = sdlc_core::feedback_thread::list_posts(&root, &id_clone)?;
         let mut value = thread_to_json(&thread);
-        value["posts"] = serde_json::json!(posts.iter().map(post_to_json).collect::<Vec<_>>());
-        value["new_post"] = post_to_json(&post);
+        value["comments"] =
+            serde_json::json!(posts.iter().map(post_to_comment_json).collect::<Vec<_>>());
+        value["new_comment"] = post_to_comment_json(&post);
         Ok::<_, sdlc_core::SdlcError>(value)
     })
     .await
@@ -205,34 +271,43 @@ mod tests {
     async fn create_thread_returns_id_and_context() {
         let (_dir, app) = make_app();
         let body = CreateBody {
-            context: "feature:my-slug".to_string(),
+            context: Some("feature:my-slug".to_string()),
             title: None,
         };
         let result = create_thread(State(app), Json(body)).await.unwrap();
         assert!(!result.0["id"].as_str().unwrap().is_empty());
+        assert_eq!(result.0["slug"], result.0["id"]); // slug alias
         assert_eq!(result.0["context"], "feature:my-slug");
-        assert_eq!(result.0["post_count"], 0);
+        assert_eq!(result.0["comment_count"], 0);
     }
 
     #[tokio::test]
-    async fn create_with_empty_context_returns_400() {
+    async fn create_with_no_context_defaults_to_general() {
         let (_dir, app) = make_app();
         let body = CreateBody {
-            context: "".to_string(),
+            context: None,
             title: None,
         };
-        let err = create_thread(State(app), Json(body)).await.unwrap_err();
-        assert_eq!(
-            err.into_response().status(),
-            axum::http::StatusCode::BAD_REQUEST
-        );
+        let result = create_thread(State(app), Json(body)).await.unwrap();
+        assert_eq!(result.0["context"], "general");
     }
 
     #[tokio::test]
-    async fn get_thread_returns_thread_with_empty_posts() {
+    async fn create_with_empty_context_defaults_to_general() {
         let (_dir, app) = make_app();
         let body = CreateBody {
-            context: "feature:x".to_string(),
+            context: Some("".to_string()),
+            title: None,
+        };
+        let result = create_thread(State(app), Json(body)).await.unwrap();
+        assert_eq!(result.0["context"], "general");
+    }
+
+    #[tokio::test]
+    async fn get_thread_returns_thread_with_empty_comments() {
+        let (_dir, app) = make_app();
+        let body = CreateBody {
+            context: Some("feature:x".to_string()),
             title: Some("Test thread".to_string()),
         };
         let created = create_thread(State(app.clone()), Json(body)).await.unwrap();
@@ -240,8 +315,10 @@ mod tests {
 
         let result = get_thread(State(app), Path(id)).await.unwrap();
         assert_eq!(result.0["context"], "feature:x");
-        let posts = result.0["posts"].as_array().unwrap();
-        assert!(posts.is_empty());
+        let comments = result.0["comments"].as_array().unwrap();
+        assert!(comments.is_empty());
+        assert_eq!(result.0["body"], serde_json::Value::Null);
+        assert_eq!(result.0["body_version"], 0);
     }
 
     #[tokio::test]
@@ -257,12 +334,12 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn add_post_appends_and_returns_thread_with_posts() {
+    async fn add_post_appends_and_returns_thread_with_comments() {
         let (_dir, app) = make_app();
         let created = create_thread(
             State(app.clone()),
             Json(CreateBody {
-                context: "feature:y".to_string(),
+                context: Some("feature:y".to_string()),
                 title: None,
             }),
         )
@@ -281,11 +358,70 @@ mod tests {
         .await
         .unwrap();
 
-        let posts = result.0["posts"].as_array().unwrap();
-        assert_eq!(posts.len(), 1);
-        assert_eq!(posts[0]["author"], "human");
-        assert_eq!(posts[0]["content"], "Hello thread");
-        assert_eq!(result.0["post_count"], 1);
+        let comments = result.0["comments"].as_array().unwrap();
+        assert_eq!(comments.len(), 1);
+        assert_eq!(comments[0]["author"], "human");
+        assert_eq!(comments[0]["body"], "Hello thread");
+        assert_eq!(result.0["comment_count"], 1);
+    }
+
+    #[tokio::test]
+    async fn add_comment_returns_comment_shape() {
+        let (_dir, app) = make_app();
+        let created = create_thread(
+            State(app.clone()),
+            Json(CreateBody {
+                context: Some("feature:z".to_string()),
+                title: None,
+            }),
+        )
+        .await
+        .unwrap();
+        let id = created.0["id"].as_str().unwrap().to_string();
+
+        let result = add_comment(
+            State(app),
+            Path(id),
+            Json(CommentBody {
+                author: Some("jordan".to_string()),
+                body: "Great idea".to_string(),
+            }),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(result.0["author"], "jordan");
+        assert_eq!(result.0["body"], "Great idea");
+        assert_eq!(result.0["incorporated"], false);
+        assert!(!result.0["id"].as_str().unwrap().is_empty());
+    }
+
+    #[tokio::test]
+    async fn add_comment_defaults_author_to_human() {
+        let (_dir, app) = make_app();
+        let created = create_thread(
+            State(app.clone()),
+            Json(CreateBody {
+                context: None,
+                title: None,
+            }),
+        )
+        .await
+        .unwrap();
+        let id = created.0["id"].as_str().unwrap().to_string();
+
+        let result = add_comment(
+            State(app),
+            Path(id),
+            Json(CommentBody {
+                author: None,
+                body: "anon".to_string(),
+            }),
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(result.0["author"], "human");
     }
 
     #[tokio::test]
@@ -332,7 +468,7 @@ mod tests {
         let created = create_thread(
             State(app.clone()),
             Json(CreateBody {
-                context: "feature:del".to_string(),
+                context: Some("feature:del".to_string()),
                 title: None,
             }),
         )
@@ -350,7 +486,7 @@ mod tests {
         let created = create_thread(
             State(app.clone()),
             Json(CreateBody {
-                context: "feature:gone".to_string(),
+                context: Some("feature:gone".to_string()),
                 title: None,
             }),
         )
@@ -375,7 +511,7 @@ mod tests {
         let _ = create_thread(
             State(app.clone()),
             Json(CreateBody {
-                context: "feature:a".to_string(),
+                context: Some("feature:a".to_string()),
                 title: None,
             }),
         )
@@ -384,7 +520,7 @@ mod tests {
         let _ = create_thread(
             State(app.clone()),
             Json(CreateBody {
-                context: "feature:b".to_string(),
+                context: Some("feature:b".to_string()),
                 title: None,
             }),
         )

@@ -496,6 +496,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             get(routes::threads::get_thread).delete(routes::threads::delete_thread),
         )
         .route("/api/threads/{id}/posts", post(routes::threads::add_post))
+        .route(
+            "/api/threads/{id}/comments",
+            post(routes::threads::add_comment),
+        )
         // Webhook ingestion — accepts raw payloads from external senders and stores in redb.
         .route("/webhooks/{route}", post(routes::webhooks::receive_webhook))
         // Orchestrator webhook event history
