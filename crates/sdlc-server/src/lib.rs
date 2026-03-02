@@ -229,6 +229,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         // Run history
         .route("/api/runs", get(routes::runs::list_runs))
         .route("/api/runs/{id}", get(routes::runs::get_run))
+        .route(
+            "/api/runs/{id}/telemetry",
+            get(routes::runs::get_run_telemetry),
+        )
         // Run (agent execution via claude-agent + MCP)
         .route("/api/run/{slug}", post(routes::runs::start_run))
         .route("/api/run/{slug}/events", get(routes::runs::run_events))

@@ -71,6 +71,12 @@ pub(crate) async fn spawn_agent_run(
     // Create the broadcast channel and build the RunRecord before taking the lock.
     let run_id = generate_run_id();
     let target = key.split(':').next_back().unwrap_or(&key).to_string();
+    // Store a truncated prompt for display in the activity feed (first 2000 chars)
+    let prompt_preview = if prompt.len() > 2000 {
+        Some(format!("{}…", &prompt[..2000]))
+    } else {
+        Some(prompt.clone())
+    };
     let record = RunRecord {
         id: run_id.clone(),
         key: key.clone(),
@@ -83,6 +89,7 @@ pub(crate) async fn spawn_agent_run(
         cost_usd: None,
         turns: None,
         error: None,
+        prompt: prompt_preview,
     };
 
     let (tx, _) = tokio::sync::broadcast::channel::<String>(512);
@@ -1426,6 +1433,44 @@ pub async fn get_run(Path(id): Path<String>, State(app): State<AppState>) -> Res
         }
         None => (
             // AppError cannot be used here: this fn returns Response directly (SSE vs JSON branch)
+            axum::http::StatusCode::NOT_FOUND,
+            Json(serde_json::json!({"error": format!("Run '{id}' not found")})),
+        )
+            .into_response(),
+    }
+}
+
+/// GET /api/runs/{id}/telemetry — structured telemetry for the activity feed.
+///
+/// Returns the stored events for a run, re-packaged in a telemetry envelope:
+/// `{ run_id, events: [...] }`. Events are returned as-is from the sidecar
+/// (the format already matches the activity-feed spec: init, assistant, tool_progress,
+/// tool_summary, result, etc.). The run record is included so the UI can display
+/// the prompt from `RunRecord.prompt`.
+pub async fn get_run_telemetry(Path(id): Path<String>, State(app): State<AppState>) -> Response {
+    let record = {
+        let history = app.run_history.lock().await;
+        history.iter().find(|r| r.id == id).cloned()
+    };
+
+    match record {
+        Some(rec) => {
+            let root = app.root.clone();
+            let id_clone = id.clone();
+            let events = tokio::task::spawn_blocking(move || {
+                crate::state::load_run_events(&root, &id_clone)
+            })
+            .await
+            .unwrap_or_else(|_| vec![]);
+
+            Json(serde_json::json!({
+                "run_id": rec.id,
+                "prompt": rec.prompt,
+                "events": events,
+            }))
+            .into_response()
+        }
+        None => (
             axum::http::StatusCode::NOT_FOUND,
             Json(serde_json::json!({"error": format!("Run '{id}' not found")})),
         )

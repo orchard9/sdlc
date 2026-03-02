@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Loader2, CheckCircle2, XCircle, StopCircle, ChevronDown, ChevronRight, Square } from 'lucide-react'
 import { AgentLog } from '@/components/shared/AgentLog'
+import { RunActivityFeed } from '@/components/runs/RunActivityFeed'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
-import { api } from '@/api/client'
 import type { AgentEvent, RunRecord, RunType } from '@/lib/types'
 
 function getStopDetails(run: RunRecord): { url: string; method: 'POST' | 'DELETE' } {
@@ -53,14 +53,16 @@ function formatTime(iso: string) {
 
 export function RunCard({ run, expanded, onToggle }: RunCardProps) {
   const { stopRun } = useAgentRuns()
-  const [events, setEvents] = useState<AgentEvent[]>([])
-  const [loadedEvents, setLoadedEvents] = useState(false)
+  const [liveEvents, setLiveEvents] = useState<AgentEvent[]>([])
   const [stopping, setStopping] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
-  // For active runs: open EventSource when expanded
+  const isActive = run.status === 'running'
+  const isPonder = run.run_type === 'ponder'
+
+  // For active runs: open EventSource when expanded to show live log
   useEffect(() => {
-    if (!expanded || run.status !== 'running') {
+    if (!expanded || !isActive) {
       eventSourceRef.current?.close()
       eventSourceRef.current = null
       return
@@ -85,7 +87,7 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
     es.addEventListener('agent', (e) => {
       try {
         const event = JSON.parse(e.data) as AgentEvent
-        setEvents(prev => [...prev, event])
+        setLiveEvents(prev => [...prev, event])
       } catch {
         // ignore parse errors
       }
@@ -100,25 +102,12 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
       es.close()
       eventSourceRef.current = null
     }
-  }, [expanded, run.status, run.run_type, run.target, run.key])
+  }, [expanded, isActive, run.run_type, run.target, run.key])
 
-  // For completed runs: fetch events on-demand when expanded
-  useEffect(() => {
-    if (!expanded || run.status === 'running' || loadedEvents) return
-
-    api.getRun(run.id)
-      .then(data => {
-        setEvents(data.events ?? [])
-        setLoadedEvents(true)
-      })
-      .catch(() => {})
-  }, [expanded, run.status, run.id, loadedEvents])
-
-  // Reset events when collapsing
+  // Reset live events when collapsing
   const handleToggle = useCallback(() => {
     if (expanded) {
-      setEvents([])
-      setLoadedEvents(false)
+      setLiveEvents([])
     }
     onToggle()
   }, [expanded, onToggle])
@@ -130,9 +119,6 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
     await stopRun(run.key, url, method)
     setStopping(false)
   }, [run, stopRun])
-
-  const isActive = run.status === 'running'
-  const isPonder = run.run_type === 'ponder'
 
   return (
     <div className={`rounded-lg border ${isActive ? 'border-primary/30 bg-primary/5' : 'border-border/50 bg-card/50'}`}>
@@ -178,7 +164,12 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
 
       {expanded && !isPonder && (
         <div className="px-3 pb-3">
-          <AgentLog running={isActive} events={events} />
+          {/* Active runs: live SSE log; completed/failed/stopped: rich telemetry feed */}
+          {isActive ? (
+            <AgentLog running={isActive} events={liveEvents} />
+          ) : (
+            <RunActivityFeed runId={run.id} isRunning={false} />
+          )}
         </div>
       )}
     </div>

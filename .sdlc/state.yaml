@@ -21,6 +21,7 @@ active_features:
 - orchestrator-integration-test
 - orchestrator-webhook-storage
 - orchestrator-webhook-routing
+- run-activity-ui
 active_directives: []
 history:
 - feature: claude-code-consumer
@@ -308,6 +309,26 @@ history:
   phase: released
   timestamp: 2026-03-01T08:30:14.455471Z
   outcome: merged
+- feature: run-activity-ui
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T02:34:14.927377Z
+  outcome: transition
+- feature: run-activity-ui
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T02:34:14.943976Z
+  outcome: transition
+- feature: run-activity-ui
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T02:34:38.777704Z
+  outcome: transition
+- feature: run-activity-ui
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T02:35:16.192915Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -320,4 +341,4 @@ milestones:
 - v08-orchestrator-webhooks
 active_ponders:
 - knowledge-librarian
-last_updated: 2026-03-01T17:29:03.771253Z
+last_updated: 2026-03-02T02:35:16.192925Z
