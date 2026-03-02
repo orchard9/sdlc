@@ -88,7 +88,8 @@ export function MilestonePreparePanel({ milestoneSlug }: { milestoneSlug: string
   }, [milestoneSlug])
 
   useEffect(() => { load() }, [load])
-  useSSE(load, undefined, (event) => { if (event.type === 'run_finished') load() })
+  const noop = useCallback(() => {}, [])
+  useSSE(noop, undefined, (event) => { if (event.type === 'run_finished') load() })
 
   if (!result) return null
 

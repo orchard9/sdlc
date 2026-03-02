@@ -60,19 +60,28 @@ pub fn run(
     db_path: Option<PathBuf>,
 ) -> Result<()> {
     let db_path = db_path.unwrap_or_else(|| sdlc_core::paths::orchestrator_db_path(root));
-    let db = ActionDb::open(&db_path)
-        .with_context(|| format!("failed to open orchestrator DB at {}", db_path.display()))?;
 
     match subcommand {
-        None => run_daemon(root, &db, tick_rate),
+        // Daemon: open its own db connections per-tick — no db opened here.
+        None => run_daemon(root, tick_rate),
         Some(OrchestrateSubcommand::Add {
             label,
             tool,
             input,
             at,
             every,
-        }) => run_add(&db, &label, &tool, &input, &at, every),
-        Some(OrchestrateSubcommand::List { status }) => run_list(&db, status.as_deref()),
+        }) => {
+            let db = ActionDb::open(&db_path).with_context(|| {
+                format!("failed to open orchestrator DB at {}", db_path.display())
+            })?;
+            run_add(&db, &label, &tool, &input, &at, every)
+        }
+        Some(OrchestrateSubcommand::List { status }) => {
+            let db = ActionDb::open(&db_path).with_context(|| {
+                format!("failed to open orchestrator DB at {}", db_path.display())
+            })?;
+            run_list(&db, status.as_deref())
+        }
     }
 }
 
@@ -80,24 +89,33 @@ pub fn run(
 // Daemon
 // ---------------------------------------------------------------------------
 
-pub fn run_daemon(root: &Path, db: &ActionDb, tick_rate_secs: u64) -> Result<()> {
+pub fn run_daemon(root: &Path, tick_rate_secs: u64) -> Result<()> {
     let tick_rate = Duration::from_secs(tick_rate_secs);
+    let db_path = sdlc_core::paths::orchestrator_db_path(root);
 
-    let recovered = db
-        .startup_recovery(tick_rate * 2)
-        .context("startup recovery failed")?;
-    if recovered > 0 {
-        eprintln!("orchestrate: recovered {recovered} stale Running action(s) → Failed");
-    }
+    // Open briefly for startup recovery, then drop the lock.
+    {
+        let db = ActionDb::open(&db_path).context("open orchestrator DB")?;
+        let recovered = db
+            .startup_recovery(tick_rate * 2)
+            .context("startup recovery failed")?;
+        if recovered > 0 {
+            eprintln!("orchestrate: recovered {recovered} stale Running action(s) → Failed");
+        }
+    } // db dropped here — lock released before the daemon loop starts
 
     eprintln!(
         "orchestrate: daemon started (tick={tick_rate_secs}s, db={})",
-        sdlc_core::paths::orchestrator_db_path(root).display()
+        db_path.display()
     );
 
     loop {
         let tick_start = Instant::now();
-        run_one_tick(root, db)?;
+        // run_one_tick opens/closes the db internally around each operation so
+        // route handlers can acquire the redb lock between db accesses.
+        if let Err(e) = run_one_tick(root, &db_path) {
+            eprintln!("orchestrate: tick error: {e}");
+        }
         let elapsed = tick_start.elapsed();
         if elapsed < tick_rate {
             std::thread::sleep(tick_rate - elapsed);
@@ -108,24 +126,33 @@ pub fn run_daemon(root: &Path, db: &ActionDb, tick_rate_secs: u64) -> Result<()>
 /// Execute one tick of the orchestrator: dispatch all due Pending actions,
 /// then dispatch all pending webhook payloads.
 ///
-/// This is the inner body of the daemon loop, extracted so that tests can
-/// call it directly without spawning a blocking thread.
-pub fn run_one_tick(root: &Path, db: &ActionDb) -> Result<()> {
-    // Phase 1: scheduled actions
+/// Opens and closes the redb file around each individual operation so that
+/// route handlers (which also call `ActionDb::open` via `spawn_blocking`) can
+/// acquire the exclusive redb lock between dispatches. Without this, holding
+/// the db open across a long tool execution blocks all concurrent API requests.
+///
+/// `db_path` is the path to the `orchestrator.db` redb file.
+pub fn run_one_tick(root: &Path, db_path: &Path) -> Result<()> {
+    // Phase 1: scheduled actions — load due list then release lock immediately.
     let now = Utc::now();
-    let due = db.range_due(now).context("range_due failed")?;
+    let due = {
+        let db = ActionDb::open(db_path).context("open DB for range_due")?;
+        db.range_due(now).context("range_due failed")?
+    }; // db dropped, lock released
     let actions_dispatched = due.len();
     for action in due {
-        dispatch(root, db, action)?;
+        dispatch(root, db_path, action)?;
     }
 
-    // Phase 2: webhook payloads
-    let webhooks = db
-        .all_pending_webhooks()
-        .context("all_pending_webhooks failed")?;
+    // Phase 2: webhook payloads — load list then release lock.
+    let webhooks = {
+        let db = ActionDb::open(db_path).context("open DB for pending_webhooks")?;
+        db.all_pending_webhooks()
+            .context("all_pending_webhooks failed")?
+    }; // db dropped, lock released
     let webhooks_dispatched = webhooks.len();
     for payload in webhooks {
-        dispatch_webhook(root, db, payload)?;
+        dispatch_webhook(root, db_path, payload)?;
     }
 
     // Write sentinel file so the server watcher can broadcast ActionStateChanged.
@@ -149,87 +176,100 @@ fn write_tick_sentinel(root: &Path, actions: usize, webhooks: usize) {
     }
 }
 
-fn dispatch_webhook(root: &Path, db: &ActionDb, payload: WebhookPayload) -> Result<()> {
-    let route = db
-        .find_route_by_path(&payload.route_path)
-        .context("route lookup failed")?;
+fn dispatch_webhook(root: &Path, db_path: &Path, payload: WebhookPayload) -> Result<()> {
+    // Look up route and render input, then drop the db lock before running the tool.
+    let (script, input_json) = {
+        let db = ActionDb::open(db_path).context("open DB for webhook lookup")?;
+        let route = db
+            .find_route_by_path(&payload.route_path)
+            .context("route lookup failed")?;
 
-    let route = match route {
-        None => {
+        let route = match route {
+            None => {
+                eprintln!(
+                    "orchestrate: webhook [{}] no route registered — dropping",
+                    payload.route_path
+                );
+                db.delete_webhook(payload.id)
+                    .context("delete_webhook failed")?;
+                return Ok(());
+            }
+            Some(r) => r,
+        };
+
+        let tool_input = match route.render_input(&payload.raw_body) {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!(
+                    "orchestrate: webhook [{}] template render error — {e}",
+                    payload.route_path
+                );
+                db.delete_webhook(payload.id)
+                    .context("delete_webhook (render error) failed")?;
+                return Ok(());
+            }
+        };
+
+        let script = sdlc_core::paths::tool_script(root, &route.tool_name);
+        if !script.exists() {
             eprintln!(
-                "orchestrate: webhook [{}] no route registered — dropping",
-                payload.route_path
+                "orchestrate: webhook [{}] tool script not found: {}",
+                payload.route_path,
+                script.display()
             );
             db.delete_webhook(payload.id)
-                .context("delete_webhook failed")?;
+                .context("delete_webhook (missing tool) failed")?;
             return Ok(());
         }
-        Some(r) => r,
-    };
 
-    let tool_input = match route.render_input(&payload.raw_body) {
-        Ok(v) => v,
-        Err(e) => {
-            eprintln!(
-                "orchestrate: webhook [{}] template render error — {e}",
-                payload.route_path
-            );
-            db.delete_webhook(payload.id)
-                .context("delete_webhook (render error) failed")?;
-            return Ok(());
-        }
-    };
+        let input_json =
+            serde_json::to_string(&tool_input).context("serialize tool_input failed")?;
+        (script, input_json)
+    }; // db dropped, lock released before tool execution
 
-    let script = sdlc_core::paths::tool_script(root, &route.tool_name);
-    if !script.exists() {
-        eprintln!(
-            "orchestrate: webhook [{}] tool script not found: {}",
-            payload.route_path,
-            script.display()
-        );
-        db.delete_webhook(payload.id)
-            .context("delete_webhook (missing tool) failed")?;
-        return Ok(());
-    }
-
-    let input_json = serde_json::to_string(&tool_input).context("serialize tool_input failed")?;
-
+    // Run tool with the db lock released.
     match sdlc_core::tool_runner::run_tool(&script, "--run", Some(&input_json), root, None) {
         Ok(_stdout) => {
-            eprintln!(
-                "orchestrate: webhook [{}] completed (tool={})",
-                payload.route_path, route.tool_name
-            );
+            eprintln!("orchestrate: webhook [{}] completed", payload.route_path);
         }
         Err(e) => {
             eprintln!("orchestrate: webhook [{}] failed — {e}", payload.route_path);
         }
     }
 
-    // Always delete the payload after dispatch (success or failure)
-    db.delete_webhook(payload.id)
-        .context("delete_webhook (post-dispatch) failed")?;
+    // Reopen db to delete the payload after dispatch (success or failure).
+    {
+        let db = ActionDb::open(db_path).context("open DB for delete_webhook")?;
+        db.delete_webhook(payload.id)
+            .context("delete_webhook (post-dispatch) failed")?;
+    }
 
     Ok(())
 }
 
-fn dispatch(root: &Path, db: &ActionDb, action: Action) -> Result<()> {
-    db.set_status(action.id, ActionStatus::Running)
-        .with_context(|| format!("set Running failed for {}", action.id))?;
+fn dispatch(root: &Path, db_path: &Path, action: Action) -> Result<()> {
+    // Set Running and prepare inputs, then release the db lock before running the tool.
+    let (script, input_json) = {
+        let db = ActionDb::open(db_path)
+            .with_context(|| format!("open DB for set Running ({})", action.id))?;
+        db.set_status(action.id, ActionStatus::Running)
+            .with_context(|| format!("set Running failed for {}", action.id))?;
 
-    let script = sdlc_core::paths::tool_script(root, &action.tool_name);
+        let script = sdlc_core::paths::tool_script(root, &action.tool_name);
+        if !script.exists() {
+            let reason = format!("tool script not found: {}", script.display());
+            eprintln!("orchestrate: [{}] {reason}", action.label);
+            db.set_status(action.id, ActionStatus::Failed { reason })
+                .with_context(|| format!("set Failed failed for {}", action.id))?;
+            return Ok(());
+        }
 
-    if !script.exists() {
-        let reason = format!("tool script not found: {}", script.display());
-        eprintln!("orchestrate: [{}] {reason}", action.label);
-        db.set_status(action.id, ActionStatus::Failed { reason })
-            .with_context(|| format!("set Failed failed for {}", action.id))?;
-        return Ok(());
-    }
+        let input_json =
+            serde_json::to_string(&action.tool_input).context("failed to serialize tool_input")?;
+        (script, input_json)
+    }; // db dropped, lock released before tool execution
 
-    let input_json =
-        serde_json::to_string(&action.tool_input).context("failed to serialize tool_input")?;
-
+    // Run tool with the db lock released so route handlers can access the db.
     let status =
         match sdlc_core::tool_runner::run_tool(&script, "--run", Some(&input_json), root, None) {
             Ok(stdout) => {
@@ -247,20 +287,24 @@ fn dispatch(root: &Path, db: &ActionDb, action: Action) -> Result<()> {
 
     let completed = matches!(status, ActionStatus::Completed { .. });
 
-    db.set_status(action.id, status)
-        .with_context(|| format!("set Completed/Failed failed for {}", action.id))?;
+    // Reopen db to persist result and optionally reschedule.
+    {
+        let db = ActionDb::open(db_path)
+            .with_context(|| format!("open DB for set Completed/Failed ({})", action.id))?;
+        db.set_status(action.id, status)
+            .with_context(|| format!("set Completed/Failed failed for {}", action.id))?;
 
-    // Reschedule if recurrence is set and the run completed successfully
-    if completed {
-        if let Some(interval) = action.recurrence {
-            let next = rescheduled(&action, interval);
-            db.insert(&next)
-                .with_context(|| format!("reschedule insert failed for {}", action.label))?;
-            eprintln!(
-                "orchestrate: [{}] rescheduled in {}s",
-                action.label,
-                interval.as_secs()
-            );
+        if completed {
+            if let Some(interval) = action.recurrence {
+                let next = rescheduled(&action, interval);
+                db.insert(&next)
+                    .with_context(|| format!("reschedule insert failed for {}", action.label))?;
+                eprintln!(
+                    "orchestrate: [{}] rescheduled in {}s",
+                    action.label,
+                    interval.as_secs()
+                );
+            }
         }
     }
 

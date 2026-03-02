@@ -4,44 +4,13 @@ use std::path::{Path, PathBuf};
 ///
 /// Priority:
 /// 1. `--root` flag / `SDLC_ROOT` env var (passed in as `explicit`)
-/// 2. Walk upward from `cwd` looking for `.sdlc/` (stops before home dir)
-/// 3. Walk upward from `cwd` looking for `.git/`
-/// 4. Fall back to `cwd`
+/// 2. Current working directory
 pub fn resolve_root(explicit: Option<&Path>) -> PathBuf {
     if let Some(p) = explicit {
         return p.to_path_buf();
     }
 
-    let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
-    let home = std::env::var("HOME").ok().map(PathBuf::from);
-
-    // Walk upward looking for .sdlc/, but never claim the home directory as a
-    // project root — ~/.sdlc/ would silently hijack every uninitialized project.
-    let mut dir = cwd.clone();
-    loop {
-        let is_home = home.as_deref().is_some_and(|h| dir == h);
-        if !is_home && dir.join(".sdlc").is_dir() {
-            return dir;
-        }
-        match dir.parent() {
-            Some(p) => dir = p.to_path_buf(),
-            None => break,
-        }
-    }
-
-    // Walk upward looking for .git/
-    let mut dir = cwd.clone();
-    loop {
-        if dir.join(".git").is_dir() {
-            return dir;
-        }
-        match dir.parent() {
-            Some(p) => dir = p.to_path_buf(),
-            None => break,
-        }
-    }
-
-    cwd
+    std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."))
 }
 
 #[cfg(test)]
@@ -57,15 +26,10 @@ mod tests {
     }
 
     #[test]
-    fn finds_sdlc_dir() {
-        let dir = TempDir::new().unwrap();
-        std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
-        let subdir = dir.path().join("src/deep");
-        std::fs::create_dir_all(&subdir).unwrap();
-
-        // Override cwd isn't possible in tests without unsafe tricks,
-        // but we can verify explicit path logic.
-        let result = resolve_root(Some(dir.path()));
-        assert_eq!(result, dir.path());
+    fn falls_back_to_cwd() {
+        // No explicit root — should return current_dir (or "." fallback).
+        let result = resolve_root(None);
+        let cwd = std::env::current_dir().unwrap_or_else(|_| PathBuf::from("."));
+        assert_eq!(result, cwd);
     }
 }

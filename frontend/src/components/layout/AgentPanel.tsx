@@ -1,11 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { RunCard } from './RunCard'
-import { QuotaPanel } from './QuotaPanel'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
 import { PanelRightClose, Maximize2 } from 'lucide-react'
-import { api } from '@/api/client'
-import type { ProjectConfig } from '@/lib/types'
 
 function RunList() {
   const { runs, expandedRunIds, toggleRun } = useAgentRuns()
@@ -55,11 +52,6 @@ function RunList() {
 export function AgentPanel() {
   const { panelOpen, setPanelOpen } = useAgentRuns()
   const [fullscreen, setFullscreen] = useState(false)
-  const [config, setConfig] = useState<ProjectConfig | null>(null)
-
-  useEffect(() => {
-    api.getConfig().then(setConfig).catch(() => {/* use default budget silently */})
-  }, [])
 
   if (!panelOpen) return null
 
@@ -94,10 +86,6 @@ export function AgentPanel() {
           <RunList />
         </div>
 
-        {/* Quota panel — always visible at bottom */}
-        <div className="border-t border-border/50 px-2 py-2">
-          <QuotaPanel dailyBudgetUsd={config?.observability?.daily_budget_usd} />
-        </div>
       </aside>
 
       <FullscreenModal
@@ -107,9 +95,6 @@ export function AgentPanel() {
       >
         <div className="space-y-2">
           <RunList />
-        </div>
-        <div className="border-t border-border/50 pt-4 mt-4">
-          <QuotaPanel dailyBudgetUsd={config?.observability?.daily_budget_usd} />
         </div>
       </FullscreenModal>
     </>

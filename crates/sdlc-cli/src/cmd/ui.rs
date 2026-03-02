@@ -93,20 +93,14 @@ fn run_start(
 
     // --- Step 2: start orchestrator daemon in background thread ---
     if !no_orchestrate {
-        let db_path = sdlc_core::paths::orchestrator_db_path(root);
         let root_for_orch = root.to_path_buf();
         std::thread::Builder::new()
             .name("sdlc-orchestrator".into())
-            .spawn(
-                move || match sdlc_core::orchestrator::ActionDb::open(&db_path) {
-                    Ok(db) => {
-                        if let Err(e) = orchestrate::run_daemon(&root_for_orch, &db, tick_rate) {
-                            eprintln!("orchestrate: daemon error: {e}");
-                        }
-                    }
-                    Err(e) => eprintln!("orchestrate: failed to open DB: {e}"),
-                },
-            )
+            .spawn(move || {
+                if let Err(e) = orchestrate::run_daemon(&root_for_orch, tick_rate) {
+                    eprintln!("orchestrate: daemon error: {e}");
+                }
+            })
             .map_err(|e| anyhow!("failed to spawn orchestrator thread: {e}"))?;
     }
 

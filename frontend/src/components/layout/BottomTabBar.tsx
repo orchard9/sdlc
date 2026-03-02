@@ -18,7 +18,7 @@ const TABS = [
   {
     label: 'Setup',
     icon: Wrench,
-    roots: ['/tools', '/secrets', '/agents'],
+    roots: ['/tools', '/secrets', '/agents', '/actions'],
     exact: null,
   },
   {

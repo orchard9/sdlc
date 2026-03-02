@@ -22,6 +22,7 @@ import { ArchitecturePage } from '@/pages/ArchitecturePage'
 import { DocsPage } from '@/pages/DocsPage'
 import { AgentsPage } from '@/pages/AgentsPage'
 import { SetupPage } from '@/pages/SetupPage'
+import { ActionsPage } from '@/pages/ActionsPage'
 
 export default function App() {
   return (
@@ -37,7 +38,6 @@ export default function App() {
             <Route path="/features" element={<FeaturesPage />} />
             <Route path="/features/:slug" element={<FeatureDetail />} />
             <Route path="/milestones" element={<MilestonesPage />} />
-            <Route path="/milestones/archive" element={<MilestonesPage filter="released" />} />
             <Route path="/milestones/:slug" element={<MilestoneDetail />} />
             <Route path="/ponder" element={<PonderPage />} />
             <Route path="/ponder/:slug" element={<PonderPage />} />
@@ -54,6 +54,7 @@ export default function App() {
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/network" element={<NetworkPage />} />
             <Route path="/agents" element={<AgentsPage />} />
+            <Route path="/actions" element={<ActionsPage />} />
             <Route path="/config" element={<SettingsPage />} />
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/docs/:section" element={<DocsPage />} />

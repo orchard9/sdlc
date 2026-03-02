@@ -13,6 +13,24 @@ use std::path::PathBuf;
 use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::TraceLayer;
 
+async fn log_request(
+    req: axum::extract::Request,
+    next: axum::middleware::Next,
+) -> axum::response::Response {
+    let method = req.method().clone();
+    let uri = req.uri().clone();
+    let start = std::time::Instant::now();
+    let resp = next.run(req).await;
+    eprintln!(
+        "← {} {} {} ({:?})",
+        method,
+        uri,
+        resp.status().as_u16(),
+        start.elapsed()
+    );
+    resp
+}
+
 /// Build the axum Router with all API routes and middleware.
 /// Used by `serve()` and available for integration testing.
 ///
@@ -526,6 +544,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             app_state.tunnel_config.clone(),
             auth::auth_middleware,
         ))
+        .layer(axum::middleware::from_fn(log_request))
         .with_state(app_state)
 }
 

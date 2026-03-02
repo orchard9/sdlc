@@ -17,6 +17,11 @@ export function FeatureDetail() {
   const { slug } = useParams<{ slug: string }>()
   const { feature, classification, error, loading } = useFeature(slug ?? '')
   const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
+  const [allSlugs, setAllSlugs] = useState<string[]>([])
+
+  useEffect(() => {
+    api.getFeatures().then(features => setAllSlugs(features.map((f: { slug: string }) => f.slug))).catch(() => {})
+  }, [])
 
   if (!slug) return null
 
@@ -25,9 +30,10 @@ export function FeatureDetail() {
   }
 
   if (error) {
-    // Extract artifact type from serde error like: artifacts[1].status: unknown variant `waived`...
+    // Detect serde corruption: artifacts[1].status: unknown variant `waived`...
     const artifactMatch = error.match(/artifacts\[\d+\]\.status[^`]*`([^`]+)`/)
     const corruptStatus = artifactMatch?.[1]
+    const isCorrupt = artifactMatch !== null
 
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -39,29 +45,33 @@ export function FeatureDetail() {
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />
             <div>
-              <p className="text-sm font-semibold text-destructive mb-1">Feature data is corrupt</p>
+              <p className="text-sm font-semibold text-destructive mb-1">
+                {isCorrupt ? 'Feature data is corrupt' : 'Failed to load feature'}
+              </p>
               <p className="text-xs text-muted-foreground font-mono break-all">{error}</p>
             </div>
           </div>
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">
-              The feature manifest contains an unrecognized value{corruptStatus ? ` ('${corruptStatus}')` : ''}.
-              Use the <code className="font-mono bg-muted/60 px-1 rounded">sdlc_repair_artifact</code> MCP tool to reset it:
-            </p>
-            <div className="flex items-center gap-1">
-              <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-2 py-1.5 rounded text-muted-foreground break-all select-all">
-                {`sdlc_repair_artifact({ "slug": "${slug}", "artifact_type": "<type>", "set_status": "missing" })`}
-              </code>
-              <CopyButton
-                text={`sdlc_repair_artifact({ "slug": "${slug}", "artifact_type": "<type>", "set_status": "missing" })`}
-                className="shrink-0 p-1 rounded border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-              />
+          {isCorrupt && (
+            <div className="space-y-2">
+              <p className="text-xs text-muted-foreground">
+                The feature manifest contains an unrecognized value{corruptStatus ? ` ('${corruptStatus}')` : ''}.
+                Use the <code className="font-mono bg-muted/60 px-1 rounded">sdlc_repair_artifact</code> MCP tool to reset it:
+              </p>
+              <div className="flex items-center gap-1">
+                <code className="flex-1 text-xs font-mono bg-muted/60 border border-border/50 px-2 py-1.5 rounded text-muted-foreground break-all select-all">
+                  {`sdlc_repair_artifact({ "slug": "${slug}", "artifact_type": "<type>", "set_status": "missing" })`}
+                </code>
+                <CopyButton
+                  text={`sdlc_repair_artifact({ "slug": "${slug}", "artifact_type": "<type>", "set_status": "missing" })`}
+                  className="shrink-0 p-1 rounded border border-border/50 bg-muted/60 hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                After repairing, call <code className="font-mono bg-muted/60 px-1 rounded">sdlc_get_directive</code> to re-enter the normal flow.
+                Valid statuses: <span className="font-mono">missing, draft, approved, rejected, needs_fix, passed, failed, waived</span>
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground">
-              After repairing, call <code className="font-mono bg-muted/60 px-1 rounded">sdlc_get_directive</code> to re-enter the normal flow.
-              Valid statuses: <span className="font-mono">missing, draft, approved, rejected, needs_fix, passed, failed, waived</span>
-            </p>
-          </div>
+          )}
         </div>
       </div>
     )
@@ -73,11 +83,6 @@ export function FeatureDetail() {
 
   const running = isRunning(slug)
   const activeRun = getRunForKey(slug)
-  const [allSlugs, setAllSlugs] = useState<string[]>([])
-
-  useEffect(() => {
-    api.getFeatures().then(features => setAllSlugs(features.map((f: { slug: string }) => f.slug))).catch(() => {})
-  }, [])
 
   const handleRun = () => {
     startRun({

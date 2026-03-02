@@ -3494,37 +3494,39 @@ fn orchestrator_two_actions_complete_in_one_tick() {
     )
     .unwrap();
 
-    // Open the orchestrator DB and insert two Pending actions scheduled in the
-    // near future so they become due after a short sleep.
+    // Insert two Pending actions scheduled in the near future, then drop the db
+    // so run_one_tick can acquire the exclusive redb lock when it re-opens it.
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
     let db_path = root.join(".sdlc/orchestrator.db");
-    let db = ActionDb::open(&db_path).unwrap();
-
-    let now = Utc::now();
-    let a1 = Action::new_scheduled(
-        "action-1",
-        "stub-tool",
-        serde_json::json!({}),
-        now + chrono::Duration::milliseconds(100),
-        None,
-    );
-    let a2 = Action::new_scheduled(
-        "action-2",
-        "stub-tool",
-        serde_json::json!({}),
-        now + chrono::Duration::milliseconds(200),
-        None,
-    );
-    db.insert(&a1).unwrap();
-    db.insert(&a2).unwrap();
+    {
+        let db = ActionDb::open(&db_path).unwrap();
+        let now = Utc::now();
+        let a1 = Action::new_scheduled(
+            "action-1",
+            "stub-tool",
+            serde_json::json!({}),
+            now + chrono::Duration::milliseconds(100),
+            None,
+        );
+        let a2 = Action::new_scheduled(
+            "action-2",
+            "stub-tool",
+            serde_json::json!({}),
+            now + chrono::Duration::milliseconds(200),
+            None,
+        );
+        db.insert(&a1).unwrap();
+        db.insert(&a2).unwrap();
+    } // db dropped, lock released
 
     // Wait for both scheduled times to pass.
     std::thread::sleep(Duration::from_millis(300));
 
     // Run exactly one tick — both due actions should be dispatched.
-    run_one_tick(root, &db).unwrap();
+    run_one_tick(root, &db_path).unwrap();
 
-    // Assert both actions completed.
+    // Re-open db to assert both actions completed.
+    let db = ActionDb::open(&db_path).unwrap();
     let actions = db.list_all().unwrap();
     assert_eq!(actions.len(), 2, "expected 2 actions in the DB");
     for action in &actions {
@@ -3664,10 +3666,11 @@ fn run_one_tick_writes_sentinel_file() {
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
 
     let db_path = root.join(".sdlc/orchestrator.db");
-    let db = ActionDb::open(&db_path).unwrap();
+    // Create the db file, then drop immediately so run_one_tick can open it.
+    let _ = ActionDb::open(&db_path).unwrap();
 
     // Tick with an empty DB.
-    run_one_tick(root, &db).unwrap();
+    run_one_tick(root, &db_path).unwrap();
 
     let sentinel = root.join(".sdlc/.orchestrator.state");
     assert!(
@@ -3698,9 +3701,10 @@ fn run_one_tick_sentinel_updates_on_each_tick() {
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
 
     let db_path = root.join(".sdlc/orchestrator.db");
-    let db = ActionDb::open(&db_path).unwrap();
+    // Create the db file, then drop immediately so run_one_tick can open it.
+    let _ = ActionDb::open(&db_path).unwrap();
 
-    run_one_tick(root, &db).unwrap();
+    run_one_tick(root, &db_path).unwrap();
 
     let sentinel = root.join(".sdlc/.orchestrator.state");
     let first_mtime = std::fs::metadata(&sentinel)
@@ -3711,7 +3715,7 @@ fn run_one_tick_sentinel_updates_on_each_tick() {
     // Sleep so the filesystem mtime resolution can distinguish the two ticks.
     std::thread::sleep(std::time::Duration::from_millis(10));
 
-    run_one_tick(root, &db).unwrap();
+    run_one_tick(root, &db_path).unwrap();
 
     let second_mtime = std::fs::metadata(&sentinel)
         .expect("sentinel must exist after second tick")

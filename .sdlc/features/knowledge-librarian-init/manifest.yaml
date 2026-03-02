@@ -1,9 +1,9 @@
 slug: knowledge-librarian-init
 title: sdlc knowledge librarian init — project scan, catalog gen, agent file, hooks
 description: 'sdlc knowledge librarian init command. IDEMPOTENT — safe to run multiple times; each step is a no-op if already complete. 9-step flow: (1) project scan — read VISION.md, ARCHITECTURE.md, CLAUDE.md, .sdlc/config.yaml; (2) workspace harvest — for each completed investigation and committed ponder, extract durable insights (root cause hypotheses, decided constraints, evolution paths) and create draft knowledge entries; (3) guideline linking — for each published guideline, create a knowledge entry with origin:guideline; (4) domain extraction — identify 5-7 knowledge domains from harvested entries and existing docs; (5) catalog generation — write .sdlc/knowledge/catalog.yaml with derived categories (no-op if catalog already exists); (6) librarian agent generation — write .claude/agents/knowledge-librarian.md with project name, full catalog, and key architectural context baked in (overwrites to pick up catalog changes); (7) hook registration — document harvest hooks in .sdlc/config.yaml; (8) cross-ref pass — suggest related[] links between newly seeded entries with matching tags; (9) report — N entries created, M entries updated, catalog categories, librarian agent written. Failure handling: each step reports success/failure independently; partial init is recoverable by re-running the command. Harvest protocol: for each durable insight, check for existing matching entry by slug (same title normalized), append to content.md if exists, create new entry if not, record harvested_from, log to maintenance-log.yaml. Durable insight extraction rules: from root-cause (hypothesis + fix approach), from evolve (lens scores + chosen paths), from ponder (Decided: entries + surfaced constraints). NOT harvested: transient symptom details, specific file paths, raw exploratory dialogue.'
-phase: review
+phase: released
 created_at: 2026-03-02T02:12:15.977972Z
-updated_at: 2026-03-02T09:32:13.305121Z
+updated_at: 2026-03-02T10:05:53.426878Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -46,18 +46,18 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T10:04:59.157109Z
+  approved_at: 2026-03-02T10:05:08.122047Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/knowledge-librarian-init/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T10:05:45.906677Z
+  approved_at: 2026-03-02T10:05:50.351631Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -69,6 +69,15 @@ tasks:
   created_at: 2026-03-02T02:28:50.491954Z
   started_at: null
   completed_at: 2026-03-02T09:31:28.106885Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Constrain publish_path to project root in harvest_guidelines (F2 audit finding)
+  description: null
+  status: pending
+  created_at: 2026-03-02T10:05:06.746136Z
+  started_at: null
+  completed_at: null
   blocker: null
   depends_on: []
 comments: []
@@ -92,6 +101,18 @@ phase_history:
   exited: 2026-03-02T09:32:13.305121Z
 - phase: review
   entered: 2026-03-02T09:32:13.305121Z
+  exited: 2026-03-02T10:03:27.052331Z
+- phase: audit
+  entered: 2026-03-02T10:03:27.052331Z
+  exited: 2026-03-02T10:05:08.123691Z
+- phase: qa
+  entered: 2026-03-02T10:05:08.123691Z
+  exited: 2026-03-02T10:05:50.353069Z
+- phase: merge
+  entered: 2026-03-02T10:05:50.353069Z
+  exited: 2026-03-02T10:05:53.426878Z
+- phase: released
+  entered: 2026-03-02T10:05:53.426878Z
   exited: null
 dependencies: []
 archived: false
