@@ -388,7 +388,7 @@ export const api = {
     label: string
     tool_name: string
     tool_input: unknown
-    scheduled_at: string
+    next_tick_at: string
     recurrence_secs: number | null
   }) =>
     request<import('@/lib/types').OrchestratorAction>('/api/orchestrator/actions', {
@@ -403,16 +403,16 @@ export const api = {
   deleteAction: (id: string) =>
     request<{ deleted: boolean }>(`/api/orchestrator/actions/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   listWebhookRoutes: () =>
-    request<import('@/lib/types').OrchestratorWebhookRoute[]>('/api/orchestrator/webhook-routes'),
+    request<import('@/lib/types').OrchestratorWebhookRoute[]>('/api/orchestrator/webhooks/routes'),
   createWebhookRoute: (body: { path: string; tool_name: string; input_template: string }) =>
-    request<import('@/lib/types').OrchestratorWebhookRoute>('/api/orchestrator/webhook-routes', {
+    request<import('@/lib/types').OrchestratorWebhookRoute>('/api/orchestrator/webhooks/routes', {
       method: 'POST',
       body: JSON.stringify(body),
     }),
   deleteWebhookRoute: (id: string) =>
-    request<{ deleted: boolean }>(`/api/orchestrator/webhook-routes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
+    request<void>(`/api/orchestrator/webhooks/routes/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   listWebhookEvents: (limit = 20) =>
-    request<import('@/lib/types').OrchestratorWebhookEvent[]>(`/api/orchestrator/webhook-events?limit=${limit}`),
+    request<import('@/lib/types').OrchestratorWebhookEvent[]>(`/api/orchestrator/webhooks/events?limit=${limit}`),
 
   // Secrets (metadata only — decryption is CLI-only)
   getSecretsStatus: () => request<{ key_count: number; env_count: number }>('/api/secrets/status'),

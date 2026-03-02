@@ -8,9 +8,10 @@ interface FullscreenModalProps {
   title: string
   children: ReactNode
   className?: string
+  hasToc?: boolean
 }
 
-export function FullscreenModal({ open, onClose, title, children, className }: FullscreenModalProps) {
+export function FullscreenModal({ open, onClose, title, children, className, hasToc = false }: FullscreenModalProps) {
   useEffect(() => {
     if (!open) return
     const handler = (e: KeyboardEvent) => {
@@ -34,7 +35,11 @@ export function FullscreenModal({ open, onClose, title, children, className }: F
           <X className="w-4 h-4" />
         </button>
       </div>
-      <div className={cn('flex-1 overflow-y-auto px-8 py-6 max-w-4xl w-full mx-auto', className)}>
+      <div className={cn(
+        'flex-1 overflow-y-auto px-8 py-6 w-full mx-auto',
+        hasToc ? 'max-w-6xl' : 'max-w-4xl',
+        className
+      )}>
         {children}
       </div>
     </div>

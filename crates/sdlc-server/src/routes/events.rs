@@ -148,7 +148,7 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
         }
         Ok(SseMessage::ActionStateChanged) => {
             let data = serde_json::json!({ "type": "action_state_changed" }).to_string();
-            Some(Ok(Event::default().event("orchestrator").data(data)))
+            Some(Ok(Event::default().event("action").data(data)))
         }
         Ok(SseMessage::KnowledgeResearchStarted { slug }) => {
             let data = serde_json::json!({

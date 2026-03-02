@@ -1,6 +1,6 @@
 //! Reverse-proxy handler for the app tunnel.
 //!
-//! When cloudflared tunnels to sdlc-server and the `Host` header matches the
+//! When orch-tunnel proxies to sdlc-server and the `Host` header matches the
 //! active app tunnel hostname, this handler proxies the request to the user's
 //! local dev server and injects a feedback FAB widget into HTML responses.
 

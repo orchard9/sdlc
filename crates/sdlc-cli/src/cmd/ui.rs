@@ -4,7 +4,7 @@ use crate::output::print_table;
 use anyhow::{anyhow, Result};
 use clap::Subcommand;
 use sdlc_core::{config::Config, ui_registry};
-use sdlc_server::tunnel::{generate_token, Tunnel, TunnelError};
+use sdlc_server::tunnel::{derive_tunnel_name, generate_token, Tunnel, TunnelError};
 use std::path::Path;
 
 // ---------------------------------------------------------------------------
@@ -21,7 +21,7 @@ pub enum UiSubcommand {
         /// Don't open browser automatically
         #[arg(long)]
         no_open: bool,
-        /// Open a public tunnel and print a QR code for remote access (requires cloudflared)
+        /// Open a public tunnel and print a QR code for remote access (requires orch-tunnel)
         #[arg(long)]
         tunnel: bool,
         /// Orchestrator tick interval in seconds (default 60)
@@ -148,8 +148,9 @@ fn run_start(
             // Warn that the server is public.
             eprintln!("Warning: tunnel mode exposes your SDLC server publicly. Share the QR code only with trusted parties.");
 
-            // Start cloudflared tunnel.
-            let tun = match Tunnel::start(actual_port).await {
+            // Start orch-tunnel.
+            let tunnel_name = derive_tunnel_name(&root_buf);
+            let tun = match Tunnel::start(actual_port, &tunnel_name).await {
                 Ok(t) => t,
                 Err(TunnelError::NotFound) => {
                     let _ = record_clone.remove();

@@ -15,7 +15,7 @@ Expose the local `sdlc ui` server to the internet through a temporary authentica
 Add a `--tunnel` flag to `sdlc ui start` that:
 
 1. Starts the server on a random free port
-2. Spawns a `cloudflared` quick-tunnel to get a public HTTPS URL
+2. Spawns an `orch-tunnel` quick-tunnel to get a public HTTPS URL
 3. Generates a short random passcode and embeds it in the tunnel URL
 4. Prints the QR code and passcode to the terminal
 5. Enforces the passcode via Axum middleware on all requests through the tunnel
@@ -31,7 +31,7 @@ $ sdlc ui --tunnel
 
 SDLC UI for 'my-project'
   Local:   http://localhost:52341  (no auth)
-  Tunnel:  https://fancy-rabbit-deluxe.trycloudflare.com
+  Tunnel:  https://my-project.tunnel.threesix.ai
 
   ┌─────────────────────────────────┐
   │                                 │
@@ -49,7 +49,7 @@ SDLC UI for 'my-project'
 Ctrl+C to stop tunnel and server
 ```
 
-Scanning the QR code opens `https://fancy-rabbit-deluxe.trycloudflare.com/?auth=K7mX9pQ2`. The middleware sets a session cookie and redirects to `/`. Subsequent requests use the cookie — no token in the URL after first visit.
+Scanning the QR code opens `https://my-project.tunnel.threesix.ai/?auth=K7mX9pQ2`. The middleware sets a session cookie and redirects to `/`. Subsequent requests use the cookie — no token in the URL after first visit.
 
 ---
 
@@ -65,8 +65,8 @@ sdlc ui --tunnel
     │                         ↑
     │                   LocalBypass (skip if Host == localhost)
     │
-    └── cloudflared tunnel process
-            └── https://<random>.trycloudflare.com → localhost:<port>
+    └── orch-tunnel process
+            └── https://<name>.tunnel.threesix.ai → localhost:<port>
 ```
 
 ### Auth Middleware
@@ -84,31 +84,31 @@ All requests through the tunnel require a valid session:
 
 ### Tunnel Backend
 
-`cloudflared` is the primary and only supported backend for v1:
+`orch-tunnel` is the supported backend:
 
 ```bash
-cloudflared tunnel --url http://localhost:<PORT> --no-autoupdate
+orch-tunnel http <PORT> --name <project-name>
 ```
 
-The public HTTPS URL is parsed from `cloudflared` stderr output — it logs a line like:
+The public HTTPS URL is printed to **stdout** — it produces a stable, predictable URL:
 ```
-Your quick Tunnel has been created! Visit it at (it may take some time to be reachable):
-https://fancy-rabbit-deluxe.trycloudflare.com
+https://<name>.tunnel.threesix.ai
 ```
 
-We capture this with a regex on stderr before printing the QR code.
+We capture this with a regex on stdout before printing the QR code.
 
 #### Graceful degradation
 
-If `cloudflared` is not in PATH, print a clear error:
+If `orch-tunnel` is not in PATH, print a clear error:
 
 ```
-✗ cloudflared not found.
+✗ orch-tunnel not found.
 
   Install it with:
-    brew install cloudflare/cloudflare/cloudflared   # macOS
-    winget install Cloudflare.cloudflared             # Windows
-    curl -L ... | sh                                  # Linux
+    brew install orch-tunnel                                      # macOS
+    gh release download --repo orchard9/tunnel \                  # Linux/Windows
+      --pattern 'orch-tunnel-*' -D /usr/local/bin
+    chmod +x /usr/local/bin/orch-tunnel
 
   Then re-run: sdlc ui --tunnel
 ```
@@ -148,12 +148,12 @@ No silent fallback — be explicit.
 
 | Property | Value |
 |---|---|
-| Transport | HTTPS via Cloudflare (TLS terminated at edge) |
+| Transport | HTTPS via orch-tunnel edge (TLS terminated at edge) |
 | Auth mechanism | HMAC-free shared token; session cookie |
 | Token entropy | ~47 bits (8 alphanumeric chars from 62-char alphabet) |
 | Token lifetime | Single process lifetime — ephemeral |
 | Local access | Unauthenticated (localhost only) |
-| Brute force | Impractical — URL is also unknown; Cloudflare rate-limits |
+| Brute force | Impractical — URL is also unknown |
 | Threat model | Casual snooping, accidental exposure — not nation-state |
 
 This is appropriate for a developer tool used in short sessions. It is **not** suitable for long-running production exposure.
@@ -162,9 +162,8 @@ This is appropriate for a developer tool used in short sessions. It is **not** s
 
 ## Out of Scope (v1)
 
-- Multiple tunnel backends (bore, serveo, localhost.run)
+- Multiple tunnel backends
 - Custom passcode (user-specified token)
-- Persistent tunnel URLs (paid Cloudflare Tunnels)
 - Per-route access control
 - Audit log of tunnel access
 - `sdlc ui list` showing tunnel URL alongside local URL (v2)
@@ -177,6 +176,6 @@ This is appropriate for a developer tool used in short sessions. It is **not** s
 - QR code URL opens the app after one scan (cookie set, no second auth prompt)
 - Accessing tunnel URL without token returns 401
 - Local `http://localhost:<port>` works without any auth
-- `cloudflared` not in PATH prints a clear install message and exits cleanly
+- `orch-tunnel` not in PATH prints a clear install message and exits cleanly
 - Ctrl+C kills both the tunnel process and the server cleanly
 - `SDLC_NO_NPM=1 cargo test --all` passes (no test regressions)

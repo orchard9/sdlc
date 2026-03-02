@@ -5,7 +5,7 @@
 //! - `GET  /api/orchestrator/webhooks/routes` — list all registered webhook routes
 
 use axum::{
-    extract::{Path, State},
+    extract::{Path, Query, State},
     http::StatusCode,
     Json,
 };
@@ -146,16 +146,23 @@ pub async fn list_routes(State(app): State<AppState>) -> Result<Json<serde_json:
 fn action_to_json(action: &sdlc_core::orchestrator::Action) -> serde_json::Value {
     use sdlc_core::orchestrator::action::{ActionStatus, ActionTrigger};
 
-    let (trigger_type, next_tick_at) = match &action.trigger {
-        ActionTrigger::Scheduled { next_tick_at } => ("scheduled", Some(next_tick_at.to_rfc3339())),
-        ActionTrigger::Webhook { .. } => ("webhook", None),
+    let trigger = match &action.trigger {
+        ActionTrigger::Scheduled { next_tick_at } => serde_json::json!({
+            "type": "scheduled",
+            "next_tick_at": next_tick_at.to_rfc3339(),
+        }),
+        ActionTrigger::Webhook { .. } => serde_json::json!({ "type": "webhook" }),
     };
 
     let status = match &action.status {
-        ActionStatus::Pending => "pending".to_string(),
-        ActionStatus::Running => "running".to_string(),
-        ActionStatus::Completed { .. } => "completed".to_string(),
-        ActionStatus::Failed { .. } => "failed".to_string(),
+        ActionStatus::Pending => serde_json::json!({ "type": "pending" }),
+        ActionStatus::Running => serde_json::json!({ "type": "running" }),
+        ActionStatus::Completed { result } => {
+            serde_json::json!({ "type": "completed", "result": result })
+        }
+        ActionStatus::Failed { reason } => {
+            serde_json::json!({ "type": "failed", "reason": reason })
+        }
     };
 
     let recurrence_secs: serde_json::Value = match action.recurrence {
@@ -163,23 +170,17 @@ fn action_to_json(action: &sdlc_core::orchestrator::Action) -> serde_json::Value
         None => serde_json::Value::Null,
     };
 
-    let mut obj = serde_json::json!({
+    serde_json::json!({
         "id": action.id.to_string(),
         "label": action.label,
         "tool_name": action.tool_name,
         "tool_input": action.tool_input,
-        "trigger_type": trigger_type,
+        "trigger": trigger,
         "status": status,
         "recurrence_secs": recurrence_secs,
         "created_at": action.created_at.to_rfc3339(),
         "updated_at": action.updated_at.to_rfc3339(),
-    });
-
-    if let Some(ts) = next_tick_at {
-        obj["next_tick_at"] = serde_json::json!(ts);
-    }
-
-    obj
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -402,16 +403,62 @@ pub async fn patch_action(
 }
 
 // ---------------------------------------------------------------------------
+// DELETE /api/orchestrator/webhooks/routes/{id}
+// ---------------------------------------------------------------------------
+
+/// `DELETE /api/orchestrator/webhooks/routes/{id}`
+///
+/// Remove a registered webhook route by UUID. Returns `204 No Content`
+/// (idempotent — succeeds even if the route does not exist).
+///
+/// Returns `400` if `id` is not a valid UUID.
+pub async fn delete_route(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<StatusCode, AppError> {
+    let uuid = id
+        .parse::<uuid::Uuid>()
+        .map_err(|_| AppError::bad_request(format!("'{id}' is not a valid UUID")))?;
+
+    let root = app.root.clone();
+    tokio::task::spawn_blocking(move || {
+        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
+            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
+        db.delete_route(uuid).map_err(|e| anyhow::anyhow!("{e}"))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+    .map_err(AppError)?;
+
+    Ok(StatusCode::NO_CONTENT)
+}
+
+// ---------------------------------------------------------------------------
 // GET /api/orchestrator/webhooks/events — list webhook event audit log
 // ---------------------------------------------------------------------------
 
-/// `GET /api/orchestrator/webhooks/events`
+#[derive(Deserialize)]
+pub struct WebhookEventsQuery {
+    /// Maximum number of events to return (default: 20).
+    #[serde(default = "default_events_limit")]
+    pub limit: usize,
+}
+
+fn default_events_limit() -> usize {
+    20
+}
+
+/// `GET /api/orchestrator/webhooks/events?limit=N`
 ///
 /// Returns stored webhook events from the ring buffer, sorted by `received_at`
-/// descending (most recent first).
+/// descending (most recent first). The optional `?limit` query parameter caps
+/// the number of returned events (default 20).
 pub async fn list_webhook_events(
     State(app): State<AppState>,
+    Query(params): Query<WebhookEventsQuery>,
 ) -> Result<Json<serde_json::Value>, AppError> {
+    let limit = params.limit;
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let db_path = sdlc_core::paths::orchestrator_db_path(&root);
@@ -421,7 +468,8 @@ pub async fn list_webhook_events(
             .list_webhook_events()
             .map_err(|e| anyhow::anyhow!("{e}"))?;
         let json: Vec<serde_json::Value> = events
-            .iter()
+            .into_iter()
+            .take(limit)
             .map(|e| {
                 serde_json::json!({
                     "id": e.id.to_string(),

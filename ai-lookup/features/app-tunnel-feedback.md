@@ -1,6 +1,6 @@
 # App Tunnel Feedback FAB (Reverse HTTP Proxy)
 
-cloudflared tunnels to `sdlc-server:3141`, which reverse-proxies to the user's local dev app and injects a feedback widget into every HTML response. Reviewers leave notes that flow into `.sdlc/feedback.yaml` and can be submitted as ponder entries.
+orch-tunnel tunnels to `sdlc-server:3141`, which reverse-proxies to the user's local dev app and injects a feedback widget into every HTML response. Reviewers leave notes that flow into `.sdlc/feedback.yaml` and can be submitted as ponder entries.
 
 ## Entry Points
 
@@ -21,8 +21,8 @@ cloudflared tunnels to `sdlc-server:3141`, which reverse-proxies to the user's l
 User → NetworkPage: port input + "Start" click
   → POST /api/app-tunnel { port: 3000 }
   → routes/app_tunnel.rs::start_app_tunnel()
-    → Tunnel::start(sdlc_port)          # spawns cloudflared to sdlc-server:3141
-    → extract_host_from_url()           # "fancy-rabbit.trycloudflare.com"
+    → Tunnel::start(sdlc_port, &name)   # spawns orch-tunnel to sdlc-server:3141
+    → extract_host_from_url()           # "<name>.tunnel.threesix.ai"
     → TunnelConfig.app_tunnel_host = Some(host)   # registers hostname in auth
     → AppState.app_tunnel_port = 3000             # stored for proxy use
     → persist_app_port() → .sdlc/config.yaml
@@ -31,8 +31,8 @@ User → NetworkPage: port input + "Start" click
 
 ### Proxy Request (reviewer)
 ```
-https://fancy-rabbit.trycloudflare.com/page
-  → cloudflared → sdlc-server:3141
+https://<name>.tunnel.threesix.ai/page
+  → orch-tunnel → sdlc-server:3141
   → auth_middleware:
       Host == app_tunnel_host AND path != /api/* → BYPASS AUTH
   → proxy_handler():
@@ -137,7 +137,7 @@ PUT   /api/app-tunnel/port      → app_tunnel::set_app_port
 | `tests/integration.rs` | 4 | Widget injection e2e, `/__sdlc/feedback` public, API blocked via app tunnel, SPA fallback |
 | `sdlc-core/feedback.rs` | 6 | Add/list, sequential IDs, delete, ID persistence, clear, markdown format |
 
-**Gap:** `start_app_tunnel()` / `stop_app_tunnel()` have no unit tests — require a live cloudflared process.
+**Gap:** `start_app_tunnel()` / `stop_app_tunnel()` have no unit tests — require a live orch-tunnel process.
 
 ## Known Constraints
 

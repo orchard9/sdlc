@@ -11,7 +11,8 @@
 make install
 ```
 
-Builds the frontend, installs the `sdlc` binary to your Cargo bin, and installs `cloudflared` (needed for `sdlc ui --tunnel`).
+Builds the frontend, installs the `sdlc` binary to your Cargo bin, and installs `orch-tunnel` (needed for `sdlc ui --tunnel`).
+Install manually: `gh release download --repo orchard9/tunnel`
 
 Other targets:
 

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
@@ -7,9 +7,20 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Skeleton } from '@/components/shared/Skeleton'
 import { DialoguePanel } from '@/components/ponder/DialoguePanel'
 import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
+import { TeamRow } from '@/components/ponder/TeamRow'
+import { OrientationStrip } from '@/components/ponder/OrientationStrip'
 import {
   Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Sparkles, SlidersHorizontal,
+  MessageSquare,
 } from 'lucide-react'
+
+const WORKSPACE_WIDTH_LS_KEY = 'ponder_workspace_width'
+const MIN_WORKSPACE_WIDTH = 160
+const DEFAULT_WORKSPACE_WIDTH = 256
+
+function clampW(val: number, min: number, maxPct: number, containerWidth: number) {
+  return Math.min(Math.max(val, min), containerWidth * maxPct)
+}
 import { cn } from '@/lib/utils'
 import type { AdvisoryHistory, AdvisorySseEvent, Finding, FindingStatus, MaturityStage, PonderDetail, PonderStatus, PonderSummary } from '@/lib/types'
 
@@ -442,16 +453,48 @@ function AdvisoryPanel({
 // Right pane: entry header + dialogue
 // ---------------------------------------------------------------------------
 
+type MobileTab = 'chat' | 'files' | 'team'
+
 function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh: () => void; onBack: () => void }) {
   const [entry, setEntry] = useState<PonderDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [mobileWorkspaceOpen, setMobileWorkspaceOpen] = useState(false)
+  const [mobileTab, setMobileTab] = useState<MobileTab>('chat')
   const [statusModalOpen, setStatusModalOpen] = useState(false)
   const [pendingStatus, setPendingStatus] = useState<PonderStatus | null>(null)
+  const [workspaceWidth, setWorkspaceWidth] = useState(() => {
+    try {
+      const stored = localStorage.getItem(WORKSPACE_WIDTH_LS_KEY)
+      return stored ? Math.max(MIN_WORKSPACE_WIDTH, parseInt(stored, 10)) : DEFAULT_WORKSPACE_WIDTH
+    } catch { return DEFAULT_WORKSPACE_WIDTH }
+  })
+  const containerRef = useRef<HTMLDivElement>(null)
+  const dragStartX = useRef<number | null>(null)
+  const dragStartWidth = useRef<number>(DEFAULT_WORKSPACE_WIDTH)
   const { isRunning, focusRun } = useAgentRuns()
   const commitKey = `ponder-commit:${slug}`
   const commitRunning = isRunning(commitKey)
+
+  const handleWorkspaceDragDown = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    dragStartX.current = e.clientX
+    dragStartWidth.current = workspaceWidth
+    e.currentTarget.setPointerCapture(e.pointerId)
+  }, [workspaceWidth])
+
+  const handleWorkspaceDragMove = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartX.current === null) return
+    const containerWidth = containerRef.current?.getBoundingClientRect().width ?? 800
+    const delta = dragStartX.current - e.clientX
+    const newWidth = clampW(dragStartWidth.current + delta, MIN_WORKSPACE_WIDTH, 0.5, containerWidth)
+    setWorkspaceWidth(newWidth)
+  }, [])
+
+  const handleWorkspaceDragUp = useCallback((e: React.PointerEvent<HTMLDivElement>) => {
+    if (dragStartX.current === null) return
+    dragStartX.current = null
+    try { localStorage.setItem(WORKSPACE_WIDTH_LS_KEY, String(workspaceWidth)) } catch { /* ok */ }
+    e.currentTarget.releasePointerCapture(e.pointerId)
+  }, [workspaceWidth])
 
   const load = useCallback(() => {
     api.getPonderEntry(slug)
@@ -500,10 +543,11 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
   }
 
   const artifactCount = entry.artifacts.length
+  const orientation = entry.orientation ?? null
 
   return (
     <div className="h-full flex flex-col min-h-0 relative overflow-hidden">
-      {/* Single header row — back arrow (mobile only) + title + workspace toggle */}
+      {/* Header */}
       <div className="shrink-0 flex items-center gap-2 px-4 pt-4 pb-3 border-b border-border/50">
         <button
           onClick={onBack}
@@ -542,30 +586,10 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
         >
           <SlidersHorizontal className="w-3.5 h-3.5" />
         </button>
-        <div className="relative shrink-0 md:hidden">
-          <button
-            onClick={() => setMobileWorkspaceOpen(o => !o)}
-            className={cn(
-              'p-1.5 rounded-lg transition-colors',
-              mobileWorkspaceOpen
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
-            )}
-            aria-label="Toggle workspace"
-            title="Workspace"
-          >
-            <Files className="w-4 h-4" />
-          </button>
-          {artifactCount > 0 && (
-            <span className="pointer-events-none absolute -top-1 -right-1 w-3.5 h-3.5 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[9px] font-semibold">
-              {artifactCount}
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* Content: dialogue + desktop right sidebar (always visible) */}
-      <div className="flex-1 flex min-h-0">
+      {/* Desktop: dialogue + resizable workspace sidebar */}
+      <div ref={containerRef} className="hidden md:flex flex-1 min-h-0">
         <div className="flex-1 min-w-0 min-h-0">
           <DialoguePanel
             entry={entry}
@@ -574,30 +598,74 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
             commitRunning={commitRunning}
           />
         </div>
-        {/* Desktop workspace: always open */}
-        <div className="hidden md:flex w-64 shrink-0 border-l border-border flex-col min-h-0">
+        {/* Resize handle */}
+        <div
+          data-testid="workspace-resize-handle"
+          className="w-1 shrink-0 cursor-col-resize hover:bg-accent/60 transition-colors z-10"
+          onPointerDown={handleWorkspaceDragDown}
+          onPointerMove={handleWorkspaceDragMove}
+          onPointerUp={handleWorkspaceDragUp}
+        />
+        {/* Workspace panel */}
+        <div
+          className="shrink-0 border-l border-border flex flex-col min-h-0"
+          style={{ width: `${workspaceWidth}px` }}
+        >
           <WorkspacePanel artifacts={entry.artifacts} />
         </div>
       </div>
 
-      {/* Mobile: backdrop + bottom sheet (workspace) */}
-      {mobileWorkspaceOpen && (
-        <div
-          className="md:hidden absolute inset-0 bg-black/30 z-40"
-          onClick={() => setMobileWorkspaceOpen(false)}
-        />
-      )}
-      <div
-        className={cn(
-          'md:hidden absolute inset-x-0 bottom-0 z-50 flex flex-col bg-card border-t border-border rounded-t-2xl shadow-2xl transition-transform duration-300',
-          mobileWorkspaceOpen ? 'translate-y-0' : 'translate-y-full',
+      {/* Mobile: tab content area */}
+      <div className="md:hidden flex-1 min-h-0 flex flex-col">
+        {mobileTab === 'chat' && (
+          <DialoguePanel
+            entry={entry}
+            onRefresh={() => { load(); onRefresh() }}
+            onCommit={handleCommit}
+            commitRunning={commitRunning}
+          />
         )}
-        style={{ height: '60%' }}
-      >
-        <div className="shrink-0 flex justify-center py-2">
-          <div className="w-10 h-1 rounded-full bg-border/60" />
-        </div>
-        <WorkspacePanel artifacts={entry.artifacts} onClose={() => setMobileWorkspaceOpen(false)} />
+        {mobileTab === 'files' && (
+          <WorkspacePanel artifacts={entry.artifacts} />
+        )}
+        {mobileTab === 'team' && (
+          <div className="p-4 space-y-4">
+            {entry.team.length > 0 && <TeamRow team={entry.team} />}
+            <OrientationStrip orientation={orientation} />
+          </div>
+        )}
+      </div>
+
+      {/* Mobile tab bar */}
+      <div className="md:hidden shrink-0 flex border-t border-border bg-card">
+        {([
+          { id: 'chat' as MobileTab, label: 'Chat', Icon: MessageSquare, badge: undefined as number | undefined },
+          { id: 'files' as MobileTab, label: 'Files', Icon: Files, badge: artifactCount > 0 ? artifactCount : undefined as number | undefined },
+          { id: 'team' as MobileTab, label: 'Team', Icon: Users, badge: undefined as number | undefined },
+        ]).map(({ id, label, Icon, badge }) => (
+          <button
+            key={id}
+            data-testid={`mobile-tab-${id}`}
+            onClick={() => setMobileTab(id)}
+            className={cn(
+              'flex-1 flex flex-col items-center gap-0.5 py-2 text-xs font-medium transition-colors relative',
+              mobileTab === id ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+            )}
+          >
+            <div className="relative">
+              <Icon className="w-4 h-4" />
+              {badge !== undefined && (
+                <span className="absolute -top-1 -right-1.5 w-3 h-3 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-[8px] font-semibold">
+                  {badge}
+                </span>
+              )}
+            </div>
+            {label}
+            {mobileTab === id && (
+              <span className="absolute bottom-0 inset-x-4 h-0.5 bg-foreground rounded-full" />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Status change modal */}

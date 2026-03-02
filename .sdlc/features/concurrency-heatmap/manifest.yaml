@@ -1,38 +1,38 @@
 slug: concurrency-heatmap
 title: 'Concurrency heatmap: cross-run view of idle vs. active agents to surface parallelism opportunities'
-phase: draft
+phase: implementation
 created_at: 2026-03-02T04:09:31.211605Z
-updated_at: 2026-03-02T04:09:31.211605Z
+updated_at: 2026-03-02T23:12:07.665168Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/concurrency-heatmap/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T23:11:14.885926Z
+  approved_at: 2026-03-02T23:11:19.810650Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/concurrency-heatmap/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T23:11:28.899543Z
+  approved_at: 2026-03-02T23:11:31.617724Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/concurrency-heatmap/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T23:11:42.644600Z
+  approved_at: 2026-03-02T23:11:45.527973Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/concurrency-heatmap/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T23:11:56.625344Z
+  approved_at: 2026-03-02T23:11:59.789749Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +67,18 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T04:09:31.211605Z
+  exited: 2026-03-02T23:11:19.811973Z
+- phase: specified
+  entered: 2026-03-02T23:11:19.811973Z
+  exited: 2026-03-02T23:11:59.791126Z
+- phase: planned
+  entered: 2026-03-02T23:11:59.791126Z
+  exited: 2026-03-02T23:12:04.122169Z
+- phase: ready
+  entered: 2026-03-02T23:12:04.122169Z
+  exited: 2026-03-02T23:12:07.665168Z
+- phase: implementation
+  entered: 2026-03-02T23:12:07.665168Z
   exited: null
 dependencies: []
 archived: false

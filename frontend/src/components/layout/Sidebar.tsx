@@ -1,6 +1,10 @@
 import { Link, useLocation } from 'react-router-dom'
 import { cn } from '@/lib/utils'
-import { LayoutDashboard, FolderKanban, Milestone, Search, Lightbulb, Microscope, Lock, Wrench, TrendingUp, MessagesSquare, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText, Zap, Bot, BookMarked, Library, CalendarClock } from 'lucide-react'
+import {
+  LayoutDashboard, FolderKanban, Milestone, Search, Lightbulb, Microscope, Lock, Wrench,
+  TrendingUp, MessagesSquare, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText,
+  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight,
+} from 'lucide-react'
 
 const navGroups = [
   {
@@ -57,6 +61,8 @@ const navGroups = [
 ]
 
 interface SidebarProps {
+  collapsed?: boolean
+  onToggle?: () => void
   /** Called after a nav link is clicked (used to close mobile sidebar). */
   onNavigate?: () => void
   /** Called when the search trigger button is clicked. */
@@ -65,21 +71,51 @@ interface SidebarProps {
   onFixRightAway?: () => void
 }
 
-export function Sidebar({ onNavigate, onSearch, onFixRightAway }: SidebarProps) {
+export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onFixRightAway }: SidebarProps) {
   const location = useLocation()
 
   return (
-    <aside className="w-56 h-full bg-card border-r border-border flex flex-col">
-      <div className="px-4 py-5 border-b border-border">
-        <h1 className="text-lg font-semibold tracking-tight">SDLC</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Feature Lifecycle</p>
+    <aside
+      data-testid="sidebar-rail"
+      className={cn(
+        'h-full bg-card border-r border-border flex flex-col transition-[width] duration-200 ease-in-out overflow-hidden',
+        collapsed ? 'w-[52px]' : 'w-56',
+      )}
+    >
+      {/* Header */}
+      <div className={cn(
+        'flex items-center border-b border-border shrink-0',
+        collapsed ? 'justify-center px-1 py-5' : 'justify-between px-4 py-5',
+      )}>
+        {!collapsed && (
+          <div>
+            <h1 className="text-lg font-semibold tracking-tight">SDLC</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">Feature Lifecycle</p>
+          </div>
+        )}
+        <button
+          data-testid="sidebar-toggle"
+          onClick={onToggle}
+          className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors shrink-0"
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed
+            ? <ChevronsRight className="w-4 h-4" />
+            : <ChevronsLeft className="w-4 h-4" />
+          }
+        </button>
       </div>
-      <nav className="flex-1 px-2 py-4 space-y-4 overflow-y-auto">
+
+      {/* Nav */}
+      <nav className="flex-1 px-1.5 py-4 space-y-4 overflow-y-auto overflow-x-hidden">
         {navGroups.map(group => (
           <div key={group.label}>
-            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
-              {group.label}
-            </p>
+            {!collapsed && (
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/40">
+                {group.label}
+              </p>
+            )}
             <div className="space-y-0.5">
               {group.items.map(({ path, label, icon: Icon, exact }) => {
                 const active = exact ? location.pathname === path : location.pathname.startsWith(path)
@@ -88,15 +124,17 @@ export function Sidebar({ onNavigate, onSearch, onFixRightAway }: SidebarProps) 
                     key={path}
                     to={path}
                     onClick={onNavigate}
+                    title={collapsed ? label : undefined}
                     className={cn(
-                      'flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors',
+                      'flex items-center rounded-lg text-sm transition-colors',
+                      collapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-2',
                       active
                         ? 'bg-accent text-accent-foreground font-medium'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
                     )}
                   >
-                    <Icon className="w-4 h-4" />
-                    {label}
+                    <Icon className="w-4 h-4 shrink-0" />
+                    {!collapsed && label}
                   </Link>
                 )
               })}
@@ -104,22 +142,40 @@ export function Sidebar({ onNavigate, onSearch, onFixRightAway }: SidebarProps) 
           </div>
         ))}
       </nav>
-      <div className="px-2 py-3 border-t border-border space-y-0.5">
+
+      {/* Bottom utility */}
+      <div className="px-1.5 py-3 border-t border-border space-y-0.5">
         <button
           onClick={onFixRightAway}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+          title={collapsed ? 'Fix Right Away' : undefined}
+          className={cn(
+            'w-full flex items-center rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors',
+            collapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-2',
+          )}
         >
-          <Zap className="w-4 h-4" />
-          <span className="flex-1 text-left">Fix Right Away</span>
-          <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">⌘⇧F</kbd>
+          <Zap className="w-4 h-4 shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">Fix Right Away</span>
+              <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">⌘⇧F</kbd>
+            </>
+          )}
         </button>
         <button
           onClick={onSearch}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+          title={collapsed ? 'Search' : undefined}
+          className={cn(
+            'w-full flex items-center rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors',
+            collapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-2',
+          )}
         >
-          <Search className="w-4 h-4" />
-          <span className="flex-1 text-left">Search</span>
-          <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">⌘K</kbd>
+          <Search className="w-4 h-4 shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">Search</span>
+              <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">⌘K</kbd>
+            </>
+          )}
         </button>
       </div>
     </aside>

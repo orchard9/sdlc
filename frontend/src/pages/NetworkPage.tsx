@@ -89,8 +89,11 @@ function TunnelDisclosure() {
   return (
     <div className="border-t border-border/50 pt-3 space-y-1.5">
       <p className="text-xs text-muted-foreground/70">
-        <span className="font-medium text-muted-foreground">Requires cloudflared.</span>{' '}
-        Install: <code className="font-mono">brew install cloudflare/cloudflare/cloudflared</code>
+        <span className="font-medium text-muted-foreground">Requires orch-tunnel.</span>{' '}
+        Install:{' '}
+        <code className="font-mono">brew install orch-tunnel</code>
+        {' '}or{' '}
+        <code className="font-mono">gh release download --repo orchard9/tunnel</code>
       </p>
       <p className="text-xs text-muted-foreground/70">
         <span className="font-medium text-muted-foreground">Proxy only.</span>{' '}

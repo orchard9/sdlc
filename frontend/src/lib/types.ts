@@ -1050,14 +1050,13 @@ export interface ThreadDetail extends ThreadSummary {
 
 export interface OrchestratorActionStatus {
   type: 'pending' | 'running' | 'completed' | 'failed'
-  started_at?: string
-  completed_at?: string
-  error?: string
+  result?: unknown
+  reason?: string
 }
 
 export interface OrchestratorActionTrigger {
   type: 'scheduled' | 'webhook'
-  next_tick_at: string
+  next_tick_at?: string
 }
 
 export interface OrchestratorAction {
@@ -1065,21 +1064,23 @@ export interface OrchestratorAction {
   label: string
   tool_name: string
   tool_input: unknown
-  scheduled_at: string
   recurrence_secs: number | null
   status: OrchestratorActionStatus
   trigger: OrchestratorActionTrigger
   created_at: string
+  updated_at: string
 }
 
 export interface OrchestratorWebhookEvent {
   id: string
+  seq: number
+  route_path: string
   received_at: string
-  path: string
-  action_id: string | null
   outcome: {
-    type: 'dispatched' | 'no_route_matched' | 'rejected'
-    error?: string
+    kind: 'received' | 'no_route' | 'routed' | 'dispatch_error'
+    route_id?: string
+    tool_name?: string
+    reason?: string
   }
 }
 

@@ -83,26 +83,6 @@ active_directives: []
 history:
 - feature: uat-skill-playwright
   action: implement_task
-  phase: implementation
-  timestamp: 2026-03-01T07:06:28.350903Z
-  outcome: transition
-- feature: playwright-mcp-setup
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-01T07:08:22.838239Z
-  outcome: transition
-- feature: playwright-mcp-setup
-  action: merge
-  phase: released
-  timestamp: 2026-03-01T07:09:30.855082Z
-  outcome: merged
-- feature: uat-run-persistence
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-01T07:09:41.989843Z
-  outcome: transition
-- feature: uat-skill-playwright
-  action: implement_task
   phase: audit
   timestamp: 2026-03-01T07:10:08.664327Z
   outcome: transition
@@ -1081,6 +1061,26 @@ history:
   phase: released
   timestamp: 2026-03-02T19:14:24.670455Z
   outcome: merged
+- feature: activity-time-series
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T23:11:29.721618Z
+  outcome: merged
+- feature: concurrency-heatmap
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T23:12:04.123359Z
+  outcome: transition
+- feature: concurrency-heatmap
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T23:12:07.667981Z
+  outcome: transition
+- feature: quota-visibility-panel
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T23:13:25.765226Z
+  outcome: transition
 blocked: []
 milestones:
 - v01-directive-core
@@ -1113,4 +1113,5 @@ active_ponders:
 - we-need-a-way-to-add-images-to-ponder-id
 - i-want-to-be-able-to-optionally-use-open
 - i-need-to-improve-the-way-we-use-network
-last_updated: 2026-03-02T20:23:54.313564Z
+- dev-driver-tool
+last_updated: 2026-03-02T23:13:25.765227Z

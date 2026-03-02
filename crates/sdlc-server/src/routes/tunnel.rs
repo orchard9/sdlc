@@ -53,7 +53,8 @@ pub async fn start_tunnel(State(app): State<AppState>) -> Result<Json<TunnelStat
     }
 
     let port = app.port;
-    let tun = Tunnel::start(port)
+    let name = crate::tunnel::derive_tunnel_name(&app.root);
+    let tun = Tunnel::start(port, &name)
         .await
         .map_err(|e| AppError(anyhow::anyhow!("{e}")))?;
 
@@ -120,19 +121,19 @@ mod tests {
         let app = AppState::new(dir.path().to_path_buf());
 
         // Simulate a tunnel already being in state.
-        // We can't start a real cloudflared in tests, so inject a sentinel.
+        // We can't start a real orch-tunnel in tests, so inject a sentinel.
         // A None tunnel_handle means inactive, so we can only test the
         // "no tunnel running" → start path indirectly.  The guard that
         // rejects a second tunnel is the unit under test here.
 
         // Manually mark as "active" with a fake URL to test the guard.
-        *app.tunnel_url.write().await = Some("https://fake.trycloudflare.com".into());
+        *app.tunnel_url.write().await = Some("https://fake.tunnel.threesix.ai".into());
         // Inject a "running" handle sentinel by setting tunnel_config.
         *app.tunnel_config.write().await = TunnelConfig::with_token("existing-token".into());
 
         // The guard checks tunnel_handle (None), not tunnel_url/config.
         // Start a second attempt without a real handle — it should succeed
-        // (cloudflared not available in tests, so we just verify the
+        // (orch-tunnel not available in tests, so we just verify the
         // guard logic by checking the handle is None initially).
         let handle = app.tunnel_handle.lock().await;
         assert!(handle.is_none());

@@ -205,7 +205,7 @@ enum Commands {
         #[arg(long)]
         no_open: bool,
 
-        /// Open a public tunnel and print a QR code for remote access (requires cloudflared)
+        /// Open a public tunnel and print a QR code for remote access (install: gh release download --repo orchard9/tunnel)
         #[arg(long)]
         tunnel: bool,
 

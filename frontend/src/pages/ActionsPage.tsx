@@ -57,13 +57,17 @@ function ActionStatusBadge({ status }: { status: OrchestratorAction['status'] })
 
 function OutcomeBadge({ outcome }: { outcome: OrchestratorWebhookEvent['outcome'] }) {
   const base = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border'
-  if (outcome.type === 'dispatched') {
+  if (outcome.kind === 'routed') {
     return <span className={cn(base, 'bg-green-500/10 text-green-400 border-green-500/20')}>Dispatched</span>
   }
-  if (outcome.type === 'no_route_matched') {
+  if (outcome.kind === 'no_route') {
     return <span className={cn(base, 'bg-muted text-muted-foreground border-border')}>No match</span>
   }
-  return <span className={cn(base, 'bg-red-500/10 text-red-400 border-red-500/20')}>Rejected</span>
+  if (outcome.kind === 'dispatch_error') {
+    return <span className={cn(base, 'bg-red-500/10 text-red-400 border-red-500/20')}>Error</span>
+  }
+  // 'received' — payload stored, awaiting next tick dispatch
+  return <span className={cn(base, 'bg-blue-500/10 text-blue-400 border-blue-500/20')}>Received</span>
 }
 
 // ---------------------------------------------------------------------------
@@ -110,7 +114,7 @@ function ScheduleActionModal({ tools, onClose, onCreated }: ScheduleActionModalP
         label,
         tool_name: toolName,
         tool_input: toolInputParsed,
-        scheduled_at: new Date(scheduledAt).toISOString(),
+        next_tick_at: new Date(scheduledAt).toISOString(),
         recurrence_secs: recurrenceSecs,
       })
       onCreated()

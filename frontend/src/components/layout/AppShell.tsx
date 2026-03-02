@@ -1,4 +1,4 @@
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, useCallback, type ReactNode } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Sidebar } from './Sidebar'
 import { AgentPanel } from './AgentPanel'
@@ -9,6 +9,8 @@ import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { PanelRightOpen, ChevronLeft, MoreHorizontal } from 'lucide-react'
 
 const DETAIL_BASES = ['/ponder/', '/investigations/', '/evolve/', '/threads/']
+
+const SIDEBAR_LS_KEY = 'sdlc:sidebar-collapsed'
 
 const PATH_LABELS: Record<string, string> = {
   '/': 'Dashboard',
@@ -33,7 +35,6 @@ const PATH_LABELS: Record<string, string> = {
 
 function titleFromPath(pathname: string): string {
   if (PATH_LABELS[pathname]) return PATH_LABELS[pathname]
-  // Match prefix for detail pages
   for (const [path, label] of Object.entries(PATH_LABELS)) {
     if (path !== '/' && pathname.startsWith(path + '/')) return label
   }
@@ -46,6 +47,9 @@ interface AppShellProps {
 
 export function AppShell({ children }: AppShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try { return localStorage.getItem(SIDEBAR_LS_KEY) === 'true' } catch { return false }
+  })
   const [searchOpen, setSearchOpen] = useState(false)
   const [fixOpen, setFixOpen] = useState(false)
   const { panelOpen, setPanelOpen } = useAgentRuns()
@@ -53,6 +57,14 @@ export function AppShell({ children }: AppShellProps) {
   const navigate = useNavigate()
 
   const isDetailView = DETAIL_BASES.some(base => location.pathname.startsWith(base))
+
+  const handleSidebarToggle = useCallback(() => {
+    setSidebarCollapsed(prev => {
+      const next = !prev
+      try { localStorage.setItem(SIDEBAR_LS_KEY, String(next)) } catch { /* ok */ }
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -88,7 +100,13 @@ export function AppShell({ children }: AppShellProps) {
           md:translate-x-0
         `}
       >
-        <Sidebar onNavigate={() => setSidebarOpen(false)} onSearch={() => setSearchOpen(true)} onFixRightAway={() => setFixOpen(true)} />
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={handleSidebarToggle}
+          onNavigate={() => setSidebarOpen(false)}
+          onSearch={() => setSearchOpen(true)}
+          onFixRightAway={() => setFixOpen(true)}
+        />
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -136,7 +154,7 @@ export function AppShell({ children }: AppShellProps) {
       {/* Mobile FAB + drawer */}
       <AgentPanelFab />
 
-<SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <FixRightAwayModal open={fixOpen} onClose={() => setFixOpen(false)} />
     </div>
   )

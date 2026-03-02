@@ -74,7 +74,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/health",
             get(|| async { axum::Json(serde_json::json!({"status": "ok"})) }),
         )
-        // Events (SSE) — GET for local, POST for Cloudflare Quick Tunnels
+        // Events (SSE) — GET for local, POST for orch-tunnel Quick Tunnels
         // Quick Tunnels intentionally buffer GET streaming responses; POST streaming works.
         .route("/api/events", get(routes::events::sse_events))
         .route("/api/events", post(routes::events::sse_events))
@@ -512,6 +512,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/orchestrator/webhooks/routes",
             get(routes::orchestrator::list_routes).post(routes::orchestrator::register_route),
         )
+        .route(
+            "/api/orchestrator/webhooks/routes/{id}",
+            delete(routes::orchestrator::delete_route),
+        )
         // Orchestrator actions CRUD
         .route(
             "/api/orchestrator/actions",
@@ -586,7 +590,7 @@ pub async fn serve(
 /// caller can read the actual port before starting (useful when `port = 0` and
 /// the OS picks a free port).
 ///
-/// Pass `Some((tunnel, token))` when a cloudflared tunnel was started before
+/// Pass `Some((tunnel, token))` when an orch-tunnel was started before
 /// the server (e.g. `sdlc ui --tunnel`). The AppState will be pre-seeded so
 /// the tunnel is immediately reflected in the `/api/tunnel` response.
 pub async fn serve_on(

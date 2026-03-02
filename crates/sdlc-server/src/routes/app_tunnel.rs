@@ -81,8 +81,9 @@ pub async fn start_app_tunnel(
     let user_port = body.port;
     let sdlc_port = app.port;
 
-    // Tunnel cloudflared to sdlc-server (which reverse-proxies to user's app).
-    let tun = Tunnel::start(sdlc_port)
+    // Tunnel orch-tunnel to sdlc-server (which reverse-proxies to user's app).
+    let name = crate::tunnel::derive_tunnel_name(&app.root);
+    let tun = Tunnel::start(sdlc_port, &name)
         .await
         .map_err(|e| AppError(anyhow::anyhow!("{e}")))?;
 

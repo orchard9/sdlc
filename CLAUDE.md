@@ -44,7 +44,7 @@ cd frontend && npm ci && npm run build
 | `crates/sdlc-cli/src/cmd/ponder.rs` | `sdlc ponder *` — CLI for the ideation workspace |
 | `crates/sdlc-server/src/routes/roadmap.rs` | REST routes for ponder entries (`/api/roadmap`) |
 | `crates/sdlc-server/src/auth.rs` | Tunnel auth middleware — token/cookie gate, local bypass |
-| `crates/sdlc-cli/src/cmd/tunnel.rs` | Tunnel process lifecycle (cloudflared), QR printing, token generation |
+| `crates/sdlc-cli/src/cmd/tunnel.rs` | Tunnel process lifecycle (orch-tunnel), QR printing, token generation |
 | `.sdlc/state.yaml` | Project-level state summary (includes `active_ponders`) |
 | `.sdlc/config.yaml` | Gates, platform commands, quality thresholds |
 | `.sdlc/features/<slug>/` | Per-feature artifact Markdown files |

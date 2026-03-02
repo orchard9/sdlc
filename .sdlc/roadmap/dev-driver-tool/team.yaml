@@ -1,0 +1,16 @@
+partners:
+- name: Priya Nair
+  role: Distributed Systems & Orchestration
+  context: Designed self-healing service orchestration at Netflix — knows what it takes to make an autonomous tool that reliably finds and advances work without getting stuck
+  agent: .claude/agents/priya-nair.md
+  recruited_at: 2026-03-02T23:11:11.652466Z
+- name: Tobias Krenn
+  role: Skeptic / Scope Guard
+  context: Has seen many 'smart automation' tools become complex failure modes — will challenge whether this needs to exist and what the simplest version looks like
+  agent: .claude/agents/tobias-krenn.md
+  recruited_at: 2026-03-02T23:11:11.659615Z
+- name: Felix Wagner
+  role: Developer Tooling Architect
+  context: Built Linear's inbox-to-issue flow and GitHub Projects — understands lifecycle primitives and CLI ergonomics for developer automation
+  agent: .claude/agents/felix-wagner.md
+  recruited_at: 2026-03-02T23:11:11.666984Z

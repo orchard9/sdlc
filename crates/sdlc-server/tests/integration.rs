@@ -906,8 +906,8 @@ async fn create_action_success() {
     assert_eq!(status, StatusCode::CREATED);
     assert_eq!(json["label"], "nightly-audit");
     assert_eq!(json["tool_name"], "quality-check");
-    assert_eq!(json["trigger_type"], "scheduled");
-    assert_eq!(json["status"], "pending");
+    assert_eq!(json["trigger"]["type"], "scheduled");
+    assert_eq!(json["status"]["type"], "pending");
     assert!(json["id"].is_string());
 }
 

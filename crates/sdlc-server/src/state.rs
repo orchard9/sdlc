@@ -260,13 +260,13 @@ pub struct AppState {
     pub run_history: Arc<Mutex<Vec<RunRecord>>>,
     /// Live tunnel auth config — updated atomically when tunnel starts/stops.
     pub tunnel_config: Arc<RwLock<TunnelConfig>>,
-    /// Running cloudflared process, if any.
+    /// Running orch-tunnel process, if any.
     pub tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
     /// Current tunnel URL, stored alongside the handle for fast reads.
     pub tunnel_url: Arc<RwLock<Option<String>>>,
     /// App tunnel: user-configured port to expose (their project dev server).
     pub app_tunnel_port: Arc<RwLock<Option<u16>>>,
-    /// App tunnel: running cloudflared process, if any.
+    /// App tunnel: running orch-tunnel process, if any.
     pub app_tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
     /// App tunnel: current URL, if active.
     pub app_tunnel_url: Arc<RwLock<Option<String>>>,
