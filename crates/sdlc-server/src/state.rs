@@ -4,6 +4,7 @@ use std::sync::Arc;
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::auth::TunnelConfig;
+use crate::telemetry::TelemetryStore;
 use crate::tunnel::Tunnel;
 
 /// Entry in the active-runs map: the broadcast sender for SSE subscribers
@@ -242,6 +243,9 @@ pub struct AppState {
     pub app_tunnel_url: Arc<RwLock<Option<String>>>,
     /// HTTP client for reverse-proxying app tunnel requests.
     pub http_client: reqwest::Client,
+    /// Telemetry store for persisting raw agent events across restarts.
+    /// `None` if `.sdlc/telemetry.redb` cannot be opened (graceful degradation).
+    pub telemetry: Option<Arc<TelemetryStore>>,
 }
 
 impl AppState {
@@ -260,6 +264,9 @@ impl AppState {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("infallible: reqwest client construction");
+        let telemetry = TelemetryStore::open(&root.join(".sdlc").join("telemetry.redb"))
+            .ok()
+            .map(Arc::new);
         let state = Self {
             port,
             event_tx: tx.clone(),
@@ -272,6 +279,7 @@ impl AppState {
             app_tunnel_handle: Arc::new(Mutex::new(None)),
             app_tunnel_url: Arc::new(RwLock::new(None)),
             http_client,
+            telemetry,
             root,
         };
 

@@ -360,6 +360,26 @@ history:
   phase: released
   timestamp: 2026-03-02T02:17:49.922266Z
   outcome: merged
+- feature: run-events-api
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T02:24:40.502914Z
+  outcome: transition
+- feature: run-events-api
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T02:24:43.086543Z
+  outcome: transition
+- feature: run-events-api
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T02:25:29.511975Z
+  outcome: transition
+- feature: run-events-api
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T02:26:16.296753Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -374,5 +394,6 @@ milestones:
 - v10-knowledge-capture
 - v11-knowledge-librarian
 - v12-knowledge-ui
-active_ponders: []
-last_updated: 2026-03-02T02:17:49.922268Z
+active_ponders:
+- sdlc-backlog
+last_updated: 2026-03-02T02:26:16.296755Z

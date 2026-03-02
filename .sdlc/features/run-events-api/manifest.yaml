@@ -1,0 +1,100 @@
+slug: run-events-api
+title: Telemetry store and API — redb-backed event store with typed query endpoints
+description: redb TelemetryStore + GET /api/runs/:id/telemetry and /summary endpoints backed by the fixed event stream
+phase: released
+created_at: 2026-03-02T02:03:58.204297Z
+updated_at: 2026-03-02T02:26:16.293187Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/run-events-api/spec.md
+  created_at: null
+  approved_at: 2026-03-02T02:05:17.593843Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/run-events-api/design.md
+  created_at: null
+  approved_at: 2026-03-02T02:06:22.634288Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/run-events-api/tasks.md
+  created_at: null
+  approved_at: 2026-03-02T02:06:49.546572Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/run-events-api/qa-plan.md
+  created_at: null
+  approved_at: 2026-03-02T02:07:15.914422Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/run-events-api/review.md
+  created_at: 2026-03-02T02:25:20.699990Z
+  approved_at: 2026-03-02T02:25:24.278683Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/run-events-api/audit.md
+  created_at: 2026-03-02T02:25:50.193993Z
+  approved_at: 2026-03-02T02:25:51.133405Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/run-events-api/qa-results.md
+  created_at: 2026-03-02T02:26:09.421524Z
+  approved_at: 2026-03-02T02:26:10.980459Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:03:58.204297Z
+  exited: 2026-03-02T02:05:17.597437Z
+- phase: specified
+  entered: 2026-03-02T02:05:17.597437Z
+  exited: 2026-03-02T02:07:15.918287Z
+- phase: planned
+  entered: 2026-03-02T02:07:15.918287Z
+  exited: 2026-03-02T02:24:40.499117Z
+- phase: ready
+  entered: 2026-03-02T02:24:40.499117Z
+  exited: 2026-03-02T02:24:43.083297Z
+- phase: implementation
+  entered: 2026-03-02T02:24:43.083297Z
+  exited: 2026-03-02T02:25:24.283166Z
+- phase: review
+  entered: 2026-03-02T02:25:24.283166Z
+  exited: 2026-03-02T02:25:29.509070Z
+- phase: audit
+  entered: 2026-03-02T02:25:29.509070Z
+  exited: 2026-03-02T02:25:51.137969Z
+- phase: qa
+  entered: 2026-03-02T02:25:51.137969Z
+  exited: 2026-03-02T02:26:10.984700Z
+- phase: merge
+  entered: 2026-03-02T02:26:10.984700Z
+  exited: 2026-03-02T02:26:16.293187Z
+- phase: released
+  entered: 2026-03-02T02:26:16.293187Z
+  exited: null
+dependencies: []
+archived: false

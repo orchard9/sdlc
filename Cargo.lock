@@ -2008,6 +2008,7 @@ dependencies = [
  "mime_guess",
  "open",
  "rand 0.8.5",
+ "redb",
  "reqwest",
  "rust-embed",
  "sdlc-core",

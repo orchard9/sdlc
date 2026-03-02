@@ -96,6 +96,7 @@ pub(crate) async fn spawn_agent_run(
     let event_tx = app.event_tx.clone();
     let root = app.root.clone();
     let run_id_clone = run_id.clone();
+    let telemetry_store = app.telemetry.clone();
 
     info!(key = %key, "spawn_agent_run: spawning agent task");
     let handle = tokio::spawn(async move {
@@ -114,6 +115,14 @@ pub(crate) async fn spawn_agent_run(
                     message_count += 1;
                     let event = message_to_event(&message);
                     accumulated_events.push(event.clone());
+                    if let Some(store) = &telemetry_store {
+                        let store = store.clone();
+                        let run_id2 = run_id_clone.clone();
+                        let ev = event.clone();
+                        tokio::task::spawn_blocking(move || {
+                            let _ = store.append_raw(&run_id2, ev);
+                        });
+                    }
                     let json = match serde_json::to_string(&event) {
                         Ok(s) => s,
                         Err(_) => continue,
