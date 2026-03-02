@@ -179,6 +179,28 @@ mod tests {
         chrono::DateTime::parse_from_rfc3339(ts)
             .expect("tool_progress event timestamp should be valid RFC-3339");
     }
+
+    #[test]
+    fn message_to_event_timestamps_are_monotonically_non_decreasing() {
+        let msg1 = make_result_message();
+        let msg2 = make_result_message();
+        let event1 = message_to_event(&msg1);
+        let event2 = message_to_event(&msg2);
+        let ts1_str = event1["timestamp"]
+            .as_str()
+            .expect("first timestamp should be a string");
+        let ts2_str = event2["timestamp"]
+            .as_str()
+            .expect("second timestamp should be a string");
+        let t1 =
+            chrono::DateTime::parse_from_rfc3339(ts1_str).expect("first timestamp should parse");
+        let t2 =
+            chrono::DateTime::parse_from_rfc3339(ts2_str).expect("second timestamp should parse");
+        assert!(
+            t2 >= t1,
+            "timestamps should be monotonically non-decreasing: {ts1_str} > {ts2_str}"
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------
