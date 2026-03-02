@@ -237,7 +237,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         // Run telemetry
         .route(
             "/api/runs/{id}/telemetry",
-            get(routes::telemetry::get_run_telemetry),
+            get(routes::runs::get_run_telemetry),
         )
         .route(
             "/api/runs/{id}/telemetry/summary",

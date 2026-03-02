@@ -553,7 +553,81 @@ export interface RunRecord {
   cost_usd?: number
   turns?: number
   error?: string
+  prompt?: string | null
 }
+
+// ---------------------------------------------------------------------------
+// Run telemetry types (GET /api/runs/:id/telemetry)
+// ---------------------------------------------------------------------------
+
+/** Raw event as stored in the events sidecar — matches message_to_event output */
+export interface RawRunEvent {
+  type: 'init' | 'assistant' | 'tool_progress' | 'tool_summary' | 'result' | 'error' | 'status' | 'system' | 'user' | 'stream_event' | 'auth_status'
+  // init
+  model?: string
+  tools_count?: number
+  mcp_servers?: string[]
+  // assistant
+  text?: string
+  tools?: { name: string; input: unknown }[]
+  // tool_progress
+  tool?: string
+  elapsed_seconds?: number
+  // tool_summary
+  summary?: string
+  // result
+  is_error?: boolean
+  cost_usd?: number
+  turns?: number
+  // error / status
+  message?: string
+  status?: string
+}
+
+export interface RunTelemetry {
+  run_id: string
+  prompt?: string | null
+  events: RawRunEvent[]
+}
+
+// ---------------------------------------------------------------------------
+// Paired/structured events for the activity feed
+// ---------------------------------------------------------------------------
+
+export interface PairedInitEvent {
+  kind: 'init'
+  event: RawRunEvent
+  prompt?: string | null
+}
+
+export interface PairedToolExchange {
+  kind: 'tool_exchange'
+  toolName: string
+  input?: unknown
+  elapsed_seconds?: number
+  summary?: string
+  isError: boolean
+  resultText?: string
+}
+
+export interface PairedAssistantText {
+  kind: 'assistant_text'
+  text: string
+}
+
+export interface PairedRunResult {
+  kind: 'run_result'
+  isError: boolean
+  cost_usd?: number
+  turns?: number
+  text?: string
+}
+
+export type PairedEvent =
+  | PairedInitEvent
+  | PairedToolExchange
+  | PairedAssistantText
+  | PairedRunResult
 
 export interface RunSseEvent {
   type: 'run_started' | 'run_finished'

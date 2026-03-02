@@ -1,0 +1,100 @@
+slug: run-activity-ui
+title: Run Activity UI
+description: React event timeline component for run telemetry
+phase: released
+created_at: 2026-03-02T02:33:39.269992Z
+updated_at: 2026-03-02T02:35:16.168624Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/run-activity-ui/spec.md
+  created_at: 2026-03-02T02:33:52.338720Z
+  approved_at: 2026-03-02T02:33:52.351500Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/run-activity-ui/design.md
+  created_at: 2026-03-02T02:33:54.800807Z
+  approved_at: 2026-03-02T02:33:54.813727Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/run-activity-ui/tasks.md
+  created_at: 2026-03-02T02:33:58.397919Z
+  approved_at: 2026-03-02T02:33:58.412127Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/run-activity-ui/qa-plan.md
+  created_at: 2026-03-02T02:34:13.289653Z
+  approved_at: 2026-03-02T02:34:13.302945Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/run-activity-ui/review.md
+  created_at: 2026-03-02T02:34:35.261097Z
+  approved_at: 2026-03-02T02:34:35.275226Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/run-activity-ui/audit.md
+  created_at: 2026-03-02T02:34:55.162379Z
+  approved_at: 2026-03-02T02:34:55.178262Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/run-activity-ui/qa-results.md
+  created_at: 2026-03-02T02:35:13.955712Z
+  approved_at: 2026-03-02T02:35:14.017865Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:33:39.269992Z
+  exited: 2026-03-02T02:33:52.354370Z
+- phase: specified
+  entered: 2026-03-02T02:33:52.354370Z
+  exited: 2026-03-02T02:34:13.305791Z
+- phase: planned
+  entered: 2026-03-02T02:34:13.305791Z
+  exited: 2026-03-02T02:34:14.924849Z
+- phase: ready
+  entered: 2026-03-02T02:34:14.924849Z
+  exited: 2026-03-02T02:34:14.941513Z
+- phase: implementation
+  entered: 2026-03-02T02:34:14.941513Z
+  exited: 2026-03-02T02:34:35.278192Z
+- phase: review
+  entered: 2026-03-02T02:34:35.278192Z
+  exited: 2026-03-02T02:34:38.775145Z
+- phase: audit
+  entered: 2026-03-02T02:34:38.775145Z
+  exited: 2026-03-02T02:34:55.181424Z
+- phase: qa
+  entered: 2026-03-02T02:34:55.181424Z
+  exited: 2026-03-02T02:35:14.037291Z
+- phase: merge
+  entered: 2026-03-02T02:35:14.037291Z
+  exited: 2026-03-02T02:35:16.168624Z
+- phase: released
+  entered: 2026-03-02T02:35:16.168624Z
+  exited: null
+dependencies: []
+archived: false

@@ -175,6 +175,7 @@ export const api = {
   // Run history
   getRuns: () => request<import('@/lib/types').RunRecord[]>('/api/runs'),
   getRun: (id: string) => request<import('@/lib/types').RunRecord & { events: import('@/lib/types').AgentEvent[] }>(`/api/runs/${id}`),
+  getRunTelemetry: (id: string) => request<import('@/lib/types').RunTelemetry>(`/api/runs/${id}/telemetry`),
 
   // Escalations
   getEscalations: (status?: string) =>
