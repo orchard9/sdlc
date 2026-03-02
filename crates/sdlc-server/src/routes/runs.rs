@@ -58,6 +58,10 @@ fn truncate_chars_with_ellipsis(input: &str, max_chars: usize) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use claude_agent::types::{
+        AssistantContent, AssistantMessage, ContentBlock, ResultMessage, ResultSuccess,
+        ResultUsage, TokenUsage, ToolProgressMessage,
+    };
 
     #[test]
     fn truncate_chars_handles_multibyte_utf8() {
@@ -71,6 +75,109 @@ mod tests {
         let s = "abcdef";
         assert_eq!(truncate_chars_with_ellipsis(s, 3), "abc…");
         assert_eq!(truncate_chars_with_ellipsis(s, 6), "abcdef");
+    }
+
+    fn make_result_message() -> Message {
+        Message::Result(ResultMessage::Success(ResultSuccess {
+            session_id: "test-session".to_string(),
+            result: "ok".to_string(),
+            duration_ms: 100,
+            duration_api_ms: 80,
+            is_error: false,
+            num_turns: 1,
+            stop_reason: Some("end_turn".to_string()),
+            total_cost_usd: 0.001,
+            usage: ResultUsage {
+                input_tokens: 10,
+                output_tokens: 5,
+                cache_creation_input_tokens: None,
+                cache_read_input_tokens: None,
+            },
+            uuid: None,
+        }))
+    }
+
+    fn make_assistant_message() -> Message {
+        Message::Assistant(AssistantMessage {
+            message: AssistantContent {
+                id: "msg_test".to_string(),
+                role: "assistant".to_string(),
+                content: vec![ContentBlock::Text {
+                    text: "Hello, world!".to_string(),
+                }],
+                model: "claude-sonnet-4-6".to_string(),
+                stop_reason: Some("end_turn".to_string()),
+                usage: TokenUsage {
+                    input_tokens: 10,
+                    output_tokens: 5,
+                    cache_creation_input_tokens: None,
+                    cache_read_input_tokens: None,
+                },
+            },
+            parent_tool_use_id: None,
+            error: None,
+            session_id: "test-session".to_string(),
+            uuid: None,
+        })
+    }
+
+    fn make_tool_progress_message() -> Message {
+        Message::ToolProgress(ToolProgressMessage {
+            tool_use_id: "tu_test".to_string(),
+            tool_name: "Bash".to_string(),
+            parent_tool_use_id: None,
+            elapsed_time_seconds: 1.5,
+            task_id: None,
+            session_id: "test-session".to_string(),
+            uuid: None,
+        })
+    }
+
+    #[test]
+    fn message_to_event_result_has_timestamp() {
+        let msg = make_result_message();
+        let event = message_to_event(&msg);
+        let ts = event["timestamp"]
+            .as_str()
+            .expect("timestamp should be a string");
+        assert!(!ts.is_empty(), "timestamp should not be empty");
+        // Must parse as RFC-3339
+        chrono::DateTime::parse_from_rfc3339(ts).expect("timestamp should be valid RFC-3339");
+    }
+
+    #[test]
+    fn message_to_event_timestamp_ends_with_z() {
+        let msg = make_result_message();
+        let event = message_to_event(&msg);
+        let ts = event["timestamp"]
+            .as_str()
+            .expect("timestamp should be a string");
+        assert!(
+            ts.ends_with('Z'),
+            "timestamp should end with Z for UTC, got: {ts}"
+        );
+    }
+
+    #[test]
+    fn message_to_event_assistant_has_timestamp() {
+        let msg = make_assistant_message();
+        let event = message_to_event(&msg);
+        let ts = event["timestamp"]
+            .as_str()
+            .expect("timestamp should be a string");
+        chrono::DateTime::parse_from_rfc3339(ts)
+            .expect("assistant event timestamp should be valid RFC-3339");
+    }
+
+    #[test]
+    fn message_to_event_tool_progress_has_timestamp() {
+        let msg = make_tool_progress_message();
+        let event = message_to_event(&msg);
+        let ts = event["timestamp"]
+            .as_str()
+            .expect("timestamp should be a string");
+        chrono::DateTime::parse_from_rfc3339(ts)
+            .expect("tool_progress event timestamp should be valid RFC-3339");
     }
 }
 
@@ -646,7 +753,8 @@ pub async fn stop_milestone_run_wave(
 // ---------------------------------------------------------------------------
 
 fn message_to_event(msg: &Message) -> serde_json::Value {
-    match msg {
+    let ts = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
+    let mut event = match msg {
         Message::System(sys) => match &sys.payload {
             SystemPayload::Init(init) => serde_json::json!({
                 "type": "init",
@@ -785,7 +893,11 @@ fn message_to_event(msg: &Message) -> serde_json::Value {
             "type": "auth_status",
             "is_authenticating": auth.is_authenticating,
         }),
+    };
+    if let Some(obj) = event.as_object_mut() {
+        obj.insert("timestamp".to_string(), serde_json::json!(ts));
     }
+    event
 }
 
 // ---------------------------------------------------------------------------
