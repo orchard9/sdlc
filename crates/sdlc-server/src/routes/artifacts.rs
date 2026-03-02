@@ -121,6 +121,38 @@ pub async fn reject_artifact(
     Ok(Json(result))
 }
 
+/// POST /api/artifacts/:slug/:type/draft — mark an artifact as draft.
+pub async fn draft_artifact(
+    State(app): State<AppState>,
+    Path((slug, artifact_type)): Path<(String, String)>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
+        let at: sdlc_core::types::ArtifactType =
+            artifact_type.parse().map_err(|e: sdlc_core::SdlcError| e)?;
+
+        feature.mark_artifact_draft(at)?;
+        feature.save(&root)?;
+
+        let transitioned_to = sdlc_core::classifier::try_auto_transition(&root, &slug);
+
+        let mut val = serde_json::json!({
+            "slug": slug,
+            "artifact_type": at,
+            "status": "draft",
+        });
+        if let Some(phase) = transitioned_to {
+            val["transitioned_to"] = serde_json::Value::String(phase);
+        }
+        Ok::<_, sdlc_core::SdlcError>(val)
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
 #[derive(serde::Deserialize)]
 pub struct WaiveBody {
     pub reason: Option<String>,

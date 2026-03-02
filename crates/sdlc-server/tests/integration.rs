@@ -363,6 +363,169 @@ async fn artifact_not_found_returns_error() {
 }
 
 // ---------------------------------------------------------------------------
+// draft_artifact endpoint tests
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn draft_artifact_ok() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create a feature (artifact starts as missing)
+    sdlc_core::feature::Feature::create(dir.path(), "feat-draft-ok", "Draft OK").unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = post_json(
+        app,
+        "/api/artifacts/feat-draft-ok/spec/draft",
+        serde_json::json!({}),
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json["slug"], "feat-draft-ok");
+    assert_eq!(json["artifact_type"], "spec");
+    assert_eq!(json["status"], "draft");
+}
+
+#[tokio::test]
+async fn draft_artifact_feature_not_found() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _json) = post_json(
+        app,
+        "/api/artifacts/nonexistent/spec/draft",
+        serde_json::json!({}),
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+#[tokio::test]
+async fn draft_artifact_invalid_type() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc_core::feature::Feature::create(dir.path(), "feat-draft-bad-type", "Draft Bad Type")
+        .unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _json) = post_json(
+        app,
+        "/api/artifacts/feat-draft-bad-type/bogus-type/draft",
+        serde_json::json!({}),
+    )
+    .await;
+
+    // ArtifactNotFound maps to 404
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+// ---------------------------------------------------------------------------
+// merge_feature endpoint tests
+// ---------------------------------------------------------------------------
+
+/// Create a feature whose manifest phase is set directly to `merge`.
+/// This bypasses the normal transition artifact gates, which is fine for
+/// testing the HTTP endpoint's own phase-check behaviour.
+fn create_feature_in_merge_phase(dir: &TempDir, slug: &str) {
+    // Create the feature directory + manifest via the normal API, then
+    // overwrite the phase field by rewriting the YAML directly.
+    sdlc_core::feature::Feature::create(dir.path(), slug, "Merge Feature").unwrap();
+    let manifest_path = dir
+        .path()
+        .join(format!(".sdlc/features/{}/manifest.yaml", slug));
+    let data = std::fs::read_to_string(&manifest_path).unwrap();
+    let data = data.replace("phase: draft", "phase: merge");
+    std::fs::write(&manifest_path, data).unwrap();
+}
+
+#[tokio::test]
+async fn merge_feature_ok() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    create_feature_in_merge_phase(&dir, "feat-merge-ok");
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = post_json(
+        app,
+        "/api/features/feat-merge-ok/merge",
+        serde_json::json!({}),
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json["slug"], "feat-merge-ok");
+    assert_eq!(json["phase"], "released");
+    assert_eq!(json["merged"], true);
+}
+
+#[tokio::test]
+async fn merge_feature_sets_phase_to_released() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    create_feature_in_merge_phase(&dir, "feat-merge-released");
+
+    // Call merge
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _) = post_json(
+        app,
+        "/api/features/feat-merge-released/merge",
+        serde_json::json!({}),
+    )
+    .await;
+    assert_eq!(status, StatusCode::OK);
+
+    // Verify the feature is now in released phase on disk
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app, "/api/features/feat-merge-released").await;
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json["phase"], "released");
+}
+
+#[tokio::test]
+async fn merge_feature_wrong_phase() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create a feature in draft phase (not merge)
+    sdlc_core::feature::Feature::create(dir.path(), "feat-merge-wrong", "Merge Wrong Phase")
+        .unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _json) = post_json(
+        app,
+        "/api/features/feat-merge-wrong/merge",
+        serde_json::json!({}),
+    )
+    .await;
+
+    // InvalidPhase maps to 400
+    assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+#[tokio::test]
+async fn merge_feature_not_found() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _json) = post_json(
+        app,
+        "/api/features/does-not-exist/merge",
+        serde_json::json!({}),
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::NOT_FOUND);
+}
+
+// ---------------------------------------------------------------------------
 // Proxy / app-tunnel integration tests
 // ---------------------------------------------------------------------------
 

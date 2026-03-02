@@ -61,7 +61,16 @@ artifacts:
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: 'UAT: error badge never shows — pairEvents.ts hardcodes isError: false, never reads is_error from user event tool_results'
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:56:59.473808Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []

@@ -33,6 +33,11 @@ active_features:
 - knowledge-page-ui
 - knowledge-advisory-integration
 - knowledge-slash-command
+- backlog-core
+- backlog-cli
+- backlog-guidance
+- backlog-server
+- backlog-dashboard
 active_directives: []
 history:
 - feature: claude-code-consumer
@@ -395,6 +400,16 @@ history:
   phase: implementation
   timestamp: 2026-03-02T02:39:39.695368Z
   outcome: transition
+- feature: server-remote-state
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T02:44:39.658654Z
+  outcome: transition
+- feature: server-remote-state
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T02:55:58.886046Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -409,6 +424,15 @@ milestones:
 - v10-knowledge-capture
 - v11-knowledge-librarian
 - v12-knowledge-ui
+- v13-backlog
 active_ponders:
-- sdlc-backlog
-last_updated: 2026-03-02T02:39:39.695368Z
+- artifact-viewer
+- install-onboarding-ux
+- agent-observability
+- sse-state-reliability
+- blocked-feature-ux
+- new-user-mental-model
+- skill-command-library
+- p4-vcs-integration
+- signal-watch
+last_updated: 2026-03-02T02:55:58.886047Z

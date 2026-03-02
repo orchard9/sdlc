@@ -69,6 +69,18 @@ pub enum SdlcError {
     #[error("invalid investigation status '{0}': must be in_progress, complete, or parked")]
     InvalidInvestigationStatus(String),
 
+    #[error("knowledge entry not found: {0}")]
+    KnowledgeNotFound(String),
+
+    #[error("knowledge entry already exists: {0}")]
+    KnowledgeExists(String),
+
+    #[error("invalid knowledge status '{0}': must be draft or published")]
+    InvalidKnowledgeStatus(String),
+
+    #[error("invalid knowledge classification code '{0}': must match NNN, NNN.NN, or NNN.NN.N (or 'uncategorized')")]
+    InvalidKnowledgeCode(String),
+
     #[error("invalid artifact filename '{0}': must not contain path separators or '..'")]
     InvalidArtifactFilename(String),
 

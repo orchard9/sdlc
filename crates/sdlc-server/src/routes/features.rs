@@ -3,6 +3,7 @@ use axum::Json;
 
 use crate::error::AppError;
 use crate::state::AppState;
+use sdlc_core::types::{ActionType, Phase};
 
 /// GET /api/features — list all features.
 pub async fn list_features(
@@ -190,6 +191,43 @@ pub async fn create_feature(
             "slug": f.slug,
             "title": f.title,
             "phase": f.phase,
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
+/// POST /api/features/:slug/merge — finalize the merge phase, transitioning to released.
+pub async fn merge_feature(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let config = sdlc_core::config::Config::load(&root)?;
+        let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
+
+        if feature.phase != Phase::Merge {
+            return Err(sdlc_core::SdlcError::InvalidPhase(format!(
+                "cannot finalize merge for '{}' from phase '{}'; move it to 'merge' first",
+                slug, feature.phase
+            )));
+        }
+
+        feature.transition(Phase::Released, &config)?;
+        feature.save(&root)?;
+
+        let mut state = sdlc_core::state::State::load(&root)?;
+        state.record_action(&slug, ActionType::Merge, Phase::Released, "merged");
+        state.complete_directive(&slug);
+        state.save(&root)?;
+
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "slug": slug,
+            "phase": "released",
+            "merged": true,
         }))
     })
     .await

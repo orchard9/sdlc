@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: run-activity-ui
+    title: Run activity timeline — human-readable event feed in the UI
+    phase: planned
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

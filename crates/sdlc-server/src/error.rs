@@ -133,6 +133,11 @@ impl IntoResponse for AppError {
                 | SdlcError::AgeDecryptFailed(_)
                 | SdlcError::AgeEncryptFailed(_)
                 | SdlcError::OrchestratorDb(_) => StatusCode::INTERNAL_SERVER_ERROR,
+                SdlcError::KnowledgeNotFound(_) => StatusCode::NOT_FOUND,
+                SdlcError::KnowledgeExists(_) => StatusCode::CONFLICT,
+                SdlcError::InvalidKnowledgeStatus(_) | SdlcError::InvalidKnowledgeCode(_) => {
+                    StatusCode::BAD_REQUEST
+                }
             }
         } else {
             StatusCode::INTERNAL_SERVER_ERROR

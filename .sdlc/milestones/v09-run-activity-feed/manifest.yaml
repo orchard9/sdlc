@@ -1,0 +1,11 @@
+slug: v09-run-activity-feed
+title: Run Activity Feed — complete readable timeline for every agent run
+vision: 'Every agent run becomes a readable, inspectable record. Engineers and developers can open any past run and see the complete conversation: the initial prompt, every tool call paired with its result, subagent cards showing what was delegated and what came back, and a cost summary at the end. Nothing is discarded. Nothing is hidden. Today, the stream delivers all of this — we throw most of it away. This milestone captures what''s already there and presents it in a timeline that reads like a conversation.'
+features:
+- run-event-capture
+- run-events-api
+- run-activity-ui
+created_at: 2026-03-02T02:03:20.801656Z
+updated_at: 2026-03-02T02:57:35.422321Z
+released_at: 2026-03-02T02:57:35.422321Z
+prepared_at: 2026-03-02T02:09:28.589207Z

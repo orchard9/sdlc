@@ -16,6 +16,9 @@ pub const BRANCHES_DIR: &str = ".sdlc/branches";
 pub const ARCHIVES_DIR: &str = ".sdlc/archives";
 pub const ROADMAP_DIR: &str = ".sdlc/roadmap";
 pub const INVESTIGATIONS_DIR: &str = ".sdlc/investigations";
+pub const KNOWLEDGE_DIR: &str = ".sdlc/knowledge";
+pub const KNOWLEDGE_CATALOG: &str = ".sdlc/knowledge/catalog.yaml";
+pub const KNOWLEDGE_MAINTENANCE_LOG: &str = ".sdlc/knowledge/maintenance-log.yaml";
 pub const TOOLS_DIR: &str = ".sdlc/tools";
 pub const TOOLS_MANIFEST: &str = ".sdlc/tools/tools.md";
 pub const TOOLS_SHARED_DIR: &str = ".sdlc/tools/_shared";
@@ -97,6 +100,26 @@ pub fn investigation_dir(root: &Path, slug: &str) -> PathBuf {
 
 pub fn investigation_manifest(root: &Path, slug: &str) -> PathBuf {
     investigation_dir(root, slug).join(MANIFEST_FILE)
+}
+
+pub fn knowledge_dir(root: &Path, slug: &str) -> PathBuf {
+    root.join(KNOWLEDGE_DIR).join(slug)
+}
+
+pub fn knowledge_manifest(root: &Path, slug: &str) -> PathBuf {
+    knowledge_dir(root, slug).join(MANIFEST_FILE)
+}
+
+pub fn knowledge_content_path(root: &Path, slug: &str) -> PathBuf {
+    knowledge_dir(root, slug).join("content.md")
+}
+
+pub fn knowledge_catalog_path(root: &Path) -> PathBuf {
+    root.join(KNOWLEDGE_CATALOG)
+}
+
+pub fn knowledge_maintenance_log_path(root: &Path) -> PathBuf {
+    root.join(KNOWLEDGE_MAINTENANCE_LOG)
 }
 
 pub fn ponder_dir(root: &Path, slug: &str) -> PathBuf {
@@ -359,6 +382,31 @@ mod tests {
         assert_eq!(
             codex_skills_dir(root),
             PathBuf::from("/tmp/proj/.agents/skills")
+        );
+    }
+
+    #[test]
+    fn knowledge_path_helpers() {
+        let root = Path::new("/tmp/proj");
+        assert_eq!(
+            knowledge_dir(root, "sse-event-system"),
+            PathBuf::from("/tmp/proj/.sdlc/knowledge/sse-event-system")
+        );
+        assert_eq!(
+            knowledge_manifest(root, "sse-event-system"),
+            PathBuf::from("/tmp/proj/.sdlc/knowledge/sse-event-system/manifest.yaml")
+        );
+        assert_eq!(
+            knowledge_content_path(root, "sse-event-system"),
+            PathBuf::from("/tmp/proj/.sdlc/knowledge/sse-event-system/content.md")
+        );
+        assert_eq!(
+            knowledge_catalog_path(root),
+            PathBuf::from("/tmp/proj/.sdlc/knowledge/catalog.yaml")
+        );
+        assert_eq!(
+            knowledge_maintenance_log_path(root),
+            PathBuf::from("/tmp/proj/.sdlc/knowledge/maintenance-log.yaml")
         );
     }
 

@@ -72,6 +72,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/features/{slug}/transition",
             post(routes::features::transition_feature),
         )
+        .route(
+            "/api/features/{slug}/merge",
+            post(routes::features::merge_feature),
+        )
         // Milestones
         .route("/api/milestones", get(routes::milestones::list_milestones))
         .route(
@@ -185,6 +189,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/artifacts/{slug}/{artifact_type}",
             get(routes::artifacts::get_artifact),
+        )
+        .route(
+            "/api/artifacts/{slug}/{artifact_type}/draft",
+            post(routes::artifacts::draft_artifact),
         )
         .route(
             "/api/artifacts/{slug}/{artifact_type}/approve",
