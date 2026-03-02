@@ -21,6 +21,18 @@ active_features:
 - orchestrator-integration-test
 - orchestrator-webhook-storage
 - orchestrator-webhook-routing
+- run-event-capture
+- run-events-api
+- run-activity-ui
+- knowledge-core-data
+- knowledge-cli-ingest
+- knowledge-librarian-init
+- knowledge-query-mode
+- knowledge-research-mode
+- knowledge-librarian-maintain
+- knowledge-page-ui
+- knowledge-advisory-integration
+- knowledge-slash-command
 active_directives: []
 history:
 - feature: claude-code-consumer
@@ -308,6 +320,46 @@ history:
   phase: released
   timestamp: 2026-03-01T08:30:14.455471Z
   outcome: merged
+- feature: server-directive-endpoint
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T02:10:21.997772Z
+  outcome: transition
+- feature: server-directive-endpoint
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T02:10:25.904907Z
+  outcome: transition
+- feature: server-directive-endpoint
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T02:12:59.327063Z
+  outcome: transition
+- feature: server-directive-endpoint
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T02:13:28.064891Z
+  outcome: merged
+- feature: run-event-capture
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T02:16:07.120495Z
+  outcome: transition
+- feature: run-event-capture
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T02:16:08.060501Z
+  outcome: transition
+- feature: run-event-capture
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T02:16:57.948693Z
+  outcome: transition
+- feature: run-event-capture
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T02:17:49.922266Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -318,6 +370,9 @@ milestones:
 - v06-uat-dashboard-and-ci
 - v07-orchestrator-core
 - v08-orchestrator-webhooks
-active_ponders:
-- knowledge-librarian
-last_updated: 2026-03-01T17:29:03.771253Z
+- v09-run-activity-feed
+- v10-knowledge-capture
+- v11-knowledge-librarian
+- v12-knowledge-ui
+active_ponders: []
+last_updated: 2026-03-02T02:17:49.922268Z

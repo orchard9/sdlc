@@ -181,6 +181,48 @@ async fn create_and_get_feature() {
 }
 
 #[tokio::test]
+async fn get_feature_directive_returns_full_classification() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc_core::feature::Feature::create_with_description(
+        dir.path(),
+        "feat-directive".to_string(),
+        "Directive Feature".to_string(),
+        Some("A feature with a description".to_string()),
+    )
+    .unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = get(app, "/api/features/feat-directive/directive").await;
+
+    assert_eq!(status, StatusCode::OK);
+    assert_eq!(json["feature"], "feat-directive");
+    assert_eq!(json["title"], "Directive Feature");
+    assert_eq!(json["description"], "A feature with a description");
+    assert_eq!(json["current_phase"], "draft");
+    assert_eq!(json["action"], "create_spec");
+    assert!(!json["message"].as_str().unwrap_or("").is_empty());
+    assert!(!json["next_command"].as_str().unwrap_or("").is_empty());
+    assert!(json.get("is_heavy").is_some());
+    assert!(json.get("timeout_minutes").is_some());
+}
+
+#[tokio::test]
+async fn get_feature_directive_returns_error_for_missing_feature() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let req = axum::http::Request::builder()
+        .uri("/api/features/does-not-exist/directive")
+        .body(axum::body::Body::empty())
+        .unwrap();
+    let response = app.oneshot(req).await.unwrap();
+    assert_ne!(response.status(), StatusCode::OK);
+}
+
+#[tokio::test]
 async fn get_artifact_returns_missing_status() {
     let dir = TempDir::new().unwrap();
     init_project(&dir);

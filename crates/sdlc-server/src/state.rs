@@ -27,6 +27,7 @@ pub struct RunRecord {
     pub cost_usd: Option<f64>,
     pub turns: Option<u64>,
     pub error: Option<String>,
+    pub prompt: Option<String>,
 }
 
 /// Generate a timestamp-based run ID: "20260227-143022-abc"

@@ -1,0 +1,136 @@
+slug: run-event-capture
+title: Capture complete event stream — tool results, subagent lifecycle, initial prompt
+description: Fix message_to_event() to capture tool results, subagent lifecycle, and thinking blocks; add prompt to RunRecord
+phase: released
+created_at: 2026-03-02T02:03:52.049326Z
+updated_at: 2026-03-02T02:17:49.918861Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/run-event-capture/spec.md
+  created_at: null
+  approved_at: 2026-03-02T02:05:16.670511Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/run-event-capture/design.md
+  created_at: null
+  approved_at: 2026-03-02T02:06:21.733934Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/run-event-capture/tasks.md
+  created_at: null
+  approved_at: 2026-03-02T02:06:48.619834Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/run-event-capture/qa-plan.md
+  created_at: null
+  approved_at: 2026-03-02T02:07:14.989678Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/run-event-capture/review.md
+  created_at: 2026-03-02T02:16:49.333909Z
+  approved_at: 2026-03-02T02:16:50.258871Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/run-event-capture/audit.md
+  created_at: 2026-03-02T02:17:17.974314Z
+  approved_at: 2026-03-02T02:17:18.901021Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/run-event-capture/qa-results.md
+  created_at: 2026-03-02T02:17:40.473737Z
+  approved_at: 2026-03-02T02:17:41.387856Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Extend Message::User arm — extract ToolResult blocks
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:16:18.201964Z
+  started_at: null
+  completed_at: 2026-03-02T02:16:24.418253Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add TaskStarted/TaskProgress/TaskNotification arms
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:16:19.117881Z
+  started_at: null
+  completed_at: 2026-03-02T02:16:25.336444Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add ContentBlock::Thinking arm
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:16:20.027091Z
+  started_at: null
+  completed_at: 2026-03-02T02:16:26.236301Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add prompt field to RunRecord and set in spawn_agent_run
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:16:20.936002Z
+  started_at: null
+  completed_at: 2026-03-02T02:16:27.154646Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:03:52.049326Z
+  exited: 2026-03-02T02:05:16.674406Z
+- phase: specified
+  entered: 2026-03-02T02:05:16.674406Z
+  exited: 2026-03-02T02:07:14.994066Z
+- phase: planned
+  entered: 2026-03-02T02:07:14.994066Z
+  exited: 2026-03-02T02:16:07.116794Z
+- phase: ready
+  entered: 2026-03-02T02:16:07.116794Z
+  exited: 2026-03-02T02:16:08.057015Z
+- phase: implementation
+  entered: 2026-03-02T02:16:08.057015Z
+  exited: 2026-03-02T02:16:50.262921Z
+- phase: review
+  entered: 2026-03-02T02:16:50.262921Z
+  exited: 2026-03-02T02:16:57.944966Z
+- phase: audit
+  entered: 2026-03-02T02:16:57.944966Z
+  exited: 2026-03-02T02:17:18.905502Z
+- phase: qa
+  entered: 2026-03-02T02:17:18.905502Z
+  exited: 2026-03-02T02:17:41.392001Z
+- phase: merge
+  entered: 2026-03-02T02:17:41.392001Z
+  exited: 2026-03-02T02:17:49.918861Z
+- phase: released
+  entered: 2026-03-02T02:17:49.918861Z
+  exited: null
+dependencies: []
+archived: false

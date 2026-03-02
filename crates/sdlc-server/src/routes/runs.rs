@@ -9,7 +9,7 @@ use axum::{
 };
 use claude_agent::{
     query,
-    types::{ContentBlock, SystemPayload},
+    types::{ContentBlock, SystemPayload, ToolResultContent, UserContentBlock},
     McpServerConfig, Message, PermissionMode, QueryOptions,
 };
 use std::collections::HashMap;
@@ -83,6 +83,7 @@ pub(crate) async fn spawn_agent_run(
         cost_usd: None,
         turns: None,
         error: None,
+        prompt: Some(prompt.clone()),
     };
 
     let (tx, _) = tokio::sync::broadcast::channel::<String>(512);
@@ -610,6 +611,28 @@ fn message_to_event(msg: &Message) -> serde_json::Value {
                 "type": "status",
                 "status": status.status,
             }),
+            SystemPayload::TaskStarted(t) => serde_json::json!({
+                "type": "subagent_started",
+                "task_id": t.task_id,
+                "tool_use_id": t.tool_use_id,
+                "description": t.description,
+            }),
+            SystemPayload::TaskProgress(t) => serde_json::json!({
+                "type": "subagent_progress",
+                "task_id": t.task_id,
+                "last_tool_name": t.last_tool_name,
+                "total_tokens": t.usage.total_tokens,
+                "tool_uses": t.usage.tool_uses,
+                "duration_ms": t.usage.duration_ms,
+            }),
+            SystemPayload::TaskNotification(t) => serde_json::json!({
+                "type": "subagent_completed",
+                "task_id": t.task_id,
+                "status": t.status,
+                "summary": t.summary,
+                "total_tokens": t.usage.as_ref().map(|u| u.total_tokens),
+                "duration_ms": t.usage.as_ref().map(|u| u.duration_ms),
+            }),
             _ => serde_json::json!({"type": "system"}),
         },
         Message::Assistant(asst) => {
@@ -637,13 +660,63 @@ fn message_to_event(msg: &Message) -> serde_json::Value {
                     }
                 })
                 .collect();
+            let thinking: Vec<serde_json::Value> = asst
+                .message
+                .content
+                .iter()
+                .filter_map(|c| {
+                    if let ContentBlock::Thinking { thinking } = c {
+                        Some(serde_json::json!({"type": "thinking", "thinking": thinking}))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
             serde_json::json!({
                 "type": "assistant",
                 "text": texts.join(""),
                 "tools": tools,
+                "thinking": thinking,
             })
         }
-        Message::User(_) => serde_json::json!({"type": "user"}),
+        Message::User(user) => {
+            let tool_results: Vec<serde_json::Value> = user
+                .message
+                .content
+                .iter()
+                .filter_map(|c| {
+                    if let UserContentBlock::ToolResult {
+                        tool_use_id,
+                        content,
+                        is_error,
+                    } = c
+                    {
+                        let text = content
+                            .as_ref()
+                            .and_then(|blocks| {
+                                blocks
+                                    .iter()
+                                    .map(|b| {
+                                        let ToolResultContent::Text { text } = b;
+                                        text.as_str()
+                                    })
+                                    .next()
+                            })
+                            .unwrap_or("");
+                        let truncated = &text[..text.len().min(2000)];
+                        Some(serde_json::json!({
+                            "type": "tool_result",
+                            "tool_use_id": tool_use_id,
+                            "is_error": is_error.unwrap_or(false),
+                            "content": truncated,
+                        }))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            serde_json::json!({"type": "user", "tool_results": tool_results})
+        }
         Message::Result(r) => serde_json::json!({
             "type": "result",
             "is_error": r.is_error(),

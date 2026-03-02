@@ -88,6 +88,35 @@ pub async fn get_feature(
     Ok(Json(result))
 }
 
+/// GET /api/features/:slug/directive — return the full Classification directive via serde.
+///
+/// Identical in semantics to `/next` but serializes the `Classification` struct
+/// directly, ensuring all fields (including future additions) are always present.
+pub async fn get_feature_directive(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<sdlc_core::classifier::Classification>, AppError> {
+    let root = app.root.clone();
+    let classification = tokio::task::spawn_blocking(move || {
+        let config = sdlc_core::config::Config::load(&root)?;
+        let state = sdlc_core::state::State::load(&root)?;
+        let feature = sdlc_core::feature::Feature::load(&root, &slug)?;
+
+        let ctx = sdlc_core::classifier::EvalContext {
+            feature: &feature,
+            state: &state,
+            config: &config,
+            root: &root,
+        };
+        let classifier = sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
+        Ok::<_, sdlc_core::SdlcError>(classifier.classify(&ctx))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(classification))
+}
+
 /// GET /api/features/:slug/next — classify next action.
 pub async fn get_feature_next(
     State(app): State<AppState>,

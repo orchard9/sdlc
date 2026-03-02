@@ -60,6 +60,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/features", post(routes::features::create_feature))
         .route("/api/features/{slug}", get(routes::features::get_feature))
         .route(
+            "/api/features/{slug}/directive",
+            get(routes::features::get_feature_directive),
+        )
+        .route(
             "/api/features/{slug}/next",
             get(routes::features::get_feature_next),
         )
