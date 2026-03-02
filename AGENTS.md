@@ -70,6 +70,8 @@ Use `sdlc next --for <slug> --json` to get the next directive. The JSON output t
 - `/sdlc-suggest` — analyze project state and suggest 3-5 ponder topics to explore next
 - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent
 - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions
+- `/sdlc-spike <slug> — <need>; [see <ref>]` — research, prototype, validate, and report; produces working prototype + findings in `.sdlc/spikes/<slug>/findings.md`
+- `/sdlc-convo-mine [file or text]` — mine conversation dumps for signal; apply 5 perspective lenses, group themes, launch parallel ponder sessions per group
 
 ### Tool Suite
 

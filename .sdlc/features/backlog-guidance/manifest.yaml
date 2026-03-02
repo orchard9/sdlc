@@ -1,0 +1,145 @@
+slug: backlog-guidance
+title: Guidance and agent command template updates for backlog
+description: 'Add backlog commands to §6 CLI table in .sdlc/guidance.md. Add §12 Session Close Protocol section: CRITICAL — capture must happen at the moment of discovery, not deferred to session end. If you defer and the run crashes, the concern is lost. Session-close review is additive. Add title quality protocol: title must be a complete sentence describing the concern with a file or component reference, e.g. ''AuthMiddleware in auth.rs: token validation has a race condition under concurrent requests.'' Add vocabulary section: backlog items (cross-feature, dormant, written by agents) vs tasks (in-feature, active, written by agents and humans). Update GUIDANCE_MD_CONTENT §6 table in crates/sdlc-cli/src/cmd/init.rs. Update sdlc-run and sdlc-next command templates: add ''Discovered out-of-scope concerns'' instruction specifying IMMEDIATE capture at moment of discovery, with example of a well-formed title.'
+phase: draft
+created_at: 2026-03-02T02:49:56.884004Z
+updated_at: 2026-03-02T03:01:14.157437Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/backlog-guidance/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/backlog-guidance/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/backlog-guidance/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/backlog-guidance/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/backlog-guidance/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/backlog-guidance/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/backlog-guidance/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add backlog commands to §6 CLI table in .sdlc/guidance.md
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:24.599515Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add §12 Session Close Protocol section to .sdlc/guidance.md
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:24.608111Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update GUIDANCE_MD_CONTENT §6 table in crates/sdlc-cli/src/cmd/init.rs with backlog commands
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:24.614223Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add 'Discovered out-of-scope concerns' instruction to sdlc-run command template in init.rs
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:24.621623Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add 'Discovered out-of-scope concerns' instruction to sdlc-next command template in init.rs
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:24.628820Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: '[user-gap] Update capture timing in sdlc-run and sdlc-next templates: ''capture IMMEDIATELY upon discovery, before the next task — not at session end. If you defer and the run crashes, the concern is lost.'''
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.100511Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] Add title quality protocol to guidance and templates: title must be a complete sentence with a component reference, e.g. ''AuthMiddleware in auth.rs: token validation race under concurrent requests'''
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.108063Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] Add vocabulary section to guidance §12 distinguishing backlog items (cross-feature, dormant, written by agents) from tasks (in-feature, active)'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.116049Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:49:56.884004Z
+  exited: null
+dependencies: []
+archived: false

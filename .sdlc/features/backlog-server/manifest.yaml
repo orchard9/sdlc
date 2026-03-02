@@ -1,0 +1,109 @@
+slug: backlog-server
+title: REST API routes for backlog in sdlc-server
+description: 'Create crates/sdlc-server/src/routes/backlog.rs with handlers: list (GET /api/backlog, supports ?status=open|parked|promoted and ?source_feature=<slug>), create (POST /api/backlog with title, description, kind, evidence, source_feature fields), park (POST /api/backlog/:id/park with required park_reason body field), promote (POST /api/backlog/:id/promote with optional slug and milestone_slug body fields). Add pub mod backlog to routes/mod.rs. Register all routes in lib.rs. Include route integration tests.'
+phase: draft
+created_at: 2026-03-02T02:49:56.891119Z
+updated_at: 2026-03-02T03:01:14.166097Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/backlog-server/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/backlog-server/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/backlog-server/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/backlog-server/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/backlog-server/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/backlog-server/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/backlog-server/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create crates/sdlc-server/src/routes/backlog.rs with list, create, park, promote handlers
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.908527Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add pub mod backlog to routes/mod.rs
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.916417Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Register GET /api/backlog, POST /api/backlog, POST /api/backlog/:id/park, POST /api/backlog/:id/promote in lib.rs
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.923409Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Write route integration tests
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.930782Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:49:56.891119Z
+  exited: null
+dependencies: []
+archived: false

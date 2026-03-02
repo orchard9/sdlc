@@ -1,0 +1,16 @@
+partners:
+- name: Ben Hartley
+  role: Developer UX Designer
+  context: Ben specializes in developer-facing interfaces and progressive disclosure — exactly what an Actions management page needs
+  agent: .claude/agents/ben-hartley.md
+  recruited_at: 2026-03-02T06:17:02.406009Z
+- name: Felix Wagner
+  role: Developer Tooling Architect
+  context: Felix thinks in minimal primitives and data models — will pressure-test what the API layer needs to expose
+  agent: .claude/agents/felix-wagner.md
+  recruited_at: 2026-03-02T06:17:02.411003Z
+- name: Dana Cho
+  role: Product Skeptic
+  context: Dana will challenge scope and push back on complexity — keeps the MVP honest
+  agent: .claude/agents/dana-cho.md
+  recruited_at: 2026-03-02T06:17:02.416916Z

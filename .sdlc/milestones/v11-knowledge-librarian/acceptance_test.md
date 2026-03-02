@@ -1,0 +1,13 @@
+- [ ] Complete a root-cause investigation — librarian harvest hook fires automatically
+- [ ] Harvested investigation produces at least one new or updated knowledge entry without manual action
+- [ ] `sdlc knowledge ask "how does the SSE event system work?"` returns a synthesized answer with cited entry codes
+- [ ] Query answer identifies a gap and suggests `sdlc knowledge research <topic>` if relevant entries are missing
+- [ ] `sdlc knowledge research "agent spawn pattern"` spawns an agent run and creates a research entry with session log
+- [ ] `sdlc knowledge librarian run` executes a maintenance pass without error
+- [ ] Maintenance pass produces a report — at minimum lists entries checked and any staleness flags
+- [ ] Maintenance pass adds a `last_verified_at` timestamp to checked entries
+- [ ] `POST /api/knowledge/maintain` starts a librarian maintenance run and streams via SSE
+- [ ] `POST /api/knowledge/harvest` triggers harvest for a given workspace slug
+- [ ] `KnowledgeResearchCompleted` SSE event emitted when a research run finishes
+- [ ] `KnowledgeMaintenanceCompleted` SSE event emitted when maintenance run finishes
+- [ ] `SDLC_NO_NPM=1 cargo test --all` passes

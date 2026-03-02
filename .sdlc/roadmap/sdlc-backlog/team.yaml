@@ -1,0 +1,16 @@
+partners:
+- name: Felix Wagner
+  role: Developer tooling architect — data model, CLI ergonomics, lifecycle design
+  context: Designed Linear's backlog/inbox primitive and GitHub Projects v2; opinionated about promotion paths and minimal primitives
+  agent: .claude/agents/felix-wagner.md
+  recruited_at: 2026-03-02T02:25:49.139559Z
+- name: Aria Chen
+  role: AI agent ergonomics researcher — capture friction, guidance wording, agent loop completion
+  context: Studied agent/environment interaction patterns; knows that without explicit instruction and a frictionless write path, agents won't capture side-concerns
+  agent: .claude/agents/aria-chen.md
+  recruited_at: 2026-03-02T02:26:24.292052Z
+- name: Dan Reeves
+  role: Systems minimalist & skeptic — questions every new primitive
+  context: 12 years in infra, killed more features than he shipped; will push back on anything that could be done with existing tools + a guidance change
+  agent: .claude/agents/dan-reeves.md
+  recruited_at: 2026-03-02T02:26:24.299143Z

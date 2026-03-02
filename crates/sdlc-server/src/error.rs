@@ -99,6 +99,7 @@ impl IntoResponse for AppError {
                 | SdlcError::TaskNotFound(_)
                 | SdlcError::ArtifactNotFound(_)
                 | SdlcError::SessionNotFound(_)
+                | SdlcError::BacklogItemNotFound(_)
                 | SdlcError::SecretEnvNotFound(_)
                 | SdlcError::SecretEnvKeyNotFound(_, _)
                 | SdlcError::SecretKeyNotFound(_)

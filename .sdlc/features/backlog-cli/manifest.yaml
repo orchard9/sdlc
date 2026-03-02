@@ -1,0 +1,163 @@
+slug: backlog-cli
+title: sdlc backlog CLI commands
+description: 'Create crates/sdlc-cli/src/cmd/backlog.rs with BacklogSubcommand enum (Add, List, Park, Promote, Show) and run() dispatch. Add to cmd/mod.rs and main.rs Commands enum. Commands: add <title...> [--description] [--kind concern|idea|debt] [--evidence] [--source-feature]; if --source-feature omitted, auto-infer from most recently active feature in .sdlc/state.yaml (warn if not found, never block). Confirmation output MUST include: ''Backlog item <ID> recorded: "<title>" [<source_feature>]'' — the ID and source are required for agent transcript auditability. list [--all | --status <s>] [--source-feature <slug>] — filter by feature origin. park <id> --reason <reason> — park_reason is required. promote <id> [--slug <feature-slug>] [--milestone <milestone-slug>] — creates feature, optionally links to milestone via sdlc milestone add-feature, outputs new feature slug. show <id>.'
+phase: draft
+created_at: 2026-03-02T02:49:56.876232Z
+updated_at: 2026-03-02T03:01:14.148644Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/backlog-cli/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/backlog-cli/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/backlog-cli/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/backlog-cli/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/backlog-cli/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/backlog-cli/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/backlog-cli/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create crates/sdlc-cli/src/cmd/backlog.rs with BacklogSubcommand enum
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:17.106040Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement add subcommand (variadic title, --description, --source-feature)
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:17.113702Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement list subcommand (default open only, --all, --status filter)
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:17.119748Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Implement park, promote (--slug optional), and show subcommands
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:17.126410Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add pub mod backlog to cmd/mod.rs and Backlog variant to Commands enum in main.rs
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:17.131985Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: '[user-gap] Auto-infer source_feature from .sdlc/state.yaml most-recently-active feature when --source-feature not provided; print warning if not found but never block'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:08.229254Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] Confirmation output must be: ''Backlog item <ID> recorded: "<title>" [<source>]'' — ID in stdout is required for agent transcript auditability'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:08.236498Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] Add --milestone flag to promote subcommand; call sdlc milestone add-feature internally; output new feature slug for confirmation'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:08.243383Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Add --source-feature filter to list subcommand: sdlc backlog list --source-feature <slug> for post-run verification by agents'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:08.250615Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T10
+  title: '[user-gap] park subcommand requires --reason flag; reject without it: ''Parking requires a reason (--reason). Example: --reason "revisit after v14"'''
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:08.258715Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:49:56.876232Z
+  exited: null
+dependencies: []
+archived: false

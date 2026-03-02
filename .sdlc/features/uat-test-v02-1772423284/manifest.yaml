@@ -1,0 +1,72 @@
+slug: uat-test-v02-1772423284
+title: UAT test feature for v02
+phase: draft
+created_at: 2026-03-02T03:48:04.768135Z
+updated_at: 2026-03-02T03:48:04.788922Z
+artifacts:
+- artifact_type: spec
+  status: draft
+  path: .sdlc/features/uat-test-v02-1772423284/spec.md
+  created_at: 2026-03-02T03:48:04.788921Z
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/uat-test-v02-1772423284/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/uat-test-v02-1772423284/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/uat-test-v02-1772423284/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/uat-test-v02-1772423284/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/uat-test-v02-1772423284/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/uat-test-v02-1772423284/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:48:04.768135Z
+  exited: null
+dependencies: []
+archived: true

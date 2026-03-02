@@ -1,62 +1,65 @@
 slug: server-directive-endpoint
 title: GET /api/features/:slug/directive returns full directive
-phase: draft
+description: Exposes the full classifier directive for any feature as a JSON HTTP endpoint, so remote agents and orchestrators can read sdlc next output without running the CLI
+phase: released
 created_at: 2026-02-25T21:09:08.598808Z
-updated_at: 2026-02-25T21:09:08.598808Z
+updated_at: 2026-03-02T04:08:27.590404Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/server-directive-endpoint/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T03:30:32.607159Z
+  approved_at: 2026-03-02T03:31:32.576482Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: waived
   path: .sdlc/features/server-directive-endpoint/design.md
   created_at: null
   approved_at: null
   rejected_at: null
   rejection_reason: null
   approved_by: null
+  waived_at: 2026-03-02T03:30:39.427742Z
+  waive_reason: Simple additive read endpoint — spec already contains full implementation detail (handler, route registration, response contract). No architectural decisions required.
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/server-directive-endpoint/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T03:30:45.547814Z
+  approved_at: 2026-03-02T03:30:52.581571Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/server-directive-endpoint/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T03:30:49.810175Z
+  approved_at: 2026-03-02T03:30:52.151689Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/server-directive-endpoint/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T03:31:37.234162Z
+  approved_at: 2026-03-02T03:31:41.295335Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/server-directive-endpoint/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T03:32:08.202945Z
+  approved_at: 2026-03-02T03:32:12.010788Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/server-directive-endpoint/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T03:32:30.785095Z
+  approved_at: 2026-03-02T03:32:41.332115Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +70,33 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-02-25T21:09:08.598808Z
+  exited: 2026-03-02T03:30:27.987007Z
+- phase: specified
+  entered: 2026-03-02T03:30:27.987007Z
+  exited: 2026-03-02T03:31:27.622483Z
+- phase: planned
+  entered: 2026-03-02T03:31:27.622483Z
+  exited: 2026-03-02T03:31:29.233730Z
+- phase: ready
+  entered: 2026-03-02T03:31:29.233730Z
+  exited: 2026-03-02T03:31:31.708373Z
+- phase: implementation
+  entered: 2026-03-02T03:31:31.708373Z
+  exited: 2026-03-02T03:31:41.296289Z
+- phase: review
+  entered: 2026-03-02T03:31:41.296289Z
+  exited: 2026-03-02T03:31:44.403348Z
+- phase: audit
+  entered: 2026-03-02T03:31:44.403348Z
+  exited: 2026-03-02T03:31:50.704066Z
+- phase: qa
+  entered: 2026-03-02T03:31:50.704066Z
+  exited: 2026-03-02T03:32:25.683230Z
+- phase: merge
+  entered: 2026-03-02T03:32:25.683230Z
+  exited: 2026-03-02T03:32:28.781460Z
+- phase: released
+  entered: 2026-03-02T03:32:28.781460Z
   exited: null
 dependencies: []
 archived: false

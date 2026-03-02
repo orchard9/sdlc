@@ -1,0 +1,181 @@
+slug: backlog-core
+title: BacklogItem data model and storage in sdlc-core
+description: 'Create crates/sdlc-core/src/backlog.rs with BacklogItem struct and BacklogStatus enum. BacklogItem fields: id (B1/B2... sequential), title (required, complete sentence), description (optional, multi-line context), kind (BacklogKind: Concern | Idea | Debt), status (BacklogStatus: Open | Parked | Promoted), park_reason (optional String, required when parking), evidence (optional String, short file/function reference grounding the concern), source_feature (optional String, auto-inferred from state.yaml if not provided), promoted_to (optional String, feature slug), created_at, updated_at. Implement: add, list (with source_feature filter), park (requires park_reason), promote (calls sdlc feature create internally), get, load_all, save_all. Add BACKLOG_FILE const and backlog_path() to paths.rs. Register pub mod backlog in lib.rs. Add BacklogItemNotFound(String) to error.rs. Unit tests for all operations including round-trip and source_feature filter.'
+phase: released
+created_at: 2026-03-02T02:49:56.866566Z
+updated_at: 2026-03-02T03:19:11.065410Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/backlog-core/spec.md
+  created_at: 2026-03-02T03:15:14.225216Z
+  approved_at: 2026-03-02T03:15:21.936226Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/backlog-core/design.md
+  created_at: 2026-03-02T03:15:51.858953Z
+  approved_at: 2026-03-02T03:15:51.866076Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/backlog-core/tasks.md
+  created_at: 2026-03-02T03:16:01.736990Z
+  approved_at: 2026-03-02T03:16:01.744006Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/backlog-core/qa-plan.md
+  created_at: 2026-03-02T03:16:14.276778Z
+  approved_at: 2026-03-02T03:16:14.283265Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/backlog-core/review.md
+  created_at: 2026-03-02T03:18:34.602205Z
+  approved_at: 2026-03-02T03:18:34.609413Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/backlog-core/audit.md
+  created_at: 2026-03-02T03:18:55.225444Z
+  approved_at: 2026-03-02T03:18:55.232376Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/backlog-core/qa-results.md
+  created_at: 2026-03-02T03:19:08.020016Z
+  approved_at: 2026-03-02T03:19:08.026922Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create crates/sdlc-core/src/backlog.rs with BacklogItem struct and BacklogStatus enum
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:50:10.711583Z
+  started_at: 2026-03-02T03:16:23.920833Z
+  completed_at: 2026-03-02T03:18:15.108943Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement add, list, park, promote, get, load_all, save_all functions
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:50:10.719440Z
+  started_at: null
+  completed_at: 2026-03-02T03:18:15.116881Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add BACKLOG_FILE const and backlog_path() to paths.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:50:10.726564Z
+  started_at: 2026-03-02T03:16:23.926840Z
+  completed_at: 2026-03-02T03:18:15.122951Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register pub mod backlog in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:50:10.733036Z
+  started_at: 2026-03-02T03:16:23.932259Z
+  completed_at: 2026-03-02T03:18:15.129039Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add BacklogItemNotFound(String) variant to error.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:50:10.740447Z
+  started_at: 2026-03-02T03:16:23.938168Z
+  completed_at: 2026-03-02T03:18:15.135139Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Write unit tests for add/list/park/promote round-trip
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:50:10.752549Z
+  started_at: null
+  completed_at: 2026-03-02T03:18:15.141320Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] Add kind field (BacklogKind: Concern | Idea | Debt) to BacklogItem — without kind the list is a junk drawer indistinguishable from noise'
+  description: null
+  status: completed
+  created_at: 2026-03-02T03:01:41.442751Z
+  started_at: 2026-03-02T03:16:23.944191Z
+  completed_at: 2026-03-02T03:18:15.147665Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] Add park_reason optional field — required when calling park(); parking without a note creates an unactionable graveyard'
+  description: null
+  status: completed
+  created_at: 2026-03-02T03:01:41.450658Z
+  started_at: 2026-03-02T03:16:23.950439Z
+  completed_at: 2026-03-02T03:18:15.153855Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Add evidence optional field (short string: file path, function name, or failing test) — grounds the concern and distinguishes signal from speculation'
+  description: null
+  status: completed
+  created_at: 2026-03-02T03:01:41.457516Z
+  started_at: 2026-03-02T03:16:23.956709Z
+  completed_at: 2026-03-02T03:18:15.160010Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:49:56.866566Z
+  exited: 2026-03-02T03:15:21.941148Z
+- phase: specified
+  entered: 2026-03-02T03:15:21.941148Z
+  exited: 2026-03-02T03:16:14.284275Z
+- phase: planned
+  entered: 2026-03-02T03:16:14.284275Z
+  exited: 2026-03-02T03:16:18.128446Z
+- phase: ready
+  entered: 2026-03-02T03:16:18.128446Z
+  exited: 2026-03-02T03:16:19.860206Z
+- phase: implementation
+  entered: 2026-03-02T03:16:19.860206Z
+  exited: 2026-03-02T03:18:34.610406Z
+- phase: review
+  entered: 2026-03-02T03:18:34.610406Z
+  exited: 2026-03-02T03:18:36.567368Z
+- phase: audit
+  entered: 2026-03-02T03:18:36.567368Z
+  exited: 2026-03-02T03:18:55.233322Z
+- phase: qa
+  entered: 2026-03-02T03:18:55.233322Z
+  exited: 2026-03-02T03:19:08.027933Z
+- phase: merge
+  entered: 2026-03-02T03:19:08.027933Z
+  exited: 2026-03-02T03:19:11.065410Z
+- phase: released
+  entered: 2026-03-02T03:19:11.065410Z
+  exited: null
+dependencies: []
+archived: false

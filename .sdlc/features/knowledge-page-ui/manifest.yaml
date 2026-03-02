@@ -1,0 +1,73 @@
+slug: knowledge-page-ui
+title: KnowledgePage — three-pane catalog browser in the sdlc UI
+description: 'frontend/src/pages/KnowledgePage.tsx — three-pane layout. Left pane: catalog tree (expandable classes/divisions, click to filter) + search bar for full-text filter. Center pane: entry list for selected class/division showing title, code badge, staleness badges (url_404, aged_out, code_ref_gone), last_updated. Right pane: entry detail — content.md rendered as markdown, source provenance footer (type+url/path+captured_at per source), related entry links clickable by code, [Research More] action button that triggers POST /api/knowledge/:slug/research. Sidebar: Library icon (lucide), below Guidelines in Plan group. Bottom tab bar: Knowledge in Plan tab roots. Routes: /knowledge and /knowledge/:slug. No PhaseStrip — entries have no phases. SSE listener for KnowledgeResearchCompleted and KnowledgeMaintenanceCompleted to trigger entry list refresh.'
+phase: draft
+created_at: 2026-03-02T02:12:48.397957Z
+updated_at: 2026-03-02T02:12:48.397957Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/knowledge-page-ui/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:12:48.397957Z
+  exited: null
+dependencies: []
+archived: false

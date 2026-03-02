@@ -1,0 +1,13 @@
+slug: blocked-feature-ux
+title: Blocked Feature UX and Navigation
+status: committed
+created_at: 2026-03-02T02:42:14.106027Z
+updated_at: 2026-03-02T04:09:32.113295Z
+committed_at: 2026-03-02T04:08:50.623962Z
+committed_to:
+- v14-new-user-experience
+sessions: 2
+orientation:
+  current: Design is settled — BlockedPanel with Run-with-direction as primary CTA, Remove per blocker (optional reason), SSE via existing Update pattern. ~125 lines of new code.
+  next: 'Create feature ''blocked-feature-ux'' in the SDLC and implement: remove_blocker Rust method, DELETE /api/features/:slug/blockers/:idx, BlockedPanel.tsx'
+  commit: Commit signal met — design is shaped, scope is minimal, implementation path is clear

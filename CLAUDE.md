@@ -115,6 +115,8 @@ All actions — including all `approve_*` verification steps and `approve_merge`
 
 **User perspectives are first-class.** The state machine ensures we build things right. User perspectives ensure we build the right things. `/sdlc-pressure-test <milestone>` runs empathy interviews against a milestone's scope and autonomously edits vision, features, acceptance criteria, and creates `[user-gap]` tasks. Use `/recruit` to assemble the right team for any project function — it always includes user perspectives.
 
+**Audits and reviews close every finding.** When `approve_audit` or `approve_review` is the directive, enumerate every finding and take one explicit action: fix it now (targeted code change), track it (`sdlc task add`), or accept it (documented rationale). Silence is not acceptance. Use targeted fixes for specific findings — `fix-all` and `remediate` are for systemic codebase-wide patterns, not individual audit items.
+
 ## How Agents Use sdlc
 
 **Explore an idea before committing to milestones:**

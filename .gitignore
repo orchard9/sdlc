@@ -16,3 +16,7 @@
 !.env.example
 .claude/settings.local.json
 .sdlc/telemetry.redb
+.sdlc/orchestrator.db
+.sdlc/secrets/envs/gitea.meta.yaml
+.playwright-mcp/
+.claude/worktrees/

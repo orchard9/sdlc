@@ -1,0 +1,16 @@
+partners:
+- name: Kai Yamazaki
+  role: Developer Experience Engineer
+  context: Led DX for a Rust-centric CLI toolchain. Deep expertise in install flows, error message design, and first-impressions UX for command-line tools. Strong opinions about README structure and multi-SSH-key setups.
+  agent: .claude/agents/kai-yamazaki.md
+  recruited_at: 2026-03-02T03:04:36.308670Z
+- name: Xist
+  role: Enterprise Game Dev First-Time User
+  context: 'Senior game dev at a large studio, P4/multi-SSH-key Mac environment, no Rust background. Hit all three install blockers on first use: wrong install URL, permission denied with no filename, Vision/Architecture gap. Patient but has finite tolerance for undocumented friction.'
+  agent: .claude/agents/xist-gamedev.md
+  recruited_at: 2026-03-02T03:04:40.330Z
+- name: Mara Solberg
+  role: Documentation Strategist
+  context: Technical writing and onboarding strategy at developer tooling companies. Thinks of README as a conversion funnel. Has run A/B tests on README structure. Clear model for README vs DEVELOPER.md audience split. Focuses on first-friction-point abandonment.
+  agent: .claude/agents/mara-solberg.md
+  recruited_at: 2026-03-02T03:04:43.867295Z

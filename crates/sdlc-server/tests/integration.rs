@@ -604,3 +604,71 @@ async fn fallback_serves_spa_when_no_app_tunnel() {
     // The embedded SPA returns 200 for unknown frontend routes.
     assert_eq!(resp.status(), StatusCode::OK);
 }
+
+// ---------------------------------------------------------------------------
+// Webhook ingestion tests
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn post_webhook_returns_202_with_id() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+
+    let req = axum::http::Request::builder()
+        .method("POST")
+        .uri("/webhooks/github")
+        .header("content-type", "application/json")
+        .body(axum::body::Body::from(b"{\"event\":\"push\"}".to_vec()))
+        .unwrap();
+    let response = app.oneshot(req).await.unwrap();
+    let status = response.status();
+    let body = response.into_body().collect().await.unwrap().to_bytes();
+    let json: serde_json::Value =
+        serde_json::from_slice(&body).expect("response should be valid JSON");
+
+    assert_eq!(status, StatusCode::ACCEPTED, "expected 202 Accepted");
+
+    let id_str = json["id"]
+        .as_str()
+        .expect("response JSON must have an 'id' string field");
+    uuid::Uuid::parse_str(id_str).expect("'id' must be a valid UUID");
+}
+
+#[tokio::test]
+async fn post_webhook_preserves_raw_body_bytes() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+
+    let raw_body = b"hello world \x00\xff binary".to_vec();
+
+    let req = axum::http::Request::builder()
+        .method("POST")
+        .uri("/webhooks/test")
+        .header("content-type", "application/octet-stream")
+        .body(axum::body::Body::from(raw_body.clone()))
+        .unwrap();
+    let response = app.oneshot(req).await.unwrap();
+    assert_eq!(response.status(), StatusCode::ACCEPTED);
+
+    // Verify the payload was stored correctly by reading from the DB directly.
+    let db = sdlc_core::orchestrator::ActionDb::open(&sdlc_core::paths::orchestrator_db_path(
+        dir.path(),
+    ))
+    .expect("ActionDb should open");
+    let payloads = db.all_pending_webhooks().expect("should retrieve webhooks");
+    assert_eq!(payloads.len(), 1, "one webhook should be stored");
+    assert_eq!(
+        payloads[0].raw_body, raw_body,
+        "raw body bytes must be preserved exactly"
+    );
+    // route_path is normalized with a leading '/' to match WebhookRoute.path format
+    assert_eq!(payloads[0].route_path, "/test");
+    assert_eq!(
+        payloads[0].content_type,
+        Some("application/octet-stream".to_string())
+    );
+}

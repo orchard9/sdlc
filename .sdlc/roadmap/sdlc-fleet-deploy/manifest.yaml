@@ -1,0 +1,10 @@
+slug: sdlc-fleet-deploy
+title: Multi-project sdlc deployment at scale
+status: exploring
+created_at: 2026-03-02T05:44:10.147971Z
+updated_at: 2026-03-02T06:05:34.215254Z
+sessions: 2
+orientation:
+  current: Gitea access established. claude-agent user with admin token. orchard9 org created. Token stored in sdlc secrets. Direct Tailscale access working at http://100.79.2.8:30300.
+  next: Set up GCP Secret Manager entry for gitea token so cluster pods can use it. Then design the multi-tenant sdlc-server refactor to route requests by project slug against the Gitea repos.
+  commit: Architecture is clear and infra is in place. Ready to commit to the multi-tenant sdlc-server feature when Jordan decides to start that work.

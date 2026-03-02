@@ -1,10 +1,15 @@
 slug: knowledge-librarian
 title: 'Knowledge librarian: a maintained, curated knowledge base'
-status: exploring
+status: committed
 created_at: 2026-03-01T17:29:03.770549Z
-updated_at: 2026-03-01T17:31:45.349018Z
-sessions: 1
+updated_at: 2026-03-02T04:09:22.917970Z
+committed_at: 2026-03-02T04:08:42.786509Z
+committed_to:
+- v10-knowledge-capture
+- v11-knowledge-librarian
+- v12-knowledge-ui
+sessions: 2
 orientation:
-  current: Core design decided — librarian is a project-generated agent with two modes (maintain + query) and a harvest hook that forces maintenance on investigation completion
-  next: 'Refine the spec: add librarian to the knowledge base spec, define the librarian init flow and the harvest hook protocol in detail'
-  commit: When the updated spec covers librarian init, harvest hooks, query mode CLI, and updated entry data model — ready to commit to a feature
+  current: All three open questions resolved — spec is final, ready to commit to features
+  next: /sdlc-ponder-commit knowledge-librarian
+  commit: Done — spec updated with all decisions, no remaining open questions

@@ -1,0 +1,13 @@
+slug: sse-state-reliability
+title: Real-Time State Sync Reliability
+status: committed
+created_at: 2026-03-02T02:42:14.099866Z
+updated_at: 2026-03-02T04:09:41.338681Z
+committed_at: 2026-03-02T04:08:48.305014Z
+committed_to:
+- install-onboarding-polish
+sessions: 2
+orientation:
+  current: 'Architecture confirmed correct — fetch on mount + passive SSE is consistently implemented, infinite reload risk eliminated. Two small consistency gaps remain: UatHistoryPanel has no SSE subscription, SettingsPage has a duplicate mount fetch.'
+  next: 'Create a feature with two tasks: add useSSE(refresh) to UatHistoryPanel, consolidate SettingsPage to call refresh() from its mount effect'
+  commit: 'Gaps patched — every data-fetching component in the frontend follows the same pattern: fetch on mount, update via SSE passively, no reload loops'

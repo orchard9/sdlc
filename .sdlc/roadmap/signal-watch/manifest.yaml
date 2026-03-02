@@ -1,0 +1,13 @@
+slug: signal-watch
+title: Weak Signals Parking Lot
+status: committed
+created_at: 2026-03-02T02:42:14.131697Z
+updated_at: 2026-03-02T04:09:42.088144Z
+committed_at: 2026-03-02T04:08:55.483376Z
+committed_to:
+- v15-layout-foundation
+sessions: 2
+orientation:
+  current: Layout design pivot — full spec for desktop/mobile layout system and Ponder-specific UI with collapsible/resizable panels
+  next: 'sdlc-ponder-commit signal-watch — promote to milestone v15-layout-foundation with two features: layout-appshell-panels and layout-ponder-columns'
+  commit: All five zones specced with widths, collapse/resize behaviors, mobile strategy, and acceptance criteria — READY to commit

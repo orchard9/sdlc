@@ -1,0 +1,11 @@
+slug: install-onboarding-ux
+title: Installation and First-Run Experience
+status: committed
+created_at: 2026-03-02T02:42:14.085629Z
+updated_at: 2026-03-02T03:17:41.817518Z
+committed_at: 2026-03-02T03:17:41.817517Z
+sessions: 2
+orientation:
+  current: Triage complete. Three Tier-1 quick-wins identified (error filenames, SSH URL, sdlc update docs). Two Tier-2 structural fixes queued (make install promotion, Vision/Architecture first-run). P4 detection deferred. Root error-filename fix located to specific lines in init/mod.rs.
+  next: 'Execute Tier-1 fixes: (1) add .with_context() to bare `?` calls in init/mod.rs lines 94 and 98; (2) add SSH URL variant and sdlc update section to README.md; then queue Tier-2 as features.'
+  commit: 'When: error messages include filenames, README has SSH URL + sdlc update + make install, and the Vision/Architecture gap has at least a docs fix. Then commit this ponder and create features.'

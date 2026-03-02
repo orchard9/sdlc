@@ -147,6 +147,31 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/ponder/{slug}/commit",
             post(routes::runs::commit_ponder),
         )
+        // Knowledge base
+        .route(
+            "/api/knowledge/catalog",
+            get(routes::knowledge::get_catalog),
+        )
+        .route(
+            "/api/knowledge",
+            get(routes::knowledge::list_knowledge).post(routes::knowledge::create_knowledge),
+        )
+        .route(
+            "/api/knowledge/{slug}",
+            get(routes::knowledge::get_knowledge).put(routes::knowledge::update_knowledge),
+        )
+        .route(
+            "/api/knowledge/{slug}/capture",
+            post(routes::knowledge::capture_knowledge_artifact),
+        )
+        .route(
+            "/api/knowledge/{slug}/sessions",
+            get(routes::knowledge::list_knowledge_sessions),
+        )
+        .route(
+            "/api/knowledge/{slug}/sessions/{n}",
+            get(routes::knowledge::get_knowledge_session),
+        )
         // Investigations
         .route(
             "/api/investigations",
@@ -399,6 +424,13 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/feedback/to-ponder", post(routes::feedback::to_ponder))
         // Public feedback alias — always reachable through the app tunnel (no auth required).
         .route("/__sdlc/feedback", post(routes::feedback::add_note))
+        // Webhook ingestion — accepts raw payloads from external senders and stores in redb.
+        .route("/webhooks/{route}", post(routes::webhooks::receive_webhook))
+        // Orchestrator webhook route management (must be before webhook ingestion wildcard)
+        .route(
+            "/api/orchestrator/webhooks/routes",
+            get(routes::orchestrator::list_routes).post(routes::orchestrator::register_route),
+        )
         // Diagnose (pre-feature triage)
         .route("/api/diagnose", post(routes::diagnose::diagnose))
         // Init

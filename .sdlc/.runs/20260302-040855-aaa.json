@@ -1,0 +1,14 @@
+{
+  "id": "20260302-040855-aaa",
+  "key": "ponder-commit:signal-watch",
+  "run_type": "ponder",
+  "target": "signal-watch",
+  "label": "commit: signal-watch",
+  "status": "completed",
+  "started_at": "2026-03-02T04:08:55.488437+00:00",
+  "completed_at": "2026-03-02T04:09:48.703124+00:00",
+  "cost_usd": 0.5450892500000001,
+  "turns": 22,
+  "error": null,
+  "prompt": "You are running the commit flow for ponder 'signal-watch' in the sdlc workspace.\n\nThe ponder status has already been marked committed. Your job is to synthesize\nthe idea into milestones and features.\n\n## Step 1 — Load context\n\n```bash\nsdlc ponder show signal-watch\nsdlc ponder artifacts signal-watch\nsdlc ponder session list signal-watch\n```\n\nRead every scrapbook artifact and all session logs (`sdlc ponder session read signal-watch <N>`) to understand the full idea. Also check existing milestones to avoid duplication:\n```bash\nsdlc milestone list\nsdlc feature list\n```\n\n## Step 2 — Size the idea\n\nBased on scope:\n- Single concern → one feature, add to an existing milestone if one fits\n- Medium idea → one new milestone with 2–5 features\n- Large idea → multiple milestones\n\n## Step 3 — Create milestones and features\n\n```bash\nsdlc milestone create <slug> --title \"<title>\" --vision \"<one-line why>\"\nsdlc feature create <slug> --title \"<title>\"\nsdlc milestone add-feature <milestone-slug> <feature-slug>\n```\n\nTrack every milestone slug you create or update.\n\n## Step 4 — Link committed-to milestones\n\nRecord which milestones came from this ponder:\n```bash\nsdlc ponder update signal-watch --committed-to <milestone-slug> [--committed-to <milestone-2> ...]\n```\n\n## Step 5 — Report\n\nOutput a brief summary: what was created, which milestones, suggested next command."
+}

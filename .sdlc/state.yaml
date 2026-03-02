@@ -38,6 +38,32 @@ active_features:
 - backlog-guidance
 - backlog-server
 - backlog-dashboard
+- init-error-filenames
+- readme-install-guide
+- sdlc-update-docs
+- setup-vision-arch-guidance
+- artifact-viewer-height-fix
+- artifact-file-links
+- artifact-tldr-teaser
+- artifact-fullscreen-toc
+- dashboard-empty-state
+- dashboard-milestone-wave
+- ponder-first-onboarding
+- pipeline-visibility
+- wave-running-context
+- qa-smoke-v02
+- qa-smoke-merge
+- blocked-feature-ux
+- commands-docs-page
+- telemetry-wallclock-timestamps
+- quota-visibility-panel
+- activity-time-series
+- concurrency-heatmap
+- layout-appshell-panels
+- layout-ponder-columns
+- sse-state-consistency
+- feedback-edit
+- feedback-enrich
 active_directives: []
 history:
 - feature: claude-code-consumer
@@ -410,6 +436,156 @@ history:
   phase: released
   timestamp: 2026-03-02T02:55:58.886046Z
   outcome: merged
+- feature: knowledge-core-data
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T03:04:29.806463Z
+  outcome: transition
+- feature: knowledge-core-data
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T03:04:29.815555Z
+  outcome: transition
+- feature: knowledge-core-data
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T03:05:06.215816Z
+  outcome: transition
+- feature: orchestrator-tick-cli
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T03:13:21.165786Z
+  outcome: transition
+- feature: orchestrator-tick-cli
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T03:13:21.182274Z
+  outcome: transition
+- feature: knowledge-cli-ingest
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T03:13:43.214318Z
+  outcome: transition
+- feature: knowledge-cli-ingest
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T03:13:43.221560Z
+  outcome: transition
+- feature: backlog-core
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T03:16:18.129330Z
+  outcome: transition
+- feature: backlog-core
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T03:16:19.861032Z
+  outcome: transition
+- feature: backlog-core
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T03:18:36.568282Z
+  outcome: transition
+- feature: backlog-core
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T03:19:11.066322Z
+  outcome: merged
+- feature: knowledge-cli-ingest
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T03:21:35.911307Z
+  outcome: transition
+- feature: server-directive-endpoint
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T03:31:31.709172Z
+  outcome: transition
+- feature: server-directive-endpoint
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T03:31:44.404300Z
+  outcome: transition
+- feature: server-directive-endpoint
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T03:32:28.782347Z
+  outcome: merged
+- feature: qa-smoke-merge
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T03:45:57.704503Z
+  outcome: merged
+- feature: knowledge-core-data
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T03:48:32.589439Z
+  outcome: merged
+- feature: orchestrator-tick-cli
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T03:54:41.469057Z
+  outcome: transition
+- feature: orchestrator-tick-cli
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T03:57:02.395847Z
+  outcome: merged
+- feature: orchestrator-integration-test
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T04:10:42.657605Z
+  outcome: transition
+- feature: orchestrator-integration-test
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T04:10:46.211813Z
+  outcome: transition
+- feature: orchestrator-integration-test
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T04:14:29.307418Z
+  outcome: transition
+- feature: orchestrator-integration-test
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T04:15:50.508151Z
+  outcome: merged
+- feature: orchestrator-webhook-storage
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T04:31:36.132080Z
+  outcome: transition
+- feature: orchestrator-webhook-storage
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T04:31:39.863144Z
+  outcome: transition
+- feature: orchestrator-webhook-routing
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T04:32:41.467480Z
+  outcome: transition
+- feature: orchestrator-webhook-routing
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T04:32:45.405154Z
+  outcome: transition
+- feature: orchestrator-webhook-storage
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T04:36:50.340358Z
+  outcome: transition
+- feature: orchestrator-webhook-storage
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T04:42:09.247613Z
+  outcome: merged
+- feature: orchestrator-webhook-routing
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T04:43:41.176148Z
+  outcome: transition
 blocked: []
 milestones:
 - v01-directive-core
@@ -425,14 +601,14 @@ milestones:
 - v11-knowledge-librarian
 - v12-knowledge-ui
 - v13-backlog
+- install-onboarding-polish
+- artifact-viewer-v1
+- v14-new-user-experience
+- v15-agent-observability
+- v15-layout-foundation
+- feedback-polish
 active_ponders:
-- artifact-viewer
-- install-onboarding-ux
-- agent-observability
-- sse-state-reliability
-- blocked-feature-ux
-- new-user-mental-model
-- skill-command-library
-- p4-vcs-integration
-- signal-watch
-last_updated: 2026-03-02T02:55:58.886047Z
+- sdlc-fleet-deploy
+- audits-reviews-fix-all-and-remediate
+- orchestrator-actions-ui
+last_updated: 2026-03-02T06:15:50.829322Z

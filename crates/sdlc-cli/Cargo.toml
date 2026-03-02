@@ -11,6 +11,10 @@ homepage = "https://github.com/orchard9/sdlc-releases"
 name = "sdlc"
 path = "src/main.rs"
 
+[lib]
+name = "sdlc_cli"
+path = "src/lib.rs"
+
 [dependencies]
 sdlc-core = { path = "../sdlc-core" }
 sdlc-server = { path = "../sdlc-server" }
@@ -29,6 +33,7 @@ thiserror = { workspace = true }
 which = { workspace = true }
 rand = "0.8"
 qrcode = "0.14"
+ureq = "2"
 
 [dev-dependencies]
 assert_cmd = "2"

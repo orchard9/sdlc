@@ -166,3 +166,19 @@ requests in development and the address is wrong in production.
 
 When fixing a CORS error or adding a new API client, apply this pattern instead of
 adding CORS headers or introducing environment-specific URLs.
+
+## 11. Project Guidelines
+
+Before writing implementation code, check if `.sdlc/guidelines/index.yaml` exists.
+If it does, read it and load any guidelines whose `scope` overlaps with the work at hand.
+
+```bash
+# Check
+ls .sdlc/guidelines/index.yaml 2>/dev/null && cat .sdlc/guidelines/index.yaml
+```
+
+Guidelines contain `⚑ Rule:` statements with `✓ Good:` and `✗ Bad:` code examples derived
+from this codebase. They are authoritative — if your implementation would violate a rule,
+fix the approach before proceeding, not after review catches it.
+
+If no index exists, no guidelines have been published yet. Proceed normally.

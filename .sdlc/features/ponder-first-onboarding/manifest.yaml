@@ -1,0 +1,75 @@
+slug: ponder-first-onboarding
+title: Ponder-First Entry Path for New Users
+phase: specified
+created_at: 2026-03-02T03:16:32.346419Z
+updated_at: 2026-03-02T03:18:08.269536Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ponder-first-onboarding/spec.md
+  created_at: 2026-03-02T03:17:32.170296Z
+  approved_at: 2026-03-02T03:18:08.268624Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/ponder-first-onboarding/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/ponder-first-onboarding/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/ponder-first-onboarding/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/ponder-first-onboarding/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/ponder-first-onboarding/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/ponder-first-onboarding/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:32.346419Z
+  exited: 2026-03-02T03:18:08.269536Z
+- phase: specified
+  entered: 2026-03-02T03:18:08.269536Z
+  exited: null
+dependencies: []
+archived: false

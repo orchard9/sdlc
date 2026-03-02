@@ -7,7 +7,8 @@ use clap::{Parser, Subcommand};
 use cmd::{
     agent::AgentSubcommand, artifact::ArtifactSubcommand, comment::CommentSubcommand,
     config::ConfigSubcommand, escalate::EscalateSubcommand, feature::FeatureSubcommand,
-    investigate::InvestigateSubcommand, milestone::MilestoneSubcommand,
+    investigate::InvestigateSubcommand, knowledge::KnowledgeSubcommand,
+    milestone::MilestoneSubcommand, orchestrate::OrchestrateSubcommand,
     platform::PlatformSubcommand, ponder::PonderSubcommand, project::ProjectSubcommand,
     query::QuerySubcommand, score::ScoreSubcommand, secrets::SecretsSubcommand,
     task::TaskSubcommand, tool::ToolCommand, ui::UiSubcommand,
@@ -98,6 +99,12 @@ enum Commands {
         subcommand: InvestigateSubcommand,
     },
 
+    /// Manage the project knowledge base
+    Knowledge {
+        #[command(subcommand)]
+        subcommand: KnowledgeSubcommand,
+    },
+
     /// Run platform-specific commands (deploy, logs, dev, etc.)
     Platform {
         #[command(subcommand)]
@@ -146,6 +153,18 @@ enum Commands {
         cmd: ToolCommand,
     },
 
+    /// Run the tick-rate orchestrator daemon (or manage scheduled actions)
+    Orchestrate {
+        /// Seconds between ticks (default 60)
+        #[arg(long, default_value_t = 60)]
+        tick_rate: u64,
+        /// Path to orchestrator DB (default: .sdlc/orchestrator.db)
+        #[arg(long)]
+        db: Option<PathBuf>,
+        #[command(subcommand)]
+        subcommand: Option<OrchestrateSubcommand>,
+    },
+
     /// Refresh agent scaffolding and stamp the current binary version
     Update,
 
@@ -177,6 +196,14 @@ enum Commands {
         /// Open a public tunnel and print a QR code for remote access (requires cloudflared)
         #[arg(long)]
         tunnel: bool,
+
+        /// Orchestrator tick interval in seconds (default 60)
+        #[arg(long, default_value_t = 60)]
+        tick_rate: u64,
+
+        /// Skip starting the orchestrator daemon
+        #[arg(long)]
+        no_orchestrate: bool,
 
         #[command(subcommand)]
         subcommand: Option<UiSubcommand>,
@@ -213,6 +240,7 @@ fn main() {
         Commands::Milestone { subcommand } => cmd::milestone::run(&root, subcommand, cli.json),
         Commands::Ponder { subcommand } => cmd::ponder::run(&root, subcommand, cli.json),
         Commands::Investigate { subcommand } => cmd::investigate::run(&root, subcommand, cli.json),
+        Commands::Knowledge { subcommand } => cmd::knowledge::run(&root, subcommand, cli.json),
         Commands::Platform { subcommand } => cmd::platform::run(&root, subcommand, cli.json),
         Commands::Project { subcommand } => cmd::project::run(&root, subcommand, cli.json),
         Commands::Query { subcommand } => cmd::query::run(&root, subcommand, cli.json),
@@ -221,6 +249,11 @@ fn main() {
         Commands::Secrets { subcommand } => cmd::secrets::run(&root, subcommand, cli.json),
         Commands::Escalate { subcommand } => cmd::escalate::run(&root, subcommand, cli.json),
         Commands::Tool { cmd } => cmd::tool::run(cmd, &root),
+        Commands::Orchestrate {
+            tick_rate,
+            db,
+            subcommand,
+        } => cmd::orchestrate::run(&root, subcommand, tick_rate, db),
         Commands::Update => cmd::update::run(&root),
         Commands::Merge { slug } => cmd::merge::run(&root, &slug, cli.json),
         Commands::Archive { slug } => {
@@ -232,8 +265,18 @@ fn main() {
             port,
             no_open,
             tunnel,
+            tick_rate,
+            no_orchestrate,
             subcommand,
-        } => cmd::ui::run(&root, subcommand, port, no_open, tunnel),
+        } => cmd::ui::run(
+            &root,
+            subcommand,
+            port,
+            no_open,
+            tunnel,
+            tick_rate,
+            no_orchestrate,
+        ),
     };
 
     if let Err(e) = result {

@@ -1,8 +1,10 @@
-//! Persistent storage for orchestrator actions using redb.
+//! Persistent storage for orchestrator actions and webhook payloads using redb.
 //!
 //! # Table design
 //!
-//! A single `ACTIONS` table uses a 24-byte composite key:
+//! ## ACTIONS table
+//!
+//! A 24-byte composite key:
 //! ```text
 //! [ timestamp_ms: u64 big-endian (8 bytes) | uuid: 16 bytes ]
 //! ```
@@ -12,6 +14,12 @@
 //! `..=due_upper_bound(now)` returns all actions due by `now` without
 //! any post-filtering for timestamp — only `Pending` status filtering
 //! is needed in application code.
+//!
+//! ## WEBHOOKS table
+//!
+//! A 16-byte UUID key (raw bytes). Webhook payloads do not need ordered range
+//! scans — they need O(1) lookup by ID for delete-after-dispatch. Full scan
+//! via `all_pending_webhooks()` is sorted by `received_at` in application code.
 
 use std::{path::Path, time::Duration};
 
@@ -22,14 +30,23 @@ use uuid::Uuid;
 use crate::error::{Result, SdlcError};
 
 use super::action::{Action, ActionStatus};
+use super::webhook::{WebhookPayload, WebhookRoute};
 
 // ---------------------------------------------------------------------------
-// Table definition
+// Table definitions
 // ---------------------------------------------------------------------------
 
 /// Key: 24-byte composite (timestamp_ms big-endian ++ uuid bytes)
 /// Value: JSON-encoded Action
 const ACTIONS: TableDefinition<&[u8], &[u8]> = TableDefinition::new("actions");
+
+/// Key: 16-byte UUID (raw bytes)
+/// Value: JSON-encoded WebhookPayload
+const WEBHOOKS: TableDefinition<&[u8], &[u8]> = TableDefinition::new("webhooks");
+
+/// Key: 16-byte UUID (raw bytes)
+/// Value: JSON-encoded WebhookRoute
+const WEBHOOK_ROUTES: TableDefinition<&[u8], &[u8]> = TableDefinition::new("webhook_routes");
 
 // ---------------------------------------------------------------------------
 // Key helpers
@@ -67,14 +84,20 @@ pub struct ActionDb {
 impl ActionDb {
     /// Open or create the redb database at `path`.
     ///
-    /// Creates the `ACTIONS` table if it doesn't already exist.
+    /// Creates the `ACTIONS`, `WEBHOOKS`, and `WEBHOOK_ROUTES` tables if they
+    /// don't already exist. Safe to call on an existing database — redb creates
+    /// missing tables in place without affecting existing data.
     pub fn open(path: &Path) -> Result<Self> {
         let db = Database::create(path).map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
-        // Ensure the table exists before any reads
+        // Ensure all tables exist before any reads
         let wt = db
             .begin_write()
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
         wt.open_table(ACTIONS)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        wt.open_table(WEBHOOKS)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        wt.open_table(WEBHOOK_ROUTES)
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
         wt.commit()
             .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
@@ -217,6 +240,173 @@ impl ActionDb {
         result.sort_by(|a, b| b.created_at.cmp(&a.created_at));
         Ok(result)
     }
+
+    // -----------------------------------------------------------------------
+    // Webhook storage
+    // -----------------------------------------------------------------------
+
+    /// Store a raw webhook payload in the `WEBHOOKS` table.
+    ///
+    /// The key is the 16-byte UUID of the payload. The value is the
+    /// JSON-encoded `WebhookPayload`.
+    pub fn insert_webhook(&self, payload: &WebhookPayload) -> Result<()> {
+        let key = payload.id.as_bytes().to_vec();
+        let value =
+            serde_json::to_vec(payload).map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(WEBHOOKS)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .insert(key.as_slice(), value.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(())
+    }
+
+    /// Return all stored webhook payloads, sorted by `received_at` ascending.
+    ///
+    /// Intended for use by the tick loop to consume pending webhooks.
+    pub fn all_pending_webhooks(&self) -> Result<Vec<WebhookPayload>> {
+        let rt = self
+            .db
+            .begin_read()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let table = rt
+            .open_table(WEBHOOKS)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+        let mut result = Vec::new();
+        for entry in table
+            .iter()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?
+        {
+            let (_, v) = entry.map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            let payload: WebhookPayload = serde_json::from_slice(v.value())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            result.push(payload);
+        }
+        result.sort_by(|a, b| a.received_at.cmp(&b.received_at));
+        Ok(result)
+    }
+
+    /// Delete a webhook payload by ID after successful dispatch.
+    ///
+    /// Silently succeeds if the ID does not exist (idempotent).
+    pub fn delete_webhook(&self, id: Uuid) -> Result<()> {
+        let key = id.as_bytes().to_vec();
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(WEBHOOKS)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .remove(key.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(())
+    }
+
+    // -----------------------------------------------------------------------
+    // Webhook route storage
+    // -----------------------------------------------------------------------
+
+    /// Insert a new webhook route.
+    ///
+    /// Returns an `OrchestratorDb` error if a route with the same `path` is
+    /// already registered. Use the error message to detect duplicates.
+    pub fn insert_route(&self, route: &WebhookRoute) -> Result<()> {
+        // Check for duplicate path
+        if self.find_route_by_path(&route.path)?.is_some() {
+            return Err(SdlcError::OrchestratorDb(format!(
+                "duplicate webhook route path: {}",
+                route.path
+            )));
+        }
+        let key = route.id.as_bytes().to_vec();
+        let value =
+            serde_json::to_vec(route).map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(WEBHOOK_ROUTES)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .insert(key.as_slice(), value.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(())
+    }
+
+    /// Return all registered webhook routes, sorted by `created_at` ascending.
+    pub fn list_routes(&self) -> Result<Vec<WebhookRoute>> {
+        let rt = self
+            .db
+            .begin_read()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let table = rt
+            .open_table(WEBHOOK_ROUTES)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+        let mut result = Vec::new();
+        for entry in table
+            .iter()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?
+        {
+            let (_, v) = entry.map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            let route: WebhookRoute = serde_json::from_slice(v.value())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            result.push(route);
+        }
+        result.sort_by(|a, b| a.created_at.cmp(&b.created_at));
+        Ok(result)
+    }
+
+    /// Find the first route whose `path` matches `path`.
+    ///
+    /// Returns `Ok(None)` if no route is registered for the path.
+    pub fn find_route_by_path(&self, path: &str) -> Result<Option<WebhookRoute>> {
+        let all = self.list_routes()?;
+        Ok(all.into_iter().find(|r| r.path == path))
+    }
+
+    /// Delete a webhook route by ID.
+    ///
+    /// Silently succeeds if the ID does not exist (idempotent).
+    pub fn delete_route(&self, id: Uuid) -> Result<()> {
+        let key = id.as_bytes().to_vec();
+        let wt = self
+            .db
+            .begin_write()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        {
+            let mut table = wt
+                .open_table(WEBHOOK_ROUTES)
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            table
+                .remove(key.as_slice())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        }
+        wt.commit()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        Ok(())
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -356,5 +546,204 @@ mod tests {
         let (_dir, db) = open_tmp();
         let n = db.startup_recovery(Duration::from_secs(60)).unwrap();
         assert_eq!(n, 0);
+    }
+
+    // -----------------------------------------------------------------------
+    // Webhook tests
+    // -----------------------------------------------------------------------
+
+    fn make_webhook(route: &str, body: &[u8]) -> WebhookPayload {
+        WebhookPayload::new(route, body.to_vec(), Some("application/json".to_string()))
+    }
+
+    #[test]
+    fn webhook_insert_and_retrieve_round_trip() {
+        let (_dir, db) = open_tmp();
+        let payload = make_webhook("github", b"{\"event\":\"push\"}");
+        let id = payload.id;
+        let route = payload.route_path.clone();
+        let body = payload.raw_body.clone();
+        let ct = payload.content_type.clone();
+
+        db.insert_webhook(&payload).unwrap();
+
+        let all = db.all_pending_webhooks().unwrap();
+        assert_eq!(all.len(), 1);
+        assert_eq!(all[0].id, id);
+        assert_eq!(all[0].route_path, route);
+        assert_eq!(all[0].raw_body, body);
+        assert_eq!(all[0].content_type, ct);
+    }
+
+    #[test]
+    fn webhook_delete_removes_record() {
+        let (_dir, db) = open_tmp();
+        let payload = make_webhook("stripe", b"{}");
+        let id = payload.id;
+
+        db.insert_webhook(&payload).unwrap();
+        assert_eq!(db.all_pending_webhooks().unwrap().len(), 1);
+
+        db.delete_webhook(id).unwrap();
+        assert!(db.all_pending_webhooks().unwrap().is_empty());
+    }
+
+    #[test]
+    fn webhook_multiple_payloads_sorted_by_received_at() {
+        let (_dir, db) = open_tmp();
+
+        let mut first = make_webhook("ci", b"first");
+        let mut second = make_webhook("ci", b"second");
+
+        // Manually set received_at to control ordering
+        first.received_at = Utc::now() - CDur::seconds(10);
+        second.received_at = Utc::now();
+
+        // Insert in reverse order to confirm sorting works
+        db.insert_webhook(&second).unwrap();
+        db.insert_webhook(&first).unwrap();
+
+        let all = db.all_pending_webhooks().unwrap();
+        assert_eq!(all.len(), 2);
+        assert_eq!(all[0].raw_body, b"first");
+        assert_eq!(all[1].raw_body, b"second");
+    }
+
+    #[test]
+    fn empty_db_all_pending_webhooks_returns_empty() {
+        let (_dir, db) = open_tmp();
+        let webhooks = db.all_pending_webhooks().unwrap();
+        assert!(webhooks.is_empty());
+    }
+
+    #[test]
+    fn existing_db_open_adds_webhooks_table() {
+        let dir = TempDir::new().unwrap();
+        let db_path = dir.path().join("test.db");
+
+        // First open — creates ACTIONS and WEBHOOKS tables
+        {
+            let db = ActionDb::open(&db_path).unwrap();
+            let payload = make_webhook("test", b"hello");
+            db.insert_webhook(&payload).unwrap();
+        }
+
+        // Second open — WEBHOOKS table already exists; must not fail
+        {
+            let db = ActionDb::open(&db_path).unwrap();
+            let all = db.all_pending_webhooks().unwrap();
+            assert_eq!(all.len(), 1);
+            assert_eq!(all[0].raw_body, b"hello");
+        }
+    }
+
+    #[test]
+    fn webhook_delete_nonexistent_is_idempotent() {
+        let (_dir, db) = open_tmp();
+        let id = uuid::Uuid::new_v4();
+        // Should not panic or error
+        db.delete_webhook(id).unwrap();
+    }
+
+    // -----------------------------------------------------------------------
+    // Webhook route tests
+    // -----------------------------------------------------------------------
+
+    fn make_route(path: &str) -> WebhookRoute {
+        WebhookRoute::new(path, "my-tool", r#"{"body": {{payload}}}"#)
+    }
+
+    #[test]
+    fn route_insert_and_find_by_path() {
+        let (_dir, db) = open_tmp();
+        let route = make_route("/hooks/github");
+        db.insert_route(&route).unwrap();
+
+        let found = db.find_route_by_path("/hooks/github").unwrap();
+        assert!(found.is_some());
+        let found = found.unwrap();
+        assert_eq!(found.path, "/hooks/github");
+        assert_eq!(found.tool_name, "my-tool");
+    }
+
+    #[test]
+    fn route_duplicate_path_returns_error() {
+        let (_dir, db) = open_tmp();
+        let route1 = make_route("/hooks/stripe");
+        let route2 = make_route("/hooks/stripe");
+        db.insert_route(&route1).unwrap();
+        let err = db.insert_route(&route2).unwrap_err();
+        assert!(
+            matches!(err, SdlcError::OrchestratorDb(_)),
+            "expected OrchestratorDb error for duplicate path"
+        );
+    }
+
+    #[test]
+    fn route_list_sorted_by_created_at() {
+        let (_dir, db) = open_tmp();
+
+        let mut first = make_route("/hooks/first");
+        let mut second = make_route("/hooks/second");
+
+        // Manually set created_at to control ordering
+        first.created_at = Utc::now() - CDur::seconds(10);
+        second.created_at = Utc::now();
+
+        // Insert second first to verify sorting works regardless of insert order
+        db.insert_route(&second).unwrap();
+        db.insert_route(&first).unwrap();
+
+        let routes = db.list_routes().unwrap();
+        assert_eq!(routes.len(), 2);
+        assert_eq!(routes[0].path, "/hooks/first");
+        assert_eq!(routes[1].path, "/hooks/second");
+    }
+
+    #[test]
+    fn route_find_not_found_returns_none() {
+        let (_dir, db) = open_tmp();
+        let found = db.find_route_by_path("/hooks/nonexistent").unwrap();
+        assert!(found.is_none());
+    }
+
+    #[test]
+    fn route_delete_removes_record() {
+        let (_dir, db) = open_tmp();
+        let route = make_route("/hooks/to-delete");
+        let id = route.id;
+        db.insert_route(&route).unwrap();
+        assert_eq!(db.list_routes().unwrap().len(), 1);
+
+        db.delete_route(id).unwrap();
+        assert!(db.list_routes().unwrap().is_empty());
+    }
+
+    #[test]
+    fn route_delete_nonexistent_is_idempotent() {
+        let (_dir, db) = open_tmp();
+        let id = uuid::Uuid::new_v4();
+        db.delete_route(id).unwrap();
+    }
+
+    #[test]
+    fn existing_db_open_adds_webhook_routes_table() {
+        let dir = TempDir::new().unwrap();
+        let db_path = dir.path().join("test2.db");
+
+        // First open: creates ACTIONS + WEBHOOKS + WEBHOOK_ROUTES
+        {
+            let db = ActionDb::open(&db_path).unwrap();
+            let route = make_route("/hooks/init");
+            db.insert_route(&route).unwrap();
+        }
+
+        // Second open: WEBHOOK_ROUTES table already exists; data survives
+        {
+            let db = ActionDb::open(&db_path).unwrap();
+            let routes = db.list_routes().unwrap();
+            assert_eq!(routes.len(), 1);
+            assert_eq!(routes[0].path, "/hooks/init");
+        }
     }
 }

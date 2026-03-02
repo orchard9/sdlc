@@ -1,0 +1,73 @@
+slug: knowledge-query-mode
+title: sdlc knowledge ask — librarian query mode via spawn_agent_run
+description: 'CLI: sdlc knowledge ask ''<question>'' — invokes librarian agent via spawn_agent_run with question plus full knowledge base catalog and entry summaries as context. Returns synthesized answer with cited entry codes. If a gap is detected, suggests sdlc knowledge research <topic>. Server: POST /api/knowledge/ask body:{question} spawns agent run and streams via SSE. SSE events: KnowledgeQueryStarted {question}, KnowledgeQueryCompleted {answer, cited_entries:[{slug,code,title}]}. Add SseMessage variants to state.rs. QueryOptions: max_turns 10, web search tools allowed for librarian to pull recent context.'
+phase: draft
+created_at: 2026-03-02T02:12:23.885278Z
+updated_at: 2026-03-02T02:12:23.885278Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/knowledge-query-mode/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:12:23.885278Z
+  exited: null
+dependencies: []
+archived: false

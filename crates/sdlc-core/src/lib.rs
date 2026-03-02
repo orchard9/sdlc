@@ -1,6 +1,7 @@
 pub mod advisory;
 pub mod ama_thread;
 pub mod artifact;
+pub mod backlog;
 pub mod classifier;
 pub mod comment;
 pub mod config;
@@ -12,6 +13,7 @@ pub mod feedback;
 pub mod focus;
 pub mod investigation;
 pub mod io;
+pub mod knowledge;
 pub mod migrations;
 pub mod milestone;
 pub mod orchestrator;

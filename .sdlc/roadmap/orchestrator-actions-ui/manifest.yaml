@@ -1,0 +1,10 @@
+slug: orchestrator-actions-ui
+title: Orchestrator Actions UI — Setup sidebar page
+status: converging
+created_at: 2026-03-02T06:15:50.828461Z
+updated_at: 2026-03-02T06:28:50.070301Z
+sessions: 2
+orientation:
+  current: SSE, webhook history, action editing, and recurrence text input confirmed — four design decisions locked, one architectural tension surfaced (daemon↔server SSE bridge via sentinel file)
+  next: 'Build: ActionStateChanged SSE variant → WebhookEvent log table → PATCH action route → recurrence parse util → update ActionsPage with third section + edit modal'
+  commit: All four additions are scoped and designed — design is ready to commit into features

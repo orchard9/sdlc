@@ -1,0 +1,16 @@
+partners:
+- name: Maya Goldberg
+  role: Onboarding & First-Run Experience Designer
+  context: Maya led new-user activation at Linear and Vercel. She has direct experience designing the first-action moment for developer tools, running A/B tests on onboarding flows, and a conviction that the empty state IS the onboarding. Ideal for diagnosing why the ponder→run-wave flow is invisible to new users.
+  agent: .claude/agents/maya-goldberg.md
+  recruited_at: 2026-03-02T03:03:53.422596Z
+- name: Xist
+  role: First-Time User Persona — Enterprise Game Dev Engineer
+  context: Xist is the actual user whose confusion surfaced this problem. Enterprise game dev background (Unreal Engine, P4), Agy user. Represents every new power user who comes to SDLC expecting a smart planning tool and doesn't discover autonomous execution for hours.
+  agent: .claude/agents/xist-user.md
+  recruited_at: 2026-03-02T03:03:57.418797Z
+- name: Priya Chakraborty
+  role: Product Strategist & Skeptic
+  context: 'Former product lead at Stripe developer experience. Pushes back on ''better onboarding'' as a cover for ''the product is confusing.'' Forces the question: is this a UI problem, conceptual problem, or product design problem? Critical voice for avoiding false solutions.'
+  agent: .claude/agents/priya-chakraborty.md
+  recruited_at: 2026-03-02T03:04:02.812407Z

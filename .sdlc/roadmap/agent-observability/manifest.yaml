@@ -1,0 +1,13 @@
+slug: agent-observability
+title: Agent Activity Monitor and Quota Visibility
+status: committed
+created_at: 2026-03-02T02:42:14.092817Z
+updated_at: 2026-03-02T04:09:36.142106Z
+committed_at: 2026-03-02T04:08:45.874486Z
+committed_to:
+- v15-agent-observability
+sessions: 2
+orientation:
+  current: Foundation shipped — telemetry capture (run-events-api) and activity feed (run-activity-ui) are done. Spike doc confirmed in repo. Original vision still has quota visibility, time-series graph, and concurrency signal ahead.
+  next: 'Crystallize remaining observability work into a milestone: quota panel, time-series chart, concurrency heatmap, timestamp fix.'
+  commit: Team aligned on v2 scope — ready to run /sdlc-ponder-commit agent-observability.

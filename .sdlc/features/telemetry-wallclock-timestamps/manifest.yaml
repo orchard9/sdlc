@@ -1,0 +1,72 @@
+slug: telemetry-wallclock-timestamps
+title: Add wall-clock timestamp to every telemetry event
+phase: draft
+created_at: 2026-03-02T04:09:31.195263Z
+updated_at: 2026-03-02T04:09:31.195263Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/telemetry-wallclock-timestamps/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T04:09:31.195263Z
+  exited: null
+dependencies: []
+archived: false

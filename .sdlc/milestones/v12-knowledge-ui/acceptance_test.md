@@ -1,0 +1,18 @@
+- [ ] Knowledge page visible in the sdlc UI at `/knowledge`
+- [ ] Sidebar shows Library icon below Guidelines in the Plan group
+- [ ] Left pane renders the catalog tree — top-level classes expandable
+- [ ] Clicking a catalog class filters the center pane to entries in that class
+- [ ] Search bar in the left pane filters entries by full-text match
+- [ ] Center pane shows entry list with staleness badges (url_404, aged_out) where applicable
+- [ ] Clicking an entry opens the detail in the right pane
+- [ ] Right pane renders content.md as markdown
+- [ ] Right pane shows source provenance footer (type, url/path, captured_at for each source)
+- [ ] Right pane shows related entry links clickable by code
+- [ ] [Research More] button in right pane triggers a research run for the entry's topic
+- [ ] Running an advisory analysis includes a "Project Knowledge" context section in the output
+- [ ] Advisory output cites at least one relevant knowledge entry when entries exist
+- [ ] `/sdlc-knowledge` slash command installed at `~/.claude/commands/sdlc-knowledge.md`
+- [ ] `/sdlc-knowledge "what is spawn_agent_run?"` returns a synthesized answer with citations
+- [ ] `/sdlc-knowledge init` triggers librarian initialization
+- [ ] GUIDANCE_MD_CONTENT in init.rs includes `sdlc knowledge *` commands in the CLI reference table
+- [ ] `SDLC_NO_NPM=1 cargo test --all` passes

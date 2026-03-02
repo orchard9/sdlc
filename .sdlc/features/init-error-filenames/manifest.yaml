@@ -1,0 +1,75 @@
+slug: init-error-filenames
+title: Add File Paths to Init Error Messages
+phase: specified
+created_at: 2026-03-02T03:16:00.546209Z
+updated_at: 2026-03-02T03:16:44.584232Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/init-error-filenames/spec.md
+  created_at: 2026-03-02T03:16:14.675510Z
+  approved_at: 2026-03-02T03:16:44.583264Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/init-error-filenames/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/init-error-filenames/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/init-error-filenames/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/init-error-filenames/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/init-error-filenames/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/init-error-filenames/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:00.546209Z
+  exited: 2026-03-02T03:16:44.584232Z
+- phase: specified
+  entered: 2026-03-02T03:16:44.584232Z
+  exited: null
+dependencies: []
+archived: false

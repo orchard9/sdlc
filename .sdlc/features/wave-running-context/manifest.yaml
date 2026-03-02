@@ -1,0 +1,75 @@
+slug: wave-running-context
+title: Wave Running Context and Recovery Path
+phase: specified
+created_at: 2026-03-02T03:16:32.357199Z
+updated_at: 2026-03-02T03:19:13.574104Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/wave-running-context/spec.md
+  created_at: 2026-03-02T03:18:38.502578Z
+  approved_at: 2026-03-02T03:19:13.573204Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/wave-running-context/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/wave-running-context/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/wave-running-context/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/wave-running-context/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/wave-running-context/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/wave-running-context/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:32.357199Z
+  exited: 2026-03-02T03:19:13.574104Z
+- phase: specified
+  entered: 2026-03-02T03:19:13.574104Z
+  exited: null
+dependencies: []
+archived: false

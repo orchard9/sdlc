@@ -45,6 +45,9 @@ pub enum SdlcError {
     #[error("blocked by: {0}")]
     Blocked(String),
 
+    #[error("backlog item not found: {0}")]
+    BacklogItemNotFound(String),
+
     #[error("ponder entry not found: {0}")]
     PonderNotFound(String),
 

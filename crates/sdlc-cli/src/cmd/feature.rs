@@ -1,7 +1,7 @@
 use crate::output::{print_json, print_table};
 use anyhow::Context;
 use clap::Subcommand;
-use sdlc_core::{config::Config, feature::Feature, state::State, types::Phase};
+use sdlc_core::{config::Config, feature::Feature, paths, state::State, types::Phase};
 use std::path::Path;
 use std::str::FromStr;
 
@@ -35,6 +35,12 @@ pub enum FeatureSubcommand {
         title: Option<String>,
         #[arg(long)]
         description: Option<String>,
+        /// Replace dependencies with one or more feature slugs
+        #[arg(long = "depends-on", value_name = "SLUG")]
+        depends_on: Vec<String>,
+        /// Clear all dependencies
+        #[arg(long = "clear-depends-on")]
+        clear_depends_on: bool,
     },
 }
 
@@ -53,7 +59,17 @@ pub fn run(root: &Path, subcmd: FeatureSubcommand, json: bool) -> anyhow::Result
             slug,
             title,
             description,
-        } => update(root, &slug, title.as_deref(), description.as_deref(), json),
+            depends_on,
+            clear_depends_on,
+        } => update(
+            root,
+            &slug,
+            title.as_deref(),
+            description.as_deref(),
+            &depends_on,
+            clear_depends_on,
+            json,
+        ),
     }
 }
 
@@ -210,13 +226,21 @@ fn update(
     slug: &str,
     title: Option<&str>,
     description: Option<&str>,
+    depends_on: &[String],
+    clear_depends_on: bool,
     json: bool,
 ) -> anyhow::Result<()> {
     let mut feature =
         Feature::load(root, slug).with_context(|| format!("feature '{slug}' not found"))?;
 
-    if title.is_none() && description.is_none() {
-        anyhow::bail!("nothing to update — provide --title and/or --description");
+    if clear_depends_on && !depends_on.is_empty() {
+        anyhow::bail!("cannot use --depends-on with --clear-depends-on");
+    }
+
+    if title.is_none() && description.is_none() && depends_on.is_empty() && !clear_depends_on {
+        anyhow::bail!(
+            "nothing to update — provide --title, --description, --depends-on, or --clear-depends-on"
+        );
     }
 
     if let Some(t) = title {
@@ -225,6 +249,23 @@ fn update(
     if let Some(d) = description {
         feature.set_description(d);
     }
+    if !depends_on.is_empty() {
+        let mut deps = Vec::new();
+        for dep in depends_on {
+            let dep = dep.trim();
+            paths::validate_slug(dep)
+                .with_context(|| format!("invalid dependency slug '{dep}'"))?;
+            if dep == slug {
+                anyhow::bail!("feature '{slug}' cannot depend on itself");
+            }
+            if !deps.iter().any(|d| d == dep) {
+                deps.push(dep.to_string());
+            }
+        }
+        feature.dependencies = deps;
+    } else if clear_depends_on {
+        feature.dependencies.clear();
+    }
     feature.save(root).context("failed to save feature")?;
 
     if json {
@@ -232,6 +273,7 @@ fn update(
             "slug": slug,
             "title": feature.title,
             "description": feature.description,
+            "dependencies": feature.dependencies,
         }))?;
     } else {
         println!("Updated feature: {slug}");
@@ -240,6 +282,11 @@ fn update(
         }
         if let Some(d) = description {
             println!("  description: {d}");
+        }
+        if !depends_on.is_empty() {
+            println!("  depends_on: {}", feature.dependencies.join(", "));
+        } else if clear_depends_on {
+            println!("  depends_on: (cleared)");
         }
     }
     Ok(())

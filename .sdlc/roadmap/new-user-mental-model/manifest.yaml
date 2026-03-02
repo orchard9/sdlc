@@ -1,0 +1,11 @@
+slug: new-user-mental-model
+title: New User Guided Workflow and Discovery
+status: committed
+created_at: 2026-03-02T02:42:14.111387Z
+updated_at: 2026-03-02T03:19:16.577594Z
+committed_at: 2026-03-02T03:19:16.577594Z
+sessions: 2
+orientation:
+  current: Diagnosed the mental model gap as a product design problem, not a UI or docs problem. Proposed concrete interventions ordered by impact.
+  next: Implement A3 (empty state redesign) and C1/C2 (rename + subtitles) as immediate low-effort fixes. Then design the Ponder-first entry path (A1) and pipeline indicator (A2).
+  commit: 'Ponder is ready to commit. The design direction is clear: make ponder the first action, make the flow visible, surface Run Wave on the dashboard. Three features + one pipeline component.'

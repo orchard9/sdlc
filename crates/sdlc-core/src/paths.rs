@@ -30,6 +30,7 @@ pub const SECRETS_KEYS_FILE: &str = ".sdlc/secrets/keys.yaml";
 pub const SECRETS_ENVS_DIR: &str = ".sdlc/secrets/envs";
 
 pub const ADVISORY_FILE: &str = ".sdlc/advisory.yaml";
+pub const BACKLOG_FILE: &str = ".sdlc/backlog.yaml";
 pub const ESCALATIONS_FILE: &str = ".sdlc/escalations.yaml";
 pub const FEEDBACK_FILE: &str = ".sdlc/feedback.yaml";
 
@@ -230,6 +231,10 @@ pub fn advisory_path(root: &Path) -> PathBuf {
     root.join(ADVISORY_FILE)
 }
 
+pub fn backlog_path(root: &Path) -> PathBuf {
+    root.join(BACKLOG_FILE)
+}
+
 pub fn escalations_path(root: &Path) -> PathBuf {
     root.join(ESCALATIONS_FILE)
 }
@@ -244,6 +249,10 @@ pub fn ai_lookup_dir(root: &Path) -> PathBuf {
 
 pub fn vision_md_path(root: &Path) -> PathBuf {
     root.join(VISION_MD)
+}
+
+pub fn orchestrator_db_path(root: &Path) -> PathBuf {
+    root.join(SDLC_DIR).join("orchestrator.db")
 }
 
 pub fn architecture_md_path(root: &Path) -> PathBuf {

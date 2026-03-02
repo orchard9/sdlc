@@ -1,0 +1,75 @@
+slug: readme-install-guide
+title: SSH and make install in README
+phase: specified
+created_at: 2026-03-02T03:16:00.552672Z
+updated_at: 2026-03-02T03:17:04.150002Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/readme-install-guide/spec.md
+  created_at: 2026-03-02T03:17:04.143250Z
+  approved_at: 2026-03-02T03:17:04.149235Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/readme-install-guide/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/readme-install-guide/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/readme-install-guide/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/readme-install-guide/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/readme-install-guide/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/readme-install-guide/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:00.552672Z
+  exited: 2026-03-02T03:17:04.150002Z
+- phase: specified
+  entered: 2026-03-02T03:17:04.150002Z
+  exited: null
+dependencies: []
+archived: false

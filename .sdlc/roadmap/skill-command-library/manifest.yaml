@@ -1,0 +1,13 @@
+slug: skill-command-library
+title: Command and Skill Discoverability Library
+status: committed
+created_at: 2026-03-02T02:42:14.117196Z
+updated_at: 2026-03-02T04:09:34.491587Z
+committed_at: 2026-03-02T04:08:52.959332Z
+committed_to:
+- v14-new-user-experience
+sessions: 2
+orientation:
+  current: Architecture and content decisions made — commands page has a clear spec ready to build
+  next: 'Create feature `commands-docs-page` and implement: CommandMeta in server, GET /api/commands, CommandsPage in frontend with category grouping'
+  commit: Concrete implementation spec written — feature can be created and driven to completion

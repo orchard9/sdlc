@@ -1,0 +1,9 @@
+slug: v11-knowledge-librarian
+title: 'Knowledge base: the active librarian'
+vision: The librarian agent runs autonomously — harvesting insights from completed investigations without human action, answering natural-language questions across all project knowledge with citations, detecting stale sources, and running scheduled maintenance. Maintenance is structurally forced, never voluntary.
+features:
+- knowledge-query-mode
+- knowledge-research-mode
+- knowledge-librarian-maintain
+created_at: 2026-03-02T02:11:51.427921Z
+updated_at: 2026-03-02T02:12:36.483151Z

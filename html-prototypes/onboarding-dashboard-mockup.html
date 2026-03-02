@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SDLC Onboarding + Dashboard Mockup</title>
+    <style>
+      :root {
+        --bg-deep: #0b1320;
+        --bg-mid: #111f2f;
+        --panel: rgba(255, 255, 255, 0.07);
+        --panel-strong: rgba(255, 255, 255, 0.11);
+        --text: #ecf3f9;
+        --muted: #9db0c3;
+        --accent: #19c3a4;
+        --accent-2: #ff9f43;
+        --danger: #f35c5c;
+        --ok: #37d67a;
+        --line: rgba(255, 255, 255, 0.14);
+        --shadow: 0 18px 48px rgba(0, 0, 0, 0.42);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 8% 10%, #163450 0%, transparent 32%),
+          radial-gradient(circle at 92% 20%, #33243f 0%, transparent 28%),
+          linear-gradient(155deg, var(--bg-deep), var(--bg-mid));
+        font-family: "Avenir Next", "Segoe UI", "Trebuchet MS", sans-serif;
+        line-height: 1.45;
+      }
+
+      .wrap {
+        max-width: 1260px;
+        margin: 0 auto;
+        padding: 28px 22px 60px;
+        animation: rise-in 680ms ease;
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        margin: 0;
+        letter-spacing: 0.01em;
+      }
+
+      .hero {
+        display: grid;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--accent);
+        border: 1px solid rgba(25, 195, 164, 0.45);
+        background: rgba(25, 195, 164, 0.09);
+        border-radius: 999px;
+        padding: 5px 12px;
+      }
+
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 999px;
+        background: var(--accent);
+        box-shadow: 0 0 0 0 rgba(25, 195, 164, 0.6);
+        animation: pulse 1.7s infinite;
+      }
+
+      .hero p {
+        color: var(--muted);
+        margin: 0;
+        max-width: 860px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+      }
+
+      .grid.top {
+        grid-template-columns: 1.08fr 1fr;
+        margin-bottom: 20px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        background: var(--panel);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(8px);
+      }
+
+      .panel-head {
+        padding: 16px 18px 12px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .panel-head p {
+        margin: 4px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .timeline {
+        padding: 14px 16px 18px;
+        display: grid;
+        gap: 10px;
+      }
+
+      .step {
+        display: grid;
+        grid-template-columns: 34px 1fr;
+        gap: 12px;
+        align-items: start;
+        padding: 11px;
+        border-radius: 11px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: rgba(4, 11, 19, 0.36);
+        animation: stagger-in 500ms ease both;
+      }
+
+      .step:nth-child(2) { animation-delay: 45ms; }
+      .step:nth-child(3) { animation-delay: 90ms; }
+      .step:nth-child(4) { animation-delay: 135ms; }
+      .step:nth-child(5) { animation-delay: 180ms; }
+      .step:nth-child(6) { animation-delay: 225ms; }
+      .step:nth-child(7) { animation-delay: 270ms; }
+      .step:nth-child(8) { animation-delay: 315ms; }
+
+      .index {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
+        display: grid;
+        place-items: center;
+        font-weight: 700;
+        color: #0b1522;
+        background: linear-gradient(135deg, var(--accent), #5ee4cd);
+      }
+
+      .step h4 {
+        font-size: 15px;
+        margin-bottom: 2px;
+      }
+
+      .step p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .cmd {
+        margin-top: 7px;
+        display: inline-block;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        color: #b8ffe7;
+        padding: 5px 8px;
+        border-radius: 7px;
+        background: rgba(9, 30, 39, 0.8);
+        border: 1px solid rgba(25, 195, 164, 0.35);
+      }
+
+      .walkthrough {
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .lane {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(5, 11, 19, 0.45);
+        border-radius: 12px;
+        padding: 12px;
+      }
+
+      .lane h4 {
+        font-size: 14px;
+        color: #d7e5f2;
+        margin-bottom: 6px;
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+      }
+
+      .chip {
+        padding: 4px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        border: 1px solid;
+      }
+
+      .chip.ok { color: #d2ffe7; border-color: rgba(55, 214, 122, 0.7); background: rgba(55, 214, 122, 0.16); }
+      .chip.warn { color: #ffe6c6; border-color: rgba(255, 159, 67, 0.8); background: rgba(255, 159, 67, 0.14); }
+      .chip.bad { color: #ffd7d7; border-color: rgba(243, 92, 92, 0.8); background: rgba(243, 92, 92, 0.14); }
+
+      .dashboard {
+        padding: 14px;
+        display: grid;
+        gap: 12px;
+      }
+
+      .row-3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .row-2 {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr;
+        gap: 10px;
+      }
+
+      .card {
+        background: rgba(7, 14, 24, 0.52);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 11px;
+        padding: 12px;
+      }
+
+      .card h4 {
+        margin-bottom: 6px;
+        font-size: 13px;
+        color: #cde2f2;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+      }
+
+      .card p,
+      .card li {
+        margin: 0;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      ul {
+        margin: 7px 0 0;
+        padding-left: 16px;
+      }
+
+      .feed {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        color: #c8d9e7;
+      }
+
+      .ascii {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: rgba(7, 14, 24, 0.62);
+      }
+
+      .ascii h3 {
+        margin-bottom: 10px;
+      }
+
+      pre {
+        margin: 0;
+        overflow-x: auto;
+        white-space: pre;
+        color: #d9e8f6;
+        font-size: 12px;
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      .legend {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+
+      .legend span {
+        font-size: 12px;
+        color: var(--muted);
+      }
+
+      @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(25, 195, 164, 0.6); }
+        70% { box-shadow: 0 0 0 9px rgba(25, 195, 164, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(25, 195, 164, 0); }
+      }
+
+      @keyframes rise-in {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes stagger-in {
+        from { opacity: 0; transform: translateY(9px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @media (max-width: 1060px) {
+        .grid.top,
+        .row-3,
+        .row-2 {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="hero">
+        <span class="eyebrow"><span class="dot"></span> Proposed Experience Upgrade</span>
+        <h1>Fast Onboarding + Action-Oriented Control Tower</h1>
+        <p>
+          This mockup compresses "time-to-first-win" and makes the dashboard operationally decisive.
+          Onboarding drives users to their first successful lifecycle transition, then lands them in a dashboard
+          centered on focus, approvals, blockers, and next executable actions.
+        </p>
+      </section>
+
+      <section class="grid top">
+        <article class="panel">
+          <header class="panel-head">
+            <h2>Onboarding Flow (first 15 minutes)</h2>
+            <p>Guided path from zero context to first completed transition.</p>
+          </header>
+          <div class="timeline">
+            <div class="step">
+              <div class="index">1</div>
+              <div>
+                <h4>Choose Start Mode</h4>
+                <p>New project or existing repo. Set expected operator mode.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">2</div>
+              <div>
+                <h4>Auto-Detect State</h4>
+                <p>Scan for `.sdlc/`, stack hints, and missing prerequisites.</p>
+                <span class="cmd">sdlc state</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">3</div>
+              <div>
+                <h4>Pick Operating Style</h4>
+                <p>Guided (step mode) vs Autonomous (run to HITL gate).</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">4</div>
+              <div>
+                <h4>Define First Milestone Outcome</h4>
+                <p>Capture one user-visible outcome and acceptance criteria.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">5</div>
+              <div>
+                <h4>Generate Starter Plan</h4>
+                <p>Create milestone + first features + dependency order.</p>
+                <span class="cmd">sdlc feature create &lt;slug&gt; --title "..."</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">6</div>
+              <div>
+                <h4>Run First Directive with Guard Rails</h4>
+                <p>Left panel shows live `next --json`; right panel executes action.</p>
+                <span class="cmd">sdlc next --for &lt;slug&gt; --json</span>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">7</div>
+              <div>
+                <h4>Checkpoint + Explain Why It Worked</h4>
+                <p>Show exact files touched and what phase moved.</p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="index">8</div>
+              <div>
+                <h4>Hand Off to Dashboard</h4>
+                <p>Pin a deterministic "Do Next" queue and start event feed.</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <header class="panel-head">
+            <h2>Guided First-Run Panel</h2>
+            <p>Single place to understand, execute, and validate the first directive loop.</p>
+          </header>
+          <div class="walkthrough">
+            <div class="lane">
+              <h4>Live Directive Snapshot</h4>
+              <div class="chip-row">
+                <span class="chip ok">feature: auth-login</span>
+                <span class="chip warn">action: create_spec</span>
+                <span class="chip ok">is_heavy: false</span>
+              </div>
+            </div>
+            <div class="lane">
+              <h4>Execution Rail</h4>
+              <p class="feed">01. write `.sdlc/features/auth-login/spec.md`</p>
+              <p class="feed">02. run `sdlc artifact draft auth-login spec`</p>
+              <p class="feed">03. run `sdlc next --for auth-login --json`</p>
+            </div>
+            <div class="lane">
+              <h4>Completion Signal</h4>
+              <div class="chip-row">
+                <span class="chip ok">draft recorded</span>
+                <span class="chip ok">phase advanced</span>
+                <span class="chip bad">open blocker: none</span>
+              </div>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel">
+        <header class="panel-head">
+          <h2>Dashboard Mockup (Control Tower)</h2>
+          <p>Prioritizes execution decisions over passive status display.</p>
+        </header>
+
+        <div class="dashboard">
+          <div class="row-3">
+            <div class="card">
+              <h4>Focus Now</h4>
+              <p><strong>Feature:</strong> auth-login</p>
+              <p><strong>Next:</strong> approve_spec</p>
+              <p><strong>Owner:</strong> autonomous-runner</p>
+            </div>
+            <div class="card">
+              <h4>Needs Approval</h4>
+              <ul>
+                <li>auth-login / spec</li>
+                <li>billing-sync / design</li>
+                <li>search-v2 / qa_plan</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>Blockers</h4>
+              <ul>
+                <li>release-docs: unresolved question</li>
+                <li>infra-upgrade: external dependency</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="card">
+              <h4>Next Action Queue</h4>
+              <p class="feed">1) auth-login    -> approve_spec         [open]</p>
+              <p class="feed">2) billing-sync  -> create_tasks         [open]</p>
+              <p class="feed">3) search-v2     -> wait_for_approval    [open]</p>
+              <p class="feed">4) docs-cleanup   -> implement_task       [heavy]</p>
+            </div>
+            <div class="card">
+              <h4>Active Runs</h4>
+              <p class="feed">run-wave:v1.2      running   04:21</p>
+              <p class="feed">ponder:enterprise  idle</p>
+              <p class="feed">milestone-uat:v1.2 failed</p>
+            </div>
+          </div>
+
+          <div class="row-2">
+            <div class="card">
+              <h4>Activity Feed (SSE)</h4>
+              <p class="feed">12:03 run started: auth-login</p>
+              <p class="feed">12:04 artifact drafted: spec.md</p>
+              <p class="feed">12:05 directive: approve_spec</p>
+              <p class="feed">12:06 run finished: completed</p>
+            </div>
+            <div class="card">
+              <h4>Quality + Quick Actions</h4>
+              <p>Tests: <strong>576 pass / 0 fail</strong></p>
+              <p>Prompt/CLI drift checks: <strong>2 warnings</strong></p>
+              <div class="chip-row" style="margin-top: 8px;">
+                <span class="chip ok">Run Focused Feature</span>
+                <span class="chip warn">Open Review Queue</span>
+                <span class="chip ok">Prepare Milestone</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="ascii">
+        <h3>Dashboard ASCII Blueprint</h3>
+<pre>+=================================================================================================+
+| SDLC DASHBOARD                                      Project: sdlc                 Mode: Guided |
++=================================================================================================+
+| FOCUS NOW                         | NEEDS APPROVAL                  | BLOCKERS                  |
+| Feature: auth-login               | 3 artifacts pending             | 1 dependency gate         |
++-------------------------------------------------------------------------------------------------+
+| PIPELINE (by phase)                                                                          [All]|
+| draft  specified  planned  ready  implementation  review  audit  qa  merge  released            |
++-------------------------------------------------------------------------------------------------+
+| ACTIVE RUNS                                    | NEXT ACTION QUEUE                              |
+| run-wave:v1.2   running 04:21                  | 1) auth-login -> approve_spec                  |
+| milestone-uat    failed                         | 2) billing-sync -> create_tasks                |
++-------------------------------------------------------------------------------------------------+
+| ACTIVITY FEED (SSE)                            | QUALITY                                         |
+| run started -> artifact drafted -> done        | tests pass, drift warnings, quick actions      |
++=================================================================================================+
+</pre>
+        <div class="legend">
+          <span>Goal: reduce setup friction</span>
+          <span>Goal: expose deterministic next action</span>
+          <span>Goal: surface blockers early</span>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

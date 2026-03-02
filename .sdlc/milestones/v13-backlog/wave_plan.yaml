@@ -1,0 +1,13 @@
+milestone: v13-backlog
+waves:
+  - wave: 1
+    rationale: "Core value — the CLI and data model. This is the minimum needed for agents to start capturing backlog items."
+    features:
+      - backlog-core
+      - backlog-cli
+      - backlog-guidance
+  - wave: 2
+    rationale: "Visibility — server routes and dashboard section. Adds web UI access and REST API for frontend consumers."
+    features:
+      - backlog-server
+      - backlog-dashboard

@@ -31,19 +31,47 @@ use crate::{
 // Input validation
 // ---------------------------------------------------------------------------
 
-/// Validate that a slug contains only safe characters: a-z, A-Z, 0-9, hyphen, underscore.
-/// Returns 400 Bad Request if the slug contains anything else.
+const DISPLAY_TRUNCATE_CHARS: usize = 2000;
+
+/// Validate a slug using the same contract as sdlc-core.
 fn validate_slug(slug: &str) -> Result<(), AppError> {
-    if slug.is_empty()
-        || !slug
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_')
-    {
-        return Err(AppError::bad_request(format!(
-            "Invalid slug '{slug}': must contain only letters, digits, hyphens, and underscores"
-        )));
+    sdlc_core::paths::validate_slug(slug)
+        .map_err(|_| AppError::bad_request(format!("invalid slug '{slug}'")))
+}
+
+/// Truncate text by character count (not bytes), preserving valid UTF-8.
+fn truncate_chars(input: &str, max_chars: usize) -> String {
+    match input.char_indices().nth(max_chars) {
+        Some((idx, _)) => input[..idx].to_string(),
+        None => input.to_string(),
     }
-    Ok(())
+}
+
+/// Truncate text by character count and append an ellipsis when truncated.
+fn truncate_chars_with_ellipsis(input: &str, max_chars: usize) -> String {
+    match input.char_indices().nth(max_chars) {
+        Some((idx, _)) => format!("{}…", &input[..idx]),
+        None => input.to_string(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn truncate_chars_handles_multibyte_utf8() {
+        let s = "hello 🧪 world";
+        let truncated = truncate_chars(s, 7);
+        assert_eq!(truncated, "hello 🧪");
+    }
+
+    #[test]
+    fn truncate_chars_with_ellipsis_marks_truncation() {
+        let s = "abcdef";
+        assert_eq!(truncate_chars_with_ellipsis(s, 3), "abc…");
+        assert_eq!(truncate_chars_with_ellipsis(s, 6), "abcdef");
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -71,12 +99,11 @@ pub(crate) async fn spawn_agent_run(
     // Create the broadcast channel and build the RunRecord before taking the lock.
     let run_id = generate_run_id();
     let target = key.split(':').next_back().unwrap_or(&key).to_string();
-    // Store a truncated prompt for display in the activity feed (first 2000 chars)
-    let prompt_preview = if prompt.len() > 2000 {
-        Some(format!("{}…", &prompt[..2000]))
-    } else {
-        Some(prompt.clone())
-    };
+    // Store a truncated prompt for display in the activity feed.
+    let prompt_preview = Some(truncate_chars_with_ellipsis(
+        &prompt,
+        DISPLAY_TRUNCATE_CHARS,
+    ));
     let record = RunRecord {
         id: run_id.clone(),
         key: key.clone(),
@@ -487,8 +514,8 @@ pub async fn start_milestone_uat(
     let prompt = format!(
         "Run the acceptance test for milestone '{slug}'. \
          Call `sdlc milestone info {slug} --json` to load the milestone and acceptance test. \
-         Execute every checklist step. Write results to uat_results.md via \
-         `sdlc milestone uat-results {slug} --file ...`. \
+         Execute every checklist step. Write signed checklist results to \
+         `.sdlc/milestones/{slug}/uat_results.md`. \
          Then call `sdlc milestone complete {slug}` if all steps pass.",
     );
     let label = format!("UAT: {slug}");
@@ -718,7 +745,7 @@ fn message_to_event(msg: &Message) -> serde_json::Value {
                                     .next()
                             })
                             .unwrap_or("");
-                        let truncated = &text[..text.len().min(2000)];
+                        let truncated = truncate_chars(text, DISPLAY_TRUNCATE_CHARS);
                         Some(serde_json::json!({
                             "type": "tool_result",
                             "tool_use_id": tool_use_id,

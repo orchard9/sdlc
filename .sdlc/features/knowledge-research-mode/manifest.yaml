@@ -1,0 +1,73 @@
+slug: knowledge-research-mode
+title: sdlc knowledge research — agent-driven multi-source research with sessions
+description: 'CLI: sdlc knowledge research ''<topic>'' [--code ''100.20''] — spawns agent research run via spawn_agent_run. Agent performs multi-source research (web search + local file scan), synthesizes findings into a comprehensive entry, logs research sessions via workspace.rs session protocol. Research sessions stored in .sdlc/knowledge/<code-dashed>-<slug>/sessions/. Server: POST /api/knowledge/:slug/research spawns research agent run (or creates entry first if slug not provided). SSE: KnowledgeResearchStarted {slug}, KnowledgeResearchCompleted {slug}. QueryOptions: max_turns 20, web search tools, file read tools. Uses same spawn_agent_run pattern as investigation chat.'
+phase: draft
+created_at: 2026-03-02T02:12:29.042895Z
+updated_at: 2026-03-02T02:12:29.042895Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/knowledge-research-mode/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:12:29.042895Z
+  exited: null
+dependencies: []
+archived: false

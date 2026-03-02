@@ -1,0 +1,9 @@
+slug: v12-knowledge-ui
+title: 'Knowledge base: UI and integrations'
+vision: The knowledge base is browsable in the sdlc UI with a three-pane catalog explorer, advisory analyses draw from it as context so the system stops re-discovering known patterns, and the /sdlc-knowledge slash command is available across all supported AI CLIs.
+features:
+- knowledge-page-ui
+- knowledge-advisory-integration
+- knowledge-slash-command
+created_at: 2026-03-02T02:11:53.488728Z
+updated_at: 2026-03-02T02:13:01.497585Z

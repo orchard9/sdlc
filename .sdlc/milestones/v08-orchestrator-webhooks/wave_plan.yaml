@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: orchestrator-webhook-routing
+    title: WebhookRoute registration and tick dispatch
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: orchestrator-webhook-storage
+    title: HTTP webhook receiver and raw payload storage in redb
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

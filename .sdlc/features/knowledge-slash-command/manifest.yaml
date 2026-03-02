@@ -1,0 +1,73 @@
+slug: knowledge-slash-command
+title: /sdlc-knowledge slash command in init.rs — all four AI CLI platforms
+description: 'Add SDLC_KNOWLEDGE_COMMAND (Claude Code markdown with frontmatter), SDLC_KNOWLEDGE_PLAYBOOK (Gemini/OpenCode TOML), and SDLC_KNOWLEDGE_SKILL (agents SKILL.md) constants to crates/sdlc-cli/src/cmd/init.rs. Command behavior: no arg shows catalog overview and entry count by category; <topic> invokes query mode and returns synthesized answer with citations; ''init'' runs knowledge librarian init; ''research <topic>'' runs active research+index; ''maintain'' runs maintenance pass. Register in all four write_user_* functions (Claude, Gemini, OpenCode, Agents). Add ''knowledge-slash-command'' filenames to migrate_legacy_project_scaffolding(). Update GUIDANCE_MD_CONTENT in init.rs: add sdlc knowledge * commands to the CLI reference table in section 6 ''Using sdlc''.'
+phase: draft
+created_at: 2026-03-02T02:13:01.490341Z
+updated_at: 2026-03-02T02:13:01.490341Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/knowledge-slash-command/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:13:01.490341Z
+  exited: null
+dependencies: []
+archived: false

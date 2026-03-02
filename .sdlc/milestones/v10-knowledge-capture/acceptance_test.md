@@ -1,0 +1,27 @@
+- [ ] `sdlc knowledge status` shows "not initialized" with a hint before init runs
+- [ ] `sdlc knowledge librarian init` runs on this project without error
+- [ ] `sdlc knowledge librarian init` run a second time completes without error and produces no duplicates (idempotency)
+- [ ] Init scans VISION.md and ARCHITECTURE.md and uses them for catalog generation
+- [ ] Init harvests completed investigations — at least one knowledge entry created per completed investigation
+- [ ] Init generates `.sdlc/knowledge/catalog.yaml` with 5–7 domain categories derived from the project
+- [ ] Init generates `.claude/agents/knowledge-librarian.md` with the catalog and project context baked in
+- [ ] `sdlc knowledge status` shows entry count, catalog category count, and last-maintained date after init
+- [ ] `sdlc knowledge list` returns a table with code, title, summary (first 60 chars), status, updated columns
+- [ ] `sdlc knowledge list --json` returns valid JSON array
+- [ ] `sdlc knowledge search "agent"` returns relevant entries with match excerpts (searches content.md, not just title)
+- [ ] `sdlc knowledge show <slug>` renders code badge, title, summary, tags, sources, and full content.md as readable text
+- [ ] `sdlc knowledge show <slug> --json` returns full entry + content as JSON
+- [ ] `sdlc knowledge add --title "Test Entry" --code "100.10" --content "Test content"` creates an entry
+- [ ] `sdlc knowledge add --title "URL Entry" --from-url "https://example.com"` stores URL source + fetches page title (no agent synthesis required)
+- [ ] `sdlc knowledge add --title "File Entry" --from-file "README.md"` reads and stores file content
+- [ ] `sdlc knowledge add --title "No Code Entry" --content "..."` creates entry with code:uncategorized, status:draft
+- [ ] `sdlc knowledge update <slug> --code "100.20"` changes code in entry.yaml without renaming the directory
+- [ ] Entry directories are at `.sdlc/knowledge/<slug>/` — slug-only, NO code prefix in path
+- [ ] `sdlc knowledge catalog show` prints the full taxonomy tree
+- [ ] `sdlc knowledge catalog add --code "100.40" --name "New Category"` adds a division
+- [ ] `GET /api/knowledge/catalog` returns the taxonomy tree as JSON
+- [ ] `GET /api/knowledge` returns all entries (metadata only)
+- [ ] `GET /api/knowledge?code=100` returns entries filtered by code prefix
+- [ ] `POST /api/knowledge` creates an entry via the server
+- [ ] `GET /api/knowledge/:slug` returns entry detail with content
+- [ ] `SDLC_NO_NPM=1 cargo test --all` passes

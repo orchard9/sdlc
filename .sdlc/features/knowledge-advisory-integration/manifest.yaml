@@ -1,0 +1,73 @@
+slug: knowledge-advisory-integration
+title: Advisory runs draw from knowledge base — inject relevant entries as context
+description: 'Modify crates/sdlc-server/src/routes/advisory.rs: before building the advisory agent prompt, query the knowledge base for relevant entries (top-N by tag intersection + recency, N=10). Inject as a ''Project Knowledge'' context block in the advisory prompt: each entry shows its code, title, and summary. This prevents the advisory system from re-discovering patterns already captured. The advisory output should cite relevant knowledge entries when they inform findings. Add GET /api/knowledge/relevant?tags=a,b&limit=10 server endpoint to support this query pattern.'
+phase: draft
+created_at: 2026-03-02T02:12:53.589906Z
+updated_at: 2026-03-02T02:12:53.589906Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/knowledge-advisory-integration/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:12:53.589906Z
+  exited: null
+dependencies: []
+archived: false

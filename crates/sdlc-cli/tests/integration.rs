@@ -456,6 +456,61 @@ fn feature_show() {
         .stdout(predicate::str::contains("draft"));
 }
 
+#[test]
+fn feature_update_dependencies_and_clear() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    sdlc(&dir)
+        .args(["feature", "create", "auth", "--title", "Auth"])
+        .assert()
+        .success();
+    sdlc(&dir)
+        .args(["feature", "create", "billing", "--title", "Billing"])
+        .assert()
+        .success();
+
+    sdlc(&dir)
+        .args(["feature", "update", "auth", "--depends-on", "billing"])
+        .assert()
+        .success();
+
+    let show_output = sdlc(&dir)
+        .args(["feature", "show", "auth", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let show_json: serde_json::Value = serde_json::from_slice(&show_output).unwrap();
+    assert_eq!(
+        show_json["dependencies"].as_array().unwrap(),
+        &vec![serde_json::json!("billing")]
+    );
+
+    sdlc(&dir)
+        .args(["feature", "update", "auth", "--clear-depends-on"])
+        .assert()
+        .success();
+
+    let show_output_after_clear = sdlc(&dir)
+        .args(["feature", "show", "auth", "--json"])
+        .assert()
+        .success()
+        .get_output()
+        .stdout
+        .clone();
+    let show_json_after_clear: serde_json::Value =
+        serde_json::from_slice(&show_output_after_clear).unwrap();
+    assert_eq!(
+        show_json_after_clear["dependencies"]
+            .as_array()
+            .unwrap()
+            .len(),
+        0
+    );
+}
+
 // ---------------------------------------------------------------------------
 // sdlc next
 // ---------------------------------------------------------------------------
@@ -3404,4 +3459,129 @@ fn test_tool_commands_all_platforms() {
         skill.contains("PASS"),
         "sdlc-tool-uat/SKILL.md must mention PASS verdict"
     );
+}
+
+// ---------------------------------------------------------------------------
+// Orchestrator integration tests
+// ---------------------------------------------------------------------------
+
+/// Happy path: two scheduled actions fire and complete in a single tick.
+///
+/// Skipped automatically when no TypeScript runtime (bun/deno/node+tsx) is
+/// available in the test environment.
+#[test]
+fn orchestrator_two_actions_complete_in_one_tick() {
+    use chrono::Utc;
+    use sdlc_cli::cmd::orchestrate::run_one_tick;
+    use sdlc_core::orchestrator::{Action, ActionDb, ActionStatus};
+    use std::time::Duration;
+
+    // Skip if no JS runtime is available — the tool stub requires one.
+    if sdlc_core::tool_runner::detect_runtime().is_none() {
+        eprintln!("skip: no JS runtime (bun/deno/npx) found in PATH");
+        return;
+    }
+
+    let dir = TempDir::new().unwrap();
+    let root = dir.path();
+
+    // Write a minimal tool stub that emits {"ok":true} and exits 0.
+    let tool_dir = root.join(".sdlc/tools/stub-tool");
+    std::fs::create_dir_all(&tool_dir).unwrap();
+    std::fs::write(
+        tool_dir.join("tool.ts"),
+        "console.log(JSON.stringify({ok:true}));\n",
+    )
+    .unwrap();
+
+    // Open the orchestrator DB and insert two Pending actions scheduled in the
+    // near future so they become due after a short sleep.
+    std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+    let db_path = root.join(".sdlc/orchestrator.db");
+    let db = ActionDb::open(&db_path).unwrap();
+
+    let now = Utc::now();
+    let a1 = Action::new_scheduled(
+        "action-1",
+        "stub-tool",
+        serde_json::json!({}),
+        now + chrono::Duration::milliseconds(100),
+        None,
+    );
+    let a2 = Action::new_scheduled(
+        "action-2",
+        "stub-tool",
+        serde_json::json!({}),
+        now + chrono::Duration::milliseconds(200),
+        None,
+    );
+    db.insert(&a1).unwrap();
+    db.insert(&a2).unwrap();
+
+    // Wait for both scheduled times to pass.
+    std::thread::sleep(Duration::from_millis(300));
+
+    // Run exactly one tick — both due actions should be dispatched.
+    run_one_tick(root, &db).unwrap();
+
+    // Assert both actions completed.
+    let actions = db.list_all().unwrap();
+    assert_eq!(actions.len(), 2, "expected 2 actions in the DB");
+    for action in &actions {
+        assert!(
+            matches!(action.status, ActionStatus::Completed { .. }),
+            "action '{}' expected Completed, got {:?}",
+            action.label,
+            action.status
+        );
+    }
+}
+
+/// Startup recovery: a Running action with a stale updated_at is recovered to Failed.
+///
+/// This test operates purely at the ActionDb level — no tool execution, no JS runtime needed.
+#[test]
+fn orchestrator_startup_recovery_marks_stale_running_as_failed() {
+    use chrono::Utc;
+    use sdlc_core::orchestrator::{Action, ActionDb, ActionStatus};
+    use std::time::Duration;
+
+    let dir = TempDir::new().unwrap();
+    let root = dir.path();
+    std::fs::create_dir_all(root.join(".sdlc")).unwrap();
+
+    let db_path = root.join(".sdlc/orchestrator.db");
+    let db = ActionDb::open(&db_path).unwrap();
+
+    // Build a Running action whose updated_at is 10 minutes in the past.
+    let mut action = Action::new_scheduled(
+        "stale",
+        "noop",
+        serde_json::json!({}),
+        Utc::now() - chrono::Duration::minutes(1),
+        None,
+    );
+    action.status = ActionStatus::Running;
+    action.updated_at = Utc::now() - chrono::Duration::minutes(10);
+    db.insert(&action).unwrap();
+
+    // Recover actions stuck in Running for more than 2 minutes.
+    let recovered = db.startup_recovery(Duration::from_secs(120)).unwrap();
+    assert_eq!(recovered, 1, "expected 1 action recovered");
+
+    let all = db.list_all().unwrap();
+    let recovered_action = all
+        .into_iter()
+        .find(|a| a.id == action.id)
+        .expect("action must still be in the DB");
+
+    match &recovered_action.status {
+        ActionStatus::Failed { reason } => {
+            assert!(
+                reason.contains("recovered"),
+                "failure reason should mention 'recovered', got: {reason}"
+            );
+        }
+        other => panic!("expected ActionStatus::Failed, got {other:?}"),
+    }
 }

@@ -1,72 +1,145 @@
 slug: server-remote-state
 title: All state ops available over HTTP for remote consumers
-phase: draft
+description: Adds HTTP endpoints for drafting artifacts and merging features, completing the HTTP write-path so remote PM clients can drive all state operations over the API
+phase: released
 created_at: 2026-02-25T21:09:08.604227Z
-updated_at: 2026-02-25T21:09:08.604227Z
+updated_at: 2026-03-02T04:08:28.194611Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:38:32.285967Z
+  approved_at: 2026-03-02T02:38:36.264550Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:39:27.755936Z
+  approved_at: 2026-03-02T02:39:27.787648Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:39:30.031399Z
+  approved_at: 2026-03-02T02:39:30.048010Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:39:32.387725Z
+  approved_at: 2026-03-02T02:39:32.450800Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:44:34.624Z
+  approved_at: 2026-03-02T02:44:34.628968Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:44:39.665404Z
+  approved_at: 2026-03-02T02:44:39.671757Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/server-remote-state/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T02:55:54.293634Z
+  approved_at: 2026-03-02T02:55:54.300860Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add draft_artifact handler to artifacts.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:39:44.804389Z
+  started_at: 2026-03-02T02:44:27.987781Z
+  completed_at: 2026-03-02T02:44:27.994001Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add merge_feature handler to features.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:39:44.809502Z
+  started_at: 2026-03-02T02:44:27.999253Z
+  completed_at: 2026-03-02T02:44:28.003509Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Register both routes in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:39:44.814494Z
+  started_at: 2026-03-02T02:44:28.007781Z
+  completed_at: 2026-03-02T02:44:28.011796Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add integration tests for draft_artifact
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:39:44.819169Z
+  started_at: 2026-03-02T02:44:28.017043Z
+  completed_at: 2026-03-02T02:44:28.022468Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add integration tests for merge_feature
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:39:44.824283Z
+  started_at: 2026-03-02T02:44:28.028083Z
+  completed_at: 2026-03-02T02:44:28.032487Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-02-25T21:09:08.604227Z
+  exited: 2026-03-02T02:39:24.381792Z
+- phase: specified
+  entered: 2026-03-02T02:39:24.381792Z
+  exited: 2026-03-02T02:39:32.485970Z
+- phase: planned
+  entered: 2026-03-02T02:39:32.485970Z
+  exited: 2026-03-02T02:39:39.687441Z
+- phase: ready
+  entered: 2026-03-02T02:39:39.687441Z
+  exited: 2026-03-02T02:39:39.694569Z
+- phase: implementation
+  entered: 2026-03-02T02:39:39.694569Z
+  exited: 2026-03-02T02:44:34.630097Z
+- phase: review
+  entered: 2026-03-02T02:44:34.630097Z
+  exited: 2026-03-02T02:44:39.657273Z
+- phase: audit
+  entered: 2026-03-02T02:44:39.657273Z
+  exited: 2026-03-02T02:44:39.672908Z
+- phase: qa
+  entered: 2026-03-02T02:44:39.672908Z
+  exited: 2026-03-02T02:55:54.302375Z
+- phase: merge
+  entered: 2026-03-02T02:55:54.302375Z
+  exited: 2026-03-02T02:55:58.885270Z
+- phase: released
+  entered: 2026-03-02T02:55:58.885270Z
   exited: null
 dependencies: []
 archived: false

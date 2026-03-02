@@ -1,0 +1,109 @@
+slug: knowledge-core-data
+title: Rust knowledge.rs module — KnowledgeEntry, Catalog, CRUD, storage
+description: 'New module crates/sdlc-core/src/knowledge.rs. Reuses workspace.rs for sessions. KnowledgeEntry struct with all fields: code, title, slug, status, tags, summary, sources (Source struct + SourceType enum: web|local|manual|harvested|guideline), related, last_verified_at, staleness_flags (url_404|code_ref_gone|superseded_by|aged_out), origin, harvested_from, created_at, updated_at. Catalog struct + CatalogClass, CatalogDivision, CatalogSection. MaintenanceLog struct + MaintenanceAction enum. validate_code() — regex ^\d{3}(\.\d{1,2}(\.\d)?)?$. CRUD: create, list, get, update, list_by_code_prefix, full_text_search. full_text_search scans both entry.yaml fields (title, summary, tags) AND content.md body — ripgrep-style, returns entries with match excerpts. Storage paths: .sdlc/knowledge/catalog.yaml, .sdlc/knowledge/maintenance-log.yaml, .sdlc/knowledge/<slug>/entry.yaml, .sdlc/knowledge/<slug>/content.md. IMPORTANT: directory name is slug-only — code lives in entry.yaml, NOT in the directory path. This makes reclassification safe: changing a code requires no filesystem rename, only an entry.yaml update.'
+phase: released
+created_at: 2026-03-02T02:12:02.872539Z
+updated_at: 2026-03-02T03:48:32.588068Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/knowledge-core-data/spec.md
+  created_at: 2026-03-02T03:03:30.378243Z
+  approved_at: 2026-03-02T03:03:32.622471Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/knowledge-core-data/design.md
+  created_at: 2026-03-02T03:03:52.522709Z
+  approved_at: 2026-03-02T03:03:52.530421Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/knowledge-core-data/tasks.md
+  created_at: 2026-03-02T03:04:07.143335Z
+  approved_at: 2026-03-02T03:04:07.150691Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/knowledge-core-data/qa-plan.md
+  created_at: 2026-03-02T03:04:24.216493Z
+  approved_at: 2026-03-02T03:04:24.250998Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/knowledge-core-data/review.md
+  created_at: 2026-03-02T03:05:01.586928Z
+  approved_at: 2026-03-02T03:05:01.594558Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/knowledge-core-data/audit.md
+  created_at: 2026-03-02T03:05:19.931724Z
+  approved_at: 2026-03-02T03:05:19.939219Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/knowledge-core-data/qa-results.md
+  created_at: 2026-03-02T03:05:58.556575Z
+  approved_at: 2026-03-02T03:05:58.563298Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: '[user-gap] directory naming is slug-only — validate no code-derived path components exist in storage layer'
+  description: null
+  status: completed
+  created_at: 2026-03-02T02:28:50.485638Z
+  started_at: null
+  completed_at: 2026-03-02T03:04:41.729926Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:12:02.872539Z
+  exited: 2026-03-02T03:03:32.623534Z
+- phase: specified
+  entered: 2026-03-02T03:03:32.623534Z
+  exited: 2026-03-02T03:04:24.252623Z
+- phase: planned
+  entered: 2026-03-02T03:04:24.252623Z
+  exited: 2026-03-02T03:04:29.805224Z
+- phase: ready
+  entered: 2026-03-02T03:04:29.805224Z
+  exited: 2026-03-02T03:04:29.814851Z
+- phase: implementation
+  entered: 2026-03-02T03:04:29.814851Z
+  exited: 2026-03-02T03:05:01.595606Z
+- phase: review
+  entered: 2026-03-02T03:05:01.595606Z
+  exited: 2026-03-02T03:05:06.215044Z
+- phase: audit
+  entered: 2026-03-02T03:05:06.215044Z
+  exited: 2026-03-02T03:05:19.940174Z
+- phase: qa
+  entered: 2026-03-02T03:05:19.940174Z
+  exited: 2026-03-02T03:05:58.564161Z
+- phase: merge
+  entered: 2026-03-02T03:05:58.564161Z
+  exited: 2026-03-02T03:48:32.588068Z
+- phase: released
+  entered: 2026-03-02T03:48:32.588068Z
+  exited: null
+dependencies: []
+archived: false

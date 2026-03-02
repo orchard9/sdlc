@@ -1,0 +1,75 @@
+slug: artifact-fullscreen-toc
+title: Fullscreen View with Sticky TOC Navigation
+phase: specified
+created_at: 2026-03-02T03:16:06.366206Z
+updated_at: 2026-03-02T03:18:06.987838Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/artifact-fullscreen-toc/spec.md
+  created_at: 2026-03-02T03:18:04.990348Z
+  approved_at: 2026-03-02T03:18:06.987066Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/artifact-fullscreen-toc/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/artifact-fullscreen-toc/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/artifact-fullscreen-toc/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/artifact-fullscreen-toc/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/artifact-fullscreen-toc/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/artifact-fullscreen-toc/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:06.366206Z
+  exited: 2026-03-02T03:18:06.987838Z
+- phase: specified
+  entered: 2026-03-02T03:18:06.987838Z
+  exited: null
+dependencies: []
+archived: false

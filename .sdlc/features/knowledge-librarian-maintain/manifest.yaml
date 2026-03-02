@@ -1,0 +1,73 @@
+slug: knowledge-librarian-maintain
+title: sdlc knowledge librarian run — maintenance pass + harvest hooks wired
+description: 'CLI: sdlc knowledge librarian run [--mode maintain|harvest] — spawns librarian maintenance agent run via spawn_agent_run. Maintenance mode checks: (1) URL health: fetch web sources, flag 404s in staleness_flags; (2) code ref health: grep for referenced symbols, flag code_ref_gone; (3) duplication: flag same-tags+code-prefix+similar-title entries; (4) catalog fitness: suggest subdivisions for categories >10 entries, flag empty; (5) cross-ref suggestions: similar-tags entries lacking mutual refs; (6) harvest pending: find completed workspaces not yet harvested, run harvest. All writes autonomous, logged to .sdlc/knowledge/maintenance-log.yaml, committed to git with ''librarian:'' prefix commit message. Server: POST /api/knowledge/maintain spawns maintenance run; POST /api/knowledge/harvest {type:''investigation''|''ponder'', slug} triggers harvest for specific workspace. SSE: KnowledgeMaintenanceStarted, KnowledgeMaintenanceCompleted {actions_taken}. Hook wiring: modify sdlc-cli investigation and ponder ''update --status complete'' paths to call knowledge librarian harvest automatically.'
+phase: draft
+created_at: 2026-03-02T02:12:36.417536Z
+updated_at: 2026-03-02T02:12:36.417536Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/knowledge-librarian-maintain/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:12:36.417536Z
+  exited: null
+dependencies: []
+archived: false

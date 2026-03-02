@@ -1,0 +1,154 @@
+slug: backlog-dashboard
+title: Backlog section in Dashboard frontend
+description: 'Modify frontend/src/pages/Dashboard.tsx to add a Backlog section. Display: open item count badge (e.g. ''3 open''), per-item card showing title + kind badge + source_feature link + timestamp. Empty state copy: ''When an agent finishes a run, it captures concerns that were out of scope for that feature. Items appear here. Promote to create a tracked feature, or Park to set aside. Nothing in the backlog blocks your current work.'' Promote CTA shows tooltip: ''Creates a draft feature. No agent work begins automatically.'' Park CTA prompts for a park_reason note before confirming. Filter by source_feature. Staleness indicator for open items older than 60 days. After promotion: toast with link to new feature.'
+phase: draft
+created_at: 2026-03-02T02:49:56.898132Z
+updated_at: 2026-03-02T03:01:14.175002Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/backlog-dashboard/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/backlog-dashboard/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/backlog-dashboard/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/backlog-dashboard/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/backlog-dashboard/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/backlog-dashboard/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/backlog-dashboard/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Fetch /api/backlog in Dashboard.tsx and add Backlog section with open item count
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.938322Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Render open backlog items list with inline Park and Promote action buttons
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.945401Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Promote action creates feature and removes item from open list via re-fetch
+  description: null
+  status: pending
+  created_at: 2026-03-02T02:50:32.952806Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: '[user-gap] Add empty state copy: 3-sentence explanation of origin, meaning, and non-blocking nature — most critical legibility fix for first-time users'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.124038Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: '[user-gap] Show kind badge + source_feature link + timestamp on each item card — minimum provenance for triage decisions'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.133243Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: '[user-gap] Promote CTA tooltip: ''Creates a draft feature. No work begins automatically.'' — removes first-time user fear of accidental execution'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.141185Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] Park CTA prompts for park_reason note in a modal before confirming — parking without a note creates an unactionable graveyard'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.148358Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] Add source_feature filter dropdown — batch triage by feature origin (morning review UX)'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.155607Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Add staleness indicator for open items older than 60 days — visual signal without automatic action'
+  description: null
+  status: pending
+  created_at: 2026-03-02T03:02:37.162471Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T02:49:56.898132Z
+  exited: null
+dependencies: []
+archived: false

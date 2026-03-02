@@ -1,0 +1,14 @@
+{
+  "id": "20260302-032927-vbb",
+  "key": "milestone-run-wave:v02-server-interface",
+  "run_type": "milestone_run_wave",
+  "target": "v02-server-interface",
+  "label": "run-wave: v02-server-interface",
+  "status": "completed",
+  "started_at": "2026-03-02T03:29:27.424956+00:00",
+  "completed_at": "2026-03-02T03:33:13.891117+00:00",
+  "cost_usd": 1.4972470000000004,
+  "turns": 5,
+  "error": null,
+  "prompt": "Execute the current wave of milestone 'v02-server-interface' in parallel. Run `sdlc project prepare --milestone v02-server-interface --json` to get the live wave plan. Wave 1 of the output is the current wave. For each feature in Wave 1 that does not need a worktree, spawn a parallel Agent call running `/sdlc-run <feature-slug>`. Wait for all agents to complete, then re-run prepare and report the updated wave plan."
+}

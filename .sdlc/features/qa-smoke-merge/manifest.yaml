@@ -1,0 +1,75 @@
+slug: qa-smoke-merge
+title: QA smoke merge test
+phase: released
+created_at: 2026-03-02T03:45:51.775895Z
+updated_at: 2026-03-02T03:45:57.703716Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/qa-smoke-merge/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: merge
+  entered: 2026-03-02T03:45:51.775895Z
+  exited: 2026-03-02T03:45:57.703716Z
+- phase: released
+  entered: 2026-03-02T03:45:57.703716Z
+  exited: null
+dependencies: []
+archived: false

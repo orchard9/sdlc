@@ -1,4 +1,5 @@
 use crate::cmd::tunnel::print_tunnel_info;
+use crate::cmd::{orchestrate, update};
 use crate::output::print_table;
 use anyhow::{anyhow, Result};
 use clap::Subcommand;
@@ -23,6 +24,12 @@ pub enum UiSubcommand {
         /// Open a public tunnel and print a QR code for remote access (requires cloudflared)
         #[arg(long)]
         tunnel: bool,
+        /// Orchestrator tick interval in seconds (default 60)
+        #[arg(long, default_value_t = 60)]
+        tick_rate: u64,
+        /// Skip starting the orchestrator daemon
+        #[arg(long)]
+        no_orchestrate: bool,
     },
     /// List all running UI instances
     List,
@@ -48,14 +55,18 @@ pub fn run(
     port: u16,
     no_open: bool,
     tunnel: bool,
+    tick_rate: u64,
+    no_orchestrate: bool,
 ) -> Result<()> {
     match subcommand {
-        None => run_start(root, port, no_open, tunnel),
+        None => run_start(root, port, no_open, tunnel, tick_rate, no_orchestrate),
         Some(UiSubcommand::Start {
             port: p,
             no_open: n,
             tunnel: t,
-        }) => run_start(root, p, n, t),
+            tick_rate: tr,
+            no_orchestrate: no_orch,
+        }) => run_start(root, p, n, t, tr, no_orch),
         Some(UiSubcommand::List) => run_list(),
         Some(UiSubcommand::Kill { name }) => run_kill(name.as_deref(), root),
         Some(UiSubcommand::Open { name }) => run_open(name.as_deref(), root),
@@ -66,7 +77,39 @@ pub fn run(
 // start
 // ---------------------------------------------------------------------------
 
-fn run_start(root: &Path, port: u16, no_open: bool, use_tunnel: bool) -> Result<()> {
+fn run_start(
+    root: &Path,
+    port: u16,
+    no_open: bool,
+    use_tunnel: bool,
+    tick_rate: u64,
+    no_orchestrate: bool,
+) -> Result<()> {
+    // --- Step 1: auto-update scaffolding ---
+    eprintln!("sdlc ui: running update...");
+    if let Err(e) = update::run(root) {
+        eprintln!("sdlc ui: update warning (continuing): {e}");
+    }
+
+    // --- Step 2: start orchestrator daemon in background thread ---
+    if !no_orchestrate {
+        let db_path = sdlc_core::paths::orchestrator_db_path(root);
+        let root_for_orch = root.to_path_buf();
+        std::thread::Builder::new()
+            .name("sdlc-orchestrator".into())
+            .spawn(
+                move || match sdlc_core::orchestrator::ActionDb::open(&db_path) {
+                    Ok(db) => {
+                        if let Err(e) = orchestrate::run_daemon(&root_for_orch, &db, tick_rate) {
+                            eprintln!("orchestrate: daemon error: {e}");
+                        }
+                    }
+                    Err(e) => eprintln!("orchestrate: failed to open DB: {e}"),
+                },
+            )
+            .map_err(|e| anyhow!("failed to spawn orchestrator thread: {e}"))?;
+    }
+
     let config = Config::load(root).map_err(|e| anyhow!("{e}"))?;
     let name = config.project.name.clone();
 

@@ -1,0 +1,75 @@
+slug: setup-vision-arch-guidance
+title: Vision and Architecture Guidance in Setup
+phase: specified
+created_at: 2026-03-02T03:16:00.564361Z
+updated_at: 2026-03-02T03:17:39.828478Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/setup-vision-arch-guidance/spec.md
+  created_at: 2026-03-02T03:17:39.820699Z
+  approved_at: 2026-03-02T03:17:39.827645Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/setup-vision-arch-guidance/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/setup-vision-arch-guidance/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/setup-vision-arch-guidance/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/setup-vision-arch-guidance/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/setup-vision-arch-guidance/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/setup-vision-arch-guidance/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:00.564361Z
+  exited: 2026-03-02T03:17:39.828478Z
+- phase: specified
+  entered: 2026-03-02T03:17:39.828478Z
+  exited: null
+dependencies: []
+archived: false

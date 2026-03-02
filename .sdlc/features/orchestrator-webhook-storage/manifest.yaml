@@ -1,73 +1,154 @@
 slug: orchestrator-webhook-storage
 title: HTTP webhook receiver and raw payload storage in redb
 description: 'Add webhooks redb table to ActionDb (key: uuid bytes, value: raw body + metadata). Add POST /webhooks/:route to sdlc-server — accepts any body, stores raw bytes + received_at + route_path. Add WebhookPayload struct to sdlc-core. ActionDb gains: insert_webhook(payload), all_pending_webhooks(), delete_webhook(id). No transformation on ingress — store exactly what arrived.'
-phase: draft
+phase: released
 created_at: 2026-03-01T07:52:17.068368Z
-updated_at: 2026-03-01T07:52:30.662062Z
+updated_at: 2026-03-02T04:42:09.245160Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:29:45.181583Z
+  approved_at: 2026-03-02T04:29:47.416579Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:30:30.806003Z
+  approved_at: 2026-03-02T04:30:33.085942Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:31:04.710008Z
+  approved_at: 2026-03-02T04:31:06.902268Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:31:22.279217Z
+  approved_at: 2026-03-02T04:31:24.293225Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:36:40.447043Z
+  approved_at: 2026-03-02T04:36:42.860123Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:37:14.989448Z
+  approved_at: 2026-03-02T04:37:17.136132Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-webhook-storage/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T04:38:04.371111Z
+  approved_at: 2026-03-02T04:40:02.956706Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add WebhookPayload struct to sdlc-core
+  description: null
+  status: completed
+  created_at: 2026-03-02T04:31:45.067519Z
+  started_at: null
+  completed_at: 2026-03-02T04:32:19.196922Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add WEBHOOKS table and methods to ActionDb
+  description: null
+  status: completed
+  created_at: 2026-03-02T04:31:49.170619Z
+  started_at: null
+  completed_at: 2026-03-02T04:33:01.268140Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add unit tests for webhook storage methods
+  description: null
+  status: completed
+  created_at: 2026-03-02T04:31:51.278131Z
+  started_at: null
+  completed_at: 2026-03-02T04:33:24.121816Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add webhook HTTP route to sdlc-server
+  description: null
+  status: completed
+  created_at: 2026-03-02T04:31:54.930219Z
+  started_at: null
+  completed_at: 2026-03-02T04:34:03.594067Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add integration test for the webhook HTTP endpoint
+  description: null
+  status: completed
+  created_at: 2026-03-02T04:31:55.635667Z
+  started_at: null
+  completed_at: 2026-03-02T04:34:44.170727Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Verify build and tests pass
+  description: null
+  status: completed
+  created_at: 2026-03-02T04:31:56.214815Z
+  started_at: null
+  completed_at: 2026-03-02T04:36:13.718651Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-01T07:52:17.068368Z
+  exited: 2026-03-02T04:29:47.418014Z
+- phase: specified
+  entered: 2026-03-02T04:29:47.418014Z
+  exited: 2026-03-02T04:31:24.295380Z
+- phase: planned
+  entered: 2026-03-02T04:31:24.295380Z
+  exited: 2026-03-02T04:31:36.131137Z
+- phase: ready
+  entered: 2026-03-02T04:31:36.131137Z
+  exited: 2026-03-02T04:31:39.862069Z
+- phase: implementation
+  entered: 2026-03-02T04:31:39.862069Z
+  exited: 2026-03-02T04:36:42.862972Z
+- phase: review
+  entered: 2026-03-02T04:36:42.862972Z
+  exited: 2026-03-02T04:36:50.338833Z
+- phase: audit
+  entered: 2026-03-02T04:36:50.338833Z
+  exited: 2026-03-02T04:37:17.140149Z
+- phase: qa
+  entered: 2026-03-02T04:37:17.140149Z
+  exited: 2026-03-02T04:40:02.958786Z
+- phase: merge
+  entered: 2026-03-02T04:40:02.958786Z
+  exited: 2026-03-02T04:42:09.245160Z
+- phase: released
+  entered: 2026-03-02T04:42:09.245160Z
   exited: null
 dependencies: []
 archived: false

@@ -1,0 +1,11 @@
+slug: v13-backlog
+title: 'Project-level backlog: capture and promote out-of-scope concerns'
+vision: Agents capture out-of-scope concerns at the moment of discovery — a single command writes a durable, ID-confirmed backlog item with kind (concern, idea, or debt), description, and auto-inferred source feature. Items aggregate on the Dashboard where operators triage, park with a note, or promote to a feature in a specific milestone. Nothing observed during autonomous execution is lost between sessions.
+features:
+- backlog-core
+- backlog-cli
+- backlog-guidance
+- backlog-server
+- backlog-dashboard
+created_at: 2026-03-02T02:49:41.461025Z
+updated_at: 2026-03-02T03:00:15.196156Z

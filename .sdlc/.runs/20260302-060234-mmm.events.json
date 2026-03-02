@@ -1,0 +1,1 @@
+[{"mcp_servers":["sdlc","playwright"],"model":"claude-sonnet-4-6","tools_count":54,"type":"init"},{"text":"API Error: Unable to connect to API (ConnectionRefused)","thinking":[],"tools":[],"type":"assistant"},{"cost_usd":0.0,"is_error":false,"text":"API Error: Unable to connect to API (ConnectionRefused)","turns":1,"type":"result"}]

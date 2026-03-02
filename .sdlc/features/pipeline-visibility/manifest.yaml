@@ -1,0 +1,75 @@
+slug: pipeline-visibility
+title: Pipeline Visibility Indicator
+phase: specified
+created_at: 2026-03-02T03:16:32.351815Z
+updated_at: 2026-03-02T03:18:36.742029Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/pipeline-visibility/spec.md
+  created_at: 2026-03-02T03:18:09.945198Z
+  approved_at: 2026-03-02T03:18:36.741149Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/pipeline-visibility/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/pipeline-visibility/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/pipeline-visibility/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/pipeline-visibility/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/pipeline-visibility/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/pipeline-visibility/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T03:16:32.351815Z
+  exited: 2026-03-02T03:18:36.742029Z
+- phase: specified
+  entered: 2026-03-02T03:18:36.742029Z
+  exited: null
+dependencies: []
+archived: false

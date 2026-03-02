@@ -1,0 +1,11 @@
+slug: artifact-viewer
+title: Rich Artifact and Plan Viewer
+status: committed
+created_at: 2026-03-02T02:42:14.077355Z
+updated_at: 2026-03-02T03:18:09.462732Z
+committed_at: 2026-03-02T03:18:09.462731Z
+sessions: 2
+orientation:
+  current: 'Three thought partners recruited and interrogated. Clear V1 direction reached: remove the height cap, add a sticky TOC, add file-path link detection with vscode:// URIs, and unify ArtifactViewer with WorkspacePanel. TLDR mechanism deferred to agent-instruction fix. Commenting deferred to V2.'
+  next: 'Write the feature spec and build V1. The spec should cover: (1) ArtifactViewer refactor to remove height cap and add fullscreen-native layout, (2) TOC extraction from Markdown headings, (3) file path auto-detection, (4) agent instruction update for ## Summary convention.'
+  commit: Feature direction established. V1 scope is bounded and implementable in one sprint. V2 commenting model design is documented but deferred.

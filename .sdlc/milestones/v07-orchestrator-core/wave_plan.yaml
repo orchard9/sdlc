@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: orchestrator-integration-test
+    title: Integration test — two scheduled actions fire and complete in one tick
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false
