@@ -1,5 +1,6 @@
 mod sdlc_approve;
 mod sdlc_architecture_adjustment;
+mod sdlc_beat;
 mod sdlc_convo_mine;
 mod sdlc_cookbook;
 mod sdlc_cookbook_run;
@@ -52,6 +53,7 @@ pub static ALL_COMMANDS: &[&CommandDef] = &[
     &sdlc_ponder::SDLC_PONDER,
     &sdlc_ponder_commit::SDLC_PONDER_COMMIT,
     &sdlc_suggest::SDLC_SUGGEST,
+    &sdlc_beat::SDLC_BEAT,
     &sdlc_recruit::SDLC_RECRUIT,
     &sdlc_empathy::SDLC_EMPATHY,
     &sdlc_prepare::SDLC_PREPARE,

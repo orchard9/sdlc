@@ -902,45 +902,76 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
 
         {/* Setup banner */}
         {tool.requires_setup && !tool.setup_done && !setupDone && (
-          <div className="flex items-start gap-3 px-4 py-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-amber-300">Setup required</p>
-              {tool.setup_description && (
-                <p className="text-xs text-amber-400/70 mt-0.5">{tool.setup_description}</p>
-              )}
-              {tool.name === 'quality-check' && (
-                <p className="text-xs text-amber-400/60 mt-1">
-                  Click <span className="font-medium text-amber-400/80">Reconfigure</span> below — detects your stack and installs a two-phase hook: auto-fix first (gofmt, prettier, rustfmt, ruff), then verify.
-                </p>
-              )}
-              {setupResult && (
-                <p className={cn(
-                  'text-xs mt-1.5 font-mono',
-                  setupResult.ok ? 'text-emerald-400' : 'text-red-400',
-                )}>
-                  {setupResult.ok
-                    ? (() => {
-                        const d = setupResult.data as Record<string, unknown> | undefined
-                        if (d && 'files_indexed' in d) {
-                          return `✓ ${d.files_indexed} files indexed, ${d.total_chunks ?? 0} chunks`
-                        }
-                        return '✓ Setup complete'
-                      })()
-                    : `Error: ${setupResult.error}`
-                  }
-                </p>
+          <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 overflow-hidden">
+            <div className="flex items-start gap-3 px-4 py-3">
+              <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-amber-300">Setup required</p>
+                {tool.setup_description && (
+                  <p className="text-xs text-amber-400/70 mt-0.5">{tool.setup_description}</p>
+                )}
+                {tool.name === 'quality-check' && (
+                  <p className="text-xs text-amber-400/60 mt-1">
+                    Click <span className="font-medium text-amber-400/80">Reconfigure</span> below — detects your stack and installs a two-phase hook: auto-fix first (gofmt, prettier, rustfmt, ruff), then verify.
+                  </p>
+                )}
+                {setupResult && (
+                  <p className={cn(
+                    'text-xs mt-1.5 font-mono',
+                    setupResult.ok ? 'text-emerald-400' : 'text-red-400',
+                  )}>
+                    {setupResult.ok
+                      ? (() => {
+                          const d = setupResult.data as Record<string, unknown> | undefined
+                          if (d && 'files_indexed' in d) {
+                            return `✓ ${d.files_indexed} files indexed, ${d.total_chunks ?? 0} chunks`
+                          }
+                          return '✓ Setup complete'
+                        })()
+                      : `Error: ${setupResult.error}`
+                    }
+                  </p>
+                )}
+              </div>
+              {tool.name !== 'quality-check' && (
+                <button
+                  onClick={handleSetup}
+                  disabled={settingUp}
+                  className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg border border-amber-500/30 transition-colors disabled:opacity-50"
+                >
+                  {settingUp && <Loader2 className="w-3 h-3 animate-spin" />}
+                  {settingUp ? 'Running…' : 'Run Setup'}
+                </button>
               )}
             </div>
-            {tool.name !== 'quality-check' && (
-              <button
-                onClick={handleSetup}
-                disabled={settingUp}
-                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 rounded-lg border border-amber-500/30 transition-colors disabled:opacity-50"
-              >
-                {settingUp && <Loader2 className="w-3 h-3 animate-spin" />}
-                {settingUp ? 'Running…' : 'Run Setup'}
-              </button>
+            {/* Required secrets list */}
+            {tool.secrets && tool.secrets.length > 0 && (
+              <div className="border-t border-amber-500/15 px-4 py-3">
+                <p className="text-xs font-medium text-amber-400/80 mb-2">Required secrets</p>
+                <div className="space-y-2">
+                  {tool.secrets.filter(s => s.required !== false).map(secret => {
+                    const missing = tool.missing_secrets?.includes(secret.env_var)
+                    return (
+                      <div key={secret.env_var} className="flex items-start gap-2">
+                        <span className={cn(
+                          'shrink-0 font-mono text-xs px-1.5 py-0.5 rounded border',
+                          missing
+                            ? 'bg-red-500/15 border-red-500/30 text-red-300'
+                            : 'bg-amber-500/10 border-amber-500/20 text-amber-300',
+                        )}>
+                          {secret.env_var}
+                        </span>
+                        <span className="text-xs text-muted-foreground leading-relaxed">
+                          {secret.description}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="text-xs text-amber-400/50 mt-2.5">
+                  Load secrets: <span className="font-mono">eval $(sdlc secrets env export &lt;env&gt;)</span>
+                </p>
+              </div>
             )}
           </div>
         )}

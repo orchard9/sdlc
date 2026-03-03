@@ -234,6 +234,10 @@ enum Commands {
         #[arg(long)]
         run_actions: bool,
 
+        /// Enable debug-level logging (equivalent to RUST_LOG=debug)
+        #[arg(long)]
+        debug: bool,
+
         #[command(subcommand)]
         subcommand: Option<UiSubcommand>,
     },
@@ -243,6 +247,7 @@ fn main() {
     let cli = Cli::parse();
 
     let default_level = match &cli.command {
+        Commands::Ui { debug: true, .. } => tracing::Level::DEBUG,
         Commands::Ui { .. } | Commands::Mcp => tracing::Level::INFO,
         _ => tracing::Level::WARN,
     };
@@ -300,6 +305,7 @@ fn main() {
             tunnel,
             tick_rate,
             run_actions,
+            debug: _,
             subcommand,
         } => cmd::ui::run(
             &root,

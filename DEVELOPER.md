@@ -7,23 +7,30 @@
 
 ## Install
 
-```bash
-make install
-```
-
-Builds the frontend, installs the `sdlc` binary to your Cargo bin, and installs `orch-tunnel` (needed for `sdlc ui --tunnel`).
-Install manually: `gh release download --repo orchard9/tunnel`
-
-Other targets:
+**All platforms — using `just`:**
 
 ```bash
-make build   # build without installing
-make test    # SDLC_NO_NPM=1 cargo test --all
-make lint    # clippy + tsc
-make clean   # remove build artifacts
+just install
 ```
 
-> `make test` skips the npm build — without `SDLC_NO_NPM=1`, `cargo test` hangs if `frontend/dist` is absent.
+Builds the frontend, installs `ponder` to `~/.cargo/bin`, creates the `sdlc` alias, and installs `orch-tunnel`.
+
+Install `just` first if you don't have it:
+```bash
+cargo install just   # or: brew install just  |  winget install just
+```
+
+**Other recipes:**
+
+```bash
+just build   # build without installing
+just test    # cargo test --all (skips npm build)
+just lint    # clippy + tsc
+just clean   # remove build artifacts
+just         # list all recipes
+```
+
+> `just test` sets `SDLC_NO_NPM=1` automatically — without it, `cargo test` hangs if `frontend/dist` is absent.
 
 ## First Steps
 
@@ -52,9 +59,17 @@ cd /path/to/your-project && sdlc init
 ```
 
 **Terminal 1** — Rust backend, recompiles on save:
+
+macOS / Linux:
 ```bash
 SDLC_ROOT=/path/to/your-project \
-cargo watch -x 'run --bin sdlc -- ui --port 3141 --no-open'
+cargo watch -x 'run --bin ponder -- ui --port 3141 --no-open'
+```
+
+Windows (PowerShell):
+```powershell
+$env:SDLC_ROOT = "C:\path\to\your-project"
+cargo watch -x 'run --bin ponder -- ui --port 3141 --no-open'
 ```
 
 **Terminal 2** — Vite dev server with React HMR:

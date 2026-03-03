@@ -38,8 +38,9 @@ function overlap(iStart: number, iEnd: number, bStart: number, bEnd: number): nu
 /**
  * Build a bucketed time-series breakdown from a flat array of run events.
  *
- * Returns null if fewer than 2 events carry a `ts` wall-clock timestamp,
+ * Returns null if fewer than 2 events carry a `timestamp` wall-clock field,
  * which means the run predates the telemetry-wallclock-timestamps feature.
+ * The field name is `timestamp` — matching message_to_event() in runs.rs.
  *
  * @param events   Raw run events from GET /api/runs/:id/telemetry
  * @param bucketCount  Number of equal-width time buckets (default 20)
@@ -57,8 +58,8 @@ export function buildTimeSeries(
 
   const timestamped: TimestampedEvent[] = []
   for (const e of events) {
-    if (e.ts) {
-      const ms = Date.parse(e.ts)
+    if (e.timestamp) {
+      const ms = Date.parse(e.timestamp)
       if (!isNaN(ms)) {
         timestamped.push({ type: e.type, tsMs: ms, task_id: e.task_id })
       }

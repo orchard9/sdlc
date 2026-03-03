@@ -581,8 +581,9 @@ export interface RunRecord {
 /** Raw event as stored in the events sidecar — matches message_to_event output */
 export interface RawRunEvent {
   type: 'init' | 'assistant' | 'tool_progress' | 'tool_summary' | 'result' | 'error' | 'status' | 'system' | 'user' | 'stream_event' | 'auth_status' | 'subagent_started' | 'subagent_completed' | 'subagent_progress'
-  // Wall-clock timestamp (ISO-8601) — added by telemetry-wallclock-timestamps feature
-  ts?: string
+  // Wall-clock timestamp (ISO-8601). Canonical field name — must match message_to_event() in
+  // crates/sdlc-server/src/routes/runs.rs which writes obj["timestamp"]. Do NOT rename to "ts".
+  timestamp?: string
   // Subagent correlation id — present on subagent_started / subagent_completed / subagent_progress
   task_id?: string
   // init

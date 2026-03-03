@@ -420,6 +420,7 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         - `/sdlc-ponder-commit <slug>` — crystallize a pondered idea into milestones and features\n\
         - `/sdlc-guideline <slug-or-problem>` — build an evidence-backed guideline through five research perspectives and TOC-first distillation\n\
         - `/sdlc-suggest` — analyze project state and suggest 3-5 ponder topics to explore next\n\
+        - `/sdlc-beat [domain | feature:<slug> | --week]` — step back with a senior leadership lens; evaluate if we're building the right thing in the right direction; stores history in `.sdlc/beat.yaml`\n\
         - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent\n\
         - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions\n\
         - `/sdlc-spike <slug> — <need>; [see <ref>]` — research, prototype, validate, and report; produces working prototype + findings in `.sdlc/spikes/<slug>/findings.md`\n\

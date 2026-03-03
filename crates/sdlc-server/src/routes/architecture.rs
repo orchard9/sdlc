@@ -40,7 +40,7 @@ pub async fn put_architecture(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let path = sdlc_core::paths::architecture_md_path(&root);
-        std::fs::write(&path, &body.content)?;
+        sdlc_core::io::atomic_write(&path, body.content.as_bytes())?;
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "ok": true,
         }))

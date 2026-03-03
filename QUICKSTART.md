@@ -1,4 +1,4 @@
-# sdlc Quickstart
+# Ponder Quickstart
 
 Get from zero to driving features with AI agents in 5 minutes.
 
@@ -8,22 +8,18 @@ Get from zero to driving features with AI agents in 5 minutes.
 
 **macOS / Linux:**
 ```bash
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/orchard9/sdlc-releases/releases/latest/download/sdlc-installer.sh | sh
+curl -sSfL https://raw.githubusercontent.com/orchard9/sdlc/main/install.sh | sh
 ```
 
 **Windows:**
 ```powershell
-powershell -ExecutionPolicy ByPass -c "irm https://github.com/orchard9/sdlc-releases/releases/latest/download/sdlc-installer.ps1 | iex"
+irm https://raw.githubusercontent.com/orchard9/sdlc/main/install.ps1 | iex
 ```
 
-**Homebrew:**
-```bash
-brew install orchard9/tap/sdlc
-```
+Installs `ponder` to `~/.local/bin` with a `sdlc` alias — both work interchangeably.
 
-Verify:
 ```bash
-sdlc --version
+ponder --version   # or: sdlc --version
 ```
 
 ---
@@ -35,27 +31,40 @@ cd your-project
 sdlc init
 ```
 
-This creates `.sdlc/` (state + config), injects `AGENTS.md`, and installs slash commands for Claude Code, Gemini CLI, OpenCode, and Codex.
+Creates `.sdlc/` (state + config), injects `AGENTS.md`, and installs slash commands for Claude Code, Gemini CLI, OpenCode, and Codex.
 
 ---
 
-## 3. Two ways to start
+## 3. Set up Vision and Architecture
+
+```bash
+sdlc ui
+```
+
+Navigate to **Setup** (`/setup`) and define:
+
+- **Vision** — why the project exists and who it serves. Agents use this to make decisions aligned with your goals.
+- **Architecture** — how the system works, key components, and technical constraints. Agents use this to understand boundaries.
+
+Once set, you're ready to create features.
+
+---
+
+## 4. Two ways to start
 
 ### A. I have an idea — explore it first
 
 ```bash
-# Open the ideation workspace (in Claude Code)
 /sdlc-ponder "I want to build a preference system with cohort layering"
 ```
 
-This creates a ponder entry at `.sdlc/roadmap/<slug>/`. The session interrogates your idea, recruits thought partners, and captures artifacts in a scrapbook.
+Creates a ponder entry at `.sdlc/roadmap/<slug>/`. The session interrogates your idea, recruits thought partners, and captures artifacts. When ready:
 
-When ready, commit the idea into the state machine:
 ```bash
 /sdlc-ponder-commit <slug>
 ```
 
-This synthesizes the scrapbook into milestones and features via `/sdlc-plan`, then drops you into execution.
+Synthesizes the scrapbook into milestones and features, then drops you into execution.
 
 ### B. I know what I'm building — create a feature directly
 
@@ -76,9 +85,9 @@ Output:
 
 ---
 
-## 4. Drive a feature
+## 5. Drive a feature
 
-**One step at a time (human controls cadence):**
+**One step at a time:**
 ```bash
 /sdlc-next auth-login
 ```
@@ -92,15 +101,51 @@ The agent reads `sdlc next --for auth-login --json`, executes the action, and lo
 
 ---
 
-## 5. Check project state
+## 6. Daily workflow
 
 ```bash
-sdlc state                    # project overview
-sdlc next                     # next action for every active feature
-sdlc query needs-approval     # features waiting for artifact approval
-sdlc query blocked            # features with blockers
-sdlc ui                       # open web dashboard
+# See what needs attention across all features
+sdlc next
+
+# Get a machine-readable directive for a specific feature
+sdlc next --for auth-login --json
+
+# Approve an artifact to advance the phase
+sdlc artifact approve auth-login spec
+
+# See all features waiting for approval
+sdlc query needs-approval
+
+# See all blocked features
+sdlc query blocked
+
+# Open the web dashboard
+sdlc ui
 ```
+
+---
+
+## 7. AI coding tool commands
+
+After `sdlc init`, these slash commands are installed automatically:
+
+**Claude Code:**
+| Command | Purpose |
+|---|---|
+| `/sdlc-ponder [slug]` | Open ideation workspace — explore ideas, recruit thought partners |
+| `/sdlc-ponder-commit <slug>` | Crystallize idea into milestones and features |
+| `/sdlc-recruit <role>` | Recruit an expert thought partner as a persistent agent |
+| `/sdlc-empathy <subject>` | Deep user perspective interviews before making decisions |
+| `/sdlc-next <slug>` | Get the next directive and act on it |
+| `/sdlc-run <slug>` | Autonomously drive a feature to the next human gate |
+| `/sdlc-plan` | Distribute a plan into milestones, features, and tasks |
+| `/sdlc-status` | Project overview |
+| `/sdlc-pressure-test <milestone>` | Pressure-test a milestone against user perspectives |
+| `/sdlc-milestone-uat <milestone>` | Run the acceptance test for a milestone |
+
+**Gemini CLI:** `.gemini/commands/*.toml`
+**OpenCode:** `.opencode/command/*.md`
+**Codex:** `.agents/skills/*/SKILL.md`
 
 ---
 
@@ -116,16 +161,6 @@ Each phase requires approved artifacts. The classifier always tells you what's n
 
 ## Roadmap (ideation)
 
-Ideas before they're features live in `.sdlc/roadmap/`:
-
-```
-ponder entry (exploring)
-  → exploring / converging
-  → /sdlc-ponder-commit → milestones + features
-  → /sdlc-pressure-test → validate against user needs
-  → /sdlc-run → execute
-```
-
 ```bash
 sdlc ponder list              # active ideas
 sdlc ponder show <slug>       # scrapbook + team + status
@@ -136,25 +171,31 @@ sdlc ponder archive <slug>    # park an idea without deleting
 
 ## Milestones
 
-Group features under a shared goal:
-
 ```bash
 sdlc milestone create v2 --title "Version 2.0"
 sdlc milestone add-feature v2 auth-login
 sdlc milestone info v2
-```
-
-Validate the milestone before executing:
-```bash
-/sdlc-pressure-test v2        # empathy interviews against milestone scope
+/sdlc-pressure-test v2        # validate against user perspectives
 /sdlc-milestone-uat v2        # run the acceptance test
 ```
 
 ---
 
+## Updating
+
+Re-run your install command to get the latest binary, then:
+
+```bash
+sdlc update
+```
+
+Refreshes the `/sdlc-*` slash commands in `~/.claude/commands/`, `~/.gemini/commands/`, etc. Run after every upgrade to keep your AI tools in sync.
+
+---
+
 ## Next steps
 
-- See [`README.md`](README.md) for the full CLI reference and core concepts
-- See [`docs/vision.md`](docs/vision.md) for the design philosophy
-- See [`AGENTS.md`](AGENTS.md) for the full agent instruction set
-- Run `sdlc init` in any project — sdlc works with any codebase and any AI coding tool
+- [`README.md`](README.md) — full CLI reference and core concepts
+- [`DEVELOPER.md`](DEVELOPER.md) — contributor setup, dev loop, build targets
+- [`docs/vision.md`](docs/vision.md) — design philosophy
+- [`AGENTS.md`](AGENTS.md) — full agent instruction set

@@ -1,5 +1,9 @@
 # CLAUDE.md
 
+## Releasing
+
+To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX.Y.Z`), then watch `gh run list --repo orchard9/sdlc` and fix any workflow errors found.
+
 ## Project
 
 `Ponder` (`sdlc`) is a Rust CLI + library that implements a deterministic state machine for feature lifecycle management. It tracks features through structured phases, emits directives for AI consumers, and records approvals. It has no LLM calls — it is the state layer that agents operate against.

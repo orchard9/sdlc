@@ -20,13 +20,14 @@ async fn log_request(
     let method = req.method().clone();
     let uri = req.uri().clone();
     let start = std::time::Instant::now();
+    tracing::info!(method = %method, path = %uri, "→");
     let resp = next.run(req).await;
-    tracing::debug!(
+    tracing::info!(
         method = %method,
         path = %uri,
         status = resp.status().as_u16(),
         latency_ms = start.elapsed().as_millis(),
-        "Request completed"
+        "←"
     );
     resp
 }

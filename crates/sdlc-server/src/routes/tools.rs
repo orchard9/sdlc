@@ -54,6 +54,7 @@ pub async fn list_tools(State(app): State<AppState>) -> Result<Json<serde_json::
                                 serde_json::json!(sdlc_core::tool_runner::is_managed_tool(&name)),
                             );
                         }
+                        inject_missing_secrets(&mut meta);
                         metas.push(meta)
                     }
                     Err(e) => warn!(tool = %name, error = %e, "tool --meta returned invalid JSON"),
@@ -101,6 +102,7 @@ pub async fn get_tool_meta(
                 serde_json::json!(sdlc_core::tool_runner::is_managed_tool(&name)),
             );
         }
+        inject_missing_secrets(&mut meta);
         Ok(meta)
     })
     .await
@@ -297,7 +299,18 @@ pub async fn setup_tool(
             return Err(AppError::not_found(format!("tool '{name}' not found")));
         }
 
-        let stdout = sdlc_core::tool_runner::run_tool(&script, "--setup", None, &root, None)?;
+        // Resolve secrets so setup can reach external services (e.g. bot token check)
+        let extra_env = match sdlc_core::tool_runner::run_tool(&script, "--meta", None, &root, None)
+        {
+            Ok(meta_stdout) => match sdlc_core::tool_runner::parse_tool_meta(&meta_stdout) {
+                Ok(meta) => resolve_secrets(&name, &meta)?,
+                Err(_) => std::collections::HashMap::new(),
+            },
+            Err(_) => std::collections::HashMap::new(),
+        };
+
+        let stdout =
+            sdlc_core::tool_runner::run_tool(&script, "--setup", None, &root, Some(&extra_env))?;
         let output: serde_json::Value = serde_json::from_str(&stdout)
             .map_err(|e| AppError(anyhow::anyhow!("tool --setup returned invalid JSON: {e}")))?;
         Ok(output)
@@ -427,6 +440,39 @@ pub async fn clone_tool(
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+/// Inject a `missing_secrets` array into a tool meta JSON object.
+///
+/// Reads the `secrets` array from the meta (if present) and checks each
+/// required entry against `std::env::var`. Missing required secrets are
+/// collected and written back as `meta["missing_secrets"]`.
+///
+/// This is a best-effort operation — any parse failures are silently ignored
+/// and the field is simply omitted.
+fn inject_missing_secrets(meta: &mut serde_json::Value) {
+    let Some(obj) = meta.as_object_mut() else {
+        return;
+    };
+
+    let secrets_val = match obj.get("secrets") {
+        Some(v) => v.clone(),
+        None => return,
+    };
+
+    let secrets: Vec<sdlc_core::tool_runner::SecretRef> = match serde_json::from_value(secrets_val)
+    {
+        Ok(v) => v,
+        Err(_) => return,
+    };
+
+    let missing: Vec<String> = secrets
+        .iter()
+        .filter(|s| s.required && std::env::var(&s.env_var).is_err())
+        .map(|s| s.env_var.clone())
+        .collect();
+
+    obj.insert("missing_secrets".into(), serde_json::json!(missing));
+}
 
 /// Validate that a tool name contains only safe characters.
 /// Tool names follow the same rules as slugs: a-z, A-Z, 0-9, hyphen, underscore.
