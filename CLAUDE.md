@@ -2,7 +2,7 @@
 
 ## Project
 
-`sdlc` is a Rust CLI + library that implements a deterministic state machine for feature lifecycle management. It tracks features through structured phases, emits directives for AI consumers, and records approvals. It has no LLM calls — it is the state layer that agents operate against.
+`Ponder` (`sdlc`) is a Rust CLI + library that implements a deterministic state machine for feature lifecycle management. It tracks features through structured phases, emits directives for AI consumers, and records approvals. It has no LLM calls — it is the state layer that agents operate against.
 
 ## Stack
 
@@ -114,6 +114,8 @@ All actions — including all `approve_*` verification steps and `approve_merge`
 **Everything in git.** All state — features, milestones, artifacts, UAT results — lives in `.sdlc/` as plain files and is committed to the project repository. There is no external database or service. Git is the audit trail, the history, and the backup.
 
 **User perspectives are first-class.** The state machine ensures we build things right. User perspectives ensure we build the right things. `/sdlc-pressure-test <milestone>` runs empathy interviews against a milestone's scope and autonomously edits vision, features, acceptance criteria, and creates `[user-gap]` tasks. Use `/recruit` to assemble the right team for any project function — it always includes user perspectives.
+
+**Production system with real users.** This server runs live. Every change must leave the codebase healthier — not just correct, but cleaner. Data migrations must be backward-compatible: add defensive deserialization before removing old formats, never the reverse. Avoid patterns that cause infinite loops, connection exhaustion, or complexity that makes failures hard to trace.
 
 **Audits and reviews close every finding.** When `approve_audit` or `approve_review` is the directive, enumerate every finding and take one explicit action: fix it now (targeted code change), track it (`sdlc task add`), or accept it (documented rationale). Silence is not acceptance. Use targeted fixes for specific findings — `fix-all` and `remediate` are for systemic codebase-wide patterns, not individual audit items.
 

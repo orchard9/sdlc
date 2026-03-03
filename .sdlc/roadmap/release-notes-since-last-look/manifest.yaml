@@ -1,0 +1,11 @@
+slug: release-notes-since-last-look
+title: 'Release Notes: What Changed Since You Last Looked'
+status: committed
+created_at: 2026-03-02T23:32:31.468755Z
+updated_at: 2026-03-02T23:43:25.209262Z
+committed_at: 2026-03-02T23:43:25.209262Z
+sessions: 1
+orientation:
+  current: 'Idea fully shaped: event log backbone + dashboard banner for V1; CLI and notification API for V2/V3'
+  next: Run /sdlc-ponder-commit release-notes-since-last-look to crystallize into milestones and features
+  commit: Event schema finalized, V1 scope agreed — ready to commit

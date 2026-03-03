@@ -1,7 +1,10 @@
 use crate::output::print_json;
 use anyhow::Context;
 use clap::Subcommand;
-use sdlc_core::{classifier::try_auto_transition, feature::Feature, types::ArtifactType};
+use sdlc_core::classifier::try_auto_transition;
+use sdlc_core::event_log::{self, EventKind};
+use sdlc_core::feature::Feature;
+use sdlc_core::types::ArtifactType;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -68,6 +71,21 @@ fn approve(
         .approve_artifact(artifact_type, by.clone())
         .with_context(|| format!("failed to approve {artifact_str}"))?;
     feature.save(root).context("failed to save feature")?;
+
+    // Emit changelog event for review/audit/qa approvals — non-fatal.
+    let changelog_kind = match artifact_type {
+        ArtifactType::Review => Some(EventKind::ReviewApproved),
+        ArtifactType::Audit => Some(EventKind::AuditApproved),
+        ArtifactType::QaResults => Some(EventKind::QaApproved),
+        _ => None,
+    };
+    if let Some(kind) = changelog_kind {
+        if let Err(e) =
+            event_log::append_event(root, kind, Some(slug.to_string()), serde_json::json!({}))
+        {
+            eprintln!("warn: changelog write failed: {e}");
+        }
+    }
 
     let transitioned_to = try_auto_transition(root, slug);
 

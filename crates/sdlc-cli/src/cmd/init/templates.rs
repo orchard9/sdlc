@@ -287,7 +287,20 @@ requests in development and the address is wrong in production.
 When fixing a CORS error or adding a new API client, apply this pattern instead of
 adding CORS headers or introducing environment-specific URLs.
 
-## 11. Project Guidelines
+## 11. Production Safety
+
+This is a live system with real users. Every change must leave the codebase healthier — not just correct, but cleaner.
+
+**Migrations:** Add defensive deserialization before removing old formats. Never the reverse. Test that both old and new formats load cleanly before shipping.
+
+**Stability hazards to avoid:**
+- Infinite loops: any polling, retry, or SSE reconnect loop must have a termination condition and backoff
+- Connection exhaustion: SSE subscriptions, DB connections, and broadcast channels must be bounded and cleaned up on drop
+- Complex failure modes: prefer simple, flat control flow over deeply nested async chains — when it breaks at 3am, you must be able to read the trace
+
+**Quality bar:** if a change makes the code harder to reason about, makes logs less useful, or adds a failure mode with no clear recovery path — stop and reconsider. Simpler is always better.
+
+## 12. Project Guidelines
 
 Before writing implementation code, check if `.sdlc/guidelines/index.yaml` exists.
 If it does, read it and load any guidelines whose `scope` overlaps with the work at hand.
@@ -1412,6 +1425,25 @@ checks:
 The quality-check tool picks them up automatically — no code changes needed.
 "#;
 
+/// dev-driver tool.ts — always overwrite (managed content).
+pub const TOOL_DEV_DRIVER_TS: &str = include_str!("../../../../../.sdlc/tools/dev-driver/tool.ts");
+
+/// dev-driver README.md — write-if-missing (user-annotatable).
+pub const TOOL_DEV_DRIVER_README_MD: &str =
+    include_str!("../../../../../.sdlc/tools/dev-driver/README.md");
+
+/// telegram-recap tool.ts — always overwrite (managed content).
+pub const TOOL_TELEGRAM_RECAP_TS: &str =
+    include_str!("../../../../../.sdlc/tools/telegram-recap/tool.ts");
+
+/// telegram-recap config.yaml — write-if-missing (user may customize).
+pub const TOOL_TELEGRAM_RECAP_CONFIG_YAML: &str =
+    include_str!("../../../../../.sdlc/tools/telegram-recap/config.yaml");
+
+/// telegram-recap README.md — write-if-missing (user-annotatable).
+pub const TOOL_TELEGRAM_RECAP_README_MD: &str =
+    include_str!("../../../../../.sdlc/tools/telegram-recap/README.md");
+
 pub const TOOL_STATIC_TOOLS_MD: &str = r#"# SDLC Tools
 
 Project-specific tools installed by sdlc. Use `sdlc tool run <name>` to invoke.
@@ -1437,6 +1469,26 @@ Runs checks from .sdlc/tools/quality-check/config.yaml and reports pass/fail.
 **Run:** `sdlc tool run quality-check`
 **Setup required:** No
 _Edit `.sdlc/tools/quality-check/config.yaml` to add your project's checks_
+
+---
+
+## dev-driver — Dev Driver
+
+Finds the next development action and dispatches it — advances the project one step per tick.
+
+**Run:** `sdlc tool run dev-driver`
+**Setup required:** No
+_Configure via orchestrator: Label=dev-driver, Tool=dev-driver, Input={}, Recurrence=14400. See `.sdlc/tools/dev-driver/README.md` for full docs._
+
+---
+
+## telegram-recap — Telegram Recap
+
+Fetch and email a Telegram chat digest — pulls messages from the configured window and sends via SMTP.
+
+**Run:** `sdlc tool run telegram-recap --input '{}'`
+**Setup required:** Yes — `sdlc tool run telegram-recap --setup`
+_Requires 7 secrets: TELEGRAM_BOT_TOKEN, SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM, SMTP_TO. Schedule with orchestrator (--every 86400) for a daily digest._
 
 ---
 

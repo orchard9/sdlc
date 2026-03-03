@@ -1,0 +1,16 @@
+[Unit]
+Description=Daily Telegram Digest Timer
+Documentation=https://github.com/orchard9/sdlc
+
+[Timer]
+# Fire daily at 07:00 local system time
+OnCalendar=*-*-* 07:00:00
+
+# If the host was offline at 07:00, fire once when it comes back online
+Persistent=true
+
+# Which service to trigger
+Unit=telegram-digest.service
+
+[Install]
+WantedBy=timers.target

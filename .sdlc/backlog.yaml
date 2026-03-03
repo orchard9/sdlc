@@ -47,3 +47,10 @@ items:
   source_feature: telegram-bot-deploy
   created_at: 2026-03-02T18:48:54.740026Z
   updated_at: 2026-03-02T18:48:54.740026Z
+- id: B7
+  title: Config-file escape hatch for project-wide orchestrator opt-out (sdlc.config.yaml setting to disable --run-actions even when flag is passed — for teams that want guaranteed no-action mode)
+  kind: concern
+  status: open
+  source_feature: fix-threadbodyignoredandbuttonstaysdisabled
+  created_at: 2026-03-03T00:47:31.012277Z
+  updated_at: 2026-03-03T00:47:31.012277Z

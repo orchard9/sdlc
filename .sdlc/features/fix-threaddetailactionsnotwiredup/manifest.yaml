@@ -1,0 +1,111 @@
+slug: fix-threaddetailactionsnotwiredup
+title: Fix Threaddetailactionsnotwiredup
+description: |-
+  Root cause: The action buttons in ThreadDetailPane.tsx (lines 86–100) are stub placeholders marked 'coming soon'; no delete button was added, no callback props exist on the component, no api.deleteThread method exists in client.ts, and there are no synthesize or promote-to-ponder API endpoints on the server.
+
+  Problem: The thread detail pane has 'Synthesize' and 'Promote to Ponder' buttons hardcoded as `disabled` with cursor-not-allowed, and there is no Delete button at all. Users cannot perform any of these three actions from the thread detail view even though the backend DELETE endpoint already exists and is tested.
+
+  Original report:
+  we need a way to be able to delete threads in e.g., in /threads/20260303-general-2
+
+  delete, synthesize, promote to ponder
+phase: released
+created_at: 2026-03-03T01:20:59.772727Z
+updated_at: 2026-03-03T01:36:08.488309Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/spec.md
+  created_at: 2026-03-03T01:22:31.288764Z
+  approved_at: 2026-03-03T01:22:34.607693Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-03T01:22:44.194877Z
+  waive_reason: Spec contains exact file paths, function signatures, and component changes. No additional design artifact needed for this UI bug fix.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/tasks.md
+  created_at: 2026-03-03T01:23:05.250592Z
+  approved_at: 2026-03-03T01:23:10.678267Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/qa-plan.md
+  created_at: 2026-03-03T01:23:35.081584Z
+  approved_at: 2026-03-03T01:23:41.647483Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/review.md
+  created_at: 2026-03-03T01:30:49.161814Z
+  approved_at: 2026-03-03T01:30:54.441751Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/audit.md
+  created_at: 2026-03-03T01:31:35.023216Z
+  approved_at: 2026-03-03T01:31:41.053578Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-threaddetailactionsnotwiredup/qa-results.md
+  created_at: 2026-03-03T01:35:53.387232Z
+  approved_at: 2026-03-03T01:35:57.535396Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T01:20:59.772727Z
+  exited: 2026-03-03T01:22:34.615376Z
+- phase: specified
+  entered: 2026-03-03T01:22:34.615376Z
+  exited: 2026-03-03T01:23:41.648820Z
+- phase: planned
+  entered: 2026-03-03T01:23:41.648820Z
+  exited: 2026-03-03T01:23:52.239276Z
+- phase: ready
+  entered: 2026-03-03T01:23:52.239276Z
+  exited: 2026-03-03T01:24:02.844350Z
+- phase: implementation
+  entered: 2026-03-03T01:24:02.844350Z
+  exited: 2026-03-03T01:30:54.447749Z
+- phase: review
+  entered: 2026-03-03T01:30:54.447749Z
+  exited: 2026-03-03T01:31:12.346690Z
+- phase: audit
+  entered: 2026-03-03T01:31:12.346690Z
+  exited: 2026-03-03T01:31:41.058786Z
+- phase: qa
+  entered: 2026-03-03T01:31:41.058786Z
+  exited: 2026-03-03T01:35:57.538523Z
+- phase: merge
+  entered: 2026-03-03T01:35:57.538523Z
+  exited: 2026-03-03T01:36:08.488309Z
+- phase: released
+  entered: 2026-03-03T01:36:08.488309Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

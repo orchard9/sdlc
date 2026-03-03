@@ -204,6 +204,39 @@ Inline markers to use consistently:
 - `Recruited: NAME · ROLE` — when a new partner joins mid-session
 - `**NAME · ROLE**` — header for each partner voice block
 
+### Product Summary section
+
+Every session log **MUST** end with a `## Product Summary` block. This section is
+extracted by the UI for session card preview — the H3 subsection labels are **stable
+and locked**. Do not rename them.
+
+```markdown
+## Product Summary
+
+### What we explored
+[1–2 sentences in plain English — what problem or idea this session covered. No jargon.]
+
+### Key shifts
+[What changed vs. before this session — decisions made (⚑), assumptions revisited,
+prior beliefs updated. If nothing shifted, say so explicitly.]
+
+### Implications
+[What this means for the feature/milestone in product language — no tech jargon.
+Connect findings to backlog or roadmap consequences for someone who manages scope.]
+
+### Still open
+[The 1–2 questions that remain unresolved, phrased as decisions to be made —
+not technical investigations. Reference ? markers from the session body.]
+```
+
+Rules:
+- H3 labels (`What we explored`, `Key shifts`, `Implications`, `Still open`) are locked —
+  do not rename, reorder, or omit them
+- Implications must use product language, not technical language
+- Still open items are phrased as decisions, not technical tasks
+- This section is what gets surfaced on session cards in the UI — make it readable
+  by someone who has not read the session
+
 ### The only correct logging procedure
 
 1. Write the session content to a temp file using the Write tool:
@@ -227,7 +260,9 @@ Before summarizing:
    `/tmp/ponder-session-<slug>.md` using the Write tool. Include everything that
    happened — tool calls, partner voices, sketches, decisions (⚑), open questions (?),
    and recruitment events. Set the orientation fields to reflect where the thinking
-   is right now, what should happen next, and what unlocks commitment.
+   is right now, what should happen next, and what unlocks commitment. **End the
+   document body with a `## Product Summary` section** using the four locked H3
+   subsections defined above (What we explored, Key shifts, Implications, Still open).
 
 2. **Log it:**
 ```bash
@@ -270,6 +305,9 @@ Open the ponder workspace for creative exploration and ideation.
 5. When artifacts are ready: `sdlc ponder capture <slug> --content "..." --as <name>.md`.
 6. Before ending: write and log the session file:
    - Compose a Markdown session with YAML frontmatter (session, timestamp, orientation).
+   - End the session body with a `## Product Summary` section containing four fixed H3s
+     (labels locked — do not rename): **What we explored**, **Key shifts**,
+     **Implications** (product language, no jargon), **Still open** (decisions, not tasks).
    - `sdlc ponder session log <slug> --file /tmp/session-<N>.md`
 7. End with **Next:** — continue exploring, commit, or park.
 "#;
@@ -295,6 +333,9 @@ Use this skill to open a ponder workspace for exploring ideas.
 5. Capture with `sdlc ponder capture <slug> --content "..." --as <name>.md`.
 6. Before ending: compose session Markdown with YAML frontmatter (session, timestamp,
    orientation) and log it: `sdlc ponder session log <slug> --file /tmp/session.md`.
+   End the session body with `## Product Summary` — four subsections with locked labels:
+   **What we explored**, **Key shifts**, **Implications** (product language, no jargon),
+   **Still open** (decisions, not tasks). Do not rename the H3 labels.
 7. End with **Next:** — continue, commit, or park.
 "#;
 

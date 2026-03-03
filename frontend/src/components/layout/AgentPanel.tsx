@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { RunCard } from './RunCard'
 import { QuotaPanel } from './QuotaPanel'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
+import { RunsHeatmap } from '@/components/runs/RunsHeatmap'
 import { PanelRightClose, Maximize2 } from 'lucide-react'
 import { api } from '@/api/client'
 import type { ProjectConfig } from '@/lib/types'
@@ -62,7 +64,7 @@ function RunList() {
 }
 
 export function AgentPanel() {
-  const { panelOpen, setPanelOpen } = useAgentRuns()
+  const { panelOpen, setPanelOpen, runs, focusRun } = useAgentRuns()
   const [fullscreen, setFullscreen] = useState(false)
   const [config, setConfig] = useState<ProjectConfig | null>(null)
   const [panelWidth, setPanelWidth] = useState(() => {
@@ -139,6 +141,19 @@ export function AgentPanel() {
             </button>
           </div>
         </div>
+
+        {/* Compact heatmap strip — shown when 2+ runs exist */}
+        {runs.length >= 2 && (
+          <div className="px-3 py-2 border-b border-border/50">
+            <RunsHeatmap runs={runs} compact onRunClick={run => focusRun(run.id)} />
+            <Link
+              to="/runs"
+              className="block text-right text-[10px] text-primary hover:underline mt-1"
+            >
+              full view →
+            </Link>
+          </div>
+        )}
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-2 space-y-1.5">

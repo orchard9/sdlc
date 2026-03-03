@@ -14,10 +14,14 @@ use claude_agent::{
 };
 use std::collections::HashMap;
 use std::convert::Infallible;
+use tokio::time::{timeout, Duration};
 use tokio_stream::wrappers::BroadcastStream;
 use tokio_stream::StreamExt as _;
 
 use tracing::{error, info, warn};
+
+/// Maximum silence between agent stream messages before treating the run as hung.
+const AGENT_MESSAGE_TIMEOUT: Duration = Duration::from_secs(600); // 10 minutes
 
 use crate::{
     error::AppError,
@@ -55,6 +59,19 @@ fn truncate_chars_with_ellipsis(input: &str, max_chars: usize) -> String {
     }
 }
 
+/// Extract the slug from a run key of the form `"prefix:slug"`.
+///
+/// Examples:
+/// - `"sdlc-run:my-feature"` → `"my-feature"`
+/// - `"milestone-run-wave:v15"` → `"v15"`
+/// - `"ponder:my-idea"` → `"my-idea"`
+/// - `"no-colon"` → `"unknown"`
+fn extract_slug_from_key(key: &str) -> String {
+    key.split_once(':')
+        .map(|(_, s)| s.to_string())
+        .unwrap_or_else(|| "unknown".to_string())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -62,6 +79,22 @@ mod tests {
         AssistantContent, AssistantMessage, ContentBlock, ResultMessage, ResultSuccess,
         ResultUsage, TokenUsage, ToolProgressMessage,
     };
+
+    #[test]
+    fn extract_slug_from_key_parses_correctly() {
+        assert_eq!(extract_slug_from_key("sdlc-run:my-feature"), "my-feature");
+        assert_eq!(
+            extract_slug_from_key("milestone-run-wave:v15-alpha"),
+            "v15-alpha"
+        );
+        assert_eq!(
+            extract_slug_from_key("sdlc-run:feature-with-dashes"),
+            "feature-with-dashes"
+        );
+        assert_eq!(extract_slug_from_key("ponder:my-idea"), "my-idea");
+        assert_eq!(extract_slug_from_key("no-colon"), "unknown");
+        assert_eq!(extract_slug_from_key(""), "unknown");
+    }
 
     #[test]
     fn truncate_chars_handles_multibyte_utf8() {
@@ -223,7 +256,19 @@ pub(crate) async fn spawn_agent_run(
     label: &str,
     completion_event: Option<SseMessage>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    info!(key = %key, "spawn_agent_run: request received");
+    tracing::debug!(key = %key, "spawn_agent_run: request received");
+
+    // Duplicate check must happen BEFORE spawning the task to close the TOCTOU race window.
+    {
+        let runs = app.agent_runs.lock().await;
+        if runs.contains_key(&key) {
+            warn!(key = %key, "spawn_agent_run: agent already running");
+            return Err(AppError::conflict(format!(
+                "Agent already running for '{key}'"
+            )));
+        }
+    }
+    // Lock dropped here — the task is not yet spawned.
 
     // Create the broadcast channel and build the RunRecord before taking the lock.
     let run_id = generate_run_id();
@@ -260,7 +305,7 @@ pub(crate) async fn spawn_agent_run(
     let run_id_clone = run_id.clone();
     let telemetry_store = app.telemetry.clone();
 
-    info!(key = %key, "spawn_agent_run: spawning agent task");
+    tracing::debug!(key = %key, "spawn_agent_run: spawning agent task");
     let handle = tokio::spawn(async move {
         let tx = tx_task;
         let mut stream = query(prompt, opts);
@@ -271,44 +316,63 @@ pub(crate) async fn spawn_agent_run(
         let mut is_error = false;
         let mut error_msg: Option<String> = None;
 
-        while let Some(msg) = stream.next().await {
-            match msg {
-                Ok(message) => {
-                    message_count += 1;
-                    let event = message_to_event(&message);
-                    accumulated_events.push(event.clone());
-                    if let Some(store) = &telemetry_store {
-                        let store = store.clone();
-                        let run_id2 = run_id_clone.clone();
-                        let ev = event.clone();
-                        tokio::task::spawn_blocking(move || {
-                            let _ = store.append_raw(&run_id2, ev);
-                        });
-                    }
-                    let json = match serde_json::to_string(&event) {
-                        Ok(s) => s,
-                        Err(_) => continue,
-                    };
-                    let _ = tx.send(json);
-
-                    if let Message::Result(ref r) = message {
-                        is_error = r.is_error();
-                        final_cost = Some(r.total_cost_usd());
-                        final_turns = Some(r.num_turns() as u64);
-                        if is_error {
-                            error_msg = r.result_text().map(|s| s.to_string());
+        // Per-message timeout: prevents the task from hanging if the agent stops emitting.
+        loop {
+            match timeout(AGENT_MESSAGE_TIMEOUT, stream.next()).await {
+                Ok(Some(msg)) => match msg {
+                    Ok(message) => {
+                        message_count += 1;
+                        let event = message_to_event(&message);
+                        accumulated_events.push(event.clone());
+                        if let Some(store) = &telemetry_store {
+                            let store = store.clone();
+                            let run_id2 = run_id_clone.clone();
+                            let ev = event.clone();
+                            tokio::task::spawn_blocking(move || {
+                                let _ = store.append_raw(&run_id2, ev);
+                            });
                         }
-                        info!(key = %key_clone, message_count, "agent run completed");
+                        let json = match serde_json::to_string(&event) {
+                            Ok(s) => s,
+                            Err(_) => continue,
+                        };
+                        let _ = tx.send(json);
+
+                        if let Message::Result(ref r) = message {
+                            is_error = r.is_error();
+                            final_cost = Some(r.total_cost_usd());
+                            final_turns = Some(r.num_turns() as u64);
+                            if is_error {
+                                error_msg = r.result_text().map(|s| s.to_string());
+                            }
+                            info!(key = %key_clone, message_count, "agent run completed");
+                            break;
+                        }
+                    }
+                    Err(e) => {
+                        error!(key = %key_clone, error = %e, message_count, "agent run error");
+                        is_error = true;
+                        error_msg = Some(e.to_string());
+                        let event = serde_json::json!({
+                            "type": "error",
+                            "message": e.to_string()
+                        });
+                        accumulated_events.push(event.clone());
+                        let _ = tx.send(event.to_string());
                         break;
                     }
+                },
+                Ok(None) => {
+                    // Stream ended normally without a Result message.
+                    break;
                 }
-                Err(e) => {
-                    error!(key = %key_clone, error = %e, message_count, "agent run error");
+                Err(_elapsed) => {
+                    error!(key = %key_clone, timeout_secs = 600, "Agent stream timed out");
                     is_error = true;
-                    error_msg = Some(e.to_string());
+                    error_msg = Some("agent stream timed out".to_string());
                     let event = serde_json::json!({
                         "type": "error",
-                        "message": e.to_string()
+                        "message": "agent stream timed out after 10 minutes of silence"
                     });
                     accumulated_events.push(event.clone());
                     let _ = tx.send(event.to_string());
@@ -321,8 +385,9 @@ pub(crate) async fn spawn_agent_run(
         let status = if is_error { "failed" } else { "completed" };
         let completed_at = chrono::Utc::now().to_rfc3339();
 
-        // Update in-memory history
-        {
+        // Update the record AND clone it for persistence in a single lock acquisition
+        // to avoid a second lock round-trip.
+        let full_rec = {
             let mut history = run_history.lock().await;
             if let Some(rec) = history.iter_mut().find(|r| r.id == run_id_clone) {
                 rec.status = status.to_string();
@@ -330,38 +395,81 @@ pub(crate) async fn spawn_agent_run(
                 rec.cost_usd = final_cost;
                 rec.turns = final_turns;
                 rec.error = error_msg.clone();
+                rec.clone()
+            } else {
+                // Fallback: create a minimal record for persistence if it's missing.
+                RunRecord {
+                    id: run_id_clone.clone(),
+                    key: key_clone.clone(),
+                    run_type: String::new(),
+                    target: String::new(),
+                    label: String::new(),
+                    status: status.to_string(),
+                    started_at: completed_at.clone(),
+                    completed_at: Some(completed_at.clone()),
+                    cost_usd: final_cost,
+                    turns: final_turns,
+                    error: error_msg.clone(),
+                    prompt: None,
+                }
             }
-        }
+        };
 
-        // Persist record + events sidecar
+        // Persist record + events sidecar (outside the lock).
         {
             let root2 = root.clone();
             let id2 = run_id_clone.clone();
-            let full_rec = {
-                let history = run_history.lock().await;
-                history.iter().find(|r| r.id == run_id_clone).cloned()
-            };
-            if let Some(full_rec) = full_rec {
-                tokio::task::spawn_blocking(move || {
-                    persist_run(&root2, &full_rec);
-                    persist_run_events(&root2, &id2, &accumulated_events);
-                    enforce_retention(&root2, 50);
-                })
-                .await
-                .ok();
-            }
+            let rec_to_persist = full_rec.clone();
+            tokio::task::spawn_blocking(move || {
+                persist_run(&root2, &rec_to_persist);
+                persist_run_events(&root2, &id2, &accumulated_events);
+                enforce_retention(&root2, 50);
+            })
+            .await
+            .ok();
         }
 
-        // Emit RunFinished SSE
+        // Remove BEFORE emitting RunFinished so a concurrent start request does not
+        // see the run still in the map when it receives the finish SSE event.
+        tracing::debug!(key = %key_clone, message_count, "agent run cleanup");
+        agent_runs.lock().await.remove(&key_clone);
+
+        // Emit RunFinished SSE (after removal so the map is already clear).
         let _ = event_tx.send(SseMessage::RunFinished {
             id: run_id_clone,
             key: key_clone.clone(),
             status: status.to_string(),
         });
 
-        // Clean up active run
-        info!(key = %key_clone, message_count, "agent run cleanup");
-        agent_runs.lock().await.remove(&key_clone);
+        // Emit changelog events — non-fatal; done in a blocking task to avoid
+        // holding the async context open for file I/O.
+        {
+            let root2 = root.clone();
+            let key2 = key_clone.clone();
+            let status2 = status.to_string();
+            tokio::task::spawn_blocking(move || {
+                use sdlc_core::event_log::{append_event, EventKind};
+                let slug = extract_slug_from_key(&key2);
+                if status2 == "failed" {
+                    let _ = append_event(
+                        &root2,
+                        EventKind::RunFailed,
+                        Some(slug.clone()),
+                        serde_json::json!({"run_key": key2}),
+                    );
+                }
+                if key2.starts_with("milestone-run-wave:") && status2 == "completed" {
+                    let _ = append_event(
+                        &root2,
+                        EventKind::MilestoneWaveCompleted,
+                        Some(slug),
+                        serde_json::json!({"run_key": key2}),
+                    );
+                }
+            })
+            .await
+            .ok();
+        }
 
         // Emit domain-specific completion event (e.g. PonderRunCompleted)
         if let Some(evt) = completion_event {
@@ -370,11 +478,13 @@ pub(crate) async fn spawn_agent_run(
     });
     let abort_handle = handle.abort_handle();
 
-    // Atomically check for a duplicate and insert — single lock window, no async work inside.
+    // Insert into the map now that the task is spawned.
+    // Second-chance duplicate check: handles the extreme race where two requests both
+    // passed the pre-spawn check above before either task was inserted.
     {
         let mut runs = app.agent_runs.lock().await;
         if runs.contains_key(&key) {
-            warn!(key = %key, "spawn_agent_run: agent already running");
+            warn!(key = %key, "spawn_agent_run: agent already running (second-chance check)");
             handle.abort();
             return Err(AppError::conflict(format!(
                 "Agent already running for '{key}'"
@@ -409,7 +519,7 @@ pub(crate) async fn spawn_agent_run(
 
 /// Subscribe to SSE events for a given run key.
 async fn get_run_events(key: &str, app: &AppState) -> Response {
-    info!(key = %key, "get_run_events: SSE subscribe");
+    tracing::debug!(key = %key, "get_run_events: SSE subscribe");
     let rx = {
         let runs = app.agent_runs.lock().await;
         runs.get(key).map(|(tx, _)| tx.subscribe())
@@ -446,7 +556,7 @@ async fn get_run_events(key: &str, app: &AppState) -> Response {
 /// Stop a running agent by removing it from the broadcast map.
 /// Also updates the RunRecord status and emits RunFinished.
 async fn stop_run_by_key(key: &str, app: &AppState) -> Json<serde_json::Value> {
-    info!(key = %key, "stop_run_by_key: request received");
+    tracing::debug!(key = %key, "stop_run_by_key: request received");
     let removed = app.agent_runs.lock().await.remove(key);
     match removed {
         Some((_, abort_handle)) => {
@@ -503,6 +613,31 @@ pub(crate) fn sdlc_guideline_query_options(
     let mut opts = sdlc_query_options(root, max_turns);
     opts.allowed_tools.push("WebSearch".into());
     opts.allowed_tools.push("WebFetch".into());
+    opts
+}
+
+/// Build query options for ponder sessions — extends sdlc_query_options with
+/// WebSearch, WebFetch, and Playwright MCP so agents can research prior art,
+/// fetch documentation, and interact with real browser UIs during ideation.
+pub(crate) fn sdlc_ponder_query_options(root: std::path::PathBuf, max_turns: u32) -> QueryOptions {
+    let mut opts = sdlc_query_options(root, max_turns);
+    opts.allowed_tools.push("WebSearch".into());
+    opts.allowed_tools.push("WebFetch".into());
+    opts.mcp_servers.push(McpServerConfig {
+        name: "playwright".into(),
+        command: "npx".into(),
+        args: vec!["@playwright/mcp@latest".into()],
+        env: HashMap::new(),
+    });
+    opts.allowed_tools.extend([
+        "mcp__playwright__browser_navigate".into(),
+        "mcp__playwright__browser_click".into(),
+        "mcp__playwright__browser_type".into(),
+        "mcp__playwright__browser_snapshot".into(),
+        "mcp__playwright__browser_take_screenshot".into(),
+        "mcp__playwright__browser_console_messages".into(),
+        "mcp__playwright__browser_wait_for".into(),
+    ]);
     opts
 }
 
@@ -641,16 +776,41 @@ pub async fn start_milestone_uat(
     ]);
 
     let prompt = format!(
-        "Run the acceptance test for milestone '{slug}'. \
+        "Run the acceptance test for milestone '{slug}'.\n\
+         \n\
          IMPORTANT: You are running INSIDE the sdlc server process at http://localhost:7777. \
          The server is already running — do NOT stop, restart, kill, or re-spawn it. \
          Do NOT call any UAT stop or start endpoints. \
          If localhost:7777 is unreachable, report it as a hard blocker and stop immediately — \
-         never attempt to start or restart the server. \
-         Call `sdlc milestone info {slug} --json` to load the milestone and acceptance test. \
-         Execute every checklist step. Write signed checklist results to \
-         `.sdlc/milestones/{slug}/uat_results.md`. \
-         Then call `sdlc milestone complete {slug}` if all steps pass.",
+         never attempt to start or restart the server.\n\
+         \n\
+         ## Step 0 — generate a run_id\n\
+         Before executing any steps, generate a run_id in the format \
+         `YYYYMMDD-HHMMSS-<three-random-lowercase-letters>` (UTC, e.g. `20260303-142500-abc`). \
+         Use this run_id consistently throughout the session. \
+         The run directory is `.sdlc/milestones/{slug}/uat-runs/<run_id>/`.\n\
+         \n\
+         ## Step 1 — load the acceptance test\n\
+         Call `sdlc milestone info {slug} --json` to load the milestone and acceptance test.\n\
+         \n\
+         ## Step 2 — execute checklist steps with screenshots\n\
+         Execute every checklist step using the Playwright MCP browser tools. \
+         After completing each UI interaction step, capture a screenshot:\n\
+         - Call `mcp__playwright__browser_take_screenshot` with a filename like \
+           `<step_number>-<step_slug>.png` (e.g. `01-login.png`).\n\
+         - Copy the file to `.sdlc/milestones/{slug}/uat-runs/<run_id>/<filename>`.\n\
+         - Append the relative path `.sdlc/milestones/{slug}/uat-runs/<run_id>/<filename>` \
+           to a `screenshot_paths` list.\n\
+         \n\
+         ## Step 3 — persist the run record\n\
+         After all steps complete:\n\
+         1. Write `summary.md` to `.sdlc/milestones/{slug}/uat-runs/<run_id>/summary.md`.\n\
+         2. Write `run.yaml` to `.sdlc/milestones/{slug}/uat-runs/<run_id>/run.yaml` \
+            with these fields: id, milestone_slug, started_at, completed_at, verdict \
+            (pass | pass_with_tasks | failed), tests_total, tests_passed, tests_failed, \
+            tasks_created, summary_path, and screenshot_paths (the list collected in Step 2).\n\
+         3. Write signed checklist results to `.sdlc/milestones/{slug}/uat_results.md`.\n\
+         4. Call `sdlc milestone complete {slug}` if all steps pass.",
     );
     let label = format!("UAT: {slug}");
     let completion_event = Some(SseMessage::MilestoneUatCompleted { slug: slug.clone() });
@@ -1002,6 +1162,14 @@ pub async fn start_ponder_chat(
          \n\
          ## Step 2 — Run the session\n\
          \n\
+         You have web research tools available when the idea benefits from external context:\n\
+         - `WebSearch` — search for prior art, competitors, specifications, research papers\n\
+         - `WebFetch` — fetch and read a specific URL (docs, APIs, blog posts)\n\
+         - Playwright browser tools (`mcp__playwright__browser_*`) — navigate live products, \
+           capture screenshots, read accessibility trees\n\
+         \n\
+         Use these tools when they would strengthen the analysis. Do not use them gratuitously.\n\
+         \n\
          You are a facilitator. Channel recruited thought partners by name — voice their \
          perspectives, let them push back, surface tensions. Interrogate the brief: push \
          past stated solutions to find real problems. Capture insights as scrapbook artifacts:\n\
@@ -1055,7 +1223,7 @@ pub async fn start_ponder_chat(
         message_context = message_context,
     );
 
-    let mut opts = sdlc_query_options(app.root.clone(), 100);
+    let mut opts = sdlc_ponder_query_options(app.root.clone(), 100);
     // Ponder sessions also need the ponder_chat tool available
     opts.allowed_tools
         .push("mcp__sdlc__sdlc_ponder_chat".into());
@@ -1121,12 +1289,12 @@ pub async fn commit_ponder(
         if let Ok(mut entry) = sdlc_core::ponder::PonderEntry::load(root, &slug) {
             entry.update_status(sdlc_core::ponder::PonderStatus::Committed);
             if let Err(e) = entry.save(root) {
-                warn!("commit_ponder: failed to save committed status for {slug}: {e}");
+                warn!(slug = %slug, error = %e, "commit_ponder: failed to save committed status");
             }
             if let Ok(mut state) = sdlc_core::state::State::load(root) {
                 state.remove_ponder(&slug);
                 if let Err(e) = state.save(root) {
-                    warn!("commit_ponder: failed to update state.yaml for {slug}: {e}");
+                    warn!(slug = %slug, error = %e, "commit_ponder: failed to update state.yaml");
                 }
             }
         }

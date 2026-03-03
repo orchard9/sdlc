@@ -1,62 +1,62 @@
 slug: fleet-reconcile-pipeline
 title: 'Woodpecker reconcile-projects.yaml: scan orchard9 org and ensure every repo has a deployment'
-phase: draft
+phase: released
 created_at: 2026-03-02T09:07:55.092763Z
-updated_at: 2026-03-02T09:07:55.092763Z
+updated_at: 2026-03-03T03:42:30.239337Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:18.406331Z
+  approved_at: 2026-03-03T03:28:25.936227Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:29:17.389074Z
+  approved_at: 2026-03-03T03:29:24.820373Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:29:50.655660Z
+  approved_at: 2026-03-03T03:29:58.314381Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:30:38.091189Z
+  approved_at: 2026-03-03T03:30:45.061846Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:34:52.497901Z
+  approved_at: 2026-03-03T03:35:01.166388Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:35:54.141400Z
+  approved_at: 2026-03-03T03:35:59.851515Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-reconcile-pipeline/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:42:02.097569Z
+  approved_at: 2026-03-03T03:42:17.180140Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T09:07:55.092763Z
+  exited: 2026-03-03T03:28:25.937541Z
+- phase: specified
+  entered: 2026-03-03T03:28:25.937541Z
+  exited: 2026-03-03T03:30:45.063177Z
+- phase: planned
+  entered: 2026-03-03T03:30:45.063177Z
+  exited: 2026-03-03T03:30:51.936217Z
+- phase: ready
+  entered: 2026-03-03T03:30:51.936217Z
+  exited: 2026-03-03T03:30:57.891331Z
+- phase: implementation
+  entered: 2026-03-03T03:30:57.891331Z
+  exited: 2026-03-03T03:35:01.169567Z
+- phase: review
+  entered: 2026-03-03T03:35:01.169567Z
+  exited: 2026-03-03T03:35:06.807500Z
+- phase: audit
+  entered: 2026-03-03T03:35:06.807500Z
+  exited: 2026-03-03T03:35:59.854495Z
+- phase: qa
+  entered: 2026-03-03T03:35:59.854495Z
+  exited: 2026-03-03T03:42:17.183717Z
+- phase: merge
+  entered: 2026-03-03T03:42:17.183717Z
+  exited: 2026-03-03T03:42:30.239337Z
+- phase: released
+  entered: 2026-03-03T03:42:30.239337Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

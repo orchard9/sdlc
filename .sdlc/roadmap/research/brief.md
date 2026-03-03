@@ -1,0 +1,1 @@
+our knowledge page at /knowledge needs a way to be able to issues research jobs that are very similar to the evolve job found at ~/Workspace/orchard9/adk-go-researcher

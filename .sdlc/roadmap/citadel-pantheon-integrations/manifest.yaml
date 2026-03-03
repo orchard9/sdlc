@@ -1,0 +1,13 @@
+slug: citadel-pantheon-integrations
+title: Citadel and Pantheon Integration Tools
+status: committed
+created_at: 2026-03-03T03:01:33.139959Z
+updated_at: 2026-03-03T05:35:42.728423Z
+committed_at: 2026-03-03T05:35:42.728422Z
+sessions: 2
+committed_to:
+  - citadel-pantheon-integration
+orientation:
+  current: 'Citadel and Pantheon are fully mapped. Citadel = observability (Rust, 50+ crates, REST API, annotation + webhook). Pantheon = developer hub (Go, Discord/web/CLI, task/incident/runbook management, tool registry). Clear two-tier integration architecture: server-to-server webhooks (automatic) + agent tool registry (on-demand). Key open question: is this work in Pantheon''s app platform, or sdlc .sdlc/tools/?'
+  next: 'Jordan to clarify ownership: Pantheon app platform integration vs. sdlc dev-driver tools — then decide which approach, sketch the ToolDefinition schema or shell tool shape, and start implementation.'
+  commit: Ownership decision made + concrete data flow confirmed + one prototype tool shape (JSON schema or shell script) drafted

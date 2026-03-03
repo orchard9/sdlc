@@ -1,0 +1,12 @@
+slug: agent-activity-missing-details
+title: agent activity missing details
+kind: root_cause
+phase: triage
+status: in_progress
+context: |-
+  We want the all agent activity to show in the UI agent activity, we'd also like it to persist for 30d
+
+  so even sub agent activity, we should surface it into the UI, and if we refresh we should see it
+sessions: 0
+created_at: 2026-03-03T01:02:20.309936Z
+updated_at: 2026-03-03T01:02:20.309936Z

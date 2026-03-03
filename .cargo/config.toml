@@ -1,0 +1,41 @@
+# Cargo configuration for cross-compilation
+#
+# Telegram Digest Bot deployment targets:
+#   amd64 (VPS): x86_64-unknown-linux-musl
+#   arm64 (RPi4): aarch64-unknown-linux-musl
+#   armv7 (RPi3): armv7-unknown-linux-musleabihf
+#
+# Cross-compilation is handled via `cross` (Docker-based) or `cargo-zigbuild`.
+# Install cross: cargo install cross --git https://github.com/cross-rs/cross
+# Install cargo-zigbuild: cargo install cargo-zigbuild
+#
+# Usage with cross:
+#   cross build --release --target x86_64-unknown-linux-musl --bin sdlc
+#   cross build --release --target aarch64-unknown-linux-musl --bin sdlc
+#   cross build --release --target armv7-unknown-linux-musleabihf --bin sdlc
+#
+# Usage with cargo-zigbuild:
+#   cargo zigbuild --release --target x86_64-unknown-linux-musl --bin sdlc
+#   cargo zigbuild --release --target aarch64-unknown-linux-musl --bin sdlc
+#   cargo zigbuild --release --target armv7-unknown-linux-musleabihf --bin sdlc
+
+# ──────────────────────────────────────────────
+# VPS target: x86_64 musl (static binary, no glibc dependency)
+# ──────────────────────────────────────────────
+# When using musl-cross toolchain directly (optional — `cross` handles this):
+# [target.x86_64-unknown-linux-musl]
+# linker = "x86_64-linux-musl-gcc"
+
+# ──────────────────────────────────────────────
+# Raspberry Pi 4 (64-bit): aarch64 musl
+# ──────────────────────────────────────────────
+# When using musl-cross toolchain directly (optional — `cross` handles this):
+# [target.aarch64-unknown-linux-musl]
+# linker = "aarch64-linux-musl-gcc"
+
+# ──────────────────────────────────────────────
+# Raspberry Pi 3 (32-bit): armv7 musl
+# ──────────────────────────────────────────────
+# When using musl-cross toolchain directly (optional — `cross` handles this):
+# [target.armv7-unknown-linux-musleabihf]
+# linker = "arm-linux-musleabihf-gcc"

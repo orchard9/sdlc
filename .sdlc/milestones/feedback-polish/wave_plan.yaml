@@ -1,12 +1,6 @@
 - number: 1
   label: Review
   items:
-  - slug: feedback-edit
-    title: Edit feedback notes inline
-    phase: draft
-    action: create_spec
-    needs_worktree: false
-    blocked_by: []
   - slug: feedback-enrich
     title: 'Enrichments: attach research context to feedback notes'
     phase: qa

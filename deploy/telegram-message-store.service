@@ -1,0 +1,35 @@
+[Unit]
+Description=Telegram Message Store — polling and SQLite persistence
+Documentation=https://github.com/orchard9/sdlc
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=telegram-bot
+Group=telegram-bot
+WorkingDirectory=/opt/telegram-bot
+
+# Load secrets from environment file (chmod 600, owned by telegram-bot)
+EnvironmentFile=/opt/telegram-bot/.env
+
+# Run the message store binary
+ExecStart=/opt/telegram-bot/bin/sdlc telegram poll
+
+# Restart on failure with 5s backoff (handles Telegram API outages gracefully)
+Restart=on-failure
+RestartSec=5s
+
+# Log to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=telegram-message-store
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/telegram-bot/data
+
+[Install]
+WantedBy=multi-user.target

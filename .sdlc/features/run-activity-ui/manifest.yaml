@@ -107,3 +107,4 @@ phase_history:
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

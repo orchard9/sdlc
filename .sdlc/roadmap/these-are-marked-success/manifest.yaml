@@ -1,0 +1,13 @@
+slug: these-are-marked-success
+title: These are marked success
+status: committed
+created_at: 2026-03-03T05:15:45.020291Z
+updated_at: 2026-03-03T05:25:40.587258Z
+committed_at: 2026-03-03T05:25:40.587257Z
+sessions: 1
+committed_to:
+- fix-run-lifecycle
+orientation:
+  current: Two UAT runs from last night display misleadingly — one stuck 'running' forever, one showing green checkmark despite a hard blocker. Run lifecycle conflates process completion with outcome quality.
+  next: 'Ship two-task fix: (T1) startup recovery marks orphaned runs failed; (T2) UAT fail endpoint + skill template update for explicit failure signaling.'
+  commit: Shape is clear. Two tasks, minimal scope, no new data model. Ready to build.

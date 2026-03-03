@@ -1,0 +1,154 @@
+slug: changelog-cli
+title: sdlc changelog CLI command — terminal digest of recent project activity
+phase: released
+created_at: 2026-03-02T23:42:47.478070Z
+updated_at: 2026-03-03T00:38:04.893156Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/changelog-cli/spec.md
+  created_at: 2026-03-03T00:26:47.210940Z
+  approved_at: 2026-03-03T00:26:52.920420Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/changelog-cli/design.md
+  created_at: 2026-03-03T00:27:34.408350Z
+  approved_at: 2026-03-03T00:27:38.616317Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/changelog-cli/tasks.md
+  created_at: 2026-03-03T00:28:08.125455Z
+  approved_at: 2026-03-03T00:28:12.205993Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/changelog-cli/qa-plan.md
+  created_at: 2026-03-03T00:28:42.739807Z
+  approved_at: 2026-03-03T00:28:44.981345Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/changelog-cli/review.md
+  created_at: 2026-03-03T00:36:26.770667Z
+  approved_at: 2026-03-03T00:36:30.060442Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/changelog-cli/audit.md
+  created_at: 2026-03-03T00:36:57.112483Z
+  approved_at: 2026-03-03T00:37:00.953090Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/changelog-cli/qa-results.md
+  created_at: 2026-03-03T00:37:54.162526Z
+  approved_at: 2026-03-03T00:37:58.772417Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create crates/sdlc-cli/src/cmd/changelog.rs — sdlc changelog [--since <date|Nd>] [--limit <N>] [--json] command
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.437916Z
+  started_at: 2026-03-03T00:29:11.662004Z
+  completed_at: 2026-03-03T00:35:54.545480Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement --since flag accepting ISO date (2026-03-01), relative (3d, 7d, 1w), or last-merge
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.442608Z
+  started_at: 2026-03-03T00:35:54.551557Z
+  completed_at: 2026-03-03T00:35:54.555423Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Pretty-print with icons: ⚠️ run_failed, 🚀 feature_merged, ✅ approvals, 🔄 phase_advanced; default last 7d, limit 20'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.448118Z
+  started_at: 2026-03-03T00:35:54.560770Z
+  completed_at: 2026-03-03T00:35:54.565134Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register sdlc changelog subcommand in crates/sdlc-cli/src/main.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.453414Z
+  started_at: 2026-03-03T00:35:54.570486Z
+  completed_at: 2026-03-03T00:35:54.574713Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'UAT: sdlc changelog reads .runs/ records instead of changelog.yaml — direct merges/approvals invisible in CLI output'
+  description: null
+  status: pending
+  created_at: 2026-03-03T03:32:24.592262Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: 'UAT: sdlc changelog --json field names mismatch spec (category≠kind, started_at≠timestamp, missing slug and meta fields)'
+  description: null
+  status: pending
+  created_at: 2026-03-03T03:32:28.218914Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T23:42:47.478070Z
+  exited: 2026-03-03T00:26:52.924158Z
+- phase: specified
+  entered: 2026-03-03T00:26:52.924158Z
+  exited: 2026-03-03T00:28:44.983637Z
+- phase: planned
+  entered: 2026-03-03T00:28:44.983637Z
+  exited: 2026-03-03T00:28:55.784701Z
+- phase: ready
+  entered: 2026-03-03T00:28:55.784701Z
+  exited: 2026-03-03T00:28:58.172697Z
+- phase: implementation
+  entered: 2026-03-03T00:28:58.172697Z
+  exited: 2026-03-03T00:36:30.070690Z
+- phase: review
+  entered: 2026-03-03T00:36:30.070690Z
+  exited: 2026-03-03T00:36:36.544251Z
+- phase: audit
+  entered: 2026-03-03T00:36:36.544251Z
+  exited: 2026-03-03T00:37:00.967013Z
+- phase: qa
+  entered: 2026-03-03T00:37:00.967013Z
+  exited: 2026-03-03T00:37:58.774043Z
+- phase: merge
+  entered: 2026-03-03T00:37:58.774043Z
+  exited: 2026-03-03T00:38:04.893156Z
+- phase: released
+  entered: 2026-03-03T00:38:04.893156Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

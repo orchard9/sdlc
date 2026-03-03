@@ -1,0 +1,13 @@
+slug: the-threads-layout-is-not-mobile-friendl
+title: The threads layout is not mobile friendly
+status: committed
+created_at: 2026-03-03T03:26:10.744275Z
+updated_at: 2026-03-03T05:36:00.913314Z
+committed_at: 2026-03-03T05:36:00.913314Z
+sessions: 1
+committed_to:
+- fix-mobile-layouts
+orientation:
+  current: Audit complete. ThreadsPage is broken (no mobile hide logic). ToolsPage has no back button. Evolve/Guideline/Investigation are functional but use a different pattern than Ponder. Two targeted fixes needed.
+  next: Implement ThreadsPage mobile fix (15 min). Then ToolsPage back button + prevent auto-select on mobile. File as feature tasks.
+  commit: When ThreadsPage and ToolsPage fixes are tracked as implementation tasks and we agree not to unify all workspace pages under one pattern.

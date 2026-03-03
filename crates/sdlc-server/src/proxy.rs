@@ -127,7 +127,13 @@ pub async fn proxy_handler(State(app): State<AppState>, req: Request) -> Respons
         .to_string();
 
     // Check whether this request is destined for the app tunnel.
-    let app_tunnel_host = app.tunnel_config.read().await.app_tunnel_host.clone();
+    let app_tunnel_host = app
+        .tunnel_snapshot
+        .read()
+        .await
+        .config
+        .app_tunnel_host
+        .clone();
     let is_app_tunnel = app_tunnel_host.as_deref().is_some_and(|h| h == bare_host);
 
     if !is_app_tunnel {
@@ -135,8 +141,8 @@ pub async fn proxy_handler(State(app): State<AppState>, req: Request) -> Respons
         return embed::static_handler(req.uri().clone()).await;
     }
 
-    // Resolve the upstream port.
-    let user_port = match *app.app_tunnel_port.read().await {
+    // Resolve the upstream port from the app tunnel snapshot.
+    let user_port = match app.app_tunnel_snapshot.read().await.port {
         Some(p) => p,
         None => {
             return Response::builder()

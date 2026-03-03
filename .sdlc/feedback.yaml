@@ -1,1 +1,11 @@
-[]
+- id: F1
+  content: Original note content for UAT
+  created_at: 2026-03-03T01:19:45.894663Z
+  updated_at: 2026-03-03T01:19:46.047351Z
+  enrichments:
+  - source: user
+    content: First enrichment
+    added_at: 2026-03-03T01:19:46.045987Z
+  - source: user
+    content: Second enrichment
+    added_at: 2026-03-03T01:19:46.047350Z

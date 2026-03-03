@@ -1,0 +1,9 @@
+slug: v24-knowledge-research
+title: Knowledge Research — web-capable agent and list-level research modal
+vision: The knowledge research agent uses real web search to pull external sources (not just local codebase grep), and any user can kick off research on a new topic directly from the list view without having to select an existing entry first.
+features:
+- knowledge-research-web-tools
+- knowledge-research-modal
+created_at: 2026-03-03T05:40:00Z
+updated_at: 2026-03-03T05:40:00Z
+schema_version: 1

@@ -1,8 +1,8 @@
 slug: feedback-edit
 title: Edit feedback notes inline
-phase: specified
+phase: released
 created_at: 2026-03-02T04:17:27.468405Z
-updated_at: 2026-03-02T09:28:55.414655Z
+updated_at: 2026-03-03T00:36:10.629404Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -21,42 +21,42 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:25:02.458951Z
+  approved_at: 2026-03-03T00:25:10.016354Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:25:18.671666Z
+  approved_at: 2026-03-03T00:25:23.659994Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:28:39.943489Z
+  approved_at: 2026-03-03T00:28:45.353226Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:29:11.826967Z
+  approved_at: 2026-03-03T00:33:20.409707Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-edit/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:36:00.808407Z
+  approved_at: 2026-03-03T00:36:05.636224Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -70,6 +70,31 @@ phase_history:
   exited: 2026-03-02T09:27:49.468610Z
 - phase: specified
   entered: 2026-03-02T09:27:49.468610Z
+  exited: 2026-03-03T00:25:23.661858Z
+- phase: planned
+  entered: 2026-03-03T00:25:23.661858Z
+  exited: 2026-03-03T00:25:33.744361Z
+- phase: ready
+  entered: 2026-03-03T00:25:33.744361Z
+  exited: 2026-03-03T00:25:37.380823Z
+- phase: implementation
+  entered: 2026-03-03T00:25:37.380823Z
+  exited: 2026-03-03T00:28:45.466200Z
+- phase: review
+  entered: 2026-03-03T00:28:45.466200Z
+  exited: 2026-03-03T00:28:59.701735Z
+- phase: audit
+  entered: 2026-03-03T00:28:59.701735Z
+  exited: 2026-03-03T00:33:20.411864Z
+- phase: qa
+  entered: 2026-03-03T00:33:20.411864Z
+  exited: 2026-03-03T00:36:05.638258Z
+- phase: merge
+  entered: 2026-03-03T00:36:05.638258Z
+  exited: 2026-03-03T00:36:10.629404Z
+- phase: released
+  entered: 2026-03-03T00:36:10.629404Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

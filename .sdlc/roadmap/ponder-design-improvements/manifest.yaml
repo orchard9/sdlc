@@ -1,0 +1,13 @@
+slug: ponder-design-improvements
+title: ponder design improvements
+status: committed
+created_at: 2026-03-03T02:55:00.551214Z
+updated_at: 2026-03-03T05:36:59.942295Z
+committed_at: 2026-03-03T05:36:59.942294Z
+sessions: 1
+orientation:
+  current: 'Decisions made: HTML mockups replace prose design artifacts in ponder; Tailwind CDN, dark theme, self-contained; .html extension captured via sdlc ponder capture. Scope: ponder skill first, feature create_design as follow-on.'
+  next: 'Implement: add Design Artifact Protocol section to sdlc_ponder.rs, with format spec, filename convention, and capture instructions. Also update sdlc-next''s create_design guidance.'
+  commit: When the skill instruction update is clear enough that a single agent can implement it without ambiguity — REACHED.
+committed_to:
+  - v26-html-design-artifacts

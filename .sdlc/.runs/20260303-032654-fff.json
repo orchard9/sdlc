@@ -1,0 +1,14 @@
+{
+  "id": "20260303-032654-fff",
+  "key": "milestone-run-wave:v21-dev-driver",
+  "run_type": "milestone_run_wave",
+  "target": "v21-dev-driver",
+  "label": "run-wave: v21-dev-driver",
+  "status": "completed",
+  "started_at": "2026-03-03T03:26:54.097607+00:00",
+  "completed_at": "2026-03-03T03:30:52.710526+00:00",
+  "cost_usd": 1.9328737499999995,
+  "turns": 4,
+  "error": null,
+  "prompt": "Execute the current wave of milestone 'v21-dev-driver' in parallel. Run `sdlc project prepare --milestone v21-dev-driver --json` to get the live wave plan. Wave 1 of the output is the current wave. For each feature in Wave 1 that does not need a worktree, spawn a parallel Agent call running `/sdlc-run <feature-slug>`. Wait for all agents to complete, then re-run prepare and report the updated wave plan."
+}

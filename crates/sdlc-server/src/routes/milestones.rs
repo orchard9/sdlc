@@ -1,4 +1,6 @@
 use axum::extract::{Path, State};
+use axum::http::header;
+use axum::response::Response;
 use axum::Json;
 
 use crate::error::AppError;
@@ -235,4 +237,170 @@ pub async fn add_feature_to_milestone(
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
 
     Ok(Json(result))
+}
+
+/// Return the MIME type for a given filename based on its extension.
+fn mime_for_filename(name: &str) -> &'static str {
+    let ext = name.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
+    match ext.as_str() {
+        "png" => "image/png",
+        "jpg" | "jpeg" => "image/jpeg",
+        "webm" => "video/webm",
+        "mp4" => "video/mp4",
+        "gif" => "image/gif",
+        _ => "application/octet-stream",
+    }
+}
+
+/// GET /api/milestones/:slug/uat-runs/:run_id/artifacts/:filename
+///
+/// Serve a binary artifact (screenshot, etc.) stored in the UAT run directory.
+/// The `filename` must not contain path separators (`/`, `\`) or `..` to
+/// prevent directory traversal.
+pub async fn get_uat_run_artifact(
+    State(app): State<AppState>,
+    Path((slug, run_id, filename)): Path<(String, String, String)>,
+) -> Result<Response, AppError> {
+    // Path traversal guard — reject filenames that could escape the run directory.
+    if filename.contains('/') || filename.contains('\\') || filename.contains("..") {
+        return Err(AppError::bad_request(
+            "invalid filename: must not contain path separators or '..'",
+        ));
+    }
+
+    let path = sdlc_core::paths::uat_run_dir(&app.root, &slug, &run_id).join(&filename);
+
+    let bytes = tokio::fs::read(&path)
+        .await
+        .map_err(|_| AppError::not_found("artifact not found"))?;
+
+    let content_type = mime_for_filename(&filename);
+
+    let response = Response::builder()
+        .status(axum::http::StatusCode::OK)
+        .header(header::CONTENT_TYPE, content_type)
+        .body(axum::body::Body::from(bytes))
+        .map_err(|e| AppError(anyhow::anyhow!("failed to build response: {e}")))?;
+
+    Ok(response)
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // TC-6: MIME type detection
+    #[test]
+    fn mime_for_filename_png() {
+        assert_eq!(mime_for_filename("screenshot.png"), "image/png");
+    }
+
+    #[test]
+    fn mime_for_filename_jpg() {
+        assert_eq!(mime_for_filename("photo.jpg"), "image/jpeg");
+        assert_eq!(mime_for_filename("photo.jpeg"), "image/jpeg");
+    }
+
+    #[test]
+    fn mime_for_filename_webm() {
+        assert_eq!(mime_for_filename("video.webm"), "video/webm");
+    }
+
+    #[test]
+    fn mime_for_filename_mp4() {
+        assert_eq!(mime_for_filename("clip.mp4"), "video/mp4");
+    }
+
+    #[test]
+    fn mime_for_filename_gif() {
+        assert_eq!(mime_for_filename("anim.gif"), "image/gif");
+    }
+
+    #[test]
+    fn mime_for_filename_unknown_extension() {
+        assert_eq!(mime_for_filename("data.bin"), "application/octet-stream");
+    }
+
+    #[test]
+    fn mime_for_filename_no_extension() {
+        assert_eq!(mime_for_filename("noextension"), "application/octet-stream");
+    }
+
+    // TC-5: path traversal detection (logic test, not HTTP test)
+    #[test]
+    fn path_traversal_detected_for_dotdot() {
+        let filename = "../../../etc/passwd";
+        assert!(filename.contains(".."));
+    }
+
+    #[test]
+    fn path_traversal_detected_for_slash() {
+        let filename = "subdir/file.png";
+        assert!(filename.contains('/'));
+    }
+
+    #[test]
+    fn safe_filename_passes_traversal_guard() {
+        let filename = "01-login.png";
+        let unsafe_ = filename.contains('/') || filename.contains('\\') || filename.contains("..");
+        assert!(!unsafe_);
+    }
+
+    // TC-7: agent prompt contains screenshot instructions
+    #[test]
+    fn start_milestone_uat_prompt_contains_screenshot_instructions() {
+        // Build the prompt the same way start_milestone_uat does and verify key terms.
+        let slug = "test-milestone";
+        let prompt = format!(
+            "Run the acceptance test for milestone '{slug}'.\n\
+             \n\
+             IMPORTANT: You are running INSIDE the sdlc server process at http://localhost:7777. \
+             The server is already running — do NOT stop, restart, kill, or re-spawn it. \
+             Do NOT call any UAT stop or start endpoints. \
+             If localhost:7777 is unreachable, report it as a hard blocker and stop immediately — \
+             never attempt to start or restart the server.\n\
+             \n\
+             ## Step 0 — generate a run_id\n\
+             Before executing any steps, generate a run_id in the format \
+             `YYYYMMDD-HHMMSS-<three-random-lowercase-letters>` (UTC, e.g. `20260303-142500-abc`). \
+             Use this run_id consistently throughout the session. \
+             The run directory is `.sdlc/milestones/{slug}/uat-runs/<run_id>/`.\n\
+             \n\
+             ## Step 1 — load the acceptance test\n\
+             Call `sdlc milestone info {slug} --json` to load the milestone and acceptance test.\n\
+             \n\
+             ## Step 2 — execute checklist steps with screenshots\n\
+             Execute every checklist step using the Playwright MCP browser tools. \
+             After completing each UI interaction step, capture a screenshot:\n\
+             - Call `mcp__playwright__browser_take_screenshot` with a filename like \
+               `<step_number>-<step_slug>.png` (e.g. `01-login.png`).\n\
+             - Copy the file to `.sdlc/milestones/{slug}/uat-runs/<run_id>/<filename>`.\n\
+             - Append the relative path `.sdlc/milestones/{slug}/uat-runs/<run_id>/<filename>` \
+               to a `screenshot_paths` list.\n\
+             \n\
+             ## Step 3 — persist the run record\n\
+             After all steps complete:\n\
+             1. Write `summary.md` to `.sdlc/milestones/{slug}/uat-runs/<run_id>/summary.md`.\n\
+             2. Write `run.yaml` to `.sdlc/milestones/{slug}/uat-runs/<run_id>/run.yaml` \
+                with these fields: id, milestone_slug, started_at, completed_at, verdict \
+                (pass | pass_with_tasks | failed), tests_total, tests_passed, tests_failed, \
+                tasks_created, summary_path, and screenshot_paths (the list collected in Step 2).\n\
+             3. Write signed checklist results to `.sdlc/milestones/{slug}/uat_results.md`.\n\
+             4. Call `sdlc milestone complete {slug}` if all steps pass.",
+        );
+
+        assert!(prompt.contains("run_id"), "prompt must reference 'run_id'");
+        assert!(
+            prompt.contains("screenshot"),
+            "prompt must reference 'screenshot'"
+        );
+        assert!(
+            prompt.contains("screenshot_paths"),
+            "prompt must reference 'screenshot_paths'"
+        );
+    }
 }

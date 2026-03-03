@@ -72,7 +72,7 @@ export function PipelineIndicator({ ponders, milestones }: PipelineIndicatorProp
   const currentStage = computeCurrentStage(ponders, milestones)
 
   return (
-    <div className="flex items-center gap-1.5 py-2" role="navigation" aria-label="SDLC pipeline stages">
+    <div className="flex items-center gap-1.5 py-2" role="navigation" aria-label="Ponder pipeline stages">
       {STAGES.map((stage, i) => {
         const isCompleted = i < currentStage
         const isCurrent = i === currentStage

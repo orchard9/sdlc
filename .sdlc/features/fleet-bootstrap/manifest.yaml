@@ -1,72 +1,145 @@
 slug: fleet-bootstrap
 title: Provision initial orchard9 projects by triggering reconcile pipeline for all existing repos
-phase: draft
+phase: released
 created_at: 2026-03-02T09:07:55.527133Z
-updated_at: 2026-03-02T09:07:55.527133Z
+updated_at: 2026-03-03T03:40:00.465747Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:20.322446Z
+  approved_at: 2026-03-03T03:28:29.479354Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:29:28.206036Z
+  approved_at: 2026-03-03T03:29:32.108027Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:30:09.815430Z
+  approved_at: 2026-03-03T03:30:14.093488Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:30:56.005788Z
+  approved_at: 2026-03-03T03:31:00.214773Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:37:10.293046Z
+  approved_at: 2026-03-03T03:37:15.579693Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:38:01.547388Z
+  approved_at: 2026-03-03T03:38:08.784005Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-bootstrap/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:39:40.953115Z
+  approved_at: 2026-03-03T03:39:47.760327Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Write bootstrap.py script (Gitea pagination, WP trigger, concurrency, dry-run)
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:31:16.997443Z
+  started_at: 2026-03-03T03:31:44.187163Z
+  completed_at: 2026-03-03T03:36:08.625645Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Write bootstrap.yaml Woodpecker pipeline definition (event: custom, python:3.12-alpine)'
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:31:17.003420Z
+  started_at: null
+  completed_at: 2026-03-03T03:36:08.634004Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Commit and push both files to orchard9/sdlc-cluster
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:31:17.009068Z
+  started_at: null
+  completed_at: 2026-03-03T03:36:08.640468Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Register Woodpecker secrets: gitea_token and woodpecker_token'
+  description: null
+  status: blocked
+  created_at: 2026-03-03T03:31:17.015297Z
+  started_at: null
+  completed_at: null
+  blocker: orchard9/sdlc-cluster not yet registered in Woodpecker — requires fleet-deploy-pipeline (v18) to complete first to activate org repos in Woodpecker CI
+  depends_on: []
+- id: T5
+  title: Validate dry run in Woodpecker (DRY_RUN=true)
+  description: null
+  status: blocked
+  created_at: 2026-03-03T03:31:17.021775Z
+  started_at: null
+  completed_at: null
+  blocker: 'Depends on T4: Woodpecker secrets cannot be validated until sdlc-cluster is activated in Woodpecker CI'
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T09:07:55.527133Z
+  exited: 2026-03-03T03:28:29.481030Z
+- phase: specified
+  entered: 2026-03-03T03:28:29.481030Z
+  exited: 2026-03-03T03:31:00.216110Z
+- phase: planned
+  entered: 2026-03-03T03:31:00.216110Z
+  exited: 2026-03-03T03:31:07.038691Z
+- phase: ready
+  entered: 2026-03-03T03:31:07.038691Z
+  exited: 2026-03-03T03:31:09.877813Z
+- phase: implementation
+  entered: 2026-03-03T03:31:09.877813Z
+  exited: 2026-03-03T03:37:15.582791Z
+- phase: review
+  entered: 2026-03-03T03:37:15.582791Z
+  exited: 2026-03-03T03:37:22.315744Z
+- phase: audit
+  entered: 2026-03-03T03:37:22.315744Z
+  exited: 2026-03-03T03:38:08.786904Z
+- phase: qa
+  entered: 2026-03-03T03:38:08.786904Z
+  exited: 2026-03-03T03:39:47.763455Z
+- phase: merge
+  entered: 2026-03-03T03:39:47.763455Z
+  exited: 2026-03-03T03:40:00.465747Z
+- phase: released
+  entered: 2026-03-03T03:40:00.465747Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

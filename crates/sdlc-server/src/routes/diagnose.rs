@@ -201,7 +201,10 @@ For vague descriptions with no file paths, still search the codebase and set con
     .await
     .is_err()
     {
-        tracing::warn!("diagnosis agent timed out after {DIAGNOSE_TIMEOUT_SECS}s");
+        tracing::warn!(
+            timeout_secs = DIAGNOSE_TIMEOUT_SECS,
+            "Diagnosis agent timed out"
+        );
         return Ok(Json(fallback_result(&description)));
     }
 

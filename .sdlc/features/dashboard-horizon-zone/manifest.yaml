@@ -1,62 +1,62 @@
 slug: dashboard-horizon-zone
 title: Horizon zone — unified forward-looking surface for milestones and ponders
-phase: draft
+phase: released
 created_at: 2026-03-02T09:10:00.655834Z
-updated_at: 2026-03-02T09:10:00.655834Z
+updated_at: 2026-03-03T02:56:03.023936Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:50:15.242284Z
+  approved_at: 2026-03-03T02:50:17.860274Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:51:07.867201Z
+  approved_at: 2026-03-03T02:51:10.932380Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:51:34.114428Z
+  approved_at: 2026-03-03T02:51:36.532481Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:52:08.486448Z
+  approved_at: 2026-03-03T02:52:11.431084Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:54:02.268995Z
+  approved_at: 2026-03-03T02:54:07.985465Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:54:46.713774Z
+  approved_at: 2026-03-03T02:54:52.783780Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-horizon-zone/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:55:53.421278Z
+  approved_at: 2026-03-03T02:55:56.455271Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T09:10:00.655834Z
+  exited: 2026-03-03T02:50:17.861798Z
+- phase: specified
+  entered: 2026-03-03T02:50:17.861798Z
+  exited: 2026-03-03T02:52:11.437012Z
+- phase: planned
+  entered: 2026-03-03T02:52:11.437012Z
+  exited: 2026-03-03T02:52:18.488465Z
+- phase: ready
+  entered: 2026-03-03T02:52:18.488465Z
+  exited: 2026-03-03T02:52:23.519546Z
+- phase: implementation
+  entered: 2026-03-03T02:52:23.519546Z
+  exited: 2026-03-03T02:54:07.986779Z
+- phase: review
+  entered: 2026-03-03T02:54:07.986779Z
+  exited: 2026-03-03T02:54:14.458280Z
+- phase: audit
+  entered: 2026-03-03T02:54:14.458280Z
+  exited: 2026-03-03T02:54:52.908727Z
+- phase: qa
+  entered: 2026-03-03T02:54:52.908727Z
+  exited: 2026-03-03T02:55:56.456882Z
+- phase: merge
+  entered: 2026-03-03T02:55:56.456882Z
+  exited: 2026-03-03T02:56:03.023936Z
+- phase: released
+  entered: 2026-03-03T02:56:03.023936Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

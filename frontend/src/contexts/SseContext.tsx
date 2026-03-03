@@ -3,6 +3,7 @@ import type { ActionSseEvent, AdvisorySseEvent, DocsSseEvent, InvestigationSseEv
 
 export interface SseCallbacks {
   onUpdate?: () => void
+  onChangelogEvent?: () => void
   onPonderEvent?: (event: PonderSseEvent) => void
   onRunEvent?: (event: RunSseEvent) => void
   onInvestigationEvent?: (event: InvestigationSseEvent) => void
@@ -33,6 +34,15 @@ export function SseProvider({ children }: { children: ReactNode }) {
       const subs = Array.from(subscribersRef.current)
 
       if (type === 'update') {
+        // Route ChangelogUpdated to its own callback; all other update events
+        // go through the shared debounced onUpdate path.
+        try {
+          const parsed = JSON.parse(data) as { type?: string }
+          if (parsed.type === 'ChangelogUpdated') {
+            for (const sub of subs) sub.onChangelogEvent?.()
+            return
+          }
+        } catch { /* malformed — fall through to debounced onUpdate */ }
         // Shared debounce: one timer fires all onUpdate subscribers together
         if (timer) clearTimeout(timer)
         timer = setTimeout(() => {

@@ -1,72 +1,163 @@
 slug: dashboard-zone-layout
 title: Dashboard four-zone layout — milestone-level digest replaces feature card grid
-phase: draft
+phase: released
 created_at: 2026-03-02T09:10:00.640767Z
-updated_at: 2026-03-02T09:10:00.640767Z
+updated_at: 2026-03-03T02:44:55.929665Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:37:55.510082Z
+  approved_at: 2026-03-03T02:38:03.344859Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:38:56.041284Z
+  approved_at: 2026-03-03T02:38:56.050128Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:39:14.531276Z
+  approved_at: 2026-03-03T02:39:14.537894Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:39:42.068216Z
+  approved_at: 2026-03-03T02:39:42.076247Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:43:23.024123Z
+  approved_at: 2026-03-03T02:43:23.035913Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:43:42.936712Z
+  approved_at: 2026-03-03T02:43:42.946775Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/dashboard-zone-layout/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:44:46.801234Z
+  approved_at: 2026-03-03T02:44:46.811339Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Create AttentionZone component
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.719640Z
+  started_at: 2026-03-03T02:39:56.032714Z
+  completed_at: 2026-03-03T02:40:34.479118Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create MilestoneDigestRow component
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.728237Z
+  started_at: 2026-03-03T02:40:34.488986Z
+  completed_at: 2026-03-03T02:40:58.622672Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create CurrentZone component
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.735707Z
+  started_at: 2026-03-03T02:40:58.635935Z
+  completed_at: 2026-03-03T02:41:08.641299Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create HorizonZone stub
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.743541Z
+  started_at: 2026-03-03T02:41:08.650044Z
+  completed_at: 2026-03-03T02:41:13.748613Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Create ArchiveZone component
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.751855Z
+  started_at: 2026-03-03T02:41:13.756620Z
+  completed_at: 2026-03-03T02:41:24.092803Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Refactor Dashboard.tsx to four-zone layout
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.759795Z
+  started_at: 2026-03-03T02:41:24.100509Z
+  completed_at: 2026-03-03T02:41:54.282160Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: 'Smoke test: verify no regressions'
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:39:53.768372Z
+  started_at: 2026-03-03T02:41:54.290661Z
+  completed_at: 2026-03-03T02:42:19.632241Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T09:10:00.640767Z
+  exited: 2026-03-03T02:38:03.346129Z
+- phase: specified
+  entered: 2026-03-03T02:38:03.346129Z
+  exited: 2026-03-03T02:39:42.077548Z
+- phase: planned
+  entered: 2026-03-03T02:39:42.077548Z
+  exited: 2026-03-03T02:39:45.215420Z
+- phase: ready
+  entered: 2026-03-03T02:39:45.215420Z
+  exited: 2026-03-03T02:39:48.341170Z
+- phase: implementation
+  entered: 2026-03-03T02:39:48.341170Z
+  exited: 2026-03-03T02:43:23.039785Z
+- phase: review
+  entered: 2026-03-03T02:43:23.039785Z
+  exited: 2026-03-03T02:43:26.679766Z
+- phase: audit
+  entered: 2026-03-03T02:43:26.679766Z
+  exited: 2026-03-03T02:43:42.949410Z
+- phase: qa
+  entered: 2026-03-03T02:43:42.949410Z
+  exited: 2026-03-03T02:44:46.813833Z
+- phase: merge
+  entered: 2026-03-03T02:44:46.813833Z
+  exited: 2026-03-03T02:44:55.929665Z
+- phase: released
+  entered: 2026-03-03T02:44:55.929665Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

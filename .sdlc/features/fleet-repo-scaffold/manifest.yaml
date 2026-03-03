@@ -1,8 +1,8 @@
 slug: fleet-repo-scaffold
 title: Scaffold orchard9/sdlc-cluster repo with base directory structure and .woodpecker.yml
-phase: specified
+phase: released
 created_at: 2026-03-02T09:07:43.801494Z
-updated_at: 2026-03-02T09:27:33.900927Z
+updated_at: 2026-03-03T03:32:07.554396Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,90 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-repo-scaffold/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:27:26.124910Z
+  approved_at: 2026-03-03T03:27:32.810451Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-repo-scaffold/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:27:50.002084Z
+  approved_at: 2026-03-03T03:27:52.836564Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-repo-scaffold/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:13.704818Z
+  approved_at: 2026-03-03T03:28:16.203517Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-repo-scaffold/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:30:49.504676Z
+  approved_at: 2026-03-03T03:30:52.248302Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-repo-scaffold/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:31:19.087625Z
+  approved_at: 2026-03-03T03:31:22.040496Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-repo-scaffold/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:31:59.518471Z
+  approved_at: 2026-03-03T03:32:01.882100Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Create orchard9/sdlc-cluster repository on threesix/gitea via API
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:28:34.297315Z
+  started_at: 2026-03-03T03:28:36.264248Z
+  completed_at: 2026-03-03T03:28:48.612479Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Clone repo and create all scaffold files
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:28:34.302425Z
+  started_at: 2026-03-03T03:28:48.618425Z
+  completed_at: 2026-03-03T03:29:32.390319Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Validate helm lint locally
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:28:34.306580Z
+  started_at: 2026-03-03T03:29:32.401372Z
+  completed_at: 2026-03-03T03:29:37.856753Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Commit and push initial scaffold
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:28:34.310502Z
+  started_at: 2026-03-03T03:29:37.902897Z
+  completed_at: 2026-03-03T03:30:13.049560Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +106,31 @@ phase_history:
   exited: 2026-03-02T09:27:33.900927Z
 - phase: specified
   entered: 2026-03-02T09:27:33.900927Z
+  exited: 2026-03-03T03:28:16.205033Z
+- phase: planned
+  entered: 2026-03-03T03:28:16.205033Z
+  exited: 2026-03-03T03:28:20.848431Z
+- phase: ready
+  entered: 2026-03-03T03:28:20.848431Z
+  exited: 2026-03-03T03:28:24.292543Z
+- phase: implementation
+  entered: 2026-03-03T03:28:24.292543Z
+  exited: 2026-03-03T03:30:52.250708Z
+- phase: review
+  entered: 2026-03-03T03:30:52.250708Z
+  exited: 2026-03-03T03:30:56.485067Z
+- phase: audit
+  entered: 2026-03-03T03:30:56.485067Z
+  exited: 2026-03-03T03:31:22.042659Z
+- phase: qa
+  entered: 2026-03-03T03:31:22.042659Z
+  exited: 2026-03-03T03:32:01.884681Z
+- phase: merge
+  entered: 2026-03-03T03:32:01.884681Z
+  exited: 2026-03-03T03:32:07.554396Z
+- phase: released
+  entered: 2026-03-03T03:32:07.554396Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

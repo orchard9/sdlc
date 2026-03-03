@@ -64,7 +64,7 @@ pub fn run(root: &Path, subcommand: ThreadSubcommand, _json: bool) -> anyhow::Re
     match subcommand {
         ThreadSubcommand::Create { context, title } => {
             let title_str = title.as_deref().unwrap_or("");
-            let thread = sdlc_core::feedback_thread::create_thread(root, &context, title_str)
+            let thread = sdlc_core::feedback_thread::create_thread(root, &context, title_str, None)
                 .with_context(|| format!("failed to create thread for context '{context}'"))?;
             println!("{}", thread.id);
             Ok(())

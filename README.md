@@ -1,6 +1,6 @@
-# sdlc
+# Ponder
 
-A deterministic SDLC state machine for software projects. Manage features, artifacts, tasks, and milestones through a structured lifecycle. Emits structured JSON directives that AI agents and humans consume to decide what to do next.
+A deterministic feature lifecycle engine for software projects. Manage features, artifacts, tasks, and milestones through a structured lifecycle. Emits structured JSON directives that AI agents and humans consume to decide what to do next.
 
 ## Quickstart
 

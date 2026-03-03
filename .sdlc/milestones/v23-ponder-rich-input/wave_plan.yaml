@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: ponder-agent-web-tools
+    title: WebSearch, WebFetch, and Playwright for ponder agent sessions
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: ponder-creation-modal
+    title: Expanded ponder creation modal — bigger form, URL references, and image paste
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

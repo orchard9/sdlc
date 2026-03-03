@@ -11,7 +11,8 @@ use cmd::{
     milestone::MilestoneSubcommand, orchestrate::OrchestrateSubcommand,
     platform::PlatformSubcommand, ponder::PonderSubcommand, project::ProjectSubcommand,
     query::QuerySubcommand, score::ScoreSubcommand, secrets::SecretsSubcommand,
-    task::TaskSubcommand, thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
+    task::TaskSubcommand, telegram::TelegramSubcommand, thread::ThreadSubcommand,
+    tool::ToolCommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -180,11 +181,27 @@ enum Commands {
     /// Refresh agent scaffolding and stamp the current binary version
     Update,
 
+    /// Show a digest of recent project activity (runs, merges, approvals)
+    Changelog {
+        /// Show events since: ISO date (2026-03-01), relative (7d, 1w), or last-merge
+        #[arg(long, default_value = "7d")]
+        since: String,
+        /// Maximum events to show
+        #[arg(long, default_value_t = 20)]
+        limit: usize,
+    },
+
     /// Merge a feature (stub)
     Merge { slug: String },
 
     /// Archive a feature
     Archive { slug: String },
+
+    /// Telegram bot integration: poll for messages and store them locally
+    Telegram {
+        #[command(subcommand)]
+        subcommand: TelegramSubcommand,
+    },
 
     /// Run as an MCP stdio server (used by claude-agent)
     Mcp,
@@ -213,9 +230,9 @@ enum Commands {
         #[arg(long, default_value_t = 60)]
         tick_rate: u64,
 
-        /// Skip starting the orchestrator daemon
+        /// Start the orchestrator daemon and execute scheduled actions
         #[arg(long)]
-        no_orchestrate: bool,
+        run_actions: bool,
 
         #[command(subcommand)]
         subcommand: Option<UiSubcommand>,
@@ -269,10 +286,12 @@ fn main() {
             subcommand,
         } => cmd::orchestrate::run(&root, subcommand, tick_rate, db),
         Commands::Update => cmd::update::run(&root),
+        Commands::Changelog { since, limit } => cmd::changelog::run(&root, &since, limit, cli.json),
         Commands::Merge { slug } => cmd::merge::run(&root, &slug, cli.json),
         Commands::Archive { slug } => {
             cmd::feature::run(&root, FeatureSubcommand::Archive { slug }, cli.json)
         }
+        Commands::Telegram { subcommand } => cmd::telegram::run(&root, subcommand),
         Commands::Mcp => cmd::mcp::run(&root),
         Commands::Agent { subcommand } => cmd::agent::run(&root, subcommand, cli.json),
         Commands::Ui {
@@ -280,7 +299,7 @@ fn main() {
             no_open,
             tunnel,
             tick_rate,
-            no_orchestrate,
+            run_actions,
             subcommand,
         } => cmd::ui::run(
             &root,
@@ -289,7 +308,7 @@ fn main() {
             no_open,
             tunnel,
             tick_rate,
-            no_orchestrate,
+            run_actions,
         ),
     };
 

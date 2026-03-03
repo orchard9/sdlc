@@ -1,8 +1,8 @@
 slug: orchestrator-actions-routes
 title: Orchestrator Actions REST API — GET/POST/DELETE actions routes + PATCH for label and recurrence editing
-phase: qa
+phase: released
 created_at: 2026-03-02T06:53:32.499054Z
-updated_at: 2026-03-02T09:42:53.426922Z
+updated_at: 2026-03-03T00:59:29.352461Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -53,10 +53,10 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/orchestrator-actions-routes/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:58:28.000348Z
+  approved_at: 2026-03-03T00:58:48.779101Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -88,6 +88,13 @@ phase_history:
   exited: 2026-03-02T09:42:53.426922Z
 - phase: qa
   entered: 2026-03-02T09:42:53.426922Z
+  exited: 2026-03-03T00:58:48.780681Z
+- phase: merge
+  entered: 2026-03-03T00:58:48.780681Z
+  exited: 2026-03-03T00:59:29.352461Z
+- phase: released
+  entered: 2026-03-03T00:59:29.352461Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

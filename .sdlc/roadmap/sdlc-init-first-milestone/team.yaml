@@ -1,0 +1,16 @@
+partners:
+- name: Ben Hartley
+  role: Developer productivity UX
+  context: Cognitive load and progressive disclosure in developer tooling — the init-to-first-action transition is a classic activation energy problem
+  agent: .claude/agents/ben-hartley.md
+  recruited_at: 2026-03-02T23:37:43.756457Z
+- name: Dan Reeves
+  role: Systems minimalist
+  context: Will push back on bloating init with milestone logic — needs to hear the minimal-change case
+  agent: .claude/agents/dan-reeves.md
+  recruited_at: 2026-03-02T23:37:43.761432Z
+- name: Felix Wagner
+  role: CLI ergonomics
+  context: Backlog data models and CLI output contracts — cares about actionable handoffs, not menus of options
+  agent: .claude/agents/felix-wagner.md
+  recruited_at: 2026-03-02T23:37:43.766258Z

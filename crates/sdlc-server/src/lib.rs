@@ -21,12 +21,12 @@ async fn log_request(
     let uri = req.uri().clone();
     let start = std::time::Instant::now();
     let resp = next.run(req).await;
-    eprintln!(
-        "← {} {} {} ({:?})",
-        method,
-        uri,
-        resp.status().as_u16(),
-        start.elapsed()
+    tracing::debug!(
+        method = %method,
+        path = %uri,
+        status = resp.status().as_u16(),
+        latency_ms = start.elapsed().as_millis(),
+        "Request completed"
     );
     resp
 }
@@ -53,10 +53,11 @@ pub fn build_router_for_test(
             cfg = cfg.with_app_tunnel_host(host);
         }
         // SAFETY: we're in test setup, no concurrent access yet.
-        *app_state
-            .tunnel_config
+        app_state
+            .tunnel_snapshot
             .try_write()
-            .expect("no contention in test setup") = cfg;
+            .expect("no contention in test setup")
+            .config = cfg;
     }
     build_router_from_state(app_state)
 }
@@ -80,6 +81,8 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/events", post(routes::events::sse_events))
         // State
         .route("/api/state", get(routes::state::get_state))
+        // Changelog
+        .route("/api/changelog", get(routes::changelog::get_changelog))
         // Backlog
         .route(
             "/api/backlog",
@@ -146,6 +149,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/milestones/{slug}/uat-runs/latest",
             get(routes::milestones::get_latest_milestone_uat_run),
+        )
+        .route(
+            "/api/milestones/{slug}/uat-runs/{run_id}/artifacts/{filename}",
+            get(routes::milestones::get_uat_run_artifact),
         )
         // Roadmap (Ponder Space)
         .route("/api/roadmap", get(routes::roadmap::list_ponders))
@@ -483,6 +490,11 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/feedback", get(routes::feedback::list_notes))
         .route("/api/feedback", post(routes::feedback::add_note))
         .route("/api/feedback/{id}", delete(routes::feedback::delete_note))
+        .route("/api/feedback/{id}", patch(routes::feedback::update_note))
+        .route(
+            "/api/feedback/{id}/enrich",
+            post(routes::feedback::enrich_note),
+        )
         .route("/api/feedback/to-ponder", post(routes::feedback::to_ponder))
         // Public feedback alias — always reachable through the app tunnel (no auth required).
         .route("/__sdlc/feedback", post(routes::feedback::add_note))
@@ -493,12 +505,18 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         )
         .route(
             "/api/threads/{id}",
-            get(routes::threads::get_thread).delete(routes::threads::delete_thread),
+            get(routes::threads::get_thread)
+                .patch(routes::threads::patch_thread)
+                .delete(routes::threads::delete_thread),
         )
         .route("/api/threads/{id}/posts", post(routes::threads::add_post))
         .route(
             "/api/threads/{id}/comments",
             post(routes::threads::add_comment),
+        )
+        .route(
+            "/api/threads/{id}/promote",
+            post(routes::threads::promote_thread),
         )
         // Webhook ingestion — accepts raw payloads from external senders and stores in redb.
         .route("/webhooks/{route}", post(routes::webhooks::receive_webhook))
@@ -559,7 +577,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .layer(TraceLayer::new_for_http())
         .layer(cors)
         .layer(axum::middleware::from_fn_with_state(
-            app_state.tunnel_config.clone(),
+            app_state.tunnel_snapshot.clone(),
             auth::auth_middleware,
         ))
         .layer(axum::middleware::from_fn(log_request))
@@ -601,7 +619,7 @@ pub async fn serve_on(
 ) -> anyhow::Result<()> {
     let actual_port = listener.local_addr()?.port();
 
-    tracing::info!("SDLC UI server listening on http://localhost:{actual_port}");
+    tracing::info!(port = actual_port, "SDLC server started");
 
     if open_browser {
         let url = format!("http://localhost:{actual_port}");
@@ -613,8 +631,10 @@ pub async fn serve_on(
     if let Some((tun, token)) = initial_tunnel {
         let url = tun.url.clone();
         *app_state.tunnel_handle.lock().await = Some(tun);
-        *app_state.tunnel_url.write().await = Some(url);
-        *app_state.tunnel_config.write().await = auth::TunnelConfig::with_token(token);
+        *app_state.tunnel_snapshot.write().await = state::TunnelSnapshot {
+            config: auth::TunnelConfig::with_token(token),
+            url: Some(url),
+        };
     }
 
     let app = build_router_from_state(app_state);

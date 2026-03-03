@@ -288,7 +288,7 @@ export function InvestigationDialoguePanel({ entry, onRefresh }: Props) {
   // Render
   // ------------------------------------------------------------------
 
-  const isRunning = runState.status === 'running'
+
   const phases = PHASE_SEQUENCES[entry.kind] ?? []
 
   return (
@@ -326,7 +326,6 @@ export function InvestigationDialoguePanel({ entry, onRefresh }: Props) {
               <SessionBlock
                 key={s.session}
                 session={s}
-                ownerName={isRunning && runState.status === 'running' ? runState.ownerName : undefined}
                 artifacts={entry.artifacts}
               />
             ))}

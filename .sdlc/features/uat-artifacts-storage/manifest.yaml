@@ -1,72 +1,136 @@
 slug: uat-artifacts-storage
 title: UAT artifact storage — UatRun model extension, binary serving route, agent prompt fix
-phase: draft
+phase: released
 created_at: 2026-03-02T18:07:59.845154Z
-updated_at: 2026-03-02T18:07:59.845154Z
+updated_at: 2026-03-03T03:07:12.672776Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:55:21.179669Z
+  approved_at: 2026-03-03T02:55:21.185926Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:56:03.717959Z
+  approved_at: 2026-03-03T02:56:03.724137Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:56:29.688407Z
+  approved_at: 2026-03-03T02:56:29.732263Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:57:00.809373Z
+  approved_at: 2026-03-03T02:57:00.816220Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:04:38.857553Z
+  approved_at: 2026-03-03T03:04:38.863861Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:05:28.861097Z
+  approved_at: 2026-03-03T03:05:28.897327Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-storage/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:07:06.718007Z
+  approved_at: 2026-03-03T03:07:06.724494Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Extend UatRun with screenshot_paths field
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:57:16.027107Z
+  started_at: 2026-03-03T02:57:21.688355Z
+  completed_at: 2026-03-03T02:58:18.446383Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add binary artifact serving route
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:57:16.032436Z
+  started_at: 2026-03-03T02:59:01.410404Z
+  completed_at: 2026-03-03T03:00:21.221008Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Fix start_milestone_uat agent prompt
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:57:16.037602Z
+  started_at: 2026-03-03T03:00:24.251393Z
+  completed_at: 2026-03-03T03:01:07.929415Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify build and tests pass
+  description: null
+  status: completed
+  created_at: 2026-03-03T02:57:16.043109Z
+  started_at: 2026-03-03T03:01:15.690623Z
+  completed_at: 2026-03-03T03:04:01.384163Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T18:07:59.845154Z
+  exited: 2026-03-03T02:55:21.187102Z
+- phase: specified
+  entered: 2026-03-03T02:55:21.187102Z
+  exited: 2026-03-03T02:57:00.817526Z
+- phase: planned
+  entered: 2026-03-03T02:57:00.817526Z
+  exited: 2026-03-03T02:57:05.373845Z
+- phase: ready
+  entered: 2026-03-03T02:57:05.373845Z
+  exited: 2026-03-03T02:57:09.676172Z
+- phase: implementation
+  entered: 2026-03-03T02:57:09.676172Z
+  exited: 2026-03-03T03:04:38.866177Z
+- phase: review
+  entered: 2026-03-03T03:04:38.866177Z
+  exited: 2026-03-03T03:04:44.650408Z
+- phase: audit
+  entered: 2026-03-03T03:04:44.650408Z
+  exited: 2026-03-03T03:05:28.911747Z
+- phase: qa
+  entered: 2026-03-03T03:05:28.911747Z
+  exited: 2026-03-03T03:07:06.726682Z
+- phase: merge
+  entered: 2026-03-03T03:07:06.726682Z
+  exited: 2026-03-03T03:07:12.672776Z
+- phase: released
+  entered: 2026-03-03T03:07:12.672776Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

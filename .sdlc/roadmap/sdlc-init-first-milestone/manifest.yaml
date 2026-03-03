@@ -1,0 +1,13 @@
+slug: sdlc-init-first-milestone
+title: sdlc-init should immediately jump into first milestone creation
+status: committed
+created_at: 2026-03-02T23:35:24.429677Z
+updated_at: 2026-03-03T02:56:49.866626Z
+committed_at: 2026-03-03T02:55:07.736643Z
+committed_to:
+- init-first-milestone-handoff
+sessions: 2
+orientation:
+  current: Approved — status converging, implementation is the only remaining step
+  next: 'Implement: edit SDLC_INIT_COMMAND Finish section in crates/sdlc-cli/src/cmd/init/commands/sdlc_init.rs + update SDLC_INIT_PLAYBOOK + SDLC_INIT_SKILL'
+  commit: DONE — commit signal met, status set to converging

@@ -1,0 +1,14 @@
+{
+  "id": "20260303-034011-xxx",
+  "key": "milestone-run-wave:v19-uat-artifacts",
+  "run_type": "milestone_run_wave",
+  "target": "v19-uat-artifacts",
+  "label": "run-wave: v19-uat-artifacts",
+  "status": "completed",
+  "started_at": "2026-03-03T03:40:11.258839+00:00",
+  "completed_at": "2026-03-03T03:40:39.289891+00:00",
+  "cost_usd": 0.2355145,
+  "turns": 3,
+  "error": null,
+  "prompt": "Execute the current wave of milestone 'v19-uat-artifacts' in parallel. Run `sdlc project prepare --milestone v19-uat-artifacts --json` to get the live wave plan. Wave 1 of the output is the current wave. For each feature in Wave 1 that does not need a worktree, spawn a parallel Agent call running `/sdlc-run <feature-slug>`. Wait for all agents to complete, then re-run prepare and report the updated wave plan."
+}

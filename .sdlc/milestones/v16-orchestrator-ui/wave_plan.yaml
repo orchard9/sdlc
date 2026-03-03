@@ -1,20 +1,8 @@
 - number: 1
-  label: Implementation
+  label: Review
   items:
   - slug: orchestrator-actions-routes
     title: Orchestrator Actions REST API — GET/POST/DELETE actions routes + PATCH for label and recurrence editing
-    phase: implementation
-    action: create_review
-    needs_worktree: false
-    blocked_by: []
-  - slug: orchestrator-sse-bridge
-    title: Orchestrator SSE Bridge — ActionStateChanged variant, daemon sentinel file, server directory watcher
-    phase: implementation
-    action: create_review
-    needs_worktree: false
-    blocked_by: []
-  - slug: orchestrator-webhook-events
-    title: Webhook Event History — WEBHOOK_EVENTS redb table, WebhookEvent struct, ring buffer (500), GET route
     phase: qa
     action: run_qa
     needs_worktree: true

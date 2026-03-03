@@ -1,0 +1,28 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: changelog-api
+    title: Changelog REST endpoint — query events by timestamp
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: changelog-cli
+    title: sdlc changelog CLI command — terminal digest of recent project activity
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: changelog-core
+    title: Changelog event log core — append-only persistent event source
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: changelog-dashboard-banner
+    title: Dashboard What Changed banner — since-your-last-visit event feed
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

@@ -2,9 +2,9 @@ slug: i-want-to-be-able-to-optionally-use-open
 title: i want to be able to optionally use open code for different milestones - and then choose the model. currently we default to claude sonnet. it can be scoped to a milestone
 status: converging
 created_at: 2026-03-02T18:50:51.130388Z
-updated_at: 2026-03-02T18:55:07.510024Z
-sessions: 1
+updated_at: 2026-03-03T03:07:46.903363Z
+sessions: 2
 orientation:
-  current: 'Two-concern request: (1) model selection per milestone — clearly implementable via milestone manifest + spawn_agent_run lookup; (2) OpenCode executor switching — architecturally harder due to protocol mismatch. Minimum viable path is model selection only.'
-  next: 'Decide scope: model-only v1 vs model+executor. If model-only, design the `agent` field in Milestone struct and wire spawn_agent_run to read it.'
-  commit: Agreement on scope boundary (model vs executor), config location (milestone manifest), and the lookup mechanism in spawn_agent_run.
+  current: 'Scope expanded: full endpoint config system (named endpoints, multi-level fallback chains, per-action-type routing) + left-panel config screen. Session 1''s two-level hierarchy still valid but becomes endpoints-first. ''Skill'' = ActionType (confirmed by design). Quota = stateful error-based detection in agent-state.yaml (gitignored). Config screen = dedicated Endpoints page in sidebar.'
+  next: 'Write the feature spec for `agent-endpoint-config`. Three sub-features: (1) data model: endpoints + chains in config.yaml + agent-state.yaml, (2) server-side fallback retry logic in spawn_agent_run, (3) frontend Endpoints page. Per-action-type routing via directive pre-read at spawn time — clean and cheap.'
+  commit: 'Scope settled: endpoints + chains + config screen is v1. Per-action-type routing ships in v1 (it''s cheap: classify before spawn). Cross-provider fallback is later. agent-state.yaml is gitignored transient runtime state.'

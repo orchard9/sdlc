@@ -1,8 +1,8 @@
 slug: feedback-thread-core
 title: 'FeedbackThread core: data model, CLI, and REST API'
-phase: qa
+phase: released
 created_at: 2026-03-02T18:34:48.271847Z
-updated_at: 2026-03-02T18:48:57.675469Z
+updated_at: 2026-03-03T00:57:48.306407Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -53,10 +53,10 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/feedback-thread-core/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:57:17.507237Z
+  approved_at: 2026-03-03T00:57:42.211400Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -169,6 +169,13 @@ phase_history:
   exited: 2026-03-02T18:48:57.675469Z
 - phase: qa
   entered: 2026-03-02T18:48:57.675469Z
+  exited: 2026-03-03T00:57:42.589357Z
+- phase: merge
+  entered: 2026-03-03T00:57:42.589357Z
+  exited: 2026-03-03T00:57:48.306407Z
+- phase: released
+  entered: 2026-03-03T00:57:48.306407Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

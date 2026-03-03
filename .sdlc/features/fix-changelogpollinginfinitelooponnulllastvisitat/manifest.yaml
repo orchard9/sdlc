@@ -1,0 +1,182 @@
+slug: fix-changelogpollinginfinitelooponnulllastvisitat
+title: Fix Changelogpollinginfinitelooponnulllastvisitat
+description: |-
+  Root cause: `since` is derived from `Date.now()` inline on every render when `lastVisitAt` is null, making it a non-stable value that invalidates `useCallback` and re-triggers the fetch effect on every render cycle.
+
+  Problem: When `lastVisitAt` is null (first-time visitor), `since` is computed as `new Date(Date.now() - SEVEN_DAYS_MS).toISOString()` on every render, producing a slightly different string each time. Because `since` is a `useCallback` dependency, a new `refresh` function is created on every render. The `useEffect(() => { refresh() }, [refresh])` then fires on every render, which calls fetch, which calls `setEvents`/`setTotal`, which triggers another render — creating an infinite tight loop of changelog API calls.
+
+  Original report:
+  its hitting changelog a lot
+
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.184Z&limit=50 200 (74.958µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.198Z&limit=50 200 (42.125µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.199Z&limit=50 200 (118.667µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.200Z&limit=50 200 (58.542µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.201Z&limit=50 200 (35.375µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.202Z&limit=50 200 (41.917µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.203Z&limit=50 200 (38.792µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.204Z&limit=50 200 (41.125µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.205Z&limit=50 200 (62.125µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.208Z&limit=50 200 (44.334µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.209Z&limit=50 200 (31.333µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.210Z&limit=50 200 (25.333µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.211Z&limit=50 200 (40.375µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.212Z&limit=50 200 (32.417µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A15%3A54.213Z&limit=50 200 (31.75µs)
+  ← GET / 200 (23.708µs)
+  ← GET /assets/index-PnxFbKAe.js 200 (295.208µs)
+  ← GET /assets/index-CaDSeFHx.css 200 (36.166µs)
+  ← GET /api/vision 200 (186.375µs)
+  ← GET /api/config 200 (179.666µs)
+  ← GET /api/architecture 200 (93.625µs)
+  ← GET /api/runs 200 (232.042µs)
+  ← POST /api/events 200 (15.042µs)
+  ← GET /api/config 200 (113.208µs)
+  ← GET /api/state 200 (13.67775ms)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A06.032Z&limit=50 200 (84.916µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A06.055Z&limit=50 200 (64µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A06.056Z&limit=50 200 (42.041µs)
+  ← GET /api/project/prepare 200 (14.232875ms)
+
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.013Z&limit=50 200 (43.042µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.023Z&limit=50 200 (57.25µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.031Z&limit=50 200 (67.375µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.032Z&limit=50 200 (40µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.035Z&limit=50 200 (57.375µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.036Z&limit=50 200 (45.083µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.037Z&limit=50 200 (43.292µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.038Z&limit=50 200 (26.417µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.040Z&limit=50 200 (26.791µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.041Z&limit=50 200 (21.084µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.042Z&limit=50 200 (33.583µs)
+  ← GET /api/state 200 (13.034292ms)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.044Z&limit=50 200 (36.166µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.046Z&limit=50 200 (47.042µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.047Z&limit=50 200 (29.583µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.048Z&limit=50 200 (22.625µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.050Z&limit=50 200 (26.166µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.052Z&limit=50 200 (44.041µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.053Z&limit=50 200 (41.417µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.054Z&limit=50 200 (57.75µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.055Z&limit=50 200 (33.166µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.056Z&limit=50 200 (24.625µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.057Z&limit=50 200 (28.625µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.059Z&limit=50 200 (41.709µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.060Z&limit=50 200 (20.375µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.062Z&limit=50 200 (41.916µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.063Z&limit=50 200 (27.833µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.064Z&limit=50 200 (35.25µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.065Z&limit=50 200 (43.167µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.066Z&limit=50 200 (24.292µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.068Z&limit=50 200 (24.917µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.069Z&limit=50 200 (27.334µs)
+  ← GET /api/changelog?since=2026-02-24T01%3A16%3A17.070Z&limit=50 200 (19µs)
+phase: released
+created_at: 2026-03-03T01:17:15.466213Z
+updated_at: 2026-03-03T01:21:09.851508Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/spec.md
+  created_at: 2026-03-03T01:17:53.004177Z
+  approved_at: 2026-03-03T01:17:55.242789Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-03T01:18:06.198624Z
+  waive_reason: 'Single-file hook fix: add useMemo for since. No architecture decisions needed.'
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/tasks.md
+  created_at: 2026-03-03T01:18:19.221098Z
+  approved_at: 2026-03-03T01:18:20.869081Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/qa-plan.md
+  created_at: 2026-03-03T01:18:34.617173Z
+  approved_at: 2026-03-03T01:18:37.758503Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/review.md
+  created_at: 2026-03-03T01:19:47.650201Z
+  approved_at: 2026-03-03T01:19:50.945576Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/audit.md
+  created_at: 2026-03-03T01:20:18.193228Z
+  approved_at: 2026-03-03T01:20:21.787742Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-changelogpollinginfinitelooponnulllastvisitat/qa-results.md
+  created_at: 2026-03-03T01:21:00.693185Z
+  approved_at: 2026-03-03T01:21:03.762077Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Wrap `since` in useMemo in useChangelog.ts
+  description: null
+  status: completed
+  created_at: 2026-03-03T01:19:25.727803Z
+  started_at: null
+  completed_at: 2026-03-03T01:19:29.403215Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T01:17:15.466213Z
+  exited: 2026-03-03T01:17:55.248803Z
+- phase: specified
+  entered: 2026-03-03T01:17:55.248803Z
+  exited: 2026-03-03T01:18:37.763632Z
+- phase: planned
+  entered: 2026-03-03T01:18:37.763632Z
+  exited: 2026-03-03T01:18:44.789995Z
+- phase: ready
+  entered: 2026-03-03T01:18:44.789995Z
+  exited: 2026-03-03T01:18:51.272343Z
+- phase: implementation
+  entered: 2026-03-03T01:18:51.272343Z
+  exited: 2026-03-03T01:19:50.947534Z
+- phase: review
+  entered: 2026-03-03T01:19:50.947534Z
+  exited: 2026-03-03T01:20:02.672576Z
+- phase: audit
+  entered: 2026-03-03T01:20:02.672576Z
+  exited: 2026-03-03T01:20:21.790646Z
+- phase: qa
+  entered: 2026-03-03T01:20:21.790646Z
+  exited: 2026-03-03T01:21:03.769175Z
+- phase: merge
+  entered: 2026-03-03T01:21:03.769175Z
+  exited: 2026-03-03T01:21:09.851508Z
+- phase: released
+  entered: 2026-03-03T01:21:09.851508Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

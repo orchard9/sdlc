@@ -9,9 +9,10 @@ import { DialoguePanel } from '@/components/ponder/DialoguePanel'
 import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
 import { TeamRow } from '@/components/ponder/TeamRow'
 import { OrientationStrip } from '@/components/ponder/OrientationStrip'
+import { NewIdeaModal } from '@/components/ponder/NewIdeaModal'
 import {
   Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Sparkles, SlidersHorizontal,
-  MessageSquare,
+  MessageSquare, ChevronLeft, ChevronRight,
 } from 'lucide-react'
 
 const WORKSPACE_WIDTH_LS_KEY = 'ponder_workspace_width'
@@ -35,16 +36,6 @@ const STATUS_TABS: { label: string; value: PonderStatus | 'all' }[] = [
   { label: 'Committed', value: 'committed' },
   { label: 'Parked', value: 'parked' },
 ]
-
-function titleToSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40)
-}
 
 // ---------------------------------------------------------------------------
 // Left pane: entry list item
@@ -88,6 +79,11 @@ function EntryRow({
           </span>
         )}
       </div>
+      {entry.last_session_preview && (
+        <p className="text-xs text-muted-foreground/50 line-clamp-1 mt-0.5 italic">
+          {entry.last_session_preview}
+        </p>
+      )}
       {entry.tags.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1">
           {entry.tags.map(t => (
@@ -99,107 +95,14 @@ function EntryRow({
   )
 }
 
-// ---------------------------------------------------------------------------
-// Left pane: new idea form (inline)
-// ---------------------------------------------------------------------------
-
-function NewIdeaForm({
-  onCreated,
-  onCancel,
-  initialTitle,
-  initialSlug,
-  initialBrief,
-}: {
-  onCreated: (slug: string) => void
-  onCancel: () => void
-  initialTitle?: string
-  initialSlug?: string
-  initialBrief?: string
-}) {
-  const [slug, setSlug] = useState(initialSlug ?? '')
-  const [title, setTitle] = useState(initialTitle ?? '')
-  const [brief, setBrief] = useState(initialBrief ?? '')
-  const [submitting, setSubmitting] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!slug.trim() || !title.trim()) return
-    setSubmitting(true)
-    setError(null)
-    try {
-      await api.createPonderEntry({
-        slug: slug.trim(),
-        title: title.trim(),
-        brief: brief.trim() || undefined,
-      })
-      const seed = brief.trim() ? `${title.trim()}\n\n${brief.trim()}` : title.trim()
-      api.startPonderChat(slug.trim(), seed).catch(() => {})
-      onCreated(slug.trim())
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create')
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  const handleTitleChange = (value: string) => {
-    setTitle(value)
-    if (!slug || slug === titleToSlug(title)) {
-      setSlug(titleToSlug(value))
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="p-3 space-y-2 border-b border-border">
-      <div className="flex items-center justify-between">
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">New Idea</span>
-        <button type="button" onClick={onCancel} className="p-0.5 text-muted-foreground hover:text-foreground transition-colors">
-          <X className="w-3.5 h-3.5" />
-        </button>
-      </div>
-      <input
-        type="text"
-        value={title}
-        onChange={e => handleTitleChange(e.target.value)}
-        placeholder="What are you thinking about?"
-        className="w-full px-2.5 py-1.5 text-sm bg-muted/60 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground"
-        // eslint-disable-next-line jsx-a11y/no-autofocus
-        autoFocus
-      />
-      <input
-        type="text"
-        value={slug}
-        onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-'))}
-        placeholder="slug"
-        className="w-full px-2.5 py-1 text-xs font-mono bg-muted/60 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground"
-      />
-      <textarea
-        value={brief}
-        onChange={e => setBrief(e.target.value)}
-        placeholder="Brief description (optional)"
-        rows={2}
-        className="w-full px-2.5 py-1.5 text-sm bg-muted/60 border border-border rounded-lg outline-none focus:border-primary/50 transition-colors placeholder:text-muted-foreground resize-none"
-      />
-      {error && <p className="text-xs text-destructive">{error}</p>}
-      <div className="flex justify-end gap-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          disabled={!slug.trim() || !title.trim() || submitting}
-          className="px-2.5 py-1 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {submitting ? 'Creating...' : 'Create'}
-        </button>
-      </div>
-    </form>
-  )
+function titleToSlug(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '')
+    .slice(0, 40)
 }
 
 // ---------------------------------------------------------------------------
@@ -455,7 +358,19 @@ function AdvisoryPanel({
 
 type MobileTab = 'chat' | 'files' | 'team'
 
-function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh: () => void; onBack: () => void }) {
+function EntryDetailPane({
+  slug,
+  onRefresh,
+  onBack,
+  prevSlug,
+  nextSlug,
+}: {
+  slug: string
+  onRefresh: () => void
+  onBack: () => void
+  prevSlug: string | null
+  nextSlug: string | null
+}) {
   const [entry, setEntry] = useState<PonderDetail | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -471,6 +386,7 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
   const containerRef = useRef<HTMLDivElement>(null)
   const dragStartX = useRef<number | null>(null)
   const dragStartWidth = useRef<number>(DEFAULT_WORKSPACE_WIDTH)
+  const navigate = useNavigate()
   const { isRunning, focusRun } = useAgentRuns()
   const commitKey = `ponder-commit:${slug}`
   const commitRunning = isRunning(commitKey)
@@ -636,6 +552,28 @@ function EntryDetailPane({ slug, onRefresh, onBack }: { slug: string; onRefresh:
         )}
       </div>
 
+      {/* Floating entry nav — mobile only, above tab bar */}
+      {(prevSlug || nextSlug) && (
+        <div className="md:hidden fixed bottom-16 right-3 flex gap-1.5 z-10">
+          <button
+            onClick={() => prevSlug && navigate(`/ponder/${prevSlug}`)}
+            disabled={!prevSlug}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-card border border-border shadow-md text-muted-foreground hover:text-foreground hover:bg-accent/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            aria-label="Previous entry"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => nextSlug && navigate(`/ponder/${nextSlug}`)}
+            disabled={!nextSlug}
+            className="flex items-center justify-center w-9 h-9 rounded-full bg-card border border-border shadow-md text-muted-foreground hover:text-foreground hover:bg-accent/60 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            aria-label="Next entry"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
       {/* Mobile tab bar */}
       <div className="md:hidden shrink-0 flex border-t border-border bg-card">
         {([
@@ -774,6 +712,11 @@ export function PonderPage() {
     ? sorted
     : sorted.filter(e => e.status === activeTab)
 
+  // Compute prev/next slugs for floating entry nav (mobile)
+  const currentIndex = slug ? filtered.findIndex(e => e.slug === slug) : -1
+  const prevSlug = currentIndex > 0 ? filtered[currentIndex - 1].slug : null
+  const nextSlug = currentIndex >= 0 && currentIndex < filtered.length - 1 ? filtered[currentIndex + 1].slug : null
+
   // Mobile: if slug is present, show detail only
   const showMobileDetail = !!slug
 
@@ -788,48 +731,23 @@ export function PonderPage() {
           {/* Header */}
           <div className="px-3 pt-4 pb-2 flex items-center justify-between">
             <h2 className="text-base font-semibold">Ponder</h2>
-            {!showForm && (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setShowSuggest(true)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-                  title="Suggest an idea"
-                >
-                  <Sparkles className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setShowForm(true)}
-                  className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-                  title="New Idea"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-            )}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowSuggest(true)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                title="Suggest an idea"
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setShowForm(true)}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+                title="New Idea"
+              >
+                <Plus className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-
-          {/* New idea form */}
-          {showForm && (
-            <NewIdeaForm
-              initialTitle={prefillTitle ?? undefined}
-              initialSlug={prefillSlug ?? undefined}
-              initialBrief={prefillBrief ?? undefined}
-              onCreated={(newSlug) => {
-                setShowForm(false)
-                setPrefillTitle(null)
-                setPrefillSlug(null)
-                setPrefillBrief(null)
-                load()
-                navigate(`/ponder/${newSlug}`)
-              }}
-              onCancel={() => {
-                setShowForm(false)
-                setPrefillTitle(null)
-                setPrefillSlug(null)
-                setPrefillBrief(null)
-              }}
-            />
-          )}
 
           {/* Status labels */}
           <div className="px-2 pb-2 space-y-0.5">
@@ -905,7 +823,14 @@ export function PonderPage() {
           showMobileDetail ? 'flex flex-col' : 'hidden md:flex md:flex-col',
         )}>
           {slug ? (
-            <EntryDetailPane key={slug} slug={slug} onRefresh={load} onBack={() => navigate('/ponder')} />
+            <EntryDetailPane
+              key={slug}
+              slug={slug}
+              onRefresh={load}
+              onBack={() => navigate('/ponder')}
+              prevSlug={prevSlug}
+              nextSlug={nextSlug}
+            />
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               <div className="text-center">
@@ -945,6 +870,28 @@ export function PonderPage() {
           onClose={() => setShowSuggest(false)}
         />
       )}
+
+      {/* New idea modal */}
+      <NewIdeaModal
+        open={showForm}
+        onClose={() => {
+          setShowForm(false)
+          setPrefillTitle(null)
+          setPrefillSlug(null)
+          setPrefillBrief(null)
+        }}
+        onCreated={(newSlug) => {
+          setShowForm(false)
+          setPrefillTitle(null)
+          setPrefillSlug(null)
+          setPrefillBrief(null)
+          load()
+          navigate(`/ponder/${newSlug}`)
+        }}
+        initialTitle={prefillTitle ?? undefined}
+        initialSlug={prefillSlug ?? undefined}
+        initialBrief={prefillBrief ?? undefined}
+      />
     </div>
   )
 }

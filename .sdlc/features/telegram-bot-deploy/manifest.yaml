@@ -1,72 +1,163 @@
 slug: telegram-bot-deploy
 title: Hosting setup and deployment (VPS or Raspberry Pi)
-phase: draft
+phase: released
 created_at: 2026-03-02T18:45:17.792318Z
-updated_at: 2026-03-02T18:45:17.792318Z
+updated_at: 2026-03-03T00:55:56.702096Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:43:25.165177Z
+  approved_at: 2026-03-03T00:43:32.562005Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:44:32.943531Z
+  approved_at: 2026-03-03T00:44:38.305270Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:45:17.045358Z
+  approved_at: 2026-03-03T00:45:24.308317Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:46:19.619547Z
+  approved_at: 2026-03-03T00:46:25.210777Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:52:06.236406Z
+  approved_at: 2026-03-03T00:52:12.465367Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:53:14.821291Z
+  approved_at: 2026-03-03T00:53:20.117962Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-deploy/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:55:23.757521Z
+  approved_at: 2026-03-03T00:55:30.914572Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add deploy directory with systemd unit files
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:52.996848Z
+  started_at: 2026-03-03T00:47:07.440154Z
+  completed_at: 2026-03-03T00:48:01.342992Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create .env.example template
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:53.001387Z
+  started_at: 2026-03-03T00:48:04.235205Z
+  completed_at: 2026-03-03T00:48:28.791767Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Write deploy.sh script
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:53.018040Z
+  started_at: 2026-03-03T00:48:30.908936Z
+  completed_at: 2026-03-03T00:49:34.529577Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Write RUNBOOK.md operator guide
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:53.024087Z
+  started_at: 2026-03-03T00:49:34.535993Z
+  completed_at: 2026-03-03T00:50:17.851486Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add cross-compilation config
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:53.030006Z
+  started_at: 2026-03-03T00:50:17.858105Z
+  completed_at: 2026-03-03T00:50:37.232022Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Add .gitignore entries for secrets
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:53.042296Z
+  started_at: 2026-03-03T00:50:37.243411Z
+  completed_at: 2026-03-03T00:50:50.475880Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Validate unit files and smoke-test deploy script
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:53.046835Z
+  started_at: 2026-03-03T00:50:50.513583Z
+  completed_at: 2026-03-03T00:51:18.545608Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T18:45:17.792318Z
+  exited: 2026-03-03T00:43:32.563777Z
+- phase: specified
+  entered: 2026-03-03T00:43:32.563777Z
+  exited: 2026-03-03T00:46:25.212302Z
+- phase: planned
+  entered: 2026-03-03T00:46:25.212302Z
+  exited: 2026-03-03T00:46:29.126488Z
+- phase: ready
+  entered: 2026-03-03T00:46:29.126488Z
+  exited: 2026-03-03T00:46:36.058533Z
+- phase: implementation
+  entered: 2026-03-03T00:46:36.058533Z
+  exited: 2026-03-03T00:52:12.467431Z
+- phase: review
+  entered: 2026-03-03T00:52:12.467431Z
+  exited: 2026-03-03T00:52:16.870661Z
+- phase: audit
+  entered: 2026-03-03T00:52:16.870661Z
+  exited: 2026-03-03T00:53:20.119872Z
+- phase: qa
+  entered: 2026-03-03T00:53:20.119872Z
+  exited: 2026-03-03T00:55:30.930823Z
+- phase: merge
+  entered: 2026-03-03T00:55:30.930823Z
+  exited: 2026-03-03T00:55:56.702096Z
+- phase: released
+  entered: 2026-03-03T00:55:56.702096Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

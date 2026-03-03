@@ -1,0 +1,1 @@
+Need to improve all layouts like this - threads, ponder, guidelines (all Workspaces) and tools and any others like this

@@ -1,0 +1,10 @@
+slug: i-need-to-be-able-to-merge-pondering-ses
+title: I need to be able to merge pondering sessions together
+status: converging
+created_at: 2026-03-03T05:43:36.307803Z
+updated_at: 2026-03-03T05:55:00Z
+sessions: 1
+orientation:
+  current: 'Problem is real: 42 ponder entries with duplicate/fragmented threads. Merge is directional — source absorbed into target, source parked with merged_into pointer. Full non-destructive merge: sessions renumbered, artifacts copied with from-<source>- prefix, team union-merged.'
+  next: Spec the feature — sdlc ponder merge CLI, data model changes (merged_into / merged_from fields), file operation behavior. ~4 files in core + CLI.
+  commit: 'Met — problem is concrete, design is clear. Ready to commit to a feature.'

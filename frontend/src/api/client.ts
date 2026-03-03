@@ -78,6 +78,8 @@ export const api = {
     request<import('@/lib/types').UatRun[]>(`/api/milestones/${encodeURIComponent(slug)}/uat-runs`),
   getLatestMilestoneUatRun: (slug: string) =>
     request<import('@/lib/types').UatRun | null>(`/api/milestones/${encodeURIComponent(slug)}/uat-runs/latest`),
+  uatArtifactUrl: (milestoneSlug: string, runId: string, filename: string): string =>
+    `/api/milestones/${encodeURIComponent(milestoneSlug)}/uat-runs/${encodeURIComponent(runId)}/artifacts/${encodeURIComponent(filename)}`,
 
   getConfig: () => request<import('@/lib/types').ProjectConfig>('/api/config'),
   updateConfig: (body: { name?: string; description?: string }) =>
@@ -328,6 +330,16 @@ export const api = {
       `/api/threads/${encodeURIComponent(slug)}/comments/${encodeURIComponent(commentId)}`,
       { method: 'PATCH', body: JSON.stringify({ resolved: true }) }
     ),
+  deleteThread: (slug: string) =>
+    request<{ deleted: boolean }>(`/api/threads/${encodeURIComponent(slug)}`, { method: 'DELETE' }),
+  patchThread: (slug: string, patch: { status?: import('@/lib/types').ThreadStatus }) =>
+    request<import('@/lib/types').ThreadDetail>(`/api/threads/${encodeURIComponent(slug)}`, {
+      method: 'PATCH', body: JSON.stringify(patch),
+    }),
+  promoteThreadToPonder: (slug: string) =>
+    request<{ ponder_slug: string; thread_id: string }>(
+      `/api/threads/${encodeURIComponent(slug)}/promote`, { method: 'POST' }
+    ),
 
   // Feedback
   getFeedback: () => request<import('@/lib/types').FeedbackNote[]>('/api/feedback'),
@@ -337,6 +349,16 @@ export const api = {
     request<{ deleted: boolean }>(`/api/feedback/${encodeURIComponent(id)}`, { method: 'DELETE' }),
   submitFeedbackToPonder: () =>
     request<{ slug: string; note_count: number }>('/api/feedback/to-ponder', { method: 'POST' }),
+  updateFeedbackNote: (id: string, content: string) =>
+    request<import('@/lib/types').FeedbackNote>(`/api/feedback/${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ content }),
+    }),
+  enrichFeedbackNote: (id: string, content: string, source: string) =>
+    request<import('@/lib/types').FeedbackNote>(`/api/feedback/${encodeURIComponent(id)}/enrich`, {
+      method: 'POST',
+      body: JSON.stringify({ content, source }),
+    }),
 
   // SDLC tunnel (exposes this UI)
   getTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel'),

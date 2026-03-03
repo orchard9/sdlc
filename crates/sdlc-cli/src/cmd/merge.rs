@@ -2,6 +2,7 @@ use crate::output::print_json;
 use anyhow::Context;
 use sdlc_core::{
     config::Config,
+    event_log::{self, EventKind},
     feature::Feature,
     state::State,
     types::{ActionType, Phase},
@@ -29,6 +30,16 @@ pub fn run(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
     state.record_action(slug, ActionType::Merge, Phase::Released, "merged");
     state.complete_directive(slug);
     state.save(root).context("failed to save state")?;
+
+    // Emit changelog event — non-fatal.
+    if let Err(e) = event_log::append_event(
+        root,
+        EventKind::FeatureMerged,
+        Some(slug.to_string()),
+        serde_json::json!({}),
+    ) {
+        eprintln!("warn: changelog write failed: {e}");
+    }
 
     if json {
         print_json(&serde_json::json!({

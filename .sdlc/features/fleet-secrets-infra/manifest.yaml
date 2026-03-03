@@ -1,8 +1,8 @@
 slug: fleet-secrets-infra
 title: GCP Secret Manager sdlc-fleet-gitea entry and ESO ClusterSecretStore manifest
-phase: specified
+phase: released
 created_at: 2026-03-02T09:07:44.518178Z
-updated_at: 2026-03-02T09:27:34.660148Z
+updated_at: 2026-03-03T03:32:05.528060Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,50 +13,50 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-secrets-infra/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:10.008872Z
+  approved_at: 2026-03-03T03:28:36.960140Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-secrets-infra/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:41.231717Z
+  approved_at: 2026-03-03T03:28:54.733915Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-secrets-infra/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:58.873862Z
+  approved_at: 2026-03-03T03:29:12.689295Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-secrets-infra/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:30:40.565939Z
+  approved_at: 2026-03-03T03:30:57.470804Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-secrets-infra/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:31:06.244747Z
+  approved_at: 2026-03-03T03:31:26.723807Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-secrets-infra/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:31:49.664800Z
+  approved_at: 2026-03-03T03:32:00.014215Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -70,6 +70,31 @@ phase_history:
   exited: 2026-03-02T09:27:34.660148Z
 - phase: specified
   entered: 2026-03-02T09:27:34.660148Z
+  exited: 2026-03-03T03:29:12.690585Z
+- phase: planned
+  entered: 2026-03-03T03:29:12.690585Z
+  exited: 2026-03-03T03:29:17.441173Z
+- phase: ready
+  entered: 2026-03-03T03:29:17.441173Z
+  exited: 2026-03-03T03:29:20.874401Z
+- phase: implementation
+  entered: 2026-03-03T03:29:20.874401Z
+  exited: 2026-03-03T03:30:57.473549Z
+- phase: review
+  entered: 2026-03-03T03:30:57.473549Z
+  exited: 2026-03-03T03:31:01.857928Z
+- phase: audit
+  entered: 2026-03-03T03:31:01.857928Z
+  exited: 2026-03-03T03:31:26.726423Z
+- phase: qa
+  entered: 2026-03-03T03:31:26.726423Z
+  exited: 2026-03-03T03:32:00.017002Z
+- phase: merge
+  entered: 2026-03-03T03:32:00.017002Z
+  exited: 2026-03-03T03:32:05.528060Z
+- phase: released
+  entered: 2026-03-03T03:32:05.528060Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

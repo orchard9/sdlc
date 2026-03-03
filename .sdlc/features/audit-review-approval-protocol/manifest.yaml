@@ -1,72 +1,136 @@
 slug: audit-review-approval-protocol
 title: 'Finding-Closure Protocol: sdlc-next template + CLAUDE.md ethos'
-phase: draft
+phase: released
 created_at: 2026-03-02T09:00:12.017853Z
-updated_at: 2026-03-02T09:00:12.017853Z
+updated_at: 2026-03-03T00:31:52.979635Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:26:19.018232Z
+  approved_at: 2026-03-03T00:26:24.134246Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:26:50.276564Z
+  approved_at: 2026-03-03T00:26:55.008371Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:27:10.642673Z
+  approved_at: 2026-03-03T00:27:14.941162Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:27:33.249811Z
+  approved_at: 2026-03-03T00:27:39.678545Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:30:27.295005Z
+  approved_at: 2026-03-03T00:30:35.521267Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:31:01.575594Z
+  approved_at: 2026-03-03T00:31:08.113657Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/audit-review-approval-protocol/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:31:38.236310Z
+  approved_at: 2026-03-03T00:31:43.119039Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Verify SDLC_NEXT_COMMAND has dedicated review/audit approval section with three-action protocol
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:27:53.700870Z
+  started_at: 2026-03-03T00:28:01.166688Z
+  completed_at: 2026-03-03T00:28:07.594232Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Verify SDLC_NEXT_PLAYBOOK has review/audit approval step
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:27:53.705340Z
+  started_at: 2026-03-03T00:28:07.600405Z
+  completed_at: 2026-03-03T00:28:12.220828Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify CLAUDE.md Ethos has the finding-closure bullet
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:27:53.709310Z
+  started_at: 2026-03-03T00:28:12.227686Z
+  completed_at: 2026-03-03T00:28:17.573050Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Build and test: SDLC_NO_NPM=1 cargo test --all'
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:27:53.713478Z
+  started_at: 2026-03-03T00:28:17.580007Z
+  completed_at: 2026-03-03T00:29:54.734462Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T09:00:12.017853Z
+  exited: 2026-03-03T00:26:24.135620Z
+- phase: specified
+  entered: 2026-03-03T00:26:24.135620Z
+  exited: 2026-03-03T00:27:39.686962Z
+- phase: planned
+  entered: 2026-03-03T00:27:39.686962Z
+  exited: 2026-03-03T00:27:44.155Z
+- phase: ready
+  entered: 2026-03-03T00:27:44.155Z
+  exited: 2026-03-03T00:27:46.541566Z
+- phase: implementation
+  entered: 2026-03-03T00:27:46.541566Z
+  exited: 2026-03-03T00:30:35.522560Z
+- phase: review
+  entered: 2026-03-03T00:30:35.522560Z
+  exited: 2026-03-03T00:30:40.075364Z
+- phase: audit
+  entered: 2026-03-03T00:30:40.075364Z
+  exited: 2026-03-03T00:31:08.115726Z
+- phase: qa
+  entered: 2026-03-03T00:31:08.115726Z
+  exited: 2026-03-03T00:31:43.128135Z
+- phase: merge
+  entered: 2026-03-03T00:31:43.128135Z
+  exited: 2026-03-03T00:31:52.979635Z
+- phase: released
+  entered: 2026-03-03T00:31:52.979635Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

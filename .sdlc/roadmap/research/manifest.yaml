@@ -1,0 +1,13 @@
+slug: research
+title: research
+status: committed
+created_at: 2026-03-03T02:57:56.266446Z
+updated_at: 2026-03-03T05:40:00.000000Z
+committed_at: 2026-03-03T05:34:51.104595Z
+committed_to:
+- v24-knowledge-research
+sessions: 1
+orientation:
+  current: Idea fully shaped — three gaps identified and solved. Backend needs web search tools + better prompt. Frontend needs a 'New Research' modal on the list view.
+  next: 'Create two features: (1) knowledge-research-web-tools — add WebSearch/WebFetch to research agent and rewrite prompt; (2) knowledge-research-modal — add NewResearchModal to knowledge list header.'
+  commit: Met — implementation shape is unambiguous and scoped. Ready to crystallize into features.

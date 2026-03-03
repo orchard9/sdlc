@@ -4,4 +4,6 @@ features:
 - uat-artifacts-storage
 - uat-artifacts-ui
 created_at: 2026-03-02T18:07:54.460634Z
-updated_at: 2026-03-02T18:08:04.908105Z
+updated_at: 2026-03-03T05:05:44.252259Z
+released_at: 2026-03-03T05:05:44.252258Z
+schema_version: 1

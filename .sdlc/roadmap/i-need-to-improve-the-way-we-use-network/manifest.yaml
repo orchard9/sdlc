@@ -1,10 +1,10 @@
 slug: i-need-to-improve-the-way-we-use-network
 title: i need to improve the way we use network
-status: exploring
+status: converging
 created_at: 2026-03-02T20:23:54.308347Z
-updated_at: 2026-03-02T20:27:23.575340Z
-sessions: 1
+updated_at: 2026-03-03T02:56:40.198218Z
+sessions: 2
 orientation:
-  current: 'Three demands with different urgency levels: (1) swap cloudflared → orch-tunnel [clear, low risk], (2) auto-start tunnel on sdlc ui [simple flag flip], (3) ''code-based auth'' [needs definition]. Design session surfaced a strong candidate: orch-tunnel named tunnels give predictable URLs + Jordan controls the edge, so auth can be layered at the edge, at the token level, or both.'
-  next: 'Get Jordan to confirm what ''code-based auth'' means — is it: (a) sdlc manages an API key list in .sdlc/, (b) orch-tunnel server enforces auth at the edge, or (c) replace the QR/cookie mechanism with something Jordan can script.'
-  commit: Auth design is agreed on. Then all three changes can be implemented in one milestone.
+  current: 'Commit signal met. Jordan confirmed all three design decisions: orch-tunnel swap, default-on tunnel, named token auth. Auth is optional (no auth.yaml = open access) and easily viewable (plain YAML + UI token name list). Ready to commit to a milestone.'
+  next: '/sdlc-ponder-commit i-need-to-improve-the-way-we-use-network — scope into one milestone with three features: orch-tunnel-swap, tunnel-auto-start, named-token-auth'
+  commit: MET — all design decisions confirmed by Jordan.

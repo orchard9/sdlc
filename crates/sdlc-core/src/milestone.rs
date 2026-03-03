@@ -49,6 +49,7 @@ pub struct Milestone {
     /// Narrative: what "done" looks like from a user's perspective; why this milestone matters.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub vision: Option<String>,
+    #[serde(default)]
     pub features: Vec<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
@@ -65,6 +66,9 @@ pub struct Milestone {
     /// Set when a milestone has been through `/sdlc-prepare` and is ready to execute.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub prepared_at: Option<DateTime<Utc>>,
+    /// Schema version used to drive auto-migration on load. Defaults to 0 (unversioned).
+    #[serde(default)]
+    pub schema_version: u32,
 }
 
 impl Milestone {
@@ -81,6 +85,7 @@ impl Milestone {
             skipped_at: None,
             released_at: None,
             prepared_at: None,
+            schema_version: crate::migrations::MILESTONE_SCHEMA_VERSION,
         }
     }
 
@@ -132,8 +137,40 @@ impl Milestone {
         if !manifest.exists() {
             return Err(SdlcError::MilestoneNotFound(slug.to_string()));
         }
+        let path_display = manifest.display().to_string();
         let data = std::fs::read_to_string(&manifest)?;
-        let milestone: Milestone = serde_yaml::from_str(&data)?;
+
+        // Phase 1: parse raw YAML (catches syntax errors with path context).
+        let mut value: serde_yaml::Value =
+            serde_yaml::from_str(&data).map_err(|e| SdlcError::ManifestParseFailed {
+                path: path_display.clone(),
+                message: e.to_string(),
+            })?;
+
+        // Phase 2: migrate to current schema.
+        let migrated = crate::migrations::migrate_milestone(&mut value).map_err(|msg| {
+            SdlcError::ManifestIncompatible {
+                path: path_display.clone(),
+                entity: "Milestone".to_string(),
+                message: msg,
+                fix_hint: "Run `sdlc doctor --fix` to attempt auto-repair.".to_string(),
+            }
+        })?;
+
+        // Phase 3: typed deserialization with actionable error message.
+        let milestone: Milestone =
+            serde_yaml::from_value(value).map_err(|e| SdlcError::ManifestIncompatible {
+                path: path_display.clone(),
+                entity: "Milestone".to_string(),
+                message: e.to_string(),
+                fix_hint: crate::migrations::milestone_fix_hint(&e),
+            })?;
+
+        // Phase 4: self-heal — rewrite file if migration ran.
+        if migrated {
+            let _ = milestone.save(root);
+        }
+
         Ok(milestone)
     }
 
@@ -335,6 +372,47 @@ pub enum UatVerdict {
     Failed,
 }
 
+/// Deserialize `tasks_created` tolerantly: accept a sequence of strings
+/// (current format) or any integer (legacy format where the count was
+/// written instead of the list — always 0 in practice).
+fn deserialize_tasks_created<'de, D>(deserializer: D) -> std::result::Result<Vec<String>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    use serde::de::{self, Visitor};
+
+    struct TasksCreatedVisitor;
+
+    impl<'de> Visitor<'de> for TasksCreatedVisitor {
+        type Value = Vec<String>;
+
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            f.write_str("a sequence of strings or an integer (legacy count)")
+        }
+
+        fn visit_seq<A>(self, mut seq: A) -> std::result::Result<Vec<String>, A::Error>
+        where
+            A: de::SeqAccess<'de>,
+        {
+            let mut v = Vec::new();
+            while let Some(s) = seq.next_element()? {
+                v.push(s);
+            }
+            Ok(v)
+        }
+
+        // Legacy: tasks_created was written as an integer count (always 0).
+        fn visit_i64<E: de::Error>(self, _: i64) -> std::result::Result<Vec<String>, E> {
+            Ok(Vec::new())
+        }
+        fn visit_u64<E: de::Error>(self, _: u64) -> std::result::Result<Vec<String>, E> {
+            Ok(Vec::new())
+        }
+    }
+
+    deserializer.deserialize_any(TasksCreatedVisitor)
+}
+
 /// A single recorded UAT execution for a milestone.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UatRun {
@@ -349,9 +427,13 @@ pub struct UatRun {
     pub tests_failed: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub playwright_report_path: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "deserialize_tasks_created")]
     pub tasks_created: Vec<String>,
     pub summary_path: String,
+    /// Relative paths (from project root) to screenshots captured during this run.
+    /// Stored as `.sdlc/milestones/<slug>/uat-runs/<id>/<filename>`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub screenshot_paths: Vec<String>,
 }
 
 /// Persist a UAT run to `.sdlc/milestones/<slug>/uat-runs/<id>/run.yaml`.
@@ -702,6 +784,7 @@ mod tests {
             playwright_report_path: None,
             tasks_created: vec![],
             summary_path: format!("milestones/{milestone_slug}/uat-runs/{id}/summary.md"),
+            screenshot_paths: vec![],
         }
     }
 
@@ -752,5 +835,52 @@ mod tests {
         let dir = TempDir::new().unwrap();
         let result = latest_uat_run(dir.path(), "v1").unwrap();
         assert!(result.is_none());
+    }
+
+    #[test]
+    fn uat_run_screenshot_paths_backward_compat() {
+        // YAML without screenshot_paths must deserialize with an empty vec.
+        let yaml = "id: test\n\
+                    milestone_slug: v1\n\
+                    started_at: 2026-01-01T00:00:00Z\n\
+                    verdict: pass\n\
+                    tests_total: 1\n\
+                    tests_passed: 1\n\
+                    tests_failed: 0\n\
+                    summary_path: foo.md\n";
+        let run: UatRun = serde_yaml::from_str(yaml).unwrap();
+        assert!(run.screenshot_paths.is_empty());
+    }
+
+    #[test]
+    fn uat_run_tasks_created_integer_backward_compat() {
+        // Legacy YAML wrote tasks_created as an integer count instead of a list.
+        let yaml = "id: test\n\
+                    milestone_slug: v1\n\
+                    started_at: 2026-01-01T00:00:00Z\n\
+                    verdict: pass\n\
+                    tests_total: 1\n\
+                    tests_passed: 1\n\
+                    tests_failed: 0\n\
+                    tasks_created: 0\n\
+                    summary_path: foo.md\n";
+        let run: UatRun = serde_yaml::from_str(yaml).unwrap();
+        assert!(run.tasks_created.is_empty());
+    }
+
+    #[test]
+    fn uat_run_screenshot_paths_round_trip() {
+        let dir = TempDir::new().unwrap();
+        let mut run = make_run("v1", "20260303-000000-zzz", Utc::now());
+        run.screenshot_paths = vec![
+            ".sdlc/milestones/v1/uat-runs/20260303-000000-zzz/01-login.png".to_string(),
+            ".sdlc/milestones/v1/uat-runs/20260303-000000-zzz/02-dashboard.png".to_string(),
+        ];
+
+        save_uat_run(dir.path(), &run).unwrap();
+
+        let runs = list_uat_runs(dir.path(), "v1").unwrap();
+        assert_eq!(runs.len(), 1);
+        assert_eq!(runs[0].screenshot_paths, run.screenshot_paths);
     }
 }

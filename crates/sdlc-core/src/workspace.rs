@@ -175,6 +175,95 @@ pub fn list_sessions(dir: &Path) -> Result<Vec<SessionMeta>> {
     Ok(metas)
 }
 
+// ---------------------------------------------------------------------------
+// Session preview extraction
+// ---------------------------------------------------------------------------
+
+const PREVIEW_MAX_CHARS: usize = 140;
+
+/// Extract a short preview string from session file content.
+///
+/// The preview is the first "meaningful" line of the session body — after
+/// stripping YAML frontmatter, HTML comment tags, `---` fences, headings,
+/// and metadata lines. Leading decorators such as `⚑ `, `? `, and surrounding
+/// `**...**` bold markers are stripped before the text is returned.
+///
+/// Returns `None` if no suitable line is found.
+pub fn extract_session_preview(content: &str) -> Option<String> {
+    // Strip frontmatter if present
+    let body = if content.starts_with("---") {
+        // Find the closing `\n---` that terminates the frontmatter block
+        if let Some(rest) = content.strip_prefix("---") {
+            if let Some(rest) = rest
+                .strip_prefix('\n')
+                .or_else(|| rest.strip_prefix("\r\n"))
+            {
+                if let Some(end) = rest.find("\n---") {
+                    // Skip past the closing `\n---` and any trailing newline
+                    let after = &rest[end + 4..];
+                    after.strip_prefix('\n').unwrap_or(after)
+                } else {
+                    content
+                }
+            } else {
+                content
+            }
+        } else {
+            content
+        }
+    } else {
+        content
+    };
+
+    for line in body.lines() {
+        let trimmed = line.trim();
+
+        // Skip empty lines
+        if trimmed.is_empty() {
+            continue;
+        }
+        // Skip `---` fences
+        if trimmed == "---" {
+            continue;
+        }
+        // Skip markdown headings
+        if trimmed.starts_with('#') {
+            continue;
+        }
+        // Skip HTML comment tags (tool/artifact blocks and other metadata)
+        if trimmed.starts_with("<!--") || trimmed.starts_with("-->") {
+            continue;
+        }
+        // Skip metadata prefixes written by agents
+        if trimmed.starts_with("Recruited:") {
+            continue;
+        }
+
+        // Strip common leading decorators
+        let mut text = trimmed;
+        text = text.strip_prefix("⚑ ").unwrap_or(text);
+        text = text.strip_prefix("? ").unwrap_or(text);
+        // Strip surrounding bold markers **...**
+        if text.starts_with("**") && text.ends_with("**") && text.len() > 4 {
+            text = &text[2..text.len() - 2];
+        }
+        let text = text.trim();
+        if text.is_empty() {
+            continue;
+        }
+
+        // Truncate to PREVIEW_MAX_CHARS with ellipsis
+        if text.chars().count() <= PREVIEW_MAX_CHARS {
+            return Some(text.to_string());
+        } else {
+            let truncated: String = text.chars().take(PREVIEW_MAX_CHARS).collect();
+            return Some(format!("{truncated}…"));
+        }
+    }
+
+    None
+}
+
 /// Read the full content of session `n`.
 pub fn read_session(dir: &Path, n: u32) -> Result<String> {
     let path = session_path(dir, n);
@@ -349,5 +438,96 @@ mod tests {
     #[test]
     fn parse_session_meta_no_frontmatter_returns_none() {
         assert!(parse_session_meta("just plain content").is_none());
+    }
+
+    // ----- extract_session_preview tests -----
+
+    #[test]
+    fn preview_empty_content_returns_none() {
+        assert_eq!(extract_session_preview(""), None);
+    }
+
+    #[test]
+    fn preview_whitespace_only_returns_none() {
+        assert_eq!(extract_session_preview("   \n\n   "), None);
+    }
+
+    #[test]
+    fn preview_frontmatter_only_returns_none() {
+        let content = "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n";
+        assert_eq!(extract_session_preview(content), None);
+    }
+
+    #[test]
+    fn preview_headings_only_returns_none() {
+        let content = "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n# Heading\n## Sub\n";
+        assert_eq!(extract_session_preview(content), None);
+    }
+
+    #[test]
+    fn preview_extracts_first_narrative_line() {
+        let content = "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\n# Heading\n\nWe are exploring whether memory is the right frame.\n";
+        let result = extract_session_preview(content).unwrap();
+        assert_eq!(
+            result,
+            "We are exploring whether memory is the right frame."
+        );
+    }
+
+    #[test]
+    fn preview_truncates_at_140_chars() {
+        let long_line = "a".repeat(200);
+        let content =
+            format!("---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\n{long_line}\n");
+        let result = extract_session_preview(&content).unwrap();
+        // 140 chars + ellipsis
+        assert_eq!(result.chars().count(), 141); // 140 + '…'
+        assert!(result.ends_with('…'));
+    }
+
+    #[test]
+    fn preview_does_not_truncate_exactly_140_chars() {
+        let exact_line = "b".repeat(140);
+        let content =
+            format!("---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\n{exact_line}\n");
+        let result = extract_session_preview(&content).unwrap();
+        assert_eq!(result, exact_line);
+        assert!(!result.ends_with('…'));
+    }
+
+    #[test]
+    fn preview_skips_html_comment_lines() {
+        let content = "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\n<!-- tool: search -->\nReal content here.\n";
+        let result = extract_session_preview(content).unwrap();
+        assert_eq!(result, "Real content here.");
+    }
+
+    #[test]
+    fn preview_strips_bold_markers() {
+        let content =
+            "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\n**Partner message here.**\n";
+        let result = extract_session_preview(content).unwrap();
+        assert_eq!(result, "Partner message here.");
+    }
+
+    #[test]
+    fn preview_strips_flag_prefix() {
+        let content = "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\n⚑ Important note about this.\n";
+        let result = extract_session_preview(content).unwrap();
+        assert_eq!(result, "Important note about this.");
+    }
+
+    #[test]
+    fn preview_works_without_frontmatter() {
+        let content = "Just a plain line without frontmatter.\n";
+        let result = extract_session_preview(content).unwrap();
+        assert_eq!(result, "Just a plain line without frontmatter.");
+    }
+
+    #[test]
+    fn preview_skips_recruited_prefix() {
+        let content = "---\nsession: 1\ntimestamp: 2026-02-27T10:00:00Z\n---\n\nRecruited: someone\nActual content.\n";
+        let result = extract_session_preview(content).unwrap();
+        assert_eq!(result, "Actual content.");
     }
 }

@@ -89,7 +89,7 @@ during any lifecycle phase. Read `.sdlc/tools/tools.md` for the full help menu.
 Use `/sdlc-tool-run`, `/sdlc-tool-build`, `/sdlc-tool-audit`, `/sdlc-tool-uat` in Claude Code for guided tool workflows.
 <!-- /sdlc:tools -->
 
-Project: sdlc
+Project: Ponder
 
 <!-- sdlc:end -->
 

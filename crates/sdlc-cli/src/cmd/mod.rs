@@ -1,6 +1,7 @@
 pub mod agent;
 pub mod artifact;
 pub mod backlog;
+pub mod changelog;
 pub mod comment;
 pub mod config;
 pub mod escalate;
@@ -23,6 +24,7 @@ pub mod score;
 pub mod secrets;
 pub mod state;
 pub mod task;
+pub mod telegram;
 pub mod thread;
 pub mod tool;
 pub mod tunnel;

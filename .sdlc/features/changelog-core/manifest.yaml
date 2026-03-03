@@ -1,0 +1,218 @@
+slug: changelog-core
+title: Changelog event log core — append-only persistent event source
+description: 'Append-only .sdlc/changelog.yaml with 7 high-signal event kinds (feature_merged, run_failed, milestone_wave_completed, feature_phase_advanced, review_approved, audit_approved, qa_approved). All events include a slug field populated from context (for run_failed: extracted from the run key, e.g. ''sdlc-run:my-feature'' → slug ''my-feature''). query_events() tail-reads the file rather than loading it fully into memory — safe for long-lived projects. Mtime watcher triggers SSE ChangelogUpdated on change.'
+phase: released
+created_at: 2026-03-02T23:42:47.464779Z
+updated_at: 2026-03-03T00:43:49.852635Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/changelog-core/spec.md
+  created_at: 2026-03-03T00:26:47.801091Z
+  approved_at: 2026-03-03T00:26:53.978048Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/changelog-core/design.md
+  created_at: 2026-03-03T00:28:37.457676Z
+  approved_at: 2026-03-03T00:28:41.234787Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/changelog-core/tasks.md
+  created_at: 2026-03-03T00:29:22.061192Z
+  approved_at: 2026-03-03T00:29:23.907663Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/changelog-core/qa-plan.md
+  created_at: 2026-03-03T00:30:03.436630Z
+  approved_at: 2026-03-03T00:30:05.280119Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/changelog-core/review.md
+  created_at: 2026-03-03T00:39:49.403644Z
+  approved_at: 2026-03-03T00:40:10.136758Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/changelog-core/audit.md
+  created_at: 2026-03-03T00:41:08.253296Z
+  approved_at: 2026-03-03T00:41:12.082809Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/changelog-core/qa-results.md
+  created_at: 2026-03-03T00:43:32.831082Z
+  approved_at: 2026-03-03T00:43:36.298710Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create crates/sdlc-core/src/event_log.rs — ChangeEvent struct, EventKind enum, append_event() + query_events() with atomic write via io.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.794889Z
+  started_at: 2026-03-03T00:30:24.551541Z
+  completed_at: 2026-03-03T00:32:42.512544Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Emit feature_merged event in crates/sdlc-cli/src/cmd/merge.rs after successful merge
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.801006Z
+  started_at: 2026-03-03T00:32:45.477882Z
+  completed_at: 2026-03-03T00:33:11.447195Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Emit review_approved, audit_approved, qa_approved events in crates/sdlc-cli/src/cmd/artifact.rs on approve for those artifact types
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.806926Z
+  started_at: 2026-03-03T00:33:11.452403Z
+  completed_at: 2026-03-03T00:33:50.174564Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Emit run_failed event in crates/sdlc-server/src/routes/runs.rs when run completes with failed status
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.812308Z
+  started_at: 2026-03-03T00:33:50.181245Z
+  completed_at: 2026-03-03T00:34:56.873495Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Emit milestone_wave_completed event in crates/sdlc-server/src/routes/runs.rs on successful wave completion
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.817224Z
+  started_at: null
+  completed_at: 2026-03-03T00:34:56.901921Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Emit feature_phase_advanced event in crates/sdlc-core/src/feature.rs when feature transitions to IMPLEMENTATION or beyond
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.821952Z
+  started_at: 2026-03-03T00:34:56.907148Z
+  completed_at: 2026-03-03T00:35:43.069820Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Add SseMessage::ChangelogUpdated variant to state.rs; add mtime watcher for .sdlc/changelog.yaml
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.827079Z
+  started_at: 2026-03-03T00:35:43.077034Z
+  completed_at: 2026-03-03T00:36:47.657792Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: 'Unit tests: append/query round-trip, since-filter, limit, empty file handling'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:01.832102Z
+  started_at: 2026-03-03T00:36:47.669546Z
+  completed_at: 2026-03-03T00:38:50.378627Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] run_failed and milestone_wave_completed events: populate slug field by parsing the run key (e.g. ''sdlc-run:my-feature'' → slug=''my-feature'', ''milestone-run-wave:v15'' → slug=''v15'') so API consumers don''t need to do string parsing'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:48:01.924445Z
+  started_at: 2026-03-03T00:38:50.386861Z
+  completed_at: 2026-03-03T00:38:54.936281Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: '[user-gap] query_events() reads from the end of changelog.yaml (tail-read) rather than loading the full file into memory — safe for projects with 2+ years of history'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:48:01.929914Z
+  started_at: 2026-03-03T00:38:54.945Z
+  completed_at: 2026-03-03T00:38:54.950344Z
+  blocker: null
+  depends_on: []
+- id: T11
+  title: '[follow-up] event_log slug field: make non-optional (slug: String instead of Option<String>) in next revision to match spec contract'
+  description: null
+  status: blocked
+  created_at: 2026-03-03T00:39:45.689555Z
+  started_at: 2026-03-03T00:39:53.881627Z
+  completed_at: null
+  blocker: 'follow-up improvement — slug: Option<String> is working correctly in all emission sites; non-optional slug is a future API refinement, not a current blocker'
+  depends_on: []
+- id: T12
+  title: '[future] changelog file rotation: implement max-size cap or event count limit to prevent unbounded growth in long-lived projects'
+  description: null
+  status: blocked
+  created_at: 2026-03-03T00:41:00.268497Z
+  started_at: null
+  completed_at: null
+  blocker: future improvement tracked in backlog — not a current security blocker
+  depends_on: []
+- id: T13
+  title: 'UAT: ChangeEvent struct missing label field — spec expects slug, label, timestamp in feature_merged events'
+  description: null
+  status: pending
+  created_at: 2026-03-03T03:32:31.439806Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T23:42:47.464779Z
+  exited: 2026-03-03T00:26:53.979677Z
+- phase: specified
+  entered: 2026-03-03T00:26:53.979677Z
+  exited: 2026-03-03T00:30:05.281617Z
+- phase: planned
+  entered: 2026-03-03T00:30:05.281617Z
+  exited: 2026-03-03T00:30:10.011300Z
+- phase: ready
+  entered: 2026-03-03T00:30:10.011300Z
+  exited: 2026-03-03T00:30:13.637669Z
+- phase: implementation
+  entered: 2026-03-03T00:30:13.637669Z
+  exited: 2026-03-03T00:40:10.138431Z
+- phase: review
+  entered: 2026-03-03T00:40:10.138431Z
+  exited: 2026-03-03T00:40:18.805415Z
+- phase: audit
+  entered: 2026-03-03T00:40:18.805415Z
+  exited: 2026-03-03T00:41:12.085060Z
+- phase: qa
+  entered: 2026-03-03T00:41:12.085060Z
+  exited: 2026-03-03T00:43:36.300390Z
+- phase: merge
+  entered: 2026-03-03T00:43:36.300390Z
+  exited: 2026-03-03T00:43:49.852635Z
+- phase: released
+  entered: 2026-03-03T00:43:49.852635Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

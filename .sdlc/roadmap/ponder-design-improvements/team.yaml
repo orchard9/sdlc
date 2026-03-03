@@ -1,0 +1,16 @@
+partners:
+- name: Ben Hartley
+  role: Developer Productivity UX
+  context: Cares deeply about information density, tooling ergonomics, and reducing cognitive load. Has strong opinions about how developers consume design artifacts.
+  agent: .claude/agents/ben-hartley.md
+  recruited_at: 2026-03-03T02:57:05.134811Z
+- name: Dana Cho
+  role: Product Skeptic
+  context: Questions whether each feature is necessary, pushes back on scope, asks what problem we're actually solving.
+  agent: .claude/agents/dana-cho.md
+  recruited_at: 2026-03-03T02:57:05.139661Z
+- name: Tobias Krenn
+  role: Skeptical Engineering Lead
+  context: Evaluates implementation scope, blast radius, and whether the abstraction is necessary. Has seen too many 'improvements' add complexity without value.
+  agent: .claude/agents/tobias-krenn.md
+  recruited_at: 2026-03-03T02:57:05.145122Z

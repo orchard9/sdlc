@@ -1,0 +1,19 @@
+slug: citadel-query-logs-tool
+title: citadel_query_logs Agent Tool
+description: |
+  Implement the citadel_query_logs Pantheon agent tool. Params: { query: string (CPL), time_range: string, limit: int }. Calls Citadel GET /api/v1/query with Citadel API key from ToolCredential. Returns log entries + episode context. Agents invoke this from Discord to fetch logs around an incident. Skill instructions must include CPL basics: level:error, service:auth, time:1h, boolean operators, trace_id correlation.
+phase: draft
+created_at: 2026-03-03T05:40:00Z
+updated_at: 2026-03-03T05:40:00Z
+artifacts: []
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T05:40:00Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

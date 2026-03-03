@@ -174,7 +174,20 @@ requests in development and the address is wrong in production.
 When fixing a CORS error or adding a new API client, apply this pattern instead of
 adding CORS headers or introducing environment-specific URLs.
 
-## 11. Project Guidelines
+## 11. Production Safety
+
+This is a live system with real users. Every change must leave the codebase healthier — not just correct, but cleaner.
+
+**Migrations:** Add defensive deserialization before removing old formats. Never the reverse. Test that both old and new formats load cleanly before shipping.
+
+**Stability hazards to avoid:**
+- Infinite loops: any polling, retry, or SSE reconnect loop must have a termination condition and backoff
+- Connection exhaustion: SSE subscriptions, DB connections, and broadcast channels must be bounded and cleaned up on drop
+- Complex failure modes: prefer simple, flat control flow over deeply nested async chains — when it breaks at 3am, you must be able to read the trace
+
+**Quality bar:** if a change makes the code harder to reason about, makes logs less useful, or adds a failure mode with no clear recovery path — stop and reconsider. Simpler is always better.
+
+## 12. Project Guidelines
 
 Before writing implementation code, check if `.sdlc/guidelines/index.yaml` exists.
 If it does, read it and load any guidelines whose `scope` overlaps with the work at hand.

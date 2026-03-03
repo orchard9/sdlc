@@ -1,0 +1,11 @@
+partners:
+- name: Lia Santangelo
+  role: Release Engineering & Distribution Expert
+  context: Built GitHub CLI and Stripe CLI distribution pipelines. Knows cross-platform binary releases, code signing, package managers (Homebrew/WinGet/APT), and install script patterns. The authoritative voice on what good distribution looks like for a Rust CLI.
+  agent: .claude/agents/lia-santangelo.md
+  recruited_at: 2026-03-03T03:12:49.140905Z
+- name: Ray Okafor
+  role: Enterprise IT Security & Gatekeeping
+  context: Director of IT Security at a 12k-person financial firm. Has blocked more tools than he's approved. Knows exactly what enterprise security teams require before allowing a CLI on corporate machines.
+  agent: .claude/agents/ray-okafor.md
+  recruited_at: 2026-03-03T03:12:50.401787Z

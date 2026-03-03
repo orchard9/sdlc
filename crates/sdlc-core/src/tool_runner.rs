@@ -131,7 +131,9 @@ pub fn detect_runtime() -> Option<Runtime> {
 }
 
 /// Tools installed and always overwritten by `sdlc init`. Cannot be durably edited.
-pub const MANAGED_TOOLS: &[&str] = &["ama", "quality-check"];
+/// Note: `dev-driver` and `restart-sdlc` are installed but NOT managed (not cloneable in the UI).
+/// `telegram-recap` is cloneable so users can fork and customize it.
+pub const MANAGED_TOOLS: &[&str] = &["ama", "quality-check", "telegram-recap"];
 
 /// Returns true if this tool is managed by `sdlc init`.
 pub fn is_managed_tool(name: &str) -> bool {

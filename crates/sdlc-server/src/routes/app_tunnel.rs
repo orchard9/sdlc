@@ -52,8 +52,10 @@ async fn persist_app_port(root: std::path::PathBuf, port: u16) {
 // ---------------------------------------------------------------------------
 
 pub async fn get_app_tunnel(State(app): State<AppState>) -> Json<AppTunnelStatus> {
-    let url = app.app_tunnel_url.read().await.clone();
-    let configured_port = *app.app_tunnel_port.read().await;
+    let snap = app.app_tunnel_snapshot.read().await;
+    let url = snap.url.clone();
+    let configured_port = snap.port;
+    drop(snap);
     Json(AppTunnelStatus {
         active: url.is_some(),
         url,
@@ -90,16 +92,22 @@ pub async fn start_app_tunnel(
     let url = tun.url.clone();
     let host = extract_host_from_url(&url);
 
-    // Record the user's app port for the proxy to use, then store tunnel state.
-    *app.app_tunnel_port.write().await = Some(user_port);
+    // Store the handle separately (Mutex, not part of the snapshot).
     *app.app_tunnel_handle.lock().await = Some(tun);
-    *app.app_tunnel_url.write().await = Some(url.clone());
+
+    // Atomically update the app tunnel snapshot (port + url together).
+    *app.app_tunnel_snapshot.write().await = crate::state::AppTunnelSnapshot {
+        port: Some(user_port),
+        url: Some(url.clone()),
+    };
 
     // Register the app tunnel hostname so auth middleware knows to bypass auth
     // for non-API requests arriving with this Host header.
+    // We update only app_tunnel_host inside the tunnel_snapshot, preserving
+    // the existing token and sdlc tunnel url.
     {
-        let mut cfg = app.tunnel_config.write().await;
-        cfg.app_tunnel_host = Some(host);
+        let mut snap = app.tunnel_snapshot.write().await;
+        snap.config.app_tunnel_host = Some(host);
     }
 
     persist_app_port(app.root.clone(), user_port).await;
@@ -125,13 +133,17 @@ pub async fn stop_app_tunnel(
         ))),
         Some(t) => {
             t.stop().await;
-            *app.app_tunnel_url.write().await = None;
             // Clear app_tunnel_host so auth no longer bypasses for this host.
             {
-                let mut cfg = app.tunnel_config.write().await;
-                cfg.app_tunnel_host = None;
+                let mut snap = app.tunnel_snapshot.write().await;
+                snap.config.app_tunnel_host = None;
             }
-            let configured_port = *app.app_tunnel_port.read().await;
+            // Atomically update the app tunnel snapshot: clear url but preserve port.
+            let configured_port = {
+                let mut snap = app.app_tunnel_snapshot.write().await;
+                snap.url = None;
+                snap.port
+            };
             Ok(Json(AppTunnelStatus {
                 active: false,
                 url: None,
@@ -151,8 +163,11 @@ pub async fn set_app_port(
 ) -> Result<Json<AppTunnelStatus>, AppError> {
     let port = body.port;
     persist_app_port(app.root.clone(), port).await;
-    *app.app_tunnel_port.write().await = Some(port);
-    let url = app.app_tunnel_url.read().await.clone();
+    let url = {
+        let mut snap = app.app_tunnel_snapshot.write().await;
+        snap.port = Some(port);
+        snap.url.clone()
+    };
     Ok(Json(AppTunnelStatus {
         active: url.is_some(),
         url,

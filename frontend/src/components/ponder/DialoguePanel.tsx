@@ -307,7 +307,6 @@ export function DialoguePanel({ entry, onRefresh, onCommit, commitRunning = fals
   // Render
   // ------------------------------------------------------------------
 
-  const isRunning = runState.status === 'running'
   const orientation = entry.orientation ?? (sessions.at(-1)?.orientation ?? null)
 
   return (
@@ -370,7 +369,6 @@ export function DialoguePanel({ entry, onRefresh, onCommit, commitRunning = fals
               <SessionBlock
                 key={s.session}
                 session={s}
-                ownerName={isRunning && runState.status === 'running' ? runState.ownerName : undefined}
                 artifacts={entry.artifacts}
               />
             ))}

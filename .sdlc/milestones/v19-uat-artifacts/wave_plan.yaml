@@ -1,0 +1,10 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: uat-artifacts-ui
+    title: UAT artifact UI — screenshot filmstrip in UatHistoryPanel and hero thumbnail on dashboard
+    phase: implementation
+    action: create_review
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

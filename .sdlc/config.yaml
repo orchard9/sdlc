@@ -1,6 +1,6 @@
 version: 1
 project:
-  name: sdlc
+  name: Ponder
   description: "Deterministic lifecycle governance for enterprise-scale autonomous services"
 phases:
   enabled:
@@ -30,4 +30,6 @@ phases:
     - audit
     specified:
     - spec
+observability:
+  daily_budget_usd: 1000.0
 sdlc_version: 0.1.0

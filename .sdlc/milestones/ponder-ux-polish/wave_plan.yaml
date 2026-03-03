@@ -1,0 +1,16 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: ponder-owner-nav
+    title: Owner message visibility fix and floating nav in ponder UI
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  - slug: ponder-session-card-preview
+    title: Session card preview from Product Summary (API + UI)
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

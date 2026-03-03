@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::event_log::{self, EventKind};
 use crate::feature::Feature;
 use crate::rules::default_rules;
 use crate::state::State;
@@ -137,6 +138,23 @@ pub fn try_auto_transition(root: &Path, slug: &str) -> Option<String> {
     if let Some(target_phase) = classification.transition_to {
         let mut feature = feature;
         if feature.transition(target_phase, &config).is_ok() && feature.save(root).is_ok() {
+            // Emit feature_phase_advanced for implementation phase or later — non-fatal.
+            if matches!(
+                target_phase,
+                Phase::Implementation
+                    | Phase::Review
+                    | Phase::Audit
+                    | Phase::Qa
+                    | Phase::Merge
+                    | Phase::Released
+            ) {
+                let _ = event_log::append_event(
+                    root,
+                    EventKind::FeaturePhaseAdvanced,
+                    Some(slug.to_string()),
+                    serde_json::json!({ "phase": target_phase.to_string() }),
+                );
+            }
             return Some(target_phase.to_string());
         }
     }

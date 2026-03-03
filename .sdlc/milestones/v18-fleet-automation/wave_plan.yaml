@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: fleet-bootstrap
+    title: Provision initial orchard9 projects by triggering reconcile pipeline for all existing repos
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: fleet-ingress-tls
+    title: Wildcard TLS cert for *.sdlc.threesix.ai via cert-manager DNS01 in GCP Cloud DNS
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: fleet-reconcile-pipeline
+    title: 'Woodpecker reconcile-projects.yaml: scan orchard9 org and ensure every repo has a deployment'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

@@ -10,7 +10,6 @@ import type { SessionContent, PonderArtifact } from '@/lib/types'
 
 interface Props {
   session: SessionContent
-  ownerName?: string | null
   artifacts?: PonderArtifact[]
 }
 
@@ -31,7 +30,7 @@ function relativeDate(iso: string | null): string {
   return d.toLocaleDateString()
 }
 
-export function SessionBlock({ session, ownerName, artifacts = [] }: Props) {
+export function SessionBlock({ session, artifacts = [] }: Props) {
   const events = useMemo(() => parseSession(session.content), [session.content])
   const dateLabel = relativeDate(session.timestamp)
   const [expandedFilename, setExpandedFilename] = useState<string | null>(null)
@@ -96,10 +95,7 @@ export function SessionBlock({ session, ownerName, artifacts = [] }: Props) {
             }
 
             case 'partner': {
-              const isOwner = ownerName
-                ? event.name.toLowerCase() === ownerName.split(' ')[0].toLowerCase() &&
-                  event.role.toLowerCase().includes('owner')
-                : false
+              const isOwner = event.role.toLowerCase().includes('owner')
               return (
                 <PartnerMessage
                   key={idx}

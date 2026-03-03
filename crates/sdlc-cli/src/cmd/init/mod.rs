@@ -17,9 +17,11 @@ use templates::{
     MASQ_DEV_STOP_SCRIPT, MASQ_LOGS_SCRIPT,
 };
 use templates::{
-    TOOL_AMA_CONFIG_YAML, TOOL_AMA_README_MD, TOOL_AMA_TS, TOOL_QUALITY_CHECK_CONFIG_YAML,
-    TOOL_QUALITY_CHECK_README_MD, TOOL_QUALITY_CHECK_TS, TOOL_SHARED_CONFIG_TS, TOOL_SHARED_LOG_TS,
-    TOOL_SHARED_RUNTIME_TS, TOOL_SHARED_TYPES_TS, TOOL_STATIC_TOOLS_MD,
+    TOOL_AMA_CONFIG_YAML, TOOL_AMA_README_MD, TOOL_AMA_TS, TOOL_DEV_DRIVER_README_MD,
+    TOOL_DEV_DRIVER_TS, TOOL_QUALITY_CHECK_CONFIG_YAML, TOOL_QUALITY_CHECK_README_MD,
+    TOOL_QUALITY_CHECK_TS, TOOL_SHARED_CONFIG_TS, TOOL_SHARED_LOG_TS, TOOL_SHARED_RUNTIME_TS,
+    TOOL_SHARED_TYPES_TS, TOOL_STATIC_TOOLS_MD, TOOL_TELEGRAM_RECAP_CONFIG_YAML,
+    TOOL_TELEGRAM_RECAP_README_MD, TOOL_TELEGRAM_RECAP_TS,
 };
 
 /// Version of the sdlc binary embedded at compile time.
@@ -121,7 +123,7 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
 
     // 11. Bootstrap knowledge base (non-fatal — runs silently)
     if let Err(e) = sdlc_core::knowledge::librarian_init(root) {
-        tracing::warn!("knowledge librarian init failed (non-fatal): {e}");
+        tracing::warn!(error = %e, "Knowledge librarian init failed (non-fatal)");
     }
 
     println!("\nSDLC initialized successfully.");
@@ -754,6 +756,61 @@ pub fn write_core_tools(root: &Path) -> anyhow::Result<()> {
         .context("failed to write quality-check/README.md")?;
     println!(
         "  {}: .sdlc/tools/quality-check/README.md",
+        if created { "created" } else { "exists " }
+    );
+
+    // Dev-driver tool
+    let dd_dir = paths::tool_dir(root, "dev-driver");
+    io::ensure_dir(&dd_dir)?;
+
+    // dev-driver/tool.ts — always overwrite (managed content)
+    let dd_script = paths::tool_script(root, "dev-driver");
+    let existed = dd_script.exists();
+    io::atomic_write(&dd_script, TOOL_DEV_DRIVER_TS.as_bytes())
+        .context("failed to write dev-driver/tool.ts")?;
+    println!(
+        "  {}: .sdlc/tools/dev-driver/tool.ts",
+        if existed { "updated" } else { "created" }
+    );
+
+    // dev-driver/README.md — write-if-missing (user may annotate)
+    let dd_readme = paths::tool_readme(root, "dev-driver");
+    let created = io::write_if_missing(&dd_readme, TOOL_DEV_DRIVER_README_MD.as_bytes())
+        .context("failed to write dev-driver/README.md")?;
+    println!(
+        "  {}: .sdlc/tools/dev-driver/README.md",
+        if created { "created" } else { "exists " }
+    );
+
+    // Telegram-recap tool
+    let tr_dir = paths::tool_dir(root, "telegram-recap");
+    io::ensure_dir(&tr_dir)?;
+
+    // telegram-recap/tool.ts — always overwrite (managed content)
+    let tr_script = paths::tool_script(root, "telegram-recap");
+    let existed = tr_script.exists();
+    io::atomic_write(&tr_script, TOOL_TELEGRAM_RECAP_TS.as_bytes())
+        .context("failed to write telegram-recap/tool.ts")?;
+    println!(
+        "  {}: .sdlc/tools/telegram-recap/tool.ts",
+        if existed { "updated" } else { "created" }
+    );
+
+    // telegram-recap/config.yaml — write-if-missing (user may customize)
+    let tr_config = paths::tool_config(root, "telegram-recap");
+    let created = io::write_if_missing(&tr_config, TOOL_TELEGRAM_RECAP_CONFIG_YAML.as_bytes())
+        .context("failed to write telegram-recap/config.yaml")?;
+    println!(
+        "  {}: .sdlc/tools/telegram-recap/config.yaml",
+        if created { "created" } else { "exists " }
+    );
+
+    // telegram-recap/README.md — write-if-missing
+    let tr_readme = paths::tool_readme(root, "telegram-recap");
+    let created = io::write_if_missing(&tr_readme, TOOL_TELEGRAM_RECAP_README_MD.as_bytes())
+        .context("failed to write telegram-recap/README.md")?;
+    println!(
+        "  {}: .sdlc/tools/telegram-recap/README.md",
         if created { "created" } else { "exists " }
     );
 

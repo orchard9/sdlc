@@ -277,6 +277,59 @@ Add or update a **Team** section in AGENTS.md listing all agents with role and i
 
 ---
 
+## Phase 7: Seed First Milestone
+
+After the team setup, synthesize the Phase 2 build scope into the state machine — while the context is still live.
+
+### 7a: Assess scope thickness
+
+Ask yourself: does the Phase 2 conversation contain **concrete deliverables** — named features, specific capabilities, or a timeline milestone?
+
+**Skip seed (thin scope)** — any of:
+- User said "I don't know what to build yet" or "still exploring"
+- Phase 2 yielded only a vague mission statement ("a platform for X") with no specifics
+- No concrete user-facing features or timeline can be extracted
+
+If thin → jump to the Finish block and use the fallback Next line.
+
+**Proceed with seed (thick scope)** — all of:
+- Phase 2 captured at least one concrete deliverable (named feature, specific capability)
+- A user-observable goal can be derived ("A [persona] can [action]")
+
+### 7b: Synthesize milestone structure
+
+From the Phase 2 build scope, derive:
+
+| Element | Rule |
+|---|---|
+| Milestone slug | Lowercase, hyphens, max 40 chars. Prefer `v1-<domain-noun>` (e.g. `v1-core-auth`, `v1-data-pipeline`) |
+| Milestone title | 4-8 words, user-facing outcome |
+| Milestone vision | One sentence: "A [persona] can [action], which [value]." |
+| Features | 2-5 semantically cohesive units from the scope. Stay coarse — `/sdlc-prepare` refines later. |
+| Acceptance test | `- [ ]` checklist from the deliverables, saved to `/tmp/<slug>_acceptance.md` |
+
+### 7c: Seed via CLI (idempotent — re-running updates, never duplicates)
+
+```bash
+# Write acceptance test checklist
+cat > /tmp/<slug>_acceptance.md << 'EOF'
+- [ ] [deliverable 1]
+- [ ] [deliverable 2]
+...
+EOF
+
+# Create milestone
+sdlc milestone create <slug> --title "<title>"
+sdlc milestone update <slug> --vision "<vision>"
+sdlc milestone set-acceptance-test <slug> --file /tmp/<slug>_acceptance.md
+
+# For each feature (2-5)
+sdlc feature create <feature-slug> --title "<feature-title>" --description "<1-sentence description>"
+sdlc milestone add-feature <slug> <feature-slug>
+```
+
+---
+
 ## Finish
 
 Summarize what was produced:
@@ -287,9 +340,12 @@ Summarize what was produced:
 ✓ .sdlc/config.yaml (project.name, project.description[, quality thresholds])
 ✓ Agents: [Name — Role], [Name — Role], ...
 ✓ AGENTS.md updated
+✓ First milestone seeded: <slug> (<N> features)   ← only if thick scope
 ```
 
-**Next:** `/sdlc-ponder` to explore your first idea — or `/sdlc-plan` if you already know what to build.
+**Next (thick scope):** `/sdlc-prepare <slug>` — align features with vision and write the execution wave plan.
+
+**Next (thin scope):** `/sdlc-ponder` to explore your first idea — or `/sdlc-plan` when you know what to build.
 "#;
 
 const SDLC_INIT_PLAYBOOK: &str = r#"# sdlc-init
@@ -308,9 +364,13 @@ Interview to bootstrap VISION.md, ARCHITECTURE.md, .sdlc/config.yaml, and a recr
 8. **Design team** — 2-4 agents matched to domain (always: core domain expert + pragmatic skeptic). Present roster as table, gate approval.
 9. **Create agents** — Write `.claude/agents/<first-last>.md` with: background, Principles, This Project, ALWAYS, NEVER, When You're Stuck.
 10. **Update AGENTS.md** — Add Team section listing names, roles, invocation triggers.
-11. **Finish** — Summarize what was produced.
+11. **Seed first milestone** — Assess scope thickness from Phase 2. If concrete deliverables exist: derive milestone slug/title/vision + 2-5 features, then seed via `sdlc milestone create`, `sdlc milestone update`, `sdlc milestone set-acceptance-test`, `sdlc feature create`, `sdlc milestone add-feature`. If scope is thin, skip.
+12. **Finish** — Summarize what was produced (include seeded milestone if applicable).
 
-**Next:** `/sdlc-ponder` to explore your first idea — or `/sdlc-plan` if you already know what to build.
+| Outcome | Next |
+|---|---|
+| Scope thick → milestone seeded | `**Next:** /sdlc-prepare <slug>` |
+| Scope thin → no milestone seeded | `**Next:** /sdlc-ponder` (explore first idea) |
 "#;
 
 const SDLC_INIT_SKILL: &str = r#"---
@@ -336,11 +396,12 @@ Interview the user to produce VISION.md, ARCHITECTURE.md, .sdlc/config.yaml upda
 8. Design 2-4 agents by domain (always: core expert + pragmatic skeptic). Gate: roster approval before creating files.
 9. Create `.claude/agents/<first-last>.md` for each agent.
 10. Update AGENTS.md with Team section.
+11. **Seed first milestone** — if Phase 2 captured concrete deliverables: derive milestone slug/title/vision + 2-5 features and seed with `sdlc milestone create` / `sdlc feature create` / `sdlc milestone add-feature`. Idempotent: re-running updates existing, never duplicates.
 
 | Outcome | Next |
 |---|---|
-| Bootstrapped, no plan yet | `**Next:** /sdlc-ponder` (explore first idea) |
-| Plan ready to distribute | `**Next:** /sdlc-plan` (distribute into milestones) |
+| Scope thick → milestone seeded | `**Next:** /sdlc-prepare <slug>` |
+| Scope thin → no milestone seeded | `**Next:** /sdlc-ponder` (explore first idea) |
 "#;
 
 pub static SDLC_INIT: CommandDef = CommandDef {

@@ -60,7 +60,6 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
   const eventSourceRef = useRef<EventSource | null>(null)
 
   const isActive = run.status === 'running'
-  const isPonder = run.run_type === 'ponder'
 
   // For active runs: open EventSource when expanded to show live log
   useEffect(() => {
@@ -76,9 +75,6 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
       eventsUrl = `/api/milestone/${encodeURIComponent(run.target)}/uat/events`
     } else if (run.run_type === 'milestone_prepare') {
       eventsUrl = `/api/milestone/${encodeURIComponent(run.target)}/prepare/events`
-    } else if (run.run_type === 'ponder') {
-      // Ponder runs don't have event streaming
-      return
     } else {
       eventsUrl = `/api/run/${encodeURIComponent(run.key)}/events`
     }
@@ -154,17 +150,15 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
             }
           </button>
         )}
-        {!isPonder && (
-          <button onClick={handleToggle} className="mt-0.5 shrink-0">
-            {expanded
-              ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-              : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-            }
-          </button>
-        )}
+        <button onClick={handleToggle} className="mt-0.5 shrink-0">
+          {expanded
+            ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+            : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+          }
+        </button>
       </div>
 
-      {expanded && !isPonder && (
+      {expanded && (
         <div className="px-3 pb-3">
           {/* Active runs: live SSE log; completed/failed/stopped: rich telemetry feed with chart */}
           {isActive ? (

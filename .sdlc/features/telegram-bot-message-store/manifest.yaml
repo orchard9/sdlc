@@ -1,72 +1,190 @@
 slug: telegram-bot-message-store
 title: Bot registration, polling, and SQLite message storage
-phase: draft
+phase: released
 created_at: 2026-03-02T18:45:17.553793Z
-updated_at: 2026-03-02T18:45:17.553793Z
+updated_at: 2026-03-03T01:08:25.198282Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:43:10.213875Z
+  approved_at: 2026-03-03T00:43:17.892411Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:44:30.498548Z
+  approved_at: 2026-03-03T00:44:35.427019Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:45:08.443044Z
+  approved_at: 2026-03-03T00:45:13.679726Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:45:45.744864Z
+  approved_at: 2026-03-03T00:45:51.027854Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:59:50.159683Z
+  approved_at: 2026-03-03T00:59:55.193161Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T01:00:47.777208Z
+  approved_at: 2026-03-03T01:02:08.982769Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-bot-message-store/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T01:08:14.741819Z
+  approved_at: 2026-03-03T01:08:19.996917Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add rusqlite and reqwest dependencies to sdlc-core
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.359282Z
+  started_at: 2026-03-03T00:46:22.100159Z
+  completed_at: 2026-03-03T00:46:56.188880Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement TelegramConfig and config loading
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.364986Z
+  started_at: 2026-03-03T00:46:58.909551Z
+  completed_at: 2026-03-03T00:49:07.432735Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement MessageStore (SQLite layer)
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.369773Z
+  started_at: 2026-03-03T00:49:07.438869Z
+  completed_at: 2026-03-03T00:49:07.443675Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Implement Telegram API types and polling functions
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.374828Z
+  started_at: 2026-03-03T00:49:07.449252Z
+  completed_at: 2026-03-03T00:49:07.454082Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Implement sdlc telegram poll CLI subcommand
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.379174Z
+  started_at: 2026-03-03T00:49:10.715719Z
+  completed_at: 2026-03-03T00:51:02.871461Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Implement sdlc telegram status CLI subcommand
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.383232Z
+  started_at: 2026-03-03T00:51:02.890206Z
+  completed_at: 2026-03-03T00:51:02.911372Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Add unit tests for MessageStore
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.387006Z
+  started_at: 2026-03-03T00:49:07.459643Z
+  completed_at: 2026-03-03T00:49:07.464798Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Add CLI integration test for missing token
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.390676Z
+  started_at: 2026-03-03T00:51:05.672606Z
+  completed_at: 2026-03-03T00:51:22.435610Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Add .sdlc/telegram/ to .gitignore
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.394437Z
+  started_at: 2026-03-03T00:51:22.493730Z
+  completed_at: 2026-03-03T00:51:35.397449Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: Verify build and clippy clean
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:46:11.397998Z
+  started_at: 2026-03-03T00:51:35.403242Z
+  completed_at: 2026-03-03T00:59:03.127891Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T18:45:17.553793Z
+  exited: 2026-03-03T00:43:17.894274Z
+- phase: specified
+  entered: 2026-03-03T00:43:17.894274Z
+  exited: 2026-03-03T00:45:51.029344Z
+- phase: planned
+  entered: 2026-03-03T00:45:51.029344Z
+  exited: 2026-03-03T00:45:54.702915Z
+- phase: ready
+  entered: 2026-03-03T00:45:54.702915Z
+  exited: 2026-03-03T00:45:58.754492Z
+- phase: implementation
+  entered: 2026-03-03T00:45:58.754492Z
+  exited: 2026-03-03T00:59:55.194599Z
+- phase: review
+  entered: 2026-03-03T00:59:55.194599Z
+  exited: 2026-03-03T01:00:00.005001Z
+- phase: audit
+  entered: 2026-03-03T01:00:00.005001Z
+  exited: 2026-03-03T01:02:08.985901Z
+- phase: qa
+  entered: 2026-03-03T01:02:08.985901Z
+  exited: 2026-03-03T01:08:19.998924Z
+- phase: merge
+  entered: 2026-03-03T01:08:19.998924Z
+  exited: 2026-03-03T01:08:25.198282Z
+- phase: released
+  entered: 2026-03-03T01:08:25.198282Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

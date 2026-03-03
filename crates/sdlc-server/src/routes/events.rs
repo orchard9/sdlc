@@ -212,6 +212,10 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             .to_string();
             Some(Ok(Event::default().event("knowledge").data(data)))
         }
+        Ok(SseMessage::ChangelogUpdated) => {
+            let data = serde_json::json!({ "type": "ChangelogUpdated" }).to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
         Err(_) => None,
     });
     // Prepend a ~2KB padding comment so the response body exceeds Cloudflare's

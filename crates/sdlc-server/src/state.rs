@@ -236,6 +236,8 @@ pub enum SseMessage {
         gap_detected: bool,
         gap_suggestion: Option<String>,
     },
+    /// The changelog event log was updated — clients can re-fetch via the API.
+    ChangelogUpdated,
 }
 
 /// A knowledge entry cited in a librarian answer.
@@ -245,6 +247,40 @@ pub struct CitedEntry {
     pub code: String,
     pub title: String,
 }
+
+// ---------------------------------------------------------------------------
+// Tunnel snapshot types — written atomically on tunnel start/stop
+// ---------------------------------------------------------------------------
+
+/// Read-only view of the main SDLC tunnel state (auth config + URL).
+/// Both fields are updated together under a single RwLock so readers never
+/// observe a partially-updated state (e.g. a new URL with the old token).
+#[derive(Clone, Debug)]
+pub struct TunnelSnapshot {
+    pub config: TunnelConfig,
+    pub url: Option<String>,
+}
+
+impl Default for TunnelSnapshot {
+    fn default() -> Self {
+        Self {
+            config: TunnelConfig::none(),
+            url: None,
+        }
+    }
+}
+
+/// Read-only view of the app tunnel state (user's dev-server port + URL).
+/// Both fields are updated together under a single RwLock.
+#[derive(Clone, Debug, Default)]
+pub struct AppTunnelSnapshot {
+    pub port: Option<u16>,
+    pub url: Option<String>,
+}
+
+// ---------------------------------------------------------------------------
+// AppState
+// ---------------------------------------------------------------------------
 
 /// Shared application state passed to all route handlers.
 #[derive(Clone)]
@@ -258,23 +294,25 @@ pub struct AppState {
     pub agent_runs: Arc<Mutex<HashMap<String, AgentRunEntry>>>,
     /// Persistent run history (active + completed).
     pub run_history: Arc<Mutex<Vec<RunRecord>>>,
-    /// Live tunnel auth config — updated atomically when tunnel starts/stops.
-    pub tunnel_config: Arc<RwLock<TunnelConfig>>,
+    /// Atomic snapshot of tunnel auth config + URL.
+    /// Written once on tunnel start and once on stop — never partially updated.
+    pub tunnel_snapshot: Arc<RwLock<TunnelSnapshot>>,
     /// Running orch-tunnel process, if any.
     pub tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
-    /// Current tunnel URL, stored alongside the handle for fast reads.
-    pub tunnel_url: Arc<RwLock<Option<String>>>,
-    /// App tunnel: user-configured port to expose (their project dev server).
-    pub app_tunnel_port: Arc<RwLock<Option<u16>>>,
+    /// Atomic snapshot of app tunnel port + URL.
+    /// Written once on start and once on stop — never partially updated.
+    pub app_tunnel_snapshot: Arc<RwLock<AppTunnelSnapshot>>,
     /// App tunnel: running orch-tunnel process, if any.
     pub app_tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
-    /// App tunnel: current URL, if active.
-    pub app_tunnel_url: Arc<RwLock<Option<String>>>,
     /// HTTP client for reverse-proxying app tunnel requests.
     pub http_client: reqwest::Client,
     /// Telemetry store for persisting raw agent events across restarts.
     /// `None` if `.sdlc/telemetry.redb` cannot be opened (graceful degradation).
     pub telemetry: Option<Arc<TelemetryStore>>,
+    /// Handles for background file-watcher tasks.
+    /// Stored so the tasks can be aborted via `abort()` if needed; dropping a
+    /// `JoinHandle` only detaches the task — it does NOT stop it.
+    pub _watcher_handles: Arc<Vec<tokio::task::JoinHandle<()>>>,
 }
 
 impl AppState {
@@ -301,14 +339,16 @@ impl AppState {
             event_tx: tx.clone(),
             agent_runs: Arc::new(Mutex::new(HashMap::new())),
             run_history: Arc::new(Mutex::new(history)),
-            tunnel_config: Arc::new(RwLock::new(TunnelConfig::none())),
+            tunnel_snapshot: Arc::new(RwLock::new(TunnelSnapshot::default())),
             tunnel_handle: Arc::new(Mutex::new(None)),
-            tunnel_url: Arc::new(RwLock::new(None)),
-            app_tunnel_port: Arc::new(RwLock::new(saved_app_port)),
+            app_tunnel_snapshot: Arc::new(RwLock::new(AppTunnelSnapshot {
+                port: saved_app_port,
+                url: None,
+            })),
             app_tunnel_handle: Arc::new(Mutex::new(None)),
-            app_tunnel_url: Arc::new(RwLock::new(None)),
             http_client,
             telemetry,
+            _watcher_handles: Arc::new(Vec::new()),
             root,
         };
 
@@ -316,9 +356,11 @@ impl AppState {
         // This catches both web-UI mutations and external CLI updates.
         // Guard: only spawn if inside a Tokio runtime (skipped in sync unit tests).
         if tokio::runtime::Handle::try_current().is_ok() {
+            let mut handles: Vec<tokio::task::JoinHandle<()>> = Vec::new();
+
             let state_file = state.root.join(".sdlc").join("state.yaml");
             let tx2 = tx.clone();
-            tokio::spawn(async move {
+            handles.push(tokio::spawn(async move {
                 let mut last_mtime = None::<std::time::SystemTime>;
                 loop {
                     tokio::time::sleep(std::time::Duration::from_millis(800)).await;
@@ -331,7 +373,7 @@ impl AppState {
                         }
                     }
                 }
-            });
+            }));
 
             // Watch roadmap manifests for ponder space changes.
             // atomic_write uses rename, which updates the parent slug dir's mtime
@@ -339,7 +381,7 @@ impl AppState {
             // manifest file directly instead of watching the directory.
             let roadmap_dir = state.root.join(".sdlc").join("roadmap");
             let tx_roadmap = tx.clone();
-            tokio::spawn(async move {
+            handles.push(tokio::spawn(async move {
                 let mut last_mtime = None::<std::time::SystemTime>;
                 loop {
                     tokio::time::sleep(std::time::Duration::from_millis(800)).await;
@@ -349,12 +391,12 @@ impl AppState {
                         let _ = tx_roadmap.send(SseMessage::Update);
                     }
                 }
-            });
+            }));
 
             // Watch investigations dir for investigation workspace changes.
             let investigations_dir = state.root.join(".sdlc").join("investigations");
             let tx_inv = tx.clone();
-            tokio::spawn(async move {
+            handles.push(tokio::spawn(async move {
                 let mut last_mtime = None::<std::time::SystemTime>;
                 loop {
                     tokio::time::sleep(std::time::Duration::from_millis(800)).await;
@@ -364,12 +406,12 @@ impl AppState {
                         let _ = tx_inv.send(SseMessage::Update);
                     }
                 }
-            });
+            }));
 
             // Watch escalations.yaml for create/resolve mutations (CLI or API).
             let escalations_file = state.root.join(".sdlc").join("escalations.yaml");
             let tx_esc = tx.clone();
-            tokio::spawn(async move {
+            handles.push(tokio::spawn(async move {
                 let mut last_mtime = None::<std::time::SystemTime>;
                 loop {
                     tokio::time::sleep(std::time::Duration::from_millis(800)).await;
@@ -382,13 +424,13 @@ impl AppState {
                         }
                     }
                 }
-            });
+            }));
 
             // Watch .sdlc/tools/ for new tool directories (scaffolding via POST /api/tools or CLI).
             // We scan for subdirectories that contain a tool.ts file and watch their count/mtime.
             let tools_dir = state.root.join(".sdlc").join("tools");
             let tx_tools = tx.clone();
-            tokio::spawn(async move {
+            handles.push(tokio::spawn(async move {
                 let mut last_snapshot: Option<(usize, std::time::SystemTime)> = None;
                 loop {
                     tokio::time::sleep(std::time::Duration::from_millis(800)).await;
@@ -398,14 +440,14 @@ impl AppState {
                         let _ = tx_tools.send(SseMessage::ToolsChanged);
                     }
                 }
-            });
+            }));
 
             // Watch .sdlc/.orchestrator.state — written by the orchestrator daemon
             // after each tick. Fires ActionStateChanged so the frontend can
             // refresh the actions list without polling.
             let sentinel = state.root.join(".sdlc").join(".orchestrator.state");
             let tx_orch = tx.clone();
-            tokio::spawn(async move {
+            handles.push(tokio::spawn(async move {
                 let mut last_mtime = None::<std::time::SystemTime>;
                 loop {
                     tokio::time::sleep(std::time::Duration::from_millis(800)).await;
@@ -418,7 +460,35 @@ impl AppState {
                         }
                     }
                 }
-            });
+            }));
+
+            // Watch .sdlc/changelog.yaml — fires ChangelogUpdated whenever a
+            // new event is appended, so the dashboard can re-fetch without polling.
+            let changelog_file = state.root.join(".sdlc").join("changelog.yaml");
+            let tx_changelog = tx.clone();
+            handles.push(tokio::spawn(async move {
+                let mut last_mtime = None::<std::time::SystemTime>;
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                    if let Ok(meta) = tokio::fs::metadata(&changelog_file).await {
+                        if let Ok(mtime) = meta.modified() {
+                            if last_mtime != Some(mtime) {
+                                last_mtime = Some(mtime);
+                                let _ = tx_changelog.send(SseMessage::ChangelogUpdated);
+                            }
+                        }
+                    }
+                }
+            }));
+
+            // Store handles so they are cancelled when AppState is dropped.
+            // SAFETY: we have exclusive access to `state` here — no other
+            // thread has seen it yet, so replacing the Arc inner value is safe.
+            // We use Arc::new on a fresh Vec to avoid a get_mut dance.
+            return Self {
+                _watcher_handles: Arc::new(handles),
+                ..state
+            };
         }
 
         state

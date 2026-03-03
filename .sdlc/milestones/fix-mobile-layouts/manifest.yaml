@@ -1,0 +1,9 @@
+slug: fix-mobile-layouts
+title: Mobile Layout Fixes
+vision: Threads and Tools pages are usable on mobile — no broken dual-column layout, no getting stuck in the detail pane with no way back.
+features:
+- fix-threadspage-mobile-layout
+- fix-toolspage-mobile-nav
+created_at: 2026-03-03T06:10:00Z
+updated_at: 2026-03-03T06:10:00Z
+schema_version: 1

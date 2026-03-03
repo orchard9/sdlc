@@ -1,62 +1,62 @@
 slug: uat-artifacts-ui
 title: UAT artifact UI — screenshot filmstrip in UatHistoryPanel and hero thumbnail on dashboard
-phase: draft
+phase: released
 created_at: 2026-03-02T18:07:59.851614Z
-updated_at: 2026-03-02T18:07:59.851614Z
+updated_at: 2026-03-03T04:55:23.705531Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:55:15.317736Z
+  approved_at: 2026-03-03T02:55:25.863198Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:56:22.483618Z
+  approved_at: 2026-03-03T02:56:27.256331Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:57:06.648644Z
+  approved_at: 2026-03-03T02:57:11.312663Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T02:57:48.936503Z
+  approved_at: 2026-03-03T02:57:53.926913Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T04:53:23.503618Z
+  approved_at: 2026-03-03T04:53:57.844820Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T04:54:07.117164Z
+  approved_at: 2026-03-03T04:54:32.070843Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/uat-artifacts-ui/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T04:54:54.850975Z
+  approved_at: 2026-03-03T04:55:19.281639Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T18:07:59.851614Z
+  exited: 2026-03-03T02:55:25.864536Z
+- phase: specified
+  entered: 2026-03-03T02:55:25.864536Z
+  exited: 2026-03-03T02:57:53.928983Z
+- phase: planned
+  entered: 2026-03-03T02:57:53.928983Z
+  exited: 2026-03-03T03:42:09.872279Z
+- phase: ready
+  entered: 2026-03-03T03:42:09.872279Z
+  exited: 2026-03-03T03:42:19.678648Z
+- phase: implementation
+  entered: 2026-03-03T03:42:19.678648Z
+  exited: 2026-03-03T04:53:57.848889Z
+- phase: review
+  entered: 2026-03-03T04:53:57.848889Z
+  exited: 2026-03-03T04:54:02.593517Z
+- phase: audit
+  entered: 2026-03-03T04:54:02.593517Z
+  exited: 2026-03-03T04:54:32.073858Z
+- phase: qa
+  entered: 2026-03-03T04:54:32.073858Z
+  exited: 2026-03-03T04:55:19.284931Z
+- phase: merge
+  entered: 2026-03-03T04:55:19.284931Z
+  exited: 2026-03-03T04:55:23.705531Z
+- phase: released
+  entered: 2026-03-03T04:55:23.705531Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

@@ -24,12 +24,13 @@ fn thread_to_json(t: &sdlc_core::feedback_thread::FeedbackThread) -> serde_json:
         // Server-native fields
         "id":            t.id,
         "context":       t.context,
+        "body":          t.body,
         // Frontend-compat aliases
         "slug":          t.id,
         "title":         t.title,
-        "status":        "open",
+        "status":        t.status,
         "author":        "",
-        "promoted_to":   serde_json::Value::Null,
+        "promoted_to":   t.promoted_to,
         "comment_count": t.post_count,
         "created_at":    t.created_at,
         "updated_at":    t.updated_at,
@@ -82,6 +83,8 @@ pub struct CreateBody {
     /// Namespaced anchor string, e.g. "feature:my-slug". Defaults to "general".
     pub context: Option<String>,
     pub title: Option<String>,
+    /// The "core element" — a living summary of the thread's subject.
+    pub body: Option<String>,
 }
 
 /// POST /api/threads — create a new thread
@@ -97,9 +100,16 @@ pub async fn create_thread(
         .unwrap_or("general")
         .to_string();
     let root = app.root.clone();
+    let body_str = body
+        .body
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string);
     let result = tokio::task::spawn_blocking(move || {
         let title = body.title.as_deref().unwrap_or("");
-        let thread = sdlc_core::feedback_thread::create_thread(&root, &context, title)?;
+        let thread =
+            sdlc_core::feedback_thread::create_thread(&root, &context, title, body_str.as_deref())?;
         Ok::<_, sdlc_core::SdlcError>(thread_to_json(&thread))
     })
     .await
@@ -122,10 +132,9 @@ pub async fn get_thread(
         let thread = sdlc_core::feedback_thread::load_thread(&root, &id_clone)?;
         let posts = sdlc_core::feedback_thread::list_posts(&root, &id_clone)?;
         let mut value = thread_to_json(&thread);
-        // Frontend expects `comments` (with body/incorporated shape) and `body`/`body_version`
+        // Frontend expects `comments` (with body/incorporated shape) and `body_version`
         value["comments"] =
             serde_json::json!(posts.iter().map(post_to_comment_json).collect::<Vec<_>>());
-        value["body"] = serde_json::Value::Null;
         value["body_version"] = serde_json::json!(0u32);
         Ok::<_, sdlc_core::SdlcError>(value)
     })
@@ -223,6 +232,120 @@ async fn append_post(
 }
 
 // ---------------------------------------------------------------------------
+// Patch (status update)
+// ---------------------------------------------------------------------------
+
+#[derive(Deserialize)]
+pub struct PatchBody {
+    pub status: Option<String>,
+}
+
+/// PATCH /api/threads/:id — update mutable thread fields (status)
+pub async fn patch_thread(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+    Json(body): Json<PatchBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let status = body.status.clone();
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let thread = sdlc_core::feedback_thread::patch_thread(&root, &id, status.as_deref(), None)?;
+        Ok::<_, sdlc_core::SdlcError>(thread_to_json(&thread))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
+// Promote to Ponder
+// ---------------------------------------------------------------------------
+
+/// POST /api/threads/:id/promote — create a ponder entry from this thread
+pub async fn promote_thread(
+    State(app): State<AppState>,
+    Path(id): Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        let thread = sdlc_core::feedback_thread::load_thread(&root, &id)?;
+        // Derive a slug from the thread title: lowercase, replace non-alnum with dash, collapse
+        let raw: String = thread
+            .title
+            .chars()
+            .map(|c| {
+                if c.is_alphanumeric() {
+                    c.to_lowercase().next().unwrap()
+                } else {
+                    '-'
+                }
+            })
+            .collect();
+        let mut prev_dash = false;
+        let slug_base: String = raw
+            .chars()
+            .filter(|&c| {
+                if c == '-' {
+                    if prev_dash {
+                        return false;
+                    }
+                    prev_dash = true;
+                } else {
+                    prev_dash = false;
+                }
+                true
+            })
+            .collect();
+        let slug_base = slug_base.trim_matches('-').to_string();
+        let slug_base = if slug_base.is_empty() {
+            thread.id.clone()
+        } else {
+            slug_base
+        };
+        // Truncate to 50 chars
+        let slug_base = if slug_base.len() > 50 {
+            slug_base[..50].trim_end_matches('-').to_string()
+        } else {
+            slug_base
+        };
+
+        // Resolve collisions
+        let ponder_slug = {
+            if sdlc_core::ponder::PonderEntry::load(&root, &slug_base).is_err() {
+                slug_base.clone()
+            } else {
+                let mut n = 2u32;
+                loop {
+                    let candidate = format!("{slug_base}-{n}");
+                    if sdlc_core::ponder::PonderEntry::load(&root, &candidate).is_err() {
+                        break candidate;
+                    }
+                    n += 1;
+                }
+            }
+        };
+
+        sdlc_core::ponder::PonderEntry::create(&root, &ponder_slug, &thread.title)?;
+
+        // Update thread status
+        sdlc_core::feedback_thread::patch_thread(
+            &root,
+            &thread.id,
+            Some("promoted"),
+            Some(Some(&ponder_slug)),
+        )?;
+
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "ponder_slug": ponder_slug,
+            "thread_id": thread.id,
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
 // Delete
 // ---------------------------------------------------------------------------
 
@@ -273,6 +396,7 @@ mod tests {
         let body = CreateBody {
             context: Some("feature:my-slug".to_string()),
             title: None,
+            body: None,
         };
         let result = create_thread(State(app), Json(body)).await.unwrap();
         assert!(!result.0["id"].as_str().unwrap().is_empty());
@@ -287,6 +411,7 @@ mod tests {
         let body = CreateBody {
             context: None,
             title: None,
+            body: None,
         };
         let result = create_thread(State(app), Json(body)).await.unwrap();
         assert_eq!(result.0["context"], "general");
@@ -298,9 +423,26 @@ mod tests {
         let body = CreateBody {
             context: Some("".to_string()),
             title: None,
+            body: None,
         };
         let result = create_thread(State(app), Json(body)).await.unwrap();
         assert_eq!(result.0["context"], "general");
+    }
+
+    #[tokio::test]
+    async fn create_with_body_stores_and_get_returns_it() {
+        let (_dir, app) = make_app();
+        let body = CreateBody {
+            context: Some("feature:body".to_string()),
+            title: Some("Body thread".to_string()),
+            body: Some("My core element".to_string()),
+        };
+        let created = create_thread(State(app.clone()), Json(body)).await.unwrap();
+        assert_eq!(created.0["body"], "My core element");
+        let id = created.0["id"].as_str().unwrap().to_string();
+
+        let result = get_thread(State(app), Path(id)).await.unwrap();
+        assert_eq!(result.0["body"], "My core element");
     }
 
     #[tokio::test]
@@ -309,6 +451,7 @@ mod tests {
         let body = CreateBody {
             context: Some("feature:x".to_string()),
             title: Some("Test thread".to_string()),
+            body: None,
         };
         let created = create_thread(State(app.clone()), Json(body)).await.unwrap();
         let id = created.0["id"].as_str().unwrap().to_string();
@@ -341,6 +484,7 @@ mod tests {
             Json(CreateBody {
                 context: Some("feature:y".to_string()),
                 title: None,
+                body: None,
             }),
         )
         .await
@@ -373,6 +517,7 @@ mod tests {
             Json(CreateBody {
                 context: Some("feature:z".to_string()),
                 title: None,
+                body: None,
             }),
         )
         .await
@@ -404,6 +549,7 @@ mod tests {
             Json(CreateBody {
                 context: None,
                 title: None,
+                body: None,
             }),
         )
         .await
@@ -470,6 +616,7 @@ mod tests {
             Json(CreateBody {
                 context: Some("feature:del".to_string()),
                 title: None,
+                body: None,
             }),
         )
         .await
@@ -488,6 +635,7 @@ mod tests {
             Json(CreateBody {
                 context: Some("feature:gone".to_string()),
                 title: None,
+                body: None,
             }),
         )
         .await
@@ -513,6 +661,7 @@ mod tests {
             Json(CreateBody {
                 context: Some("feature:a".to_string()),
                 title: None,
+                body: None,
             }),
         )
         .await
@@ -522,6 +671,7 @@ mod tests {
             Json(CreateBody {
                 context: Some("feature:b".to_string()),
                 title: None,
+                body: None,
             }),
         )
         .await

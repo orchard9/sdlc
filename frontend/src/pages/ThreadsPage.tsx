@@ -69,6 +69,23 @@ export function ThreadsPage() {
     navigate(`/threads/${newThread.slug}`)
   }, [navigate])
 
+  const handleDelete = useCallback(() => {
+    setDetail(null)
+    setThreads(prev => prev.filter(t => t.slug !== slug))
+    navigate('/threads')
+  }, [slug, navigate])
+
+  const handleStatusChange = useCallback((updated: import('@/lib/types').ThreadDetail) => {
+    setDetail(updated)
+    setThreads(prev =>
+      prev.map(t => t.slug === updated.slug ? { ...t, status: updated.status } : t)
+    )
+  }, [])
+
+  const handlePromoted = useCallback((ponderSlug: string) => {
+    navigate(`/ponder/${ponderSlug}`)
+  }, [navigate])
+
   return (
     <div className="flex h-full overflow-hidden">
       {/* Left pane: thread list */}
@@ -97,6 +114,9 @@ export function ThreadsPage() {
           <ThreadDetailPane
             detail={detail}
             onCommentAdded={handleCommentAdded}
+            onDelete={handleDelete}
+            onStatusChange={handleStatusChange}
+            onPromoted={handlePromoted}
           />
         ) : (
           <EmptyDetailState onNewThread={() => setCreateOpen(true)} />

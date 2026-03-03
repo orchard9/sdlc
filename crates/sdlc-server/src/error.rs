@@ -89,6 +89,41 @@ impl IntoResponse for AppError {
             return (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(u.0.clone())).into_response();
         }
 
+        // Manifest errors carry a `fix_hint` that should appear alongside the
+        // error in the response body so callers know exactly how to repair the
+        // file. Handle them before the generic status-code match.
+        if let Some(SdlcError::ManifestIncompatible {
+            path,
+            entity,
+            message,
+            fix_hint,
+        }) = self.0.downcast_ref::<SdlcError>()
+        {
+            tracing::error!(
+                path = %path,
+                entity = %entity,
+                error = %message,
+                fix = %fix_hint,
+                "Manifest incompatible with current schema"
+            );
+            let body = serde_json::json!({
+                "error": format!("{path}: {entity} manifest is incompatible with the current schema: {message}"),
+                "fix": fix_hint,
+            });
+            return (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(body)).into_response();
+        }
+
+        if let Some(SdlcError::ManifestParseFailed { path, message }) =
+            self.0.downcast_ref::<SdlcError>()
+        {
+            tracing::error!(path = %path, error = %message, "Manifest YAML parse failed");
+            let body = serde_json::json!({
+                "error": format!("{path}: cannot parse YAML: {message}"),
+                "fix": "The file contains invalid YAML. Inspect it manually or restore from git.",
+            });
+            return (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(body)).into_response();
+        }
+
         let status = if let Some(e) = self.0.downcast_ref::<SdlcError>() {
             match e {
                 SdlcError::NotInitialized => StatusCode::BAD_REQUEST,
@@ -120,13 +155,23 @@ impl IntoResponse for AppError {
                 | SdlcError::InvalidArtifactFilename(_)
                 | SdlcError::InvalidFeatureOrder(_)
                 | SdlcError::InvalidSecretKeyType(_) => StatusCode::BAD_REQUEST,
+                SdlcError::DependencyCycle(_) => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::DuplicateTeamMember(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidTransition { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::MissingArtifact { .. } => StatusCode::UNPROCESSABLE_ENTITY,
                 SdlcError::Blocked(_) => StatusCode::CONFLICT,
                 SdlcError::NoToolRuntime => StatusCode::SERVICE_UNAVAILABLE,
                 SdlcError::ToolFailed(_) => StatusCode::UNPROCESSABLE_ENTITY,
-                SdlcError::Search(_)
+                SdlcError::TelegramTokenMissing | SdlcError::TelegramApi(_) => {
+                    StatusCode::BAD_REQUEST
+                }
+                // Manifest errors are handled above with early returns; these
+                // arms are unreachable but required for exhaustiveness.
+                SdlcError::ManifestParseFailed { .. } | SdlcError::ManifestIncompatible { .. } => {
+                    StatusCode::UNPROCESSABLE_ENTITY
+                }
+                SdlcError::Sqlite(_)
+                | SdlcError::Search(_)
                 | SdlcError::Io(_)
                 | SdlcError::Yaml(_)
                 | SdlcError::Json(_)
@@ -145,6 +190,14 @@ impl IntoResponse for AppError {
         } else {
             StatusCode::INTERNAL_SERVER_ERROR
         };
+
+        if status.is_server_error() {
+            tracing::error!(
+                error = %self.0,
+                status = status.as_u16(),
+                "Request failed with server error"
+            );
+        }
 
         let body = serde_json::json!({ "error": self.0.to_string() });
         (status, axum::Json(body)).into_response()

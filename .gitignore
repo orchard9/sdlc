@@ -17,6 +17,8 @@
 .claude/settings.local.json
 .sdlc/telemetry.redb
 .sdlc/orchestrator.db
+.sdlc/telegram/
 .sdlc/secrets/envs/gitea.meta.yaml
 .playwright-mcp/
 .claude/worktrees/
+.sdlc/secrets/envs/telegram.meta.yaml

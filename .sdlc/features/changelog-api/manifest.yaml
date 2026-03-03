@@ -1,0 +1,127 @@
+slug: changelog-api
+title: Changelog REST endpoint — query events by timestamp
+phase: released
+created_at: 2026-03-02T23:42:47.471701Z
+updated_at: 2026-03-03T00:37:29.778511Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/changelog-api/spec.md
+  created_at: 2026-03-03T00:26:16.719644Z
+  approved_at: 2026-03-03T00:26:22.185449Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/changelog-api/design.md
+  created_at: 2026-03-03T00:27:18.219881Z
+  approved_at: 2026-03-03T00:27:21.450060Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/changelog-api/tasks.md
+  created_at: 2026-03-03T00:27:51.370991Z
+  approved_at: 2026-03-03T00:27:53.876806Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/changelog-api/qa-plan.md
+  created_at: 2026-03-03T00:28:20.826205Z
+  approved_at: 2026-03-03T00:28:22.646108Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/changelog-api/review.md
+  created_at: 2026-03-03T00:33:37.611766Z
+  approved_at: 2026-03-03T00:33:40.534783Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/changelog-api/audit.md
+  created_at: 2026-03-03T00:34:24.254526Z
+  approved_at: 2026-03-03T00:34:27.930757Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/changelog-api/qa-results.md
+  created_at: 2026-03-03T00:37:22.531436Z
+  approved_at: 2026-03-03T00:37:25.687438Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create crates/sdlc-server/src/routes/changelog.rs — GET /api/changelog with since (ISO timestamp) and limit query params; returns { events, total }
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.423033Z
+  started_at: 2026-03-03T00:29:05.811269Z
+  completed_at: 2026-03-03T00:29:41.001344Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Register GET /api/changelog route in crates/sdlc-server/src/routes/mod.rs router
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.428510Z
+  started_at: 2026-03-03T00:29:44.043728Z
+  completed_at: 2026-03-03T00:30:10.578502Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create frontend/src/hooks/useChangelog.ts — fetches /api/changelog?since=<ts>, re-fetches on ChangelogUpdated SSE event
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:10.433473Z
+  started_at: 2026-03-03T00:30:10.583453Z
+  completed_at: 2026-03-03T00:30:24.939688Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T23:42:47.471701Z
+  exited: 2026-03-03T00:26:22.186805Z
+- phase: specified
+  entered: 2026-03-03T00:26:22.186805Z
+  exited: 2026-03-03T00:28:22.647944Z
+- phase: planned
+  entered: 2026-03-03T00:28:22.647944Z
+  exited: 2026-03-03T00:28:26.191183Z
+- phase: ready
+  entered: 2026-03-03T00:28:26.191183Z
+  exited: 2026-03-03T00:28:30.816825Z
+- phase: implementation
+  entered: 2026-03-03T00:28:30.816825Z
+  exited: 2026-03-03T00:33:40.536241Z
+- phase: review
+  entered: 2026-03-03T00:33:40.536241Z
+  exited: 2026-03-03T00:33:44.299810Z
+- phase: audit
+  entered: 2026-03-03T00:33:44.299810Z
+  exited: 2026-03-03T00:34:27.948360Z
+- phase: qa
+  entered: 2026-03-03T00:34:27.948360Z
+  exited: 2026-03-03T00:37:25.688826Z
+- phase: merge
+  entered: 2026-03-03T00:37:25.688826Z
+  exited: 2026-03-03T00:37:29.778511Z
+- phase: released
+  entered: 2026-03-03T00:37:29.778511Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

@@ -1,13 +1,11 @@
 slug: v18-fleet-automation
 title: 'sdlc-cluster: Fleet automation and full provisioning'
-vision: >
-  Every repo in the orchard9 Gitea org automatically gets a live sdlc-server instance —
-  no manual action required per project. A scheduled Woodpecker reconcile pipeline handles
-  new repos, TLS is wildcard-automated, and the initial 80+ existing projects are provisioned
-  in a single bootstrap run.
+vision: |
+  Every repo in the orchard9 Gitea org automatically gets a live sdlc-server instance — no manual action required per project. A scheduled Woodpecker reconcile pipeline handles new repos, TLS is wildcard-automated, and the initial 80+ existing projects are provisioned in a single bootstrap run.
 features:
 - fleet-reconcile-pipeline
 - fleet-ingress-tls
 - fleet-bootstrap
 created_at: 2026-03-02T09:08:07.886533Z
 updated_at: 2026-03-02T09:08:07.904535Z
+schema_version: 1

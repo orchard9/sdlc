@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::auth::TunnelConfig;
 use crate::error::AppError;
-use crate::state::AppState;
+use crate::state::{AppState, TunnelSnapshot};
 use crate::tunnel::{generate_token, Tunnel};
 
 // ---------------------------------------------------------------------------
@@ -27,8 +27,10 @@ pub struct TunnelStatus {
 // ---------------------------------------------------------------------------
 
 pub async fn get_tunnel(State(app): State<AppState>) -> Json<TunnelStatus> {
-    let url = app.tunnel_url.read().await.clone();
-    let token = app.tunnel_config.read().await.token.clone();
+    let snap = app.tunnel_snapshot.read().await;
+    let url = snap.url.clone();
+    let token = snap.config.token.clone();
+    drop(snap);
     Json(TunnelStatus {
         active: url.is_some(),
         url,
@@ -61,10 +63,12 @@ pub async fn start_tunnel(State(app): State<AppState>) -> Result<Json<TunnelStat
     let url = tun.url.clone();
     let token = generate_token();
 
-    // Store handle + activate auth.
+    // Store handle, then atomically update the snapshot (url + auth config together).
     *app.tunnel_handle.lock().await = Some(tun);
-    *app.tunnel_url.write().await = Some(url.clone());
-    *app.tunnel_config.write().await = TunnelConfig::with_token(token.clone());
+    *app.tunnel_snapshot.write().await = TunnelSnapshot {
+        config: TunnelConfig::with_token(token.clone()),
+        url: Some(url.clone()),
+    };
 
     Ok(Json(TunnelStatus {
         active: true,
@@ -84,8 +88,7 @@ pub async fn stop_tunnel(State(app): State<AppState>) -> Result<Json<TunnelStatu
         None => Err(AppError(anyhow::anyhow!("no tunnel is currently active"))),
         Some(t) => {
             t.stop().await;
-            *app.tunnel_url.write().await = None;
-            *app.tunnel_config.write().await = TunnelConfig::none();
+            *app.tunnel_snapshot.write().await = TunnelSnapshot::default();
             Ok(Json(TunnelStatus {
                 active: false,
                 url: None,
@@ -126,10 +129,11 @@ mod tests {
         // "no tunnel running" → start path indirectly.  The guard that
         // rejects a second tunnel is the unit under test here.
 
-        // Manually mark as "active" with a fake URL to test the guard.
-        *app.tunnel_url.write().await = Some("https://fake.tunnel.threesix.ai".into());
-        // Inject a "running" handle sentinel by setting tunnel_config.
-        *app.tunnel_config.write().await = TunnelConfig::with_token("existing-token".into());
+        // Manually mark as "active" with a fake URL + token to test the guard.
+        *app.tunnel_snapshot.write().await = TunnelSnapshot {
+            config: TunnelConfig::with_token("existing-token".into()),
+            url: Some("https://fake.tunnel.threesix.ai".into()),
+        };
 
         // The guard checks tunnel_handle (None), not tunnel_url/config.
         // Start a second attempt without a real handle — it should succeed

@@ -513,7 +513,7 @@ function ScheduledActionsSection({
                   <td className="px-4 py-3"><ActionStatusBadge status={action.status} /></td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
                     {action.trigger.type === 'scheduled'
-                      ? futureRelativeTime(action.trigger.next_tick_at)
+                      ? futureRelativeTime(action.trigger.next_tick_at ?? '')
                       : 'webhook-triggered'}
                   </td>
                   <td className="px-4 py-3 text-xs text-muted-foreground">
@@ -673,17 +673,11 @@ function WebhookRoutesSection({ routes, tools, onRefresh, onRouteDeleted }: Webh
 
 interface WebhookEventsSectionProps {
   events: OrchestratorWebhookEvent[]
-  actions: OrchestratorAction[]
   limit: number
   onLoadMore: () => void
 }
 
-function WebhookEventsSection({ events, actions, limit, onLoadMore }: WebhookEventsSectionProps) {
-  function findActionLabel(actionId: string | null): string | null {
-    if (!actionId) return null
-    return actions.find(a => a.id === actionId)?.label ?? null
-  }
-
+function WebhookEventsSection({ events, limit, onLoadMore }: WebhookEventsSectionProps) {
   return (
     <section>
       <div className="flex items-center gap-2 mb-3">
@@ -705,28 +699,21 @@ function WebhookEventsSection({ events, actions, limit, onLoadMore }: WebhookEve
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Time</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Path</th>
                   <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Outcome</th>
-                  <th className="px-4 py-2.5 text-left text-xs font-medium text-muted-foreground">Action</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {events.map(event => {
-                  const actionLabel = findActionLabel(event.action_id)
-                  return (
-                    <tr key={event.id} className="hover:bg-accent/20 transition-colors">
-                      <td
-                        className="px-4 py-3 text-xs text-muted-foreground"
-                        title={new Date(event.received_at).toLocaleString()}
-                      >
-                        {relativeTime(event.received_at)}
-                      </td>
-                      <td className="px-4 py-3 text-xs font-mono text-foreground">{event.path}</td>
-                      <td className="px-4 py-3"><OutcomeBadge outcome={event.outcome} /></td>
-                      <td className="px-4 py-3 text-xs text-muted-foreground">
-                        {actionLabel ?? '—'}
-                      </td>
-                    </tr>
-                  )
-                })}
+                {events.map(event => (
+                  <tr key={event.id} className="hover:bg-accent/20 transition-colors">
+                    <td
+                      className="px-4 py-3 text-xs text-muted-foreground"
+                      title={new Date(event.received_at).toLocaleString()}
+                    >
+                      {relativeTime(event.received_at)}
+                    </td>
+                    <td className="px-4 py-3 text-xs font-mono text-foreground">{event.route_path}</td>
+                    <td className="px-4 py-3"><OutcomeBadge outcome={event.outcome} /></td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
@@ -869,7 +856,6 @@ export function ActionsPage() {
 
       <WebhookEventsSection
         events={events}
-        actions={actions}
         limit={eventsLimitState}
         onLoadMore={handleLoadMoreEvents}
       />

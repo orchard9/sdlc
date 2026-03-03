@@ -1,0 +1,16 @@
+partners:
+- name: Ben Hartley
+  role: Developer Productivity UX Designer
+  context: Designed GitHub's 'viewed' file state — literally the same concept. Knows how to surface 'what changed' without overwhelming developers who arrive without a specific question.
+  agent: .claude/agents/ben-hartley.md
+  recruited_at: 2026-03-02T23:33:21.045506Z
+- name: Dana Cho
+  role: Product Skeptic
+  context: Will ask 'do users want release notes or do they want to know what to do next?' — forces clarity on what value this actually delivers vs. what we think it delivers.
+  agent: .claude/agents/dana-cho.md
+  recruited_at: 2026-03-02T23:33:21.051977Z
+- name: Priya Nair
+  role: Distributed Systems Engineer
+  context: The 'since you last looked' model requires tracking per-consumer state — who is 'you'? An agent? A human? A webhook? Priya will map the data model problem and flag what's actually tractable.
+  agent: .claude/agents/priya-nair.md
+  recruited_at: 2026-03-02T23:33:21.058991Z

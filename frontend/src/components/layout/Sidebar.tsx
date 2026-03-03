@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, FolderKanban, Milestone, Search, Lightbulb, Microscope, Lock, Wrench,
   TrendingUp, MessagesSquare, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText,
-  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight,
+  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight, BarChart2,
 } from 'lucide-react'
 
 const navGroups = [
@@ -13,6 +13,7 @@ const navGroups = [
       { path: '/', label: 'Dashboard', icon: LayoutDashboard, exact: true },
       { path: '/milestones', label: 'Milestones', icon: Milestone, exact: true },
       { path: '/features', label: 'Features', icon: FolderKanban, exact: false },
+      { path: '/runs', label: 'Run History', icon: BarChart2, exact: true },
     ],
   },
   {
@@ -69,9 +70,11 @@ interface SidebarProps {
   onSearch?: () => void
   /** Called when the Fix Right Away button is clicked. */
   onFixRightAway?: () => void
+  /** Project name from config.project.name */
+  projectName?: string
 }
 
-export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onFixRightAway }: SidebarProps) {
+export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onFixRightAway, projectName = 'Ponder' }: SidebarProps) {
   const location = useLocation()
 
   return (
@@ -89,8 +92,7 @@ export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onF
       )}>
         {!collapsed && (
           <div>
-            <h1 className="text-lg font-semibold tracking-tight">SDLC</h1>
-            <p className="text-xs text-muted-foreground mt-0.5">Feature Lifecycle</p>
+            <h1 className="text-lg font-semibold tracking-tight">{projectName}</h1>
           </div>
         )}
         <button

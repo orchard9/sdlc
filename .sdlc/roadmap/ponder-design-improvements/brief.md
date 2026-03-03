@@ -1,0 +1,1 @@
+any ponder skill call that asks for a "design" should result in an html mockup as an artifact

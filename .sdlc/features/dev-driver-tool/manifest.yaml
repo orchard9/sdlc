@@ -1,0 +1,190 @@
+slug: dev-driver-tool
+title: 'dev-driver: stock tool that finds and does the next development action'
+phase: released
+created_at: 2026-03-02T23:29:21.618553Z
+updated_at: 2026-03-03T03:30:26.030192Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/dev-driver-tool/spec.md
+  created_at: 2026-03-02T23:44:37.613687Z
+  approved_at: 2026-03-02T23:44:46.343546Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/dev-driver-tool/design.md
+  created_at: 2026-03-02T23:45:30.890282Z
+  approved_at: 2026-03-02T23:45:30.897668Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/dev-driver-tool/tasks.md
+  created_at: 2026-03-02T23:46:10.882208Z
+  approved_at: 2026-03-02T23:46:10.889585Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/dev-driver-tool/qa-plan.md
+  created_at: 2026-03-02T23:46:38.414653Z
+  approved_at: 2026-03-02T23:46:38.422980Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/dev-driver-tool/review.md
+  created_at: 2026-03-02T23:50:48.126782Z
+  approved_at: 2026-03-02T23:50:48.133273Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/dev-driver-tool/audit.md
+  created_at: 2026-03-02T23:52:15.860442Z
+  approved_at: 2026-03-02T23:52:15.867604Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/dev-driver-tool/qa-results.md
+  created_at: 2026-03-03T03:30:16.968867Z
+  approved_at: 2026-03-03T03:30:21.845026Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Scaffold dev-driver/tool.ts following quality-check pattern (meta + run exports)
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:31.764202Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.270855Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement flight lock read/write/check (.sdlc/.dev-driver.lock, 2h TTL)
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:31.770992Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.279398Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement priority waterfall levels 1-5
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:31.776533Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.286875Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Implement async spawn for Claude dispatch (detached: true, stdio: ignore)'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:31.781639Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.294507Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Define and validate output schema (ToolResult<DevDriverResult>)
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:31.787503Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.301552Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Write dev-driver/README.md
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:31.792510Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.308657Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] Use /sdlc-next (one step) not /sdlc-run (to completion) for feature advancement — 4h recurrence is the iteration rhythm, not the tool'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:33:01.677305Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.316472Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] Check for any active agent runs before dispatching — not just the flight lock, but any running sdlc run in the DB'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:33:01.683815Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.323893Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Surface dev-driver decision in action output: which feature was picked, which directive, what the result was'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:33:01.689983Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.331243Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: '[user-gap] Document in README: what autonomous advancement means (one step per tick), which features get picked, and how to skip a feature (add a task tagged skip:autonomous)'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:33:01.695913Z
+  started_at: null
+  completed_at: 2026-03-02T23:49:28.338591Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T23:29:21.618553Z
+  exited: 2026-03-02T23:44:46.345022Z
+- phase: specified
+  entered: 2026-03-02T23:44:46.345022Z
+  exited: 2026-03-02T23:46:38.424635Z
+- phase: planned
+  entered: 2026-03-02T23:46:38.424635Z
+  exited: 2026-03-02T23:46:43.514740Z
+- phase: ready
+  entered: 2026-03-02T23:46:43.514740Z
+  exited: 2026-03-02T23:46:43.523664Z
+- phase: implementation
+  entered: 2026-03-02T23:46:43.523664Z
+  exited: 2026-03-02T23:50:48.134458Z
+- phase: review
+  entered: 2026-03-02T23:50:48.134458Z
+  exited: 2026-03-02T23:51:27.918220Z
+- phase: audit
+  entered: 2026-03-02T23:51:27.918220Z
+  exited: 2026-03-02T23:52:15.868959Z
+- phase: qa
+  entered: 2026-03-02T23:52:15.868959Z
+  exited: 2026-03-03T03:30:21.848213Z
+- phase: merge
+  entered: 2026-03-03T03:30:21.848213Z
+  exited: 2026-03-03T03:30:26.030192Z
+- phase: released
+  entered: 2026-03-03T03:30:26.030192Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

@@ -1,0 +1,800 @@
+- id: ev-0001
+  kind: feature_phase_advanced
+  slug: fix-changelogpollinginfinitelooponnulllastvisitat
+  timestamp: 2026-03-03T01:19:50.950904Z
+  metadata:
+    phase: review
+- id: ev-0002
+  kind: feature_phase_advanced
+  slug: fix-changelogpollinginfinitelooponnulllastvisitat
+  timestamp: 2026-03-03T01:20:21.793831Z
+  metadata:
+    phase: qa
+- id: ev-0003
+  kind: feature_phase_advanced
+  slug: fix-changelogpollinginfinitelooponnulllastvisitat
+  timestamp: 2026-03-03T01:21:03.770276Z
+  metadata:
+    phase: merge
+- id: ev-0004
+  kind: feature_merged
+  slug: fix-changelogpollinginfinitelooponnulllastvisitat
+  timestamp: 2026-03-03T01:21:09.858755Z
+  metadata: {}
+- id: ev-0005
+  kind: feature_phase_advanced
+  slug: fix-recentactivityscrollablefixedheightbelowstats
+  timestamp: 2026-03-03T01:26:24.876130Z
+  metadata:
+    phase: review
+- id: ev-0006
+  kind: feature_phase_advanced
+  slug: fix-recentactivityscrollablefixedheightbelowstats
+  timestamp: 2026-03-03T01:26:48.681338Z
+  metadata:
+    phase: qa
+- id: ev-0007
+  kind: feature_phase_advanced
+  slug: fix-recentactivityscrollablefixedheightbelowstats
+  timestamp: 2026-03-03T01:27:22.215092Z
+  metadata:
+    phase: merge
+- id: ev-0008
+  kind: feature_merged
+  slug: fix-recentactivityscrollablefixedheightbelowstats
+  timestamp: 2026-03-03T01:27:28.564921Z
+  metadata: {}
+- id: ev-0009
+  kind: feature_phase_advanced
+  slug: fix-threaddetailactionsnotwiredup
+  timestamp: 2026-03-03T01:30:54.448169Z
+  metadata:
+    phase: review
+- id: ev-0010
+  kind: feature_phase_advanced
+  slug: fix-threaddetailactionsnotwiredup
+  timestamp: 2026-03-03T01:31:41.059473Z
+  metadata:
+    phase: qa
+- id: ev-0011
+  kind: feature_phase_advanced
+  slug: fix-threaddetailactionsnotwiredup
+  timestamp: 2026-03-03T01:35:57.543905Z
+  metadata:
+    phase: merge
+- id: ev-0012
+  kind: feature_merged
+  slug: fix-threaddetailactionsnotwiredup
+  timestamp: 2026-03-03T01:36:08.507831Z
+  metadata: {}
+- id: ev-0013
+  kind: review_approved
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:43:23.036790Z
+  metadata: {}
+- id: ev-0014
+  kind: feature_phase_advanced
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:43:23.040355Z
+  metadata:
+    phase: review
+- id: ev-0015
+  kind: audit_approved
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:43:42.947959Z
+  metadata: {}
+- id: ev-0016
+  kind: feature_phase_advanced
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:43:42.949844Z
+  metadata:
+    phase: qa
+- id: ev-0017
+  kind: qa_approved
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:44:46.812386Z
+  metadata: {}
+- id: ev-0018
+  kind: feature_phase_advanced
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:44:46.815008Z
+  metadata:
+    phase: merge
+- id: ev-0019
+  kind: feature_merged
+  slug: dashboard-zone-layout
+  timestamp: 2026-03-03T02:44:55.933238Z
+  metadata: {}
+- id: ev-0020
+  kind: milestone_wave_completed
+  slug: v21-dev-driver
+  timestamp: 2026-03-03T02:53:14.953894Z
+  metadata:
+    run_key: milestone-run-wave:v21-dev-driver
+- id: ev-0021
+  kind: review_approved
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:53:57.590779Z
+  metadata: {}
+- id: ev-0022
+  kind: feature_phase_advanced
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:53:57.655291Z
+  metadata:
+    phase: review
+- id: ev-0023
+  kind: feature_phase_advanced
+  slug: dashboard-horizon-zone
+  timestamp: 2026-03-03T02:54:07.987151Z
+  metadata:
+    phase: review
+- id: ev-0024
+  kind: audit_approved
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:54:33.358116Z
+  metadata: {}
+- id: ev-0025
+  kind: feature_phase_advanced
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:54:33.386164Z
+  metadata:
+    phase: qa
+- id: ev-0026
+  kind: feature_phase_advanced
+  slug: dashboard-horizon-zone
+  timestamp: 2026-03-03T02:54:53.005298Z
+  metadata:
+    phase: qa
+- id: ev-0027
+  kind: qa_approved
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:55:16.782264Z
+  metadata: {}
+- id: ev-0028
+  kind: feature_phase_advanced
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:55:16.783874Z
+  metadata:
+    phase: merge
+- id: ev-0029
+  kind: feature_merged
+  slug: dashboard-empty-states
+  timestamp: 2026-03-03T02:55:29.154054Z
+  metadata: {}
+- id: ev-0030
+  kind: feature_phase_advanced
+  slug: dashboard-horizon-zone
+  timestamp: 2026-03-03T02:55:56.457451Z
+  metadata:
+    phase: merge
+- id: ev-0031
+  kind: feature_merged
+  slug: dashboard-horizon-zone
+  timestamp: 2026-03-03T02:56:03.027558Z
+  metadata: {}
+- id: ev-0032
+  kind: milestone_wave_completed
+  slug: dashboard-rethink
+  timestamp: 2026-03-03T02:56:49.535859Z
+  metadata:
+    run_key: milestone-run-wave:dashboard-rethink
+- id: ev-0033
+  kind: milestone_wave_completed
+  slug: v21-dev-driver
+  timestamp: 2026-03-03T02:58:42.746389Z
+  metadata:
+    run_key: milestone-run-wave:v21-dev-driver
+- id: ev-0034
+  kind: run_failed
+  slug: ponder-ux-polish
+  timestamp: 2026-03-03T03:03:04.572006Z
+  metadata:
+    run_key: milestone-run-wave:ponder-ux-polish
+- id: ev-0035
+  kind: review_approved
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:04:38.864495Z
+  metadata: {}
+- id: ev-0036
+  kind: feature_phase_advanced
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:04:38.866695Z
+  metadata:
+    phase: review
+- id: ev-0037
+  kind: review_approved
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:04:43.175342Z
+  metadata: {}
+- id: ev-0038
+  kind: feature_phase_advanced
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:04:43.177443Z
+  metadata:
+    phase: review
+- id: ev-0039
+  kind: audit_approved
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:05:20.144767Z
+  metadata: {}
+- id: ev-0040
+  kind: feature_phase_advanced
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:05:20.146510Z
+  metadata:
+    phase: qa
+- id: ev-0041
+  kind: audit_approved
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:05:28.904066Z
+  metadata: {}
+- id: ev-0042
+  kind: feature_phase_advanced
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:05:28.928134Z
+  metadata:
+    phase: qa
+- id: ev-0043
+  kind: review_approved
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:05:31.251253Z
+  metadata: {}
+- id: ev-0044
+  kind: feature_phase_advanced
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:05:31.286628Z
+  metadata:
+    phase: review
+- id: ev-0045
+  kind: audit_approved
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:06:05.152163Z
+  metadata: {}
+- id: ev-0046
+  kind: feature_phase_advanced
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:06:05.367115Z
+  metadata:
+    phase: qa
+- id: ev-0047
+  kind: qa_approved
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:06:53.880310Z
+  metadata: {}
+- id: ev-0048
+  kind: feature_phase_advanced
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:06:53.882281Z
+  metadata:
+    phase: merge
+- id: ev-0049
+  kind: feature_merged
+  slug: init-smarter-finish
+  timestamp: 2026-03-03T03:06:57.348860Z
+  metadata: {}
+- id: ev-0050
+  kind: qa_approved
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:07:06.725137Z
+  metadata: {}
+- id: ev-0051
+  kind: feature_phase_advanced
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:07:06.727192Z
+  metadata:
+    phase: merge
+- id: ev-0052
+  kind: feature_merged
+  slug: uat-artifacts-storage
+  timestamp: 2026-03-03T03:07:12.675687Z
+  metadata: {}
+- id: ev-0053
+  kind: qa_approved
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:07:21.818006Z
+  metadata: {}
+- id: ev-0054
+  kind: feature_phase_advanced
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:07:21.819985Z
+  metadata:
+    phase: merge
+- id: ev-0055
+  kind: feature_merged
+  slug: ponder-agent-web-tools
+  timestamp: 2026-03-03T03:07:25.032088Z
+  metadata: {}
+- id: ev-0056
+  kind: milestone_wave_completed
+  slug: init-first-milestone-handoff
+  timestamp: 2026-03-03T03:07:29.299247Z
+  metadata:
+    run_key: milestone-run-wave:init-first-milestone-handoff
+- id: ev-0057
+  kind: review_approved
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:07:29.583462Z
+  metadata: {}
+- id: ev-0058
+  kind: feature_phase_advanced
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:07:29.585419Z
+  metadata:
+    phase: review
+- id: ev-0059
+  kind: milestone_wave_completed
+  slug: v19-uat-artifacts
+  timestamp: 2026-03-03T03:07:45.645025Z
+  metadata:
+    run_key: milestone-run-wave:v19-uat-artifacts
+- id: ev-0060
+  kind: audit_approved
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:08:03.562845Z
+  metadata: {}
+- id: ev-0061
+  kind: feature_phase_advanced
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:08:03.565046Z
+  metadata:
+    phase: qa
+- id: ev-0062
+  kind: qa_approved
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:10:07.626998Z
+  metadata: {}
+- id: ev-0063
+  kind: feature_phase_advanced
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:10:07.630476Z
+  metadata:
+    phase: merge
+- id: ev-0064
+  kind: feature_merged
+  slug: ponder-creation-modal
+  timestamp: 2026-03-03T03:10:16.908942Z
+  metadata: {}
+- id: ev-0065
+  kind: milestone_wave_completed
+  slug: v23-ponder-rich-input
+  timestamp: 2026-03-03T03:10:48.641412Z
+  metadata:
+    run_key: milestone-run-wave:v23-ponder-rich-input
+- id: ev-0066
+  kind: milestone_wave_completed
+  slug: v19-uat-artifacts
+  timestamp: 2026-03-03T03:27:01.569802Z
+  metadata:
+    run_key: milestone-run-wave:v19-uat-artifacts
+- id: ev-0067
+  kind: review_approved
+  slug: ponder-session-product-summary
+  timestamp: 2026-03-03T03:28:08.830990Z
+  metadata: {}
+- id: ev-0068
+  kind: feature_phase_advanced
+  slug: ponder-session-product-summary
+  timestamp: 2026-03-03T03:28:08.833008Z
+  metadata:
+    phase: review
+- id: ev-0069
+  kind: feature_phase_advanced
+  slug: ponder-session-product-summary
+  timestamp: 2026-03-03T03:28:58.983046Z
+  metadata:
+    phase: qa
+- id: ev-0070
+  kind: feature_phase_advanced
+  slug: fleet-deploy-pipeline
+  timestamp: 2026-03-03T03:30:10.038890Z
+  metadata:
+    phase: review
+- id: ev-0071
+  kind: qa_approved
+  slug: dev-driver-tool
+  timestamp: 2026-03-03T03:30:21.846229Z
+  metadata: {}
+- id: ev-0072
+  kind: feature_phase_advanced
+  slug: dev-driver-tool
+  timestamp: 2026-03-03T03:30:21.848978Z
+  metadata:
+    phase: merge
+- id: ev-0073
+  kind: feature_merged
+  slug: dev-driver-tool
+  timestamp: 2026-03-03T03:30:26.032675Z
+  metadata: {}
+- id: ev-0074
+  kind: qa_approved
+  slug: ponder-session-product-summary
+  timestamp: 2026-03-03T03:30:26.760890Z
+  metadata: {}
+- id: ev-0075
+  kind: feature_phase_advanced
+  slug: ponder-session-product-summary
+  timestamp: 2026-03-03T03:30:26.763230Z
+  metadata:
+    phase: merge
+- id: ev-0076
+  kind: feature_merged
+  slug: ponder-session-product-summary
+  timestamp: 2026-03-03T03:30:32.895241Z
+  metadata: {}
+- id: ev-0077
+  kind: milestone_wave_completed
+  slug: ponder-ux-polish
+  timestamp: 2026-03-03T03:30:43.481386Z
+  metadata:
+    run_key: milestone-run-wave:ponder-ux-polish
+- id: ev-0078
+  kind: review_approved
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:30:52.249145Z
+  metadata: {}
+- id: ev-0079
+  kind: feature_phase_advanced
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:30:52.251326Z
+  metadata:
+    phase: review
+- id: ev-0080
+  kind: milestone_wave_completed
+  slug: v21-dev-driver
+  timestamp: 2026-03-03T03:30:52.716831Z
+  metadata:
+    run_key: milestone-run-wave:v21-dev-driver
+- id: ev-0081
+  kind: review_approved
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:30:57.471769Z
+  metadata: {}
+- id: ev-0082
+  kind: feature_phase_advanced
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:30:57.474217Z
+  metadata:
+    phase: review
+- id: ev-0083
+  kind: feature_phase_advanced
+  slug: fleet-deploy-pipeline
+  timestamp: 2026-03-03T03:30:58.661244Z
+  metadata:
+    phase: qa
+- id: ev-0084
+  kind: audit_approved
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:31:22.041303Z
+  metadata: {}
+- id: ev-0085
+  kind: feature_phase_advanced
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:31:22.043205Z
+  metadata:
+    phase: qa
+- id: ev-0086
+  kind: audit_approved
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:31:26.724838Z
+  metadata: {}
+- id: ev-0087
+  kind: feature_phase_advanced
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:31:26.727025Z
+  metadata:
+    phase: qa
+- id: ev-0088
+  kind: feature_phase_advanced
+  slug: fleet-deploy-pipeline
+  timestamp: 2026-03-03T03:31:49.364306Z
+  metadata:
+    phase: merge
+- id: ev-0089
+  kind: feature_merged
+  slug: fleet-deploy-pipeline
+  timestamp: 2026-03-03T03:31:53.485292Z
+  metadata: {}
+- id: ev-0090
+  kind: qa_approved
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:32:00.015205Z
+  metadata: {}
+- id: ev-0091
+  kind: feature_phase_advanced
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:32:00.017733Z
+  metadata:
+    phase: merge
+- id: ev-0092
+  kind: qa_approved
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:32:01.883062Z
+  metadata: {}
+- id: ev-0093
+  kind: feature_phase_advanced
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:32:01.885364Z
+  metadata:
+    phase: merge
+- id: ev-0094
+  kind: feature_merged
+  slug: fleet-secrets-infra
+  timestamp: 2026-03-03T03:32:05.530657Z
+  metadata: {}
+- id: ev-0095
+  kind: feature_merged
+  slug: fleet-repo-scaffold
+  timestamp: 2026-03-03T03:32:07.556648Z
+  metadata: {}
+- id: ev-0096
+  kind: review_approved
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:32:34.432660Z
+  metadata: {}
+- id: ev-0097
+  kind: feature_phase_advanced
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:32:34.434818Z
+  metadata:
+    phase: review
+- id: ev-0098
+  kind: audit_approved
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:33:18.514006Z
+  metadata: {}
+- id: ev-0099
+  kind: feature_phase_advanced
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:33:18.517024Z
+  metadata:
+    phase: qa
+- id: ev-0100
+  kind: qa_approved
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:34:26.978661Z
+  metadata: {}
+- id: ev-0101
+  kind: feature_phase_advanced
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:34:26.981661Z
+  metadata:
+    phase: merge
+- id: ev-0102
+  kind: feature_merged
+  slug: fleet-helm-chart
+  timestamp: 2026-03-03T03:34:30.951708Z
+  metadata: {}
+- id: ev-0103
+  kind: review_approved
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:35:01.167677Z
+  metadata: {}
+- id: ev-0104
+  kind: feature_phase_advanced
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:35:01.170374Z
+  metadata:
+    phase: review
+- id: ev-0105
+  kind: milestone_wave_completed
+  slug: v17-fleet-foundation
+  timestamp: 2026-03-03T03:35:09.008777Z
+  metadata:
+    run_key: milestone-run-wave:v17-fleet-foundation
+- id: ev-0106
+  kind: audit_approved
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:35:59.852614Z
+  metadata: {}
+- id: ev-0107
+  kind: feature_phase_advanced
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:35:59.855354Z
+  metadata:
+    phase: qa
+- id: ev-0108
+  kind: review_approved
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:36:56.301387Z
+  metadata: {}
+- id: ev-0109
+  kind: feature_phase_advanced
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:36:56.304204Z
+  metadata:
+    phase: review
+- id: ev-0110
+  kind: review_approved
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:37:15.580843Z
+  metadata: {}
+- id: ev-0111
+  kind: feature_phase_advanced
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:37:15.583679Z
+  metadata:
+    phase: review
+- id: ev-0112
+  kind: audit_approved
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:37:59.861880Z
+  metadata: {}
+- id: ev-0113
+  kind: feature_phase_advanced
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:37:59.864032Z
+  metadata:
+    phase: qa
+- id: ev-0114
+  kind: audit_approved
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:38:08.785088Z
+  metadata: {}
+- id: ev-0115
+  kind: feature_phase_advanced
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:38:08.787743Z
+  metadata:
+    phase: qa
+- id: ev-0116
+  kind: qa_approved
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:39:42.613803Z
+  metadata: {}
+- id: ev-0117
+  kind: feature_phase_advanced
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:39:42.615898Z
+  metadata:
+    phase: merge
+- id: ev-0118
+  kind: qa_approved
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:39:47.761482Z
+  metadata: {}
+- id: ev-0119
+  kind: feature_phase_advanced
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:39:47.764410Z
+  metadata:
+    phase: merge
+- id: ev-0120
+  kind: feature_merged
+  slug: fleet-ingress-tls
+  timestamp: 2026-03-03T03:39:53.189670Z
+  metadata: {}
+- id: ev-0121
+  kind: feature_merged
+  slug: fleet-bootstrap
+  timestamp: 2026-03-03T03:40:00.468274Z
+  metadata: {}
+- id: ev-0122
+  kind: milestone_wave_completed
+  slug: v19-uat-artifacts
+  timestamp: 2026-03-03T03:40:39.299146Z
+  metadata:
+    run_key: milestone-run-wave:v19-uat-artifacts
+- id: ev-0123
+  kind: qa_approved
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:42:17.181555Z
+  metadata: {}
+- id: ev-0124
+  kind: feature_phase_advanced
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:42:17.184728Z
+  metadata:
+    phase: merge
+- id: ev-0125
+  kind: feature_merged
+  slug: fleet-reconcile-pipeline
+  timestamp: 2026-03-03T03:42:30.241900Z
+  metadata: {}
+- id: ev-0126
+  kind: feature_phase_advanced
+  slug: ponder-owner-nav
+  timestamp: 2026-03-03T03:43:07.882032Z
+  metadata:
+    phase: review
+- id: ev-0127
+  kind: milestone_wave_completed
+  slug: v18-fleet-automation
+  timestamp: 2026-03-03T03:43:21.221641Z
+  metadata:
+    run_key: milestone-run-wave:v18-fleet-automation
+- id: ev-0128
+  kind: feature_phase_advanced
+  slug: ponder-owner-nav
+  timestamp: 2026-03-03T03:43:40.189052Z
+  metadata:
+    phase: qa
+- id: ev-0129
+  kind: feature_phase_advanced
+  slug: ponder-owner-nav
+  timestamp: 2026-03-03T03:44:42.969596Z
+  metadata:
+    phase: merge
+- id: ev-0130
+  kind: feature_merged
+  slug: ponder-owner-nav
+  timestamp: 2026-03-03T03:44:55.673455Z
+  metadata: {}
+- id: ev-0131
+  kind: feature_phase_advanced
+  slug: ponder-session-card-preview
+  timestamp: 2026-03-03T03:44:58.462114Z
+  metadata:
+    phase: review
+- id: ev-0132
+  kind: feature_phase_advanced
+  slug: ponder-session-card-preview
+  timestamp: 2026-03-03T03:45:36.990068Z
+  metadata:
+    phase: qa
+- id: ev-0133
+  kind: feature_phase_advanced
+  slug: ponder-session-card-preview
+  timestamp: 2026-03-03T03:47:18.522572Z
+  metadata:
+    phase: merge
+- id: ev-0134
+  kind: feature_merged
+  slug: ponder-session-card-preview
+  timestamp: 2026-03-03T03:47:30.804608Z
+  metadata: {}
+- id: ev-0135
+  kind: milestone_wave_completed
+  slug: ponder-ux-polish
+  timestamp: 2026-03-03T03:48:12.496274Z
+  metadata:
+    run_key: milestone-run-wave:ponder-ux-polish
+- id: ev-0136
+  kind: run_failed
+  slug: v19-uat-artifacts
+  timestamp: 2026-03-03T03:53:38.577671Z
+  metadata:
+    run_key: milestone-run-wave:v19-uat-artifacts
+- id: ev-0137
+  kind: review_approved
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:53:57.846074Z
+  metadata: {}
+- id: ev-0138
+  kind: feature_phase_advanced
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:53:57.849805Z
+  metadata:
+    phase: review
+- id: ev-0139
+  kind: audit_approved
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:54:32.072004Z
+  metadata: {}
+- id: ev-0140
+  kind: feature_phase_advanced
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:54:32.074810Z
+  metadata:
+    phase: qa
+- id: ev-0141
+  kind: qa_approved
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:55:19.282902Z
+  metadata: {}
+- id: ev-0142
+  kind: feature_phase_advanced
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:55:19.285936Z
+  metadata:
+    phase: merge
+- id: ev-0143
+  kind: feature_merged
+  slug: uat-artifacts-ui
+  timestamp: 2026-03-03T04:55:23.709005Z
+  metadata: {}
+- id: ev-0144
+  kind: milestone_wave_completed
+  slug: v19-uat-artifacts
+  timestamp: 2026-03-03T04:55:50.609880Z
+  metadata:
+    run_key: milestone-run-wave:v19-uat-artifacts

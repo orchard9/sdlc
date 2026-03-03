@@ -51,6 +51,7 @@ export interface UatRun {
   playwright_report_path: string | null
   tasks_created: string[]
   summary_path: string
+  screenshots: string[]       // filenames; empty array if none
 }
 
 export interface PlatformArg {
@@ -428,10 +429,18 @@ export interface PrepareResult {
   next_commands: string[]
 }
 
+export interface Enrichment {
+  source: string
+  content: string
+  added_at: string
+}
+
 export interface FeedbackNote {
   id: string
   content: string
   created_at: string
+  updated_at: string | null
+  enrichments: Enrichment[]
 }
 
 // ---------------------------------------------------------------------------
@@ -490,6 +499,7 @@ export interface PonderSummary {
   updated_at: string
   committed_at: string | null
   committed_to: string[]
+  last_session_preview?: string | null
 }
 
 export interface PonderTeamMember {

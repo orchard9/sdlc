@@ -1,0 +1,19 @@
+slug: citadel-webhook-handler
+title: Citadel Webhook Handler in Pantheon
+description: |
+  Tier 1 automatic integration. Add a POST /api/v1/webhooks/citadel route to Pantheon that accepts HMAC-SHA256-signed error threshold webhooks from Citadel and automatically creates Pantheon incidents. Maps Citadel error level to Pantheon severity. Follows the existing Alertmanager webhook handler as a pattern.
+phase: draft
+created_at: 2026-03-03T05:40:00Z
+updated_at: 2026-03-03T05:40:00Z
+artifacts: []
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T05:40:00Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

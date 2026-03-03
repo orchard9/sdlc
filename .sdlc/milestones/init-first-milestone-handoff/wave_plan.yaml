@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: init-smarter-finish
+    title: Smarter sdlc-init Finish — auto-seed first milestone from Phase 2 build scope
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

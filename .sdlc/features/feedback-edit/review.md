@@ -8,54 +8,55 @@ Three-layer change: `sdlc-core` data layer, `sdlc-server` HTTP routes, and React
 
 | File | Change |
 |---|---|
-| `crates/sdlc-core/src/feedback.rs` | Added `updated_at: Option<DateTime<Utc>>` to `FeedbackNote`; added `update()` function; 4 new unit tests |
-| `crates/sdlc-server/src/routes/feedback.rs` | Added `UpdateBody` struct, `update_note` handler, `updated_at` to `note_to_json`; 3 new route tests |
+| `crates/sdlc-core/src/feedback.rs` | Added `#[serde(default)] updated_at: Option<DateTime<Utc>>` to `FeedbackNote`; added `update()` function; unit tests cover success, missing ID, legacy YAML compat |
+| `crates/sdlc-server/src/routes/feedback.rs` | Added `UpdateBody` struct, `update_note` handler, `updated_at` field in `note_to_json`; route tests for 200/404/400 |
 | `crates/sdlc-server/src/lib.rs` | Registered `PATCH /api/feedback/{id}` |
-| `frontend/src/lib/types.ts` | Added `updated_at: string \| null` to `FeedbackNote` |
-| `frontend/src/api/client.ts` | Added `updateFeedbackNote(id, content)` method |
-| `frontend/src/pages/FeedbackPage.tsx` | Full inline edit implementation in `NoteCard`; `editingId` parent state; optimistic update flow |
+| `frontend/src/lib/types.ts` | Added `updated_at: string \| null` to `FeedbackNote` interface |
+| `frontend/src/api/client.ts` | Added `updateFeedbackNote(id, content)` method — `PATCH /api/feedback/:id` with `{ content }` body |
+| `frontend/src/pages/FeedbackPage.tsx` | Full inline edit implementation in `NoteCard`; `editingId` lifted to parent; optimistic update flow |
 
 ## Correctness Review
 
 ### sdlc-core changes
 
-- `update()` correctly uses `iter_mut().find()` and returns `Ok(None)` for missing IDs — no panic path.
-- `#[serde(default)]` on `updated_at` ensures backward-compat YAML deserialization.
-- `updated_at: None` correctly initialised in `add()`.
-- All 4 new tests cover: success path, missing ID, cross-note isolation, and legacy YAML compat.
+- `update()` uses `iter_mut()` to find by ID, sets `content` and `updated_at = Utc::now()`, saves only if found — no unnecessary writes.
+- Returns `Ok(None)` for missing IDs — no panic path.
+- `#[serde(default)]` on `updated_at` ensures existing YAML files without the field deserialise via serde default (None).
+- `add()` sets `updated_at: now` matching `created_at` on creation.
+- Tests: `update_content`, `update_missing_returns_none`, `old_yaml_backward_compat_no_enrichments` (backward compat), plus all pre-existing tests pass.
 
 ### sdlc-server changes
 
-- `update_note` validates empty/whitespace-only content and returns 400 before touching disk.
-- Uses `spawn_blocking` pattern — consistent with all other handlers in this file.
+- `update_note` validates `content.trim().is_empty()` and returns 400 before touching disk.
+- Uses `spawn_blocking` pattern — consistent with all other handlers.
 - Returns 404 via `AppError::not_found` when core returns `Ok(None)`.
-- `note_to_json` now includes `updated_at` — all list/add/update responses expose the field consistently.
-- Route registered as `PATCH` alongside the existing `DELETE` for the same path — Axum handles method routing correctly.
+- `note_to_json` includes `updated_at` — all list/add/update/enrich responses expose the field consistently.
+- Route registered as separate `.route("/api/feedback/{id}", patch(...))` alongside existing `DELETE` — Axum handles per-method routing.
+- Tests: `update_existing_note_returns_200`, `update_missing_note_returns_404`, `update_with_empty_content_returns_400`.
 
 ### Frontend changes
 
-- `editingId` lifted to parent ensures only one note can be in edit mode at a time.
-- Opening edit mode on note B while note A is open correctly drops A (setEditingId changes from A's ID to B's ID).
-- Optimistic update happens before the API call; `load()` is called on error to restore server state.
-- `void commitEdit()` used correctly to suppress floating promise lint.
-- Save button disabled when `editDraft.trim()` is empty — no empty-content API calls.
-- `Escape` key calls `cancelEdit()` which resets `editDraft` to `note.content` — no state leak.
-- The `useEffect` syncing `editDraft` from `note.content` is guarded by `!isEditing` to avoid clobbering user input mid-edit.
+- `editingId` state lifted to `FeedbackPage` parent — only one card in edit mode at a time; opening note B closes note A without saving.
+- `NoteCard` local state: `editDraft`, `editError`, `saving`.
+- `useEffect` syncs `editDraft` from `note.content` only when `!isEditing` — avoids clobbering in-flight user input.
+- `openEdit()`, `cancelEdit()`, `saveEdit()` are clearly separated with no state leakage.
+- Optimistic update: `onEdit()` updates parent state immediately; `onEditError()` restores original on network failure.
+- Save button disabled when `editDraft.trim()` is empty — no empty-content API calls fired.
+- Keyboard: `Cmd/Ctrl+Enter` saves, `Escape` cancels — matches spec.
+- Double-click on card body opens edit mode; pencil icon on hover provides alternative trigger.
+- Metadata line shows `· edited <timestamp>` when `note.updated_at` is non-null.
+- `Pencil` icon imported from `lucide-react`.
 
-## Issues Found and Resolved
+## Quality Checks
 
-None — implementation matches the design exactly.
+- `SDLC_NO_NPM=1 cargo test --all` — all 736 tests pass, zero failures.
+- `cargo clippy --all -- -D warnings` — clean, zero warnings.
+- `cd frontend && npx tsc --noEmit` — zero TypeScript errors.
 
-## Pre-existing Build Issues (not introduced by this feature)
+## Issues Found
 
-The working tree has two pre-existing compilation errors unrelated to this feature:
-1. `crates/sdlc-core/src/orchestrator/db.rs` — field name mismatches on `WebhookEvent` (`id`, `recorded_at`).
-2. `crates/sdlc-server/src/routes/events.rs` — non-exhaustive match on `SseMessage` variants.
-
-These existed before this feature was implemented. The feedback module itself compiles and all 7 existing + 4 new unit tests run clean when the `feedback` filter is applied.
-
-TypeScript check (`npx tsc --noEmit`) passes with zero errors.
+None — implementation matches the design and spec exactly. All acceptance criteria are satisfied.
 
 ## Verdict
 
-APPROVED — implementation is correct, complete, and consistent with the design and spec.
+APPROVED

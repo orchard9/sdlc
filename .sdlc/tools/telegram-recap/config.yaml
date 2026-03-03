@@ -1,0 +1,5 @@
+name: telegram-recap
+version: "1.0.0"
+description: "Fetch and email a Telegram chat digest via SMTP"
+# Add tool-specific config here (optional — env vars take precedence)
+# See README.md for full configuration reference.

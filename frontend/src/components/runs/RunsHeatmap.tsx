@@ -37,7 +37,7 @@ interface RunsHeatmapProps {
 
 export function RunsHeatmap({ runs, onRunClick, compact = false }: RunsHeatmapProps) {
   const data = useHeatmap(runs)
-  const { buckets, lanes, peakConcurrency, spanLabel, bucketSizeMs, startMs } = data
+  const { buckets, lanes, peakConcurrency, spanLabel, bucketSizeMs } = data
 
   const totalBuckets = buckets.length
 

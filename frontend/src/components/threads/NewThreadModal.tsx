@@ -19,6 +19,7 @@ export function NewThreadModal({ open, onClose, onSubmit }: NewThreadModalProps)
       setTitle('')
       setBody('')
       setError(null)
+      setSubmitting(false)
       setTimeout(() => titleRef.current?.focus(), 50)
     }
   }, [open])
@@ -40,6 +41,7 @@ export function NewThreadModal({ open, onClose, onSubmit }: NewThreadModalProps)
     setError(null)
     try {
       await onSubmit({ title: t, body: body.trim() || undefined })
+      setSubmitting(false)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create thread')
       setSubmitting(false)

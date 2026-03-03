@@ -2,6 +2,7 @@ use crate::output::{print_json, print_table};
 use anyhow::Context;
 use clap::Subcommand;
 use sdlc_core::{config::Config, feature::Feature, paths, state::State, types::Phase};
+use std::collections::HashMap;
 use std::path::Path;
 use std::str::FromStr;
 
@@ -262,6 +263,11 @@ fn update(
                 deps.push(dep.to_string());
             }
         }
+        // Build the current dependency graph from disk and validate for cycles.
+        let graph: HashMap<String, Vec<String>> =
+            Feature::dep_graph(root).context("failed to load feature dependency graph")?;
+        Feature::validate_no_dep_cycle(slug, &deps, &graph)
+            .with_context(|| format!("dependency update for '{slug}' rejected"))?;
         feature.dependencies = deps;
     } else if clear_depends_on {
         feature.dependencies.clear();

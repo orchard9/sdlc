@@ -1,0 +1,14 @@
+{
+  "id": "20260303-032657-rrr",
+  "key": "milestone-uat:v22-project-changelog",
+  "run_type": "milestone_uat",
+  "target": "v22-project-changelog",
+  "label": "UAT: v22-project-changelog",
+  "status": "completed",
+  "started_at": "2026-03-03T03:26:57.372177+00:00",
+  "completed_at": "2026-03-03T03:33:42.820409+00:00",
+  "cost_usd": 2.29884925,
+  "turns": 54,
+  "error": null,
+  "prompt": "Run the acceptance test for milestone 'v22-project-changelog'. IMPORTANT: You are running INSIDE the sdlc server process at http://localhost:7777. The server is already running — do NOT stop, restart, kill, or re-spawn it. Do NOT call any UAT stop or start endpoints. If localhost:7777 is unreachable, report it as a hard blocker and stop immediately — never attempt to start or restart the server. Call `sdlc milestone info v22-project-changelog --json` to load the milestone and acceptance test. Execute every checklist step. Write signed checklist results to `.sdlc/milestones/v22-project-changelog/uat_results.md`. Then call `sdlc milestone complete v22-project-changelog` if all steps pass."
+}

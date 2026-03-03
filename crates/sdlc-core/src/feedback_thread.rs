@@ -24,6 +24,10 @@ use std::path::Path;
 // Types
 // ---------------------------------------------------------------------------
 
+fn default_status() -> String {
+    "open".to_string()
+}
+
 /// Thread-level metadata.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FeedbackThread {
@@ -31,6 +35,15 @@ pub struct FeedbackThread {
     pub title: String,
     /// Arbitrary namespaced context string, e.g. "feature:my-slug".
     pub context: String,
+    /// The "core element" — a living summary of the thread's subject.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub body: Option<String>,
+    /// Thread status: "open" | "synthesized" | "promoted"
+    #[serde(default = "default_status")]
+    pub status: String,
+    /// Ponder slug this thread was promoted to, if any.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub promoted_to: Option<String>,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
     pub post_count: u32,
@@ -133,18 +146,31 @@ fn make_thread_id(root: &Path, context: &str) -> String {
 /// Create a new feedback thread anchored to `context`.
 ///
 /// If `title` is empty, a default title of `"Discussion: <context>"` is used.
-pub fn create_thread(root: &Path, context: &str, title: &str) -> Result<FeedbackThread> {
+/// `body` is the optional "core element" — a living summary of the thread's subject.
+pub fn create_thread(
+    root: &Path,
+    context: &str,
+    title: &str,
+    body: Option<&str>,
+) -> Result<FeedbackThread> {
     let id = make_thread_id(root, context);
     let title = if title.trim().is_empty() {
         format!("Discussion: {context}")
     } else {
         title.to_string()
     };
+    let body = body
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .map(str::to_string);
     let now = Utc::now();
     let thread = FeedbackThread {
         id,
         title,
         context: context.to_string(),
+        body,
+        status: "open".to_string(),
+        promoted_to: None,
         created_at: now,
         updated_at: now,
         post_count: 0,
@@ -184,6 +210,27 @@ pub fn list_threads(root: &Path, filter_context: Option<&str>) -> Result<Vec<Fee
 
     threads.sort_by(|a, b| b.updated_at.cmp(&a.updated_at));
     Ok(threads)
+}
+
+/// Update mutable fields on a thread. Returns the updated thread.
+///
+/// Supported fields: `status`, `promoted_to`. `updated_at` is always bumped.
+pub fn patch_thread(
+    root: &Path,
+    id: &str,
+    status: Option<&str>,
+    promoted_to: Option<Option<&str>>,
+) -> Result<FeedbackThread> {
+    let mut thread = load_manifest(root, id)?;
+    if let Some(s) = status {
+        thread.status = s.to_string();
+    }
+    if let Some(p) = promoted_to {
+        thread.promoted_to = p.map(str::to_string);
+    }
+    thread.updated_at = Utc::now();
+    save_manifest(root, &thread)?;
+    Ok(thread)
 }
 
 /// Delete a thread and all its posts.
@@ -262,11 +309,12 @@ mod tests {
     #[test]
     fn create_and_load_thread() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:my-slug", "").unwrap();
+        let t = create_thread(dir.path(), "feature:my-slug", "", None).unwrap();
         assert!(t.id.contains("feature-my-slug"));
         assert_eq!(t.context, "feature:my-slug");
         assert_eq!(t.title, "Discussion: feature:my-slug");
         assert_eq!(t.post_count, 0);
+        assert_eq!(t.body, None);
 
         let loaded = load_thread(dir.path(), &t.id).unwrap();
         assert_eq!(loaded.id, t.id);
@@ -276,8 +324,31 @@ mod tests {
     #[test]
     fn create_with_explicit_title() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "ponder:idea", "My custom title").unwrap();
+        let t = create_thread(dir.path(), "ponder:idea", "My custom title", None).unwrap();
         assert_eq!(t.title, "My custom title");
+    }
+
+    #[test]
+    fn create_with_body_stores_and_round_trips() {
+        let dir = init_dir();
+        let t = create_thread(
+            dir.path(),
+            "feature:body-test",
+            "Body thread",
+            Some("My core element"),
+        )
+        .unwrap();
+        assert_eq!(t.body, Some("My core element".to_string()));
+
+        let loaded = load_thread(dir.path(), &t.id).unwrap();
+        assert_eq!(loaded.body, Some("My core element".to_string()));
+    }
+
+    #[test]
+    fn create_with_whitespace_only_body_stores_none() {
+        let dir = init_dir();
+        let t = create_thread(dir.path(), "general", "T", Some("   ")).unwrap();
+        assert_eq!(t.body, None);
     }
 
     #[test]
@@ -290,8 +361,8 @@ mod tests {
     #[test]
     fn list_all_threads() {
         let dir = init_dir();
-        create_thread(dir.path(), "feature:a", "").unwrap();
-        create_thread(dir.path(), "feature:b", "").unwrap();
+        create_thread(dir.path(), "feature:a", "", None).unwrap();
+        create_thread(dir.path(), "feature:b", "", None).unwrap();
         let threads = list_threads(dir.path(), None).unwrap();
         assert_eq!(threads.len(), 2);
     }
@@ -299,8 +370,8 @@ mod tests {
     #[test]
     fn list_with_context_filter() {
         let dir = init_dir();
-        create_thread(dir.path(), "feature:a", "").unwrap();
-        create_thread(dir.path(), "feature:b", "").unwrap();
+        create_thread(dir.path(), "feature:a", "", None).unwrap();
+        create_thread(dir.path(), "feature:b", "", None).unwrap();
         let threads = list_threads(dir.path(), Some("feature:a")).unwrap();
         assert_eq!(threads.len(), 1);
         assert_eq!(threads[0].context, "feature:a");
@@ -309,7 +380,7 @@ mod tests {
     #[test]
     fn add_posts_increments_seq_and_post_count() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:x", "").unwrap();
+        let t = create_thread(dir.path(), "feature:x", "", None).unwrap();
         let p1 = add_post(dir.path(), &t.id, "human", "Hello").unwrap();
         let p2 = add_post(dir.path(), &t.id, "agent:advisor", "World").unwrap();
         assert_eq!(p1.seq, 1);
@@ -322,7 +393,7 @@ mod tests {
     #[test]
     fn list_posts_ordered_by_seq() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:y", "").unwrap();
+        let t = create_thread(dir.path(), "feature:y", "", None).unwrap();
         add_post(dir.path(), &t.id, "human", "First").unwrap();
         add_post(dir.path(), &t.id, "human", "Second").unwrap();
         let posts = list_posts(dir.path(), &t.id).unwrap();
@@ -336,7 +407,7 @@ mod tests {
     #[test]
     fn list_posts_empty_when_none() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:z", "").unwrap();
+        let t = create_thread(dir.path(), "feature:z", "", None).unwrap();
         let posts = list_posts(dir.path(), &t.id).unwrap();
         assert!(posts.is_empty());
     }
@@ -344,7 +415,7 @@ mod tests {
     #[test]
     fn delete_thread_removes_directory() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:del", "").unwrap();
+        let t = create_thread(dir.path(), "feature:del", "", None).unwrap();
         delete_thread(dir.path(), &t.id).unwrap();
         let threads = list_threads(dir.path(), None).unwrap();
         assert!(threads.is_empty());
@@ -383,15 +454,15 @@ mod tests {
     fn collision_safe_id_generation() {
         let dir = init_dir();
         // Create two threads with the same context on the same day — IDs must differ
-        let t1 = create_thread(dir.path(), "feature:same", "First").unwrap();
-        let t2 = create_thread(dir.path(), "feature:same", "Second").unwrap();
+        let t1 = create_thread(dir.path(), "feature:same", "First", None).unwrap();
+        let t2 = create_thread(dir.path(), "feature:same", "Second", None).unwrap();
         assert_ne!(t1.id, t2.id);
     }
 
     #[test]
     fn context_with_special_chars_sanitizes_to_valid_path() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:my/slug with spaces", "").unwrap();
+        let t = create_thread(dir.path(), "feature:my/slug with spaces", "", None).unwrap();
         // ID must not contain colons, slashes, or spaces
         assert!(!t.id.contains(':'));
         assert!(!t.id.contains('/'));
@@ -401,7 +472,7 @@ mod tests {
     #[test]
     fn updated_at_changes_after_post() {
         let dir = init_dir();
-        let t = create_thread(dir.path(), "feature:time", "").unwrap();
+        let t = create_thread(dir.path(), "feature:time", "", None).unwrap();
         let before = t.updated_at;
         // Small sleep to ensure timestamp differs
         std::thread::sleep(std::time::Duration::from_millis(5));

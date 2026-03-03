@@ -1,0 +1,10 @@
+slug: the-tools-page-layout-doesnt-work-for-mo
+title: The tools page layout doesn't work for mobile
+status: converging
+created_at: 2026-03-03T01:33:49.236205Z
+updated_at: 2026-03-03T02:58:55.106256Z
+sessions: 3
+orientation:
+  current: Design produced. URL routing decision solid. Visual spec shows before/after for desktop and mobile — concrete code diffs included. ~50-70 lines, two files.
+  next: If Jordan approves the design, create feature fix-toolspage-url-routing and run /sdlc-next to implement it.
+  commit: Architecture locked in Session 2. Design produced in Session 3. Ready to build when Jordan signs off on the layout.

@@ -1,0 +1,10 @@
+slug: v21-dev-driver
+title: 'Dev Driver: autonomous development advancement'
+vision: A developer runs `sdlc ui --run-actions`, creates one scheduled action, and from that point their project advances one step at a time — every 4 hours, dev-driver picks the single highest-priority pending directive, dispatches it with `/sdlc-next`, and exits. The recurrence provides the iteration rhythm. Developers see exactly what ran and why in the Actions UI. The system is always opt-in and always auditable.
+features:
+- dev-driver-tool
+- dev-driver-run-actions-flag
+- dev-driver-init-scaffold
+created_at: 2026-03-02T23:29:05.403174Z
+updated_at: 2026-03-02T23:32:54.975742Z
+schema_version: 1

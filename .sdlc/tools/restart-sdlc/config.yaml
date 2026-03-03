@@ -1,0 +1,4 @@
+name: restart-sdlc
+version: 0.1.0
+description: "Kills port 7777, rebuilds with make install, and relaunches sdlc ui"
+# Add tool-specific config here

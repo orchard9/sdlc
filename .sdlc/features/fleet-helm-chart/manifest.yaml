@@ -1,8 +1,8 @@
 slug: fleet-helm-chart
 title: 'Helm chart: sdlc-server + git-sync sidecar Deployment, Service, Ingress, ExternalSecret'
-phase: specified
+phase: released
 created_at: 2026-03-02T09:07:44.188500Z
-updated_at: 2026-03-02T09:27:20.500796Z
+updated_at: 2026-03-03T03:34:30.948569Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -13,54 +13,144 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-helm-chart/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:02.363024Z
+  approved_at: 2026-03-03T03:28:07.961203Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-helm-chart/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:28:41.214594Z
+  approved_at: 2026-03-03T03:28:46.970075Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-helm-chart/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:29:18.782129Z
+  approved_at: 2026-03-03T03:29:24.195713Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-helm-chart/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:32:28.062818Z
+  approved_at: 2026-03-03T03:32:34.431761Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-helm-chart/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:33:12.165639Z
+  approved_at: 2026-03-03T03:33:18.512887Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/fleet-helm-chart/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:34:19.546261Z
+  approved_at: 2026-03-03T03:34:26.977301Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Scaffold chart directory structure (Chart.yaml, values.yaml, templates/)
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.581369Z
+  started_at: 2026-03-03T03:29:45.904707Z
+  completed_at: 2026-03-03T03:29:55.737811Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Write values.yaml with full defaults
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.586280Z
+  started_at: 2026-03-03T03:29:57.806368Z
+  completed_at: 2026-03-03T03:30:09.270065Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Write templates/_helpers.tpl
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.590926Z
+  started_at: 2026-03-03T03:30:09.278257Z
+  completed_at: 2026-03-03T03:30:17.535052Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Write templates/namespace.yaml
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.595136Z
+  started_at: 2026-03-03T03:30:17.542073Z
+  completed_at: 2026-03-03T03:30:22.863315Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Write templates/external-secret.yaml
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.599029Z
+  started_at: 2026-03-03T03:30:22.870447Z
+  completed_at: 2026-03-03T03:30:29.465882Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Write templates/deployment.yaml
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.602695Z
+  started_at: 2026-03-03T03:30:29.471493Z
+  completed_at: 2026-03-03T03:30:43.393307Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Write templates/service.yaml
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.606633Z
+  started_at: 2026-03-03T03:30:43.399479Z
+  completed_at: 2026-03-03T03:30:48.417856Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Write templates/ingress.yaml
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.610664Z
+  started_at: 2026-03-03T03:30:48.424784Z
+  completed_at: 2026-03-03T03:30:55.620994Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: helm lint and helm template smoke test
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.614749Z
+  started_at: 2026-03-03T03:30:55.627143Z
+  completed_at: 2026-03-03T03:31:16.209784Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: kubectl apply --dry-run=client validation
+  description: null
+  status: completed
+  created_at: 2026-03-03T03:29:43.618777Z
+  started_at: 2026-03-03T03:31:16.217445Z
+  completed_at: 2026-03-03T03:31:53.293009Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -70,6 +160,31 @@ phase_history:
   exited: 2026-03-02T09:27:20.500796Z
 - phase: specified
   entered: 2026-03-02T09:27:20.500796Z
+  exited: 2026-03-03T03:29:24.212186Z
+- phase: planned
+  entered: 2026-03-03T03:29:24.212186Z
+  exited: 2026-03-03T03:29:27.655593Z
+- phase: ready
+  entered: 2026-03-03T03:29:27.655593Z
+  exited: 2026-03-03T03:29:32.442811Z
+- phase: implementation
+  entered: 2026-03-03T03:29:32.442811Z
+  exited: 2026-03-03T03:32:34.434166Z
+- phase: review
+  entered: 2026-03-03T03:32:34.434166Z
+  exited: 2026-03-03T03:32:38.564245Z
+- phase: audit
+  entered: 2026-03-03T03:32:38.564245Z
+  exited: 2026-03-03T03:33:18.516143Z
+- phase: qa
+  entered: 2026-03-03T03:33:18.516143Z
+  exited: 2026-03-03T03:34:26.980764Z
+- phase: merge
+  entered: 2026-03-03T03:34:26.980764Z
+  exited: 2026-03-03T03:34:30.948569Z
+- phase: released
+  entered: 2026-03-03T03:34:30.948569Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

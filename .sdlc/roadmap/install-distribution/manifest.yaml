@@ -1,0 +1,13 @@
+slug: install-distribution
+title: Cross-Platform Install and Distribution
+status: committed
+created_at: 2026-03-03T03:00:05.467872Z
+updated_at: 2026-03-03T05:45:00.000000Z
+committed_at: 2026-03-03T05:36:36.330212Z
+sessions: 3
+committed_to:
+- v25-install-distribution
+orientation:
+  current: cargo-dist already configured, TypeScript errors already fixed, release pipeline is 80% done — only missing two GitHub repos (sdlc-releases, homebrew-tap) and two secrets (GH_RELEASES_TOKEN, HOMEBREW_TAP_TOKEN)
+  next: Jordan creates the two GitHub repos + secrets; agent makes musl target + install-path code changes; then tag v0.1.0 to trigger first release
+  commit: All 4 prep steps complete + musl/install-path fixes merged — ready to commit as an install-distribution milestone

@@ -1,0 +1,111 @@
+slug: fix-recentactivityscrollablefixedheightbelowstats
+title: Fix Recentactivityscrollablefixedheightbelowstats
+description: |-
+  Root cause: WhatChangedBanner is placed at line 218 of Dashboard.tsx before the project overview section (line 220) and stats bar (line 239), and uses an unconstrained `space-y-0.5` div with a client-side expand toggle instead of a `max-h` + `overflow-y-auto` scrollable container positioned after the stats.
+
+  Problem: The 'Recent project activity' WhatChangedBanner renders above the project header and stats bar, breaking the expected top-down flow. The event list has no fixed height or scroll container — it expands unboundedly inline via a 'See more' toggle, making the page layout shift unpredictably depending on how many events exist.
+
+  Original report:
+  i dont like the layout of the recent project activity because its not consistent flow, i think it can be a scrollable component with fixed height under the stats and should be a major event
+phase: released
+created_at: 2026-03-03T01:22:40.044163Z
+updated_at: 2026-03-03T01:27:28.558099Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/spec.md
+  created_at: 2026-03-03T01:23:14.909009Z
+  approved_at: 2026-03-03T01:23:20.779394Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-03T01:23:34.808262Z
+  waive_reason: Pure CSS/position fix — no architectural decisions required. Spec fully defines the two file changes needed.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/tasks.md
+  created_at: 2026-03-03T01:23:51.091636Z
+  approved_at: 2026-03-03T01:23:56.123122Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/qa-plan.md
+  created_at: 2026-03-03T01:24:15.024881Z
+  approved_at: 2026-03-03T01:24:20.090029Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/review.md
+  created_at: 2026-03-03T01:26:18.884583Z
+  approved_at: 2026-03-03T01:26:24.870525Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-03T01:26:48.678289Z
+  waive_reason: Pure frontend layout change — moves a component's render position and replaces an inline-expand toggle with a CSS overflow container. No new data exposure, no auth surface, no user input handling.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-recentactivityscrollablefixedheightbelowstats/qa-results.md
+  created_at: 2026-03-03T01:27:16.215027Z
+  approved_at: 2026-03-03T01:27:22.210074Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T01:22:40.044163Z
+  exited: 2026-03-03T01:23:20.785538Z
+- phase: specified
+  entered: 2026-03-03T01:23:20.785538Z
+  exited: 2026-03-03T01:24:20.095215Z
+- phase: planned
+  entered: 2026-03-03T01:24:20.095215Z
+  exited: 2026-03-03T01:24:32.058989Z
+- phase: ready
+  entered: 2026-03-03T01:24:32.058989Z
+  exited: 2026-03-03T01:24:42.237604Z
+- phase: implementation
+  entered: 2026-03-03T01:24:42.237604Z
+  exited: 2026-03-03T01:26:24.872201Z
+- phase: review
+  entered: 2026-03-03T01:26:24.872201Z
+  exited: 2026-03-03T01:26:36.308128Z
+- phase: audit
+  entered: 2026-03-03T01:26:36.308128Z
+  exited: 2026-03-03T01:26:48.680678Z
+- phase: qa
+  entered: 2026-03-03T01:26:48.680678Z
+  exited: 2026-03-03T01:27:22.211486Z
+- phase: merge
+  entered: 2026-03-03T01:27:22.211486Z
+  exited: 2026-03-03T01:27:28.558099Z
+- phase: released
+  entered: 2026-03-03T01:27:28.558099Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

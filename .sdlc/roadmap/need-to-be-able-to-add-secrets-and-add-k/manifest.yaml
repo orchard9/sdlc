@@ -1,0 +1,13 @@
+slug: need-to-be-able-to-add-secrets-and-add-k
+title: need to be able to add secrets and add keys to the "/secrets" interface
+status: committed
+created_at: 2026-03-03T03:07:16.760776Z
+updated_at: 2026-03-03T05:36:23.156884Z
+committed_at: 2026-03-03T05:36:23.156884Z
+sessions: 1
+committed_to:
+- v25-secrets-write-ui
+orientation:
+  current: 'Gaps identified: UI is read-only for secrets (envs); can create new envs server-side safely; updating existing envs hits a security wall. Add-Key for recipients already works.'
+  next: 'Scope a feature that adds (1) ''Add Environment'' modal for new envs and (2) ''Set Secret'' inline form, with a clear security boundary: server can create-new (encrypt-only), CLI required for update-existing (decrypt needed).'
+  commit: When the security boundary is agreed upon and the two UI interactions (new env + add to existing) are clearly defined with their constraints.

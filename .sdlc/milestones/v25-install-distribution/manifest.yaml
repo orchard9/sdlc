@@ -1,0 +1,11 @@
+slug: v25-install-distribution
+title: Cross-Platform Binary Distribution
+vision: Any user can install sdlc on macOS, Linux, or Windows with a one-liner — no Rust toolchain, no make, no build step required
+features:
+- dist-cargo-toml-fixes
+- dist-release-infra
+- dist-developer-docs
+- dist-first-release
+created_at: 2026-03-03T05:45:00Z
+updated_at: 2026-03-03T05:45:00Z
+schema_version: 1

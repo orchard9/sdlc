@@ -1,0 +1,164 @@
+slug: changelog-dashboard-banner
+title: Dashboard What Changed banner — since-your-last-visit event feed
+description: 'Dashboard WhatChangedBanner component with two modes: (1) returning user — shows count + relative time since last_visit_at from localStorage, failed runs listed first; (2) first visit (no last_visit_at) — shows last 7 days under ''Recent project activity'' header instead of nothing. Only the Dismiss button updates last_visit_at — SPA navigation within the app does NOT reset it, so the banner persists across page changes until explicitly dismissed.'
+phase: released
+created_at: 2026-03-02T23:42:47.484592Z
+updated_at: 2026-03-03T00:34:39.837158Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/spec.md
+  created_at: 2026-03-03T00:26:33.691606Z
+  approved_at: 2026-03-03T00:26:38.841532Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/design.md
+  created_at: 2026-03-03T00:27:45.405789Z
+  approved_at: 2026-03-03T00:27:50.344481Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/tasks.md
+  created_at: 2026-03-03T00:28:33.349036Z
+  approved_at: 2026-03-03T00:28:36.477602Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/qa-plan.md
+  created_at: 2026-03-03T00:29:08.513037Z
+  approved_at: 2026-03-03T00:29:12.074990Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/review.md
+  created_at: 2026-03-03T00:32:42.232159Z
+  approved_at: 2026-03-03T00:32:45.759514Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/audit.md
+  created_at: 2026-03-03T00:33:20.773129Z
+  approved_at: 2026-03-03T00:33:23.863380Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/changelog-dashboard-banner/qa-results.md
+  created_at: 2026-03-03T00:34:32.416123Z
+  approved_at: 2026-03-03T00:34:35.375650Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create frontend/src/components/layout/WhatChangedBanner.tsx — reads localStorage last_visit_at, fetches changelog since that timestamp, shows count + relative time
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:17.456403Z
+  started_at: 2026-03-03T00:29:28.142365Z
+  completed_at: 2026-03-03T00:29:45.948759Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Implement expand behavior: show up to 7 events (⚠️ run_failed first, then timestamp desc); show See X more if truncated'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:17.461364Z
+  started_at: 2026-03-03T00:29:51.968414Z
+  completed_at: 2026-03-03T00:30:21.801835Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Implement dismiss: sets last_visit_at = now, collapses; add beforeunload handler to save last_visit_at on navigation away'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:17.466571Z
+  started_at: 2026-03-03T00:30:32.192267Z
+  completed_at: 2026-03-03T00:30:32.196736Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Wire ⚠️ run_failed items to link to run detail in Runs page; wire 🚀 feature_merged to feature list
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:17.471898Z
+  started_at: 2026-03-03T00:30:40.541187Z
+  completed_at: 2026-03-03T00:30:40.545319Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add WhatChangedBanner to the Dashboard page above main content zones
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:43:17.476572Z
+  started_at: 2026-03-03T00:30:45.321945Z
+  completed_at: 2026-03-03T00:30:59.790168Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: '[user-gap] First visit (no localStorage last_visit_at): show last 7 days of events under header ''Recent project activity'' instead of showing nothing — new developers joining mid-project need context immediately'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:48:06.614334Z
+  started_at: 2026-03-03T00:31:08.763915Z
+  completed_at: 2026-03-03T00:31:08.772811Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] SPA navigation (changing routes within the app) must NOT update last_visit_at — only explicit Dismiss updates it. The beforeunload handler should ONLY be used for window/tab close, not for React Router navigation events'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:48:06.619755Z
+  started_at: 2026-03-03T00:31:17.543357Z
+  completed_at: 2026-03-03T00:31:17.579333Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T23:42:47.484592Z
+  exited: 2026-03-03T00:26:38.843252Z
+- phase: specified
+  entered: 2026-03-03T00:26:38.843252Z
+  exited: 2026-03-03T00:29:12.111874Z
+- phase: planned
+  entered: 2026-03-03T00:29:12.111874Z
+  exited: 2026-03-03T00:29:17.434558Z
+- phase: ready
+  entered: 2026-03-03T00:29:17.434558Z
+  exited: 2026-03-03T00:29:19.919010Z
+- phase: implementation
+  entered: 2026-03-03T00:29:19.919010Z
+  exited: 2026-03-03T00:32:45.761225Z
+- phase: review
+  entered: 2026-03-03T00:32:45.761225Z
+  exited: 2026-03-03T00:32:49.782753Z
+- phase: audit
+  entered: 2026-03-03T00:32:49.782753Z
+  exited: 2026-03-03T00:33:23.865099Z
+- phase: qa
+  entered: 2026-03-03T00:33:23.865099Z
+  exited: 2026-03-03T00:34:35.395452Z
+- phase: merge
+  entered: 2026-03-03T00:34:35.395452Z
+  exited: 2026-03-03T00:34:39.837158Z
+- phase: released
+  entered: 2026-03-03T00:34:39.837158Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

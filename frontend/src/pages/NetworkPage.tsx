@@ -140,7 +140,7 @@ function SdlcTunnelSection() {
       setStatus(s)
       if (s.token) setSessionToken(s.token)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to start SDLC tunnel')
+      setError(e instanceof Error ? e.message : 'Failed to start Ponder tunnel')
     } finally {
       setToggling(false)
     }
@@ -154,7 +154,7 @@ function SdlcTunnelSection() {
       setStatus(s)
       setSessionToken(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to stop SDLC tunnel')
+      setError(e instanceof Error ? e.message : 'Failed to stop Ponder tunnel')
     } finally {
       setToggling(false)
     }
@@ -166,9 +166,9 @@ function SdlcTunnelSection() {
     <section className="bg-card border border-border rounded-xl p-5 space-y-4">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h2 className="text-sm font-semibold">SDLC Tunnel</h2>
+          <h2 className="text-sm font-semibold">Ponder Tunnel</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Expose the SDLC UI publicly — share with collaborators via QR code or auth URL
+            Expose the Ponder UI publicly — share with collaborators via QR code or auth URL
           </p>
           {!loading && status && (
             <p className="text-xs text-muted-foreground/70 mt-1">
@@ -293,7 +293,7 @@ function AppTunnelSection() {
         <div>
           <h2 className="text-sm font-semibold">App Tunnel</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Shares your app publicly and injects a feedback widget into every page — reviewers can leave notes that appear directly in your SDLC feedback inbox
+            Shares your app publicly and injects a feedback widget into every page — reviewers can leave notes that appear directly in your Ponder feedback inbox
           </p>
         </div>
         {!loading && status && (

@@ -30,6 +30,18 @@ pub async fn list_ponders(
                 let team_size = sdlc_core::ponder::load_team(&root, &e.slug)
                     .map(|t| t.partners.len())
                     .unwrap_or(0);
+                // Best-effort: read last session and extract preview text.
+                // Any I/O failure silently produces null.
+                let last_session_preview: Option<String> =
+                    sdlc_core::ponder::list_sessions(&root, &e.slug)
+                        .ok()
+                        .and_then(|sessions| sessions.into_iter().last())
+                        .and_then(|last| {
+                            sdlc_core::ponder::read_session(&root, &e.slug, last.session).ok()
+                        })
+                        .and_then(|content| {
+                            sdlc_core::workspace::extract_session_preview(&content)
+                        });
                 serde_json::json!({
                     "slug": e.slug,
                     "title": e.title,
@@ -42,6 +54,7 @@ pub async fn list_ponders(
                     "updated_at": e.updated_at,
                     "committed_at": e.committed_at,
                     "committed_to": e.committed_to,
+                    "last_session_preview": last_session_preview,
                 })
             })
             .collect();

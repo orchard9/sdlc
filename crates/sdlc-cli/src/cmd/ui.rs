@@ -27,9 +27,9 @@ pub enum UiSubcommand {
         /// Orchestrator tick interval in seconds (default 60)
         #[arg(long, default_value_t = 60)]
         tick_rate: u64,
-        /// Skip starting the orchestrator daemon
+        /// Start the orchestrator daemon and execute scheduled actions
         #[arg(long)]
-        no_orchestrate: bool,
+        run_actions: bool,
     },
     /// List all running UI instances
     List,
@@ -56,17 +56,17 @@ pub fn run(
     no_open: bool,
     tunnel: bool,
     tick_rate: u64,
-    no_orchestrate: bool,
+    run_actions: bool,
 ) -> Result<()> {
     match subcommand {
-        None => run_start(root, port, no_open, tunnel, tick_rate, no_orchestrate),
+        None => run_start(root, port, no_open, tunnel, tick_rate, run_actions),
         Some(UiSubcommand::Start {
             port: p,
             no_open: n,
             tunnel: t,
             tick_rate: tr,
-            no_orchestrate: no_orch,
-        }) => run_start(root, p, n, t, tr, no_orch),
+            run_actions: ra,
+        }) => run_start(root, p, n, t, tr, ra),
         Some(UiSubcommand::List) => run_list(),
         Some(UiSubcommand::Kill { name }) => run_kill(name.as_deref(), root),
         Some(UiSubcommand::Open { name }) => run_open(name.as_deref(), root),
@@ -83,7 +83,7 @@ fn run_start(
     no_open: bool,
     use_tunnel: bool,
     tick_rate: u64,
-    no_orchestrate: bool,
+    run_actions: bool,
 ) -> Result<()> {
     // --- Step 1: auto-update scaffolding ---
     eprintln!("sdlc ui: running update...");
@@ -92,7 +92,7 @@ fn run_start(
     }
 
     // --- Step 2: start orchestrator daemon in background thread ---
-    if !no_orchestrate {
+    if run_actions {
         let root_for_orch = root.to_path_buf();
         std::thread::Builder::new()
             .name("sdlc-orchestrator".into())

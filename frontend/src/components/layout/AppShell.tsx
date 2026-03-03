@@ -6,6 +6,7 @@ import { AgentPanelFab } from './AgentPanelFab'
 import { SearchModal } from '@/components/shared/SearchModal'
 import { FixRightAwayModal } from '@/components/shared/FixRightAwayModal'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
+import { api } from '@/api/client'
 import { PanelRightOpen, ChevronLeft, MoreHorizontal } from 'lucide-react'
 
 const DETAIL_BASES = ['/ponder/', '/investigations/', '/evolve/', '/threads/']
@@ -38,7 +39,7 @@ function titleFromPath(pathname: string): string {
   for (const [path, label] of Object.entries(PATH_LABELS)) {
     if (path !== '/' && pathname.startsWith(path + '/')) return label
   }
-  return 'SDLC'
+  return 'Ponder'
 }
 
 interface AppShellProps {
@@ -52,9 +53,16 @@ export function AppShell({ children }: AppShellProps) {
   })
   const [searchOpen, setSearchOpen] = useState(false)
   const [fixOpen, setFixOpen] = useState(false)
+  const [projectName, setProjectName] = useState<string>('Ponder')
   const { panelOpen, setPanelOpen } = useAgentRuns()
   const location = useLocation()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    api.getConfig().catch(() => null).then(cfg => {
+      if (cfg?.project.name) setProjectName(cfg.project.name)
+    })
+  }, [])
 
   const isDetailView = DETAIL_BASES.some(base => location.pathname.startsWith(base))
 
@@ -106,6 +114,7 @@ export function AppShell({ children }: AppShellProps) {
           onNavigate={() => setSidebarOpen(false)}
           onSearch={() => setSearchOpen(true)}
           onFixRightAway={() => setFixOpen(true)}
+          projectName={projectName}
         />
       </div>
 

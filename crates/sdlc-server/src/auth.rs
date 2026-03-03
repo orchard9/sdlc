@@ -8,11 +8,13 @@ use axum::{
     response::Response,
 };
 
+use crate::state::TunnelSnapshot;
+
 /// Controls tunnel authentication.
 ///
 /// When `token` is `None` the middleware is a transparent no-op — all requests
 /// pass through. Set a token only when a public tunnel is active.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TunnelConfig {
     pub token: Option<String>,
     /// Hostname of the active app tunnel (e.g. "fancy-rabbit.trycloudflare.com").
@@ -59,18 +61,18 @@ impl TunnelConfig {
 /// 6. Query param `?auth=TOKEN` matches → set session cookie, 302 to same path without param
 /// 7. None matched → 401 (JSON for `/api/*`, HTML for everything else)
 pub async fn auth_middleware(
-    State(config): State<Arc<RwLock<TunnelConfig>>>,
+    State(snapshot): State<Arc<RwLock<TunnelSnapshot>>>,
     req: Request,
     next: Next,
 ) -> Response {
-    let cfg = config.read().await;
-    let Some(ref token) = cfg.token else {
-        drop(cfg);
+    let snap = snapshot.read().await;
+    let Some(ref token) = snap.config.token else {
+        drop(snap);
         return next.run(req).await;
     };
     let token = token.clone();
-    let app_tunnel_host = cfg.app_tunnel_host.clone();
-    drop(cfg);
+    let app_tunnel_host = snap.config.app_tunnel_host.clone();
+    drop(snap);
 
     // Local access is always allowed regardless of token.
     let host_value = req
@@ -182,7 +184,7 @@ mod tests {
     }
 
     fn test_app(config: TunnelConfig) -> Router {
-        let arc = Arc::new(RwLock::new(config));
+        let arc = Arc::new(RwLock::new(TunnelSnapshot { config, url: None }));
         Router::new()
             .route("/", get(ok_handler))
             .route("/api/state", get(ok_handler))

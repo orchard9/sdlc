@@ -1,0 +1,11 @@
+slug: v26-html-design-artifacts
+title: HTML Design Artifacts — visual mockups replace prose design docs
+vision: |
+  When an agent designs a UI in a ponder session or creates a feature design, it produces a browser-openable HTML mockup instead of a Markdown prose description — making design review immediate and visual. Agents no longer write paragraphs describing layouts; they write layouts. Reviewers open a file and see the design, not imagine it.
+features:
+- ponder-design-artifact-protocol
+- design-create-action-html
+- scrapbook-html-preview
+created_at: 2026-03-03T06:00:00Z
+updated_at: 2026-03-03T06:00:00Z
+schema_version: 1

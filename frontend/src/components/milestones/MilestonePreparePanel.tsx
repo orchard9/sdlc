@@ -93,14 +93,13 @@ export function MilestonePreparePanel({ milestoneSlug }: { milestoneSlug: string
 
   if (!result) return null
 
-  const { waves, blocked, milestone_progress, next_commands, project_phase } = result
+  const { waves, blocked, milestone_progress, next_commands } = result
 
   const isVerifying =
-    project_phase.phase === 'verifying' ||
-    (waves.length === 0 &&
-      milestone_progress != null &&
-      milestone_progress.total > 0 &&
-      milestone_progress.released === milestone_progress.total)
+    waves.length === 0 &&
+    milestone_progress != null &&
+    milestone_progress.total > 0 &&
+    milestone_progress.released === milestone_progress.total
 
   if (waves.length === 0 && !isVerifying) return null
 

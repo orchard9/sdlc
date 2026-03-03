@@ -1,16 +1,16 @@
 - number: 1
-  label: Planning
+  label: Review
   items:
   - slug: feedback-thread-core
     title: 'FeedbackThread core: data model, CLI, and REST API'
-    phase: draft
-    action: create_spec
-    needs_worktree: false
+    phase: qa
+    action: run_qa
+    needs_worktree: true
     blocked_by: []
   - slug: feedback-thread-ui
     title: 'FeedbackThread UI: thread list, detail view, and sidebar nav'
-    phase: draft
-    action: create_spec
-    needs_worktree: false
+    phase: qa
+    action: run_qa
+    needs_worktree: true
     blocked_by: []
-  needs_worktrees: false
+  needs_worktrees: true

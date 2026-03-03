@@ -1,7 +1,7 @@
 import { AlertTriangle } from 'lucide-react'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 
-const DEFAULT_DAILY_BUDGET_USD = 10.0
+const DEFAULT_DAILY_BUDGET_USD = 1000.0
 
 interface QuotaPanelProps {
   dailyBudgetUsd?: number
@@ -66,13 +66,22 @@ export function QuotaPanel({ dailyBudgetUsd }: QuotaPanelProps) {
             {Math.round(pct)}%
           </span>
           {(isWarning || isExceeded) && (
-            <AlertTriangle className={`w-3 h-3 ${isExceeded ? 'text-red-500' : 'text-amber-500'}`} />
+            <span aria-label={isExceeded ? 'Daily budget exceeded' : 'Approaching daily limit'}>
+              <AlertTriangle className={`w-3 h-3 ${isExceeded ? 'text-red-500' : 'text-amber-500'}`} aria-hidden="true" />
+            </span>
           )}
         </div>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 rounded-full bg-muted overflow-hidden">
+      <div
+        role="progressbar"
+        aria-valuenow={Math.round(barPct)}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-label="Daily API quota usage"
+        className="h-1.5 rounded-full bg-muted overflow-hidden"
+      >
         <div
           className={`h-full rounded-full transition-all duration-300 ${barColor}`}
           style={{ width: `${barPct}%` }}

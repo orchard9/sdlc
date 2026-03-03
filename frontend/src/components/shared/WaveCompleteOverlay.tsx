@@ -58,7 +58,7 @@ export function WaveCompleteOverlay() {
         Wave complete.{featureCount > 0 ? ` ${featureCount} features built in parallel.` : ''}
       </p>
       <p className="text-sm text-muted-foreground leading-relaxed">
-        This is how SDLC works: you ponder, you commit, you run — then check in on results.
+        This is how Ponder works: you ponder, you commit, you run — then check in on results.
         You don't need to watch while agents work.
       </p>
     </div>

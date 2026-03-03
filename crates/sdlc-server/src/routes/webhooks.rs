@@ -70,7 +70,7 @@ pub async fn receive_webhook(
             WebhookEventOutcome::Received,
         );
         if let Err(e) = db.insert_webhook_event(&event) {
-            tracing::warn!("webhook_events: failed to record arrival event: {e}");
+            tracing::warn!(error = %e, "Failed to record webhook arrival event");
         }
 
         Ok::<_, sdlc_core::SdlcError>(())

@@ -1,62 +1,62 @@
 slug: telegram-digest-cron
 title: 'Daily cron digest: query messages and send email via SMTP'
-phase: draft
+phase: released
 created_at: 2026-03-02T18:45:17.695078Z
-updated_at: 2026-03-02T18:45:17.695078Z
+updated_at: 2026-03-03T01:01:44.883699Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:43:19.436839Z
+  approved_at: 2026-03-03T00:43:24.678877Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:44:34.415687Z
+  approved_at: 2026-03-03T00:44:40.588371Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:45:37.427284Z
+  approved_at: 2026-03-03T00:45:42.456573Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:46:40.578261Z
+  approved_at: 2026-03-03T00:46:46.168991Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:58:58.789609Z
+  approved_at: 2026-03-03T00:59:05.206437Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T01:00:09.096407Z
+  approved_at: 2026-03-03T01:00:14.968785Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/telegram-digest-cron/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T01:01:33.665273Z
+  approved_at: 2026-03-03T01:01:39.960443Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -67,6 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T18:45:17.695078Z
+  exited: 2026-03-03T00:43:24.680345Z
+- phase: specified
+  entered: 2026-03-03T00:43:24.680345Z
+  exited: 2026-03-03T00:46:46.179458Z
+- phase: planned
+  entered: 2026-03-03T00:46:46.179458Z
+  exited: 2026-03-03T00:46:56.209190Z
+- phase: ready
+  entered: 2026-03-03T00:46:56.209190Z
+  exited: 2026-03-03T00:47:00.403952Z
+- phase: implementation
+  entered: 2026-03-03T00:47:00.403952Z
+  exited: 2026-03-03T00:59:05.222717Z
+- phase: review
+  entered: 2026-03-03T00:59:05.222717Z
+  exited: 2026-03-03T00:59:19.048384Z
+- phase: audit
+  entered: 2026-03-03T00:59:19.048384Z
+  exited: 2026-03-03T01:00:14.970802Z
+- phase: qa
+  entered: 2026-03-03T01:00:14.970802Z
+  exited: 2026-03-03T01:01:39.961846Z
+- phase: merge
+  entered: 2026-03-03T01:01:39.961846Z
+  exited: 2026-03-03T01:01:44.883699Z
+- phase: released
+  entered: 2026-03-03T01:01:44.883699Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

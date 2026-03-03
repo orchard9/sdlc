@@ -134,6 +134,9 @@ pub enum SdlcError {
     #[error("invalid key type '{0}': must be 'ssh' or 'age'")]
     InvalidSecretKeyType(String),
 
+    #[error("dependency cycle detected: {0}")]
+    DependencyCycle(String),
+
     #[error("No supported JavaScript runtime found. Install bun to use SDLC tools:\n  curl -fsSL https://bun.sh/install | bash\n  Or install deno: https://deno.land or node: https://nodejs.org")]
     NoToolRuntime,
 
@@ -145,6 +148,28 @@ pub enum SdlcError {
 
     #[error("orchestrator DB error: {0}")]
     OrchestratorDb(String),
+
+    #[error("Telegram bot token is not configured. Set the TELEGRAM_BOT_TOKEN environment variable or add telegram.bot_token to .sdlc/config.yaml")]
+    TelegramTokenMissing,
+
+    #[error("Telegram API error: {0}")]
+    TelegramApi(String),
+
+    #[error("SQLite error: {0}")]
+    Sqlite(String),
+
+    /// A manifest file exists but contains invalid YAML syntax.
+    #[error("{path}: cannot parse YAML: {message}")]
+    ManifestParseFailed { path: String, message: String },
+
+    /// A manifest's YAML is valid but does not match the current schema (even after migration).
+    #[error("{path}: {entity} manifest is incompatible with the current schema: {message}\nFix: {fix_hint}")]
+    ManifestIncompatible {
+        path: String,
+        entity: String,
+        message: String,
+        fix_hint: String,
+    },
 
     #[error(transparent)]
     Io(#[from] std::io::Error),

@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
-import { Loader2, Send } from 'lucide-react'
+import { Loader2, Send, Trash2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { api } from '@/api/client'
 import type { ThreadDetail, ThreadComment, ThreadStatus } from '@/lib/types'
@@ -9,6 +9,9 @@ import { CommentCard } from './CommentCard'
 interface ThreadDetailPaneProps {
   detail: ThreadDetail
   onCommentAdded: (comment: ThreadComment) => void
+  onDelete: () => void
+  onStatusChange: (updated: ThreadDetail) => void
+  onPromoted: (ponderSlug: string) => void
 }
 
 function StatusBadge({ status }: { status: ThreadStatus }) {
@@ -40,11 +43,24 @@ function formatMeta(author: string, createdAt: string, commentCount: number): st
   return parts.join(' · ')
 }
 
-export function ThreadDetailPane({ detail, onCommentAdded }: ThreadDetailPaneProps) {
+export function ThreadDetailPane({ detail, onCommentAdded, onDelete, onStatusChange, onPromoted }: ThreadDetailPaneProps) {
   const [draft, setDraft] = useState('')
   const [composing, setComposing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Delete state
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState<string | null>(null)
+
+  // Synthesize state
+  const [synthesizing, setSynthesizing] = useState(false)
+  const [synthesizeError, setSynthesizeError] = useState<string | null>(null)
+
+  // Promote state
+  const [promoting, setPromoting] = useState(false)
+  const [promoteError, setPromoteError] = useState<string | null>(null)
 
   const sendComment = useCallback(async () => {
     const body = draft.trim()
@@ -70,6 +86,48 @@ export function ThreadDetailPane({ detail, onCommentAdded }: ThreadDetailPanePro
     }
   }
 
+  async function handleDelete() {
+    if (!deleteConfirm) {
+      setDeleteConfirm(true)
+      return
+    }
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      await api.deleteThread(detail.slug)
+      onDelete()
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : 'Failed to delete thread')
+      setDeleting(false)
+      setDeleteConfirm(false)
+    }
+  }
+
+  async function handleSynthesize() {
+    setSynthesizing(true)
+    setSynthesizeError(null)
+    try {
+      const updated = await api.patchThread(detail.slug, { status: 'synthesized' })
+      onStatusChange(updated)
+    } catch (e) {
+      setSynthesizeError(e instanceof Error ? e.message : 'Failed to synthesize')
+    } finally {
+      setSynthesizing(false)
+    }
+  }
+
+  async function handlePromote() {
+    setPromoting(true)
+    setPromoteError(null)
+    try {
+      const result = await api.promoteThreadToPonder(detail.slug)
+      onPromoted(result.ponder_slug)
+    } catch (e) {
+      setPromoteError(e instanceof Error ? e.message : 'Failed to promote')
+      setPromoting(false)
+    }
+  }
+
   const unincorporatedCount = detail.comments.filter(c => !c.incorporated).length
 
   return (
@@ -81,27 +139,63 @@ export function ThreadDetailPane({ detail, onCommentAdded }: ThreadDetailPanePro
             <h1 className="text-lg font-semibold leading-snug">{detail.title}</h1>
             <StatusBadge status={detail.status} />
           </div>
-          {/* Action stubs */}
+          {/* Action buttons */}
           <div className="flex items-center gap-1.5 shrink-0">
             <button
-              disabled
-              title="Synthesis agent (coming soon)"
-              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-950/30 text-indigo-400/50 cursor-not-allowed"
+              onClick={handleSynthesize}
+              disabled={synthesizing || detail.status !== 'open'}
+              title={detail.status !== 'open' ? 'Already synthesized' : 'Mark thread as synthesized'}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-indigo-950/30 text-indigo-400 hover:bg-indigo-950/50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
+              {synthesizing && <Loader2 className="w-3 h-3 animate-spin" />}
               Synthesize
             </button>
             <button
-              disabled
-              title="Promote to Ponder (coming soon)"
-              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary/40 cursor-not-allowed"
+              onClick={handlePromote}
+              disabled={promoting || detail.status === 'promoted'}
+              title={detail.status === 'promoted' ? 'Already promoted to ponder' : 'Promote thread to a ponder entry'}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
+              {promoting && <Loader2 className="w-3 h-3 animate-spin" />}
               Promote to Ponder
             </button>
+            {deleteConfirm ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium bg-destructive/20 text-destructive hover:bg-destructive/30 transition-colors disabled:opacity-40"
+                >
+                  {deleting ? <Loader2 className="w-3 h-3 animate-spin" /> : null}
+                  Delete?
+                </button>
+                <button
+                  onClick={() => setDeleteConfirm(false)}
+                  disabled={deleting}
+                  className="px-2.5 py-1 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={handleDelete}
+                title="Delete thread"
+                className="p-1.5 rounded-md text-muted-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
         <p className="text-xs text-muted-foreground/60">
           {formatMeta(detail.author, detail.created_at, detail.comment_count)}
         </p>
+        {(synthesizeError || promoteError || deleteError) && (
+          <p className="mt-1.5 text-xs text-destructive">
+            {synthesizeError || promoteError || deleteError}
+          </p>
+        )}
       </div>
 
       {/* Scrollable body */}

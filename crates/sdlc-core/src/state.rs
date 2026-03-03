@@ -42,10 +42,13 @@ pub struct State {
     #[serde(default = "default_version")]
     pub version: u32,
     pub project: String,
+    #[serde(default)]
     pub active_features: Vec<String>,
-    #[serde(alias = "active_work")]
+    #[serde(default, alias = "active_work")]
     pub active_directives: Vec<ActiveDirective>,
+    #[serde(default)]
     pub history: Vec<HistoryEntry>,
+    #[serde(default)]
     pub blocked: Vec<BlockedItem>,
     #[serde(default)]
     pub milestones: Vec<String>,
@@ -82,8 +85,26 @@ impl State {
         if !path.exists() {
             return Err(SdlcError::NotInitialized);
         }
+        let path_display = path.display().to_string();
         let data = std::fs::read_to_string(&path)?;
-        let state: State = serde_yaml::from_str(&data)?;
+
+        // Phase 1: parse raw YAML (catches syntax errors with path context).
+        let value: serde_yaml::Value =
+            serde_yaml::from_str(&data).map_err(|e| SdlcError::ManifestParseFailed {
+                path: path_display.clone(),
+                message: e.to_string(),
+            })?;
+
+        // Phase 2: typed deserialization with actionable error message.
+        // State has no structural migrations — #[serde(default)] covers all Vec fields.
+        let state: State =
+            serde_yaml::from_value(value).map_err(|e| SdlcError::ManifestIncompatible {
+                path: path_display.clone(),
+                entity: "State".to_string(),
+                message: e.to_string(),
+                fix_hint: crate::migrations::state_fix_hint(&e),
+            })?;
+
         Ok(state)
     }
 

@@ -1,0 +1,152 @@
+slug: dev-driver-run-actions-flag
+title: 'sdlc ui --run-actions: make action execution opt-in (invert --no-orchestrate default)'
+phase: released
+created_at: 2026-03-02T23:29:21.626780Z
+updated_at: 2026-03-03T00:52:14.786243Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/spec.md
+  created_at: 2026-03-03T00:43:31.421518Z
+  approved_at: 2026-03-03T00:43:33.489101Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/design.md
+  created_at: 2026-03-03T00:44:13.166478Z
+  approved_at: 2026-03-03T00:44:13.173045Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/tasks.md
+  created_at: 2026-03-03T00:44:45.393631Z
+  approved_at: 2026-03-03T00:44:45.406598Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/qa-plan.md
+  created_at: 2026-03-03T00:45:13.672045Z
+  approved_at: 2026-03-03T00:45:13.679484Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/review.md
+  created_at: 2026-03-03T00:49:43.536168Z
+  approved_at: 2026-03-03T00:49:43.544002Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/audit.md
+  created_at: 2026-03-03T00:50:19.920804Z
+  approved_at: 2026-03-03T00:50:19.927846Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/dev-driver-run-actions-flag/qa-results.md
+  created_at: 2026-03-03T00:52:05.768804Z
+  approved_at: 2026-03-03T00:52:05.773905Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Remove no_orchestrate field from Cli struct in main.rs
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:38.546732Z
+  started_at: 2026-03-03T00:45:43.123116Z
+  completed_at: 2026-03-03T00:45:54.557237Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Add run_actions: bool field (default false) to sdlc ui command'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:38.551741Z
+  started_at: 2026-03-03T00:45:57.620549Z
+  completed_at: 2026-03-03T00:46:24.875315Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Flip orchestrator spawn logic: only start when run_actions == true'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:38.556906Z
+  started_at: 2026-03-03T00:46:27.988337Z
+  completed_at: 2026-03-03T00:46:35.689087Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update DEVELOPER.md to replace --no-orchestrate with --run-actions
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:29:38.562037Z
+  started_at: 2026-03-03T00:46:38.003206Z
+  completed_at: 2026-03-03T00:47:08.515469Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: '[user-gap] Also check for CLAUDE.md or sdlc config flag that disables autonomous advancement project-wide (escape hatch for teams that want to opt-out after trying)'
+  description: null
+  status: completed
+  created_at: 2026-03-02T23:33:05.597543Z
+  started_at: 2026-03-03T00:47:19.714433Z
+  completed_at: 2026-03-03T00:47:41.120405Z
+  blocker: null
+  depends_on: []
+comments:
+- id: C1
+  author: null
+  body: 'T5 decision: Adding a config-file escape hatch (e.g., sdlc.config.yaml orchestrator.auto_run: false) is non-trivial — requires new config field in sdlc-core, serde, and plumbing through run_start. Captured as backlog item B7. The --run-actions flag itself provides sufficient opt-in control for the current release; config-level override is a future enhancement.'
+  flag: null
+  target:
+    kind: feature
+  created_at: 2026-03-03T00:47:36.394119Z
+next_comment_seq: 1
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-02T23:29:21.626780Z
+  exited: 2026-03-03T00:43:33.491213Z
+- phase: specified
+  entered: 2026-03-03T00:43:33.491213Z
+  exited: 2026-03-03T00:45:13.681200Z
+- phase: planned
+  entered: 2026-03-03T00:45:13.681200Z
+  exited: 2026-03-03T00:45:26.610671Z
+- phase: ready
+  entered: 2026-03-03T00:45:26.610671Z
+  exited: 2026-03-03T00:45:33.496724Z
+- phase: implementation
+  entered: 2026-03-03T00:45:33.496724Z
+  exited: 2026-03-03T00:49:43.545796Z
+- phase: review
+  entered: 2026-03-03T00:49:43.545796Z
+  exited: 2026-03-03T00:49:49.016966Z
+- phase: audit
+  entered: 2026-03-03T00:49:49.016966Z
+  exited: 2026-03-03T00:50:19.929599Z
+- phase: qa
+  entered: 2026-03-03T00:50:19.929599Z
+  exited: 2026-03-03T00:52:05.775177Z
+- phase: merge
+  entered: 2026-03-03T00:52:05.775177Z
+  exited: 2026-03-03T00:52:14.786243Z
+- phase: released
+  entered: 2026-03-03T00:52:14.786243Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

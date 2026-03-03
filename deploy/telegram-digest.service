@@ -1,0 +1,31 @@
+[Unit]
+Description=Telegram Digest Sender — daily email digest
+Documentation=https://github.com/orchard9/sdlc
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=telegram-bot
+Group=telegram-bot
+WorkingDirectory=/opt/telegram-bot
+
+# Load secrets from environment file (chmod 600, owned by telegram-bot)
+EnvironmentFile=/opt/telegram-bot/.env
+
+# Run the digest sender (exits after sending)
+ExecStart=/opt/telegram-bot/bin/sdlc telegram digest --send
+
+# Log to journald
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=telegram-digest
+
+# Security hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/telegram-bot/data
+
+# No Restart= — oneshot services are controlled by the timer
+# If digest fails, it logs and the timer retries next day

@@ -1,72 +1,136 @@
 slug: ponder-owner-nav
 title: Owner message visibility fix and floating nav in ponder UI
-phase: draft
+phase: released
 created_at: 2026-03-02T18:13:53.644643Z
-updated_at: 2026-03-02T18:13:53.644643Z
+updated_at: 2026-03-03T03:44:55.669386Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:26:45.921688Z
+  approved_at: 2026-03-03T00:26:47.768855Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:27:21.983548Z
+  approved_at: 2026-03-03T00:27:21.989137Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:27:32.585004Z
+  approved_at: 2026-03-03T00:27:32.697121Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T00:27:56.155516Z
+  approved_at: 2026-03-03T00:27:56.160155Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:43:04.809298Z
+  approved_at: 2026-03-03T03:43:07.878124Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:43:38.234733Z
+  approved_at: 2026-03-03T03:43:40.183207Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-owner-nav/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T03:44:38.814951Z
+  approved_at: 2026-03-03T03:44:42.966505Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Fix isOwner detection in SessionBlock — remove ownerName prop dependency
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:28:15.133168Z
+  started_at: 2026-03-03T00:28:18.162635Z
+  completed_at: 2026-03-03T00:28:50.771608Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add FloatingEntryNav to mobile ponder detail view
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:28:15.138399Z
+  started_at: 2026-03-03T00:28:54.205976Z
+  completed_at: 2026-03-03T03:41:59.810583Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify TypeScript build passes
+  description: null
+  status: completed
+  created_at: 2026-03-03T00:28:15.143912Z
+  started_at: null
+  completed_at: 2026-03-03T03:42:11.108777Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'UAT: Restart sdlc server with new binary — binary compiled Mar 2 19:48 predates all ponder-ux-polish implementations; kill running server and restart from project terminal, then re-run UAT'
+  description: null
+  status: pending
+  created_at: 2026-03-03T05:26:04.147083Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-02T18:13:53.644643Z
+  exited: 2026-03-03T00:26:47.770692Z
+- phase: specified
+  entered: 2026-03-03T00:26:47.770692Z
+  exited: 2026-03-03T00:27:56.161289Z
+- phase: planned
+  entered: 2026-03-03T00:27:56.161289Z
+  exited: 2026-03-03T00:28:05.062599Z
+- phase: ready
+  entered: 2026-03-03T00:28:05.062599Z
+  exited: 2026-03-03T00:28:08.687558Z
+- phase: implementation
+  entered: 2026-03-03T00:28:08.687558Z
+  exited: 2026-03-03T03:43:07.880369Z
+- phase: review
+  entered: 2026-03-03T03:43:07.880369Z
+  exited: 2026-03-03T03:43:15.094895Z
+- phase: audit
+  entered: 2026-03-03T03:43:15.094895Z
+  exited: 2026-03-03T03:43:40.186582Z
+- phase: qa
+  entered: 2026-03-03T03:43:40.186582Z
+  exited: 2026-03-03T03:44:42.968504Z
+- phase: merge
+  entered: 2026-03-03T03:44:42.968504Z
+  exited: 2026-03-03T03:44:55.669386Z
+- phase: released
+  entered: 2026-03-03T03:44:55.669386Z
   exited: null
 dependencies: []
 archived: false
+schema_version: 2

@@ -1,0 +1,10 @@
+slug: routing-requests-properly
+title: routing requests properly
+status: converging
+created_at: 2026-03-03T02:09:06.719948Z
+updated_at: 2026-03-03T02:57:46.366693Z
+sessions: 1
+orientation:
+  current: 'Route inventory complete. Config schema designed. Phase split proposed: Phase 1 = model routing for Claude Code only. Phase 2 = provider routing (OpenCode/Gemini CLI) pending protocol spike.'
+  next: Run a technical spike on OpenCode CLI stream-json protocol compatibility, then commit to milestone if compatible or define Phase 2 scope separately.
+  commit: Ready when (1) spike confirms or denies OpenCode stream-json compatibility, and (2) jordan confirms Phase 1 (model-only routing) is sufficient to ship first.

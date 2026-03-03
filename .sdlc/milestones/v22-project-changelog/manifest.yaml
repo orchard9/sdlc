@@ -1,0 +1,11 @@
+slug: v22-project-changelog
+title: Project Changelog — what changed since you last looked
+vision: A developer coming back to the dashboard after days away immediately sees what happened — failed runs at the top, merges and approvals below — without hunting through logs or git history. The same event log answers 'what changed' for the CLI user running sdlc changelog and for the Telegram bot building daily digests.
+features:
+- changelog-core
+- changelog-api
+- changelog-cli
+- changelog-dashboard-banner
+created_at: 2026-03-02T23:42:39.138397Z
+updated_at: 2026-03-02T23:47:37.213292Z
+schema_version: 1

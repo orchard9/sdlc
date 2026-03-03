@@ -1,0 +1,9 @@
+slug: fix-run-lifecycle
+title: Run Lifecycle Correctness
+vision: Runs that get stuck or exit misleadingly never show green — orphaned runs recover on restart and UAT blockers surface as failures, not silent successes.
+features:
+- fix-run-startup-recovery
+- fix-uat-fail-signaling
+created_at: 2026-03-03T05:30:00Z
+updated_at: 2026-03-03T05:30:00Z
+schema_version: 1
