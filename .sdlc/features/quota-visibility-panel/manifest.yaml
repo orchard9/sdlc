@@ -1,8 +1,8 @@
 slug: quota-visibility-panel
 title: 'Quota panel: translate token cost to % of daily API limit and estimated remaining calls'
-phase: audit
+phase: released
 created_at: 2026-03-02T04:09:31.201019Z
-updated_at: 2026-03-02T23:13:25.764113Z
+updated_at: 2026-03-02T23:15:04.128485Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -45,22 +45,31 @@ artifacts:
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/quota-visibility-panel/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T23:14:24.473147Z
+  approved_at: 2026-03-02T23:14:26.187612Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/quota-visibility-panel/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-02T23:14:51.058856Z
+  approved_at: 2026-03-02T23:14:55.571395Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: 'UAT: all 5 quota panel tests fail — server binary predates QuotaPanel integration; restart server with rebuilt binary to deploy'
+  description: null
+  status: pending
+  created_at: 2026-03-03T00:11:44.967703Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -85,6 +94,15 @@ phase_history:
   exited: 2026-03-02T23:13:25.764113Z
 - phase: audit
   entered: 2026-03-02T23:13:25.764113Z
+  exited: 2026-03-02T23:14:26.189175Z
+- phase: qa
+  entered: 2026-03-02T23:14:26.189175Z
+  exited: 2026-03-02T23:14:55.574833Z
+- phase: merge
+  entered: 2026-03-02T23:14:55.574833Z
+  exited: 2026-03-02T23:15:04.128485Z
+- phase: released
+  entered: 2026-03-02T23:15:04.128485Z
   exited: null
 dependencies: []
 archived: false

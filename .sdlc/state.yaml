@@ -79,58 +79,16 @@ active_features:
 - telegram-bot-deploy
 - ponder-session-product-summary
 - ponder-session-card-preview
+- dev-driver-tool
+- dev-driver-run-actions-flag
+- dev-driver-init-scaffold
+- changelog-core
+- changelog-api
+- changelog-cli
+- changelog-dashboard-banner
+- fix-threadbodyignoredandbuttonstaysdisabled
 active_directives: []
 history:
-- feature: uat-skill-playwright
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-01T07:10:08.664327Z
-  outcome: transition
-- feature: uat-run-persistence
-  action: merge
-  phase: released
-  timestamp: 2026-03-01T07:10:26.585737Z
-  outcome: merged
-- feature: uat-skill-playwright
-  action: merge
-  phase: released
-  timestamp: 2026-03-01T07:10:54.817899Z
-  outcome: merged
-- feature: uat-run-server-routes
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-01T07:14:36.834343Z
-  outcome: transition
-- feature: uat-run-server-routes
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-01T07:14:38.553025Z
-  outcome: transition
-- feature: uat-run-server-routes
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-01T07:17:28.445963Z
-  outcome: transition
-- feature: uat-run-server-routes
-  action: merge
-  phase: released
-  timestamp: 2026-03-01T07:19:54.933977Z
-  outcome: merged
-- feature: orchestrator-action-model
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-01T07:57:42.634697Z
-  outcome: transition
-- feature: orchestrator-action-model
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-01T07:57:48.977132Z
-  outcome: transition
-- feature: orchestrator-action-model
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-01T08:04:28.353516Z
-  outcome: transition
 - feature: orchestrator-action-model
   action: merge
   phase: released
@@ -1081,6 +1039,56 @@ history:
   phase: audit
   timestamp: 2026-03-02T23:13:25.765226Z
   outcome: transition
+- feature: quota-visibility-panel
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T23:15:04.129978Z
+  outcome: merged
+- feature: concurrency-heatmap
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T23:18:44.649077Z
+  outcome: merged
+- feature: telemetry-wallclock-timestamps
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T23:45:16.427333Z
+  outcome: transition
+- feature: dev-driver-tool
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-02T23:46:43.516227Z
+  outcome: transition
+- feature: dev-driver-tool
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-02T23:46:43.525045Z
+  outcome: transition
+- feature: telemetry-wallclock-timestamps
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T23:49:51.322585Z
+  outcome: transition
+- feature: dev-driver-tool
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-02T23:51:27.919499Z
+  outcome: transition
+- feature: telemetry-wallclock-timestamps
+  action: merge
+  phase: released
+  timestamp: 2026-03-02T23:53:24.782349Z
+  outcome: merged
+- feature: fix-threadbodyignoredandbuttonstaysdisabled
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-03T00:03:08.327561Z
+  outcome: transition
+- feature: fix-threadbodyignoredandbuttonstaysdisabled
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-03T00:03:15.236788Z
+  outcome: transition
 blocked: []
 milestones:
 - v01-directive-core
@@ -1107,11 +1115,13 @@ milestones:
 - ponder-ux-polish
 - v20-feedback-threads
 - telegram-digest-bot
+- v21-dev-driver
+- v22-project-changelog
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
 - we-need-a-way-to-add-images-to-ponder-id
 - i-want-to-be-able-to-optionally-use-open
 - i-need-to-improve-the-way-we-use-network
-- dev-driver-tool
-last_updated: 2026-03-02T23:13:25.765227Z
+- sdlc-init-first-milestone
+last_updated: 2026-03-03T00:03:15.236790Z
