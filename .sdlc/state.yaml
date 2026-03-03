@@ -93,6 +93,11 @@ active_features:
 - init-smarter-finish
 - ponder-creation-modal
 - ponder-agent-web-tools
+- tool-streaming-async
+- tool-state-primitives
+- tool-agent-invocation
+- beat-tool
+- dev-driver-agentic-dispatch
 active_directives: []
 history:
 - feature: orchestrator-webhook-routing
@@ -1125,6 +1130,7 @@ milestones:
 - v22-project-changelog
 - init-first-milestone-handoff
 - v23-ponder-rich-input
+- v27-agentic-tool-suite
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1134,4 +1140,4 @@ active_ponders:
 - routing-requests-properly
 - i-need-to-be-able-to-merge-pondering-ses
 - agent-activity-display-improvements
-last_updated: 2026-03-03T06:42:19.505769Z
+last_updated: 2026-03-03T09:01:12.571005Z

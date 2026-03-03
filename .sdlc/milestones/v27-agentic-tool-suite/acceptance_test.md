@@ -1,0 +1,8 @@
+- [ ] A streaming tool emits NDJSON progress lines that appear as live SSE events in the dashboard run feed
+- [ ] The server returns a job ID immediately for async tool runs — frontend subscribes to progress without blocking
+- [ ] A tool can import `_shared/sdlc.ts` and read feature list, milestone list, and write to a domain state file (e.g. beat.yaml) without raw filesystem hacks
+- [ ] A tool can call `runAgent({ prompt, agent })` from `_shared/agent.ts` and receive structured reasoning back as a string
+- [ ] The server exposes `POST /api/tools/agent-call` gated by a per-run token injected as `SDLC_AGENT_TOKEN` env var — prevents unauthorized use
+- [ ] The beat tool runs from the dashboard UI, streams progress events, invokes the recruited CTO/CPO agent, writes verdict + concerns to `.sdlc/beat.yaml`
+- [ ] `sdlc-beat --week` (via CLI or tool) reads accumulated beat.yaml history and produces a prioritized top-5 check-in list
+- [ ] All existing tool contracts (--meta, --run, --setup, error shapes, logging) continue to pass audit unchanged

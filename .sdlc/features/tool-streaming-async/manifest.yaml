@@ -1,0 +1,119 @@
+slug: tool-streaming-async
+title: Streaming + async tool execution
+description: Wire the streaming:true meta flag end-to-end. Streaming tools emit NDJSON progress lines to stdout; the server relays them as SSE events to the frontend. Tool execution becomes non-blocking — server returns a job ID immediately, tool runs in background, frontend subscribes to progress. Produces RunRecord entries like agent runs.
+phase: draft
+created_at: 2026-03-03T08:59:19.251136Z
+updated_at: 2026-03-03T08:59:19.251136Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/tool-streaming-async/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/tool-streaming-async/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/tool-streaming-async/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/tool-streaming-async/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/tool-streaming-async/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/tool-streaming-async/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/tool-streaming-async/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Detect streaming:true in tool meta and switch to NDJSON read loop in server run_tool handler
+  description: null
+  status: pending
+  created_at: 2026-03-03T08:59:47.727956Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Return job ID immediately for async tool runs (202 Accepted) instead of blocking
+  description: null
+  status: pending
+  created_at: 2026-03-03T08:59:47.734234Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Relay NDJSON progress lines as SSE events on the tool run channel
+  description: null
+  status: pending
+  created_at: 2026-03-03T08:59:47.740299Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Persist RunRecord for streaming tool runs (started_at, completed_at, status)
+  description: null
+  status: pending
+  created_at: 2026-03-03T08:59:47.746536Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Inject SDLC_SERVER_URL and SDLC_AGENT_TOKEN as env vars for every tool run
+  description: null
+  status: pending
+  created_at: 2026-03-03T08:59:47.753115Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T08:59:19.251136Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

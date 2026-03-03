@@ -1,0 +1,12 @@
+slug: v27-agentic-tool-suite
+title: Agentic Tool Suite — streaming, state, and agent invocation for tools
+vision: A developer can build a tool that reads project state, invokes a recruited agent to reason about it, streams progress to the dashboard, and persists findings — all within the standard tool contract. Beat is the proof-of-concept that unlocks any future agentic tool.
+features:
+- tool-streaming-async
+- tool-state-primitives
+- tool-agent-invocation
+- beat-tool
+- dev-driver-agentic-dispatch
+created_at: 2026-03-03T08:59:08.066896Z
+updated_at: 2026-03-03T09:01:12.578276Z
+schema_version: 1

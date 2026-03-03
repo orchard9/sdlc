@@ -1,0 +1,137 @@
+slug: beat-tool
+title: beat tool — proof-of-concept agentic tool
+description: 'The take-a-beat tool built on all three primitives. Input: { scope: ''project''|''<domain>''|''feature:<slug>'', mode: ''evaluate''|''week'' }. Execution: streams progress via NDJSON. State: reads features/milestones/vision via _shared/sdlc.ts. Reasoning: delegates to recruited CTO/CPO agent via _shared/agent.ts (recruits the agent if missing). Output: verdict (on-track|drifting|off-course) + concerns + weekly items. Persists to .sdlc/beat.yaml. This tool proves the full agentic tool pattern works end-to-end.'
+phase: draft
+created_at: 2026-03-03T08:59:38.246320Z
+updated_at: 2026-03-03T08:59:38.246320Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/beat-tool/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/beat-tool/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/beat-tool/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/beat-tool/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/beat-tool/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/beat-tool/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/beat-tool/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Scaffold beat tool with streaming:true meta and scope/mode input schema
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:18.983191Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Implement state gathering: readVision(), readFeatures(), readMilestones() via _shared/sdlc.ts'
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:18.989001Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Determine leadership lens from scope, recruit agent if missing via sdlc CLI, load agent file
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:18.994503Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Invoke agent via runAgent() with full project context and VISION.md as evaluation frame
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:19.000186Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Parse agent verdict and write to .sdlc/beat.yaml via writeBeat() — append evaluations, carry concern trends
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:19.005732Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: 'Implement --week mode: read previous beat.yaml, produce top-5 prioritized check-in list'
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:19.011531Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Stream NDJSON progress events at each major step (gathering, recruiting, evaluating, writing)
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:19.017596Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T08:59:38.246320Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

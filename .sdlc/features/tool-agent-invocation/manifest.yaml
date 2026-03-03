@@ -1,0 +1,119 @@
+slug: tool-agent-invocation
+title: _shared/agent.ts — agent invocation from within tools
+description: 'Tools can invoke Claude agent runs from inside their execution. _shared/agent.ts exports runAgent({ prompt, agentFile?, maxTurns? }): Promise<string>. Internally calls POST /api/tools/agent-call on the local sdlc-server using SDLC_AGENT_TOKEN (a per-run token injected by the server as an env var). The server validates the token and spawns the agent via spawn_agent_run, returning the result. Requires tool-streaming-async (non-blocking execution) to avoid deadlock.'
+phase: draft
+created_at: 2026-03-03T08:59:30.611766Z
+updated_at: 2026-03-03T08:59:30.611766Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/tool-agent-invocation/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add POST /api/tools/agent-call route — validates SDLC_AGENT_TOKEN, spawns agent via spawn_agent_run, returns result
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:05.587777Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Generate per-run SDLC_AGENT_TOKEN (UUID) in server and inject alongside SDLC_SERVER_URL for every tool run
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:05.595914Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Write _shared/agent.ts with runAgent({ prompt, agentFile?, maxTurns? }): Promise<string>'
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:05.603214Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Handle agent-not-found gracefully: runAgent returns { ok: false, error: ''agent file not found'' }'
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:05.609463Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Document the recruit-if-missing pattern in _shared/agent.ts JSDoc and sdlc-tool-build skill
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:00:05.615328Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T08:59:30.611766Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2

@@ -1,0 +1,110 @@
+slug: dev-driver-agentic-dispatch
+title: Rewrite dev-driver to dispatch through the agent infrastructure
+description: 'Dev-driver currently spawns ''claude --print'' as a raw shell subprocess. This bypasses spawn_agent_run entirely: no RunRecord, no SSE, no activity feed, no visibility in the frontend. The lock file exists because the tool has no way to know if a previous run is still active. Rewrite dispatch to use _shared/agent.ts runAgent() — which calls back through POST /api/tools/agent-call. Server handles the run properly: RunRecord persisted, SSE streamed, activity feed updated, duplicate detection via agent_runs map. Remove the lock file kludge entirely.'
+phase: draft
+created_at: 2026-03-03T09:01:12.569611Z
+updated_at: 2026-03-03T09:01:12.569611Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/dev-driver-agentic-dispatch/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Replace spawn('claude --print') with runAgent() from _shared/agent.ts for all dispatch levels (sdlc-next, sdlc-run-wave)
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:01:18.548466Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Remove .sdlc/.dev-driver.lock — replace flight-lock check with query to POST /api/runs or agent_runs map via server
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:01:18.554426Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Use active RunRecord detection (check for in-flight 'dev-driver' keyed run) instead of TTL-based file lock
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:01:18.560413Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update dev-driver README and tool meta to document the new dispatch pattern and remove lock file references
+  description: null
+  status: pending
+  created_at: 2026-03-03T09:01:18.567208Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T09:01:12.569611Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 2
