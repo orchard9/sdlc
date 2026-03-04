@@ -22,3 +22,6 @@
 .playwright-mcp/
 .claude/worktrees/
 .sdlc/secrets/envs/telegram.meta.yaml
+
+# UAT screenshots (ephemeral)
+/*.png

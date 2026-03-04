@@ -1,0 +1,1 @@
+i want to be able to add images/diagrams/markdown/etc through the ponder create tool and have them immediately available in that workspace

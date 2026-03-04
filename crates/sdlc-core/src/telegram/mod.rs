@@ -11,7 +11,6 @@
 //! - `poll_loop` — long-poll loop writing to `MessageStore`
 //! - `MessageStore` — SQLite-backed message storage
 
-pub mod client;
 pub mod digest;
 pub mod mailer;
 pub mod poll;
@@ -20,4 +19,4 @@ pub mod types;
 
 pub use poll::{get_me, poll_loop, BotUser, MessageStore, TelegramConfig};
 pub use runner::DigestRunner;
-pub use types::{DigestConfig, DigestRunResult, DigestSummary, SmtpConfig};
+pub use types::{DigestConfig, DigestRunResult, DigestSummary, ResendConfig};

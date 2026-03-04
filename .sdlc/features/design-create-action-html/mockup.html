@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mockup: create_design → HTML mockup</title>
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ── */
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --text: #e2e8f0;
+      --muted: #8892aa;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --success: #22c55e;
+      --tag-bg: #252a3d;
+      --code-bg: #131622;
+      --code-text: #a5b4fc;
+      --radius: 8px;
+      --font-mono: "Menlo", "Consolas", monospace;
+      --font: system-ui, -apple-system, sans-serif;
+    }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Navigation ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      height: 52px;
+      gap: 4px;
+    }
+
+    nav .brand {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-right: 24px;
+      letter-spacing: 0.02em;
+    }
+
+    nav button {
+      font: inherit;
+      font-size: 13px;
+      color: var(--muted);
+      background: transparent;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    nav button:hover { color: var(--text); background: var(--surface2); }
+
+    nav button.active {
+      color: var(--text);
+      background: var(--surface2);
+      font-weight: 500;
+    }
+
+    /* ── Screen wrappers ── */
+    section { display: none; padding: 32px 24px; max-width: 860px; margin: 0 auto; }
+    section.visible { display: block; }
+
+    h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 24px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .badge-blue { background: #1e3a8a; color: #93c5fd; }
+    .badge-green { background: #14532d; color: #86efac; }
+    .badge-purple { background: #4c1d95; color: #c4b5fd; }
+    .badge-gray { background: var(--surface2); color: var(--muted); }
+
+    /* ── Code blocks ── */
+    pre {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      background: var(--code-bg);
+      color: var(--code-text);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      overflow-x: auto;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    /* ── Diff view ── */
+    .diff-line { display: block; padding: 0 8px; border-radius: 3px; }
+    .diff-add { color: #86efac; background: rgba(34,197,94,0.08); }
+    .diff-remove { color: #f87171; background: rgba(239,68,68,0.08); text-decoration: line-through; }
+    .diff-context { color: var(--muted); }
+
+    /* ── Two-column layout ── */
+    .cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) { .cols { grid-template-columns: 1fr; } }
+
+    /* ── File tree ── */
+    .tree {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      line-height: 1.8;
+      color: var(--muted);
+    }
+
+    .tree .highlight { color: var(--accent-hover); font-weight: 600; }
+    .tree .new-file { color: var(--success); }
+
+    /* ── Inline labels ── */
+    code {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      background: var(--tag-bg);
+      color: var(--code-text);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ── Section title bar ── */
+    .section-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .section-meta h2 { margin-bottom: 0; }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 24px 0;
+    }
+
+    p { font-size: 14px; line-height: 1.65; color: var(--text); margin-bottom: 10px; }
+
+    ul, ol { font-size: 14px; line-height: 1.8; padding-left: 20px; color: var(--text); margin-bottom: 12px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 16px; }
+    th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted);
+         border-bottom: 1px solid var(--border); padding: 8px 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+    td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+
+    .arrow { color: var(--success); font-weight: 700; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <span class="brand">design-create-action-html</span>
+    <button class="active" onclick="show('screen-overview')">Overview</button>
+    <button onclick="show('screen-changes')">Code Changes</button>
+    <button onclick="show('screen-contract')">Format Contract</button>
+    <button onclick="show('screen-example')">Output Example</button>
+  </nav>
+
+  <!-- Screen 1: Overview -->
+  <section id="screen-overview" class="visible">
+    <div class="section-meta">
+      <h2>Feature Overview</h2>
+      <span class="badge badge-blue">Instruction-Layer Change</span>
+    </div>
+    <p class="subtitle">
+      Upgrades the <code>create_design</code> action so agents produce an interactive
+      HTML mockup alongside <code>design.md</code> for UI features.
+    </p>
+
+    <div class="cols">
+      <div class="card">
+        <div class="card-header">
+          <span class="badge badge-gray">Before</span>
+        </div>
+        <div class="tree">
+          .sdlc/features/my-ui-feature/<br>
+          &nbsp;&nbsp;spec.md<br>
+          &nbsp;&nbsp;<span class="highlight">design.md</span>   ← ASCII wireframes<br>
+          &nbsp;&nbsp;tasks.md<br>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="badge badge-green">After</span>
+        </div>
+        <div class="tree">
+          .sdlc/features/my-ui-feature/<br>
+          &nbsp;&nbsp;spec.md<br>
+          &nbsp;&nbsp;<span class="highlight">design.md</span>   ← Markdown + link<br>
+          &nbsp;&nbsp;<span class="new-file">mockup.html</span>  ← interactive mockup<br>
+          &nbsp;&nbsp;tasks.md<br>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="badge badge-purple">What Changes</span></div>
+      <table>
+        <tr><th>Layer</th><th>Change</th></tr>
+        <tr><td>State machine</td><td>No change — <code>design</code> artifact type unchanged</td></tr>
+        <tr><td><code>rules.rs</code> message</td><td>Explicit HTML mockup requirement in directive message</td></tr>
+        <tr><td><code>sdlc_next.rs</code> instructions</td><td>Added sub-step for UI features under <code>create_design</code></td></tr>
+        <tr><td>CLI / server / frontend</td><td>No change</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- Screen 2: Code Changes -->
+  <section id="screen-changes">
+    <h2>Code Changes</h2>
+    <p class="subtitle">Two files edited; no new files in Rust source.</p>
+
+    <div class="card">
+      <div class="card-header">
+        <code>crates/sdlc-core/src/rules.rs</code>
+        <span class="badge badge-blue">needs_design message</span>
+      </div>
+      <pre>
+<span class="diff-context">// 6. Specified — no design</span>
+<span class="diff-context">rule! {</span>
+<span class="diff-context">    id: "needs_design",</span>
+<span class="diff-context">    message: |ctx| format!(</span>
+<span class="diff-remove">        "No design exists for '{}'. Write design.md as the primary entry point.\n\
+         Format guidance: use plain markdown for most features. For architecture-heavy work, \
+         include diagrams (embed as images referenced from design.md). For UI features, include \
+         an HTML prototype or ASCII wireframes alongside design.md. Any companion files \
+         (images, HTML, diagrams) go in the same feature directory and must be referenced \
+         from design.md. ..."</span>
+<span class="diff-add">        "No design exists for '{}'. Write design.md as the primary entry point.\n\
+         For UI features: also write mockup.html — a single self-contained HTML file \
+         (inline &lt;style&gt;/&lt;script&gt;, no CDN or external resources) with a &lt;nav&gt; bar \
+         to navigate between named &lt;section id=\"screen-*\"&gt; blocks for each major UI state. \
+         Reference the file from design.md: [Mockup](mockup.html). \
+         For non-UI features: ASCII wireframes or plain Markdown are sufficient. \
+         If this feature needs no design, run: sdlc artifact waive {} design ..."</span></pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <code>crates/sdlc-cli/src/cmd/init/commands/sdlc_next.rs</code>
+        <span class="badge badge-blue">SDLC_NEXT_COMMAND</span>
+      </div>
+      <pre>
+<span class="diff-context">For **artifact creation** (`create_spec`, `create_design`, ...):</span>
+<span class="diff-context">1. Run `sdlc feature show &lt;slug&gt; --json` for context</span>
+<span class="diff-context">2. Read existing artifacts in `.sdlc/features/&lt;slug&gt;/`</span>
+<span class="diff-context">3. Write a thorough Markdown artifact to `output_path`</span>
+<span class="diff-add">
+For `create_design` on a **UI feature**, also write `mockup.html`:
+- Single self-contained file — inline `&lt;style&gt;` and `&lt;script&gt;`, no external resources
+- Valid HTML5 with a `&lt;nav&gt;` or tab bar to navigate between screens
+- Named sections (`&lt;section id="screen-*"&gt;`) for each major UI state
+- Representative colors and typography; pixel-perfect fidelity not required
+- Reference it from `design.md`: `[Mockup](mockup.html)`
+- Place the file in the same directory as `design.md`
+
+Non-UI features (backend, CLI, config): mockup is optional.</span></pre>
+    </div>
+  </section>
+
+  <!-- Screen 3: Format Contract -->
+  <section id="screen-contract">
+    <h2>HTML Mockup Format Contract</h2>
+    <p class="subtitle">
+      Rules every agent must follow when producing <code>mockup.html</code>.
+    </p>
+
+    <div class="card">
+      <table>
+        <tr><th>Constraint</th><th>Rationale</th></tr>
+        <tr>
+          <td><code>mockup.html</code> — single file</td>
+          <td>Committable to git, viewable by double-click, no server needed</td>
+        </tr>
+        <tr>
+          <td>Inline <code>&lt;style&gt;</code> block</td>
+          <td>No external CSS dependency</td>
+        </tr>
+        <tr>
+          <td>Inline <code>&lt;script&gt;</code> block (if used)</td>
+          <td>Screen navigation without a bundler</td>
+        </tr>
+        <tr>
+          <td><code>&lt;!DOCTYPE html&gt;</code> + <code>&lt;html lang="en"&gt;</code></td>
+          <td>Valid HTML5; renders in all browsers</td>
+        </tr>
+        <tr>
+          <td><code>&lt;nav&gt;</code> or tab bar at the top</td>
+          <td>Reviewers navigate without scrolling through the whole file</td>
+        </tr>
+        <tr>
+          <td><code>&lt;section id="screen-*"&gt;</code> per view</td>
+          <td>Predictable structure; easy to reference in design.md</td>
+        </tr>
+        <tr>
+          <td>No CDN references (<code>https://cdn.*</code>)</td>
+          <td>Offline-friendly; works in air-gapped environments</td>
+        </tr>
+        <tr>
+          <td>Placed in <code>.sdlc/features/&lt;slug&gt;/</code></td>
+          <td>Alongside design.md; relative link works from the same directory</td>
+        </tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="badge badge-gray">Minimal Structure</span></div>
+      <pre>
+&lt;!DOCTYPE html&gt;
+&lt;html lang="en"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;title&gt;Mockup: &lt;feature-title&gt;&lt;/title&gt;
+  &lt;style&gt;
+    /* all CSS inline here */
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;nav&gt;
+    &lt;button onclick="show('screen-a')"&gt;Screen A&lt;/button&gt;
+    &lt;button onclick="show('screen-b')"&gt;Screen B&lt;/button&gt;
+  &lt;/nav&gt;
+
+  &lt;section id="screen-a"&gt;
+    &lt;!-- first screen content --&gt;
+  &lt;/section&gt;
+
+  &lt;section id="screen-b" style="display:none"&gt;
+    &lt;!-- second screen content --&gt;
+  &lt;/section&gt;
+
+  &lt;script&gt;
+    function show(id) {
+      document.querySelectorAll('section').forEach(s =&gt; s.style.display = 'none');
+      document.getElementById(id).style.display = 'block';
+    }
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</pre>
+    </div>
+  </section>
+
+  <!-- Screen 4: Output Example -->
+  <section id="screen-example">
+    <h2>Agent Output Example</h2>
+    <p class="subtitle">
+      What an agent produces after reading the updated <code>create_design</code>
+      directive for a UI feature.
+    </p>
+
+    <div class="card">
+      <div class="card-header"><span class="badge badge-green">sdlc next --json output (message field)</span></div>
+      <pre>
+{
+  "action": "create_design",
+  "message": "No design exists for 'my-ui-feature'. Write design.md as
+the primary entry point.
+
+For UI features: also write mockup.html — a single self-contained
+HTML file (inline &lt;style&gt;/&lt;script&gt;, no CDN or external resources)
+with a &lt;nav&gt; bar to navigate between named &lt;section id=\"screen-*\"&gt;
+blocks for each major UI state. Reference the file from design.md:
+[Mockup](mockup.html).
+
+For non-UI features: ASCII wireframes or plain Markdown are
+sufficient. If no design is needed, run:
+  sdlc artifact waive my-ui-feature design --reason \"&lt;reason&gt;\"",
+  "output_path": ".sdlc/features/my-ui-feature/design.md"
+}</pre>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="badge badge-blue">Resulting files</span></div>
+      <div class="tree">
+        .sdlc/features/my-ui-feature/<br>
+        &nbsp;&nbsp;spec.md<br>
+        &nbsp;&nbsp;<span class="highlight">design.md</span>    ← references mockup.html<br>
+        &nbsp;&nbsp;<span class="new-file">mockup.html</span>   ← interactive screens<br>
+        &nbsp;&nbsp;tasks.md<br>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="badge badge-purple">design.md reference</span></div>
+      <pre>
+## Mockup
+
+See companion: [mockup.html](mockup.html) — open in any browser to
+navigate between all UI screens interactively.
+
+&lt;!-- Screens covered: Overview, Form, Confirmation --&gt;</pre>
+    </div>
+  </section>
+
+  <script>
+    function show(id) {
+      // Hide all screens
+      document.querySelectorAll('section').forEach(function(s) {
+        s.classList.remove('visible');
+      });
+      // Deactivate all nav buttons
+      document.querySelectorAll('nav button').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      // Show target screen
+      var target = document.getElementById(id);
+      if (target) target.classList.add('visible');
+      // Activate matching button
+      document.querySelectorAll('nav button').forEach(function(b) {
+        if (b.getAttribute('onclick') && b.getAttribute('onclick').indexOf(id) !== -1) {
+          b.classList.add('active');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 pub mod agent;
 pub mod artifact;
+pub mod auth;
 pub mod backlog;
 pub mod changelog;
 pub mod comment;

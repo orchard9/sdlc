@@ -146,6 +146,14 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             .to_string();
             Some(Ok(Event::default().event("milestone_uat").data(data)))
         }
+        Ok(SseMessage::MilestoneUatFailed { slug }) => {
+            let data = serde_json::json!({
+                "type": "milestone_uat_failed",
+                "slug": slug,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("milestone_uat").data(data)))
+        }
         Ok(SseMessage::ActionStateChanged) => {
             let data = serde_json::json!({ "type": "action_state_changed" }).to_string();
             Some(Ok(Event::default().event("action").data(data)))
@@ -215,6 +223,58 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
         Ok(SseMessage::ChangelogUpdated) => {
             let data = serde_json::json!({ "type": "ChangelogUpdated" }).to_string();
             Some(Ok(Event::default().event("update").data(data)))
+        }
+        Ok(SseMessage::ToolRunStarted {
+            name,
+            interaction_id,
+        }) => {
+            let data = serde_json::json!({
+                "type": "tool_run_started",
+                "name": name,
+                "interaction_id": interaction_id,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("tool").data(data)))
+        }
+        Ok(SseMessage::ToolRunProgress {
+            name,
+            interaction_id,
+            line,
+        }) => {
+            let data = serde_json::json!({
+                "type": "tool_run_progress",
+                "name": name,
+                "interaction_id": interaction_id,
+                "line": line,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("tool").data(data)))
+        }
+        Ok(SseMessage::ToolRunCompleted {
+            name,
+            interaction_id,
+        }) => {
+            let data = serde_json::json!({
+                "type": "tool_run_completed",
+                "name": name,
+                "interaction_id": interaction_id,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("tool").data(data)))
+        }
+        Ok(SseMessage::ToolRunFailed {
+            name,
+            interaction_id,
+            error,
+        }) => {
+            let data = serde_json::json!({
+                "type": "tool_run_failed",
+                "name": name,
+                "interaction_id": interaction_id,
+                "error": error,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("tool").data(data)))
         }
         Err(_) => None,
     });

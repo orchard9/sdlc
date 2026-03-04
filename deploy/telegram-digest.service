@@ -14,7 +14,7 @@ WorkingDirectory=/opt/telegram-bot
 EnvironmentFile=/opt/telegram-bot/.env
 
 # Run the digest sender (exits after sending)
-ExecStart=/opt/telegram-bot/bin/sdlc telegram digest --send
+ExecStart=/opt/telegram-bot/bin/sdlc telegram digest
 
 # Log to journald
 StandardOutput=journal

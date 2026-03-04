@@ -1,0 +1,136 @@
+slug: orch-tunnel-migration
+title: orch-tunnel migration — stable named URLs, default-on tunnel, graceful local fallback
+phase: released
+created_at: 2026-03-03T20:07:13.955857Z
+updated_at: 2026-03-03T23:49:53.416238Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/spec.md
+  created_at: 2026-03-03T23:37:18.939800Z
+  approved_at: 2026-03-03T23:37:21.378790Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/design.md
+  created_at: 2026-03-03T23:37:59.824451Z
+  approved_at: 2026-03-03T23:37:59.832345Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/tasks.md
+  created_at: 2026-03-03T23:38:28.198734Z
+  approved_at: 2026-03-03T23:38:28.205248Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/qa-plan.md
+  created_at: 2026-03-03T23:38:58.103823Z
+  approved_at: 2026-03-03T23:38:58.111997Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/review.md
+  created_at: 2026-03-03T23:48:40.335995Z
+  approved_at: 2026-03-03T23:48:40.344800Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/audit.md
+  created_at: 2026-03-03T23:49:24.714929Z
+  approved_at: 2026-03-03T23:49:24.721701Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/orch-tunnel-migration/qa-results.md
+  created_at: 2026-03-03T23:49:48.263644Z
+  approved_at: 2026-03-03T23:49:48.295303Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Flip --tunnel to --no-tunnel in UiSubcommand::Start and update run_start signature
+  description: null
+  status: completed
+  created_at: 2026-03-03T23:39:12.213116Z
+  started_at: 2026-03-03T23:39:18.010034Z
+  completed_at: 2026-03-03T23:41:43.115209Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement graceful tunnel fallback in run_start
+  description: null
+  status: completed
+  created_at: 2026-03-03T23:39:12.940035Z
+  started_at: 2026-03-03T23:41:43.124398Z
+  completed_at: 2026-03-03T23:41:43.129653Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update help text and docs/orch-tunnel-reference.md
+  description: null
+  status: completed
+  created_at: 2026-03-03T23:39:15.770493Z
+  started_at: 2026-03-03T23:41:45.604669Z
+  completed_at: 2026-03-03T23:42:04.295424Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add unit test for graceful fallback
+  description: null
+  status: completed
+  created_at: 2026-03-03T23:39:15.778274Z
+  started_at: 2026-03-03T23:42:04.303589Z
+  completed_at: 2026-03-03T23:47:57.696150Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T20:07:13.955857Z
+  exited: 2026-03-03T23:37:21.381425Z
+- phase: specified
+  entered: 2026-03-03T23:37:21.381425Z
+  exited: 2026-03-03T23:38:58.114042Z
+- phase: planned
+  entered: 2026-03-03T23:38:58.114042Z
+  exited: 2026-03-03T23:39:02.225361Z
+- phase: ready
+  entered: 2026-03-03T23:39:02.225361Z
+  exited: 2026-03-03T23:39:05.960735Z
+- phase: implementation
+  entered: 2026-03-03T23:39:05.960735Z
+  exited: 2026-03-03T23:48:40.350783Z
+- phase: review
+  entered: 2026-03-03T23:48:40.350783Z
+  exited: 2026-03-03T23:48:45.295208Z
+- phase: audit
+  entered: 2026-03-03T23:48:45.295208Z
+  exited: 2026-03-03T23:49:24.726672Z
+- phase: qa
+  entered: 2026-03-03T23:49:24.726672Z
+  exited: 2026-03-03T23:49:48.371070Z
+- phase: merge
+  entered: 2026-03-03T23:49:48.371070Z
+  exited: 2026-03-03T23:49:53.416238Z
+- phase: released
+  entered: 2026-03-03T23:49:53.416238Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

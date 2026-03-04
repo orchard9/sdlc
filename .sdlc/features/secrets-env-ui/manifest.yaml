@@ -1,9 +1,65 @@
 slug: secrets-env-ui
 title: 'Secrets: Add Environment modal and CLI hint affordance on SecretsPage'
-phase: draft
+phase: released
 created_at: 2026-03-03T05:45:00Z
-updated_at: 2026-03-03T05:45:00Z
-artifacts: []
+updated_at: 2026-03-03T19:48:17.398322Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/secrets-env-ui/spec.md
+  created_at: 2026-03-03T19:29:07.961601Z
+  approved_at: 2026-03-03T19:29:23.389905Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/secrets-env-ui/design.md
+  created_at: 2026-03-03T19:29:36.907331Z
+  approved_at: 2026-03-03T19:29:43.098944Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/secrets-env-ui/tasks.md
+  created_at: 2026-03-03T19:29:48.265484Z
+  approved_at: 2026-03-03T19:29:48.274999Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/secrets-env-ui/qa-plan.md
+  created_at: 2026-03-03T19:29:55.817589Z
+  approved_at: 2026-03-03T19:29:55.823677Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/secrets-env-ui/review.md
+  created_at: 2026-03-03T19:47:06.735845Z
+  approved_at: 2026-03-03T19:47:11.710555Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/secrets-env-ui/audit.md
+  created_at: 2026-03-03T19:47:34.082929Z
+  approved_at: 2026-03-03T19:47:39.731610Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/secrets-env-ui/qa-results.md
+  created_at: 2026-03-03T19:48:08.158043Z
+  approved_at: 2026-03-03T19:48:13.048203Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -11,7 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:45:00Z
+  exited: 2026-03-03T19:29:23.392050Z
+- phase: specified
+  entered: 2026-03-03T19:29:23.392050Z
+  exited: 2026-03-03T19:29:55.825272Z
+- phase: planned
+  entered: 2026-03-03T19:29:55.825272Z
+  exited: 2026-03-03T19:30:10.991946Z
+- phase: ready
+  entered: 2026-03-03T19:30:10.991946Z
+  exited: 2026-03-03T19:30:14.464985Z
+- phase: implementation
+  entered: 2026-03-03T19:30:14.464985Z
+  exited: 2026-03-03T19:47:11.713505Z
+- phase: review
+  entered: 2026-03-03T19:47:11.713505Z
+  exited: 2026-03-03T19:47:32.012271Z
+- phase: audit
+  entered: 2026-03-03T19:47:32.012271Z
+  exited: 2026-03-03T19:47:39.735957Z
+- phase: qa
+  entered: 2026-03-03T19:47:39.735957Z
+  exited: 2026-03-03T19:48:13.051300Z
+- phase: merge
+  entered: 2026-03-03T19:48:13.051300Z
+  exited: 2026-03-03T19:48:17.398322Z
+- phase: released
+  entered: 2026-03-03T19:48:17.398322Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

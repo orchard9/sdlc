@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: citadel-annotate-log-tool
+    title: citadel_annotate_log Agent Tool
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: citadel-app-registration
+    title: Register Citadel as a Pantheon App
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: citadel-incident-runbook
+    title: Create Incident from Citadel Logs Runbook
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

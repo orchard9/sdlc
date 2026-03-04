@@ -217,7 +217,13 @@ Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 sdlc milestone complete <slug>
 ```
 
-**On Failed:** do NOT call `milestone complete`. The milestone stays in `Verifying`. Fix the feature tasks, then re-run this command.
+**On Failed:** do NOT call `milestone complete`. Call the fail endpoint to signal the outcome:
+
+```bash
+curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail
+```
+
+The milestone stays in `Verifying`. Fix the feature tasks, then re-run this command.
 
 ## Step 6 — Final report
 
@@ -251,7 +257,7 @@ Use this playbook to run a milestone's acceptance test using Playwright — Mode
    - Tasks created: list or none
    - Results: Playwright JSON summary
 5. Write `uat_results.md` to `.sdlc/milestones/<slug>/uat_results.md` (signed checklist).
-6. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On Failed: leave in Verifying.
+6. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On Failed: do NOT call milestone complete — call `curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail` to signal the failure, then leave in Verifying.
 
 ## Key Rules
 
@@ -279,7 +285,7 @@ Use this skill to run a milestone's acceptance test via Playwright.
 3. **Mode B** — if no spec: navigate each `acceptance_test.md` checklist item via Playwright MCP browser tools, write `frontend/e2e/milestones/<slug>.spec.ts` using `getByRole`/`getByTestId` locators, run and fix until passing, then continue to Mode A synthesis.
 4. For each failure: selector break → fix spec + rerun; code bug → `sdlc task add <feature-slug> "..."`.
 5. Write `summary.md` to `.sdlc/milestones/<slug>/uat-runs/<date>-<id>/` with Verdict (Pass/PassWithTasks/Failed), test counts, tasks created, and Playwright results.
-6. Write `uat_results.md` to `.sdlc/milestones/<slug>/`. On Pass or PassWithTasks: `sdlc milestone complete <slug>`.
+6. Write `uat_results.md` to `.sdlc/milestones/<slug>/`. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On Failed: call `curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail` to signal the failure, then leave in Verifying.
 "#;
 
 pub static SDLC_MILESTONE_UAT: CommandDef = CommandDef {

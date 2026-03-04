@@ -8,5 +8,6 @@ features:
 - fleet-secrets-infra
 - fleet-deploy-pipeline
 created_at: 2026-03-02T09:08:03.359395Z
-updated_at: 2026-03-02T09:08:03.470982Z
+updated_at: 2026-03-03T15:54:03.873725Z
+released_at: 2026-03-03T15:54:03.873724Z
 schema_version: 1

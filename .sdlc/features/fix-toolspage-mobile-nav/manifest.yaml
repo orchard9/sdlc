@@ -1,17 +1,109 @@
 slug: fix-toolspage-mobile-nav
 title: ToolsPage mobile back navigation fix
-phase: draft
+phase: released
 created_at: 2026-03-03T06:10:00Z
-updated_at: 2026-03-03T06:10:00Z
-artifacts: []
-tasks: []
+updated_at: 2026-03-03T11:16:37.251023Z
+artifacts:
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/audit.md
+  created_at: 2026-03-03T11:15:39.236668Z
+  approved_at: 2026-03-03T11:15:39.254834Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/spec.md
+  created_at: 2026-03-03T11:15:24.598669Z
+  approved_at: 2026-03-03T11:15:24.641964Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/design.md
+  created_at: 2026-03-03T11:15:24.691495Z
+  approved_at: 2026-03-03T11:15:24.763891Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/tasks.md
+  created_at: 2026-03-03T11:15:24.872819Z
+  approved_at: 2026-03-03T11:15:24.930712Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/qa-plan.md
+  created_at: 2026-03-03T11:15:24.967445Z
+  approved_at: 2026-03-03T11:15:25.065116Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/review.md
+  created_at: 2026-03-03T11:15:33.784714Z
+  approved_at: 2026-03-03T11:15:33.790919Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-toolspage-mobile-nav/qa-results.md
+  created_at: 2026-03-03T11:16:28.701059Z
+  approved_at: 2026-03-03T11:16:33.238479Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Implement code changes in ToolsPage.tsx — DONE (build passes)
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:15:30.550518Z
+  started_at: 2026-03-03T11:15:30.570322Z
+  completed_at: 2026-03-03T11:15:30.597926Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T06:10:00Z
+  exited: 2026-03-03T11:15:24.662990Z
+- phase: specified
+  entered: 2026-03-03T11:15:24.662990Z
+  exited: 2026-03-03T11:15:25.102373Z
+- phase: planned
+  entered: 2026-03-03T11:15:25.102373Z
+  exited: 2026-03-03T11:15:30.438560Z
+- phase: ready
+  entered: 2026-03-03T11:15:30.438560Z
+  exited: 2026-03-03T11:15:30.485154Z
+- phase: implementation
+  entered: 2026-03-03T11:15:30.485154Z
+  exited: 2026-03-03T11:15:33.806131Z
+- phase: review
+  entered: 2026-03-03T11:15:33.806131Z
+  exited: 2026-03-03T11:15:36.436720Z
+- phase: audit
+  entered: 2026-03-03T11:15:36.436720Z
+  exited: 2026-03-03T11:15:39.278011Z
+- phase: qa
+  entered: 2026-03-03T11:15:39.278011Z
+  exited: 2026-03-03T11:16:33.242655Z
+- phase: merge
+  entered: 2026-03-03T11:16:33.242655Z
+  exited: 2026-03-03T11:16:37.251023Z
+- phase: released
+  entered: 2026-03-03T11:16:37.251023Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

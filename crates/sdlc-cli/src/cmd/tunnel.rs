@@ -10,6 +10,7 @@ pub fn print_tunnel_info(project_name: &str, local_port: u16, tunnel_base_url: &
     println!("SDLC UI for '{project_name}'");
     println!("  Local:   http://localhost:{local_port}  (no auth)");
     println!("  Tunnel:  {tunnel_base_url}");
+    println!("  Authed:  {auth_url}");
     println!();
 
     match render_qr(&auth_url) {

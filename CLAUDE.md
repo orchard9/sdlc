@@ -1,5 +1,16 @@
 # CLAUDE.md
 
+## Environment Variables (Cluster Operations)
+
+Available in shell for fleet/cluster operations:
+
+| Variable | Purpose |
+|----------|---------|
+| `THREE_SIX_WOODPECKER` | Woodpecker CI API token — trigger fleet deploy pipelines |
+| `THREE_SIX_GITEA` | Gitea `claude-agent` admin token (`http://100.79.2.8:30300`) |
+| `THREESIX_CLOUDFLARE_API_TOKEN` | Cloudflare API token (DNS/cert operations) |
+| `THREESIX_CLOUDFLARE_ZONE_ID` | Cloudflare zone ID for `threesix.ai` |
+
 ## Releasing
 
 To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX.Y.Z`), then watch `gh run list --repo orchard9/sdlc` and fix any workflow errors found.

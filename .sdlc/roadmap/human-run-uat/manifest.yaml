@@ -1,0 +1,13 @@
+slug: human-run-uat
+title: human run uat
+status: committed
+created_at: 2026-03-03T09:12:43.095751Z
+updated_at: 2026-03-03T15:41:33.664364Z
+committed_at: 2026-03-03T15:40:33.716467Z
+committed_to:
+- v28-human-run-uat
+sessions: 1
+orientation:
+  current: 'Two distinct surfaces show ''Run UAT'' — MilestonePreparePanel (milestone-level) and FeatureDetail (feature run_qa action). Jordan wants a human path for both. Design is clear: secondary button alongside existing AI button, modal with checklist from qa_plan/acceptance_test.md, verdict selection, POST to new REST endpoint.'
+  next: 'Create feature: write spec for human-run-uat covering both surfaces, data model changes (UatRun runner field), REST endpoints, and UI modal design.'
+  commit: Design shaped — ready to create feature and write spec.

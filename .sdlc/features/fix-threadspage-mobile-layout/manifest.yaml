@@ -1,9 +1,65 @@
 slug: fix-threadspage-mobile-layout
 title: ThreadsPage mobile layout fix
-phase: draft
+phase: released
 created_at: 2026-03-03T06:10:00Z
-updated_at: 2026-03-03T06:10:00Z
-artifacts: []
+updated_at: 2026-03-03T11:18:08.370041Z
+artifacts:
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/qa-results.md
+  created_at: 2026-03-03T11:17:38.372416Z
+  approved_at: 2026-03-03T11:18:05.460047Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/spec.md
+  created_at: 2026-03-03T11:17:54.410Z
+  approved_at: 2026-03-03T11:17:54.416492Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/design.md
+  created_at: 2026-03-03T11:17:54.422527Z
+  approved_at: 2026-03-03T11:17:54.428427Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/tasks.md
+  created_at: 2026-03-03T11:17:54.434173Z
+  approved_at: 2026-03-03T11:17:54.439754Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/qa-plan.md
+  created_at: 2026-03-03T11:17:54.445115Z
+  approved_at: 2026-03-03T11:17:54.450791Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/review.md
+  created_at: 2026-03-03T11:18:00.062429Z
+  approved_at: 2026-03-03T11:18:00.094812Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-threadspage-mobile-layout/audit.md
+  created_at: 2026-03-03T11:18:02.739295Z
+  approved_at: 2026-03-03T11:18:02.751207Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -11,7 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T06:10:00Z
+  exited: 2026-03-03T11:17:54.417801Z
+- phase: specified
+  entered: 2026-03-03T11:17:54.417801Z
+  exited: 2026-03-03T11:17:54.452255Z
+- phase: planned
+  entered: 2026-03-03T11:17:54.452255Z
+  exited: 2026-03-03T11:17:59.509884Z
+- phase: ready
+  entered: 2026-03-03T11:17:59.509884Z
+  exited: 2026-03-03T11:17:59.748081Z
+- phase: implementation
+  entered: 2026-03-03T11:17:59.748081Z
+  exited: 2026-03-03T11:18:00.108448Z
+- phase: review
+  entered: 2026-03-03T11:18:00.108448Z
+  exited: 2026-03-03T11:18:02.726378Z
+- phase: audit
+  entered: 2026-03-03T11:18:02.726378Z
+  exited: 2026-03-03T11:18:02.754876Z
+- phase: qa
+  entered: 2026-03-03T11:18:02.754876Z
+  exited: 2026-03-03T11:18:05.462808Z
+- phase: merge
+  entered: 2026-03-03T11:18:05.462808Z
+  exited: 2026-03-03T11:18:08.370041Z
+- phase: released
+  entered: 2026-03-03T11:18:08.370041Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

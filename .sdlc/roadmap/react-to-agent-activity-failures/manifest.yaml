@@ -1,0 +1,10 @@
+slug: react-to-agent-activity-failures
+title: react to agent-activity failures
+status: converging
+created_at: 2026-03-03T22:17:57.954328Z
+updated_at: 2026-03-03T22:22:18.594677Z
+sessions: 1
+orientation:
+  current: 'Three distinct problems diagnosed: (1) max_turns masquerades as failure, (2) session_id is silently discarded so --resume is impossible, (3) UI has zero recovery affordance. Solution path is clear: store session_id + stop_reason in RunRecord, fix the UI label, add a Resume action.'
+  next: Create feature `fix-run-max-turns-recovery` — store session_id/stop_reason in RunRecord, surface 'Paused (turn limit)' in UI, add Resume endpoint for investigation/ponder runs.
+  commit: 'Decision converged: store session_id + stop_reason (2 fields in RunRecord), add Resume button for max_turns runs, bump investigation max_turns 100→150 as a parallel relief valve.'

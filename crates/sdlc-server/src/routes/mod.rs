@@ -4,6 +4,7 @@ pub mod ama_threads;
 pub mod app_tunnel;
 pub mod architecture;
 pub mod artifacts;
+pub mod auth_tokens;
 pub mod backlog;
 pub mod changelog;
 pub mod comments;

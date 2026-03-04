@@ -1,8 +1,11 @@
 slug: i-need-to-improve-the-way-we-use-network
 title: i need to improve the way we use network
-status: converging
+status: committed
 created_at: 2026-03-02T20:23:54.308347Z
-updated_at: 2026-03-03T02:56:40.198218Z
+updated_at: 2026-03-03T20:07:24.047557Z
+committed_at: 2026-03-03T20:06:08.719130Z
+committed_to:
+- v29-tunnel-auth
 sessions: 2
 orientation:
   current: 'Commit signal met. Jordan confirmed all three design decisions: orch-tunnel swap, default-on tunnel, named token auth. Auth is optional (no auth.yaml = open access) and easily viewable (plain YAML + UI token name list). Ready to commit to a milestone.'

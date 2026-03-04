@@ -158,6 +158,21 @@ export interface QueryNeedsApprovalItem {
 }
 
 // ---------------------------------------------------------------------------
+// Auth token types
+// ---------------------------------------------------------------------------
+
+/** Named tunnel-access token — stored in .sdlc/auth.yaml. */
+export interface AuthToken {
+  name: string
+  created_at: string
+}
+
+/** Returned only on creation — the token value shown once. */
+export interface CreatedAuthToken extends AuthToken {
+  token: string
+}
+
+// ---------------------------------------------------------------------------
 // Secrets types
 // ---------------------------------------------------------------------------
 
@@ -483,7 +498,7 @@ export interface AdvisorySseEvent {
 }
 
 export interface MilestoneUatSseEvent {
-  type: 'milestone_uat_completed'
+  type: 'milestone_uat_completed' | 'milestone_uat_failed'
   slug: string
 }
 
@@ -845,10 +860,24 @@ export interface ToolInteractionRecord {
   completed_at?: string
   input: unknown
   result?: unknown
-  status: 'running' | 'completed' | 'failed'
+  status: 'running' | 'streaming' | 'completed' | 'failed'
   tags: string[]
   notes?: string
   streaming_log: boolean
+}
+
+// ---------------------------------------------------------------------------
+// Tool SSE events (streaming tool runs)
+// ---------------------------------------------------------------------------
+
+export interface ToolSseEvent {
+  type: 'tool_run_started' | 'tool_run_progress' | 'tool_run_completed' | 'tool_run_failed'
+  name: string
+  interaction_id: string
+  /** Present on tool_run_progress — the parsed NDJSON line emitted by the tool. */
+  line?: unknown
+  /** Present on tool_run_failed — the error message. */
+  error?: string
 }
 
 // ---------------------------------------------------------------------------

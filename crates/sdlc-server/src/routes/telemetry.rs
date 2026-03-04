@@ -15,7 +15,7 @@ pub async fn get_run_telemetry(
 ) -> Result<Json<serde_json::Value>, AppError> {
     let store = app
         .telemetry
-        .as_ref()
+        .get()
         .ok_or_else(|| AppError(anyhow::anyhow!("Telemetry store not available")))?
         .clone();
 
@@ -41,7 +41,7 @@ pub async fn get_run_telemetry_summary(
 ) -> Result<Json<serde_json::Value>, AppError> {
     let store = app
         .telemetry
-        .as_ref()
+        .get()
         .ok_or_else(|| AppError(anyhow::anyhow!("Telemetry store not available")))?
         .clone();
 

@@ -1,0 +1,14 @@
+{
+  "id": "20260303-160824-ooo",
+  "key": "ponder:when-uats-fail-we-should-have-multiple-p",
+  "run_type": "ponder",
+  "target": "when-uats-fail-we-should-have-multiple-p",
+  "label": "ponder: when-uats-fail-we-should-have-multiple-p",
+  "status": "failed",
+  "started_at": "2026-03-03T16:08:24.874765+00:00",
+  "completed_at": "2026-03-03T16:11:36.453972+00:00",
+  "cost_usd": null,
+  "turns": null,
+  "error": "server restarted",
+  "prompt": "You are running a ponder session for the idea 'when-uats-fail-we-should-have-multiple-p' in the sdlc workspace.\n\nThe owner (jordan) has seeded this session with the following message — include it verbatim at the top of your session log as `**jordan · Owner**\\nwhen uats fail we should have multiple pathways\n\nthis is a core template - the uat. when it fails we need to give it multiple pathways that are all actionable - NEVER STALL\n\n1. if it fails and can be fixed, then fix it and re-run the uat\n2. if theres a fairly simple escalation path, then go through that\n3. if its complicated, then there is a skill called \"recap\" in the workspace, we want to adopt that into a template, run it, and propose ponder sessions\n\nthis is essentially close off the current work session with whatever has been complete and figure out how to move forward from current state\n\nwe should have sdlc-recap as a new sdlc skill from this work, we should also have updates to the uat template and pathways in the code for escalation and proposal`:\n\n> when uats fail we should have multiple pathways\n\nthis is a core template - the uat. when it fails we need to give it multiple pathways that are all actionable - NEVER STALL\n\n1. if it fails and can be fixed, then fix it and re-run the uat\n2. if theres a fairly simple escalation path, then go through that\n3. if its complicated, then there is a skill called \"recap\" in the workspace, we want to adopt that into a template, run it, and propose ponder sessions\n\nthis is essentially close off the current work session with whatever has been complete and figure out how to move forward from current state\n\nwe should have sdlc-recap as a new sdlc skill from this work, we should also have updates to the uat template and pathways in the code for escalation and proposal\n\n## Step 1 — Load context\n\n```bash\nsdlc ponder show when-uats-fail-we-should-have-multiple-p\nsdlc ponder session list when-uats-fail-we-should-have-multiple-p\n```\n\nRead the manifest, every scrapbook artifact…"
+}

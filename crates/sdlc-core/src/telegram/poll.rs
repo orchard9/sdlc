@@ -2,6 +2,7 @@
 
 use crate::config::TelegramConfigYaml;
 use crate::error::{Result, SdlcError};
+use chrono::{DateTime, Utc};
 use serde::Deserialize;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -171,7 +172,7 @@ impl MessageStore {
         Ok(())
     }
 
-    fn insert_message(&self, update_id: i64, msg: &serde_json::Value) -> Result<()> {
+    pub fn insert_message(&self, update_id: i64, msg: &serde_json::Value) -> Result<()> {
         let chat = &msg["chat"];
         let from = &msg["from"];
 
@@ -193,6 +194,78 @@ impl MessageStore {
             )
             .map_err(|e| SdlcError::Sqlite(e.to_string()))?;
         Ok(())
+    }
+
+    /// Return all messages with `date >= now - window_hours` as `TelegramUpdate` values.
+    ///
+    /// Fields not stored in the DB (`last_name`, `chat.username`, `chat.type_`) are set
+    /// to defaults. Empty username strings are treated as `None`.
+    pub fn query_messages_in_window(
+        &self,
+        window_hours: u32,
+        now: DateTime<Utc>,
+    ) -> Result<Vec<crate::telegram::types::TelegramUpdate>> {
+        use crate::telegram::types::{TelegramChat, TelegramMessage, TelegramUpdate, TelegramUser};
+
+        let since_ts = (now - chrono::Duration::seconds(window_hours as i64 * 3600)).timestamp();
+
+        let mut stmt = self
+            .conn
+            .prepare(
+                "SELECT update_id, chat_id, chat_title, user_id, username, first_name, date, text
+                 FROM messages WHERE date >= ?1 ORDER BY date ASC",
+            )
+            .map_err(|e| SdlcError::Sqlite(e.to_string()))?;
+
+        let updates = stmt
+            .query_map(rusqlite::params![since_ts], |row| {
+                let update_id: i64 = row.get(0)?;
+                let chat_id: i64 = row.get(1)?;
+                let chat_title: Option<String> = row.get(2)?;
+                let user_id: i64 = row.get(3)?;
+                let username: Option<String> = row.get(4)?;
+                let first_name: Option<String> = row.get(5)?;
+                let date: i64 = row.get(6)?;
+                let text: Option<String> = row.get(7)?;
+                Ok((
+                    update_id, chat_id, chat_title, user_id, username, first_name, date, text,
+                ))
+            })
+            .map_err(|e| SdlcError::Sqlite(e.to_string()))?
+            .map(|row| {
+                let (update_id, chat_id, chat_title, user_id, username, first_name, date, text) =
+                    row.map_err(|e| SdlcError::Sqlite(e.to_string()))?;
+
+                // Treat empty strings as None
+                let username = username.filter(|s| !s.is_empty());
+                let chat_title = chat_title.filter(|s| !s.is_empty());
+                let text = text.filter(|s| !s.is_empty());
+                let first_name = first_name.unwrap_or_default();
+
+                Ok(TelegramUpdate {
+                    update_id,
+                    message: Some(TelegramMessage {
+                        message_id: update_id,
+                        from: Some(TelegramUser {
+                            id: user_id,
+                            first_name,
+                            last_name: None,
+                            username,
+                        }),
+                        chat: TelegramChat {
+                            id: chat_id,
+                            title: chat_title,
+                            username: None,
+                            type_: "stored".to_string(),
+                        },
+                        date,
+                        text,
+                    }),
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(updates)
     }
 }
 
@@ -410,5 +483,112 @@ mod tests {
         let cfg = TelegramConfig::from_env_and_yaml(Some(&yaml), dir.path()).unwrap();
         assert_eq!(cfg.bot_token, "env_wins");
         std::env::remove_var("TELEGRAM_BOT_TOKEN");
+    }
+
+    #[test]
+    fn query_in_window_empty_db() {
+        let (store, _dir) = make_store();
+        let now = Utc::now();
+        let updates = store.query_messages_in_window(24, now).unwrap();
+        assert!(updates.is_empty());
+    }
+
+    #[test]
+    fn query_in_window_filters_by_time() {
+        let (store, _dir) = make_store();
+        let now = Utc::now();
+
+        // Within window (1 hour ago)
+        store
+            .insert_message(
+                1,
+                &serde_json::json!({
+                    "chat": { "id": -1001, "title": "Alpha" },
+                    "from": { "id": 1, "username": "alice", "first_name": "Alice" },
+                    "date": now.timestamp() - 3600_i64,
+                    "text": "inside"
+                }),
+            )
+            .unwrap();
+
+        // Outside window (25 hours ago)
+        store
+            .insert_message(
+                2,
+                &serde_json::json!({
+                    "chat": { "id": -1001, "title": "Alpha" },
+                    "from": { "id": 2, "username": "bob", "first_name": "Bob" },
+                    "date": now.timestamp() - 25 * 3600_i64,
+                    "text": "outside"
+                }),
+            )
+            .unwrap();
+
+        let updates = store.query_messages_in_window(24, now).unwrap();
+        assert_eq!(updates.len(), 1);
+        assert_eq!(
+            updates[0].message.as_ref().unwrap().text,
+            Some("inside".to_string())
+        );
+    }
+
+    #[test]
+    fn query_in_window_reconstructs_fields() {
+        let (store, _dir) = make_store();
+        let now = Utc::now();
+
+        store
+            .insert_message(
+                99,
+                &serde_json::json!({
+                    "chat": { "id": -1001_i64, "title": "Test Chat" },
+                    "from": { "id": 42, "username": "alice_dev", "first_name": "Alice" },
+                    "date": now.timestamp() - 1800_i64,
+                    "text": "hello world"
+                }),
+            )
+            .unwrap();
+
+        let updates = store.query_messages_in_window(24, now).unwrap();
+        assert_eq!(updates.len(), 1);
+
+        let update = &updates[0];
+        assert_eq!(update.update_id, 99);
+
+        let message = update.message.as_ref().unwrap();
+        assert_eq!(message.chat.id, -1001);
+        assert_eq!(message.chat.title, Some("Test Chat".to_string()));
+        assert_eq!(message.text, Some("hello world".to_string()));
+
+        let from = message.from.as_ref().unwrap();
+        assert_eq!(from.id, 42);
+        assert_eq!(from.first_name, "Alice");
+        assert_eq!(from.username, Some("alice_dev".to_string()));
+    }
+
+    #[test]
+    fn query_in_window_empty_username_becomes_none() {
+        let (store, _dir) = make_store();
+        let now = Utc::now();
+
+        // insert_message stores "" for missing username
+        store
+            .insert_message(
+                10,
+                &serde_json::json!({
+                    "chat": { "id": -1001_i64, "title": "" },
+                    "from": { "id": 1, "username": "", "first_name": "Bob" },
+                    "date": now.timestamp() - 100_i64,
+                    "text": "hi"
+                }),
+            )
+            .unwrap();
+
+        let updates = store.query_messages_in_window(24, now).unwrap();
+        let from = updates[0].message.as_ref().unwrap().from.as_ref().unwrap();
+        assert_eq!(
+            from.username, None,
+            "empty username string should become None"
+        );
     }
 }

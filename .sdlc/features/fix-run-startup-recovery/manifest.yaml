@@ -1,9 +1,65 @@
 slug: fix-run-startup-recovery
 title: Server startup marks orphaned runs failed
-phase: draft
+phase: released
 created_at: 2026-03-03T05:30:00Z
-updated_at: 2026-03-03T05:30:00Z
-artifacts: []
+updated_at: 2026-03-03T19:34:47.117342Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/spec.md
+  created_at: 2026-03-03T15:41:11.962189Z
+  approved_at: 2026-03-03T15:41:14.537668Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/design.md
+  created_at: 2026-03-03T15:41:29.693596Z
+  approved_at: 2026-03-03T15:41:32.256139Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/tasks.md
+  created_at: 2026-03-03T15:41:44.562492Z
+  approved_at: 2026-03-03T15:41:47.265074Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/qa-plan.md
+  created_at: 2026-03-03T15:42:00.492635Z
+  approved_at: 2026-03-03T15:42:03.540247Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/review.md
+  created_at: 2026-03-03T19:31:55.417040Z
+  approved_at: 2026-03-03T19:31:57.695477Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/audit.md
+  created_at: 2026-03-03T19:32:39.067333Z
+  approved_at: 2026-03-03T19:32:39.101352Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-run-startup-recovery/qa-results.md
+  created_at: 2026-03-03T19:34:34.226700Z
+  approved_at: 2026-03-03T19:34:43.207757Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -11,7 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:30:00Z
+  exited: 2026-03-03T15:41:14.539115Z
+- phase: specified
+  entered: 2026-03-03T15:41:14.539115Z
+  exited: 2026-03-03T15:42:03.541890Z
+- phase: planned
+  entered: 2026-03-03T15:42:03.541890Z
+  exited: 2026-03-03T15:42:11.025715Z
+- phase: ready
+  entered: 2026-03-03T15:42:11.025715Z
+  exited: 2026-03-03T15:42:17.036487Z
+- phase: implementation
+  entered: 2026-03-03T15:42:17.036487Z
+  exited: 2026-03-03T19:31:57.726629Z
+- phase: review
+  entered: 2026-03-03T19:31:57.726629Z
+  exited: 2026-03-03T19:32:30.763712Z
+- phase: audit
+  entered: 2026-03-03T19:32:30.763712Z
+  exited: 2026-03-03T19:32:39.133187Z
+- phase: qa
+  entered: 2026-03-03T19:32:39.133187Z
+  exited: 2026-03-03T19:34:43.215245Z
+- phase: merge
+  entered: 2026-03-03T19:34:43.215245Z
+  exited: 2026-03-03T19:34:47.117342Z
+- phase: released
+  entered: 2026-03-03T19:34:47.117342Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

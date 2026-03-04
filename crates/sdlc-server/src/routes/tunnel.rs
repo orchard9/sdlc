@@ -29,12 +29,12 @@ pub struct TunnelStatus {
 pub async fn get_tunnel(State(app): State<AppState>) -> Json<TunnelStatus> {
     let snap = app.tunnel_snapshot.read().await;
     let url = snap.url.clone();
-    let token = snap.config.token.clone();
     drop(snap);
+    // Token is never returned on GET — it was only returned on the initial POST.
     Json(TunnelStatus {
         active: url.is_some(),
         url,
-        token,
+        token: None,
         port: app.port,
     })
 }

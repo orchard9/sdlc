@@ -402,7 +402,9 @@ pub async fn research_knowledge(
 
     let topic = body.topic.unwrap_or_else(|| slug.clone());
     let prompt = build_research_prompt(&slug, &title, &topic, &app.root);
-    let opts = sdlc_query_options(app.root.clone(), 20);
+    let mut opts = sdlc_query_options(app.root.clone(), 20);
+    opts.allowed_tools.push("WebSearch".into());
+    opts.allowed_tools.push("WebFetch".into());
 
     let completion = Some(SseMessage::KnowledgeResearchCompleted { slug: slug.clone() });
     let result = spawn_agent_run(
@@ -427,17 +429,35 @@ fn build_research_prompt(slug: &str, title: &str, topic: &str, root: &std::path:
 Root directory: {root_str}
 Knowledge entry path: {root_str}/.sdlc/knowledge/{slug}/
 
-Steps:
-1. Search the local codebase for existing information about "{topic}" using Grep and Read tools.
-2. Read any relevant source files, docs, or examples you find.
-3. Synthesize your findings into a comprehensive Markdown summary.
-4. Write the content to the entry using the Bash tool:
-   sdlc knowledge update {slug} --summary "<one-line summary>"
-   Then write detailed content to {root_str}/.sdlc/knowledge/{slug}/content.md
-5. Log this research session using:
-   sdlc knowledge session log {slug} --content "<brief session summary>"
+Follow these steps in order:
 
-Focus on accuracy. Only include information you actually found in the codebase or can verify.
+1. **Web research** — Use `WebSearch` to find 3–5 authoritative external sources on "{topic}". For each promising result, use `WebFetch` to read the full content. Capture key facts, patterns, and references, and note the source URLs for citation.
+
+2. **Local codebase context** — Use `Grep` and `Read` to search the project at {root_str} for any existing usage, configuration, or documentation related to "{topic}". Note any internal conventions, prior art, or gaps.
+
+3. **Synthesize and write `content.md`** — Write a comprehensive Markdown document to {root_str}/.sdlc/knowledge/{slug}/content.md with this structure:
+   ```
+   ## External Findings
+   <summary of web research with source URLs as Markdown links>
+
+   ## Local Context
+   <summary of what exists in the codebase, or "None found" if absent>
+
+   ## Summary
+   <2–4 sentence synthesis combining both sources>
+   ```
+
+4. **Update entry summary** — Run:
+   ```
+   sdlc knowledge update {slug} --summary "<one-line summary of the topic>"
+   ```
+
+5. **Log the session** — Run:
+   ```
+   sdlc knowledge session log {slug} --content "<brief description of what was researched and found>"
+   ```
+
+Focus on accuracy and citation. Only include external claims that you fetched and read directly — do not hallucinate sources.
 When done, confirm completion with a brief summary of findings.
 "#
     )

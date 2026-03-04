@@ -1,0 +1,25 @@
+beats:
+  - id: beat-001
+    scope: project
+    mode: evaluate
+    timestamp: 2026-03-03T22:29:36.440Z
+    verdict: drifting
+    score: 54
+    concerns:
+      - "All 42 active milestones report 'unknown' status — the governance tool cannot report its own milestone state, which is the primary credibility gap when positioning to enterprise compliance buyers whose core requirement is auditable, machine-readable state."
+      - "Fleet Foundation (v17) and Dev Driver (v21) are still active milestones, not shipped capabilities — the two most differentiated success criteria ('1,000 services in parallel' and 'come back to a project that advanced on its own') are undelivered while the milestone count has grown to 42."
+      - "v16-orchestrator-ui is an active milestone directly in tension with 'Directives, Not Dashboards' — the vision's primary interface is machine-readable JSON for agents and orchestrators; investing in orchestrator UI risks drifting toward the dashboard-for-humans pattern the vision explicitly rejects."
+      - human-uat-backend (specified) and v28-human-run-uat are building human-in-the-loop UAT flows while the vision states all approval steps are agentive — this is scope drift toward the human workflow tooling the platform was designed to replace.
+      - 141 features across 42 milestones with the two flagship value propositions (fleet scale, autonomous dev-driver) still unshipped indicates the backlog is expanding faster than strategic delivery — the governance layer governs everything except its own roadmap prioritization.
+  - id: beat-002
+    scope: project
+    mode: evaluate
+    timestamp: 2026-03-03T22:30:29.194Z
+    verdict: drifting
+    score: 61
+    concerns:
+      - "All 10 visible milestones report 'unknown' status — a governance tool that cannot report its own milestone state is an immediate credibility gap against the core value proposition. If Ponder can't govern itself, the enterprise pitch breaks down at the demo."
+      - "141 features across 42 milestones indicates significant scope expansion beyond the lean deterministic state machine described in the vision. The vision explicitly says 'Not a project management tool for humans' — 42 milestones and 141 features is approaching Jira territory, and risks the product becoming what it is positioned against."
+      - "The 20-feature sample shows at least 5 UI features (layout-appshell-panels, artifact-viewer-height-fix, fix-toolspage-mobile-nav, feedback-thread-ui, artifact-file-links) against a vision that explicitly states 'The primary interface is machine-readable JSON, not a UI.' Investment density in the view layer suggests the product is drifting toward a dashboard experience rather than a directives-first machine interface."
+      - "v28-human-run-uat as a dedicated milestone creates structural tension with the autonomous-by-default ethos and the 'not for humans' positioning. UAT infrastructure is necessary, but a human-gated milestone signals the workflow is still designed around human actors rather than agent actors — directly contradicting the 'Fire and iterate, not gate and wait' principle."
+      - The Fortune 500 success criteria — 100 services onboarded in a week, next-tick orchestrator driving 1,000 services in parallel — have no corresponding shipped evidence in the feature list. v17-fleet-foundation exists but is not released. Without a single validated enterprise-scale deployment story, the gap between vision language and shipping reality is widening every sprint.

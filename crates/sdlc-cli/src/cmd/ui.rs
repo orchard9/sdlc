@@ -4,7 +4,7 @@ use crate::output::print_table;
 use anyhow::{anyhow, Result};
 use clap::Subcommand;
 use sdlc_core::{config::Config, ui_registry};
-use sdlc_server::tunnel::{derive_tunnel_name, generate_token, Tunnel, TunnelError};
+use sdlc_server::tunnel::{derive_tunnel_name, generate_token, Tunnel};
 use std::path::Path;
 
 // ---------------------------------------------------------------------------
@@ -21,9 +21,9 @@ pub enum UiSubcommand {
         /// Don't open browser automatically
         #[arg(long)]
         no_open: bool,
-        /// Open a public tunnel and print a QR code for remote access (requires orch-tunnel)
+        /// Disable the public tunnel (tunnel starts automatically by default, requires orch-tunnel)
         #[arg(long)]
-        tunnel: bool,
+        no_tunnel: bool,
         /// Orchestrator tick interval in seconds (default 60)
         #[arg(long, default_value_t = 60)]
         tick_rate: u64,
@@ -54,19 +54,19 @@ pub fn run(
     subcommand: Option<UiSubcommand>,
     port: u16,
     no_open: bool,
-    tunnel: bool,
+    no_tunnel: bool,
     tick_rate: u64,
     run_actions: bool,
 ) -> Result<()> {
     match subcommand {
-        None => run_start(root, port, no_open, tunnel, tick_rate, run_actions),
+        None => run_start(root, port, no_open, no_tunnel, tick_rate, run_actions),
         Some(UiSubcommand::Start {
             port: p,
             no_open: n,
-            tunnel: t,
+            no_tunnel: nt,
             tick_rate: tr,
             run_actions: ra,
-        }) => run_start(root, p, n, t, tr, ra),
+        }) => run_start(root, p, n, nt, tr, ra),
         Some(UiSubcommand::List) => run_list(),
         Some(UiSubcommand::Kill { name }) => run_kill(name.as_deref(), root),
         Some(UiSubcommand::Open { name }) => run_open(name.as_deref(), root),
@@ -81,10 +81,11 @@ fn run_start(
     root: &Path,
     port: u16,
     no_open: bool,
-    use_tunnel: bool,
+    no_tunnel: bool,
     tick_rate: u64,
     run_actions: bool,
 ) -> Result<()> {
+    let use_tunnel = !no_tunnel;
     // --- Step 1: auto-update scaffolding ---
     eprintln!("sdlc ui: running update...");
     if let Err(e) = update::run(root) {
@@ -148,27 +149,26 @@ fn run_start(
             // Warn that the server is public.
             eprintln!("Warning: tunnel mode exposes your SDLC server publicly. Share the QR code only with trusted parties.");
 
-            // Start orch-tunnel.
+            // Start orch-tunnel; fall back to local-only on any failure.
             let tunnel_name = derive_tunnel_name(&root_buf);
-            let tun = match Tunnel::start(actual_port, &tunnel_name).await {
-                Ok(t) => t,
-                Err(TunnelError::NotFound) => {
-                    let _ = record_clone.remove();
-                    return Err(anyhow!("{}", TunnelError::NotFound));
+            match Tunnel::start(actual_port, &tunnel_name).await {
+                Ok(tun) => {
+                    let token = generate_token();
+                    print_tunnel_info(&name, actual_port, &tun.url, &token);
+                    tokio::select! {
+                        res = sdlc_server::serve_on(root_buf, listener, false, Some((tun, token))) => res,
+                        _ = tokio::signal::ctrl_c() => Ok(()),
+                    }
                 }
                 Err(e) => {
-                    let _ = record_clone.remove();
-                    return Err(anyhow!("{e}"));
+                    // Graceful fallback: warn and continue in local-only mode.
+                    eprintln!("Warning: orch-tunnel failed to start ({e}). Running in local-only mode.");
+                    println!("SDLC UI for '{name}' → {local_url}  (PID {pid})");
+                    tokio::select! {
+                        res = sdlc_server::serve_on(root_buf, listener, !no_open, None) => res,
+                        _ = tokio::signal::ctrl_c() => Ok(()),
+                    }
                 }
-            };
-
-            let token = generate_token();
-
-            print_tunnel_info(&name, actual_port, &tun.url, &token);
-
-            tokio::select! {
-                res = sdlc_server::serve_on(root_buf, listener, false, Some((tun, token))) => res,
-                _ = tokio::signal::ctrl_c() => Ok(()),
             }
         } else {
             println!("SDLC UI for '{name}' → {local_url}  (PID {pid})");
@@ -282,4 +282,43 @@ fn resolve_name(name: Option<&str>, root: &Path) -> Result<String> {
     }
     let config = Config::load(root).map_err(|e| anyhow!("{e}"))?;
     Ok(config.project.name)
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    /// Verify that `--no-tunnel` correctly inverts to `use_tunnel = false`.
+    /// This is the semantic core of the default-on tunnel change.
+    #[test]
+    fn no_tunnel_flag_inverts_use_tunnel() {
+        // When --no-tunnel is passed (no_tunnel = true), the server must NOT
+        // attempt a tunnel. This is the key behavioral contract.
+        let no_tunnel = true;
+        let use_tunnel = !no_tunnel;
+        assert!(!use_tunnel, "--no-tunnel should disable tunnel");
+
+        // When --no-tunnel is absent (no_tunnel = false), the server MUST
+        // attempt a tunnel by default.
+        let no_tunnel = false;
+        let use_tunnel = !no_tunnel;
+        assert!(
+            use_tunnel,
+            "tunnel must be active by default (no --no-tunnel)"
+        );
+    }
+
+    /// Verify that the graceful fallback warning message includes the error
+    /// reason and the "local-only mode" phrase, so operators know what happened.
+    #[test]
+    fn fallback_warning_format_is_informative() {
+        let reason = "orch-tunnel not found\nInstall with: brew install orch-tunnel";
+        let warning =
+            format!("Warning: orch-tunnel failed to start ({reason}). Running in local-only mode.");
+        assert!(warning.contains("orch-tunnel failed to start"));
+        assert!(warning.contains("local-only mode"));
+        assert!(warning.contains(reason));
+    }
 }

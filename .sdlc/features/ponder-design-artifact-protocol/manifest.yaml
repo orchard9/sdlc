@@ -1,17 +1,109 @@
 slug: ponder-design-artifact-protocol
 title: Ponder Design Artifact Protocol — HTML mockups in ponder skill
-phase: draft
+phase: released
 created_at: 2026-03-03T06:00:00Z
-updated_at: 2026-03-03T06:00:00Z
-artifacts: []
-tasks: []
+updated_at: 2026-03-03T22:29:40.000809Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/spec.md
+  created_at: 2026-03-03T11:17:16.560154Z
+  approved_at: 2026-03-03T11:17:16.566576Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/design.md
+  created_at: 2026-03-03T11:17:19.113654Z
+  approved_at: 2026-03-03T11:17:19.119885Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/tasks.md
+  created_at: 2026-03-03T11:17:21.526359Z
+  approved_at: 2026-03-03T11:17:21.531784Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/qa-plan.md
+  created_at: 2026-03-03T11:17:23.870117Z
+  approved_at: 2026-03-03T11:17:23.876066Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/review.md
+  created_at: 2026-03-03T11:18:06.023933Z
+  approved_at: 2026-03-03T11:18:11.099591Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/audit.md
+  created_at: 2026-03-03T11:18:42.580293Z
+  approved_at: 2026-03-03T11:18:48.132644Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/ponder-design-artifact-protocol/qa-results.md
+  created_at: 2026-03-03T22:29:28.742686Z
+  approved_at: 2026-03-03T22:29:34.403421Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'clippy: unused HeaderMap import in tools.rs (pre-existing, from v27 in-progress work) — fix when v27 feature lands'
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:16:57.728290Z
+  started_at: 2026-03-03T11:17:34.479924Z
+  completed_at: 2026-03-03T11:17:34.484993Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T06:00:00Z
+  exited: 2026-03-03T11:17:16.568055Z
+- phase: specified
+  entered: 2026-03-03T11:17:16.568055Z
+  exited: 2026-03-03T11:17:23.877557Z
+- phase: planned
+  entered: 2026-03-03T11:17:23.877557Z
+  exited: 2026-03-03T11:17:28.337806Z
+- phase: ready
+  entered: 2026-03-03T11:17:28.337806Z
+  exited: 2026-03-03T11:17:28.344648Z
+- phase: implementation
+  entered: 2026-03-03T11:17:28.344648Z
+  exited: 2026-03-03T11:18:11.114203Z
+- phase: review
+  entered: 2026-03-03T11:18:11.114203Z
+  exited: 2026-03-03T11:18:14.944794Z
+- phase: audit
+  entered: 2026-03-03T11:18:14.944794Z
+  exited: 2026-03-03T11:18:48.137368Z
+- phase: qa
+  entered: 2026-03-03T11:18:48.137368Z
+  exited: 2026-03-03T22:29:35.313322Z
+- phase: merge
+  entered: 2026-03-03T22:29:35.313322Z
+  exited: 2026-03-03T22:29:40.000809Z
+- phase: released
+  entered: 2026-03-03T22:29:40.000809Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

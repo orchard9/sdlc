@@ -1,0 +1,22 @@
+- number: 1
+  label: Review
+  items:
+  - slug: design-create-action-html
+    title: Feature create_design action produces HTML mockup
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  - slug: ponder-design-artifact-protocol
+    title: Ponder Design Artifact Protocol — HTML mockups in ponder skill
+    phase: qa
+    action: run_qa
+    needs_worktree: true
+    blocked_by: []
+  - slug: scrapbook-html-preview
+    title: Scrapbook renders *-mockup.html artifacts in an inline iframe
+    phase: qa
+    action: run_qa
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

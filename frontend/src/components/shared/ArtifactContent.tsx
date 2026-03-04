@@ -19,7 +19,7 @@ export function ArtifactContent({ filename, content, fullscreen }: Props) {
         sandbox="allow-scripts"
         className={cn(
           'w-full border-0 rounded bg-white',
-          fullscreen ? 'min-h-[60vh]' : 'min-h-64 max-h-80',
+          fullscreen ? 'min-h-[60vh]' : 'min-h-[300px] max-h-96',
         )}
         title={filename}
       />

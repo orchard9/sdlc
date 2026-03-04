@@ -1,0 +1,40 @@
+# build.yaml
+#
+# Builds and publishes the sdlc-server container image to the internal Zot registry.
+# Triggered automatically on every push to main.
+#
+# No secrets required — registry.threesix.ai (Zot) has no authentication.
+
+when:
+  - branch: main
+    event: push
+
+steps:
+  - name: build-image
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      repo: registry.threesix.ai/sdlc-server
+      registry: registry.threesix.ai
+      dockerfile: Dockerfile
+      context: .
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:7}
+      # Zot registry requires no authentication
+      username: anonymous
+      password: anonymous
+
+  - name: rollout-restart
+    image: bitnami/kubectl:latest
+    commands:
+      - |
+        echo "Restarting all sdlc-server deployments..."
+        for ns in $(kubectl get namespaces -o name | grep "namespace/sdlc-" | sed 's|namespace/||'); do
+          slug="${ns#sdlc-}"
+          echo "  Restarting sdlc-server in $ns..."
+          kubectl rollout restart deployment/"sdlc-${slug}" -n "$ns" || true
+          kubectl rollout status deployment/"sdlc-${slug}" -n "$ns" --timeout=120s || true
+        done
+        echo "Done."
+    depends_on:
+      - build-image

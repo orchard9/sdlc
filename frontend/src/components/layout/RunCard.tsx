@@ -159,7 +159,7 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
       </div>
 
       {expanded && (
-        <div className="px-3 pb-3">
+        <div className="px-3 pb-3 overflow-hidden">
           {/* Active runs: live SSE log; completed/failed/stopped: rich telemetry feed with chart */}
           {isActive ? (
             <AgentLog running={isActive} events={liveEvents} />

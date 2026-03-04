@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useSSE } from '@/hooks/useSSE'
-import { useAgentRuns } from '@/contexts/AgentRunContext'
+import { useMilestoneUatRun } from '@/hooks/useMilestoneUatRun'
 import { api } from '@/api/client'
 import { WavePlan } from '@/components/features/WavePlan'
+import { HumanUatModal } from '@/components/shared/HumanUatModal'
 import type { PrepareResult, Wave } from '@/lib/types'
 import { CheckCircle, Loader2, Play } from 'lucide-react'
 
@@ -31,50 +32,52 @@ function ProgressBarMini({ progress, waves }: {
 }
 
 function VerifyingMini({ milestoneSlug }: { milestoneSlug: string }) {
-  const key = `milestone-uat:${milestoneSlug}`
-  const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
-  const running = isRunning(key)
-  const activeRun = getRunForKey(key)
-
-  const handleStart = () => {
-    startRun({
-      key,
-      runType: 'milestone_uat',
-      target: milestoneSlug,
-      label: `UAT: ${milestoneSlug}`,
-      startUrl: `/api/milestone/${encodeURIComponent(milestoneSlug)}/uat`,
-      stopUrl: `/api/milestone/${encodeURIComponent(milestoneSlug)}/uat/stop`,
-    })
-  }
-
-  const handleFocus = () => {
-    if (activeRun) focusRun(activeRun.id)
-  }
+  const { running, handleStart, handleFocus, modalOpen, setModalOpen } = useMilestoneUatRun(milestoneSlug)
 
   return (
-    <div className="flex items-center justify-between gap-3 bg-green-950/20 border border-green-500/20 rounded-lg px-3 py-2">
-      <div className="flex items-center gap-2">
-        <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
-        <span className="text-xs text-green-400 font-medium">All features released</span>
+    <>
+      <div className="flex flex-col gap-1.5 bg-green-950/20 border border-green-500/20 rounded-lg px-3 py-2">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="w-4 h-4 text-green-400 shrink-0" />
+            <span className="text-xs text-green-400 font-medium">All features released</span>
+          </div>
+          {running ? (
+            <button
+              onClick={handleFocus}
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground text-[10px] hover:bg-muted/80 transition-colors whitespace-nowrap"
+            >
+              <Loader2 className="w-3 h-3 animate-spin" />
+              Running
+            </button>
+          ) : (
+            <button
+              onClick={handleStart}
+              className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-green-500/30 bg-green-500/20 text-green-400 text-[10px] hover:bg-green-500/30 transition-colors whitespace-nowrap"
+            >
+              <Play className="w-3 h-3" />
+              Run UAT
+            </button>
+          )}
+        </div>
+        {!running && (
+          <div className="flex justify-end">
+            <button
+              onClick={() => setModalOpen(true)}
+              className="text-[10px] text-muted-foreground underline hover:text-foreground transition-colors"
+            >
+              Submit manually
+            </button>
+          </div>
+        )}
       </div>
-      {running ? (
-        <button
-          onClick={handleFocus}
-          className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-border bg-muted text-muted-foreground text-[10px] hover:bg-muted/80 transition-colors whitespace-nowrap"
-        >
-          <Loader2 className="w-3 h-3 animate-spin" />
-          Running
-        </button>
-      ) : (
-        <button
-          onClick={handleStart}
-          className="shrink-0 inline-flex items-center gap-1 px-2 py-0.5 rounded border border-green-500/30 bg-green-500/20 text-green-400 text-[10px] hover:bg-green-500/30 transition-colors whitespace-nowrap"
-        >
-          <Play className="w-3 h-3" />
-          Run UAT
-        </button>
-      )}
-    </div>
+      <HumanUatModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mode="milestone"
+        slug={milestoneSlug}
+      />
+    </>
   )
 }
 

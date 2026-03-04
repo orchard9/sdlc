@@ -798,3 +798,997 @@
   timestamp: 2026-03-03T04:55:50.609880Z
   metadata:
     run_key: milestone-run-wave:v19-uat-artifacts
+- id: ev-0145
+  kind: audit_approved
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:15:13.686669Z
+  metadata: {}
+- id: ev-0146
+  kind: review_approved
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:15:33.791821Z
+  metadata: {}
+- id: ev-0147
+  kind: feature_phase_advanced
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:15:33.807267Z
+  metadata:
+    phase: review
+- id: ev-0148
+  kind: audit_approved
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:15:39.266614Z
+  metadata: {}
+- id: ev-0149
+  kind: feature_phase_advanced
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:15:39.279061Z
+  metadata:
+    phase: qa
+- id: ev-0150
+  kind: qa_approved
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:16:33.239531Z
+  metadata: {}
+- id: ev-0151
+  kind: feature_phase_advanced
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:16:33.243547Z
+  metadata:
+    phase: merge
+- id: ev-0152
+  kind: feature_merged
+  slug: fix-toolspage-mobile-nav
+  timestamp: 2026-03-03T11:16:37.272152Z
+  metadata: {}
+- id: ev-0153
+  kind: review_approved
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T11:17:08.888217Z
+  metadata: {}
+- id: ev-0154
+  kind: feature_phase_advanced
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T11:17:08.908808Z
+  metadata:
+    phase: review
+- id: ev-0155
+  kind: audit_approved
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T11:17:42.667579Z
+  metadata: {}
+- id: ev-0156
+  kind: feature_phase_advanced
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T11:17:42.670112Z
+  metadata:
+    phase: qa
+- id: ev-0157
+  kind: review_approved
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:00.097428Z
+  metadata: {}
+- id: ev-0158
+  kind: feature_phase_advanced
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:00.110923Z
+  metadata:
+    phase: review
+- id: ev-0159
+  kind: audit_approved
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:02.752638Z
+  metadata: {}
+- id: ev-0160
+  kind: feature_phase_advanced
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:02.755975Z
+  metadata:
+    phase: qa
+- id: ev-0161
+  kind: qa_approved
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:05.461045Z
+  metadata: {}
+- id: ev-0162
+  kind: feature_phase_advanced
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:05.463628Z
+  metadata:
+    phase: merge
+- id: ev-0163
+  kind: feature_merged
+  slug: fix-threadspage-mobile-layout
+  timestamp: 2026-03-03T11:18:08.372884Z
+  metadata: {}
+- id: ev-0164
+  kind: review_approved
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T11:18:11.107502Z
+  metadata: {}
+- id: ev-0165
+  kind: feature_phase_advanced
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T11:18:11.116006Z
+  metadata:
+    phase: review
+- id: ev-0166
+  kind: milestone_wave_completed
+  slug: fix-mobile-layouts
+  timestamp: 2026-03-03T11:18:38.461135Z
+  metadata:
+    run_key: milestone-run-wave:fix-mobile-layouts
+- id: ev-0167
+  kind: audit_approved
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T11:18:48.134490Z
+  metadata: {}
+- id: ev-0168
+  kind: feature_phase_advanced
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T11:18:48.138273Z
+  metadata:
+    phase: qa
+- id: ev-0169
+  kind: review_approved
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T11:19:28.927074Z
+  metadata: {}
+- id: ev-0170
+  kind: feature_phase_advanced
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T11:19:28.931308Z
+  metadata:
+    phase: review
+- id: ev-0171
+  kind: run_failed
+  slug: v27-agentic-tool-suite
+  timestamp: 2026-03-03T11:20:12.612425Z
+  metadata:
+    run_key: milestone-run-wave:v27-agentic-tool-suite
+- id: ev-0172
+  kind: audit_approved
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T11:20:29.137803Z
+  metadata: {}
+- id: ev-0173
+  kind: feature_phase_advanced
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T11:20:29.144770Z
+  metadata:
+    phase: qa
+- id: ev-0174
+  kind: review_approved
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:49:45.466840Z
+  metadata: {}
+- id: ev-0175
+  kind: feature_phase_advanced
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:49:45.471153Z
+  metadata:
+    phase: review
+- id: ev-0176
+  kind: audit_approved
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:51:38.986761Z
+  metadata: {}
+- id: ev-0177
+  kind: feature_phase_advanced
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:51:38.990099Z
+  metadata:
+    phase: qa
+- id: ev-0178
+  kind: qa_approved
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:52:34.067293Z
+  metadata: {}
+- id: ev-0179
+  kind: feature_phase_advanced
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:52:34.078878Z
+  metadata:
+    phase: merge
+- id: ev-0180
+  kind: feature_merged
+  slug: knowledge-research-modal
+  timestamp: 2026-03-03T15:53:03.061900Z
+  metadata: {}
+- id: ev-0181
+  kind: milestone_wave_completed
+  slug: v24-knowledge-research
+  timestamp: 2026-03-03T19:25:51.338943Z
+  metadata:
+    run_key: milestone-run-wave:v24-knowledge-research
+- id: ev-0182
+  kind: review_approved
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:31:57.713643Z
+  metadata: {}
+- id: ev-0183
+  kind: feature_phase_advanced
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:31:57.737552Z
+  metadata:
+    phase: review
+- id: ev-0184
+  kind: audit_approved
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:32:39.110443Z
+  metadata: {}
+- id: ev-0185
+  kind: feature_phase_advanced
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:32:39.142798Z
+  metadata:
+    phase: qa
+- id: ev-0186
+  kind: qa_approved
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:34:43.212489Z
+  metadata: {}
+- id: ev-0187
+  kind: feature_phase_advanced
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:34:43.216086Z
+  metadata:
+    phase: merge
+- id: ev-0188
+  kind: feature_merged
+  slug: fix-run-startup-recovery
+  timestamp: 2026-03-03T19:34:47.127682Z
+  metadata: {}
+- id: ev-0189
+  kind: milestone_wave_completed
+  slug: fix-run-lifecycle
+  timestamp: 2026-03-03T19:35:17.264867Z
+  metadata:
+    run_key: milestone-run-wave:fix-run-lifecycle
+- id: ev-0190
+  kind: review_approved
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:35:31.941388Z
+  metadata: {}
+- id: ev-0191
+  kind: feature_phase_advanced
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:35:31.944193Z
+  metadata:
+    phase: review
+- id: ev-0192
+  kind: audit_approved
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:35:51.407819Z
+  metadata: {}
+- id: ev-0193
+  kind: feature_phase_advanced
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:35:51.411844Z
+  metadata:
+    phase: qa
+- id: ev-0194
+  kind: run_failed
+  slug: v26-html-design-artifacts
+  timestamp: 2026-03-03T19:36:10.085729Z
+  metadata:
+    run_key: milestone-run-wave:v26-html-design-artifacts
+- id: ev-0195
+  kind: qa_approved
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:36:13.535516Z
+  metadata: {}
+- id: ev-0196
+  kind: feature_phase_advanced
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:36:13.539809Z
+  metadata:
+    phase: merge
+- id: ev-0197
+  kind: feature_merged
+  slug: knowledge-research-web-tools
+  timestamp: 2026-03-03T19:36:22.240504Z
+  metadata: {}
+- id: ev-0198
+  kind: milestone_wave_completed
+  slug: v24-knowledge-research
+  timestamp: 2026-03-03T19:36:48.672090Z
+  metadata:
+    run_key: milestone-run-wave:v24-knowledge-research
+- id: ev-0199
+  kind: run_failed
+  slug: v25-secrets-write-ui
+  timestamp: 2026-03-03T19:41:48.660277Z
+  metadata:
+    run_key: milestone-run-wave:v25-secrets-write-ui
+- id: ev-0200
+  kind: milestone_wave_completed
+  slug: fix-run-lifecycle
+  timestamp: 2026-03-03T19:43:12.848241Z
+  metadata:
+    run_key: milestone-run-wave:fix-run-lifecycle
+- id: ev-0201
+  kind: milestone_wave_completed
+  slug: v26-html-design-artifacts
+  timestamp: 2026-03-03T19:43:39.145412Z
+  metadata:
+    run_key: milestone-run-wave:v26-html-design-artifacts
+- id: ev-0202
+  kind: feature_phase_advanced
+  slug: citadel-webhook-handler
+  timestamp: 2026-03-03T19:46:58.921922Z
+  metadata:
+    phase: review
+- id: ev-0203
+  kind: feature_phase_advanced
+  slug: citadel-app-registration
+  timestamp: 2026-03-03T19:47:10.336104Z
+  metadata:
+    phase: review
+- id: ev-0204
+  kind: review_approved
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:47:11.711704Z
+  metadata: {}
+- id: ev-0205
+  kind: feature_phase_advanced
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:47:11.714476Z
+  metadata:
+    phase: review
+- id: ev-0206
+  kind: feature_phase_advanced
+  slug: citadel-annotate-log-tool
+  timestamp: 2026-03-03T19:47:26.565024Z
+  metadata:
+    phase: review
+- id: ev-0207
+  kind: audit_approved
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:47:39.733302Z
+  metadata: {}
+- id: ev-0208
+  kind: feature_phase_advanced
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:47:39.737418Z
+  metadata:
+    phase: qa
+- id: ev-0209
+  kind: feature_phase_advanced
+  slug: citadel-app-registration
+  timestamp: 2026-03-03T19:47:55.647006Z
+  metadata:
+    phase: qa
+- id: ev-0210
+  kind: feature_phase_advanced
+  slug: citadel-webhook-handler
+  timestamp: 2026-03-03T19:47:56.742524Z
+  metadata:
+    phase: qa
+- id: ev-0211
+  kind: feature_phase_advanced
+  slug: citadel-incident-runbook
+  timestamp: 2026-03-03T19:48:07.459299Z
+  metadata:
+    phase: review
+- id: ev-0212
+  kind: qa_approved
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:48:13.049433Z
+  metadata: {}
+- id: ev-0213
+  kind: feature_phase_advanced
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:48:13.052277Z
+  metadata:
+    phase: merge
+- id: ev-0214
+  kind: feature_merged
+  slug: secrets-env-ui
+  timestamp: 2026-03-03T19:48:17.401201Z
+  metadata: {}
+- id: ev-0215
+  kind: feature_phase_advanced
+  slug: citadel-app-registration
+  timestamp: 2026-03-03T19:48:21.262728Z
+  metadata:
+    phase: merge
+- id: ev-0216
+  kind: feature_phase_advanced
+  slug: citadel-query-logs-tool
+  timestamp: 2026-03-03T19:48:23.111243Z
+  metadata:
+    phase: review
+- id: ev-0217
+  kind: feature_merged
+  slug: citadel-app-registration
+  timestamp: 2026-03-03T19:48:39.353829Z
+  metadata: {}
+- id: ev-0218
+  kind: feature_phase_advanced
+  slug: citadel-webhook-handler
+  timestamp: 2026-03-03T19:48:41.466986Z
+  metadata:
+    phase: merge
+- id: ev-0219
+  kind: feature_phase_advanced
+  slug: citadel-annotate-log-tool
+  timestamp: 2026-03-03T19:48:45.196823Z
+  metadata:
+    phase: qa
+- id: ev-0220
+  kind: milestone_wave_completed
+  slug: v25-secrets-write-ui
+  timestamp: 2026-03-03T19:48:49.648926Z
+  metadata:
+    run_key: milestone-run-wave:v25-secrets-write-ui
+- id: ev-0221
+  kind: feature_merged
+  slug: citadel-webhook-handler
+  timestamp: 2026-03-03T19:49:22.325731Z
+  metadata: {}
+- id: ev-0222
+  kind: feature_phase_advanced
+  slug: citadel-incident-runbook
+  timestamp: 2026-03-03T19:49:24.682519Z
+  metadata:
+    phase: qa
+- id: ev-0223
+  kind: feature_phase_advanced
+  slug: citadel-query-logs-tool
+  timestamp: 2026-03-03T19:50:01.791469Z
+  metadata:
+    phase: qa
+- id: ev-0224
+  kind: feature_phase_advanced
+  slug: citadel-annotate-log-tool
+  timestamp: 2026-03-03T19:50:27.614294Z
+  metadata:
+    phase: merge
+- id: ev-0225
+  kind: feature_merged
+  slug: citadel-annotate-log-tool
+  timestamp: 2026-03-03T19:50:31.738899Z
+  metadata: {}
+- id: ev-0226
+  kind: feature_phase_advanced
+  slug: citadel-incident-runbook
+  timestamp: 2026-03-03T19:51:02.368907Z
+  metadata:
+    phase: merge
+- id: ev-0227
+  kind: feature_merged
+  slug: citadel-incident-runbook
+  timestamp: 2026-03-03T19:51:23.854939Z
+  metadata: {}
+- id: ev-0228
+  kind: feature_phase_advanced
+  slug: citadel-query-logs-tool
+  timestamp: 2026-03-03T19:52:44.521278Z
+  metadata:
+    phase: merge
+- id: ev-0229
+  kind: feature_merged
+  slug: citadel-query-logs-tool
+  timestamp: 2026-03-03T19:52:48.280872Z
+  metadata: {}
+- id: ev-0230
+  kind: milestone_wave_completed
+  slug: citadel-pantheon-integration
+  timestamp: 2026-03-03T19:53:16.034271Z
+  metadata:
+    run_key: milestone-run-wave:citadel-pantheon-integration
+- id: ev-0231
+  kind: milestone_wave_completed
+  slug: fix-run-lifecycle
+  timestamp: 2026-03-03T22:26:05.586341Z
+  metadata:
+    run_key: milestone-run-wave:fix-run-lifecycle
+- id: ev-0232
+  kind: milestone_wave_completed
+  slug: v25-secrets-write-ui
+  timestamp: 2026-03-03T22:26:26.966167Z
+  metadata:
+    run_key: milestone-run-wave:v25-secrets-write-ui
+- id: ev-0233
+  kind: feature_phase_advanced
+  slug: beat-tool
+  timestamp: 2026-03-03T22:27:42.511371Z
+  metadata:
+    phase: review
+- id: ev-0234
+  kind: feature_phase_advanced
+  slug: beat-tool
+  timestamp: 2026-03-03T22:28:34.160403Z
+  metadata:
+    phase: qa
+- id: ev-0235
+  kind: qa_approved
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T22:29:35.109416Z
+  metadata: {}
+- id: ev-0236
+  kind: feature_phase_advanced
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T22:29:35.562641Z
+  metadata:
+    phase: merge
+- id: ev-0237
+  kind: feature_merged
+  slug: ponder-design-artifact-protocol
+  timestamp: 2026-03-03T22:29:40.010120Z
+  metadata: {}
+- id: ev-0238
+  kind: review_approved
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:30:03.059521Z
+  metadata: {}
+- id: ev-0239
+  kind: feature_phase_advanced
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:30:03.207832Z
+  metadata:
+    phase: review
+- id: ev-0240
+  kind: feature_phase_advanced
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:30:44.433663Z
+  metadata:
+    phase: audit
+- id: ev-0241
+  kind: audit_approved
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:30:49.405839Z
+  metadata: {}
+- id: ev-0242
+  kind: feature_phase_advanced
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:30:49.467879Z
+  metadata:
+    phase: qa
+- id: ev-0243
+  kind: feature_phase_advanced
+  slug: beat-tool
+  timestamp: 2026-03-03T22:31:33.268066Z
+  metadata:
+    phase: merge
+- id: ev-0244
+  kind: feature_merged
+  slug: beat-tool
+  timestamp: 2026-03-03T22:31:37.210864Z
+  metadata: {}
+- id: ev-0245
+  kind: qa_approved
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T22:31:41.362562Z
+  metadata: {}
+- id: ev-0246
+  kind: feature_phase_advanced
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T22:31:41.365655Z
+  metadata:
+    phase: merge
+- id: ev-0247
+  kind: qa_approved
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:31:46.570863Z
+  metadata: {}
+- id: ev-0248
+  kind: feature_phase_advanced
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:31:46.573972Z
+  metadata:
+    phase: merge
+- id: ev-0249
+  kind: feature_merged
+  slug: scrapbook-html-preview
+  timestamp: 2026-03-03T22:31:47.530391Z
+  metadata: {}
+- id: ev-0250
+  kind: feature_merged
+  slug: design-create-action-html
+  timestamp: 2026-03-03T22:31:51.018968Z
+  metadata: {}
+- id: ev-0251
+  kind: milestone_wave_completed
+  slug: v26-html-design-artifacts
+  timestamp: 2026-03-03T22:32:17.698022Z
+  metadata:
+    run_key: milestone-run-wave:v26-html-design-artifacts
+- id: ev-0252
+  kind: review_approved
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:33:00.903775Z
+  metadata: {}
+- id: ev-0253
+  kind: review_approved
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:34:54.197164Z
+  metadata: {}
+- id: ev-0254
+  kind: feature_phase_advanced
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:34:54.200856Z
+  metadata:
+    phase: review
+- id: ev-0255
+  kind: audit_approved
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:35:25.779529Z
+  metadata: {}
+- id: ev-0256
+  kind: feature_phase_advanced
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:35:25.783096Z
+  metadata:
+    phase: qa
+- id: ev-0257
+  kind: run_failed
+  slug: v29-tunnel-auth
+  timestamp: 2026-03-03T22:37:28.850364Z
+  metadata:
+    run_key: milestone-run-wave:v29-tunnel-auth
+- id: ev-0258
+  kind: qa_approved
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:37:37.425464Z
+  metadata: {}
+- id: ev-0259
+  kind: feature_phase_advanced
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:37:37.428820Z
+  metadata:
+    phase: merge
+- id: ev-0260
+  kind: feature_merged
+  slug: human-uat-frontend
+  timestamp: 2026-03-03T22:37:46.890773Z
+  metadata: {}
+- id: ev-0261
+  kind: feature_phase_advanced
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:38:53.330825Z
+  metadata:
+    phase: review
+- id: ev-0262
+  kind: audit_approved
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:39:53.953979Z
+  metadata: {}
+- id: ev-0263
+  kind: feature_phase_advanced
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:39:53.958926Z
+  metadata:
+    phase: qa
+- id: ev-0264
+  kind: review_approved
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:39:55.222361Z
+  metadata: {}
+- id: ev-0265
+  kind: feature_phase_advanced
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:39:55.227448Z
+  metadata:
+    phase: review
+- id: ev-0266
+  kind: run_failed
+  slug: workspace-layout-improvements
+  timestamp: 2026-03-03T22:39:58.934278Z
+  metadata:
+    run_key: ponder:workspace-layout-improvements
+- id: ev-0267
+  kind: audit_approved
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:40:28.693335Z
+  metadata: {}
+- id: ev-0268
+  kind: feature_phase_advanced
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:40:28.697284Z
+  metadata:
+    phase: qa
+- id: ev-0269
+  kind: qa_approved
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:42:21.461610Z
+  metadata: {}
+- id: ev-0270
+  kind: feature_phase_advanced
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:42:21.596835Z
+  metadata:
+    phase: merge
+- id: ev-0271
+  kind: feature_merged
+  slug: tool-streaming-async
+  timestamp: 2026-03-03T22:42:27.354058Z
+  metadata: {}
+- id: ev-0272
+  kind: review_approved
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:42:47.583359Z
+  metadata: {}
+- id: ev-0273
+  kind: feature_phase_advanced
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:42:47.586713Z
+  metadata:
+    phase: review
+- id: ev-0274
+  kind: qa_approved
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:43:02.366252Z
+  metadata: {}
+- id: ev-0275
+  kind: feature_phase_advanced
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:43:02.369801Z
+  metadata:
+    phase: merge
+- id: ev-0276
+  kind: feature_merged
+  slug: human-uat-backend
+  timestamp: 2026-03-03T22:43:06.362306Z
+  metadata: {}
+- id: ev-0277
+  kind: milestone_wave_completed
+  slug: v28-human-run-uat
+  timestamp: 2026-03-03T22:43:38.661703Z
+  metadata:
+    run_key: milestone-run-wave:v28-human-run-uat
+- id: ev-0278
+  kind: review_approved
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:44:41.806095Z
+  metadata: {}
+- id: ev-0279
+  kind: feature_phase_advanced
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:44:41.810961Z
+  metadata:
+    phase: review
+- id: ev-0280
+  kind: audit_approved
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:44:57.864473Z
+  metadata: {}
+- id: ev-0281
+  kind: feature_phase_advanced
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:44:57.869882Z
+  metadata:
+    phase: qa
+- id: ev-0282
+  kind: audit_approved
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:45:04.777547Z
+  metadata: {}
+- id: ev-0283
+  kind: feature_phase_advanced
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:45:04.783290Z
+  metadata:
+    phase: qa
+- id: ev-0284
+  kind: qa_approved
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:46:08.539280Z
+  metadata: {}
+- id: ev-0285
+  kind: feature_phase_advanced
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:46:08.544034Z
+  metadata:
+    phase: merge
+- id: ev-0286
+  kind: feature_merged
+  slug: secrets-create-env-endpoint
+  timestamp: 2026-03-03T22:46:14.231756Z
+  metadata: {}
+- id: ev-0287
+  kind: milestone_wave_completed
+  slug: v25-secrets-write-ui
+  timestamp: 2026-03-03T22:46:39.170993Z
+  metadata:
+    run_key: milestone-run-wave:v25-secrets-write-ui
+- id: ev-0288
+  kind: qa_approved
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:47:03.420002Z
+  metadata: {}
+- id: ev-0289
+  kind: feature_phase_advanced
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:47:03.423659Z
+  metadata:
+    phase: merge
+- id: ev-0290
+  kind: feature_merged
+  slug: dev-driver-agentic-dispatch
+  timestamp: 2026-03-03T22:47:07.951835Z
+  metadata: {}
+- id: ev-0291
+  kind: milestone_wave_completed
+  slug: v27-agentic-tool-suite
+  timestamp: 2026-03-03T22:47:36.685944Z
+  metadata:
+    run_key: milestone-run-wave:v27-agentic-tool-suite
+- id: ev-0292
+  kind: milestone_wave_completed
+  slug: fix-run-lifecycle
+  timestamp: 2026-03-03T23:35:46.990476Z
+  metadata:
+    run_key: milestone-run-wave:fix-run-lifecycle
+- id: ev-0293
+  kind: qa_approved
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T23:40:43.789701Z
+  metadata: {}
+- id: ev-0294
+  kind: feature_phase_advanced
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T23:40:43.793935Z
+  metadata:
+    phase: merge
+- id: ev-0295
+  kind: feature_merged
+  slug: tool-state-primitives
+  timestamp: 2026-03-03T23:40:48.212011Z
+  metadata: {}
+- id: ev-0296
+  kind: run_failed
+  slug: v27-agentic-tool-suite
+  timestamp: 2026-03-03T23:46:24.746387Z
+  metadata:
+    run_key: milestone-run-wave:v27-agentic-tool-suite
+- id: ev-0297
+  kind: review_approved
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:48:40.346843Z
+  metadata: {}
+- id: ev-0298
+  kind: feature_phase_advanced
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:48:40.352493Z
+  metadata:
+    phase: review
+- id: ev-0299
+  kind: audit_approved
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:49:24.723654Z
+  metadata: {}
+- id: ev-0300
+  kind: feature_phase_advanced
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:49:24.728297Z
+  metadata:
+    phase: qa
+- id: ev-0301
+  kind: qa_approved
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:49:48.320655Z
+  metadata: {}
+- id: ev-0302
+  kind: feature_phase_advanced
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:49:48.405169Z
+  metadata:
+    phase: merge
+- id: ev-0303
+  kind: feature_merged
+  slug: orch-tunnel-migration
+  timestamp: 2026-03-03T23:49:53.434898Z
+  metadata: {}
+- id: ev-0304
+  kind: review_approved
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:52:36.899942Z
+  metadata: {}
+- id: ev-0305
+  kind: feature_phase_advanced
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:52:36.905663Z
+  metadata:
+    phase: review
+- id: ev-0306
+  kind: audit_approved
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:53:47.253040Z
+  metadata: {}
+- id: ev-0307
+  kind: feature_phase_advanced
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:53:47.333534Z
+  metadata:
+    phase: qa
+- id: ev-0308
+  kind: qa_approved
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:55:03.945896Z
+  metadata: {}
+- id: ev-0309
+  kind: feature_phase_advanced
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:55:03.949789Z
+  metadata:
+    phase: merge
+- id: ev-0310
+  kind: feature_merged
+  slug: auth-named-tokens
+  timestamp: 2026-03-03T23:55:08.650643Z
+  metadata: {}
+- id: ev-0311
+  kind: review_approved
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:55:18.088222Z
+  metadata: {}
+- id: ev-0312
+  kind: feature_phase_advanced
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:55:18.094301Z
+  metadata:
+    phase: review
+- id: ev-0313
+  kind: milestone_wave_completed
+  slug: v29-tunnel-auth
+  timestamp: 2026-03-03T23:55:48.461569Z
+  metadata:
+    run_key: milestone-run-wave:v29-tunnel-auth
+- id: ev-0314
+  kind: audit_approved
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:56:38.311631Z
+  metadata: {}
+- id: ev-0315
+  kind: feature_phase_advanced
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:56:38.316434Z
+  metadata:
+    phase: qa
+- id: ev-0316
+  kind: qa_approved
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:59:26.327253Z
+  metadata: {}
+- id: ev-0317
+  kind: feature_phase_advanced
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:59:26.332769Z
+  metadata:
+    phase: merge
+- id: ev-0318
+  kind: feature_merged
+  slug: tool-agent-invocation
+  timestamp: 2026-03-03T23:59:33.939750Z
+  metadata: {}
+- id: ev-0319
+  kind: milestone_wave_completed
+  slug: fix-run-lifecycle
+  timestamp: 2026-03-04T00:03:54.821962Z
+  metadata:
+    run_key: milestone-run-wave:fix-run-lifecycle
+- id: ev-0320
+  kind: feature_phase_advanced
+  slug: fix-activitytimeseriesoverflowsagentsidebar
+  timestamp: 2026-03-04T00:45:07.700611Z
+  metadata:
+    phase: review
+- id: ev-0321
+  kind: feature_phase_advanced
+  slug: fix-activitytimeseriesoverflowsagentsidebar
+  timestamp: 2026-03-04T00:45:16.214458Z
+  metadata:
+    phase: qa
+- id: ev-0322
+  kind: feature_phase_advanced
+  slug: fix-activitytimeseriesoverflowsagentsidebar
+  timestamp: 2026-03-04T00:45:38.362553Z
+  metadata:
+    phase: merge
+- id: ev-0323
+  kind: feature_merged
+  slug: fix-activitytimeseriesoverflowsagentsidebar
+  timestamp: 2026-03-04T00:45:42.445037Z
+  metadata: {}

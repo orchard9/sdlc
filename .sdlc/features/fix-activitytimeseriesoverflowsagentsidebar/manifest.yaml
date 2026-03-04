@@ -1,0 +1,140 @@
+slug: fix-activitytimeseriesoverflowsagentsidebar
+title: Fix Activitytimeseriesoverflowsagentsidebar
+description: |-
+  Root cause: The SVG in ActivityTimeSeries has `className="overflow-visible"` which allows x-axis labels and bars to render outside the SVG's reported dimensions, and the legend row (`flex items-center gap-3` with 5 items) has no overflow constraint — combined, they can exceed the panel width since no parent in the RunCard expanded section enforces `overflow-hidden`.
+
+  Problem: When a run card is expanded in the Agent Activity sidebar, the ActivityTimeSeries chart and its legend row overflow horizontally, pushing the sidebar beyond its bounds and making it scrollable. This breaks the fixed-width panel layout and degrades the UX.
+
+  Original report:
+  in the agent activity, when i open the activity of something i see columns for time activity, those extend beyond the page and cause the entire sidebar to be scrollable, we should make sure it fits by either making the agent activity section slightly wider or the columns slightly skinnier
+
+  the overall agent activity container should be overflow hidden
+phase: released
+created_at: 2026-03-04T00:43:10.627757Z
+updated_at: 2026-03-04T00:45:42.438714Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/spec.md
+  created_at: 2026-03-04T00:43:40.288043Z
+  approved_at: 2026-03-04T00:43:42.053921Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T00:43:47.805993Z
+  waive_reason: Pure CSS layout fix — two className changes in two existing files, no new UI states or visual design changes needed.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/tasks.md
+  created_at: 2026-03-04T00:43:52.500262Z
+  approved_at: 2026-03-04T00:43:57.742635Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/qa-plan.md
+  created_at: 2026-03-04T00:44:07.091080Z
+  approved_at: 2026-03-04T00:44:08.812913Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/review.md
+  created_at: 2026-03-04T00:45:05.739384Z
+  approved_at: 2026-03-04T00:45:07.690266Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T00:45:16.211376Z
+  waive_reason: Pure CSS className changes — no logic, no data handling, no security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-activitytimeseriesoverflowsagentsidebar/qa-results.md
+  created_at: 2026-03-04T00:45:35.767755Z
+  approved_at: 2026-03-04T00:45:38.354805Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Remove overflow-visible from SVG and add overflow-hidden to outer container in ActivityTimeSeries.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-04T00:44:34.632722Z
+  started_at: null
+  completed_at: 2026-03-04T00:44:41.161758Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add flex-wrap to legend row in ActivityTimeSeries.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-04T00:44:36.466248Z
+  started_at: null
+  completed_at: 2026-03-04T00:44:43.971668Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add overflow-hidden to expanded panel wrapper in RunCard.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-04T00:44:38.900751Z
+  started_at: null
+  completed_at: 2026-03-04T00:44:47.967534Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T00:43:10.627757Z
+  exited: 2026-03-04T00:43:42.056414Z
+- phase: specified
+  entered: 2026-03-04T00:43:42.056414Z
+  exited: 2026-03-04T00:44:08.815148Z
+- phase: planned
+  entered: 2026-03-04T00:44:08.815148Z
+  exited: 2026-03-04T00:44:14.079549Z
+- phase: ready
+  entered: 2026-03-04T00:44:14.079549Z
+  exited: 2026-03-04T00:44:18.035545Z
+- phase: implementation
+  entered: 2026-03-04T00:44:18.035545Z
+  exited: 2026-03-04T00:45:07.697588Z
+- phase: review
+  entered: 2026-03-04T00:45:07.697588Z
+  exited: 2026-03-04T00:45:11.871739Z
+- phase: audit
+  entered: 2026-03-04T00:45:11.871739Z
+  exited: 2026-03-04T00:45:16.213064Z
+- phase: qa
+  entered: 2026-03-04T00:45:16.213064Z
+  exited: 2026-03-04T00:45:38.357620Z
+- phase: merge
+  entered: 2026-03-04T00:45:38.357620Z
+  exited: 2026-03-04T00:45:42.438714Z
+- phase: released
+  entered: 2026-03-04T00:45:42.438714Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

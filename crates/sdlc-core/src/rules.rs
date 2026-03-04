@@ -237,12 +237,14 @@ pub fn default_rules() -> Vec<Rule> {
             action: ActionType::CreateDesign,
             message: |ctx| format!(
                 "No design exists for '{}'. Write design.md as the primary entry point.\n\
-                Format guidance: use plain markdown for most features. For architecture-heavy work, \
-                include diagrams (embed as images referenced from design.md). For UI features, include \
-                an HTML prototype or ASCII wireframes alongside design.md. Any companion files \
-                (images, HTML, diagrams) go in the same feature directory and must be referenced \
-                from design.md. If this feature needs no design (simple CRUD, config-only), \
-                run: sdlc artifact waive {} design --reason \"<reason>\"",
+                For UI features: also write mockup.html — a single self-contained HTML file \
+                (inline <style>/<script>, no CDN or external resources) with a <nav> bar to navigate \
+                between named <section id=\"screen-*\"> blocks for each major UI state. \
+                Reference the file from design.md with a relative link: [Mockup](mockup.html). \
+                Place mockup.html in the same directory as design.md.\n\
+                For non-UI features (backend, CLI, config-only): ASCII wireframes or plain Markdown \
+                in design.md are sufficient.\n\
+                If this feature needs no design, run: sdlc artifact waive {} design --reason \"<reason>\"",
                 ctx.feature.slug, ctx.feature.slug
             ),
             next_command: |ctx| format!("/design-feature {}", ctx.feature.slug),
@@ -261,7 +263,15 @@ pub fn default_rules() -> Vec<Rule> {
             id: "design_rejected",
             condition: |ctx| in_phase(ctx, Phase::Specified) && artifact_rejected(ctx, ArtifactType::Design),
             action: ActionType::CreateDesign,
-            message: |ctx| format!("Design for '{}' was rejected. Rewrite it.", ctx.feature.slug),
+            message: |ctx| format!(
+                "Design for '{}' was rejected. Rewrite it.\n\
+                For UI features: also rewrite mockup.html — a single self-contained HTML file \
+                (inline <style>/<script>, no CDN or external resources) with a <nav> bar to navigate \
+                between named <section id=\"screen-*\"> blocks for each major UI state. \
+                Reference it from design.md: [Mockup](mockup.html).\n\
+                For non-UI features: ASCII wireframes or plain Markdown are sufficient.",
+                ctx.feature.slug
+            ),
             next_command: |ctx| format!("/design-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/design.md", feature_dir(ctx))
         },

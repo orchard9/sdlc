@@ -9,6 +9,8 @@ use std::path::{Path, PathBuf};
 
 #[derive(Subcommand)]
 pub enum SecretsSubcommand {
+    /// Show all authorized keys and encrypted environments
+    List,
     /// Manage authorized decryption keys
     Keys {
         #[command(subcommand)]
@@ -120,9 +122,57 @@ fn resolve_identity(explicit: Option<PathBuf>) -> anyhow::Result<PathBuf> {
 
 pub fn run(root: &Path, subcommand: SecretsSubcommand, _json: bool) -> anyhow::Result<()> {
     match subcommand {
+        SecretsSubcommand::List => run_list(root),
         SecretsSubcommand::Keys { subcommand } => run_keys(root, subcommand),
         SecretsSubcommand::Env { subcommand } => run_env(root, subcommand),
     }
+}
+
+// ---------------------------------------------------------------------------
+// List (overview)
+// ---------------------------------------------------------------------------
+
+fn run_list(root: &Path) -> anyhow::Result<()> {
+    let keys = secrets::list_keys(root)?;
+    let envs = secrets::list_envs(root)?;
+
+    println!("Keys ({}):", keys.len());
+    if keys.is_empty() {
+        println!("  (none)  —  sdlc secrets keys add --name <name> --key \"$(cat ~/.ssh/id_ed25519.pub)\"");
+    } else {
+        print_table(
+            &["NAME", "TYPE", "ID", "ADDED"],
+            keys.iter()
+                .map(|k| {
+                    vec![
+                        k.name.clone(),
+                        k.key_type.to_string(),
+                        k.short_id(),
+                        k.added_at.format("%Y-%m-%d").to_string(),
+                    ]
+                })
+                .collect(),
+        );
+    }
+
+    println!("\nEnvironments ({}):", envs.len());
+    if envs.is_empty() {
+        println!("  (none)  —  sdlc secrets env set production KEY=value");
+    } else {
+        print_table(
+            &["ENV", "KEYS", "UPDATED"],
+            envs.iter()
+                .map(|e| {
+                    vec![
+                        e.env.clone(),
+                        e.key_names.len().to_string(),
+                        e.updated_at.format("%Y-%m-%d").to_string(),
+                    ]
+                })
+                .collect(),
+        );
+    }
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------

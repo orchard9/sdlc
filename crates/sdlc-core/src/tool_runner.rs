@@ -82,6 +82,10 @@ pub struct ToolMeta {
     pub output_schema: serde_json::Value,
     // --- Extended optional fields ---
     pub secrets: Option<Vec<SecretRef>>,
+    /// Name of the `sdlc secrets env` group to export before running this tool.
+    /// When set, the runner calls `sdlc secrets env export <secrets_env>` and
+    /// injects the resulting KEY=VALUE pairs as environment variables.
+    pub secrets_env: Option<String>,
     pub form_layout: Option<Vec<FormField>>,
     pub streaming: Option<bool>,
     pub result_actions: Option<Vec<ResultAction>>,
@@ -95,6 +99,33 @@ pub struct ToolMeta {
 /// or missing required fields.
 pub fn parse_tool_meta(stdout: &str) -> Result<ToolMeta> {
     serde_json::from_str(stdout).map_err(SdlcError::Json)
+}
+
+/// Call `sdlc secrets env export <group>` and parse the KEY=VALUE output.
+///
+/// Returns a map of env var names → decrypted values.
+/// Failures are silently swallowed (no sdlc binary, no key, wrong group)
+/// so callers can treat this as best-effort enrichment.
+pub fn export_secrets_env(group: &str) -> HashMap<String, String> {
+    let output = std::process::Command::new("sdlc")
+        .args(["secrets", "env", "export", group])
+        .output();
+
+    let Ok(out) = output else {
+        return HashMap::new();
+    };
+    if !out.status.success() {
+        return HashMap::new();
+    }
+
+    let text = String::from_utf8_lossy(&out.stdout);
+    let mut map = HashMap::new();
+    for line in text.lines() {
+        if let Some((k, v)) = line.split_once('=') {
+            map.insert(k.trim().to_string(), v.trim().to_string());
+        }
+    }
+    map
 }
 
 /// The available JavaScript runtimes, in priority order.
@@ -219,33 +250,50 @@ pub fn run_tool(
     Ok(stdout)
 }
 
-fn build_command(runtime: Runtime, script: &str, mode: &str) -> Command {
+/// Return the program name and argument list for spawning a tool in a given mode.
+///
+/// This is the low-level building block used by both `run_tool` (synchronous,
+/// `std::process::Command`) and async callers in sdlc-server that construct a
+/// `tokio::process::Command` with piped stdout for line-by-line streaming.
+///
+/// # Returns
+/// `(program, args)` — pass directly to `Command::new(program).args(args)`.
+pub fn tool_spawn_args(runtime: Runtime, script: &str, mode: &str) -> (&'static str, Vec<String>) {
     match runtime {
-        Runtime::Bun => {
-            let mut cmd = Command::new("bun");
-            cmd.args(["run", script, mode]);
-            cmd
-        }
-        Runtime::Deno => {
-            let mut cmd = Command::new("deno");
-            cmd.args([
-                "run",
-                "--allow-read",
-                "--allow-run",
-                "--allow-write",
-                "--allow-env",
-                "--allow-net",
-                script,
-                mode,
-            ]);
-            cmd
-        }
-        Runtime::Node => {
-            let mut cmd = Command::new("npx");
-            cmd.args(["--yes", "tsx", script, mode]);
-            cmd
-        }
+        Runtime::Bun => (
+            "bun",
+            vec!["run".into(), script.to_string(), mode.to_string()],
+        ),
+        Runtime::Deno => (
+            "deno",
+            vec![
+                "run".into(),
+                "--allow-read".into(),
+                "--allow-run".into(),
+                "--allow-write".into(),
+                "--allow-env".into(),
+                "--allow-net".into(),
+                script.to_string(),
+                mode.to_string(),
+            ],
+        ),
+        Runtime::Node => (
+            "npx",
+            vec![
+                "--yes".into(),
+                "tsx".into(),
+                script.to_string(),
+                mode.to_string(),
+            ],
+        ),
     }
+}
+
+fn build_command(runtime: Runtime, script: &str, mode: &str) -> Command {
+    let (program, args) = tool_spawn_args(runtime, script, mode);
+    let mut cmd = Command::new(program);
+    cmd.args(args);
+    cmd
 }
 
 /// Scaffold a new tool skeleton in `.sdlc/tools/<name>/`.

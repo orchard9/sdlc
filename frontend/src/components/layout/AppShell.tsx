@@ -90,7 +90,7 @@ export function AppShell({ children }: AppShellProps) {
   }, [])
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-[100dvh] overflow-hidden">
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
@@ -141,7 +141,7 @@ export function AppShell({ children }: AppShellProps) {
           <span className="text-sm font-semibold tracking-tight">{titleFromPath(location.pathname)}</span>
         </header>
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto">
           {children}
         </main>
       </div>

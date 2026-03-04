@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSSE } from '@/hooks/useSSE'
-import { useAgentRuns } from '@/contexts/AgentRunContext'
+import { useMilestoneUatRun } from '@/hooks/useMilestoneUatRun'
 import { api } from '@/api/client'
 import { WavePlan } from './WavePlan'
 import { CommandBlock } from '@/components/shared/CommandBlock'
+import { HumanUatModal } from '@/components/shared/HumanUatModal'
 import type { PrepareResult, Wave } from '@/lib/types'
 import { AlertTriangle, CheckCircle, Layers, Play, Loader2 } from 'lucide-react'
 
@@ -63,66 +64,67 @@ function VerifyingPanel({ phase, milestone }: {
   milestone?: string
 }) {
   const slug = milestone ?? ''
-  const key = `milestone-uat:${slug}`
-  const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
-  const running = isRunning(key)
-  const activeRun = getRunForKey(key)
-
-  const handleStart = () => {
-    startRun({
-      key,
-      runType: 'milestone_uat',
-      target: slug,
-      label: `UAT: ${slug}`,
-      startUrl: `/api/milestone/${encodeURIComponent(slug)}/uat`,
-      stopUrl: `/api/milestone/${encodeURIComponent(slug)}/uat/stop`,
-    })
-  }
-
-  const handleFocus = () => {
-    if (activeRun) focusRun(activeRun.id)
-  }
+  const { running, handleStart, handleFocus, modalOpen, setModalOpen } = useMilestoneUatRun(slug)
 
   return (
-    <section className="mb-6">
-      <div className="flex items-center gap-2 mb-2">
-        <Layers className="w-3.5 h-3.5 text-muted-foreground" />
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wave Plan</h3>
-        <PhaseLabel phase={phase} />
-      </div>
-      <div className="bg-green-950/20 border border-green-500/20 rounded-xl p-4 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-5 h-5 text-green-400" />
-              <p className="text-sm text-green-400 font-medium">All features released</p>
+    <>
+      <section className="mb-6">
+        <div className="flex items-center gap-2 mb-2">
+          <Layers className="w-3.5 h-3.5 text-muted-foreground" />
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wave Plan</h3>
+          <PhaseLabel phase={phase} />
+        </div>
+        <div className="bg-green-950/20 border border-green-500/20 rounded-xl p-4 space-y-3">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-5 h-5 text-green-400" />
+                <p className="text-sm text-green-400 font-medium">All features released</p>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">Run UAT to verify and close the milestone</p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">Run UAT to verify and close the milestone</p>
+            {running ? (
+              <button
+                onClick={handleFocus}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors whitespace-nowrap"
+              >
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                Running...
+              </button>
+            ) : (
+              <button
+                onClick={handleStart}
+                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-medium hover:bg-green-500/30 transition-colors whitespace-nowrap"
+              >
+                <Play className="w-3.5 h-3.5" />
+                Run UAT
+              </button>
+            )}
           </div>
-          {running ? (
-            <button
-              onClick={handleFocus}
-              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted text-muted-foreground border border-border text-xs font-medium hover:bg-muted/80 transition-colors whitespace-nowrap"
-            >
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-              Running...
-            </button>
-          ) : (
-            <button
-              onClick={handleStart}
-              className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-500/20 text-green-400 border border-green-500/30 text-xs font-medium hover:bg-green-500/30 transition-colors whitespace-nowrap"
-            >
-              <Play className="w-3.5 h-3.5" />
-              Run UAT
-            </button>
+
+          {!running && (
+            <div className="flex justify-end">
+              <button
+                onClick={() => setModalOpen(true)}
+                className="text-xs text-muted-foreground underline hover:text-foreground transition-colors"
+              >
+                Submit manually
+              </button>
+            </div>
+          )}
+
+          {slug && (
+            <CommandBlock cmd={`/sdlc-milestone-uat ${slug}`} />
           )}
         </div>
-
-        {slug && (
-          <CommandBlock cmd={`/sdlc-milestone-uat ${slug}`} />
-        )}
-      </div>
-    </section>
+      </section>
+      <HumanUatModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        mode="milestone"
+        slug={slug}
+      />
+    </>
   )
 }
 

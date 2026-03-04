@@ -20,15 +20,30 @@ async fn log_request(
     let method = req.method().clone();
     let uri = req.uri().clone();
     let start = std::time::Instant::now();
-    tracing::info!(method = %method, path = %uri, "→");
+    let is_events = uri.path() == "/api/events";
+    if is_events {
+        tracing::debug!(method = %method, path = %uri, "→");
+    } else {
+        tracing::info!(method = %method, path = %uri, "→");
+    }
     let resp = next.run(req).await;
-    tracing::info!(
-        method = %method,
-        path = %uri,
-        status = resp.status().as_u16(),
-        latency_ms = start.elapsed().as_millis(),
-        "←"
-    );
+    if is_events {
+        tracing::debug!(
+            method = %method,
+            path = %uri,
+            status = resp.status().as_u16(),
+            latency_ms = start.elapsed().as_millis(),
+            "←"
+        );
+    } else {
+        tracing::info!(
+            method = %method,
+            path = %uri,
+            status = resp.status().as_u16(),
+            latency_ms = start.elapsed().as_millis(),
+            "←"
+        );
+    }
     resp
 }
 
@@ -47,7 +62,7 @@ pub fn build_router_for_test(
     tunnel_token: Option<String>,
     app_tunnel_host: Option<String>,
 ) -> Router {
-    let app_state = state::AppState::new_with_port(root, 0);
+    let app_state = state::AppState::new_for_test(root);
     if let Some(token) = tunnel_token {
         let mut cfg = auth::TunnelConfig::with_token(token);
         if let Some(host) = app_tunnel_host {
@@ -121,6 +136,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/features/{slug}/blockers/{idx}",
             delete(routes::features::remove_blocker),
         )
+        .route(
+            "/api/features/{slug}/human-qa",
+            post(routes::features::submit_human_qa),
+        )
         // Milestones
         .route("/api/milestones", get(routes::milestones::list_milestones))
         .route(
@@ -142,6 +161,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/milestones/{slug}/features/order",
             put(routes::milestones::reorder_milestone_features),
+        )
+        .route(
+            "/api/milestones/{slug}/acceptance-test",
+            get(routes::milestones::get_milestone_acceptance_test),
         )
         .route(
             "/api/milestones/{slug}/uat-runs",
@@ -363,6 +386,14 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/milestone/{slug}/uat/stop",
             post(routes::runs::stop_milestone_uat),
         )
+        .route(
+            "/api/milestone/{slug}/uat/fail",
+            post(routes::runs::fail_milestone_uat),
+        )
+        .route(
+            "/api/milestone/{slug}/uat/human",
+            post(routes::runs::submit_milestone_uat_human),
+        )
         // Milestone prepare (agent execution)
         .route(
             "/api/milestone/{slug}/prepare",
@@ -414,10 +445,22 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/secrets/keys/{name}",
             delete(routes::secrets::remove_key),
         )
-        .route("/api/secrets/envs", get(routes::secrets::list_envs))
+        .route(
+            "/api/secrets/envs",
+            get(routes::secrets::list_envs).post(routes::secrets::create_env),
+        )
         .route(
             "/api/secrets/envs/{name}",
             delete(routes::secrets::delete_env),
+        )
+        // Auth tokens (named tunnel-access tokens stored in .sdlc/auth.yaml)
+        .route(
+            "/api/auth/tokens",
+            get(routes::auth_tokens::list_tokens).post(routes::auth_tokens::create_token),
+        )
+        .route(
+            "/api/auth/tokens/{name}",
+            delete(routes::auth_tokens::delete_token),
         )
         // AMA threads (must be before /api/tools/{name} wildcard)
         .route(
@@ -451,6 +494,15 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         // Plan-Act pattern for tool creation (must be before {name} wildcard)
         .route("/api/tools/plan", post(routes::runs::plan_tool))
         .route("/api/tools/build", post(routes::runs::build_tool))
+        // Agent-call endpoint — used by tools to dispatch synchronous blocking agent runs.
+        // Validates SDLC_AGENT_TOKEN bearer header and waits for completion before responding.
+        // Must be before {name} wildcard.
+        .route("/api/tools/agent-call", post(routes::tools::agent_call))
+        // Agent-dispatch endpoint — fire-and-forget variant; returns 202 immediately (must be before {name} wildcard)
+        .route(
+            "/api/tools/agent-dispatch",
+            post(routes::tools::agent_dispatch),
+        )
         .route(
             "/api/tools",
             get(routes::tools::list_tools).post(routes::tools::create_tool),
@@ -624,21 +676,29 @@ pub async fn serve_on(
 
     if open_browser {
         let url = format!("http://localhost:{actual_port}");
+        tracing::debug!("opening browser at {url}");
         let _ = open::that(&url);
+        tracing::debug!("browser open returned");
     }
 
+    tracing::debug!("initializing app state");
     let app_state = state::AppState::new_with_port(root, actual_port);
+    tracing::debug!("app state ready");
 
     if let Some((tun, token)) = initial_tunnel {
         let url = tun.url.clone();
+        tracing::debug!("seeding tunnel state: {url}");
         *app_state.tunnel_handle.lock().await = Some(tun);
         *app_state.tunnel_snapshot.write().await = state::TunnelSnapshot {
             config: auth::TunnelConfig::with_token(token),
             url: Some(url),
         };
+        tracing::debug!("tunnel state seeded");
     }
 
+    tracing::debug!("building router");
     let app = build_router_from_state(app_state);
+    tracing::debug!("router ready — accepting connections");
 
     axum::serve(listener, app).await?;
     Ok(())

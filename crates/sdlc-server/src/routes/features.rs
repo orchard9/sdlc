@@ -273,6 +273,92 @@ pub async fn remove_blocker(
     Ok(Json(result))
 }
 
+// ---------------------------------------------------------------------------
+// Human QA submission
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct HumanQaBody {
+    pub verdict: String,
+    #[serde(default)]
+    pub notes: String,
+}
+
+/// POST /api/features/:slug/human-qa — submit a human-run QA result for a feature.
+///
+/// Writes a `qa-results.md` Draft artifact on the feature, ready for the agent to
+/// approve via the normal state machine flow.
+pub async fn submit_human_qa(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+    Json(body): Json<HumanQaBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    use sdlc_core::types::ArtifactType;
+
+    // Validate verdict string.
+    let verdict_display = match body.verdict.as_str() {
+        "pass" => "Pass",
+        "pass_with_tasks" => "Pass with Tasks",
+        "failed" => "Fail",
+        other => {
+            return Err(AppError::unprocessable_json(serde_json::json!({
+                "error": format!("invalid verdict '{}'; must be pass, pass_with_tasks, or failed", other)
+            })));
+        }
+    };
+
+    // Notes required for non-pass verdicts.
+    if body.verdict != "pass" && body.notes.trim().is_empty() {
+        return Err(AppError::unprocessable_json(serde_json::json!({
+            "error": "notes are required when verdict is not pass"
+        })));
+    }
+
+    let root = app.root.clone();
+    let notes = body.notes.clone();
+    let verdict_display = verdict_display.to_string();
+
+    let result = tokio::task::spawn_blocking(move || {
+        use chrono::Utc;
+
+        // Verify feature exists.
+        sdlc_core::feature::Feature::load(&root, &slug)?;
+
+        let now = Utc::now();
+        let qa_content = format!(
+            "## Verdict\n\
+             {verdict_display}\n\
+             \n\
+             ## Notes\n\
+             {notes}\n\
+             \n\
+             Runner: human (manual)\n\
+             Completed: {now}\n"
+        );
+
+        // Write qa-results.md.
+        let qa_path = root.join(format!(".sdlc/features/{slug}/qa-results.md"));
+        sdlc_core::io::atomic_write(&qa_path, qa_content.as_bytes())?;
+
+        // Reload and mark as draft.
+        let mut feature = sdlc_core::feature::Feature::load(&root, &slug)?;
+        feature.mark_artifact_draft(ArtifactType::QaResults)?;
+        feature.save(&root)?;
+
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "slug": feature.slug,
+            "artifact": "qa_results",
+            "status": "draft"
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    let _ = app.event_tx.send(crate::state::SseMessage::Update);
+
+    Ok(Json(result))
+}
+
 #[derive(serde::Deserialize)]
 pub struct TransitionBody {
     pub phase: String,

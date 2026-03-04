@@ -2,14 +2,15 @@
  * Dev Driver
  * ==========
  * Finds the single most important next development action and dispatches it
- * asynchronously. Designed to run on a schedule (e.g. every 4 hours) via the
- * sdlc orchestrator to make development self-advancing.
+ * asynchronously via the sdlc-server agent infrastructure. Designed to run on
+ * a schedule (e.g. every 4 hours) via the sdlc orchestrator to make development
+ * self-advancing.
  *
  * WHAT IT DOES
  * ------------
  * --run:   Reads JSON from stdin: {} (no parameters)
  *          Applies a 5-level priority waterfall:
- *            1. Flight lock  — if .sdlc/.dev-driver.lock < 2h old, exit waiting
+ *            1. Active runs  — if an agent run is in flight, exit waiting
  *            2. Quality      — if quality-check fails, exit quality_failing
  *            3. Features     — if features have active directives, dispatch /sdlc-next
  *            4. Wave         — if a milestone wave is ready, dispatch /sdlc-run-wave
@@ -24,24 +25,27 @@
  * The 4h recurrence IS the iteration rhythm. Each tick advances exactly one
  * feature by one directive. This keeps the developer in control.
  *
+ * DISPATCH
+ * --------
+ * Calls POST /api/tools/agent-dispatch on the local sdlc-server, which:
+ *   - Creates a RunRecord (visible in the activity feed)
+ *   - Streams SSE events to the frontend
+ *   - Returns 409 Conflict if the same run key is already in flight
+ * Requires SDLC_SERVER_URL and SDLC_AGENT_TOKEN (injected by the server).
+ *
  * HOW TO SKIP A FEATURE
  * ---------------------
  * Add a task to the feature with "skip:autonomous" in the title:
  *   sdlc task add <slug> --title "skip:autonomous: needs human review"
  * The dev-driver will exclude this feature from Level 3 until the task is removed.
- *
- * LOCK FILE
- * ---------
- * Path: .sdlc/.dev-driver.lock
- * Written before each dispatch. TTL: 2 hours. Format:
- *   { started_at: ISO, action: string, slug?: string, milestone?: string, pid: number }
  */
 
 import type { ToolMeta, ToolResult } from '../_shared/types.ts'
 import { makeLogger } from '../_shared/log.ts'
 import { getArgs, readStdin, exit } from '../_shared/runtime.ts'
-import { execSync, spawn } from 'node:child_process'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { runAgentDispatch } from '../_shared/agent.ts'
+import { execSync } from 'node:child_process'
+import { readFileSync, existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const log = makeLogger('dev-driver')
@@ -69,10 +73,6 @@ export const meta: ToolMeta = {
         enum: ['waiting', 'quality_failing', 'feature_advanced', 'wave_started', 'idle'],
         description: 'What the dev-driver decided to do',
       },
-      lock_age_mins: {
-        type: 'number',
-        description: 'Age of the flight lock in minutes (present when action=waiting from lock)',
-      },
       reason: {
         type: 'string',
         description: 'Human-readable reason (present when action=waiting or idle)',
@@ -98,6 +98,10 @@ export const meta: ToolMeta = {
         type: 'string',
         description: 'Milestone slug that started (present when action=wave_started)',
       },
+      run_id: {
+        type: 'string',
+        description: 'Server run ID for the dispatched agent (present when action=feature_advanced or wave_started)',
+      },
     },
     required: ['action'],
   },
@@ -108,53 +112,11 @@ export const meta: ToolMeta = {
 // ---------------------------------------------------------------------------
 
 type DevDriverOutput =
-  | { action: 'waiting'; lock_age_mins: number }
   | { action: 'waiting'; reason: string }
   | { action: 'quality_failing'; failed_checks: string[] }
-  | { action: 'feature_advanced'; slug: string; phase: string; directive: string }
-  | { action: 'wave_started'; milestone: string }
+  | { action: 'feature_advanced'; slug: string; phase: string; directive: string; run_id?: string }
+  | { action: 'wave_started'; milestone: string; run_id?: string }
   | { action: 'idle'; reason: string }
-
-// ---------------------------------------------------------------------------
-// Lock file (T2)
-// ---------------------------------------------------------------------------
-
-interface LockFile {
-  started_at: string
-  action: string
-  slug?: string
-  milestone?: string
-  pid: number
-}
-
-const LOCK_TTL_MINS = 120
-
-function lockPath(root: string): string {
-  return join(root, '.sdlc', '.dev-driver.lock')
-}
-
-function readLock(root: string): LockFile | null {
-  const p = lockPath(root)
-  if (!existsSync(p)) return null
-  try {
-    return JSON.parse(readFileSync(p, 'utf8')) as LockFile
-  } catch {
-    return null
-  }
-}
-
-function isLockActive(lock: LockFile): boolean {
-  const ageMs = Date.now() - Date.parse(lock.started_at)
-  return ageMs < LOCK_TTL_MINS * 60 * 1000
-}
-
-function lockAgeMins(lock: LockFile): number {
-  return Math.floor((Date.now() - Date.parse(lock.started_at)) / 60000)
-}
-
-function writeLock(root: string, payload: Omit<LockFile, 'pid'> & { pid: number }): void {
-  writeFileSync(lockPath(root), JSON.stringify(payload, null, 2), 'utf8')
-}
 
 // ---------------------------------------------------------------------------
 // Quality check (T3 - Level 2)
@@ -302,21 +264,6 @@ function findReadyWave(root: string): string | null {
 }
 
 // ---------------------------------------------------------------------------
-// Async spawn (T4)
-// ---------------------------------------------------------------------------
-
-function spawnClaude(command: string, root: string): number {
-  const child = spawn('claude', ['--print', command], {
-    detached: true,
-    stdio: 'ignore',
-    cwd: root,
-    env: { ...process.env, SDLC_ROOT: root },
-  })
-  child.unref()
-  return child.pid ?? 0
-}
-
-// ---------------------------------------------------------------------------
 // Main run function (T1, T3, T5)
 // ---------------------------------------------------------------------------
 
@@ -326,15 +273,13 @@ export async function run(
 ): Promise<ToolResult<DevDriverOutput>> {
   const start = Date.now()
 
-  // ── Level 1: Flight lock ──────────────────────────────────────────────────
-  const lock = readLock(root)
-  if (lock && isLockActive(lock)) {
-    const mins = lockAgeMins(lock)
-    log.info(`flight lock active (${mins}m old) — waiting`)
-    return { ok: true, data: { action: 'waiting', lock_age_mins: mins }, duration_ms: Date.now() - start }
-  }
-  if (lock) {
-    log.info(`stale lock found (${lockAgeMins(lock)}m old) — proceeding`)
+  // ── Level 1: Active run check ─────────────────────────────────────────────
+  // Replaces the TTL-based lock file. If any sdlc agent run is currently
+  // in flight (per `sdlc run list --status running`), wait for it to finish
+  // before dispatching another.
+  if (hasActiveRuns(root)) {
+    log.info('active sdlc agent run detected — waiting')
+    return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
   }
 
   // ── Level 2: Quality check ────────────────────────────────────────────────
@@ -347,35 +292,26 @@ export async function run(
   log.info('quality checks passed')
 
   // ── Level 3: Features with active directives ──────────────────────────────
-  if (hasActiveRuns(root)) {
-    log.info('active sdlc agent run detected — waiting')
-    return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
-  }
-
   const feature = findActionableFeature(root)
   if (feature) {
     log.info(`advancing feature: ${feature.feature} (${feature.current_phase})`)
 
-    // Write lock before spawning
-    writeLock(root, {
-      started_at: new Date().toISOString(),
-      action: 'feature_advanced',
-      slug: feature.feature,
-      pid: 0, // will be overwritten after spawn
-    })
+    // Intentionally /sdlc-next — one step per tick, not /sdlc-run to completion.
+    // Dispatched via the server so the run appears in the activity feed with a
+    // RunRecord, SSE events, and exact flight detection (409 on duplicate key).
+    const r = await runAgentDispatch(
+      `/sdlc-next ${feature.feature}`,
+      `dev-driver:feature:${feature.feature}`,
+      `dev-driver: advance ${feature.feature}`,
+      { maxTurns: 40 },
+    )
 
-    // Intentionally /sdlc-next — one step per tick, not /sdlc-run to completion
-    const pid = spawnClaude(`/sdlc-next ${feature.feature}`, root)
+    if (r.status === 'conflict') {
+      log.info(`agent already running for ${feature.feature} — waiting`)
+      return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
+    }
 
-    // Update lock with actual PID
-    writeLock(root, {
-      started_at: new Date().toISOString(),
-      action: 'feature_advanced',
-      slug: feature.feature,
-      pid,
-    })
-
-    log.info(`dispatched /sdlc-next ${feature.feature} (pid: ${pid})`)
+    log.info(`dispatched /sdlc-next ${feature.feature} (run_id: ${r.run_id})`)
     return {
       ok: true,
       data: {
@@ -383,6 +319,7 @@ export async function run(
         slug: feature.feature,
         phase: feature.current_phase,
         directive: feature.next_command || `/sdlc-next ${feature.feature}`,
+        run_id: r.run_id,
       },
       duration_ms: Date.now() - start,
     }
@@ -393,26 +330,22 @@ export async function run(
   if (milestone) {
     log.info(`wave ready for milestone: ${milestone}`)
 
-    writeLock(root, {
-      started_at: new Date().toISOString(),
-      action: 'wave_started',
-      milestone,
-      pid: 0,
-    })
+    const r = await runAgentDispatch(
+      `/sdlc-run-wave ${milestone}`,
+      `dev-driver:wave:${milestone}`,
+      `dev-driver: run wave ${milestone}`,
+      { maxTurns: 100 },
+    )
 
-    const pid = spawnClaude(`/sdlc-run-wave ${milestone}`, root)
+    if (r.status === 'conflict') {
+      log.info(`wave agent already running for ${milestone} — waiting`)
+      return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
+    }
 
-    writeLock(root, {
-      started_at: new Date().toISOString(),
-      action: 'wave_started',
-      milestone,
-      pid,
-    })
-
-    log.info(`dispatched /sdlc-run-wave ${milestone} (pid: ${pid})`)
+    log.info(`dispatched /sdlc-run-wave ${milestone} (run_id: ${r.run_id})`)
     return {
       ok: true,
-      data: { action: 'wave_started', milestone },
+      data: { action: 'wave_started', milestone, run_id: r.run_id },
       duration_ms: Date.now() - start,
     }
   }

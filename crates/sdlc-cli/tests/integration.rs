@@ -3451,8 +3451,8 @@ fn test_tool_commands_all_platforms() {
     // Spot-check Agents content
     let skill = std::fs::read_to_string(agents_dir.join("sdlc-tool-audit/SKILL.md")).unwrap();
     assert!(
-        skill.contains("18"),
-        "sdlc-tool-audit/SKILL.md must reference the 18-item checklist"
+        skill.contains("19"),
+        "sdlc-tool-audit/SKILL.md must reference the 19-item checklist"
     );
     let skill = std::fs::read_to_string(agents_dir.join("sdlc-tool-uat/SKILL.md")).unwrap();
     assert!(

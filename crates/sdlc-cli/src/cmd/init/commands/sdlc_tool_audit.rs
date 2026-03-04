@@ -45,6 +45,10 @@ Read `.sdlc/tools/<name>/tool.ts` and verify each item. Mark ✓ or ✗.
 - [ ] Uses `makeLogger` from `_shared/log.ts`
 - [ ] No `console.log()` calls for logs (only `console.error()` via logger)
 
+### State access (1 check)
+
+- [ ] If the tool reads `.sdlc/` files (features, milestones, beat, VISION.md), it uses `_shared/sdlc.ts` primitives (`readFeatures`, `readMilestones`, `readBeat`, `readVision`) instead of raw `readFileSync` on manifest paths or `execSync('sdlc feature list --json')`
+
 ### Documentation (3 checks)
 
 - [ ] `README.md` exists and has Usage section
@@ -69,7 +73,7 @@ echo '{}' | bun run .sdlc/tools/<name>/tool.ts --run; echo "exit: $?"
 
 const SDLC_TOOL_AUDIT_PLAYBOOK: &str = r#"# sdlc-tool-audit
 
-Audit an SDLC tool against the full quality contract (18-item checklist).
+Audit an SDLC tool against the full quality contract (19-item checklist).
 
 > Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
 
@@ -100,31 +104,35 @@ Read `.sdlc/tools/<name>/tool.ts` and mark ✓ or ✗ for each item.
 - [ ] Uses `makeLogger` from `_shared/log.ts`
 - [ ] No `console.log()` calls for logs (only `console.error()` via logger)
 
+### State access (1)
+- [ ] `.sdlc/` reads use `_shared/sdlc.ts` primitives, not raw `readFileSync` on manifest paths or `execSync('sdlc feature list --json')`
+
 ### Documentation (3)
 - [ ] `README.md` exists and has Usage section
 - [ ] `README.md` has Setup section (or "Setup required: No" note)
 - [ ] Instruction header in `tool.ts` has WHAT IT DOES, WHAT IT READS, WHAT IT WRITES, EXTENDING
 
-**Next:** `/sdlc-tool-uat <name>` after all 18 checks pass
+**Next:** `/sdlc-tool-uat <name>` after all 19 checks pass
 "#;
 
 const SDLC_TOOL_AUDIT_SKILL: &str = r#"---
 name: sdlc-tool-audit
-description: Audit an SDLC tool against the full quality contract (18-item checklist). Use when verifying tool correctness before shipping.
+description: Audit an SDLC tool against the full quality contract (19-item checklist). Use when verifying tool correctness before shipping.
 ---
 
 # SDLC Tool-Audit Skill
 
-Audit an SDLC tool against 18 quality checks in 5 categories.
+Audit an SDLC tool against 19 quality checks in 6 categories.
 
 > Read `.sdlc/guidance.md` (§7 "SDLC Tool Suite"). <!-- sdlc:guidance -->
 
 ## Workflow
 
 1. Read `.sdlc/tools/<name>/tool.ts`.
-2. Check all 18 items: Metadata (5), Protocol (4), Error handling (4), Logging (2), Documentation (3).
+2. Check all 19 items: Metadata (5), Protocol (4), Error handling (4), Logging (2), State access (1), Documentation (3).
 3. Mark ✓/✗ for each. Report failing items with suggested fixes.
-4. End: `**Next:** /sdlc-tool-uat <name>` when all pass.
+4. For State access: if the tool reads `.sdlc/` files directly, recommend migrating to `_shared/sdlc.ts` primitives.
+5. End: `**Next:** /sdlc-tool-uat <name>` when all pass.
 "#;
 
 pub static SDLC_TOOL_AUDIT: CommandDef = CommandDef {

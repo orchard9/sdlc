@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: auth-named-tokens
+    title: Named token auth — .sdlc/auth.yaml with hot-reload, optional auth mode, and UI token-name panel
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: orch-tunnel-migration
+    title: orch-tunnel migration — stable named URLs, default-on tunnel, graceful local fallback
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

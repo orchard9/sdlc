@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { FileText, ChevronDown, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { FileText, Monitor, ChevronDown, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ArtifactContent } from '@/components/shared/ArtifactContent'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
 import { AreaCards } from '@/components/investigation/AreaCards'
@@ -175,8 +175,16 @@ export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation 
                   onClick={() => setActiveIndex(activeIndex === i ? null : i)}
                   className="flex-1 flex items-center gap-3 px-3 py-2.5 text-left min-w-0"
                 >
-                  <FileText className={cn('w-3.5 h-3.5 shrink-0 transition-colors', activeIndex === i ? 'text-primary' : 'text-muted-foreground/50')} />
+                  {/\.(html|htm)$/i.test(artifact.filename)
+                    ? <Monitor className={cn('w-3.5 h-3.5 shrink-0 transition-colors', activeIndex === i ? 'text-primary' : 'text-muted-foreground/50')} />
+                    : <FileText className={cn('w-3.5 h-3.5 shrink-0 transition-colors', activeIndex === i ? 'text-primary' : 'text-muted-foreground/50')} />
+                  }
                   <span className="flex-1 text-sm font-mono truncate">{artifact.filename}</span>
+                  {/\.(html|htm)$/i.test(artifact.filename) && (
+                    <span className="shrink-0 text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded font-mono">
+                      preview
+                    </span>
+                  )}
                   <span className="text-xs text-muted-foreground/40 shrink-0 tabular-nums">
                     {formatBytes(artifact.size_bytes)}
                   </span>
@@ -226,7 +234,7 @@ export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation 
             </button>
           </div>
           {/* Scrollable content */}
-          <div className="overflow-auto max-h-64 px-3 py-2">
+          <div className="overflow-auto max-h-96 px-3 py-2">
             {activeArtifact.content ? (
               <ArtifactContent filename={activeArtifact.filename} content={activeArtifact.content} />
             ) : (

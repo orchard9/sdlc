@@ -1,9 +1,65 @@
 slug: secrets-create-env-endpoint
 title: 'Secrets: POST /api/secrets/envs create-only endpoint'
-phase: draft
+phase: released
 created_at: 2026-03-03T05:45:00Z
-updated_at: 2026-03-03T05:45:00Z
-artifacts: []
+updated_at: 2026-03-03T22:46:14.227772Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/spec.md
+  created_at: 2026-03-03T19:28:49.819825Z
+  approved_at: 2026-03-03T19:29:02.844671Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/design.md
+  created_at: 2026-03-03T19:29:15.612872Z
+  approved_at: 2026-03-03T19:29:21.568887Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/tasks.md
+  created_at: 2026-03-03T19:29:26.455434Z
+  approved_at: 2026-03-03T19:29:31.839105Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/qa-plan.md
+  created_at: 2026-03-03T19:29:36.326670Z
+  approved_at: 2026-03-03T19:29:38.447334Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/review.md
+  created_at: 2026-03-03T22:44:41.793637Z
+  approved_at: 2026-03-03T22:44:41.803754Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/audit.md
+  created_at: 2026-03-03T22:44:57.851764Z
+  approved_at: 2026-03-03T22:44:57.862348Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/secrets-create-env-endpoint/qa-results.md
+  created_at: 2026-03-03T22:46:08.529059Z
+  approved_at: 2026-03-03T22:46:08.537234Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -11,7 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:45:00Z
+  exited: 2026-03-03T19:29:02.847052Z
+- phase: specified
+  entered: 2026-03-03T19:29:02.847052Z
+  exited: 2026-03-03T19:29:38.449293Z
+- phase: planned
+  entered: 2026-03-03T19:29:38.449293Z
+  exited: 2026-03-03T22:43:04.883892Z
+- phase: ready
+  entered: 2026-03-03T22:43:04.883892Z
+  exited: 2026-03-03T22:43:08.703117Z
+- phase: implementation
+  entered: 2026-03-03T22:43:08.703117Z
+  exited: 2026-03-03T22:44:41.808875Z
+- phase: review
+  entered: 2026-03-03T22:44:41.808875Z
+  exited: 2026-03-03T22:44:46.105360Z
+- phase: audit
+  entered: 2026-03-03T22:44:46.105360Z
+  exited: 2026-03-03T22:44:57.867477Z
+- phase: qa
+  entered: 2026-03-03T22:44:57.867477Z
+  exited: 2026-03-03T22:46:08.542282Z
+- phase: merge
+  entered: 2026-03-03T22:46:08.542282Z
+  exited: 2026-03-03T22:46:14.227772Z
+- phase: released
+  entered: 2026-03-03T22:46:14.227772Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

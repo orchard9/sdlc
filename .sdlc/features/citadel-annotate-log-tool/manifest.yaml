@@ -2,10 +2,66 @@ slug: citadel-annotate-log-tool
 title: citadel_annotate_log Agent Tool
 description: |
   Implement the citadel_annotate_log Pantheon agent tool. Params: { log_id: string, content: string, annotation_type: string }. Calls Citadel POST /api/v1/annotations with author_type: "ai_agent" — Citadel explicitly supports AI agent annotations. annotation_type values: note | bug | root_cause | false_positive | incident. Returns annotation ID + timestamp. Enables agents to link Citadel log entries to Pantheon incidents and tasks, keeping observability and task layers connected.
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
+updated_at: 2026-03-03T19:50:31.734957Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/spec.md
+  created_at: 2026-03-03T19:44:05.157344Z
+  approved_at: 2026-03-03T19:44:21.475413Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/design.md
+  created_at: 2026-03-03T19:45:13.876027Z
+  approved_at: 2026-03-03T19:45:16.131782Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/tasks.md
+  created_at: 2026-03-03T19:45:45.627865Z
+  approved_at: 2026-03-03T19:45:47.696126Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/qa-plan.md
+  created_at: 2026-03-03T19:46:28.125900Z
+  approved_at: 2026-03-03T19:46:32.358537Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/review.md
+  created_at: 2026-03-03T19:47:23.968144Z
+  approved_at: 2026-03-03T19:47:26.558393Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/audit.md
+  created_at: 2026-03-03T19:48:26.344719Z
+  approved_at: 2026-03-03T19:48:45.190726Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/citadel-annotate-log-tool/qa-results.md
+  created_at: 2026-03-03T19:50:08.623589Z
+  approved_at: 2026-03-03T19:50:27.606005Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -13,7 +69,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T19:44:21.728347Z
+- phase: specified
+  entered: 2026-03-03T19:44:21.728347Z
+  exited: 2026-03-03T19:46:32.360840Z
+- phase: planned
+  entered: 2026-03-03T19:46:32.360840Z
+  exited: 2026-03-03T19:46:38.754577Z
+- phase: ready
+  entered: 2026-03-03T19:46:38.754577Z
+  exited: 2026-03-03T19:46:43.311093Z
+- phase: implementation
+  entered: 2026-03-03T19:46:43.311093Z
+  exited: 2026-03-03T19:47:26.562700Z
+- phase: review
+  entered: 2026-03-03T19:47:26.562700Z
+  exited: 2026-03-03T19:47:31.366203Z
+- phase: audit
+  entered: 2026-03-03T19:47:31.366203Z
+  exited: 2026-03-03T19:48:45.194537Z
+- phase: qa
+  entered: 2026-03-03T19:48:45.194537Z
+  exited: 2026-03-03T19:50:27.611519Z
+- phase: merge
+  entered: 2026-03-03T19:50:27.611519Z
+  exited: 2026-03-03T19:50:31.734957Z
+- phase: released
+  entered: 2026-03-03T19:50:31.734957Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

@@ -1,63 +1,63 @@
 slug: dev-driver-agentic-dispatch
 title: Rewrite dev-driver to dispatch through the agent infrastructure
 description: 'Dev-driver currently spawns ''claude --print'' as a raw shell subprocess. This bypasses spawn_agent_run entirely: no RunRecord, no SSE, no activity feed, no visibility in the frontend. The lock file exists because the tool has no way to know if a previous run is still active. Rewrite dispatch to use _shared/agent.ts runAgent() — which calls back through POST /api/tools/agent-call. Server handles the run properly: RunRecord persisted, SSE streamed, activity feed updated, duplicate detection via agent_runs map. Remove the lock file kludge entirely.'
-phase: draft
+phase: released
 created_at: 2026-03-03T09:01:12.569611Z
-updated_at: 2026-03-03T09:01:12.569611Z
+updated_at: 2026-03-03T22:47:07.941156Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:26:56.234949Z
+  approved_at: 2026-03-03T22:27:03.684189Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:30:17.186297Z
+  approved_at: 2026-03-03T22:30:23.406117Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:30:55.397841Z
+  approved_at: 2026-03-03T22:31:01.305082Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:31:32.150934Z
+  approved_at: 2026-03-03T22:31:38.856155Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:39:45.215548Z
+  approved_at: 2026-03-03T22:42:47.581777Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:45:02.138898Z
+  approved_at: 2026-03-03T22:45:04.774598Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/dev-driver-agentic-dispatch/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:47:03.411640Z
+  approved_at: 2026-03-03T22:47:03.418501Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,37 +65,46 @@ tasks:
 - id: T1
   title: Replace spawn('claude --print') with runAgent() from _shared/agent.ts for all dispatch levels (sdlc-next, sdlc-run-wave)
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:01:18.548466Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T22:32:01.908221Z
+  completed_at: 2026-03-03T22:33:42.589605Z
   blocker: null
   depends_on: []
 - id: T2
   title: Remove .sdlc/.dev-driver.lock — replace flight-lock check with query to POST /api/runs or agent_runs map via server
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:01:18.554426Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T22:33:42.617721Z
+  completed_at: 2026-03-03T22:34:07.922652Z
   blocker: null
   depends_on: []
 - id: T3
   title: Use active RunRecord detection (check for in-flight 'dev-driver' keyed run) instead of TTL-based file lock
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:01:18.560413Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T22:34:07.932853Z
+  completed_at: 2026-03-03T22:35:38.129939Z
   blocker: null
   depends_on: []
 - id: T4
   title: Update dev-driver README and tool meta to document the new dispatch pattern and remove lock file references
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:01:18.567208Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T22:35:38.136136Z
+  completed_at: 2026-03-03T22:36:17.654709Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'Add unit tests for agent_dispatch endpoint (TC-1 through TC-5 from QA plan: empty prompt → 400, empty run_key → 400, empty label → 400, duplicate key → 409)'
+  description: null
+  status: completed
+  created_at: 2026-03-03T22:39:42.778234Z
+  started_at: 2026-03-03T22:39:50.753838Z
+  completed_at: 2026-03-03T22:42:42.731914Z
   blocker: null
   depends_on: []
 comments: []
@@ -104,7 +113,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T09:01:12.569611Z
+  exited: 2026-03-03T22:27:03.685721Z
+- phase: specified
+  entered: 2026-03-03T22:27:03.685721Z
+  exited: 2026-03-03T22:31:38.857838Z
+- phase: planned
+  entered: 2026-03-03T22:31:38.857838Z
+  exited: 2026-03-03T22:31:43.933485Z
+- phase: ready
+  entered: 2026-03-03T22:31:43.933485Z
+  exited: 2026-03-03T22:31:47.781544Z
+- phase: implementation
+  entered: 2026-03-03T22:31:47.781544Z
+  exited: 2026-03-03T22:42:47.585451Z
+- phase: review
+  entered: 2026-03-03T22:42:47.585451Z
+  exited: 2026-03-03T22:42:51.493863Z
+- phase: audit
+  entered: 2026-03-03T22:42:51.493863Z
+  exited: 2026-03-03T22:45:04.781091Z
+- phase: qa
+  entered: 2026-03-03T22:45:04.781091Z
+  exited: 2026-03-03T22:47:03.422330Z
+- phase: merge
+  entered: 2026-03-03T22:47:03.422330Z
+  exited: 2026-03-03T22:47:07.941156Z
+- phase: released
+  entered: 2026-03-03T22:47:07.941156Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

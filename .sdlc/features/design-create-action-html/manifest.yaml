@@ -1,17 +1,145 @@
 slug: design-create-action-html
 title: Feature create_design action produces HTML mockup
-phase: draft
+phase: released
 created_at: 2026-03-03T06:00:00Z
-updated_at: 2026-03-03T06:00:00Z
-artifacts: []
-tasks: []
+updated_at: 2026-03-03T22:31:51.015320Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/design-create-action-html/spec.md
+  created_at: 2026-03-03T11:15:36.827329Z
+  approved_at: 2026-03-03T11:17:12.468855Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/design-create-action-html/design.md
+  created_at: 2026-03-03T11:16:23.044042Z
+  approved_at: 2026-03-03T11:17:20.369866Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/design-create-action-html/tasks.md
+  created_at: 2026-03-03T11:17:52.439102Z
+  approved_at: 2026-03-03T11:17:58.289567Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/design-create-action-html/qa-plan.md
+  created_at: 2026-03-03T11:18:24.959283Z
+  approved_at: 2026-03-03T11:18:30.110835Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/design-create-action-html/review.md
+  created_at: 2026-03-03T22:29:56.758167Z
+  approved_at: 2026-03-03T22:30:03.034125Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/design-create-action-html/audit.md
+  created_at: 2026-03-03T22:30:44.412535Z
+  approved_at: 2026-03-03T22:30:49.370960Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/design-create-action-html/qa-results.md
+  created_at: 2026-03-03T22:31:41.947006Z
+  approved_at: 2026-03-03T22:31:46.569470Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Update needs_design and design_rejected rule messages in rules.rs to include explicit HTML mockup requirement
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:18:54.550278Z
+  started_at: 2026-03-03T11:18:59.728850Z
+  completed_at: 2026-03-03T11:19:23.078438Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update SDLC_NEXT_COMMAND with UI feature create_design HTML mockup sub-step
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:18:54.558365Z
+  started_at: 2026-03-03T11:19:27.911421Z
+  completed_at: 2026-03-03T11:19:42.407132Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update SDLC_NEXT_PLAYBOOK with HTML mockup bullet
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:18:54.564119Z
+  started_at: 2026-03-03T11:19:44.642234Z
+  completed_at: 2026-03-03T11:19:55.726156Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update SDLC_NEXT_SKILL with HTML mockup step note
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:18:54.570031Z
+  started_at: 2026-03-03T11:19:58.643532Z
+  completed_at: 2026-03-03T11:20:08.628914Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Run tests and clippy, verify no regressions
+  description: null
+  status: completed
+  created_at: 2026-03-03T11:18:54.575776Z
+  started_at: 2026-03-03T11:20:11.328545Z
+  completed_at: 2026-03-03T22:29:07.835277Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T06:00:00Z
+  exited: 2026-03-03T11:17:12.470668Z
+- phase: specified
+  entered: 2026-03-03T11:17:12.470668Z
+  exited: 2026-03-03T11:18:30.112291Z
+- phase: planned
+  entered: 2026-03-03T11:18:30.112291Z
+  exited: 2026-03-03T11:18:40.062940Z
+- phase: ready
+  entered: 2026-03-03T11:18:40.062940Z
+  exited: 2026-03-03T11:18:44.586499Z
+- phase: implementation
+  entered: 2026-03-03T11:18:44.586499Z
+  exited: 2026-03-03T22:30:03.142750Z
+- phase: review
+  entered: 2026-03-03T22:30:03.142750Z
+  exited: 2026-03-03T22:30:44.419481Z
+- phase: audit
+  entered: 2026-03-03T22:30:44.419481Z
+  exited: 2026-03-03T22:30:49.453913Z
+- phase: qa
+  entered: 2026-03-03T22:30:49.453913Z
+  exited: 2026-03-03T22:31:46.572848Z
+- phase: merge
+  entered: 2026-03-03T22:31:46.572848Z
+  exited: 2026-03-03T22:31:51.015320Z
+- phase: released
+  entered: 2026-03-03T22:31:51.015320Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

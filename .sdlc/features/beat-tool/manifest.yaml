@@ -1,63 +1,63 @@
 slug: beat-tool
 title: beat tool — proof-of-concept agentic tool
 description: 'The take-a-beat tool built on all three primitives. Input: { scope: ''project''|''<domain>''|''feature:<slug>'', mode: ''evaluate''|''week'' }. Execution: streams progress via NDJSON. State: reads features/milestones/vision via _shared/sdlc.ts. Reasoning: delegates to recruited CTO/CPO agent via _shared/agent.ts (recruits the agent if missing). Output: verdict (on-track|drifting|off-course) + concerns + weekly items. Persists to .sdlc/beat.yaml. This tool proves the full agentic tool pattern works end-to-end.'
-phase: draft
+phase: released
 created_at: 2026-03-03T08:59:38.246320Z
-updated_at: 2026-03-03T08:59:38.246320Z
+updated_at: 2026-03-03T22:31:37.199503Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:19:45.953421Z
+  approved_at: 2026-03-03T11:19:46.003718Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:19:50.820758Z
+  approved_at: 2026-03-03T11:19:50.826898Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:19:56.807378Z
+  approved_at: 2026-03-03T11:19:56.844238Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:20:01.424795Z
+  approved_at: 2026-03-03T11:20:01.432381Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:27:39.735522Z
+  approved_at: 2026-03-03T22:27:42.385202Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:28:31.608268Z
+  approved_at: 2026-03-03T22:28:34.151881Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/beat-tool/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T22:31:30.896952Z
+  approved_at: 2026-03-03T22:31:33.264757Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,64 +65,73 @@ tasks:
 - id: T1
   title: Scaffold beat tool with streaming:true meta and scope/mode input schema
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:18.983191Z
   started_at: null
-  completed_at: null
+  completed_at: 2026-03-03T11:16:13.340232Z
   blocker: null
   depends_on: []
 - id: T2
   title: 'Implement state gathering: readVision(), readFeatures(), readMilestones() via _shared/sdlc.ts'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:18.989001Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:16:15.773415Z
+  completed_at: 2026-03-03T11:17:22.854137Z
   blocker: null
   depends_on: []
 - id: T3
   title: Determine leadership lens from scope, recruit agent if missing via sdlc CLI, load agent file
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:18.994503Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:17:22.861388Z
+  completed_at: 2026-03-03T11:18:42.249607Z
   blocker: null
   depends_on: []
 - id: T4
   title: Invoke agent via runAgent() with full project context and VISION.md as evaluation frame
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:19.000186Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:18:42.257082Z
+  completed_at: 2026-03-03T11:18:56.697909Z
   blocker: null
   depends_on: []
 - id: T5
   title: Parse agent verdict and write to .sdlc/beat.yaml via writeBeat() — append evaluations, carry concern trends
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:19.005732Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:18:56.705595Z
+  completed_at: 2026-03-03T11:19:03.026529Z
   blocker: null
   depends_on: []
 - id: T6
   title: 'Implement --week mode: read previous beat.yaml, produce top-5 prioritized check-in list'
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:19.011531Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:19:03.039641Z
+  completed_at: 2026-03-03T11:19:03.048721Z
   blocker: null
   depends_on: []
 - id: T7
   title: Stream NDJSON progress events at each major step (gathering, recruiting, evaluating, writing)
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T09:00:19.017596Z
+  started_at: 2026-03-03T11:19:05.637940Z
+  completed_at: 2026-03-03T11:19:11.875291Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: 'skip:autonomous: UAT hold'
+  description: null
+  status: completed
+  created_at: 2026-03-03T19:46:57.400011Z
   started_at: null
-  completed_at: null
+  completed_at: 2026-03-03T19:49:57.199555Z
   blocker: null
   depends_on: []
 comments: []
@@ -131,7 +140,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T08:59:38.246320Z
+  exited: 2026-03-03T11:19:46.042092Z
+- phase: specified
+  entered: 2026-03-03T11:19:46.042092Z
+  exited: 2026-03-03T11:20:01.433965Z
+- phase: planned
+  entered: 2026-03-03T11:20:01.433965Z
+  exited: 2026-03-03T11:20:08.815258Z
+- phase: ready
+  entered: 2026-03-03T11:20:08.815258Z
+  exited: 2026-03-03T11:20:08.824074Z
+- phase: implementation
+  entered: 2026-03-03T11:20:08.824074Z
+  exited: 2026-03-03T22:27:42.431356Z
+- phase: review
+  entered: 2026-03-03T22:27:42.431356Z
+  exited: 2026-03-03T22:27:49.595834Z
+- phase: audit
+  entered: 2026-03-03T22:27:49.595834Z
+  exited: 2026-03-03T22:28:34.156589Z
+- phase: qa
+  entered: 2026-03-03T22:28:34.156589Z
+  exited: 2026-03-03T22:31:33.266724Z
+- phase: merge
+  entered: 2026-03-03T22:31:33.266724Z
+  exited: 2026-03-03T22:31:37.199503Z
+- phase: released
+  entered: 2026-03-03T22:31:37.199503Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

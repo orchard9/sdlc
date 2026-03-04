@@ -191,23 +191,6 @@ pub struct Config {
 // TelegramConfigYaml — optional YAML config for Telegram bot integration
 // ---------------------------------------------------------------------------
 
-/// SMTP configuration for the Telegram digest email.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct SmtpConfigYaml {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub host: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub port: Option<u16>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub username: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub password: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub from: Option<String>,
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub to: Vec<String>,
-}
-
 /// YAML-deserialized Telegram config (all fields optional; merged with env vars).
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct TelegramConfigYaml {
@@ -225,9 +208,6 @@ pub struct TelegramConfigYaml {
     /// Chat IDs to query for the digest (e.g. ["-1001234567890"]).
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub chat_ids: Vec<String>,
-    /// SMTP config for sending the digest email.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub smtp: Option<SmtpConfigYaml>,
     /// Time window in hours (default: 24).
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub window_hours: Option<u32>,

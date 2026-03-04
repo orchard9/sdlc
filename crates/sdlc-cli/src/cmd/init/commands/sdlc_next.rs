@@ -52,6 +52,15 @@ For **artifact creation** (`create_spec`, `create_design`, `create_tasks`, `crea
 2. Read existing artifacts in `.sdlc/features/<slug>/`
 3. Write a thorough Markdown artifact to `output_path`
 
+For `create_design` on a **UI feature**, also write `mockup.html` in the same directory:
+- Single self-contained file — inline `<style>` and `<script>`, no CDN or external resources
+- Valid HTML5 (`<!DOCTYPE html>`) with a `<nav>` or tab bar to navigate between screens
+- Named sections (`<section id="screen-*">`) for each major UI state
+- Representative colors and typography; pixel-perfect fidelity is not required
+- Reference it from `design.md` with a relative link: `[Mockup](mockup.html)`
+
+For non-UI features (backend, CLI, config-only): `mockup.html` is optional; ASCII wireframes in `design.md` are sufficient.
+
 For **approval** (`approve_spec`, `approve_design`, `approve_tasks`, `approve_qa_plan`, `approve_merge`):
 1. Read the artifact at `output_path`, verify it is complete and correct
 2. Run `sdlc artifact approve <slug> <artifact_type>` autonomously — no confirmation needed
@@ -104,6 +113,7 @@ Use this playbook to drive the next SDLC directive for a feature.
    - Read feature context and existing artifacts.
    - Write the required artifact to `output_path`.
    - Mark it draft with `sdlc artifact draft <slug> <artifact_type>`.
+   - For `create_design` on a UI feature: also write `mockup.html` (self-contained, inline CSS/JS, named `<section id="screen-*">` blocks, navigation bar). Reference it from `design.md`: `[Mockup](mockup.html)`.
 5. For approval actions (`approve_spec`, `approve_design`, `approve_tasks`, `approve_qa_plan`, `approve_merge`):
    - Read the artifact at `output_path`, verify it is complete and correct.
    - Run `sdlc artifact approve <slug> <artifact_type>` autonomously.
@@ -134,6 +144,7 @@ Use this skill when a user asks for the next SDLC action for a feature.
 3. Follow the directive fields (`action`, `message`, `output_path`, `gates`).
 4. For approval or dependency gates, surface context and wait for explicit user approval.
 5. For creation actions, write the requested artifact at `output_path`.
+   For `create_design` on a UI feature: also produce `mockup.html` — self-contained HTML5 (no external resources), with a nav bar and named `<section id="screen-*">` blocks for each UI state. Reference it from `design.md`: `[Mockup](mockup.html)`.
 6. For implementation actions, complete the next pending task.
 7. Run `sdlc next --for <slug>` to confirm what comes next.
 "#;

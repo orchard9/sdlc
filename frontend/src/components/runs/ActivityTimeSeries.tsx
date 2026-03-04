@@ -110,9 +110,9 @@ export function ActivityTimeSeries({ events }: ActivityTimeSeriesProps) {
   const xLabels = xAxisLabels(runDurationMs, 4)
 
   return (
-    <div ref={containerRef} className="relative w-full select-none">
+    <div ref={containerRef} className="relative w-full select-none overflow-hidden">
       {/* Legend */}
-      <div className="flex items-center gap-3 mb-1">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1">
         <span className="text-[10px] text-muted-foreground/60 font-medium">Activity</span>
         {LEGEND_LABELS.map(({ key, label }) => (
           <span key={key} className="flex items-center gap-1">
@@ -129,7 +129,7 @@ export function ActivityTimeSeries({ events }: ActivityTimeSeriesProps) {
       <svg
         width={chartWidth}
         height={CHART_HEIGHT}
-        className="overflow-visible"
+        className="overflow-hidden"
         onMouseLeave={() => setTooltip(null)}
       >
         {/* Bars */}

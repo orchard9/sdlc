@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use tokio::sync::{broadcast, Mutex, RwLock};
 
 use crate::auth::TunnelConfig;
@@ -10,6 +10,24 @@ use crate::tunnel::Tunnel;
 /// Entry in the active-runs map: the broadcast sender for SSE subscribers
 /// and an abort handle to cancel the spawned task.
 pub type AgentRunEntry = (broadcast::Sender<String>, tokio::task::AbortHandle);
+
+/// Owns a set of background watcher task abort handles.
+/// Calls `.abort()` on every handle when dropped, ensuring watcher tasks
+/// are cancelled when `AppState` is dropped — including in integration tests
+/// where the Tokio runtime shuts down after each `#[tokio::test]`.
+///
+/// This prevents JoinHandle's detach-on-drop semantics from leaking the 7
+/// watcher loops spawned by `AppState::new_with_port` into the runtime's
+/// blocking thread pool.
+pub(crate) struct WatcherGuard(Vec<tokio::task::AbortHandle>);
+
+impl Drop for WatcherGuard {
+    fn drop(&mut self) {
+        for handle in &self.0 {
+            handle.abort();
+        }
+    }
+}
 
 // ---------------------------------------------------------------------------
 // RunRecord — persistent agent run metadata
@@ -59,7 +77,8 @@ fn runs_dir(root: &Path) -> PathBuf {
     root.join(".sdlc").join(".runs")
 }
 
-/// Load all RunRecords from `.sdlc/.runs/*.json`, marking any `running` as `stopped`.
+/// Load all RunRecords from `.sdlc/.runs/*.json`, marking any `running` as `failed`
+/// (orphaned by a server restart).
 pub fn load_run_history(root: &Path) -> Vec<RunRecord> {
     let dir = runs_dir(root);
     let entries = match std::fs::read_dir(&dir) {
@@ -76,10 +95,12 @@ pub fn load_run_history(root: &Path) -> Vec<RunRecord> {
         .filter_map(|e| {
             let data = std::fs::read_to_string(e.path()).ok()?;
             let mut rec: RunRecord = serde_json::from_str(&data).ok()?;
-            // Mark stale running records as stopped
+            // Mark stale running records as failed — they were orphaned by a crash
+            // or restart, not stopped intentionally by the user.
             if rec.status == "running" {
-                rec.status = "stopped".to_string();
+                rec.status = "failed".to_string();
                 rec.completed_at = Some(chrono::Utc::now().to_rfc3339());
+                rec.error = Some("server restarted".to_string());
                 // Best-effort persist the update
                 let _ = std::fs::write(
                     e.path(),
@@ -216,6 +237,9 @@ pub enum SseMessage {
     ToolActCompleted { name: String, action_index: usize },
     /// A milestone UAT agent run completed — UatRun record may have been written.
     MilestoneUatCompleted { slug: String },
+    /// A milestone UAT agent run completed with a failing verdict — no state change,
+    /// but the frontend can react (refresh runs list, show failure badge).
+    MilestoneUatFailed { slug: String },
     /// The orchestrator daemon completed a tick — action states may have changed.
     /// Frontend should re-fetch the orchestrator actions list.
     ActionStateChanged,
@@ -238,6 +262,28 @@ pub enum SseMessage {
     },
     /// The changelog event log was updated — clients can re-fetch via the API.
     ChangelogUpdated,
+    /// A streaming tool run has started — interaction record created with status "streaming".
+    ToolRunStarted {
+        name: String,
+        interaction_id: String,
+    },
+    /// A single NDJSON progress line emitted by a streaming tool's stdout.
+    ToolRunProgress {
+        name: String,
+        interaction_id: String,
+        line: serde_json::Value,
+    },
+    /// A streaming tool run completed successfully — record updated to "completed".
+    ToolRunCompleted {
+        name: String,
+        interaction_id: String,
+    },
+    /// A streaming tool run failed — record updated to "failed".
+    ToolRunFailed {
+        name: String,
+        interaction_id: String,
+        error: String,
+    },
 }
 
 /// A knowledge entry cited in a librarian answer.
@@ -307,39 +353,109 @@ pub struct AppState {
     /// HTTP client for reverse-proxying app tunnel requests.
     pub http_client: reqwest::Client,
     /// Telemetry store for persisting raw agent events across restarts.
-    /// `None` if `.sdlc/telemetry.redb` cannot be opened (graceful degradation).
-    pub telemetry: Option<Arc<TelemetryStore>>,
-    /// Handles for background file-watcher tasks.
-    /// Stored so the tasks can be aborted via `abort()` if needed; dropping a
-    /// `JoinHandle` only detaches the task — it does NOT stop it.
-    pub _watcher_handles: Arc<Vec<tokio::task::JoinHandle<()>>>,
+    /// Populated asynchronously at startup via a background `spawn_blocking` task
+    /// to avoid blocking the tokio runtime during redb WAL recovery.
+    /// `None` (i.e. OnceLock not yet set) until the background open completes;
+    /// remains empty if `.sdlc/telemetry.redb` cannot be opened (graceful degradation).
+    pub telemetry: Arc<OnceLock<Arc<TelemetryStore>>>,
+    /// Abort guards for background file-watcher tasks.
+    /// `WatcherGuard` calls `.abort()` on every handle when dropped, so all
+    /// watcher loops are cancelled when `AppState` goes out of scope.
+    pub(crate) _watcher_handles: Arc<WatcherGuard>,
+    /// Per-instance token for tool-to-server agent calls via POST /api/tools/agent-call.
+    /// Generated at startup from OS CSPRNG, never persisted to disk.
+    /// Injected into every tool subprocess as SDLC_AGENT_TOKEN.
+    pub agent_token: Arc<String>,
+}
+
+/// Generate a 32-char hex token (128-bit entropy) from the OS CSPRNG.
+/// Falls back to a timestamp+pid based value if the OS source is unavailable.
+fn generate_agent_token() -> String {
+    // Read exactly 16 random bytes from OS CSPRNG.
+    // Must use read_exact — /dev/urandom never returns EOF, so std::fs::read()
+    // would loop forever trying to read to end-of-file.
+    let bytes: Option<[u8; 16]> = (|| {
+        use std::io::Read;
+        let mut buf = [0u8; 16];
+        std::fs::File::open("/dev/urandom")
+            .ok()?
+            .read_exact(&mut buf)
+            .ok()?;
+        Some(buf)
+    })();
+
+    match bytes {
+        Some(b) => b.iter().map(|byte| format!("{byte:02x}")).collect(),
+        None => {
+            // Fallback: mix nanos + pid for environments without /dev/urandom (Windows, some CI)
+            let nanos = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default()
+                .subsec_nanos();
+            let pid = std::process::id();
+            format!("{nanos:08x}{pid:08x}{nanos:08x}{pid:08x}")
+        }
+    }
 }
 
 impl AppState {
+    /// Construct AppState without spawning watcher tasks.
+    /// All test code uses this path — watcher tasks are only needed in the
+    /// production server process (via `new_with_port` → `build_router`).
     pub fn new(root: PathBuf) -> Self {
-        Self::new_with_port(root, 0)
+        Self::build_base_state(root, 0)
     }
 
-    pub fn new_with_port(root: PathBuf, port: u16) -> Self {
+    /// Build an AppState with no watcher tasks spawned — for integration tests
+    /// that use `#[tokio::test]` and don't need file-change notifications.
+    /// Avoids creating and immediately aborting the 7 watcher tasks that
+    /// `new_with_port` would spawn when a Tokio runtime is present.
+    pub fn new_for_test(root: PathBuf) -> Self {
+        Self::build_base_state(root, 0)
+    }
+
+    /// Shared construction path: allocates all AppState fields with an empty
+    /// WatcherGuard. Called by both `new_with_port` (which then spawns watchers)
+    /// and `new_for_test` (which deliberately skips watcher spawning).
+    fn build_base_state(root: PathBuf, port: u16) -> Self {
         let (tx, _) = broadcast::channel(64);
+        tracing::debug!(root = %root.display(), "loading run history");
         let history = load_run_history(&root);
+        tracing::debug!(count = history.len(), "run history loaded");
         // Seed the app tunnel port from config.yaml so it survives restarts.
+        tracing::debug!("loading config");
         let saved_app_port = sdlc_core::config::Config::load(&root)
             .ok()
             .and_then(|c| c.app_port);
+        tracing::debug!("building http client");
         let http_client = reqwest::Client::builder()
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("infallible: reqwest client construction");
-        let telemetry = TelemetryStore::open(&root.join(".sdlc").join("telemetry.redb"))
-            .ok()
-            .map(Arc::new);
-        let state = Self {
+        // Telemetry is NOT opened here — `new_with_port` spawns a background
+        // task to open it via `spawn_blocking` so WAL recovery on large redb
+        // files does not block the tokio runtime during startup.
+        let telemetry: Arc<OnceLock<Arc<TelemetryStore>>> = Arc::new(OnceLock::new());
+        // Pre-populate named tokens from .sdlc/auth.yaml so the auth gate is
+        // active immediately on startup — before the first watcher tick fires.
+        tracing::debug!("loading auth config");
+        let initial_tokens: Vec<(String, String)> = sdlc_core::auth_config::load(&root)
+            .map(|c| c.tokens.into_iter().map(|t| (t.name, t.token)).collect())
+            .unwrap_or_default();
+        let initial_tunnel_snapshot = if initial_tokens.is_empty() {
+            TunnelSnapshot::default()
+        } else {
+            TunnelSnapshot {
+                config: crate::auth::TunnelConfig::with_tokens(initial_tokens),
+                url: None,
+            }
+        };
+        Self {
             port,
-            event_tx: tx.clone(),
+            event_tx: tx,
             agent_runs: Arc::new(Mutex::new(HashMap::new())),
             run_history: Arc::new(Mutex::new(history)),
-            tunnel_snapshot: Arc::new(RwLock::new(TunnelSnapshot::default())),
+            tunnel_snapshot: Arc::new(RwLock::new(initial_tunnel_snapshot)),
             tunnel_handle: Arc::new(Mutex::new(None)),
             app_tunnel_snapshot: Arc::new(RwLock::new(AppTunnelSnapshot {
                 port: saved_app_port,
@@ -348,32 +464,64 @@ impl AppState {
             app_tunnel_handle: Arc::new(Mutex::new(None)),
             http_client,
             telemetry,
-            _watcher_handles: Arc::new(Vec::new()),
+            _watcher_handles: Arc::new(WatcherGuard(Vec::new())),
+            agent_token: Arc::new(generate_agent_token()),
             root,
-        };
+        }
+    }
+
+    pub fn new_with_port(root: PathBuf, port: u16) -> Self {
+        let state = Self::build_base_state(root, port);
+        let tx = state.event_tx.clone();
+
+        // Open the telemetry DB in a background task so redb WAL recovery on
+        // large files does not block the tokio worker thread at startup.
+        // Guard: only spawn if inside a Tokio runtime (skipped in sync unit tests).
+        if tokio::runtime::Handle::try_current().is_ok() {
+            let telemetry_cell = state.telemetry.clone();
+            let telemetry_path = state.root.join(".sdlc").join("telemetry.redb");
+            tokio::spawn(async move {
+                tracing::debug!(path = %telemetry_path.display(), "opening telemetry store (background)");
+                let result = tokio::task::spawn_blocking(move || {
+                    TelemetryStore::open(&telemetry_path).ok().map(Arc::new)
+                })
+                .await
+                .unwrap_or(None);
+                if let Some(store) = result {
+                    let _ = telemetry_cell.set(store);
+                    tracing::debug!("telemetry store ready");
+                } else {
+                    tracing::warn!("telemetry store unavailable — events will not be persisted");
+                }
+            });
+        }
 
         // Watch .sdlc/state.yaml mtime and broadcast when it changes.
         // This catches both web-UI mutations and external CLI updates.
         // Guard: only spawn if inside a Tokio runtime (skipped in sync unit tests).
         if tokio::runtime::Handle::try_current().is_ok() {
-            let mut handles: Vec<tokio::task::JoinHandle<()>> = Vec::new();
+            tracing::debug!("spawning 7 file-watcher tasks");
+            let mut handles: Vec<tokio::task::AbortHandle> = Vec::new();
 
             let state_file = state.root.join(".sdlc").join("state.yaml");
             let tx2 = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_mtime = None::<std::time::SystemTime>;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    if let Ok(meta) = tokio::fs::metadata(&state_file).await {
-                        if let Ok(mtime) = meta.modified() {
-                            if last_mtime != Some(mtime) {
-                                last_mtime = Some(mtime);
-                                let _ = tx2.send(SseMessage::Update);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        if let Ok(meta) = tokio::fs::metadata(&state_file).await {
+                            if let Ok(mtime) = meta.modified() {
+                                if last_mtime != Some(mtime) {
+                                    last_mtime = Some(mtime);
+                                    let _ = tx2.send(SseMessage::Update);
+                                }
                             }
                         }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
             // Watch roadmap manifests for ponder space changes.
             // atomic_write uses rename, which updates the parent slug dir's mtime
@@ -381,112 +529,162 @@ impl AppState {
             // manifest file directly instead of watching the directory.
             let roadmap_dir = state.root.join(".sdlc").join("roadmap");
             let tx_roadmap = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_mtime = None::<std::time::SystemTime>;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    let latest = scan_dir_mtime(&roadmap_dir).await;
-                    if latest != last_mtime {
-                        last_mtime = latest;
-                        let _ = tx_roadmap.send(SseMessage::Update);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        let latest = scan_dir_mtime(&roadmap_dir).await;
+                        if latest != last_mtime {
+                            last_mtime = latest;
+                            let _ = tx_roadmap.send(SseMessage::Update);
+                        }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
             // Watch investigations dir for investigation workspace changes.
             let investigations_dir = state.root.join(".sdlc").join("investigations");
             let tx_inv = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_mtime = None::<std::time::SystemTime>;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    let latest = scan_dir_mtime(&investigations_dir).await;
-                    if latest != last_mtime {
-                        last_mtime = latest;
-                        let _ = tx_inv.send(SseMessage::Update);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        let latest = scan_dir_mtime(&investigations_dir).await;
+                        if latest != last_mtime {
+                            last_mtime = latest;
+                            let _ = tx_inv.send(SseMessage::Update);
+                        }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
             // Watch escalations.yaml for create/resolve mutations (CLI or API).
             let escalations_file = state.root.join(".sdlc").join("escalations.yaml");
             let tx_esc = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_mtime = None::<std::time::SystemTime>;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    if let Ok(meta) = tokio::fs::metadata(&escalations_file).await {
-                        if let Ok(mtime) = meta.modified() {
-                            if last_mtime != Some(mtime) {
-                                last_mtime = Some(mtime);
-                                let _ = tx_esc.send(SseMessage::Update);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        if let Ok(meta) = tokio::fs::metadata(&escalations_file).await {
+                            if let Ok(mtime) = meta.modified() {
+                                if last_mtime != Some(mtime) {
+                                    last_mtime = Some(mtime);
+                                    let _ = tx_esc.send(SseMessage::Update);
+                                }
                             }
                         }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
             // Watch .sdlc/tools/ for new tool directories (scaffolding via POST /api/tools or CLI).
             // We scan for subdirectories that contain a tool.ts file and watch their count/mtime.
             let tools_dir = state.root.join(".sdlc").join("tools");
             let tx_tools = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_snapshot: Option<(usize, std::time::SystemTime)> = None;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    let snapshot = scan_tools_snapshot(&tools_dir).await;
-                    if snapshot != last_snapshot {
-                        last_snapshot = snapshot;
-                        let _ = tx_tools.send(SseMessage::ToolsChanged);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_snapshot: Option<(usize, std::time::SystemTime)> = None;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        let snapshot = scan_tools_snapshot(&tools_dir).await;
+                        if snapshot != last_snapshot {
+                            last_snapshot = snapshot;
+                            let _ = tx_tools.send(SseMessage::ToolsChanged);
+                        }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
             // Watch .sdlc/.orchestrator.state — written by the orchestrator daemon
             // after each tick. Fires ActionStateChanged so the frontend can
             // refresh the actions list without polling.
             let sentinel = state.root.join(".sdlc").join(".orchestrator.state");
             let tx_orch = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_mtime = None::<std::time::SystemTime>;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    if let Ok(meta) = tokio::fs::metadata(&sentinel).await {
-                        if let Ok(mtime) = meta.modified() {
-                            if last_mtime != Some(mtime) {
-                                last_mtime = Some(mtime);
-                                let _ = tx_orch.send(SseMessage::ActionStateChanged);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        if let Ok(meta) = tokio::fs::metadata(&sentinel).await {
+                            if let Ok(mtime) = meta.modified() {
+                                if last_mtime != Some(mtime) {
+                                    last_mtime = Some(mtime);
+                                    let _ = tx_orch.send(SseMessage::ActionStateChanged);
+                                }
                             }
                         }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
             // Watch .sdlc/changelog.yaml — fires ChangelogUpdated whenever a
             // new event is appended, so the dashboard can re-fetch without polling.
             let changelog_file = state.root.join(".sdlc").join("changelog.yaml");
             let tx_changelog = tx.clone();
-            handles.push(tokio::spawn(async move {
-                let mut last_mtime = None::<std::time::SystemTime>;
-                loop {
-                    tokio::time::sleep(std::time::Duration::from_millis(800)).await;
-                    if let Ok(meta) = tokio::fs::metadata(&changelog_file).await {
-                        if let Ok(mtime) = meta.modified() {
-                            if last_mtime != Some(mtime) {
-                                last_mtime = Some(mtime);
-                                let _ = tx_changelog.send(SseMessage::ChangelogUpdated);
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        if let Ok(meta) = tokio::fs::metadata(&changelog_file).await {
+                            if let Ok(mtime) = meta.modified() {
+                                if last_mtime != Some(mtime) {
+                                    last_mtime = Some(mtime);
+                                    let _ = tx_changelog.send(SseMessage::ChangelogUpdated);
+                                }
                             }
                         }
                     }
-                }
-            }));
+                })
+                .abort_handle(),
+            );
 
-            // Store handles so they are cancelled when AppState is dropped.
-            // SAFETY: we have exclusive access to `state` here — no other
-            // thread has seen it yet, so replacing the Arc inner value is safe.
-            // We use Arc::new on a fresh Vec to avoid a get_mut dance.
+            // Watch .sdlc/auth.yaml — hot-reload named tokens into tunnel_snapshot.
+            // When the file is added, removed, or updated, the in-memory token
+            // list is updated atomically so the next request uses the new set.
+            let auth_file = state.root.join(".sdlc").join("auth.yaml");
+            let snap_auth = state.tunnel_snapshot.clone();
+            let root_auth = state.root.clone();
+            handles.push(
+                tokio::spawn(async move {
+                    let mut last_mtime = None::<std::time::SystemTime>;
+                    loop {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        // Check current mtime (file may not exist yet).
+                        let current = tokio::fs::metadata(&auth_file)
+                            .await
+                            .ok()
+                            .and_then(|m| m.modified().ok());
+                        if current != last_mtime {
+                            last_mtime = current;
+                            // Reload token list from disk.
+                            let tokens: Vec<(String, String)> =
+                                sdlc_core::auth_config::load(&root_auth)
+                                    .map(|c| {
+                                        c.tokens.into_iter().map(|t| (t.name, t.token)).collect()
+                                    })
+                                    .unwrap_or_default();
+                            let mut snap = snap_auth.write().await;
+                            snap.config.tokens = tokens;
+                        }
+                    }
+                })
+                .abort_handle(),
+            );
+
+            tracing::debug!("all 8 watcher tasks spawned");
+            // WatcherGuard aborts all tasks when AppState is dropped — including
+            // in integration tests where the runtime shuts down after each test.
             return Self {
-                _watcher_handles: Arc::new(handles),
+                _watcher_handles: Arc::new(WatcherGuard(handles)),
                 ..state
             };
         }
@@ -579,5 +777,92 @@ mod tests {
     fn new_state_stores_root() {
         let state = AppState::new(std::path::PathBuf::from("/tmp/test"));
         assert_eq!(state.root, std::path::PathBuf::from("/tmp/test"));
+    }
+
+    #[test]
+    fn orphaned_runs_marked_failed_on_startup() {
+        let tmp = tempfile::TempDir::new().expect("tempdir");
+        let runs_dir = tmp.path().join(".sdlc").join(".runs");
+        std::fs::create_dir_all(&runs_dir).expect("create runs dir");
+
+        // Helper to build a minimal RunRecord JSON
+        fn make_record(id: &str, status: &str) -> serde_json::Value {
+            serde_json::json!({
+                "id": id,
+                "key": format!("sdlc-run:{id}"),
+                "run_type": "sdlc-run",
+                "target": id,
+                "label": format!("Run {id}"),
+                "status": status,
+                "started_at": "2026-01-01T00:00:00Z",
+                "completed_at": null,
+                "cost_usd": null,
+                "turns": null,
+                "error": null
+            })
+        }
+
+        // Write an orphaned (running) record
+        let orphan_id = "20260101-000001-aaa";
+        std::fs::write(
+            runs_dir.join(format!("{orphan_id}.json")),
+            serde_json::to_string_pretty(&make_record(orphan_id, "running")).unwrap(),
+        )
+        .expect("write orphan");
+
+        // Write a completed record — must remain unchanged
+        let completed_id = "20260101-000002-bbb";
+        std::fs::write(
+            runs_dir.join(format!("{completed_id}.json")),
+            serde_json::to_string_pretty(&make_record(completed_id, "completed")).unwrap(),
+        )
+        .expect("write completed");
+
+        let history = load_run_history(tmp.path());
+
+        // Locate records by id
+        let orphan = history
+            .iter()
+            .find(|r| r.id == orphan_id)
+            .expect("orphan record");
+        let completed = history
+            .iter()
+            .find(|r| r.id == completed_id)
+            .expect("completed record");
+
+        // Orphaned run must be marked failed with the crash reason
+        assert_eq!(orphan.status, "failed", "orphaned run must be 'failed'");
+        assert_eq!(
+            orphan.error.as_deref(),
+            Some("server restarted"),
+            "orphaned run must carry 'server restarted' error"
+        );
+        assert!(
+            orphan.completed_at.is_some(),
+            "orphaned run must have completed_at set"
+        );
+
+        // Completed run must be unchanged
+        assert_eq!(
+            completed.status, "completed",
+            "completed run must remain 'completed'"
+        );
+        assert!(
+            completed.error.is_none(),
+            "completed run must not have error set"
+        );
+
+        // Verify the on-disk JSON was updated for the orphaned run
+        let disk_data =
+            std::fs::read_to_string(runs_dir.join(format!("{orphan_id}.json"))).expect("read back");
+        let disk_rec: serde_json::Value = serde_json::from_str(&disk_data).expect("parse back");
+        assert_eq!(
+            disk_rec["status"], "failed",
+            "on-disk status must be 'failed'"
+        );
+        assert_eq!(
+            disk_rec["error"], "server restarted",
+            "on-disk error must be 'server restarted'"
+        );
     }
 }

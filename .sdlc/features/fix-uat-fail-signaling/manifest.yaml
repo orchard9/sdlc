@@ -1,17 +1,148 @@
 slug: fix-uat-fail-signaling
 title: UAT fail endpoint and skill template for explicit failure signaling
-phase: draft
+phase: implementation
 created_at: 2026-03-03T05:30:00Z
-updated_at: 2026-03-03T05:30:00Z
-artifacts: []
-tasks: []
+updated_at: 2026-03-03T15:42:06.501077Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-uat-fail-signaling/spec.md
+  created_at: 2026-03-03T15:41:25.119918Z
+  approved_at: 2026-03-03T15:41:28.039792Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-uat-fail-signaling/design.md
+  created_at: 2026-03-03T15:41:36.112607Z
+  approved_at: 2026-03-03T15:41:36.119369Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-uat-fail-signaling/tasks.md
+  created_at: 2026-03-03T15:41:41.003313Z
+  approved_at: 2026-03-03T15:41:41.010376Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-uat-fail-signaling/qa-plan.md
+  created_at: 2026-03-03T15:41:45.334336Z
+  approved_at: 2026-03-03T15:41:45.339669Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fix-uat-fail-signaling/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fix-uat-fail-signaling/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fix-uat-fail-signaling/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add MilestoneUatFailed SSE variant to state.rs
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:42:13.654220Z
+  started_at: 2026-03-03T15:42:16.710304Z
+  completed_at: 2026-03-03T15:42:29.478395Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Serialize MilestoneUatFailed in events.rs
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:42:13.660390Z
+  started_at: 2026-03-03T15:42:32.480087Z
+  completed_at: 2026-03-03T15:42:44.760825Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement fail_milestone_uat handler in runs.rs
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:42:13.666276Z
+  started_at: 2026-03-03T15:42:48.407350Z
+  completed_at: 2026-03-03T15:43:04.945780Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register POST /api/milestone/:slug/uat/fail route in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:42:13.672376Z
+  started_at: 2026-03-03T15:43:08.431918Z
+  completed_at: 2026-03-03T15:43:16.654226Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update MilestoneUatSseEvent TypeScript type in types.ts
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:42:13.677163Z
+  started_at: 2026-03-03T15:43:19.907647Z
+  completed_at: 2026-03-03T15:43:33.368518Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Update all three UAT skill templates with fail endpoint call
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:42:13.683071Z
+  started_at: 2026-03-03T15:43:36.370612Z
+  completed_at: 2026-03-03T15:44:04.803190Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Verify build and tests pass
+  description: null
+  status: in_progress
+  created_at: 2026-03-03T15:42:13.688433Z
+  started_at: 2026-03-03T15:44:18.062881Z
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:30:00Z
+  exited: 2026-03-03T15:41:28.041347Z
+- phase: specified
+  entered: 2026-03-03T15:41:28.041347Z
+  exited: 2026-03-03T15:41:45.341024Z
+- phase: planned
+  entered: 2026-03-03T15:41:45.341024Z
+  exited: 2026-03-03T15:42:00.174321Z
+- phase: ready
+  entered: 2026-03-03T15:42:00.174321Z
+  exited: 2026-03-03T15:42:06.501077Z
+- phase: implementation
+  entered: 2026-03-03T15:42:06.501077Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

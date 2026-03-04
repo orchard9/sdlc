@@ -1,0 +1,16 @@
+partners:
+- name: Felix Wagner
+  role: Data model & CLI semantics
+  context: Developer tooling architect, backlog/lifecycle specialist
+  agent: felix-wagner
+  recruited_at: 2026-03-04T03:33:23.085219Z
+- name: Dana Cho
+  role: Scope guard
+  context: Product skeptic, challenges necessity
+  agent: dana-cho
+  recruited_at: 2026-03-04T03:33:23.995895Z
+- name: Tobias Krenn
+  role: Over-engineering check
+  context: Skeptical eng lead, questions scope
+  agent: tobias-krenn
+  recruited_at: 2026-03-04T03:33:25.964643Z

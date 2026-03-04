@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Human UAT Frontend Mockup</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #111111;
+    --border: #2a2a2a;
+    --muted: #1c1c1c;
+    --muted-fg: #888;
+    --fg: #e5e5e5;
+    --fg-dim: #666;
+    --primary: #3b82f6;
+    --primary-fg: #fff;
+    --green: #22c55e;
+    --green-dim: #14532d;
+    --green-border: #16a34a40;
+    --destructive: #ef4444;
+    --radius: 0.75rem;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 14px; }
+
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: #0d0d0d; border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; padding: 10px 16px; overflow-x: auto;
+  }
+  nav a {
+    text-decoration: none; font-size: 12px; padding: 5px 12px;
+    border-radius: 6px; border: 1px solid var(--border);
+    color: var(--muted-fg); white-space: nowrap;
+    transition: background 0.15s, color 0.15s;
+  }
+  nav a:hover, nav a.active { background: var(--card); color: var(--fg); }
+
+  section { padding: 40px 24px; max-width: 860px; margin: 0 auto; }
+  .screen-label {
+    font-size: 11px; font-family: monospace; color: var(--muted-fg);
+    background: var(--muted); border: 1px solid var(--border);
+    border-radius: 4px; padding: 2px 8px; display: inline-block; margin-bottom: 20px;
+  }
+  h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .note { font-size: 11px; color: var(--muted-fg); margin-top: 12px; font-style: italic; }
+
+  /* Cards */
+  .card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+  }
+
+  /* Verifying mini */
+  .verifying-banner {
+    display: flex; flex-direction: column; gap: 6px;
+    background: rgba(21, 83, 45, 0.15); border: 1px solid var(--green-border);
+    border-radius: var(--radius); padding: 10px 12px;
+  }
+  .verifying-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .verifying-label {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: var(--green); font-weight: 500;
+  }
+  .dot-green {
+    width: 14px; height: 14px; color: var(--green);
+  }
+  .btn-run-uat {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 6px; font-size: 10px; font-weight: 500;
+    background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.3);
+    color: var(--green); cursor: pointer;
+  }
+  .link-submit {
+    font-size: 10px; color: var(--muted-fg); text-decoration: underline; cursor: pointer;
+    align-self: flex-end;
+  }
+  .link-submit:hover { color: var(--fg); }
+
+  /* Feature action card */
+  .action-card { margin-bottom: 24px; }
+  .action-header {
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px;
+  }
+  .action-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+  .action-msg { font-size: 12px; color: var(--muted-fg); }
+  .action-btns { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .btn-ghost {
+    font-size: 11px; color: var(--muted-fg); cursor: pointer; background: none; border: none;
+    text-decoration: underline; padding: 0;
+  }
+  .btn-ghost:hover { color: var(--fg); }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    background: var(--primary); color: var(--primary-fg); border: none; cursor: pointer;
+  }
+  .btn-secondary {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    background: var(--muted); color: var(--fg); border: 1px solid var(--border); cursor: pointer;
+  }
+  .cmd-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cmd-pill {
+    font-size: 11px; font-family: monospace; background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 3px 8px; color: var(--muted-fg);
+  }
+
+  /* Modal overlay */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 1rem; width: 100%; max-width: 520px; margin: 16px;
+    overflow: hidden;
+  }
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--border);
+  }
+  .modal-title { font-size: 15px; font-weight: 600; }
+  .modal-close {
+    width: 24px; height: 24px; border-radius: 6px; background: none; border: none;
+    color: var(--muted-fg); cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: var(--muted); color: var(--fg); }
+  .modal-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .section-label { font-size: 12px; font-weight: 600; color: var(--muted-fg); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .checklist-block {
+    background: var(--muted); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; max-height: 140px; overflow-y: auto;
+    font-size: 12px; font-family: monospace; color: var(--muted-fg); white-space: pre-wrap; line-height: 1.5;
+  }
+  .checklist-placeholder {
+    background: var(--muted); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; font-size: 12px; color: var(--fg-dim); font-style: italic;
+  }
+
+  .verdict-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .verdict-opt {
+    display: flex; align-items: center; gap: 6px; cursor: pointer;
+    font-size: 13px; padding: 7px 14px; border-radius: 8px;
+    border: 1px solid var(--border); background: var(--muted);
+    transition: background 0.1s, border-color 0.1s;
+  }
+  .verdict-opt.selected { border-color: var(--primary); background: rgba(59, 130, 246, 0.12); }
+  .verdict-opt.pass.selected { border-color: var(--green); background: rgba(34, 197, 94, 0.1); }
+  .verdict-opt.fail.selected { border-color: var(--destructive); background: rgba(239, 68, 68, 0.1); }
+
+  .notes-area {
+    width: 100%; height: 80px; resize: none;
+    background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    padding: 10px 12px; color: var(--fg); font-size: 13px; font-family: inherit; line-height: 1.5;
+  }
+  .notes-area::placeholder { color: var(--fg-dim); }
+  .notes-area:focus { outline: none; border-color: var(--primary); }
+
+  .error-msg { font-size: 12px; color: var(--destructive); padding: 8px 12px; background: rgba(239,68,68,0.08); border-radius: 6px; }
+
+  .modal-footer {
+    display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+    padding: 16px 20px; border-top: 1px solid var(--border);
+  }
+
+  .btn-submit {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    background: var(--primary); color: var(--primary-fg); border: none; cursor: pointer;
+  }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-cancel {
+    padding: 8px 16px; border-radius: 8px; font-size: 13px;
+    background: none; border: 1px solid var(--border); color: var(--fg); cursor: pointer;
+  }
+  .btn-cancel:hover { background: var(--muted); }
+  .spinner {
+    width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* divider */
+  .divider { height: 1px; background: var(--border); }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#screen-verifying-mini" class="active">1. VerifyingMini (before)</a>
+  <a href="#screen-verifying-with-submit">2. VerifyingMini (after)</a>
+  <a href="#screen-feature-action">3. Feature QA action (before)</a>
+  <a href="#screen-feature-with-submit">4. Feature QA action (after)</a>
+  <a href="#screen-modal-milestone">5. Modal — Milestone (open)</a>
+  <a href="#screen-modal-feature">6. Modal — Feature (open)</a>
+  <a href="#screen-modal-no-checklist">7. Modal — no checklist</a>
+  <a href="#screen-modal-notes-required">8. Modal — notes required</a>
+  <a href="#screen-modal-submitting">9. Modal — submitting</a>
+  <a href="#screen-modal-error">10. Modal — error</a>
+</nav>
+
+<!-- 1: VerifyingMini BEFORE -->
+<section id="screen-verifying-mini">
+  <div class="screen-label">screen-verifying-mini-before</div>
+  <h2>1. VerifyingMini — Current (no change)</h2>
+  <div class="verifying-banner">
+    <div class="verifying-row">
+      <div class="verifying-label">
+        <svg class="dot-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        All features released
+      </div>
+      <button class="btn-run-uat">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Run UAT
+      </button>
+    </div>
+  </div>
+  <p class="note">Current state — no "Submit manually" option present.</p>
+</section>
+
+<!-- 2: VerifyingMini AFTER -->
+<section id="screen-verifying-with-submit">
+  <div class="screen-label">screen-verifying-with-submit</div>
+  <h2>2. VerifyingMini — With "Submit manually" (new)</h2>
+  <div class="verifying-banner">
+    <div class="verifying-row">
+      <div class="verifying-label">
+        <svg class="dot-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        All features released
+      </div>
+      <button class="btn-run-uat">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Run UAT
+      </button>
+    </div>
+    <div class="verifying-row">
+      <span></span>
+      <span class="link-submit">Submit manually</span>
+    </div>
+  </div>
+  <p class="note">"Submit manually" is a low-weight text link below the primary button row. Hidden while a run is in progress.</p>
+</section>
+
+<!-- 3: Feature action BEFORE -->
+<section id="screen-feature-action">
+  <div class="screen-label">screen-feature-action-before</div>
+  <h2>3. Feature QA action card — Current (no change)</h2>
+  <div class="card action-card">
+    <div class="action-header">
+      <div>
+        <div class="action-title">Next: run qa</div>
+        <div class="action-msg">Run the QA plan verification for 'my-feature'.</div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-primary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run
+        </button>
+      </div>
+    </div>
+    <div class="cmd-row">
+      <span class="cmd-pill">/sdlc-run my-feature</span>
+      <span class="cmd-pill">/sdlc-next my-feature</span>
+    </div>
+  </div>
+  <p class="note">Current state — primary "Run" button only.</p>
+</section>
+
+<!-- 4: Feature action AFTER -->
+<section id="screen-feature-with-submit">
+  <div class="screen-label">screen-feature-with-submit</div>
+  <h2>4. Feature QA action card — With "Submit manually" (new)</h2>
+  <div class="card action-card">
+    <div class="action-header">
+      <div>
+        <div class="action-title">Next: run qa</div>
+        <div class="action-msg">Run the QA plan verification for 'my-feature'.</div>
+      </div>
+      <div class="action-btns">
+        <button class="btn-ghost">Submit manually</button>
+        <button class="btn-primary">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Run
+        </button>
+      </div>
+    </div>
+    <div class="cmd-row">
+      <span class="cmd-pill">/sdlc-run my-feature</span>
+      <span class="cmd-pill">/sdlc-next my-feature</span>
+    </div>
+  </div>
+  <p class="note">"Submit manually" is a ghost/text button to the left of the primary Run button. Visible only when action === 'run_qa'.</p>
+</section>
+
+<!-- 5: Modal — Milestone open with checklist -->
+<section id="screen-modal-milestone">
+  <div class="screen-label">screen-modal-milestone</div>
+  <h2>5. HumanUatModal — Milestone (open, checklist loaded)</h2>
+  <div class="modal" style="position:relative;max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title">Submit UAT Results</span>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-label">Checklist</div>
+        <div class="checklist-block">## Acceptance Test: v28-human-run-uat
+
+- [ ] "Submit manually" link appears when all features released
+- [ ] Clicking it opens the UAT modal
+- [ ] Verdict selection enables the Submit button
+- [ ] Non-pass verdict requires notes
+- [ ] Successful submission creates a UatRun record
+- [ ] UatHistoryPanel refreshes after submission</div>
+      </div>
+      <div>
+        <div class="section-label">Verdict</div>
+        <div class="verdict-row">
+          <label class="verdict-opt pass selected">
+            <input type="radio" name="v5" style="display:none" checked /> Pass
+          </label>
+          <label class="verdict-opt">
+            <input type="radio" name="v5" style="display:none" /> Pass with Tasks
+          </label>
+          <label class="verdict-opt">
+            <input type="radio" name="v5" style="display:none" /> Fail
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Notes <span style="color:var(--fg-dim);font-size:10px;font-weight:400;">(optional for Pass)</span></div>
+        <textarea class="notes-area" placeholder="Describe what you tested and what you found…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-submit">Submit Results</button>
+    </div>
+  </div>
+  <p class="note">Milestone mode. Checklist loaded from acceptance-test endpoint. "Pass" selected — notes optional.</p>
+</section>
+
+<!-- 6: Modal — Feature open with checklist -->
+<section id="screen-modal-feature">
+  <div class="screen-label">screen-modal-feature</div>
+  <h2>6. HumanUatModal — Feature QA (open, qa_plan loaded)</h2>
+  <div class="modal" style="position:relative;max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title">Submit QA Results</span>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-label">QA Plan</div>
+        <div class="checklist-block">## QA Plan: human-uat-frontend
+
+### Smoke Tests
+- [ ] "Submit manually" link visible in VerifyingMini
+- [ ] "Submit manually" visible in run_qa action card
+- [ ] Modal opens and closes correctly
+
+### Functional Tests
+- [ ] Verdict selection works
+- [ ] Notes required for non-Pass
+- [ ] API POST called on submit
+- [ ] Success closes modal</div>
+      </div>
+      <div>
+        <div class="section-label">Verdict</div>
+        <div class="verdict-row">
+          <label class="verdict-opt">
+            <input type="radio" name="v6" style="display:none" /> Pass
+          </label>
+          <label class="verdict-opt pass selected">
+            <input type="radio" name="v6" style="display:none" checked /> Pass with Tasks
+          </label>
+          <label class="verdict-opt">
+            <input type="radio" name="v6" style="display:none" /> Fail
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Notes <span style="color:#f59e0b;font-size:10px;font-weight:400;">required</span></div>
+        <textarea class="notes-area" placeholder="Describe what you tested and what you found…">All core paths work. SSE refresh for UatHistoryPanel needs a follow-up task — T6 in milestone-uat-history-panel is tracking this.</textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-submit">Submit Results</button>
+    </div>
+  </div>
+  <p class="note">Feature mode. QA plan loaded from artifact endpoint. "Pass with Tasks" selected — notes required and filled.</p>
+</section>
+
+<!-- 7: Modal — no checklist -->
+<section id="screen-modal-no-checklist">
+  <div class="screen-label">screen-modal-no-checklist</div>
+  <h2>7. HumanUatModal — No checklist available</h2>
+  <div class="modal" style="position:relative;max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title">Submit UAT Results</span>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-label">Checklist</div>
+        <div class="checklist-placeholder">No checklist available — proceed with manual assessment.</div>
+      </div>
+      <div>
+        <div class="section-label">Verdict</div>
+        <div class="verdict-row">
+          <label class="verdict-opt">
+            <input type="radio" name="v7" style="display:none" /> Pass
+          </label>
+          <label class="verdict-opt">
+            <input type="radio" name="v7" style="display:none" /> Pass with Tasks
+          </label>
+          <label class="verdict-opt">
+            <input type="radio" name="v7" style="display:none" /> Fail
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Notes</div>
+        <textarea class="notes-area" placeholder="Describe what you tested and what you found…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-submit" disabled>Submit Results</button>
+    </div>
+  </div>
+  <p class="note">Graceful degradation when acceptance-test or qa_plan is unavailable. Submit disabled until verdict selected.</p>
+</section>
+
+<!-- 8: Modal — notes required, blocked -->
+<section id="screen-modal-notes-required">
+  <div class="screen-label">screen-modal-notes-required</div>
+  <h2>8. HumanUatModal — Notes required (Fail selected, notes empty)</h2>
+  <div class="modal" style="position:relative;max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title">Submit UAT Results</span>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-label">Checklist</div>
+        <div class="checklist-placeholder">No checklist available — proceed with manual assessment.</div>
+      </div>
+      <div>
+        <div class="section-label">Verdict</div>
+        <div class="verdict-row">
+          <label class="verdict-opt">
+            <input type="radio" name="v8" style="display:none" /> Pass
+          </label>
+          <label class="verdict-opt">
+            <input type="radio" name="v8" style="display:none" /> Pass with Tasks
+          </label>
+          <label class="verdict-opt fail selected">
+            <input type="radio" name="v8" style="display:none" checked /> Fail
+          </label>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Notes <span style="color:#ef4444;font-size:10px;font-weight:400;">required</span></div>
+        <textarea class="notes-area" placeholder="Describe what you tested and what you found…" style="border-color:#ef4444;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-submit" disabled>Submit Results</button>
+    </div>
+  </div>
+  <p class="note">"Fail" selected but notes empty — Submit is disabled. Notes label shows red "required" badge.</p>
+</section>
+
+<!-- 9: Modal — submitting in-flight -->
+<section id="screen-modal-submitting">
+  <div class="screen-label">screen-modal-submitting</div>
+  <h2>9. HumanUatModal — Submitting in-flight</h2>
+  <div class="modal" style="position:relative;max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title">Submit UAT Results</span>
+      <button class="modal-close" disabled style="opacity:0.4;">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-label">Checklist</div>
+        <div class="checklist-block">- [ ] All surfaces work
+- [ ] Modal opens/closes correctly</div>
+      </div>
+      <div>
+        <div class="section-label">Verdict</div>
+        <div class="verdict-row">
+          <label class="verdict-opt pass selected">
+            <input type="radio" name="v9" style="display:none" checked /> Pass
+          </label>
+          <label class="verdict-opt"><input type="radio" name="v9" style="display:none" /> Pass with Tasks</label>
+          <label class="verdict-opt"><input type="radio" name="v9" style="display:none" /> Fail</label>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Notes</div>
+        <textarea class="notes-area" disabled placeholder="…" style="opacity:0.6;"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" disabled style="opacity:0.4;">Cancel</button>
+      <button class="btn-submit" disabled>
+        <div class="spinner"></div>
+        Submitting…
+      </button>
+    </div>
+  </div>
+  <p class="note">During submission: all controls disabled, spinner on submit button.</p>
+</section>
+
+<!-- 10: Modal — error -->
+<section id="screen-modal-error">
+  <div class="screen-label">screen-modal-error</div>
+  <h2>10. HumanUatModal — Submission error</h2>
+  <div class="modal" style="position:relative;max-width:520px;">
+    <div class="modal-header">
+      <span class="modal-title">Submit UAT Results</span>
+      <button class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <div class="section-label">Checklist</div>
+        <div class="checklist-block">- [ ] All surfaces work</div>
+      </div>
+      <div>
+        <div class="section-label">Verdict</div>
+        <div class="verdict-row">
+          <label class="verdict-opt pass selected">
+            <input type="radio" name="v10" style="display:none" checked /> Pass
+          </label>
+          <label class="verdict-opt"><input type="radio" name="v10" style="display:none" /> Pass with Tasks</label>
+          <label class="verdict-opt"><input type="radio" name="v10" style="display:none" /> Fail</label>
+        </div>
+      </div>
+      <div>
+        <div class="section-label">Notes</div>
+        <textarea class="notes-area" placeholder="…"></textarea>
+      </div>
+      <div class="error-msg">Submission failed: milestone not found. Please refresh and try again.</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel">Cancel</button>
+      <button class="btn-submit">Retry</button>
+    </div>
+  </div>
+  <p class="note">Error shown inline inside the modal, not as a toast. "Submit Results" label reverts to "Retry" (or stays as "Submit Results"). Cancel stays active.</p>
+</section>
+
+<script>
+  // Highlight active nav link on scroll
+  const sections = document.querySelectorAll('section[id]')
+  const links = document.querySelectorAll('nav a')
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'))
+        const link = document.querySelector(`nav a[href="#${e.target.id}"]`)
+        if (link) link.classList.add('active')
+      }
+    })
+  }, { threshold: 0.5 })
+  sections.forEach(s => observer.observe(s))
+</script>
+</body>
+</html>

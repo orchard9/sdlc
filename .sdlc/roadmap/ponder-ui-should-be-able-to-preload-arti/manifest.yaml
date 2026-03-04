@@ -1,0 +1,10 @@
+slug: ponder-ui-should-be-able-to-preload-arti
+title: ponder ui should be able to preload artifacts
+status: converging
+created_at: 2026-03-03T16:02:30.390139Z
+updated_at: 2026-03-03T16:07:16.588605Z
+sessions: 1
+orientation:
+  current: Scope split into two phases. Phase 1 (text-file preload in NewIdeaModal, zero backend) is clearly shaped and ready to spec. Phase 2 (binary image upload/serve/render) is designed but deferred.
+  next: Confirm with jordan whether Phase 1 scope (text files only, NewIdeaModal) is sufficient to ship as a feature, or if binary image support is needed in the same feature. If confirmed, run /sdlc-ponder-commit to create the feature.
+  commit: Jordan confirms scope split is acceptable — ship text preload now, images later.

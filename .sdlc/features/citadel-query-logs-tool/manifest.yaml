@@ -2,10 +2,66 @@ slug: citadel-query-logs-tool
 title: citadel_query_logs Agent Tool
 description: |
   Implement the citadel_query_logs Pantheon agent tool. Params: { query: string (CPL), time_range: string, limit: int }. Calls Citadel GET /api/v1/query with Citadel API key from ToolCredential. Returns log entries + episode context. Agents invoke this from Discord to fetch logs around an incident. Skill instructions must include CPL basics: level:error, service:auth, time:1h, boolean operators, trace_id correlation.
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
+updated_at: 2026-03-03T19:52:48.277647Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/spec.md
+  created_at: 2026-03-03T19:43:43.328648Z
+  approved_at: 2026-03-03T19:43:45.435965Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/design.md
+  created_at: 2026-03-03T19:44:30.214914Z
+  approved_at: 2026-03-03T19:44:32.409242Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/tasks.md
+  created_at: 2026-03-03T19:45:01.780415Z
+  approved_at: 2026-03-03T19:45:04.555137Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/qa-plan.md
+  created_at: 2026-03-03T19:45:43.608956Z
+  approved_at: 2026-03-03T19:45:46.910943Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/review.md
+  created_at: 2026-03-03T19:48:19.803614Z
+  approved_at: 2026-03-03T19:48:23.102861Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/audit.md
+  created_at: 2026-03-03T19:49:57.658572Z
+  approved_at: 2026-03-03T19:50:01.784222Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/citadel-query-logs-tool/qa-results.md
+  created_at: 2026-03-03T19:52:41.364193Z
+  approved_at: 2026-03-03T19:52:44.515083Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -13,7 +69,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T19:43:45.437527Z
+- phase: specified
+  entered: 2026-03-03T19:43:45.437527Z
+  exited: 2026-03-03T19:45:46.912592Z
+- phase: planned
+  entered: 2026-03-03T19:45:46.912592Z
+  exited: 2026-03-03T19:45:51.645045Z
+- phase: ready
+  entered: 2026-03-03T19:45:51.645045Z
+  exited: 2026-03-03T19:45:55.626289Z
+- phase: implementation
+  entered: 2026-03-03T19:45:55.626289Z
+  exited: 2026-03-03T19:48:23.107641Z
+- phase: review
+  entered: 2026-03-03T19:48:23.107641Z
+  exited: 2026-03-03T19:48:41.607356Z
+- phase: audit
+  entered: 2026-03-03T19:48:41.607356Z
+  exited: 2026-03-03T19:50:01.788374Z
+- phase: qa
+  entered: 2026-03-03T19:50:01.788374Z
+  exited: 2026-03-03T19:52:44.518758Z
+- phase: merge
+  entered: 2026-03-03T19:52:44.518758Z
+  exited: 2026-03-03T19:52:48.277647Z
+- phase: released
+  entered: 2026-03-03T19:52:48.277647Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

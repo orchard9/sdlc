@@ -195,22 +195,32 @@ pub async fn list_milestone_uat_runs(
     Ok(Json(runs))
 }
 
-/// GET /api/milestones/:slug/uat-runs/latest — most recent UAT run, or 404 if none.
+/// GET /api/milestones/:slug/uat-runs/latest — most recent UAT run, or null if none.
 pub async fn get_latest_milestone_uat_run(
     State(app): State<AppState>,
     Path(slug): Path<String>,
-) -> Result<Json<sdlc_core::milestone::UatRun>, AppError> {
+) -> Result<Json<Option<sdlc_core::milestone::UatRun>>, AppError> {
     let root = app.root.clone();
     let run =
         tokio::task::spawn_blocking(move || sdlc_core::milestone::latest_uat_run(&root, &slug))
             .await
             .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
-    match run {
-        Some(r) => Ok(Json(r)),
-        None => Err(AppError::not_found(
-            "no UAT runs recorded for this milestone",
-        )),
-    }
+    Ok(Json(run))
+}
+
+/// GET /api/milestones/:slug/acceptance-test — acceptance test markdown content.
+pub async fn get_milestone_acceptance_test(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let content = tokio::task::spawn_blocking(move || {
+        let m = sdlc_core::milestone::Milestone::load(&root, &slug)?;
+        m.load_acceptance_test(&root)
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(serde_json::json!({ "content": content })))
 }
 
 /// POST /api/milestones/:slug/features — add a feature to a milestone.

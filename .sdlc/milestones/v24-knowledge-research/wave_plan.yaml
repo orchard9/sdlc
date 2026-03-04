@@ -1,0 +1,10 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: knowledge-research-web-tools
+    title: 'Knowledge research: web-capable agent with rewritten prompt'
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

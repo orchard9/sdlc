@@ -1,6 +1,17 @@
 # orch-tunnel Reference
 
-`orch-tunnel` is the tunnel binary used by `sdlc ui --tunnel` to expose the SDLC server publicly.
+`orch-tunnel` is the tunnel binary used by `sdlc ui` to expose the SDLC server publicly. The tunnel starts automatically by default — use `sdlc ui --no-tunnel` to run without it.
+
+## Default Behavior
+
+`sdlc ui` starts a public tunnel automatically on launch. The tunnel URL is stable across restarts — the same project always gets the same URL.
+
+```bash
+sdlc ui              # tunnel starts automatically (default)
+sdlc ui --no-tunnel  # local-only, no tunnel
+```
+
+If `orch-tunnel` is not installed or fails to connect, `sdlc ui` logs a warning and continues in local-only mode. It does not fail hard.
 
 ## CLI
 
@@ -33,14 +44,14 @@ orch-tunnel https 3000
 
 ## Usage in sdlc
 
-`sdlc ui --tunnel` spawns `orch-tunnel` with the project name from `.sdlc/config.yaml`:
+`sdlc ui` spawns `orch-tunnel` with the project name from `.sdlc/config.yaml`:
 
 ```bash
 orch-tunnel http 3141 --name sdlc
 # → https://sdlc.tunnel.threesix.ai
 ```
 
-The project name is passed as `--name`, giving a predictable URL that matches the project. The tunnel URL is extracted from `orch-tunnel`'s stderr output and validated by checking for `.tunnel.threesix.ai`.
+The project name is passed as `--name`, giving a stable URL that matches the project and does not change between restarts. The tunnel URL is extracted from `orch-tunnel`'s stdout output and validated by checking for `.tunnel.threesix.ai`.
 
 ## Install
 

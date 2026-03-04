@@ -184,6 +184,11 @@ export function AmaThreadPanel({ tool }: AmaThreadPanelProps) {
 
     try {
       const res = await api.runTool(tool.name, { question: q.trim() })
+      if ('streaming' in res) {
+        setSearchError('Unexpected streaming response')
+        setSearching(false)
+        return
+      }
       if (!res.ok) {
         setSearchError(res.error ?? 'Search failed')
         setSearching(false)

@@ -8,11 +8,12 @@ default:
 
 # ─── Install ─────────────────────────────────────────────────────────────────
 
-# Build frontend, install ponder + sdlc alias, install orch-tunnel
+# Build frontend, install ponder + sdlc alias
 install: _frontend
     cargo install --path crates/sdlc-cli --locked
     just _symlink
-    just _install-orch-tunnel
+    @printf '\n  \033[36mOptional:\033[0m For remote UI tunneling, install orch-tunnel:\n'
+    @printf '           https://github.com/orchard9/tunnel\n\n'
 
 # Build without installing
 build: _frontend
@@ -74,46 +75,3 @@ _symlink:
     New-Item -ItemType HardLink -Path $sdlc -Target $ponder | Out-Null
     Write-Host "  OK sdlc -> ponder (alias)"
 
-[unix]
-_install-orch-tunnel:
-    #!/usr/bin/env sh
-    if command -v orch-tunnel >/dev/null 2>&1; then
-        printf '  \033[32m✓\033[0m orch-tunnel already installed\n'
-    elif command -v brew >/dev/null 2>&1; then
-        echo "  Installing orch-tunnel via Homebrew..."
-        brew install orch-tunnel
-    elif command -v gh >/dev/null 2>&1; then
-        OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        ARCH=$(uname -m)
-        case "$ARCH" in arm64|aarch64) ARCH=arm64 ;; x86_64) ARCH=amd64 ;; esac
-        DEST="$HOME/.local/bin"
-        mkdir -p "$DEST"
-        echo "  Installing orch-tunnel (${OS}-${ARCH}) to $DEST..."
-        gh release download --repo orchard9/tunnel --pattern "orch-tunnel-${OS}-${ARCH}*" -D "$DEST"
-        chmod +x "$DEST"/orch-tunnel-*
-        ln -sf "$DEST"/orch-tunnel-* "$DEST/orch-tunnel"
-    else
-        printf '\n  \033[33m⚠\033[0m  orch-tunnel not installed\n'
-        printf '     Needed only for: ponder ui --tunnel\n'
-        printf '     Install: gh release download --repo orchard9/tunnel\n\n'
-    fi
-
-[windows]
-_install-orch-tunnel:
-    #!powershell
-    if (Get-Command orch-tunnel -ErrorAction SilentlyContinue) {
-        Write-Host "  OK orch-tunnel already installed"
-    } elseif (Get-Command gh -ErrorAction SilentlyContinue) {
-        $dest = "$env:USERPROFILE\.local\bin"
-        New-Item -ItemType Directory -Force -Path $dest | Out-Null
-        gh release download --repo orchard9/tunnel --pattern "orch-tunnel-windows-amd64*" -D $dest
-        $bin = Get-Item "$dest\orch-tunnel-windows-amd64*"
-        Rename-Item $bin.FullName "orch-tunnel.exe" -Force
-        Write-Host "  OK orch-tunnel installed to $dest"
-    } else {
-        Write-Host ""
-        Write-Host "  WARN orch-tunnel not installed"
-        Write-Host "       Needed only for: ponder ui --tunnel"
-        Write-Host "       Install: gh release download --repo orchard9/tunnel"
-        Write-Host ""
-    }

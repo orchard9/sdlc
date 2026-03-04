@@ -839,8 +839,10 @@ async fn sentinel_watcher_fires_action_state_changed() {
     let dir = TempDir::new().unwrap();
     std::fs::create_dir_all(dir.path().join(".sdlc")).unwrap();
 
-    // Construct AppState — this spawns the watcher tasks (we are inside a tokio runtime).
-    let state = AppState::new(dir.path().to_path_buf());
+    // Construct AppState with watchers explicitly — AppState::new() skips watcher
+    // spawning (for test isolation), so we use new_with_port() here to get the
+    // sentinel watcher. WatcherGuard aborts the tasks when state is dropped.
+    let state = AppState::new_with_port(dir.path().to_path_buf(), 0);
     let mut rx = state.event_tx.subscribe();
 
     // Give the watcher task a moment to start its first poll.
@@ -1101,4 +1103,134 @@ async fn patch_action_empty_label() {
     )
     .await;
     assert_eq!(status, StatusCode::BAD_REQUEST);
+}
+
+// ---------------------------------------------------------------------------
+// Human UAT submission tests
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn human_uat_submit_pass() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create a milestone to submit against.
+    sdlc_core::milestone::Milestone::create(dir.path(), "v-test-uat", "Test UAT milestone")
+        .unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = post_json(
+        app,
+        "/api/milestone/v-test-uat/uat/human",
+        serde_json::json!({
+            "verdict": "pass",
+            "tests_total": 3,
+            "tests_passed": 3,
+            "tests_failed": 0,
+            "notes": "All steps passed."
+        }),
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::OK, "body: {json}");
+    assert_eq!(json["slug"], "v-test-uat");
+    assert_eq!(json["status"], "submitted");
+
+    // Verify run.yaml was written with mode: human.
+    let run_id = json["run_id"].as_str().unwrap();
+    let run_path = dir.path().join(format!(
+        ".sdlc/milestones/v-test-uat/uat-runs/{run_id}/run.yaml"
+    ));
+    assert!(run_path.exists(), "run.yaml not found at {run_path:?}");
+    let run: sdlc_core::milestone::UatRun =
+        serde_yaml::from_str(&std::fs::read_to_string(&run_path).unwrap()).unwrap();
+    assert_eq!(run.mode, sdlc_core::milestone::UatRunMode::Human);
+    assert_eq!(run.verdict, sdlc_core::milestone::UatVerdict::Pass);
+
+    // Verify milestone was released (released_at is set).
+    let milestone = sdlc_core::milestone::Milestone::load(dir.path(), "v-test-uat").unwrap();
+    assert!(
+        milestone.released_at.is_some(),
+        "milestone.released_at should be set after pass verdict"
+    );
+}
+
+#[tokio::test]
+async fn human_uat_submit_pass_with_tasks_empty_notes() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc_core::milestone::Milestone::create(dir.path(), "v-test-pwt", "Test").unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _json) = post_json(
+        app,
+        "/api/milestone/v-test-pwt/uat/human",
+        serde_json::json!({
+            "verdict": "pass_with_tasks",
+            "tests_total": 3,
+            "tests_passed": 2,
+            "tests_failed": 1,
+            "notes": ""
+        }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+}
+
+#[tokio::test]
+async fn human_uat_submit_failed_empty_notes() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+    sdlc_core::milestone::Milestone::create(dir.path(), "v-test-fail", "Test").unwrap();
+
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, _json) = post_json(
+        app,
+        "/api/milestone/v-test-fail/uat/human",
+        serde_json::json!({
+            "verdict": "failed",
+            "tests_total": 3,
+            "tests_passed": 0,
+            "tests_failed": 3,
+            "notes": ""
+        }),
+    )
+    .await;
+    assert_eq!(status, StatusCode::UNPROCESSABLE_ENTITY);
+}
+
+#[tokio::test]
+async fn human_qa_submit_drafts_artifact() {
+    let dir = TempDir::new().unwrap();
+    init_project(&dir);
+
+    // Create a feature.
+    sdlc_core::feature::Feature::create(dir.path(), "feat-hqa", "Human QA feature").unwrap();
+
+    // Write a placeholder qa-results file so mark_artifact_draft path exists.
+    // (The endpoint itself creates the file, but feature must exist.)
+    let app = sdlc_server::build_router(dir.path().to_path_buf(), 0);
+    let (status, json) = post_json(
+        app,
+        "/api/features/feat-hqa/human-qa",
+        serde_json::json!({
+            "verdict": "pass",
+            "notes": "All scenarios verified."
+        }),
+    )
+    .await;
+
+    assert_eq!(status, StatusCode::OK, "body: {json}");
+    assert_eq!(json["slug"], "feat-hqa");
+    assert_eq!(json["artifact"], "qa_results");
+    assert_eq!(json["status"], "draft");
+
+    // Verify the feature's qa_results artifact is now draft.
+    let feature = sdlc_core::feature::Feature::load(dir.path(), "feat-hqa").unwrap();
+    let qa_artifact = feature
+        .artifacts
+        .iter()
+        .find(|a| a.artifact_type == sdlc_core::types::ArtifactType::QaResults)
+        .unwrap();
+    assert_eq!(qa_artifact.status, sdlc_core::types::ArtifactStatus::Draft);
 }

@@ -25,7 +25,7 @@ pub struct ToolInteractionRecord {
     pub input: serde_json::Value,
     /// None while the tool is running; populated on completion.
     pub result: Option<serde_json::Value>,
-    /// "running" | "completed" | "failed"
+    /// "running" | "streaming" | "completed" | "failed"
     pub status: String,
     #[serde(default)]
     pub tags: Vec<String>,
@@ -45,6 +45,11 @@ pub fn interactions_dir(root: &Path, tool_name: &str) -> PathBuf {
 
 fn interaction_path(root: &Path, tool_name: &str, id: &str) -> PathBuf {
     interactions_dir(root, tool_name).join(format!("{id}.yaml"))
+}
+
+/// Path to the NDJSON streaming log sidecar for an interaction.
+pub fn streaming_log_path(root: &Path, tool_name: &str, id: &str) -> PathBuf {
+    interactions_dir(root, tool_name).join(format!("{id}.log"))
 }
 
 // ---------------------------------------------------------------------------
@@ -106,6 +111,29 @@ pub fn delete_interaction(root: &Path, tool_name: &str, id: &str) -> Result<()> 
     let path = interaction_path(root, tool_name, id);
     std::fs::remove_file(&path)?;
     Ok(())
+}
+
+/// Load the NDJSON streaming log sidecar for an interaction.
+///
+/// Reads `.sdlc/tool-interactions/<name>/<id>.log`, parses each line as JSON,
+/// and returns valid entries. Invalid or empty lines are silently skipped.
+/// Returns an empty `Vec` (not an error) if the file does not exist.
+pub fn load_streaming_log(
+    root: &Path,
+    tool_name: &str,
+    id: &str,
+) -> Result<Vec<serde_json::Value>> {
+    let path = streaming_log_path(root, tool_name, id);
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let data = std::fs::read_to_string(&path)?;
+    let entries = data
+        .lines()
+        .filter(|l| !l.trim().is_empty())
+        .filter_map(|l| serde_json::from_str(l).ok())
+        .collect();
+    Ok(entries)
 }
 
 /// Delete oldest interaction files until at most `max` remain.
@@ -230,5 +258,42 @@ mod tests {
         enforce_interaction_retention(dir.path(), "tool", 3);
         let list = list_interactions(dir.path(), "tool", 0).unwrap();
         assert_eq!(list.len(), 3);
+    }
+
+    #[test]
+    fn load_streaming_log_returns_empty_when_file_missing() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let entries = load_streaming_log(dir.path(), "tool", "20260228-100000-abc").unwrap();
+        assert!(entries.is_empty());
+    }
+
+    #[test]
+    fn load_streaming_log_parses_valid_ndjson_lines() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let log_dir = interactions_dir(dir.path(), "tool");
+        std::fs::create_dir_all(&log_dir).unwrap();
+        let log_path = log_dir.join("20260228-100000-abc.log");
+        std::fs::write(
+            &log_path,
+            "{\"type\":\"progress\",\"pct\":10}\n{\"ok\":true,\"data\":{}}\n",
+        )
+        .unwrap();
+        let entries = load_streaming_log(dir.path(), "tool", "20260228-100000-abc").unwrap();
+        assert_eq!(entries.len(), 2);
+    }
+
+    #[test]
+    fn load_streaming_log_skips_invalid_json_lines() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let log_dir = interactions_dir(dir.path(), "tool");
+        std::fs::create_dir_all(&log_dir).unwrap();
+        let log_path = log_dir.join("20260228-100000-xyz.log");
+        std::fs::write(
+            &log_path,
+            "{\"type\":\"progress\"}\nnot-json\n{\"ok\":true}\n",
+        )
+        .unwrap();
+        let entries = load_streaming_log(dir.path(), "tool", "20260228-100000-xyz").unwrap();
+        assert_eq!(entries.len(), 2);
     }
 }

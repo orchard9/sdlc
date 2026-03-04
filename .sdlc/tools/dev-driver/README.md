@@ -37,12 +37,13 @@ Then run `sdlc ui --run-actions` to enable the orchestrator.
 
 ## Priority waterfall (detail)
 
-### Level 1: Flight lock
+### Level 1: Active run check
 
-Reads `.sdlc/.dev-driver.lock`. If the lock exists and is less than 2 hours old,
-exits immediately with `{ action: "waiting", lock_age_mins: N }`.
+Queries `sdlc run list --status running`. If any agent run is currently in flight,
+exits immediately with `{ action: "waiting", reason: "agent run in progress" }`.
 
 This prevents double-dispatch when a previous Claude agent is still running.
+Flight detection is exact — based on the server's `agent_runs` map — not a TTL.
 
 ### Level 2: Quality check
 
@@ -56,33 +57,38 @@ Fix the failing checks before dev-driver will advance features.
 ### Level 3: Feature advancement
 
 Finds features in `implementation`, `review`, `audit`, or `qa` phase with a
-pending directive. Picks the first one alphabetically. Dispatches:
+pending directive. Picks the first one alphabetically. Dispatches via the server:
 
-```bash
-claude --print "/sdlc-next <slug>"
+```
+POST /api/tools/agent-dispatch
+{ "prompt": "/sdlc-next <slug>", "run_key": "dev-driver:feature:<slug>", "label": "dev-driver: advance <slug>" }
 ```
 
 **This is `/sdlc-next` — one step only.** The 4-hour recurrence advances the feature
 step by step over time. This is intentional: it keeps you in control and lets you
 course-correct between steps.
 
+The dispatched run appears in the activity feed and emits SSE events. If the server
+returns 409 (run already in flight for this key), dev-driver returns `waiting`.
+
 Returns:
 ```json
-{ "action": "feature_advanced", "slug": "my-feature", "phase": "implementation", "directive": "/sdlc-next my-feature" }
+{ "action": "feature_advanced", "slug": "my-feature", "phase": "implementation", "directive": "/sdlc-next my-feature", "run_id": "20260303-120000-abc" }
 ```
 
 ### Level 4: Wave start
 
 If no features have active directives but a milestone has all features in PLANNED or READY
-phase, starts the next wave:
+phase, starts the next wave via the server:
 
-```bash
-claude --print "/sdlc-run-wave <milestone>"
+```
+POST /api/tools/agent-dispatch
+{ "prompt": "/sdlc-run-wave <milestone>", "run_key": "dev-driver:wave:<milestone>", "label": "dev-driver: run wave <milestone>" }
 ```
 
 Returns:
 ```json
-{ "action": "wave_started", "milestone": "v21-dev-driver" }
+{ "action": "wave_started", "milestone": "v21-dev-driver", "run_id": "20260303-120000-xyz" }
 ```
 
 ### Level 5: Idle
@@ -123,22 +129,23 @@ This means:
 
 ---
 
-## Lock file
+## Dispatch
 
-Path: `.sdlc/.dev-driver.lock`
-TTL: 2 hours
+Dev-driver dispatches agent runs via `POST /api/tools/agent-dispatch` on the local
+sdlc-server. Each dispatched run:
 
-```json
-{
-  "started_at": "2026-03-02T04:00:00.000Z",
-  "action": "feature_advanced",
-  "slug": "my-feature",
-  "pid": 12345
-}
-```
+- Creates a **RunRecord** visible in the activity feed
+- Streams **SSE events** to the frontend
+- Is keyed under `dev-driver:feature:<slug>` or `dev-driver:wave:<milestone>` — the
+  server returns 409 Conflict if that key is already in flight, which dev-driver
+  treats as a "waiting" signal
 
-The lock is written before each dispatch and cleared automatically after 2 hours.
-You can delete it manually if you need to run dev-driver before the TTL expires.
+This replaces the old TTL-based `.sdlc/.dev-driver.lock` file, which was imprecise
+and invisible to the frontend.
+
+Requires `SDLC_SERVER_URL` and `SDLC_AGENT_TOKEN` (injected automatically by the
+server for every tool subprocess). Running dev-driver outside the server (e.g. `sdlc
+tool run dev-driver` without a running server) will fail with a clear error.
 
 ---
 
@@ -147,20 +154,17 @@ You can delete it manually if you need to run dev-driver before the TTL expires.
 All five possible outputs:
 
 ```json
-// Level 1 (lock)
-{ "action": "waiting", "lock_age_mins": 45 }
-
-// Level 1 (active run)
+// Level 1 (active run in flight)
 { "action": "waiting", "reason": "agent run in progress" }
 
 // Level 2
 { "action": "quality_failing", "failed_checks": ["test", "clippy"] }
 
 // Level 3
-{ "action": "feature_advanced", "slug": "my-feature", "phase": "implementation", "directive": "/sdlc-next my-feature" }
+{ "action": "feature_advanced", "slug": "my-feature", "phase": "implementation", "directive": "/sdlc-next my-feature", "run_id": "20260303-120000-abc" }
 
 // Level 4
-{ "action": "wave_started", "milestone": "v21-dev-driver" }
+{ "action": "wave_started", "milestone": "v21-dev-driver", "run_id": "20260303-120001-xyz" }
 
 // Level 5
 { "action": "idle", "reason": "no actionable work found" }

@@ -1,0 +1,2 @@
+i just hit a "Run failed" in the investigation agent, i'm not sure what to do. it spent 101 turns, i'd like to be able to just resume/retry
+it didn't actually fail either, i see the file it was writing to

@@ -1,17 +1,127 @@
 slug: knowledge-research-web-tools
 title: 'Knowledge research: web-capable agent with rewritten prompt'
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
-tasks: []
+updated_at: 2026-03-03T19:36:22.235385Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/spec.md
+  created_at: 2026-03-03T15:40:55.273426Z
+  approved_at: 2026-03-03T15:41:07.190199Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/design.md
+  created_at: 2026-03-03T15:41:24.674537Z
+  approved_at: 2026-03-03T15:41:35.848165Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/tasks.md
+  created_at: 2026-03-03T15:41:54.201528Z
+  approved_at: 2026-03-03T15:41:59.598983Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/qa-plan.md
+  created_at: 2026-03-03T15:42:16.943228Z
+  approved_at: 2026-03-03T15:42:23.482712Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/review.md
+  created_at: 2026-03-03T19:35:27.068750Z
+  approved_at: 2026-03-03T19:35:31.940339Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/audit.md
+  created_at: 2026-03-03T19:35:45.665051Z
+  approved_at: 2026-03-03T19:35:51.406218Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/knowledge-research-web-tools/qa-results.md
+  created_at: 2026-03-03T19:36:08.863114Z
+  approved_at: 2026-03-03T19:36:13.533429Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add WebSearch and WebFetch to research_knowledge opts
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:43:22.419231Z
+  started_at: 2026-03-03T15:43:24.763908Z
+  completed_at: 2026-03-03T15:43:40.514643Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Rewrite build_research_prompt
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:43:22.423096Z
+  started_at: 2026-03-03T15:43:40.539054Z
+  completed_at: 2026-03-03T15:44:25.678530Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Build and verify
+  description: null
+  status: completed
+  created_at: 2026-03-03T15:43:22.426960Z
+  started_at: 2026-03-03T15:44:25.690995Z
+  completed_at: 2026-03-03T19:34:54.917048Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T15:41:07.191910Z
+- phase: specified
+  entered: 2026-03-03T15:41:07.191910Z
+  exited: 2026-03-03T15:42:23.484387Z
+- phase: planned
+  entered: 2026-03-03T15:42:23.484387Z
+  exited: 2026-03-03T15:42:34.557801Z
+- phase: ready
+  entered: 2026-03-03T15:42:34.557801Z
+  exited: 2026-03-03T15:42:39.429030Z
+- phase: implementation
+  entered: 2026-03-03T15:42:39.429030Z
+  exited: 2026-03-03T19:35:31.943221Z
+- phase: review
+  entered: 2026-03-03T19:35:31.943221Z
+  exited: 2026-03-03T19:35:38.948551Z
+- phase: audit
+  entered: 2026-03-03T19:35:38.948551Z
+  exited: 2026-03-03T19:35:51.410430Z
+- phase: qa
+  entered: 2026-03-03T19:35:51.410430Z
+  exited: 2026-03-03T19:36:13.538276Z
+- phase: merge
+  entered: 2026-03-03T19:36:13.538276Z
+  exited: 2026-03-03T19:36:22.235385Z
+- phase: released
+  entered: 2026-03-03T19:36:22.235385Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

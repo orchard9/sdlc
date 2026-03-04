@@ -1,6 +1,7 @@
 pub mod advisory;
 pub mod ama_thread;
 pub mod artifact;
+pub mod auth_config;
 pub mod backlog;
 pub mod classifier;
 pub mod comment;

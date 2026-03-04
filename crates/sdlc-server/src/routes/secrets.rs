@@ -116,6 +116,69 @@ pub async fn list_envs(State(app): State<AppState>) -> Result<Json<serde_json::V
     Ok(Json(result))
 }
 
+#[derive(serde::Deserialize)]
+pub struct EnvPair {
+    pub key: String,
+    pub value: String,
+}
+
+#[derive(serde::Deserialize)]
+pub struct CreateEnvBody {
+    pub env: String,
+    pub pairs: Vec<EnvPair>,
+}
+
+/// POST /api/secrets/envs — create a new encrypted env file.
+///
+/// Returns 400 if `pairs` is empty or no keys are configured.
+/// Returns 409 if an env with the given name already exists.
+/// Returns 201 with `{ status, env, key_names }` on success.
+pub async fn create_env(
+    State(app): State<AppState>,
+    Json(body): Json<CreateEnvBody>,
+) -> Result<(axum::http::StatusCode, Json<serde_json::Value>), AppError> {
+    if body.pairs.is_empty() {
+        return Ok((
+            axum::http::StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "error": "pairs must not be empty" })),
+        ));
+    }
+    let root = app.root.clone();
+    let env_name = body.env.clone();
+    let pairs_content: String = body
+        .pairs
+        .iter()
+        .map(|p| format!("{}={}", p.key, p.value))
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n";
+    let key_names = tokio::task::spawn_blocking(move || {
+        let config = sdlc_core::secrets::load_config(&root)?;
+        if config.keys.is_empty() {
+            return Ok((
+                axum::http::StatusCode::BAD_REQUEST,
+                Json(serde_json::json!({ "error": "no keys configured — add a recipient key first" })),
+            )) as Result<_, AppError>;
+        }
+        let env_path = sdlc_core::paths::secrets_env_path(&root, &env_name);
+        if env_path.exists() {
+            return Err(AppError(
+                sdlc_core::SdlcError::SecretEnvExists(env_name.clone()).into(),
+            ));
+        }
+        sdlc_core::secrets::write_env(&root, &env_name, &pairs_content, &config.keys)?;
+        let meta = sdlc_core::secrets::load_env_meta(&root, &env_name)?;
+        Ok((axum::http::StatusCode::CREATED, Json(serde_json::json!({
+            "status": "created",
+            "env": env_name,
+            "key_names": meta.key_names,
+        }))))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(key_names)
+}
+
 /// DELETE /api/secrets/envs/:name — delete an env file and its metadata sidecar.
 pub async fn delete_env(
     State(app): State<AppState>,
@@ -205,5 +268,32 @@ mod tests {
             .await
             .unwrap_err();
         assert_eq!(err.into_response().status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn create_env_empty_pairs_returns_bad_request() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = CreateEnvBody {
+            env: "staging".to_string(),
+            pairs: vec![],
+        };
+        let (status, _) = create_env(State(app), Json(body)).await.unwrap();
+        assert_eq!(status, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn create_env_no_keys_returns_bad_request() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = CreateEnvBody {
+            env: "staging".to_string(),
+            pairs: vec![EnvPair {
+                key: "API_KEY".to_string(),
+                value: "secret".to_string(),
+            }],
+        };
+        let (status, _) = create_env(State(app), Json(body)).await.unwrap();
+        assert_eq!(status, StatusCode::BAD_REQUEST);
     }
 }

@@ -1,7 +1,7 @@
 /**
  * telegram-recap
  * ==============
- * Fetches Telegram chat messages from the configured window and emails a digest.
+ * Fetches Telegram chat messages from the configured window and emails a digest via Resend.
  * Delegates all logic to `sdlc telegram digest --json`.
  *
  * WHAT IT DOES
@@ -15,15 +15,29 @@
  *
  * --meta:   Writes ToolMeta JSON to stdout. Declares required secrets.
  *
- * SECRETS (injected as env vars by the orchestrator)
- * ---------------------------------------------------
+ * SECRETS (all sourced from: sdlc secrets env export telegram)
+ * ------------------------------------------------------------
  * TELEGRAM_BOT_TOKEN   Required — Telegram bot API token (from @BotFather)
- * SMTP_HOST            Required — SMTP server hostname (e.g. smtp.resend.com)
- * SMTP_PORT            Required — SMTP port (e.g. 587 for STARTTLS, 465 for SSL)
- * SMTP_USERNAME        Required — SMTP authentication username
- * SMTP_PASSWORD        Required — SMTP authentication password or API key
- * SMTP_FROM            Required — From address for digest emails
- * SMTP_TO              Required — Recipient address(es), comma-separated
+ * RESEND_API_KEY       Required — Resend API key (starts with re_*)
+ * RESEND_FROM          Required — Verified sender address (e.g. digest@yourdomain.com)
+ * RESEND_TO            Required — Recipient address(es), comma-separated
+ * TELEGRAM_CHAT_IDS    Optional — Comma-separated chat IDs (overrides config.yaml list)
+ *
+ * CHAT IDS
+ * --------
+ * Chat IDs identify which Telegram chats to include in the digest. The format is:
+ *   - Private chats: positive integer (e.g. "123456789")
+ *   - Groups / supergroups: negative integer (e.g. "-100123456789")
+ *   - Channels: negative integer prefixed with -100 (e.g. "-1001234567890")
+ *
+ * How to find your chat ID:
+ *   1. Add your bot to the chat (it must be a member to receive messages)
+ *   2. Send a message in the chat
+ *   3. Run: sdlc telegram poll  (leave it running a few seconds, then Ctrl-C)
+ *   4. Query the DB for stored chat IDs:
+ *        sqlite3 .sdlc/telegram/messages.db "SELECT DISTINCT chat_id, chat_title FROM messages LIMIT 20;"
+ *   5. Store discovered IDs:
+ *        sdlc secrets env set telegram TELEGRAM_CHAT_IDS="-100123456789,-100987654321"
  *
  * WHAT IT READS
  * -------------
@@ -43,12 +57,12 @@ import { spawnSync } from 'node:child_process'
 const log = makeLogger('telegram-recap')
 
 // ---------------------------------------------------------------------------
-// Extended ToolMeta type with secrets, tags, result_actions
-// (the Rust runtime supports these fields; they're not yet in the shared type)
+// Extended ToolMeta type with secrets, tags, result_actions, secrets_env
 // ---------------------------------------------------------------------------
 
 interface ToolMeta extends BaseToolMeta {
   secrets?: Array<{ env_var: string; description: string; required?: boolean }>
+  secrets_env?: string
   tags?: string[]
   result_actions?: Array<{
     label: string
@@ -67,11 +81,13 @@ export const meta: ToolMeta = {
   name: 'telegram-recap',
   display_name: 'Telegram Recap',
   description:
-    'Fetch and email a Telegram chat digest — pulls messages from the configured window and sends via SMTP',
-  version: '1.0.0',
+    'Fetch and email a Telegram chat digest — pulls messages from the configured window and sends via Resend',
+  version: '1.1.0',
   requires_setup: true,
   setup_description:
     'Verifies TELEGRAM_BOT_TOKEN by calling Telegram getMe and checking database connectivity',
+  // All secrets sourced from: sdlc secrets env export telegram
+  secrets_env: 'telegram',
   input_schema: {
     type: 'object',
     required: [],
@@ -87,7 +103,13 @@ export const meta: ToolMeta = {
       chat_ids: {
         type: 'array',
         items: { type: 'string' },
-        description: 'Override configured chat IDs (e.g. ["-100123456789"])',
+        description:
+          'Override configured chat IDs for this run. ' +
+          'Format: negative integers for groups/channels (e.g. ["-100123456789"]), ' +
+          'positive integers for private chats. ' +
+          'If omitted, uses TELEGRAM_CHAT_IDS env var or the chat_ids list in .sdlc/config.yaml. ' +
+          'To discover IDs: run `sdlc telegram poll`, then: ' +
+          'sqlite3 .sdlc/telegram/messages.db "SELECT DISTINCT chat_id, chat_title FROM messages LIMIT 20;"',
       },
     },
   },
@@ -109,38 +131,33 @@ export const meta: ToolMeta = {
   secrets: [
     {
       env_var: 'TELEGRAM_BOT_TOKEN',
-      description: 'Telegram bot API token (from @BotFather)',
+      description: 'Telegram bot API token (from @BotFather). Store with: sdlc secrets env set telegram TELEGRAM_BOT_TOKEN=<value>',
       required: true,
     },
     {
-      env_var: 'SMTP_HOST',
-      description: 'SMTP server hostname (e.g. smtp.resend.com)',
+      env_var: 'RESEND_API_KEY',
+      description: 'Resend API key (starts with re_*). Store with: sdlc secrets env set telegram RESEND_API_KEY=<value>',
       required: true,
     },
     {
-      env_var: 'SMTP_PORT',
-      description: 'SMTP server port (e.g. 587 for STARTTLS, 465 for SSL)',
+      env_var: 'RESEND_FROM',
+      description:
+        'Verified sender address for digest emails (e.g. digest@yourdomain.com). ' +
+        'Must be a domain verified in your Resend account. Store with: sdlc secrets env set telegram RESEND_FROM=<value>',
       required: true,
     },
     {
-      env_var: 'SMTP_USERNAME',
-      description: 'SMTP authentication username',
+      env_var: 'RESEND_TO',
+      description: 'Recipient address(es), comma-separated. Store with: sdlc secrets env set telegram RESEND_TO=<value>',
       required: true,
     },
     {
-      env_var: 'SMTP_PASSWORD',
-      description: 'SMTP authentication password or API key',
-      required: true,
-    },
-    {
-      env_var: 'SMTP_FROM',
-      description: 'From address for digest emails (e.g. digest@yourdomain.com)',
-      required: true,
-    },
-    {
-      env_var: 'SMTP_TO',
-      description: 'Recipient address(es), comma-separated',
-      required: true,
+      env_var: 'TELEGRAM_CHAT_IDS',
+      description:
+        'Comma-separated list of Telegram chat IDs to digest (e.g. "-100123456789,-100987654321"). ' +
+        'Groups/channels use negative IDs. Find IDs by running `sdlc telegram poll` then querying messages.db. ' +
+        'Store with: sdlc secrets env set telegram TELEGRAM_CHAT_IDS=<value>',
+      required: false,
     },
   ],
   tags: ['telegram', 'email', 'digest'],

@@ -1,8 +1,11 @@
 slug: agent-activity-display-improvements
 title: agent activity display improvements
-status: converging
+status: committed
 created_at: 2026-03-03T06:42:19.501156Z
-updated_at: 2026-03-03T06:46:22.092981Z
+updated_at: 2026-03-04T00:38:04.052892Z
+committed_at: 2026-03-04T00:37:13.319462Z
+committed_to:
+- v31-activity-feed-polish
 sessions: 1
 orientation:
   current: 'Design complete for all three improvements. Implementation scope is clear: CompactMarkdown component, SubagentCard + pairEvents update, RunInitCard column layout. One open question on subagent_completed text field population from Rust.'

@@ -2,10 +2,66 @@ slug: citadel-webhook-handler
 title: Citadel Webhook Handler in Pantheon
 description: |
   Tier 1 automatic integration. Add a POST /api/v1/webhooks/citadel route to Pantheon that accepts HMAC-SHA256-signed error threshold webhooks from Citadel and automatically creates Pantheon incidents. Maps Citadel error level to Pantheon severity. Follows the existing Alertmanager webhook handler as a pattern.
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
+updated_at: 2026-03-03T19:49:22.321606Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/spec.md
+  created_at: 2026-03-03T19:44:31.675907Z
+  approved_at: 2026-03-03T19:44:33.753923Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/design.md
+  created_at: 2026-03-03T19:45:21.345720Z
+  approved_at: 2026-03-03T19:45:26.803341Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/tasks.md
+  created_at: 2026-03-03T19:45:44.510455Z
+  approved_at: 2026-03-03T19:45:47.493561Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/qa-plan.md
+  created_at: 2026-03-03T19:46:14.693360Z
+  approved_at: 2026-03-03T19:46:16.940057Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/review.md
+  created_at: 2026-03-03T19:46:55.785761Z
+  approved_at: 2026-03-03T19:46:58.916569Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/audit.md
+  created_at: 2026-03-03T19:47:53.967552Z
+  approved_at: 2026-03-03T19:47:56.735481Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/citadel-webhook-handler/qa-results.md
+  created_at: 2026-03-03T19:48:26.004161Z
+  approved_at: 2026-03-03T19:48:41.464464Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -13,7 +69,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T19:44:33.759905Z
+- phase: specified
+  entered: 2026-03-03T19:44:33.759905Z
+  exited: 2026-03-03T19:46:16.942265Z
+- phase: planned
+  entered: 2026-03-03T19:46:16.942265Z
+  exited: 2026-03-03T19:46:23.647619Z
+- phase: ready
+  entered: 2026-03-03T19:46:23.647619Z
+  exited: 2026-03-03T19:46:27.533594Z
+- phase: implementation
+  entered: 2026-03-03T19:46:27.533594Z
+  exited: 2026-03-03T19:46:58.919588Z
+- phase: review
+  entered: 2026-03-03T19:46:58.919588Z
+  exited: 2026-03-03T19:47:02.945384Z
+- phase: audit
+  entered: 2026-03-03T19:47:02.945384Z
+  exited: 2026-03-03T19:47:56.739923Z
+- phase: qa
+  entered: 2026-03-03T19:47:56.739923Z
+  exited: 2026-03-03T19:48:41.465981Z
+- phase: merge
+  entered: 2026-03-03T19:48:41.465981Z
+  exited: 2026-03-03T19:49:22.321606Z
+- phase: released
+  entered: 2026-03-03T19:49:22.321606Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

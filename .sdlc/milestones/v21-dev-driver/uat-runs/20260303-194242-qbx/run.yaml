@@ -1,0 +1,18 @@
+id: 20260303-194242-qbx
+milestone_slug: v21-dev-driver
+started_at: "2026-03-03T19:42:42Z"
+completed_at: "2026-03-03T19:50:00Z"
+verdict: pass_with_tasks
+tests_total: 8
+tests_passed: 5
+tests_failed: 2
+tasks_created: 2
+summary_path: .sdlc/milestones/v21-dev-driver/uat-runs/20260303-194242-qbx/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v21-dev-driver/uat-runs/20260303-194242-qbx/01-actions-page.png
+  - .sdlc/milestones/v21-dev-driver/uat-runs/20260303-194242-qbx/02-actions-fire-test-row.png
+  - .sdlc/milestones/v21-dev-driver/uat-runs/20260303-194242-qbx/03-actions-final.png
+notes: |
+  Tests 4 and 5 verified by code inspection (live project state prevents setup of idle/wave conditions).
+  Test 8 partially verified (cannot restart server to test --run-actions positive case).
+  Two bugs tracked as tasks T11 and T12 on dev-driver-tool feature.

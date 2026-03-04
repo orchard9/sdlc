@@ -1,0 +1,28 @@
+id: 20260303-154509-xpz
+milestone_slug: v17-fleet-foundation
+started_at: "2026-03-03T15:45:09Z"
+completed_at: "2026-03-03T16:15:00Z"
+verdict: pass_with_tasks
+tests_total: 29
+tests_passed: 24
+tests_failed: 4
+tests_partial: 1
+tasks_created: 4
+summary_path: .sdlc/milestones/v17-fleet-foundation/uat-runs/20260303-154509-xpz/summary.md
+screenshot_paths: []
+notes: |
+  Browser launch failed (Chrome conflict) — infrastructure milestone verified via
+  Gitea API, kubectl, helm CLI, and gcloud. All checks performed programmatically.
+
+  Key findings:
+  - fleet-repo-scaffold: 10/10 PASS — repo, all files, initial commit confirmed
+  - fleet-helm-chart: 7/9 PASS — chart logic correct, helm lint/template pass,
+    but templates untracked in k3s-fleet (never committed) and ClusterSecretStore
+    name mismatch (gcp-secret-store vs gcp-secret-manager)
+  - fleet-secrets-infra: 6/8 PASS — GCP secret provisioned, ESO syncing works,
+    but ClusterSecretStore name mismatch and cluster-secret-store.yaml not in repo
+  - fleet-deploy-pipeline: 1/2 PASS — Woodpecker running, but deploy-project.yaml
+    file never committed (review doc claimed commit 86399af4 which does not exist)
+  - No sdlc-server pods currently running in cluster
+
+  4 tasks created to close gaps before end-to-end integration test.

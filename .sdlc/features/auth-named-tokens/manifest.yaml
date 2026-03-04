@@ -1,0 +1,100 @@
+slug: auth-named-tokens
+title: Named token auth — .sdlc/auth.yaml with hot-reload, optional auth mode, and UI token-name panel
+phase: released
+created_at: 2026-03-03T20:07:13.963632Z
+updated_at: 2026-03-03T23:55:08.644772Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/auth-named-tokens/spec.md
+  created_at: 2026-03-03T23:37:18.760774Z
+  approved_at: 2026-03-03T23:37:24.531926Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/auth-named-tokens/design.md
+  created_at: 2026-03-03T23:39:29.197218Z
+  approved_at: 2026-03-03T23:39:35.366583Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/auth-named-tokens/tasks.md
+  created_at: 2026-03-03T23:40:11.968014Z
+  approved_at: 2026-03-03T23:40:15.504606Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/auth-named-tokens/qa-plan.md
+  created_at: 2026-03-03T23:40:52.058662Z
+  approved_at: 2026-03-03T23:40:55.286036Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/auth-named-tokens/review.md
+  created_at: 2026-03-03T23:51:49.478326Z
+  approved_at: 2026-03-03T23:52:36.897151Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/auth-named-tokens/audit.md
+  created_at: 2026-03-03T23:52:59.247697Z
+  approved_at: 2026-03-03T23:53:47.219023Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/auth-named-tokens/qa-results.md
+  created_at: 2026-03-03T23:54:34.306561Z
+  approved_at: 2026-03-03T23:55:03.944043Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T20:07:13.963632Z
+  exited: 2026-03-03T23:37:24.533674Z
+- phase: specified
+  entered: 2026-03-03T23:37:24.533674Z
+  exited: 2026-03-03T23:40:55.294385Z
+- phase: planned
+  entered: 2026-03-03T23:40:55.294385Z
+  exited: 2026-03-03T23:40:59.860494Z
+- phase: ready
+  entered: 2026-03-03T23:40:59.860494Z
+  exited: 2026-03-03T23:41:03.946025Z
+- phase: implementation
+  entered: 2026-03-03T23:41:03.946025Z
+  exited: 2026-03-03T23:52:36.903540Z
+- phase: review
+  entered: 2026-03-03T23:52:36.903540Z
+  exited: 2026-03-03T23:52:41.528866Z
+- phase: audit
+  entered: 2026-03-03T23:52:41.528866Z
+  exited: 2026-03-03T23:53:47.299423Z
+- phase: qa
+  entered: 2026-03-03T23:53:47.299423Z
+  exited: 2026-03-03T23:55:03.948453Z
+- phase: merge
+  entered: 2026-03-03T23:55:03.948453Z
+  exited: 2026-03-03T23:55:08.644772Z
+- phase: released
+  entered: 2026-03-03T23:55:08.644772Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

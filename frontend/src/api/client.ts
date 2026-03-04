@@ -80,6 +80,24 @@ export const api = {
     request<import('@/lib/types').UatRun | null>(`/api/milestones/${encodeURIComponent(slug)}/uat-runs/latest`),
   uatArtifactUrl: (milestoneSlug: string, runId: string, filename: string): string =>
     `/api/milestones/${encodeURIComponent(milestoneSlug)}/uat-runs/${encodeURIComponent(runId)}/artifacts/${encodeURIComponent(filename)}`,
+  submitHumanMilestoneUat: (
+    slug: string,
+    body: { verdict: string; notes: string; tests_total?: number; tests_passed?: number; tests_failed?: number }
+  ) =>
+    request<{ run_id: string }>(`/api/milestone/${encodeURIComponent(slug)}/uat/human`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  submitHumanFeatureQa: (
+    slug: string,
+    body: { verdict: string; notes: string }
+  ) =>
+    request<{ status: string }>(`/api/features/${encodeURIComponent(slug)}/human-qa`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    }),
+  getMilestoneAcceptanceTest: (slug: string) =>
+    request<{ content: string | null }>(`/api/milestones/${encodeURIComponent(slug)}/acceptance-test`),
 
   getConfig: () => request<import('@/lib/types').ProjectConfig>('/api/config'),
   updateConfig: (body: { name?: string; description?: string }) =>
@@ -108,8 +126,8 @@ export const api = {
   getArchitecture: () => request<{ content: string; exists: boolean }>('/api/architecture'),
   putArchitecture: (content: string) =>
     request('/api/architecture', { method: 'PUT', body: JSON.stringify({ content }) }),
-  runVisionAlign: () => request<{ status: string; run_id: string }>('/api/vision/run', { method: 'POST' }),
-  runArchitectureAlign: () => request<{ status: string; run_id: string }>('/api/architecture/run', { method: 'POST' }),
+  runVisionAlign: (direction?: string) => request<{ status: string; run_id: string }>('/api/vision/run', { method: 'POST', body: JSON.stringify({ direction: direction ?? '' }) }),
+  runArchitectureAlign: (direction?: string) => request<{ status: string; run_id: string }>('/api/architecture/run', { method: 'POST', body: JSON.stringify({ direction: direction ?? '' }) }),
   runTeamRecruit: () => request<{ status: string; run_id: string }>('/api/team/recruit', { method: 'POST' }),
 
   // Roadmap / Ponder
@@ -206,7 +224,7 @@ export const api = {
     }),
   getTool: (name: string) => request<import('@/lib/types').ToolMeta>(`/api/tools/${encodeURIComponent(name)}`),
   runTool: (name: string, input: unknown) =>
-    request<import('@/lib/types').ToolResult>(`/api/tools/${encodeURIComponent(name)}/run`, {
+    request<import('@/lib/types').ToolResult | { streaming: true; job_id: string }>(`/api/tools/${encodeURIComponent(name)}/run`, {
       method: 'POST',
       body: JSON.stringify(input),
     }),
@@ -446,4 +464,16 @@ export const api = {
   getSecretsEnvs: () => request<import('@/lib/types').SecretsEnvMeta[]>('/api/secrets/envs'),
   deleteSecretsEnv: (name: string) =>
     request(`/api/secrets/envs/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+  createSecretsEnv: (body: { env: string; pairs: { key: string; value: string }[] }) =>
+    request('/api/secrets/envs', { method: 'POST', body: JSON.stringify(body) }),
+
+  // Auth tokens (named tunnel-access tokens)
+  getAuthTokens: () => request<import('@/lib/types').AuthToken[]>('/api/auth/tokens'),
+  createAuthToken: (name: string) =>
+    request<import('@/lib/types').CreatedAuthToken>('/api/auth/tokens', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+    }),
+  deleteAuthToken: (name: string) =>
+    request(`/api/auth/tokens/${encodeURIComponent(name)}`, { method: 'DELETE' }),
 }

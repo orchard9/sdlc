@@ -2,10 +2,66 @@ slug: citadel-incident-runbook
 title: Create Incident from Citadel Logs Runbook
 description: |
   Implement a Pantheon Runbook for the full triage loop: Step 1 (command: citadel_query_logs for the relevant time window) → Step 2 (command: citadel_annotate_log on key entries with "linked to incident-{id}") → Step 3 (command: create Pantheon incident with log summary + episode link). Models "create ticket based on logs" as a multi-step runbook rather than a monolithic tool call, fitting Pantheon's existing runbook execution model. Discord trigger: "create incident from logs around <time> for <service>".
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
+updated_at: 2026-03-03T19:51:23.851902Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/spec.md
+  created_at: 2026-03-03T19:44:30.883178Z
+  approved_at: 2026-03-03T19:44:33.300992Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/design.md
+  created_at: 2026-03-03T19:45:30.421124Z
+  approved_at: 2026-03-03T19:45:32.585694Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/tasks.md
+  created_at: 2026-03-03T19:46:12.303485Z
+  approved_at: 2026-03-03T19:46:14.482666Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/qa-plan.md
+  created_at: 2026-03-03T19:46:56.796884Z
+  approved_at: 2026-03-03T19:46:59.640272Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/review.md
+  created_at: 2026-03-03T19:48:01.332729Z
+  approved_at: 2026-03-03T19:48:07.454386Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/audit.md
+  created_at: 2026-03-03T19:49:09.948462Z
+  approved_at: 2026-03-03T19:49:24.678367Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/citadel-incident-runbook/qa-results.md
+  created_at: 2026-03-03T19:50:30.069977Z
+  approved_at: 2026-03-03T19:51:02.362215Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -13,7 +69,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T19:44:33.324332Z
+- phase: specified
+  entered: 2026-03-03T19:44:33.324332Z
+  exited: 2026-03-03T19:46:59.643774Z
+- phase: planned
+  entered: 2026-03-03T19:46:59.643774Z
+  exited: 2026-03-03T19:47:18.557285Z
+- phase: ready
+  entered: 2026-03-03T19:47:18.557285Z
+  exited: 2026-03-03T19:47:26.083242Z
+- phase: implementation
+  entered: 2026-03-03T19:47:26.083242Z
+  exited: 2026-03-03T19:48:07.457292Z
+- phase: review
+  entered: 2026-03-03T19:48:07.457292Z
+  exited: 2026-03-03T19:48:13.919867Z
+- phase: audit
+  entered: 2026-03-03T19:48:13.919867Z
+  exited: 2026-03-03T19:49:24.680892Z
+- phase: qa
+  entered: 2026-03-03T19:49:24.680892Z
+  exited: 2026-03-03T19:51:02.366966Z
+- phase: merge
+  entered: 2026-03-03T19:51:02.366966Z
+  exited: 2026-03-03T19:51:23.851902Z
+- phase: released
+  entered: 2026-03-03T19:51:23.851902Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

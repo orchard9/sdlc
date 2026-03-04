@@ -2,3 +2,4 @@
 # No tool-specific settings yet — all inputs come from .sdlc/config.yaml platform.commands
 name: quality-check
 version: "0.1.0"
+

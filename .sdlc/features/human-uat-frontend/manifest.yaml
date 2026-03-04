@@ -1,0 +1,136 @@
+slug: human-uat-frontend
+title: 'Human UAT frontend: submission modal and secondary buttons'
+phase: released
+created_at: 2026-03-03T15:41:27.155685Z
+updated_at: 2026-03-03T22:37:46.882910Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/human-uat-frontend/spec.md
+  created_at: 2026-03-03T22:28:19.423658Z
+  approved_at: 2026-03-03T22:28:25.013266Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/human-uat-frontend/design.md
+  created_at: 2026-03-03T22:30:32.436322Z
+  approved_at: 2026-03-03T22:30:38.275641Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/human-uat-frontend/tasks.md
+  created_at: 2026-03-03T22:31:04.265061Z
+  approved_at: 2026-03-03T22:31:06.914919Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/human-uat-frontend/qa-plan.md
+  created_at: 2026-03-03T22:31:37.677705Z
+  approved_at: 2026-03-03T22:31:41.758469Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/human-uat-frontend/review.md
+  created_at: 2026-03-03T22:34:50.718Z
+  approved_at: 2026-03-03T22:34:54.195717Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/human-uat-frontend/audit.md
+  created_at: 2026-03-03T22:35:22.413189Z
+  approved_at: 2026-03-03T22:35:25.777980Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/human-uat-frontend/qa-results.md
+  created_at: 2026-03-03T22:37:34.064666Z
+  approved_at: 2026-03-03T22:37:37.424133Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add API client helpers for human UAT submission
+  description: null
+  status: completed
+  created_at: 2026-03-03T22:32:01.400425Z
+  started_at: 2026-03-03T22:32:03.859187Z
+  completed_at: 2026-03-03T22:32:13.455169Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement HumanUatModal component
+  description: null
+  status: completed
+  created_at: 2026-03-03T22:32:01.404682Z
+  started_at: 2026-03-03T22:32:15.647851Z
+  completed_at: 2026-03-03T22:32:52.066587Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update VerifyingMini in MilestonePreparePanel.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-03T22:32:01.409112Z
+  started_at: 2026-03-03T22:32:55.051174Z
+  completed_at: 2026-03-03T22:33:18.855635Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update run_qa action card in FeatureDetail.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-03T22:32:01.413388Z
+  started_at: 2026-03-03T22:33:21.405446Z
+  completed_at: 2026-03-03T22:33:52.138994Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T15:41:27.155685Z
+  exited: 2026-03-03T22:28:25.435372Z
+- phase: specified
+  entered: 2026-03-03T22:28:25.435372Z
+  exited: 2026-03-03T22:31:41.760077Z
+- phase: planned
+  entered: 2026-03-03T22:31:41.760077Z
+  exited: 2026-03-03T22:31:52.633803Z
+- phase: ready
+  entered: 2026-03-03T22:31:52.633803Z
+  exited: 2026-03-03T22:31:54.517983Z
+- phase: implementation
+  entered: 2026-03-03T22:31:54.517983Z
+  exited: 2026-03-03T22:34:54.199622Z
+- phase: review
+  entered: 2026-03-03T22:34:54.199622Z
+  exited: 2026-03-03T22:34:58.511013Z
+- phase: audit
+  entered: 2026-03-03T22:34:58.511013Z
+  exited: 2026-03-03T22:35:25.781766Z
+- phase: qa
+  entered: 2026-03-03T22:35:25.781766Z
+  exited: 2026-03-03T22:37:37.427528Z
+- phase: merge
+  entered: 2026-03-03T22:37:37.427528Z
+  exited: 2026-03-03T22:37:46.882910Z
+- phase: released
+  entered: 2026-03-03T22:37:46.882910Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

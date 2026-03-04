@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: human-uat-backend
+    title: 'Human UAT backend: UatRun mode field and submission endpoints'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: human-uat-frontend
+    title: 'Human UAT frontend: submission modal and secondary buttons'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

@@ -4,6 +4,7 @@ vision: Threads and Tools pages are usable on mobile — no broken dual-column l
 features:
 - fix-threadspage-mobile-layout
 - fix-toolspage-mobile-nav
+- fix-toolspage-url-routing
 created_at: 2026-03-03T06:10:00Z
-updated_at: 2026-03-03T06:10:00Z
+updated_at: 2026-03-04T00:37:41.566897Z
 schema_version: 1

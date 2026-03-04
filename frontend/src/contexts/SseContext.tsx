@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, type ReactNode } from 'react'
-import type { ActionSseEvent, AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, MilestoneUatSseEvent, PonderSseEvent, RunSseEvent } from '@/lib/types'
+import type { ActionSseEvent, AdvisorySseEvent, DocsSseEvent, InvestigationSseEvent, MilestoneUatSseEvent, PonderSseEvent, RunSseEvent, ToolSseEvent } from '@/lib/types'
 
 export interface SseCallbacks {
   onUpdate?: () => void
@@ -11,6 +11,7 @@ export interface SseCallbacks {
   onAdvisoryEvent?: (event: AdvisorySseEvent) => void
   onActionEvent?: (event: ActionSseEvent) => void
   onMilestoneUatEvent?: (event: MilestoneUatSseEvent) => void
+  onToolEvent?: (event: ToolSseEvent) => void
 }
 
 interface SseContextValue {
@@ -85,6 +86,11 @@ export function SseProvider({ children }: { children: ReactNode }) {
         try {
           const event = JSON.parse(data) as MilestoneUatSseEvent
           for (const sub of subs) sub.onMilestoneUatEvent?.(event)
+        } catch { /* malformed */ }
+      } else if (type === 'tool') {
+        try {
+          const event = JSON.parse(data) as ToolSseEvent
+          for (const sub of subs) sub.onToolEvent?.(event)
         } catch { /* malformed */ }
       }
     }

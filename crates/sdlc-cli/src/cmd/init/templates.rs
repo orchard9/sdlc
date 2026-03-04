@@ -1484,11 +1484,11 @@ _Configure via orchestrator: Label=dev-driver, Tool=dev-driver, Input={}, Recurr
 
 ## telegram-recap — Telegram Recap
 
-Fetch and email a Telegram chat digest — pulls messages from the configured window and sends via SMTP.
+Fetch and email a Telegram chat digest — pulls messages from the configured window and sends via Resend.
 
 **Run:** `sdlc tool run telegram-recap --input '{}'`
 **Setup required:** Yes — `sdlc tool run telegram-recap --setup`
-_Requires 7 secrets: TELEGRAM_BOT_TOKEN, SMTP_HOST, SMTP_PORT, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM, SMTP_TO. Schedule with orchestrator (--every 86400) for a daily digest._
+_Requires 5 secrets: TELEGRAM_BOT_TOKEN, RESEND_API_KEY, RESEND_FROM, RESEND_TO, TELEGRAM_CHAT_IDS (optional). Schedule with orchestrator (--every 86400) for a daily digest._
 
 ---
 

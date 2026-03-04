@@ -5,9 +5,9 @@ use serde_json::json;
 use std::path::Path;
 
 use super::{
-    client::TelegramClient,
     digest::DigestBuilder,
-    mailer::SmtpMailer,
+    mailer::ResendMailer,
+    poll::MessageStore,
     types::{DigestConfig, DigestRunResult},
 };
 
@@ -67,11 +67,11 @@ impl DigestRunner {
     }
 
     fn execute(&self, dry_run: bool) -> Result<DigestRunResult> {
-        let client = TelegramClient::new(&self.config.bot_token);
-        let updates = client.get_updates(self.config.max_messages_per_chat)?;
+        let store = MessageStore::open(&self.config.db_path)?;
+        let now = Utc::now();
+        let updates = store.query_messages_in_window(self.config.window_hours, now)?;
 
         let builder = DigestBuilder::new(&self.config);
-        let now = Utc::now();
         let summary = builder.build(updates, now);
 
         if dry_run {
@@ -95,10 +95,10 @@ impl DigestRunner {
         let plain = summary.format_plain_text();
         let html = summary.format_html();
 
-        let mailer = SmtpMailer::new(self.config.smtp.clone());
+        let mailer = ResendMailer::new(self.config.resend.clone());
         mailer.send(&subject, &plain, &html)?;
 
-        let sent_to = self.config.smtp.to.clone();
+        let sent_to = self.config.resend.to.clone();
         Ok(DigestRunResult {
             summary,
             dry_run: false,
@@ -158,9 +158,8 @@ fn build_run_record(
             "message_count": message_count,
             "recipients": result.map(|r| r.sent_to.clone()).unwrap_or_default(),
             "dry_run": dry_run,
-            // Never include bot_token, smtp username, or smtp password.
-            "smtp_host": config.smtp.host,
-            "smtp_port": config.smtp.port,
+            // Never include bot_token or api_key.
+            "resend_from": config.resend.from,
         }
     })
 }
@@ -172,23 +171,21 @@ fn build_run_record(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::telegram::types::{DigestConfig, SmtpConfig};
+    use crate::telegram::types::{DigestConfig, ResendConfig};
 
     fn make_config(bot_token: &str) -> DigestConfig {
         DigestConfig {
             bot_token: bot_token.to_string(),
             chat_ids: vec![],
-            smtp: SmtpConfig {
-                host: "smtp.example.com".to_string(),
-                port: 587,
-                username: "user".to_string(),
-                password: "pass".to_string(),
+            resend: ResendConfig {
+                api_key: "re_secret_key".to_string(),
                 from: "from@example.com".to_string(),
                 to: vec!["team@example.com".to_string()],
             },
             window_hours: 24,
             subject_prefix: "[Test]".to_string(),
             max_messages_per_chat: 100,
+            db_path: std::path::PathBuf::from("/dev/null"),
         }
     }
 
@@ -208,9 +205,9 @@ mod tests {
         let json_str = record.to_string();
         // Credentials must NOT appear in the run record
         assert!(!json_str.contains("secret-bot-token"));
-        assert!(!json_str.contains("\"pass\""));
-        // SMTP host and port ARE acceptable in metadata
-        assert!(json_str.contains("smtp.example.com"));
+        assert!(!json_str.contains("re_secret_key"));
+        // From address is acceptable in metadata
+        assert!(json_str.contains("from@example.com"));
     }
 
     #[test]

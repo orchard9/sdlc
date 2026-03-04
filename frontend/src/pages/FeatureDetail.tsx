@@ -6,6 +6,7 @@ import { PhaseProgressBar } from '@/components/shared/PhaseProgressBar'
 import { ArtifactViewer } from '@/components/features/ArtifactViewer'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
 import { CopyButton } from '@/components/shared/CopyButton'
+import { HumanUatModal } from '@/components/shared/HumanUatModal'
 import { ArrowLeft, Play, Loader2, AlertTriangle } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { api } from '@/api/client'
@@ -18,6 +19,7 @@ export function FeatureDetail() {
   const { feature, classification, error, loading } = useFeature(slug ?? '')
   const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
   const [allSlugs, setAllSlugs] = useState<string[]>([])
+  const [humanQaModalOpen, setHumanQaModalOpen] = useState(false)
 
   useEffect(() => {
     api.getFeatures().then(features => setAllSlugs(features.map((f: { slug: string }) => f.slug))).catch(() => {})
@@ -159,13 +161,23 @@ export function FeatureDetail() {
                 Running...
               </button>
             ) : (
-              <button
-                onClick={handleRun}
-                className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
-              >
-                <Play className="w-3.5 h-3.5" />
-                Run
-              </button>
+              <div className="flex items-center gap-2">
+                {classification.action === 'run_qa' && (
+                  <button
+                    onClick={() => setHumanQaModalOpen(true)}
+                    className="text-xs text-muted-foreground underline hover:text-foreground transition-colors whitespace-nowrap"
+                  >
+                    Submit manually
+                  </button>
+                )}
+                <button
+                  onClick={handleRun}
+                  className="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap"
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  Run
+                </button>
+              </div>
             )}
           </div>
 
@@ -246,6 +258,13 @@ export function FeatureDetail() {
           </div>
         )}
       </section>
+
+      <HumanUatModal
+        open={humanQaModalOpen}
+        onClose={() => setHumanQaModalOpen(false)}
+        mode="feature"
+        slug={slug}
+      />
     </div>
   )
 }

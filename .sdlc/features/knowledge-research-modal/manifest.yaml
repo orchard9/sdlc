@@ -1,9 +1,65 @@
 slug: knowledge-research-modal
 title: 'Knowledge research: NewResearchModal and Research button on list view'
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
+updated_at: 2026-03-03T15:53:02.935099Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/spec.md
+  created_at: 2026-03-03T15:41:58.402686Z
+  approved_at: 2026-03-03T15:42:09.792238Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/design.md
+  created_at: 2026-03-03T15:42:28.835749Z
+  approved_at: 2026-03-03T15:42:39.622058Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/tasks.md
+  created_at: 2026-03-03T15:42:49.707561Z
+  approved_at: 2026-03-03T15:43:01.075645Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/qa-plan.md
+  created_at: 2026-03-03T15:43:18.059280Z
+  approved_at: 2026-03-03T15:43:24.805968Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/review.md
+  created_at: 2026-03-03T15:49:36.572325Z
+  approved_at: 2026-03-03T15:49:45.465758Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/audit.md
+  created_at: 2026-03-03T15:50:58.250890Z
+  approved_at: 2026-03-03T15:51:38.985628Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/knowledge-research-modal/qa-results.md
+  created_at: 2026-03-03T15:52:07.758129Z
+  approved_at: 2026-03-03T15:52:34.065631Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -11,7 +67,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T15:42:09.794559Z
+- phase: specified
+  entered: 2026-03-03T15:42:09.794559Z
+  exited: 2026-03-03T15:43:24.808200Z
+- phase: planned
+  entered: 2026-03-03T15:43:24.808200Z
+  exited: 2026-03-03T15:44:13.671275Z
+- phase: ready
+  entered: 2026-03-03T15:44:13.671275Z
+  exited: 2026-03-03T15:44:19.009309Z
+- phase: implementation
+  entered: 2026-03-03T15:44:19.009309Z
+  exited: 2026-03-03T15:49:45.470211Z
+- phase: review
+  entered: 2026-03-03T15:49:45.470211Z
+  exited: 2026-03-03T15:50:10.851734Z
+- phase: audit
+  entered: 2026-03-03T15:50:10.851734Z
+  exited: 2026-03-03T15:51:38.989131Z
+- phase: qa
+  entered: 2026-03-03T15:51:38.989131Z
+  exited: 2026-03-03T15:52:34.077872Z
+- phase: merge
+  entered: 2026-03-03T15:52:34.077872Z
+  exited: 2026-03-03T15:53:02.935099Z
+- phase: released
+  entered: 2026-03-03T15:53:02.935099Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

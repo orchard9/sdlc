@@ -24,7 +24,9 @@ pub fn migrate_config(cfg: Config) -> Result<Config> {
 ///   1 – reserved (no distinct v1 was ever explicitly stamped)
 ///   2 – added `blockers`, `dependencies`, `tasks`, `archived`, `phase_history`;
 ///       normalised `artifacts: {}` → `artifacts: []`
-pub const FEATURE_SCHEMA_VERSION: u32 = 2;
+///   3 – backfill missing artifact entries (review, audit, qa_results) with
+///       status `missing` so mark_artifact_draft can find them
+pub const FEATURE_SCHEMA_VERSION: u32 = 3;
 
 /// Migrate a raw `serde_yaml::Value` representing a feature manifest to
 /// [`FEATURE_SCHEMA_VERSION`].
@@ -44,42 +46,114 @@ pub fn migrate_feature(value: &mut serde_yaml::Value) -> std::result::Result<boo
         .as_mapping_mut()
         .ok_or_else(|| "feature manifest is not a YAML mapping".to_string())?;
 
-    // v0/v1 → v2 ---------------------------------------------------------------
-    // Fields that were added after the initial schema but have safe empty defaults.
-    insert_seq_if_missing(map, "blockers");
-    insert_seq_if_missing(map, "dependencies");
-    insert_seq_if_missing(map, "tasks");
-    insert_bool_if_missing(map, "archived", false);
+    if version < 2 {
+        // v0/v1 → v2 -----------------------------------------------------------
+        // Fields that were added after the initial schema but have safe empty defaults.
+        insert_seq_if_missing(map, "blockers");
+        insert_seq_if_missing(map, "dependencies");
+        insert_seq_if_missing(map, "tasks");
+        insert_bool_if_missing(map, "archived", false);
 
-    // phase_history: synthesise a single entry from the existing `phase` and
-    // `created_at` fields so the struct constraint is satisfied.
-    let ph_key = serde_yaml::Value::String("phase_history".to_owned());
-    if !map.contains_key(&ph_key) {
-        let phase = map
-            .get("phase")
-            .cloned()
-            .unwrap_or_else(|| serde_yaml::Value::String("draft".to_owned()));
-        let entered = map
-            .get("created_at")
-            .cloned()
-            .unwrap_or_else(|| serde_yaml::Value::String(chrono::Utc::now().to_rfc3339()));
+        // phase_history: synthesise a single entry from the existing `phase` and
+        // `created_at` fields so the struct constraint is satisfied.
+        let ph_key = serde_yaml::Value::String("phase_history".to_owned());
+        if !map.contains_key(&ph_key) {
+            let phase = map
+                .get("phase")
+                .cloned()
+                .unwrap_or_else(|| serde_yaml::Value::String("draft".to_owned()));
+            let entered = map
+                .get("created_at")
+                .cloned()
+                .unwrap_or_else(|| serde_yaml::Value::String(chrono::Utc::now().to_rfc3339()));
 
-        let mut transition = serde_yaml::Mapping::new();
-        transition.insert("phase".into(), phase);
-        transition.insert("entered".into(), entered);
-        transition.insert("exited".into(), serde_yaml::Value::Null);
+            let mut transition = serde_yaml::Mapping::new();
+            transition.insert("phase".into(), phase);
+            transition.insert("entered".into(), entered);
+            transition.insert("exited".into(), serde_yaml::Value::Null);
 
-        map.insert(
-            ph_key,
-            serde_yaml::Value::Sequence(vec![serde_yaml::Value::Mapping(transition)]),
-        );
+            map.insert(
+                ph_key,
+                serde_yaml::Value::Sequence(vec![serde_yaml::Value::Mapping(transition)]),
+            );
+        }
+
+        // artifacts: {} → artifacts: []  (also handled by the custom deserialiser
+        // on the struct, but normalise here so the rewritten file is canonical)
+        let ak = serde_yaml::Value::String("artifacts".to_owned());
+        if map.get(&ak).map(|v| v.is_mapping()).unwrap_or(false) {
+            map.insert(ak, serde_yaml::Value::Sequence(vec![]));
+        }
     }
 
-    // artifacts: {} → artifacts: []  (also handled by the custom deserialiser
-    // on the struct, but normalise here so the rewritten file is canonical)
-    let ak = serde_yaml::Value::String("artifacts".to_owned());
-    if map.get(&ak).map(|v| v.is_mapping()).unwrap_or(false) {
-        map.insert(ak, serde_yaml::Value::Sequence(vec![]));
+    // v2 → v3 -----------------------------------------------------------------
+    // Backfill any artifact entries that are missing from the artifacts list.
+    // Older features may have been created before all 7 artifact types were
+    // tracked in default_artifacts(), leaving the state machine unable to call
+    // mark_artifact_draft() on the missing types. Add them with status `missing`.
+    {
+        // Read slug for path construction (best-effort; skip if absent).
+        let slug = map
+            .get("slug")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
+
+        let ak = serde_yaml::Value::String("artifacts".to_owned());
+        // Ensure artifacts is a sequence (v2 migration above handles {}→[], but
+        // we may arrive here with version == 2 where it was already a sequence).
+        if map.get(&ak).map(|v| v.is_mapping()).unwrap_or(false) {
+            map.insert(ak.clone(), serde_yaml::Value::Sequence(vec![]));
+        }
+
+        if let Some(serde_yaml::Value::Sequence(artifacts)) = map.get_mut(&ak) {
+            // Collect already-present artifact types.
+            let present: std::collections::HashSet<String> = artifacts
+                .iter()
+                .filter_map(|a| {
+                    a.get("artifact_type")
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string())
+                })
+                .collect();
+
+            // The canonical set of artifact types and their filenames.
+            let all_artifact_types: &[(&str, &str)] = &[
+                ("spec", "spec.md"),
+                ("design", "design.md"),
+                ("tasks", "tasks.md"),
+                ("qa_plan", "qa-plan.md"),
+                ("review", "review.md"),
+                ("audit", "audit.md"),
+                ("qa_results", "qa-results.md"),
+            ];
+
+            for (type_str, filename) in all_artifact_types {
+                if !present.contains(*type_str) {
+                    let path = if slug.is_empty() {
+                        format!(".sdlc/features/<slug>/{filename}")
+                    } else {
+                        format!(".sdlc/features/{slug}/{filename}")
+                    };
+                    let mut entry = serde_yaml::Mapping::new();
+                    entry.insert(
+                        "artifact_type".into(),
+                        serde_yaml::Value::String(type_str.to_string()),
+                    );
+                    entry.insert(
+                        "status".into(),
+                        serde_yaml::Value::String("missing".to_string()),
+                    );
+                    entry.insert("path".into(), serde_yaml::Value::String(path));
+                    entry.insert("created_at".into(), serde_yaml::Value::Null);
+                    entry.insert("approved_at".into(), serde_yaml::Value::Null);
+                    entry.insert("rejected_at".into(), serde_yaml::Value::Null);
+                    entry.insert("rejection_reason".into(), serde_yaml::Value::Null);
+                    entry.insert("approved_by".into(), serde_yaml::Value::Null);
+                    artifacts.push(serde_yaml::Value::Mapping(entry));
+                }
+            }
+        }
     }
 
     // Stamp the version so subsequent loads skip migration entirely.
@@ -319,6 +393,115 @@ artifacts: {}
         assert!(
             !changed,
             "should skip migration when already at current version"
+        );
+    }
+
+    #[test]
+    fn migrate_v2_to_v3_backfills_missing_artifacts() {
+        // Build a v2 manifest that has only spec and design — simulating a feature
+        // created before all 7 artifact types were tracked.
+        let mut v: serde_yaml::Value = serde_yaml::from_str(
+            r#"
+slug: my-feature
+title: My Feature
+phase: implementation
+created_at: "2026-01-01T00:00:00Z"
+updated_at: "2026-01-01T00:00:00Z"
+artifacts:
+  - artifact_type: spec
+    status: approved
+    path: .sdlc/features/my-feature/spec.md
+    created_at: null
+    approved_at: null
+    rejected_at: null
+    rejection_reason: null
+    approved_by: null
+  - artifact_type: design
+    status: approved
+    path: .sdlc/features/my-feature/design.md
+    created_at: null
+    approved_at: null
+    rejected_at: null
+    rejection_reason: null
+    approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+dependencies: []
+archived: false
+phase_history:
+  - phase: draft
+    entered: "2026-01-01T00:00:00Z"
+    exited: null
+schema_version: 2
+"#,
+        )
+        .unwrap();
+
+        let changed = migrate_feature(&mut v).unwrap();
+        assert!(changed, "migration should report changes");
+        assert_eq!(
+            v["schema_version"].as_u64(),
+            Some(FEATURE_SCHEMA_VERSION as u64)
+        );
+
+        let artifacts = v["artifacts"].as_sequence().unwrap();
+        // All 7 artifact types must be present after migration.
+        let all_types = [
+            "spec",
+            "design",
+            "tasks",
+            "qa_plan",
+            "review",
+            "audit",
+            "qa_results",
+        ];
+        for expected_type in all_types {
+            let found = artifacts.iter().any(|a| {
+                a.get("artifact_type")
+                    .and_then(|v| v.as_str())
+                    .map(|t| t == expected_type)
+                    .unwrap_or(false)
+            });
+            assert!(
+                found,
+                "artifact type '{}' should be present after v2→v3 migration",
+                expected_type
+            );
+        }
+
+        // Pre-existing artifacts must not be duplicated.
+        let spec_count = artifacts
+            .iter()
+            .filter(|a| {
+                a.get("artifact_type")
+                    .and_then(|v| v.as_str())
+                    .map(|t| t == "spec")
+                    .unwrap_or(false)
+            })
+            .count();
+        assert_eq!(spec_count, 1, "spec must not be duplicated");
+
+        // Backfilled entries must have status 'missing'.
+        let review = artifacts
+            .iter()
+            .find(|a| {
+                a.get("artifact_type")
+                    .and_then(|v| v.as_str())
+                    .map(|t| t == "review")
+                    .unwrap_or(false)
+            })
+            .expect("review artifact must be present");
+        assert_eq!(
+            review.get("status").and_then(|v| v.as_str()),
+            Some("missing"),
+            "backfilled review must have status 'missing'"
+        );
+        assert_eq!(
+            review.get("path").and_then(|v| v.as_str()),
+            Some(".sdlc/features/my-feature/review.md"),
+            "backfilled review must have correct path"
         );
     }
 

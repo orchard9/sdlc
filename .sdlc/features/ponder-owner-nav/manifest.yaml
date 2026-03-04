@@ -97,6 +97,24 @@ tasks:
   completed_at: null
   blocker: null
   depends_on: []
+- id: T5
+  title: Fix PARTNER_HEADER regex in parseSession.ts to match mixed-case/lowercase partner names (e.g. **jordan · Owner** and **Nadia Osei · Role**) — current regex requires ALL_CAPS names only
+  description: null
+  status: pending
+  created_at: 2026-03-03T15:50:27.860414Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Fix z-index overlap between floating entry nav buttons (bottom-16 right-3) and agent activity badge button (bottom-[56px] right-4 z-40) on mobile viewport
+  description: null
+  status: pending
+  created_at: 2026-03-03T15:50:29.337576Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -133,4 +151,4 @@ phase_history:
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

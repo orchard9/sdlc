@@ -32,6 +32,19 @@ impl std::fmt::Display for NotFoundError {
 
 impl std::error::Error for NotFoundError {}
 
+/// Private sentinel error type used to carry an explicit HTTP 401 through
+/// the `anyhow::Error` chain.
+#[derive(Debug)]
+struct UnauthorizedError(String);
+
+impl std::fmt::Display for UnauthorizedError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for UnauthorizedError {}
+
 /// Private sentinel for 422 Unprocessable Entity with a custom JSON body.
 #[derive(Debug)]
 struct UnprocessableJsonError(serde_json::Value);
@@ -68,6 +81,11 @@ impl AppError {
         Self(NotFoundError(msg.into()).into())
     }
 
+    /// Construct a 401 Unauthorized error with the given message.
+    pub fn unauthorized(msg: impl Into<String>) -> Self {
+        Self(UnauthorizedError(msg.into()).into())
+    }
+
     /// Construct a 422 Unprocessable Entity error with a custom JSON body.
     pub fn unprocessable_json(body: serde_json::Value) -> Self {
         Self(UnprocessableJsonError(body).into())
@@ -77,6 +95,10 @@ impl AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         // Check for explicit sentinel types before falling through to SdlcError.
+        if let Some(u) = self.0.downcast_ref::<UnauthorizedError>() {
+            let body = serde_json::json!({ "error": u.0.clone() });
+            return (StatusCode::UNAUTHORIZED, axum::Json(body)).into_response();
+        }
         if let Some(c) = self.0.downcast_ref::<ConflictError>() {
             let body = serde_json::json!({ "error": c.0.clone() });
             return (StatusCode::CONFLICT, axum::Json(body)).into_response();
@@ -140,13 +162,16 @@ impl IntoResponse for AppError {
                 | SdlcError::SecretKeyNotFound(_)
                 | SdlcError::EscalationNotFound(_)
                 | SdlcError::FeedbackNoteNotFound(_)
-                | SdlcError::ThreadNotFound(_) => StatusCode::NOT_FOUND,
+                | SdlcError::ThreadNotFound(_)
+                | SdlcError::AuthTokenNotFound(_) => StatusCode::NOT_FOUND,
                 SdlcError::FeatureExists(_)
                 | SdlcError::MilestoneExists(_)
                 | SdlcError::PonderExists(_)
                 | SdlcError::InvestigationExists(_)
                 | SdlcError::SecretKeyExists(_)
-                | SdlcError::ToolExists(_) => StatusCode::CONFLICT,
+                | SdlcError::SecretEnvExists(_)
+                | SdlcError::ToolExists(_)
+                | SdlcError::AuthTokenExists(_) => StatusCode::CONFLICT,
                 SdlcError::InvalidSlug(_)
                 | SdlcError::InvalidPhase(_)
                 | SdlcError::InvalidPonderStatus(_)

@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: dist-cargo-toml-fixes
+    title: 'cargo-dist: switch to musl Linux target and set install-path to ~/.local/bin'
+    phase: review
+    action: create_audit
+    needs_worktree: false
+    blocked_by: []
+  - slug: dist-developer-docs
+    title: 'DEVELOPER.md: cross-platform dev install path — remove make dependency, document cargo install and just targets'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: dist-first-release
+    title: Tag v0.1.0 and verify install scripts on macOS, Linux, and Windows
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

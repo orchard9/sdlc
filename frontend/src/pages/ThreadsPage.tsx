@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MessageSquare } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { api } from '@/api/client'
 import type { ThreadSummary, ThreadDetail, ThreadComment } from '@/lib/types'
 import { ThreadListPane } from '@/components/threads/ThreadListPane'
@@ -88,8 +89,13 @@ export function ThreadsPage() {
 
   return (
     <div className="flex h-full overflow-hidden">
-      {/* Left pane: thread list */}
-      <div className="w-[280px] shrink-0 border-r border-border flex flex-col overflow-hidden md:flex md:w-[280px]">
+      {/* Left pane: thread list — full width on mobile, fixed 280px on desktop */}
+      {/* On mobile: shown when no thread selected (list view), hidden when detail is active */}
+      <div className={cn(
+        'w-full shrink-0 border-r border-border flex-col overflow-hidden',
+        'md:flex md:w-[280px]',
+        slug ? 'hidden' : 'flex',
+      )}>
         {loadingList ? (
           <div className="flex-1 flex items-center justify-center text-muted-foreground/40 text-sm">
             Loading…
@@ -104,8 +110,12 @@ export function ThreadsPage() {
         )}
       </div>
 
-      {/* Right pane: thread detail */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Right pane: thread detail — hidden on mobile when no thread selected, shown when detail active */}
+      <div className={cn(
+        'flex-1 flex-col overflow-hidden',
+        'md:flex',
+        slug ? 'flex' : 'hidden',
+      )}>
         {loadingDetail ? (
           <div className="flex-1 flex items-center justify-center text-muted-foreground/40 text-sm">
             Loading thread…

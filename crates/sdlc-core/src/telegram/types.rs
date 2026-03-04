@@ -5,20 +5,12 @@ use serde::{Deserialize, Serialize};
 // Configuration
 // ---------------------------------------------------------------------------
 
-/// SMTP delivery configuration.
+/// Resend API delivery configuration.
 #[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct SmtpConfig {
-    pub host: String,
-    #[serde(default = "default_smtp_port")]
-    pub port: u16,
-    pub username: String,
-    pub password: String,
+pub struct ResendConfig {
+    pub api_key: String,
     pub from: String,
     pub to: Vec<String>,
-}
-
-fn default_smtp_port() -> u16 {
-    587
 }
 
 /// Top-level Telegram digest configuration (nested under `telegram:` in config.yaml).
@@ -27,13 +19,16 @@ pub struct DigestConfig {
     pub bot_token: String,
     #[serde(default)]
     pub chat_ids: Vec<String>,
-    pub smtp: SmtpConfig,
+    pub resend: ResendConfig,
     #[serde(default = "default_window_hours")]
     pub window_hours: u32,
     #[serde(default = "default_subject_prefix")]
     pub subject_prefix: String,
     #[serde(default = "default_max_messages")]
     pub max_messages_per_chat: u32,
+    /// Path to the SQLite messages database. Resolved at runtime; never serialized.
+    #[serde(skip)]
+    pub db_path: std::path::PathBuf,
 }
 
 fn default_window_hours() -> u32 {
@@ -53,10 +48,8 @@ impl DigestConfig {
     /// Returns an error if a referenced env var is not set.
     pub fn resolve_env(mut self) -> Result<Self, String> {
         self.bot_token = resolve_placeholder(&self.bot_token)?;
-        self.smtp.username = resolve_placeholder(&self.smtp.username)?;
-        self.smtp.password = resolve_placeholder(&self.smtp.password)?;
-        self.smtp.host = resolve_placeholder(&self.smtp.host)?;
-        self.smtp.from = resolve_placeholder(&self.smtp.from)?;
+        self.resend.api_key = resolve_placeholder(&self.resend.api_key)?;
+        self.resend.from = resolve_placeholder(&self.resend.from)?;
         Ok(self)
     }
 }
@@ -253,10 +246,8 @@ mod tests {
         let yaml = r#"
 bot_token: "tok"
 chat_ids: []
-smtp:
-  host: smtp.example.com
-  username: user
-  password: pass
+resend:
+  api_key: re_test_key
   from: from@example.com
   to: ["to@example.com"]
 "#;
@@ -264,38 +255,32 @@ smtp:
         assert_eq!(cfg.window_hours, 24);
         assert_eq!(cfg.max_messages_per_chat, 100);
         assert_eq!(cfg.subject_prefix, "[sdlc Digest]");
-        assert_eq!(cfg.smtp.port, 587);
     }
 
     #[test]
     fn resolve_env_applies_to_all_sensitive_fields() {
         std::env::set_var("TG_RESOLVE_TEST_TOKEN", "bot-token-value");
-        std::env::set_var("TG_RESOLVE_TEST_USER", "smtp-user");
-        std::env::set_var("TG_RESOLVE_TEST_PASS", "smtp-pass");
+        std::env::set_var("TG_RESOLVE_TEST_API_KEY", "re_api_key_value");
 
         let cfg = DigestConfig {
             bot_token: "${TG_RESOLVE_TEST_TOKEN}".to_string(),
             chat_ids: vec![],
-            smtp: SmtpConfig {
-                host: "smtp.example.com".to_string(),
-                port: 587,
-                username: "${TG_RESOLVE_TEST_USER}".to_string(),
-                password: "${TG_RESOLVE_TEST_PASS}".to_string(),
+            resend: ResendConfig {
+                api_key: "${TG_RESOLVE_TEST_API_KEY}".to_string(),
                 from: "from@example.com".to_string(),
                 to: vec!["to@example.com".to_string()],
             },
             window_hours: 24,
             subject_prefix: "[Test]".to_string(),
             max_messages_per_chat: 100,
+            db_path: std::path::PathBuf::new(),
         };
 
         let resolved = cfg.resolve_env().unwrap();
         assert_eq!(resolved.bot_token, "bot-token-value");
-        assert_eq!(resolved.smtp.username, "smtp-user");
-        assert_eq!(resolved.smtp.password, "smtp-pass");
+        assert_eq!(resolved.resend.api_key, "re_api_key_value");
 
         std::env::remove_var("TG_RESOLVE_TEST_TOKEN");
-        std::env::remove_var("TG_RESOLVE_TEST_USER");
-        std::env::remove_var("TG_RESOLVE_TEST_PASS");
+        std::env::remove_var("TG_RESOLVE_TEST_API_KEY");
     }
 }

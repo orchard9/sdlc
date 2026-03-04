@@ -1,0 +1,9 @@
+slug: v31-activity-feed-polish
+title: Activity Feed Polish — subagent cards, markdown rendering, init header column
+features:
+- activity-subagent-cards
+- activity-compact-markdown
+- activity-run-init-column
+created_at: 2026-03-04T00:37:54.484786Z
+updated_at: 2026-03-04T00:38:01.005378Z
+schema_version: 1

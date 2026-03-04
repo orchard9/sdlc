@@ -26,8 +26,8 @@ const AGENT_MESSAGE_TIMEOUT: Duration = Duration::from_secs(600); // 10 minutes
 use crate::{
     error::AppError,
     state::{
-        enforce_retention, generate_run_id, persist_run, persist_run_events, AppState, RunRecord,
-        SseMessage,
+        enforce_retention, generate_run_id, load_run_history, persist_run, persist_run_events,
+        AppState, RunRecord, SseMessage,
     },
 };
 
@@ -303,7 +303,7 @@ pub(crate) async fn spawn_agent_run(
     let event_tx = app.event_tx.clone();
     let root = app.root.clone();
     let run_id_clone = run_id.clone();
-    let telemetry_store = app.telemetry.clone();
+    let telemetry_store = app.telemetry.get().cloned();
 
     tracing::debug!(key = %key, "spawn_agent_run: spawning agent task");
     let handle = tokio::spawn(async move {
@@ -420,10 +420,18 @@ pub(crate) async fn spawn_agent_run(
             let root2 = root.clone();
             let id2 = run_id_clone.clone();
             let rec_to_persist = full_rec.clone();
+            let telemetry_for_prune = telemetry_store.clone();
             tokio::task::spawn_blocking(move || {
                 persist_run(&root2, &rec_to_persist);
                 persist_run_events(&root2, &id2, &accumulated_events);
                 enforce_retention(&root2, 50);
+                // Prune telemetry to match the retained run set so the redb
+                // file does not grow without bound.
+                if let Some(tstore) = &telemetry_for_prune {
+                    let retained_ids: std::collections::HashSet<String> =
+                        load_run_history(&root2).into_iter().map(|r| r.id).collect();
+                    let _ = tstore.prune_runs_not_in(&retained_ids);
+                }
             })
             .await
             .ok();
@@ -574,7 +582,9 @@ async fn stop_run_by_key(key: &str, app: &AppState) -> Json<serde_json::Value> {
                     rec.completed_at = Some(chrono::Utc::now().to_rfc3339());
                     let root = app.root.clone();
                     let rec_clone = rec.clone();
-                    tokio::task::spawn_blocking(move || persist_run(&root, &rec_clone));
+                    tokio::task::spawn_blocking(move || persist_run(&root, &rec_clone))
+                        .await
+                        .ok();
                     Some(rec.id.clone())
                 } else {
                     None
@@ -842,6 +852,153 @@ pub async fn stop_milestone_uat(
 ) -> Json<serde_json::Value> {
     let key = format!("milestone-uat:{slug}");
     stop_run_by_key(&key, &app).await
+}
+
+/// POST /api/milestone/{slug}/uat/fail — signal that a UAT run completed with a
+/// failing verdict. Emits a `MilestoneUatFailed` SSE event on the `milestone_uat`
+/// channel so the frontend can react (refresh runs list, show failure badge).
+///
+/// This endpoint does **not** change milestone state — the milestone stays in
+/// `Verifying` because there are outstanding failures. It is purely a signal.
+/// The endpoint is idempotent: calling it multiple times only emits additional
+/// SSE events with no other side effects.
+pub async fn fail_milestone_uat(
+    Path(slug): Path<String>,
+    State(app): State<AppState>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    validate_slug(&slug)?;
+    // Verify the milestone exists (early error on unknown slug).
+    let root = app.root.clone();
+    let slug_clone = slug.clone();
+    tokio::task::spawn_blocking(move || sdlc_core::milestone::Milestone::load(&root, &slug_clone))
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    let _ = app
+        .event_tx
+        .send(SseMessage::MilestoneUatFailed { slug: slug.clone() });
+    Ok(Json(
+        serde_json::json!({ "slug": slug, "status": "failed" }),
+    ))
+}
+
+// ---------------------------------------------------------------------------
+// Human UAT submission
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct HumanUatBody {
+    pub verdict: sdlc_core::milestone::UatVerdict,
+    pub tests_total: u32,
+    pub tests_passed: u32,
+    pub tests_failed: u32,
+    #[serde(default)]
+    pub notes: String,
+}
+
+/// POST /api/milestone/{slug}/uat/human — submit a human-run UAT result for a milestone.
+///
+/// Creates a `UatRun` with `mode: human`, writes `run.yaml` and `summary.md` to the standard
+/// path, and emits `MilestoneUatCompleted` SSE. When `verdict == pass`, also sets
+/// `milestone.released_at` to mark the milestone officially released.
+pub async fn submit_milestone_uat_human(
+    Path(slug): Path<String>,
+    State(app): State<AppState>,
+    Json(body): Json<HumanUatBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    use sdlc_core::milestone::{save_uat_run, UatRun, UatRunMode, UatVerdict};
+
+    validate_slug(&slug)?;
+
+    // Validate: notes required for non-pass verdicts.
+    if body.verdict != UatVerdict::Pass && body.notes.trim().is_empty() {
+        return Err(AppError::unprocessable_json(serde_json::json!({
+            "error": "notes are required when verdict is not pass"
+        })));
+    }
+
+    let run_id = generate_run_id();
+    let root = app.root.clone();
+    let slug_clone = slug.clone();
+    let run_id_clone = run_id.clone();
+    let notes = body.notes.clone();
+    let verdict = body.verdict.clone();
+    let tests_total = body.tests_total;
+    let tests_passed = body.tests_passed;
+    let tests_failed = body.tests_failed;
+
+    tokio::task::spawn_blocking(move || {
+        use chrono::Utc;
+
+        // Verify milestone exists.
+        let mut milestone = sdlc_core::milestone::Milestone::load(&root, &slug_clone)?;
+
+        let now = Utc::now();
+        let summary_path = format!(
+            ".sdlc/milestones/{}/uat-runs/{}/summary.md",
+            slug_clone, run_id_clone
+        );
+
+        let verdict_display = match &verdict {
+            UatVerdict::Pass => "Pass",
+            UatVerdict::PassWithTasks => "Pass with Tasks",
+            UatVerdict::Failed => "Fail",
+        };
+
+        // Write summary.md.
+        let summary_content = format!(
+            "# UAT Results — {slug_clone}\n\
+             \n\
+             Run ID: {run_id_clone}\n\
+             Mode: Human (manual)\n\
+             Verdict: {verdict_display}\n\
+             Tests: {tests_passed}/{tests_total} passed\n\
+             \n\
+             ## Notes\n\
+             {notes}\n\
+             \n\
+             Submitted: {now}\n"
+        );
+        let summary_full_path = root.join(&summary_path);
+        sdlc_core::io::atomic_write(&summary_full_path, summary_content.as_bytes())?;
+
+        // Build and save the run record.
+        let run = UatRun {
+            id: run_id_clone.clone(),
+            milestone_slug: slug_clone.clone(),
+            started_at: now,
+            completed_at: Some(now),
+            verdict: verdict.clone(),
+            tests_total,
+            tests_passed,
+            tests_failed,
+            playwright_report_path: None,
+            tasks_created: vec![],
+            summary_path,
+            screenshot_paths: vec![],
+            mode: UatRunMode::Human,
+        };
+        save_uat_run(&root, &run)?;
+
+        // If verdict is pass, mark milestone as released.
+        if verdict == UatVerdict::Pass {
+            milestone.release();
+            milestone.save(&root)?;
+        }
+
+        Ok::<_, sdlc_core::SdlcError>(())
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    let _ = app
+        .event_tx
+        .send(SseMessage::MilestoneUatCompleted { slug: slug.clone() });
+
+    Ok(Json(serde_json::json!({
+        "run_id": run_id,
+        "slug": slug,
+        "status": "submitted"
+    })))
 }
 
 // ---------------------------------------------------------------------------
@@ -1593,6 +1750,59 @@ pub async fn start_investigation_chat(
          Evolve gate artifacts: each phase artifact unlocks the next phase.\n\
          Call the update command immediately after capturing the gate artifact — do not wait.\n\
          \n\
+         ### Completing the investigation\n\
+         \n\
+         **Root-cause `output` phase** — write `findings.md` as the canonical deliverable:\n\
+         ```markdown\n\
+         # Root Cause: <title>\n\
+         \n\
+         ## Finding\n\
+         <1-3 sentence summary identifying the root cause>\n\
+         \n\
+         ## Evidence\n\
+         - Code paths: <key finding>\n\
+         - Bottlenecks: <finding or N/A>\n\
+         - Data flow: <finding or N/A>\n\
+         - Auth chain: <finding or N/A>\n\
+         - Environment: <finding or N/A>\n\
+         \n\
+         ## Confidence\n\
+         <0-100>% — <reason>\n\
+         \n\
+         ## Recommended Next Steps\n\
+         1. <Immediate fix or task to create>\n\
+         2. <Preventive measure>\n\
+         ```\n\
+         Then record the outcome and mark complete:\n\
+         ```bash\n\
+         sdlc investigate update {slug} --confidence <0-100>\n\
+         sdlc investigate update {slug} --output-ref \"findings.md\"\n\
+         sdlc investigate update {slug} --status complete\n\
+         ```\n\
+         \n\
+         **Evolve `output` phase** — write `action-plan.md` as the concrete path forward:\n\
+         ```markdown\n\
+         # Evolution Plan: <title>\n\
+         \n\
+         ## Chosen Path\n\
+         <Name and vision of the chosen evolution path>\n\
+         \n\
+         ## Why This Path\n\
+         <1-2 sentences — key tradeoffs that decided this over alternatives>\n\
+         \n\
+         ## Action Steps\n\
+         1. <First concrete action: feature/milestone slug to create, or specific code change>\n\
+         2. <Second action>\n\
+         ...\n\
+         \n\
+         ## What We Are Not Doing\n\
+         - <Rejected path> — <brief reason>\n\
+         ```\n\
+         Then mark complete:\n\
+         ```bash\n\
+         sdlc investigate update {slug} --status complete\n\
+         ```\n\
+         \n\
          ## Step 3 — Log the session (MANDATORY)\n\
          \n\
          Before ending, you MUST log the session. This is not optional — skipping it means \
@@ -1679,16 +1889,29 @@ pub async fn stop_investigation_chat(
 
 /// POST /api/vision/run — generate or align VISION.md.
 ///
+/// Optional request body for align endpoints — carries user-supplied direction.
+#[derive(serde::Deserialize, Default)]
+pub struct AlignBody {
+    pub direction: Option<String>,
+}
+
 /// For fresh projects (no VISION.md): reads `.sdlc/config.yaml` for the project
 /// name and description and writes VISION.md from scratch.
 /// For existing projects: aligns the document with current feature/milestone state.
 /// Fires `vision_align_completed` SSE on finish so the page re-fetches.
 pub async fn start_vision_align(
     State(app): State<AppState>,
+    body: Option<Json<AlignBody>>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "vision-align".to_string();
     let opts = sdlc_query_options(app.root.clone(), 40);
-    let prompt = "Check whether VISION.md exists in the project root.\n\n\
+    let direction_prefix = body
+        .and_then(|Json(b)| b.direction)
+        .filter(|d| !d.trim().is_empty())
+        .map(|d| format!("User direction: {d}\n\n"))
+        .unwrap_or_default();
+    let prompt = format!(
+        "{direction_prefix}Check whether VISION.md exists in the project root.\n\n\
         If VISION.md does NOT exist: read `.sdlc/config.yaml` to get the project name \
         and description. Write VISION.md from scratch — what this project is, who it is \
         for, what problem it solves, and what success looks like. Ground every claim in \
@@ -1700,10 +1923,11 @@ pub async fn start_vision_align(
         that became clearer, direction that evolved through building. Update VISION.md to \
         capture what was actually learned while preserving strategic intent and \
         aspirational language. Do not water down ambition — sharpen it with what we now know.\n\n\
-        Write the result directly to VISION.md in the project root using the Write tool.";
+        Write the result directly to VISION.md in the project root using the Write tool."
+    );
     spawn_agent_run(
         key,
-        prompt.to_string(),
+        prompt,
         opts,
         &app,
         "vision_align",
@@ -1721,10 +1945,17 @@ pub async fn start_vision_align(
 /// Fires `architecture_align_completed` SSE on finish so the page re-fetches.
 pub async fn start_architecture_align(
     State(app): State<AppState>,
+    body: Option<Json<AlignBody>>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "architecture-align".to_string();
     let opts = sdlc_query_options(app.root.clone(), 40);
-    let prompt = "Check whether ARCHITECTURE.md exists in the project root.\n\n\
+    let direction_prefix = body
+        .and_then(|Json(b)| b.direction)
+        .filter(|d| !d.trim().is_empty())
+        .map(|d| format!("User direction: {d}\n\n"))
+        .unwrap_or_default();
+    let prompt = format!(
+        "{direction_prefix}Check whether ARCHITECTURE.md exists in the project root.\n\n\
         If ARCHITECTURE.md does NOT exist: read `.sdlc/config.yaml` for the project name \
         and description, then scan the codebase — key source files, directory structure, \
         frameworks, and dependencies — using filesystem tools (Read, Glob, Grep). \
@@ -1736,10 +1967,11 @@ pub async fn start_architecture_align(
         built: renamed components, new modules, changed interfaces, evolved data flows, \
         or patterns that emerged during implementation. Update ARCHITECTURE.md to \
         accurately describe the real system as it exists today.\n\n\
-        Write the result directly to ARCHITECTURE.md in the project root using the Write tool.";
+        Write the result directly to ARCHITECTURE.md in the project root using the Write tool."
+    );
     spawn_agent_run(
         key,
-        prompt.to_string(),
+        prompt,
         opts,
         &app,
         "architecture_align",
@@ -2075,6 +2307,145 @@ pub async fn answer_ama(
         }
     }
     Ok(Json(resp))
+}
+
+// ---------------------------------------------------------------------------
+// Agent-call endpoint — used by tools to dispatch agent runs via spawn_agent_run
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize)]
+pub struct AgentCallRequest {
+    /// The slash command or instruction to execute (e.g. "/sdlc-next my-feature").
+    command: String,
+    /// Deduplication key — identifies the run for duplicate detection.
+    /// Follows the pattern `namespace:type:identifier`, e.g. `dev-driver:feature:slug`.
+    key: String,
+    /// Human-readable label for the activity feed.
+    label: String,
+    /// Run type tag stored in the RunRecord (optional, defaults to "tool_agent").
+    #[serde(default)]
+    run_type: Option<String>,
+}
+
+/// POST /api/tools/agent-call — spawn an agent run from a tool.
+///
+/// Accepts `{ command, key, label, run_type? }`. The command is wrapped in a
+/// minimal system prompt and dispatched via `spawn_agent_run`.
+///
+/// Returns 202 `{ run_id, key, status: "started" }` on success.
+/// Returns 409 Conflict if a run with the same key is already in flight.
+/// Returns 400 if command, key, or label are missing or empty.
+pub async fn agent_call(
+    State(app): State<AppState>,
+    Json(body): Json<AgentCallRequest>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    if body.command.is_empty() {
+        return Err(AppError::bad_request("'command' must not be empty"));
+    }
+    if body.key.is_empty() {
+        return Err(AppError::bad_request("'key' must not be empty"));
+    }
+    if body.label.is_empty() {
+        return Err(AppError::bad_request("'label' must not be empty"));
+    }
+
+    let run_type = body
+        .run_type
+        .as_deref()
+        .filter(|s| !s.is_empty())
+        .unwrap_or("tool_agent")
+        .to_string();
+
+    let command = body.command.clone();
+    let prompt = format!(
+        "You are an autonomous SDLC agent. Your task is to execute exactly one command and then stop.\n\
+         \n\
+         Execute: {command}\n\
+         \n\
+         Use the available tools to fulfill this command. When the command is complete, stop."
+    );
+
+    let opts = sdlc_query_options(app.root.clone(), 200);
+    let result = spawn_agent_run(
+        body.key.clone(),
+        prompt,
+        opts,
+        &app,
+        &run_type,
+        &body.label,
+        None,
+    )
+    .await?;
+
+    let run_id = result
+        .0
+        .get("run_id")
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string();
+
+    Ok(Json(serde_json::json!({
+        "run_id": run_id,
+        "key": body.key,
+        "status": "started"
+    })))
+}
+
+#[cfg(test)]
+mod agent_call_tests {
+    use super::*;
+    use axum::extract::State;
+
+    #[tokio::test]
+    async fn agent_call_rejects_empty_command() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let req = AgentCallRequest {
+            command: "".to_string(),
+            key: "dev-driver:feature:x".to_string(),
+            label: "test".to_string(),
+            run_type: None,
+        };
+        let result = agent_call(State(app), Json(req)).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let resp = axum::response::IntoResponse::into_response(err);
+        assert_eq!(resp.status(), axum::http::StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn agent_call_rejects_empty_key() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let req = AgentCallRequest {
+            command: "/sdlc-next x".to_string(),
+            key: "".to_string(),
+            label: "test".to_string(),
+            run_type: None,
+        };
+        let result = agent_call(State(app), Json(req)).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let resp = axum::response::IntoResponse::into_response(err);
+        assert_eq!(resp.status(), axum::http::StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn agent_call_rejects_empty_label() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let req = AgentCallRequest {
+            command: "/sdlc-next x".to_string(),
+            key: "dev-driver:feature:x".to_string(),
+            label: "".to_string(),
+            run_type: None,
+        };
+        let result = agent_call(State(app), Json(req)).await;
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let resp = axum::response::IntoResponse::into_response(err);
+        assert_eq!(resp.status(), axum::http::StatusCode::BAD_REQUEST);
+    }
 }
 
 /// POST /api/tools/quality-check/reconfigure — spawn an agent that detects the

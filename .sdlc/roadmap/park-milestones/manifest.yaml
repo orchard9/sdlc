@@ -1,0 +1,10 @@
+slug: park-milestones
+title: park milestones
+status: converging
+created_at: 2026-03-04T03:32:12.557167Z
+updated_at: 2026-03-04T03:34:46.830251Z
+sessions: 1
+orientation:
+  current: 'Problem is clear, design is converged. Simple primitive: parked_at timestamp on Milestone.'
+  next: 'Commit to milestone + feature. Implementation is ~2 hours: Rust struct change, CLI commands, UI sections, REST endpoints.'
+  commit: Owner confirms the park/unpark semantics and UI treatment are what they want.

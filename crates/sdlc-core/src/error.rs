@@ -122,6 +122,9 @@ pub enum SdlcError {
     #[error("secret key already exists: {0}")]
     SecretKeyExists(String),
 
+    #[error("env already exists: {0}")]
+    SecretEnvExists(String),
+
     #[error("escalation not found: {0}")]
     EscalationNotFound(String),
 
@@ -136,6 +139,12 @@ pub enum SdlcError {
 
     #[error("dependency cycle detected: {0}")]
     DependencyCycle(String),
+
+    #[error("auth token already exists: {0}")]
+    AuthTokenExists(String),
+
+    #[error("auth token not found: {0}")]
+    AuthTokenNotFound(String),
 
     #[error("No supported JavaScript runtime found. Install bun to use SDLC tools:\n  curl -fsSL https://bun.sh/install | bash\n  Or install deno: https://deno.land or node: https://nodejs.org")]
     NoToolRuntime,

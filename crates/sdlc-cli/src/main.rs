@@ -5,14 +5,14 @@ mod tools;
 
 use clap::{Parser, Subcommand};
 use cmd::{
-    agent::AgentSubcommand, artifact::ArtifactSubcommand, backlog::BacklogSubcommand,
-    comment::CommentSubcommand, config::ConfigSubcommand, escalate::EscalateSubcommand,
-    feature::FeatureSubcommand, investigate::InvestigateSubcommand, knowledge::KnowledgeSubcommand,
-    milestone::MilestoneSubcommand, orchestrate::OrchestrateSubcommand,
-    platform::PlatformSubcommand, ponder::PonderSubcommand, project::ProjectSubcommand,
-    query::QuerySubcommand, score::ScoreSubcommand, secrets::SecretsSubcommand,
-    task::TaskSubcommand, telegram::TelegramSubcommand, thread::ThreadSubcommand,
-    tool::ToolCommand, ui::UiSubcommand,
+    agent::AgentSubcommand, artifact::ArtifactSubcommand, auth::AuthSubcommand,
+    backlog::BacklogSubcommand, comment::CommentSubcommand, config::ConfigSubcommand,
+    escalate::EscalateSubcommand, feature::FeatureSubcommand, investigate::InvestigateSubcommand,
+    knowledge::KnowledgeSubcommand, milestone::MilestoneSubcommand,
+    orchestrate::OrchestrateSubcommand, platform::PlatformSubcommand, ponder::PonderSubcommand,
+    project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
+    secrets::SecretsSubcommand, task::TaskSubcommand, telegram::TelegramSubcommand,
+    thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -148,6 +148,12 @@ enum Commands {
         subcommand: SecretsSubcommand,
     },
 
+    /// Manage named tunnel-access tokens (.sdlc/auth.yaml)
+    Auth {
+        #[command(subcommand)]
+        subcommand: AuthSubcommand,
+    },
+
     /// Escalate an action that requires human intervention
     Escalate {
         #[command(subcommand)]
@@ -222,9 +228,9 @@ enum Commands {
         #[arg(long)]
         no_open: bool,
 
-        /// Open a public tunnel and print a QR code for remote access (install: gh release download --repo orchard9/tunnel)
+        /// Disable the public tunnel (tunnel starts automatically by default, requires orch-tunnel)
         #[arg(long)]
-        tunnel: bool,
+        no_tunnel: bool,
 
         /// Orchestrator tick interval in seconds (default 60)
         #[arg(long, default_value_t = 60)]
@@ -282,6 +288,7 @@ fn main() {
         Commands::Config { subcommand } => cmd::config::run(&root, subcommand, cli.json),
         Commands::Score { subcommand } => cmd::score::run(&root, subcommand, cli.json),
         Commands::Secrets { subcommand } => cmd::secrets::run(&root, subcommand, cli.json),
+        Commands::Auth { subcommand } => cmd::auth::run(&root, subcommand, cli.json),
         Commands::Escalate { subcommand } => cmd::escalate::run(&root, subcommand, cli.json),
         Commands::Thread { subcommand } => cmd::thread::run(&root, subcommand, cli.json),
         Commands::Tool { cmd } => cmd::tool::run(cmd, &root),
@@ -302,7 +309,7 @@ fn main() {
         Commands::Ui {
             port,
             no_open,
-            tunnel,
+            no_tunnel,
             tick_rate,
             run_actions,
             debug: _,
@@ -312,7 +319,7 @@ fn main() {
             subcommand,
             port,
             no_open,
-            tunnel,
+            no_tunnel,
             tick_rate,
             run_actions,
         ),

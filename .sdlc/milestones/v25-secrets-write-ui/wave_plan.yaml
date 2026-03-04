@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: secrets-create-env-endpoint
+    title: 'Secrets: POST /api/secrets/envs create-only endpoint'
+    phase: planned
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

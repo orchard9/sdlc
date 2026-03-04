@@ -245,24 +245,22 @@ fn html_escape(s: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::telegram::types::{SmtpConfig, TelegramChat, TelegramMessage, TelegramUser};
+    use crate::telegram::types::{ResendConfig, TelegramChat, TelegramMessage, TelegramUser};
     use chrono::TimeZone;
 
     fn make_config(chat_ids: Vec<String>, window_hours: u32, max_messages: u32) -> DigestConfig {
         DigestConfig {
             bot_token: "tok".to_string(),
             chat_ids,
-            smtp: SmtpConfig {
-                host: "smtp.example.com".to_string(),
-                port: 587,
-                username: "user".to_string(),
-                password: "pass".to_string(),
+            resend: ResendConfig {
+                api_key: "re_test_key".to_string(),
                 from: "from@example.com".to_string(),
                 to: vec!["to@example.com".to_string()],
             },
             window_hours,
             subject_prefix: "[Test]".to_string(),
             max_messages_per_chat: max_messages,
+            db_path: std::path::PathBuf::new(),
         }
     }
 

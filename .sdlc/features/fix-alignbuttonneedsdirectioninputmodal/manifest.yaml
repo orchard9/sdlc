@@ -1,0 +1,92 @@
+slug: fix-alignbuttonneedsdirectioninputmodal
+title: Fix Alignbuttonneedsdirectioninputmodal
+description: |-
+  Root cause: handleAlign in VisionPage.tsx and ArchitecturePage.tsx calls api.runVisionAlign/runArchitectureAlign directly without first opening a modal to collect direction input from the user, so the payload sent to the backend carries no user context.
+
+  Problem: On the Vision and Architecture pages, clicking the 'Align' button immediately fires an API call (runVisionAlign/runArchitectureAlign) with no opportunity for the user to provide directional input or context. This means the agent has no user-supplied direction to align against, making the action a black-box fire-and-forget with no user control over the outcome.
+
+  Original report:
+  in vision and architecture, when we hit "align" i expect a modal to pop up and it asks for direction so we can input that
+phase: implementation
+created_at: 2026-03-03T16:15:04.283624Z
+updated_at: 2026-03-03T16:17:33.234942Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/spec.md
+  created_at: 2026-03-03T16:15:55.722693Z
+  approved_at: 2026-03-03T16:15:59.430215Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/design.md
+  created_at: 2026-03-03T16:16:37.892882Z
+  approved_at: 2026-03-03T16:16:40.345784Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/tasks.md
+  created_at: 2026-03-03T16:16:55.231802Z
+  approved_at: 2026-03-03T16:16:57.267312Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/qa-plan.md
+  created_at: 2026-03-03T16:17:15.355147Z
+  approved_at: 2026-03-03T16:17:17.970610Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fix-alignbuttonneedsdirectioninputmodal/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-03T16:15:04.283624Z
+  exited: 2026-03-03T16:15:59.440577Z
+- phase: specified
+  entered: 2026-03-03T16:15:59.440577Z
+  exited: 2026-03-03T16:17:17.974913Z
+- phase: planned
+  entered: 2026-03-03T16:17:17.974913Z
+  exited: 2026-03-03T16:17:28.838591Z
+- phase: ready
+  entered: 2026-03-03T16:17:28.838591Z
+  exited: 2026-03-03T16:17:33.234942Z
+- phase: implementation
+  entered: 2026-03-03T16:17:33.234942Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

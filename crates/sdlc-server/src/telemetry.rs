@@ -1,5 +1,5 @@
 use anyhow::Context as _;
-use redb::{Database, TableDefinition};
+use redb::{Database, ReadableTable, TableDefinition};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::path::Path;
@@ -91,6 +91,49 @@ impl TelemetryStore {
                 .context("insert event")?;
         }
         wtx.commit().context("commit event")?;
+        Ok(())
+    }
+
+    /// Delete all events whose run_id is NOT in `keep_ids`.
+    ///
+    /// Called after `enforce_retention` to keep the redb file from growing
+    /// without bound. Safe to call with an empty `keep_ids` — it will delete
+    /// everything. Synchronous — call from `tokio::task::spawn_blocking`.
+    pub fn prune_runs_not_in(
+        &self,
+        keep_ids: &std::collections::HashSet<String>,
+    ) -> anyhow::Result<()> {
+        let wtx = self.db.begin_write().context("begin write for prune")?;
+        {
+            let mut table = wtx
+                .open_table(EVENTS)
+                .context("open events table for prune")?;
+            // Collect keys to delete first (can't mutate while iterating).
+            let to_delete: Vec<(String, u64)> = table
+                .iter()
+                .context("full scan for prune")?
+                .filter_map(|entry| entry.ok())
+                .filter_map(|(key, _)| {
+                    let (run_id, seq) = key.value();
+                    let run_id_str: &str = run_id;
+                    if !keep_ids.contains(run_id_str) {
+                        Some((run_id_str.to_string(), seq))
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            for (run_id, seq) in &to_delete {
+                let _ = table.remove((run_id.as_str(), *seq));
+            }
+            if !to_delete.is_empty() {
+                tracing::debug!(deleted = to_delete.len(), "pruned telemetry events");
+            }
+        }
+        wtx.commit().context("commit prune")?;
+        // Drop counters for pruned runs so the in-memory map stays bounded.
+        let mut counters = self.counters.lock().unwrap_or_else(|e| e.into_inner());
+        counters.retain(|k, _| keep_ids.contains(k));
         Ok(())
     }
 

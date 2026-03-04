@@ -1,5 +1,5 @@
 name: telegram-recap
-version: "1.0.0"
-description: "Fetch and email a Telegram chat digest via SMTP"
-# Add tool-specific config here (optional — env vars take precedence)
+version: "1.1.0"
+description: "Fetch and email a Telegram chat digest via Resend"
+# All secrets sourced from: sdlc secrets env export telegram
 # See README.md for full configuration reference.

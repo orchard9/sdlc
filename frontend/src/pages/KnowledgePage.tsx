@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
 import { Skeleton } from '@/components/shared/Skeleton'
+import { NewResearchModal } from '@/components/knowledge/NewResearchModal'
 import {
   Library, ChevronRight, ArrowLeft, ExternalLink, AlertTriangle,
-  Clock, RefreshCw, Loader2, Tag,
+  Clock, RefreshCw, Loader2, Tag, FlaskConical,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type {
@@ -149,11 +150,13 @@ function EntryListPane({
   loading,
   selectedSlug,
   onSelect,
+  onResearch,
 }: {
   entries: KnowledgeEntrySummary[]
   loading: boolean
   selectedSlug: string | null
   onSelect: (slug: string) => void
+  onResearch: (slug: string, title: string) => void
 }) {
   if (loading) {
     return (
@@ -186,7 +189,7 @@ function EntryListPane({
           key={entry.slug}
           onClick={() => onSelect(entry.slug)}
           className={cn(
-            'w-full text-left px-3 py-2.5 rounded-lg transition-colors',
+            'group w-full text-left px-3 py-2.5 rounded-lg transition-colors',
             selectedSlug === entry.slug
               ? 'bg-accent text-accent-foreground'
               : 'hover:bg-accent/40 text-foreground',
@@ -201,9 +204,23 @@ function EntryListPane({
                 </p>
               )}
             </div>
-            <span className={cn('text-xs font-mono shrink-0 mt-0.5', statusColor(entry.status))}>
-              {entry.status}
-            </span>
+            <div className="shrink-0 flex items-center gap-1 mt-0.5">
+              <span className={cn('text-xs font-mono', statusColor(entry.status))}>
+                {entry.status}
+              </span>
+              <button
+                type="button"
+                aria-label={`Research: ${entry.title}`}
+                title="Research More"
+                onClick={e => {
+                  e.stopPropagation()
+                  onResearch(entry.slug, entry.title)
+                }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-muted-foreground hover:text-primary"
+              >
+                <FlaskConical className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
           {entry.tags.length > 0 && (
             <div className="flex items-center gap-1 mt-1 flex-wrap">
@@ -437,6 +454,8 @@ export function KnowledgePage() {
   const [entriesLoading, setEntriesLoading] = useState(false)
   const [selectedCode, setSelectedCode] = useState<string | null>(null)
 
+  const [researchTarget, setResearchTarget] = useState<{ slug: string; title: string } | null>(null)
+
   // Load catalog once on mount
   useEffect(() => {
     api.getKnowledgeCatalog()
@@ -507,6 +526,7 @@ export function KnowledgePage() {
             loading={entriesLoading}
             selectedSlug={slug ?? null}
             onSelect={s => navigate(`/knowledge/${s}`)}
+            onResearch={(entrySlug, entryTitle) => setResearchTarget({ slug: entrySlug, title: entryTitle })}
           />
         </div>
 
@@ -535,6 +555,16 @@ export function KnowledgePage() {
         </div>
 
       </div>
+
+      {researchTarget && (
+        <NewResearchModal
+          open
+          entrySlug={researchTarget.slug}
+          entryTitle={researchTarget.title}
+          onClose={() => setResearchTarget(null)}
+          onStarted={() => setResearchTarget(null)}
+        />
+      )}
     </div>
   )
 }

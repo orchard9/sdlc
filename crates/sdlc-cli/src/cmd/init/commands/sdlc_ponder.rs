@@ -106,6 +106,40 @@ sdlc ponder capture <slug> --content "<markdown content>" --as <filename>.md
 sdlc ponder capture <slug> --file /tmp/exploration.md --as exploration.md
 ```
 
+### Design Artifact Protocol
+
+When producing a design for a **user interface** — a screen, panel, modal, widget,
+layout, or interaction flow — produce a self-contained HTML mockup, not a Markdown
+description.
+
+**Format:**
+- `<!DOCTYPE html>` with Tailwind CDN (`<script src="https://cdn.tailwindcss.com"></script>`)
+- `<body class="bg-gray-950 text-gray-100 p-8 font-mono">`
+- Yellow prototype banner at the top:
+  ```html
+  <div class="text-xs text-yellow-400 border border-yellow-900 rounded px-3 py-1 inline-block mb-6">
+    ⚠ Design Prototype — not production code
+  </div>
+  ```
+- Show 2–3 key states (empty / populated; before / after; state A / state B) using
+  tab buttons or labeled sections
+- Placeholder data throughout — no real data, no complex animations
+- Self-contained — no external dependencies beyond Tailwind CDN
+
+**Filename:** `<descriptive-name>-mockup.html`
+Examples: `dashboard-layout-mockup.html`, `thread-detail-mockup.html`
+
+**Capture:**
+```bash
+# Write HTML to temp file first, then capture into the scrapbook
+sdlc ponder capture <slug> --file /tmp/<name>-mockup.html --as <name>-mockup.html
+```
+
+**When NOT to use HTML:** data model designs, CLI command syntax, API contracts,
+algorithm sketches — these remain Markdown with code blocks.
+
+---
+
 ### Recruiting additional partners
 
 If a new domain surfaces ("oh, this also needs a real-time sync layer"), recruit:
@@ -303,6 +337,12 @@ Open the ponder workspace for creative exploration and ideation.
 3. If no arguments: `sdlc ponder list` and ask which to explore.
 4. Facilitate: interrogate the brief, channel thought partners, suggest captures.
 5. When artifacts are ready: `sdlc ponder capture <slug> --content "..." --as <name>.md`.
+   For UI/layout designs (screens, panels, modals, widgets), produce a self-contained HTML
+   mockup (`<name>-mockup.html`): Tailwind CDN, dark `bg-gray-950` body, yellow prototype
+   banner (`⚠ Design Prototype — not production code`), 2–3 states shown, placeholder data.
+   Write to `/tmp/<name>-mockup.html` first, then:
+   `sdlc ponder capture <slug> --file /tmp/<name>-mockup.html --as <name>-mockup.html`.
+   Non-UI designs (data schemas, CLI syntax, API contracts, algorithms) stay as Markdown.
 6. Before ending: write and log the session file:
    - Compose a Markdown session with YAML frontmatter (session, timestamp, orientation).
    - End the session body with a `## Product Summary` section containing four fixed H3s
@@ -331,6 +371,10 @@ Use this skill to open a ponder workspace for exploring ideas.
 3. If no args: `sdlc ponder list`. Ask which to explore.
 4. Facilitate: interrogate, channel partners, capture artifacts.
 5. Capture with `sdlc ponder capture <slug> --content "..." --as <name>.md`.
+   For UI/layout designs, produce an HTML mockup (`<name>-mockup.html`): Tailwind CDN,
+   dark `bg-gray-950` body, yellow prototype banner, 2–3 states. Write to `/tmp/` first,
+   then `sdlc ponder capture <slug> --file /tmp/<name>-mockup.html --as <name>-mockup.html`.
+   Non-UI designs (data schemas, CLI syntax, API contracts) stay Markdown.
 6. Before ending: compose session Markdown with YAML frontmatter (session, timestamp,
    orientation) and log it: `sdlc ponder session log <slug> --file /tmp/session.md`.
    End the session body with `## Product Summary` — four subsections with locked labels:

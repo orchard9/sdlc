@@ -1,63 +1,63 @@
 slug: tool-state-primitives
 title: _shared/sdlc.ts — typed state access for tools
 description: 'A shared TypeScript module that tools import to read and write .sdlc/ state files through the correct conventions. Provides: readFeatures(), readMilestones(), readBeat()/writeBeat(), createPonder(), readVision(). No raw filesystem access — everything goes through the same model the CLI uses. Makes tools first-class participants in project state.'
-phase: draft
+phase: released
 created_at: 2026-03-03T08:59:24.429709Z
-updated_at: 2026-03-03T08:59:24.429709Z
+updated_at: 2026-03-03T23:40:48.208070Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:18:32.761445Z
+  approved_at: 2026-03-03T11:18:32.768486Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:18:34.613645Z
+  approved_at: 2026-03-03T11:18:34.625221Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:18:37.037164Z
+  approved_at: 2026-03-03T11:18:37.044081Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:18:39.041734Z
+  approved_at: 2026-03-03T11:18:39.048644Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:19:28.916117Z
+  approved_at: 2026-03-03T11:19:28.925610Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T11:20:29.127251Z
+  approved_at: 2026-03-03T11:20:29.136623Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/tool-state-primitives/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-03T23:40:37.210442Z
+  approved_at: 2026-03-03T23:40:43.783169Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -65,44 +65,53 @@ tasks:
 - id: T1
   title: Write _shared/sdlc.ts with readVision(), readFeatures(), readMilestones()
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T08:59:58.532967Z
   started_at: null
-  completed_at: null
+  completed_at: 2026-03-03T11:16:02.928363Z
   blocker: null
   depends_on: []
 - id: T2
   title: Add readBeat() and writeBeat() that load/save .sdlc/beat.yaml with correct schema
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T08:59:58.538376Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:16:07.121751Z
+  completed_at: 2026-03-03T11:16:07.127293Z
   blocker: null
   depends_on: []
 - id: T3
   title: Add createPonder() and appendPonderSession() wrappers around sdlc CLI
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T08:59:58.543605Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:16:09.047149Z
+  completed_at: 2026-03-03T11:16:09.053159Z
   blocker: null
   depends_on: []
 - id: T4
   title: Expose getProjectRoot() that resolves .sdlc/ from SDLC_ROOT env var (injected by server)
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T08:59:58.548678Z
-  started_at: null
-  completed_at: null
+  started_at: 2026-03-03T11:16:11.153054Z
+  completed_at: 2026-03-03T11:16:11.158593Z
   blocker: null
   depends_on: []
 - id: T5
   title: Update sdlc-tool-build and sdlc-tool-audit skills to document _shared/sdlc.ts usage
   description: null
-  status: pending
+  status: completed
   created_at: 2026-03-03T08:59:58.553857Z
+  started_at: 2026-03-03T11:16:26.285493Z
+  completed_at: 2026-03-03T11:18:20.726311Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Add random suffix to appendPonderSession temp file path for defense-in-depth
+  description: null
+  status: pending
+  created_at: 2026-03-03T11:20:26.241849Z
   started_at: null
   completed_at: null
   blocker: null
@@ -113,7 +122,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T08:59:24.429709Z
+  exited: 2026-03-03T11:18:32.770113Z
+- phase: specified
+  entered: 2026-03-03T11:18:32.770113Z
+  exited: 2026-03-03T11:18:39.050223Z
+- phase: planned
+  entered: 2026-03-03T11:18:39.050223Z
+  exited: 2026-03-03T11:18:41.320015Z
+- phase: ready
+  entered: 2026-03-03T11:18:41.320015Z
+  exited: 2026-03-03T11:18:41.328206Z
+- phase: implementation
+  entered: 2026-03-03T11:18:41.328206Z
+  exited: 2026-03-03T11:19:28.930279Z
+- phase: review
+  entered: 2026-03-03T11:19:28.930279Z
+  exited: 2026-03-03T11:19:33.866109Z
+- phase: audit
+  entered: 2026-03-03T11:19:33.866109Z
+  exited: 2026-03-03T11:20:29.143791Z
+- phase: qa
+  entered: 2026-03-03T11:20:29.143791Z
+  exited: 2026-03-03T23:40:43.792619Z
+- phase: merge
+  entered: 2026-03-03T23:40:43.792619Z
+  exited: 2026-03-03T23:40:48.208070Z
+- phase: released
+  entered: 2026-03-03T23:40:48.208070Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

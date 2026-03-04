@@ -12,11 +12,15 @@ use crate::state::TunnelSnapshot;
 
 /// Controls tunnel authentication.
 ///
-/// When `token` is `None` the middleware is a transparent no-op — all requests
-/// pass through. Set a token only when a public tunnel is active.
+/// When `tokens` is empty the middleware is a transparent no-op — all requests
+/// pass through (open mode). Tokens are populated from `.sdlc/auth.yaml` on
+/// startup and hot-reloaded whenever the file changes. The ephemeral tunnel
+/// token (generated on `POST /api/tunnel`) is added as `("_tunnel", token)` in
+/// memory only and is never written to disk.
 #[derive(Clone, Debug)]
 pub struct TunnelConfig {
-    pub token: Option<String>,
+    /// Named token list: `(name, token_value)`. Empty = no-auth (open) mode.
+    pub tokens: Vec<(String, String)>,
     /// Hostname of the active app tunnel (e.g. "fancy-rabbit.trycloudflare.com").
     /// When set, requests arriving with this Host header bypass SDLC auth so the
     /// reverse-proxy can serve the user's app without auth friction for reviewers.
@@ -25,18 +29,27 @@ pub struct TunnelConfig {
 }
 
 impl TunnelConfig {
-    /// No tunnel active — middleware passes all requests through.
+    /// No tokens configured — middleware passes all requests through (open mode).
     pub fn none() -> Self {
         Self {
-            token: None,
+            tokens: Vec::new(),
             app_tunnel_host: None,
         }
     }
 
-    /// Tunnel is active with the given shared token.
+    /// Single ephemeral token (backward-compat shim for tunnel start flow).
+    /// Adds `("_tunnel", token)` to the token list without writing to disk.
     pub fn with_token(token: String) -> Self {
         Self {
-            token: Some(token),
+            tokens: vec![("_tunnel".to_string(), token)],
+            app_tunnel_host: None,
+        }
+    }
+
+    /// Named token list constructor — used when loading from `auth.yaml`.
+    pub fn with_tokens(tokens: Vec<(String, String)>) -> Self {
+        Self {
+            tokens,
             app_tunnel_host: None,
         }
     }
@@ -46,32 +59,37 @@ impl TunnelConfig {
         self.app_tunnel_host = Some(host);
         self
     }
+
+    /// Returns `true` if `value` matches any token in the list.
+    pub fn is_valid_token(&self, value: &str) -> bool {
+        self.tokens.iter().any(|(_, t)| t == value)
+    }
 }
 
-/// Axum middleware that gates requests behind a shared token when a tunnel
-/// is active.
+/// Axum middleware that gates requests behind named tokens when any are configured.
 ///
 /// Auth flow (evaluated in order):
-/// 1. `token` is `None` → passthrough (tunnel not active)
+/// 1. `tokens` is empty → passthrough (no-auth / open mode)
 /// 2. `Host` header is `localhost` or `127.0.0.1` → passthrough (local always allowed)
 /// 3. Path starts with `/__sdlc/` → passthrough (feedback widget endpoint, always public)
 /// 4. Host == `app_tunnel_host` AND path does NOT start with `/api/` → passthrough
 ///    (proxy requests bypass SDLC auth; `/api/*` via app tunnel still gets normal auth)
-/// 5. Cookie `sdlc_auth` matches token → passthrough
-/// 6. Query param `?auth=TOKEN` matches → set session cookie, 302 to same path without param
-/// 7. None matched → 401 (JSON for `/api/*`, HTML for everything else)
+/// 5. Cookie `sdlc_auth` matches any token → passthrough
+/// 6. `Authorization: Bearer <TOKEN>` matches any token → passthrough
+/// 7. Query param `?auth=TOKEN` matches any token → set session cookie, 302 to same path
+/// 8. None matched → 401 (JSON for `/api/*`, HTML for everything else)
 pub async fn auth_middleware(
     State(snapshot): State<Arc<RwLock<TunnelSnapshot>>>,
     req: Request,
     next: Next,
 ) -> Response {
     let snap = snapshot.read().await;
-    let Some(ref token) = snap.config.token else {
+    if snap.config.tokens.is_empty() {
         drop(snap);
         return next.run(req).await;
-    };
-    let token = token.clone();
-    let app_tunnel_host = snap.config.app_tunnel_host.clone();
+    }
+    let config = snap.config.clone();
+    let app_tunnel_host = config.app_tunnel_host.clone();
     drop(snap);
 
     // Local access is always allowed regardless of token.
@@ -98,13 +116,26 @@ pub async fn auth_middleware(
         }
     }
 
-    // Valid session cookie — allow.
+    // Valid session cookie — allow if it matches any token.
     if let Some(cookies) = req.headers().get("cookie").and_then(|v| v.to_str().ok()) {
         for part in cookies.split(';') {
             if let Some(val) = part.trim().strip_prefix("sdlc_auth=") {
-                if val == token {
+                if config.is_valid_token(val) {
                     return next.run(req).await;
                 }
+            }
+        }
+    }
+
+    // Authorization: Bearer <TOKEN> — allow if it matches any token.
+    if let Some(auth_header) = req
+        .headers()
+        .get("authorization")
+        .and_then(|v| v.to_str().ok())
+    {
+        if let Some(bearer_val) = auth_header.strip_prefix("Bearer ") {
+            if config.is_valid_token(bearer_val) {
+                return next.run(req).await;
             }
         }
     }
@@ -113,9 +144,9 @@ pub async fn auth_middleware(
     let uri = req.uri().clone();
     if let Some(query) = uri.query() {
         if let Some(val) = extract_auth_param(query) {
-            if val == token {
+            if config.is_valid_token(val) {
                 let destination = strip_auth_param(uri.path(), query);
-                let cookie = format!("sdlc_auth={token}; HttpOnly; SameSite=Lax; Path=/");
+                let cookie = format!("sdlc_auth={val}; HttpOnly; SameSite=Lax; Path=/");
                 return Response::builder()
                     .status(302)
                     .header("Location", destination)
@@ -202,6 +233,16 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn empty_tokens_passthrough() {
+        let config = TunnelConfig::with_tokens(vec![]);
+        let resp = test_app(config)
+            .oneshot(Request::builder().uri("/").body(Body::empty()).unwrap())
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
     async fn localhost_bypasses_auth() {
         let resp = test_app(TunnelConfig::with_token("secret".into()))
             .oneshot(
@@ -245,6 +286,82 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn multi_token_first_token_cookie_passes() {
+        let config = TunnelConfig::with_tokens(vec![
+            ("jordan".to_string(), "tok1xxxx".to_string()),
+            ("ci-bot".to_string(), "tok2yyyy".to_string()),
+        ]);
+        let resp = test_app(config)
+            .oneshot(
+                Request::builder()
+                    .uri("/")
+                    .header("host", "abc.trycloudflare.com")
+                    .header("cookie", "sdlc_auth=tok1xxxx")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn multi_token_second_token_cookie_passes() {
+        let config = TunnelConfig::with_tokens(vec![
+            ("jordan".to_string(), "tok1xxxx".to_string()),
+            ("ci-bot".to_string(), "tok2yyyy".to_string()),
+        ]);
+        let resp = test_app(config)
+            .oneshot(
+                Request::builder()
+                    .uri("/")
+                    .header("host", "abc.trycloudflare.com")
+                    .header("cookie", "sdlc_auth=tok2yyyy")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn bearer_header_passes_auth() {
+        let config =
+            TunnelConfig::with_tokens(vec![("jordan".to_string(), "bearer1x".to_string())]);
+        let resp = test_app(config)
+            .oneshot(
+                Request::builder()
+                    .uri("/api/state")
+                    .header("host", "abc.trycloudflare.com")
+                    .header("authorization", "Bearer bearer1x")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
+    }
+
+    #[tokio::test]
+    async fn bearer_header_wrong_token_401() {
+        let config =
+            TunnelConfig::with_tokens(vec![("jordan".to_string(), "bearer1x".to_string())]);
+        let resp = test_app(config)
+            .oneshot(
+                Request::builder()
+                    .uri("/api/state")
+                    .header("host", "abc.trycloudflare.com")
+                    .header("authorization", "Bearer wrongtok")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
     }
 
     #[tokio::test]

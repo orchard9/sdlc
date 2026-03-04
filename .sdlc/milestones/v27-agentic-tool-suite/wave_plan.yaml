@@ -1,0 +1,16 @@
+- number: 1
+  label: Review
+  items:
+  - slug: tool-agent-invocation
+    title: _shared/agent.ts — agent invocation from within tools
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  - slug: tool-state-primitives
+    title: _shared/sdlc.ts — typed state access for tools
+    phase: qa
+    action: run_qa
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

@@ -372,6 +372,26 @@ pub enum UatVerdict {
     Failed,
 }
 
+/// Who performed the UAT run — an AI agent (default) or a human tester.
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum UatRunMode {
+    /// Automated run executed by the AI Playwright agent (default).
+    #[default]
+    Agent,
+    /// Manual run submitted by a human tester via the dashboard.
+    Human,
+}
+
+impl UatRunMode {
+    /// Returns `true` when the mode is `Agent`.
+    /// Used as a `skip_serializing_if` predicate to omit the field from
+    /// agent-generated `run.yaml` files (backward compatibility).
+    pub fn is_agent(&self) -> bool {
+        *self == UatRunMode::Agent
+    }
+}
+
 /// Deserialize `tasks_created` tolerantly: accept a sequence of strings
 /// (current format) or any integer (legacy format where the count was
 /// written instead of the list — always 0 in practice).
@@ -434,6 +454,10 @@ pub struct UatRun {
     /// Stored as `.sdlc/milestones/<slug>/uat-runs/<id>/<filename>`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub screenshot_paths: Vec<String>,
+    /// Who performed this run — `agent` (AI Playwright) or `human` (manual submission).
+    /// Defaults to `agent` for backward compatibility with existing run.yaml files.
+    #[serde(default, skip_serializing_if = "UatRunMode::is_agent")]
+    pub mode: UatRunMode,
 }
 
 /// Persist a UAT run to `.sdlc/milestones/<slug>/uat-runs/<id>/run.yaml`.
@@ -785,6 +809,7 @@ mod tests {
             tasks_created: vec![],
             summary_path: format!("milestones/{milestone_slug}/uat-runs/{id}/summary.md"),
             screenshot_paths: vec![],
+            mode: UatRunMode::Agent,
         }
     }
 
@@ -866,6 +891,21 @@ mod tests {
                     summary_path: foo.md\n";
         let run: UatRun = serde_yaml::from_str(yaml).unwrap();
         assert!(run.tasks_created.is_empty());
+    }
+
+    #[test]
+    fn uat_run_mode_backward_compat() {
+        // Existing run.yaml files have no `mode` field — must deserialize as Agent.
+        let yaml = "id: test\n\
+                    milestone_slug: v1\n\
+                    started_at: 2026-01-01T00:00:00Z\n\
+                    verdict: pass\n\
+                    tests_total: 1\n\
+                    tests_passed: 1\n\
+                    tests_failed: 0\n\
+                    summary_path: foo.md\n";
+        let run: UatRun = serde_yaml::from_str(yaml).unwrap();
+        assert_eq!(run.mode, UatRunMode::Agent);
     }
 
     #[test]

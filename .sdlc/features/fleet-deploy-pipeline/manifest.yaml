@@ -79,6 +79,15 @@ tasks:
   completed_at: null
   blocker: null
   depends_on: []
+- id: T3
+  title: Create and push pipelines/deploy-project.yaml to orchard9/sdlc-cluster (file was never committed despite review doc claiming it was)
+  description: null
+  status: pending
+  created_at: 2026-03-03T15:54:00.307725Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -115,4 +124,4 @@ phase_history:
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

@@ -2,10 +2,66 @@ slug: citadel-app-registration
 title: Register Citadel as a Pantheon App
 description: |
   Tier 2 foundation. Register Citadel in Pantheon's App Platform with ToolDefinitions (JSON schema for each agent tool) and ToolCredential support (Citadel API key stored encrypted, org-scoped). Establishes the credential management pattern for Citadel API keys (format: ck_<env>_<org>_<random>) and enables tool execution via Pantheon's existing auth + HTTP plumbing.
-phase: draft
+phase: released
 created_at: 2026-03-03T05:40:00Z
-updated_at: 2026-03-03T05:40:00Z
-artifacts: []
+updated_at: 2026-03-03T19:48:39.346947Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/citadel-app-registration/spec.md
+  created_at: 2026-03-03T19:44:18.202689Z
+  approved_at: 2026-03-03T19:44:20.688703Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/citadel-app-registration/design.md
+  created_at: 2026-03-03T19:45:30.321913Z
+  approved_at: 2026-03-03T19:45:32.455265Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/citadel-app-registration/tasks.md
+  created_at: 2026-03-03T19:45:53.772906Z
+  approved_at: 2026-03-03T19:45:55.870660Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/citadel-app-registration/qa-plan.md
+  created_at: 2026-03-03T19:46:25.903014Z
+  approved_at: 2026-03-03T19:46:28.878167Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/citadel-app-registration/review.md
+  created_at: 2026-03-03T19:47:08.151569Z
+  approved_at: 2026-03-03T19:47:10.333693Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/citadel-app-registration/audit.md
+  created_at: 2026-03-03T19:47:53.387285Z
+  approved_at: 2026-03-03T19:47:55.642639Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/citadel-app-registration/qa-results.md
+  created_at: 2026-03-03T19:48:17.732780Z
+  approved_at: 2026-03-03T19:48:21.257992Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
 tasks: []
 comments: []
 next_comment_seq: 0
@@ -13,7 +69,34 @@ blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-03T05:40:00Z
+  exited: 2026-03-03T19:44:21.026849Z
+- phase: specified
+  entered: 2026-03-03T19:44:21.026849Z
+  exited: 2026-03-03T19:46:28.879895Z
+- phase: planned
+  entered: 2026-03-03T19:46:28.879895Z
+  exited: 2026-03-03T19:46:35.322017Z
+- phase: ready
+  entered: 2026-03-03T19:46:35.322017Z
+  exited: 2026-03-03T19:46:39.099720Z
+- phase: implementation
+  entered: 2026-03-03T19:46:39.099720Z
+  exited: 2026-03-03T19:47:10.335142Z
+- phase: review
+  entered: 2026-03-03T19:47:10.335142Z
+  exited: 2026-03-03T19:47:15.322435Z
+- phase: audit
+  entered: 2026-03-03T19:47:15.322435Z
+  exited: 2026-03-03T19:47:55.645851Z
+- phase: qa
+  entered: 2026-03-03T19:47:55.645851Z
+  exited: 2026-03-03T19:48:21.260987Z
+- phase: merge
+  entered: 2026-03-03T19:48:21.260987Z
+  exited: 2026-03-03T19:48:39.346947Z
+- phase: released
+  entered: 2026-03-03T19:48:39.346947Z
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

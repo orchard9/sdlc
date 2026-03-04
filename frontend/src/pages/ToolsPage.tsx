@@ -5,9 +5,10 @@ import { AmaThreadPanel } from '@/components/tools/AmaThreadPanel'
 import { AmaAnswerPanel } from '@/components/tools/AmaAnswerPanel'
 import { QualityCheckPanel } from '@/components/tools/QualityCheckPanel'
 import { ToolUsageSection } from '@/components/tools/ToolUsageSection'
-import { Loader2, AlertTriangle, Play, Plus, Wrench, RefreshCw, X, Copy, Sparkles, History, Trash2, Zap, ChevronDown, ChevronRight } from 'lucide-react'
+import { useSSE } from '@/hooks/useSSE'
+import { Loader2, AlertTriangle, Play, Plus, Wrench, RefreshCw, X, Copy, Sparkles, History, Trash2, Zap, ChevronDown, ChevronRight, ArrowLeft } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { ToolMeta, ToolResult, QualityCheckData, CheckResult, ToolInteractionRecord, ResultAction } from '@/lib/types'
+import type { ToolMeta, ToolResult, QualityCheckData, CheckResult, ToolInteractionRecord, ResultAction, ToolSseEvent } from '@/lib/types'
 
 // ---------------------------------------------------------------------------
 // CreateToolModal — Plan-Act Pattern
@@ -732,9 +733,10 @@ function defaultSchemaValues(schema: Record<string, unknown>): Record<string, st
 interface ToolRunPanelProps {
   tool: ToolMeta
   onReload: (selectName?: string) => void
+  onBack: () => void
 }
 
-function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
+function ToolRunPanel({ tool, onReload, onBack }: ToolRunPanelProps) {
   const [scope, setScope] = useState('')
   const [jsonInput, setJsonInput] = useState('{}')
   const [schemaValues, setSchemaValues] = useState<Record<string, string | number | boolean>>(
@@ -745,6 +747,10 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
   const [reconfiguring, setReconfiguring] = useState(false)
   const [fixing, setFixing] = useState(false)
   const [result, setResult] = useState<ToolResult | null>(null)
+  // Streaming state: job_id while the background task is running, null otherwise
+  const [streamingJobId, setStreamingJobId] = useState<string | null>(null)
+  // Accumulated NDJSON progress lines from streaming tool runs
+  const [streamingLines, setStreamingLines] = useState<unknown[]>([])
   const [setupResult, setSetupResult] = useState<ToolResult | null>(null)
   const [setupDone, setSetupDone] = useState(false)
   const [reconfigureRunKey, setReconfigureRunKey] = useState<string | null>(null)
@@ -773,6 +779,8 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
     setInteractions([])
     setActRunKey(null)
     setLastInput(null)
+    setStreamingJobId(null)
+    setStreamingLines([])
   }, [tool.name])
 
   const loadHistory = async () => {
@@ -786,6 +794,48 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
       setHistoryLoading(false)
     }
   }
+
+  // Keep streaming job id in a ref for the SSE handler closure
+  const streamingJobIdRef = useRef<string | null>(null)
+  streamingJobIdRef.current = streamingJobId
+
+  const handleToolEvent = useCallback((event: ToolSseEvent) => {
+    // Only handle events for this tool and the current streaming job
+    if (event.name !== tool.name) return
+    if (event.interaction_id !== streamingJobIdRef.current) return
+
+    if (event.type === 'tool_run_progress' && event.line !== undefined) {
+      setStreamingLines(prev => [...prev, event.line])
+    } else if (event.type === 'tool_run_completed') {
+      // Fetch the finalized interaction record and use it as the result
+      api.getToolInteraction(tool.name, event.interaction_id)
+        .then(record => {
+          if (record.result != null) {
+            setResult(record.result as ToolResult)
+          }
+          setStreamingJobId(null)
+          setRunning(false)
+          api.listToolInteractions(tool.name).then(records => setInteractions(records)).catch(() => {})
+        })
+        .catch(() => {
+          setResult({ ok: false, error: 'Run completed but could not fetch result' })
+          setStreamingJobId(null)
+          setRunning(false)
+        })
+    } else if (event.type === 'tool_run_failed') {
+      setResult({ ok: false, error: event.error ?? 'Streaming tool run failed' })
+      setStreamingJobId(null)
+      setRunning(false)
+      api.listToolInteractions(tool.name).then(records => setInteractions(records)).catch(() => {})
+    }
+  }, [tool.name])
+
+  // Subscribe to SSE tool events (streaming progress + completion)
+  useSSE(
+    () => {}, // no project state refresh needed
+    undefined, undefined, undefined, undefined, undefined, undefined,
+    handleToolEvent,
+  )
 
   const handleSetup = async () => {
     setSettingUp(true)
@@ -805,6 +855,8 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
     setRunning(true)
     setResult(null)
     setActRunKey(null)
+    setStreamingLines([])
+    setStreamingJobId(null)
     try {
       let input: unknown
       if (tool.name === 'quality-check') {
@@ -828,13 +880,25 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
       }
       setLastInput(input)
       const res = await api.runTool(tool.name, input)
-      setResult(res)
+
+      // Streaming tool: server returns 202 with job_id — subscribe via SSE
+      if ('streaming' in res && res.streaming && 'job_id' in res) {
+        setStreamingJobId(res.job_id)
+        // running stays true — handleToolEvent will clear it on completion/failure
+        return
+      }
+
+      // Non-streaming tool: result is the ToolResult directly
+      setResult(res as ToolResult)
       // Refresh history in the background after each run
       api.listToolInteractions(tool.name).then(records => setInteractions(records)).catch(() => {})
     } catch (e) {
       setResult({ ok: false, error: e instanceof Error ? e.message : 'Run failed' })
     } finally {
-      setRunning(false)
+      // Only clear running for non-streaming runs; streaming clears it via SSE event
+      if (!streamingJobIdRef.current) {
+        setRunning(false)
+      }
     }
   }
 
@@ -886,6 +950,13 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
       {/* Header */}
       <div className="shrink-0 px-5 pt-5 pb-4 border-b border-border/50">
         <div className="flex items-start gap-3">
+          <button
+            onClick={onBack}
+            className="md:hidden shrink-0 -ml-1 mt-0.5 p-1 rounded text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Back to tools list"
+          >
+            <ArrowLeft className="w-4 h-4" />
+          </button>
           <div className="flex-1 min-w-0">
             <h2 className="text-base font-semibold">{tool.display_name}</h2>
             <p className="text-sm text-muted-foreground mt-0.5">{tool.description}</p>
@@ -1133,6 +1204,36 @@ function ToolRunPanel({ tool, onReload }: ToolRunPanelProps) {
                   <AmaAnswerPanel runKey={fixRunKey} />
                 )}
 
+                {/* Streaming progress log — shown while a streaming tool run is in flight */}
+                {(streamingJobId || streamingLines.length > 0) && !result && (
+                  <div className="mt-2 rounded-lg border border-border bg-muted/20 overflow-hidden">
+                    <div className="flex items-center gap-2 px-3 py-2 border-b border-border/50">
+                      <Loader2 className={cn('w-3.5 h-3.5 text-primary', streamingJobId ? 'animate-spin' : '')} />
+                      <span className="text-xs font-medium text-muted-foreground">
+                        {streamingJobId ? 'Streaming…' : 'Completed'}
+                      </span>
+                    </div>
+                    <div className="px-3 py-2 max-h-64 overflow-y-auto space-y-0.5 font-mono text-xs">
+                      {streamingLines.map((line, i) => {
+                        const obj = line as Record<string, unknown>
+                        const msg = obj?.message ?? obj?.msg ?? JSON.stringify(line)
+                        const pct = typeof obj?.pct === 'number' ? obj.pct : null
+                        return (
+                          <div key={i} className="flex items-start gap-2 text-muted-foreground">
+                            {pct !== null && (
+                              <span className="shrink-0 text-primary/70">{pct}%</span>
+                            )}
+                            <span className="break-all">{String(msg)}</span>
+                          </div>
+                        )
+                      })}
+                      {streamingLines.length === 0 && (
+                        <span className="text-muted-foreground/50">Waiting for output…</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Results */}
                 {result && (
                   <div className="mt-2">
@@ -1325,7 +1426,7 @@ export function ToolsPage() {
         !selectedTool ? 'hidden md:flex items-center justify-center' : 'flex flex-col',
       )}>
         {selectedTool ? (
-          <ToolRunPanel tool={selectedTool} onReload={(name) => { setLoading(true); load(name) }} />
+          <ToolRunPanel tool={selectedTool} onReload={(name) => { setLoading(true); load(name) }} onBack={() => setSelectedName(null)} />
         ) : (
           <div className="text-center">
             <Wrench className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />

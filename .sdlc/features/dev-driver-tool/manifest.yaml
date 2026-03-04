@@ -151,6 +151,24 @@ tasks:
   completed_at: 2026-03-02T23:49:28.338591Z
   blocker: null
   depends_on: []
+- id: T11
+  title: 'fix: quality-check failure not detected when tool exits with non-zero code — execSync throws, catch treats it as no failures; need to read stdout from thrown error or use spawnSync'
+  description: null
+  status: pending
+  created_at: 2026-03-03T19:50:08.153956Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T12
+  title: 'fix: Actions page does not render status.result output content — completed action only shows pass/fail badge, not which feature was picked, directive ran, or why'
+  description: null
+  status: pending
+  created_at: 2026-03-03T19:50:09.666682Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
@@ -187,4 +205,4 @@ phase_history:
   exited: null
 dependencies: []
 archived: false
-schema_version: 2
+schema_version: 3

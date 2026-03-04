@@ -1,0 +1,14 @@
+{
+  "id": "20260303-194300-qqq",
+  "key": "milestone-run-wave:citadel-pantheon-integration",
+  "run_type": "milestone_run_wave",
+  "target": "citadel-pantheon-integration",
+  "label": "run-wave: citadel-pantheon-integration",
+  "status": "completed",
+  "started_at": "2026-03-03T19:43:00.054534+00:00",
+  "completed_at": "2026-03-03T19:53:16.027317+00:00",
+  "cost_usd": 11.790950499999994,
+  "turns": 2,
+  "error": null,
+  "prompt": "Execute the current wave of milestone 'citadel-pantheon-integration' in parallel. Run `sdlc project prepare --milestone citadel-pantheon-integration --json` to get the live wave plan. Wave 1 of the output is the current wave. For each feature in Wave 1 that does not need a worktree, spawn a parallel Agent call running `/sdlc-run <feature-slug>`. Wait for all agents to complete, then re-run prepare and report the updated wave plan."
+}

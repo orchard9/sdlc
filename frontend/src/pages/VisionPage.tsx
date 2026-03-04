@@ -3,6 +3,7 @@ import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
 import { MarkdownContent } from '@/components/shared/MarkdownContent'
 import { Skeleton } from '@/components/shared/Skeleton'
+import { AlignModal } from '@/components/shared/AlignModal'
 import { Target, Sparkles } from 'lucide-react'
 import type { DocsSseEvent } from '@/lib/types'
 
@@ -10,6 +11,7 @@ export function VisionPage() {
   const [vision, setVision] = useState<{ content: string; exists: boolean } | null>(null)
   const [loading, setLoading] = useState(true)
   const [aligning, setAligning] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
 
   const fetchVision = useCallback(() => {
     api.getVision()
@@ -31,9 +33,10 @@ export function VisionPage() {
 
   useSSE(() => {}, undefined, undefined, undefined, onDocsEvent)
 
-  const handleAlign = () => {
+  const handleAlignConfirm = (direction: string) => {
+    setModalOpen(false)
     setAligning(true)
-    api.runVisionAlign().catch(() => setAligning(false))
+    api.runVisionAlign(direction).catch(() => setAligning(false))
   }
 
   return (
@@ -44,7 +47,7 @@ export function VisionPage() {
           <h2 className="text-xl font-semibold">Vision</h2>
         </div>
         <button
-          onClick={handleAlign}
+          onClick={() => setModalOpen(true)}
           disabled={aligning}
           className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-md border border-border text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
@@ -76,6 +79,13 @@ export function VisionPage() {
           <MarkdownContent content={vision.content} />
         </div>
       )}
+
+      <AlignModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onConfirm={handleAlignConfirm}
+        title="Align Vision"
+      />
     </div>
   )
 }

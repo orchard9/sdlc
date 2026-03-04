@@ -1,0 +1,10 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: fix-uat-fail-signaling
+    title: UAT fail endpoint and skill template for explicit failure signaling
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true
