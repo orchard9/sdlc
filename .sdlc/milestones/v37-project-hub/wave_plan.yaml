@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: hub-heartbeat-client
+    title: Hub heartbeat client — project instances announce themselves every 30s
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: hub-ui
+    title: Hub UI — live project listing with filter, status dots, and card navigation
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

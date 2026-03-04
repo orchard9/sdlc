@@ -1,0 +1,11 @@
+slug: project-navigator
+title: 'Project Navigator: listing and navigation across local and cluster sdlc instances'
+status: committed
+created_at: 2026-03-04T18:19:37.090668Z
+updated_at: 2026-03-04T21:03:58.267289Z
+committed_at: 2026-03-04T21:03:58.267288Z
+sessions: 2
+orientation:
+  current: Architecture fully locked — heartbeat protocol, credential pool, hub topology for both local and cluster. Written into ARCHITECTURE.md.
+  next: Commit to milestone. This is ready to build.
+  commit: Architecture is documented and aligned. No open questions remain.

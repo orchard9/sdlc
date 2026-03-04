@@ -1792,3 +1792,155 @@
   slug: fix-activitytimeseriesoverflowsagentsidebar
   timestamp: 2026-03-04T00:45:42.445037Z
   metadata: {}
+- id: ev-0324
+  kind: review_approved
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:23:09.229252Z
+  metadata: {}
+- id: ev-0325
+  kind: feature_phase_advanced
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:23:09.234080Z
+  metadata:
+    phase: review
+- id: ev-0326
+  kind: audit_approved
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:23:42.718732Z
+  metadata: {}
+- id: ev-0327
+  kind: feature_phase_advanced
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:23:42.723600Z
+  metadata:
+    phase: qa
+- id: ev-0328
+  kind: qa_approved
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:24:06.295435Z
+  metadata: {}
+- id: ev-0329
+  kind: feature_phase_advanced
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:24:06.299920Z
+  metadata:
+    phase: merge
+- id: ev-0330
+  kind: feature_merged
+  slug: page-title-fix
+  timestamp: 2026-03-04T21:24:12.211207Z
+  metadata: {}
+- id: ev-0331
+  kind: review_approved
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:24:54.764220Z
+  metadata: {}
+- id: ev-0332
+  kind: feature_phase_advanced
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:24:54.768625Z
+  metadata:
+    phase: review
+- id: ev-0333
+  kind: audit_approved
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:25:43.064346Z
+  metadata: {}
+- id: ev-0334
+  kind: feature_phase_advanced
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:25:43.068417Z
+  metadata:
+    phase: qa
+- id: ev-0335
+  kind: qa_approved
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:26:35.633727Z
+  metadata: {}
+- id: ev-0336
+  kind: feature_phase_advanced
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:26:35.637873Z
+  metadata:
+    phase: merge
+- id: ev-0337
+  kind: feature_merged
+  slug: hub-server-mode
+  timestamp: 2026-03-04T21:26:44.908955Z
+  metadata: {}
+- id: ev-0338
+  kind: review_approved
+  slug: hub-ui
+  timestamp: 2026-03-04T21:34:16.337606Z
+  metadata: {}
+- id: ev-0339
+  kind: feature_phase_advanced
+  slug: hub-ui
+  timestamp: 2026-03-04T21:34:16.367958Z
+  metadata:
+    phase: review
+- id: ev-0340
+  kind: audit_approved
+  slug: hub-ui
+  timestamp: 2026-03-04T21:34:44.471138Z
+  metadata: {}
+- id: ev-0341
+  kind: feature_phase_advanced
+  slug: hub-ui
+  timestamp: 2026-03-04T21:34:44.704340Z
+  metadata:
+    phase: qa
+- id: ev-0342
+  kind: qa_approved
+  slug: hub-ui
+  timestamp: 2026-03-04T21:35:38.247917Z
+  metadata: {}
+- id: ev-0343
+  kind: feature_phase_advanced
+  slug: hub-ui
+  timestamp: 2026-03-04T21:35:38.253374Z
+  metadata:
+    phase: merge
+- id: ev-0344
+  kind: review_approved
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:35:45.916310Z
+  metadata: {}
+- id: ev-0345
+  kind: feature_phase_advanced
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:35:45.920076Z
+  metadata:
+    phase: review
+- id: ev-0346
+  kind: audit_approved
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:36:20.256130Z
+  metadata: {}
+- id: ev-0347
+  kind: feature_phase_advanced
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:36:20.260459Z
+  metadata:
+    phase: qa
+- id: ev-0348
+  kind: qa_approved
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:36:48.692779Z
+  metadata: {}
+- id: ev-0349
+  kind: feature_phase_advanced
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:36:48.703810Z
+  metadata:
+    phase: merge
+- id: ev-0350
+  kind: feature_merged
+  slug: hub-heartbeat-client
+  timestamp: 2026-03-04T21:37:00.531249Z
+  metadata: {}
+- id: ev-0351
+  kind: feature_merged
+  slug: hub-ui
+  timestamp: 2026-03-04T21:37:07.808526Z
+  metadata: {}

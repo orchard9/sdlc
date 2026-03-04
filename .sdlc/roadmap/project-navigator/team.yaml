@@ -1,0 +1,16 @@
+partners:
+- name: Maya Krishnamurthy
+  role: Developer Portal Architect
+  context: Fleet listing UX, discoverability patterns, multi-environment service catalogs
+  agent: .claude/agents/maya-krishnamurthy.md
+  recruited_at: 2026-03-04T18:20:32.270883Z
+- name: Daniel Park
+  role: Multi-Project Developer (End-User)
+  context: Runs 6-10 local sdlc instances simultaneously, deep context-switching friction experience
+  agent: .claude/agents/daniel-park.md
+  recruited_at: 2026-03-04T18:20:32.277399Z
+- name: Priya Shah
+  role: Systems Minimalist / Skeptic
+  context: HashiCorp CLI tooling background, will challenge whether a UI is even the right answer
+  agent: .claude/agents/priya-shah.md
+  recruited_at: 2026-03-04T18:20:32.282472Z

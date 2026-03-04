@@ -138,7 +138,7 @@ pub async fn proxy_handler(State(app): State<AppState>, req: Request) -> Respons
 
     if !is_app_tunnel {
         // Not an app tunnel request — serve the embedded SPA.
-        return embed::static_handler(req.uri().clone()).await;
+        return embed::static_handler(State(app), req.uri().clone()).await;
     }
 
     // Resolve the upstream port from the app tunnel snapshot.

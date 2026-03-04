@@ -113,66 +113,6 @@ active_features:
 - fix-activitytimeseriesoverflowsagentsidebar
 active_directives: []
 history:
-- feature: telegram-digest-cron
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T00:46:56.212787Z
-  outcome: transition
-- feature: telegram-digest-cron
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T00:47:00.405803Z
-  outcome: transition
-- feature: dev-driver-run-actions-flag
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T00:49:49.018158Z
-  outcome: transition
-- feature: dev-driver-init-scaffold
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T00:51:07.533673Z
-  outcome: transition
-- feature: dev-driver-run-actions-flag
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:52:14.787716Z
-  outcome: merged
-- feature: telegram-bot-deploy
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T00:52:16.871855Z
-  outcome: transition
-- feature: dev-driver-init-scaffold
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:53:13.212025Z
-  outcome: merged
-- feature: telegram-bot-deploy
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:55:56.703603Z
-  outcome: merged
-- feature: feedback-thread-ui
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:57:05.010009Z
-  outcome: merged
-- feature: feedback-thread-core
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:57:48.315454Z
-  outcome: merged
-- feature: telegram-digest-cron
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T00:59:19.049723Z
-  outcome: transition
-- feature: orchestrator-actions-routes
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:59:29.353723Z
-  outcome: merged
 - feature: feedback-enrich
   action: merge
   phase: released
@@ -1113,6 +1053,66 @@ history:
   phase: released
   timestamp: 2026-03-04T00:45:42.440292Z
   outcome: merged
+- feature: page-title-fix
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T21:23:15.567776Z
+  outcome: transition
+- feature: page-title-fix
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T21:24:12.208395Z
+  outcome: merged
+- feature: hub-server-mode
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T21:25:03.197701Z
+  outcome: transition
+- feature: hub-server-mode
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T21:26:44.906321Z
+  outcome: merged
+- feature: hub-heartbeat-client
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T21:30:03.141398Z
+  outcome: transition
+- feature: hub-heartbeat-client
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T21:30:06.165976Z
+  outcome: transition
+- feature: hub-ui
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T21:30:42.468477Z
+  outcome: transition
+- feature: hub-ui
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T21:30:44.801356Z
+  outcome: transition
+- feature: hub-ui
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T21:34:19.106158Z
+  outcome: transition
+- feature: hub-heartbeat-client
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T21:35:53.658747Z
+  outcome: transition
+- feature: hub-heartbeat-client
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T21:37:00.529131Z
+  outcome: merged
+- feature: hub-ui
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T21:37:07.806244Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1163,4 +1163,4 @@ active_ponders:
 - qa-test-tc12
 - test-ponder-entry-for-tc12-qa
 - park-milestones
-last_updated: 2026-03-04T03:32:12.559398Z
+last_updated: 2026-03-04T21:37:07.806245Z

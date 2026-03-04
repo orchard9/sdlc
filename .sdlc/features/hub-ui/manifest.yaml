@@ -1,9 +1,9 @@
 slug: hub-ui
 title: Hub UI — live project listing with filter, status dots, and card navigation
 description: 'React page served in hub mode at ''/'': filter input, live project cards (name, URL, status dot, milestone, feature count, agent badge), SSE subscription for live updates, empty state with config hint.'
-phase: merge
+phase: released
 created_at: 2026-03-04T21:02:43.276139Z
-updated_at: 2026-03-04T21:35:38.251627Z
+updated_at: 2026-03-04T21:37:07.803754Z
 artifacts:
 - artifact_type: spec
   status: approved
@@ -137,6 +137,9 @@ phase_history:
   exited: 2026-03-04T21:35:38.251627Z
 - phase: merge
   entered: 2026-03-04T21:35:38.251627Z
+  exited: 2026-03-04T21:37:07.803754Z
+- phase: released
+  entered: 2026-03-04T21:37:07.803754Z
   exited: null
 dependencies:
 - hub-server-mode

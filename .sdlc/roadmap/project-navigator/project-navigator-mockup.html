@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Navigator — Design Prototype</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 p-8 font-mono min-h-screen">
+
+<div class="text-xs text-yellow-400 border border-yellow-900 rounded px-3 py-1 inline-block mb-6">
+  ⚠ Design Prototype — not production code
+</div>
+
+<!-- Tab selector -->
+<div class="flex gap-2 mb-8">
+  <button onclick="showState('local')" id="tab-local"
+    class="px-4 py-1.5 rounded text-xs border transition-colors border-indigo-600 bg-indigo-900/40 text-indigo-300">
+    Local Hub (4 projects)
+  </button>
+  <button onclick="showState('cluster')" id="tab-cluster"
+    class="px-4 py-1.5 rounded text-xs border transition-colors border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-400">
+    Cluster Hub (org view)
+  </button>
+  <button onclick="showState('empty')" id="tab-empty"
+    class="px-4 py-1.5 rounded text-xs border transition-colors border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-400">
+    Empty State
+  </button>
+</div>
+
+<!-- LOCAL STATE -->
+<div id="state-local">
+  <div class="max-w-3xl">
+    <!-- Header -->
+    <div class="mb-6">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="text-gray-500 text-xs">sdlc hub</span>
+        <span class="text-gray-700">·</span>
+        <span class="text-gray-500 text-xs">localhost</span>
+      </div>
+      <h1 class="text-xl font-semibold text-white">Projects</h1>
+    </div>
+
+    <!-- Filter -->
+    <div class="relative mb-6">
+      <input
+        type="text"
+        placeholder="filter projects…"
+        class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-gray-600"
+      />
+      <span class="absolute right-3 top-2.5 text-gray-600 text-xs">4 projects</span>
+    </div>
+
+    <!-- Project cards -->
+    <div class="flex flex-col gap-2">
+
+      <!-- Card: running, active milestone -->
+      <a href="#" class="group block bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" title="reachable"></div>
+            <div>
+              <div class="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">payments-api</div>
+              <div class="text-xs text-gray-500 mt-0.5">localhost:3001</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-400">v12-checkout-flow</div>
+              <div class="text-gray-600">milestone</div>
+            </div>
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-400">3</div>
+              <div class="text-gray-600">features</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-700 group-hover:text-gray-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card: running, no active milestone -->
+      <a href="#" class="group block bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+            <div>
+              <div class="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">onboarding-flow</div>
+              <div class="text-xs text-gray-500 mt-0.5">localhost:3002</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-600">no active milestone</div>
+            </div>
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-400">1</div>
+              <div class="text-gray-600">features</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-700 group-hover:text-gray-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </a>
+
+      <!-- Card: not running (grey dot) -->
+      <div class="group block bg-gray-900/50 border border-gray-800/50 rounded-lg px-4 py-3 opacity-60 cursor-not-allowed">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-gray-600 flex-shrink-0" title="unreachable"></div>
+            <div>
+              <div class="text-sm font-medium text-gray-400">billing-service</div>
+              <div class="text-xs text-gray-600 mt-0.5">localhost:3003</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div class="text-xs text-gray-600">
+              <div>not running</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card: running, agent currently active -->
+      <a href="#" class="group block bg-gray-900 border border-indigo-900/50 hover:border-indigo-700/50 rounded-lg px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">auth-service</span>
+                <span class="text-xs text-indigo-400 border border-indigo-800 rounded px-1.5 py-0.5 animate-pulse">agent running</span>
+              </div>
+              <div class="text-xs text-gray-500 mt-0.5">localhost:3004</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-400">v8-oauth-flow</div>
+              <div class="text-gray-600">milestone</div>
+            </div>
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-400">5</div>
+              <div class="text-gray-600">features</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-700 group-hover:text-gray-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <!-- Footer hint -->
+    <div class="mt-6 text-xs text-gray-700">
+      add projects · <span class="text-gray-600">~/.sdlc/hub.yaml</span>
+    </div>
+  </div>
+</div>
+
+<!-- CLUSTER STATE -->
+<div id="state-cluster" class="hidden">
+  <div class="max-w-3xl">
+    <div class="mb-6">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="text-gray-500 text-xs">sdlc hub</span>
+        <span class="text-gray-700">·</span>
+        <span class="text-gray-500 text-xs">orchard9 · sdlc.threesix.ai</span>
+      </div>
+      <h1 class="text-xl font-semibold text-white">Projects</h1>
+    </div>
+
+    <div class="relative mb-6">
+      <input
+        type="text"
+        placeholder="filter projects…"
+        value="pay"
+        class="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none focus:border-gray-600"
+      />
+      <span class="absolute right-3 top-2.5 text-gray-500 text-xs">2 of 47</span>
+    </div>
+
+    <div class="flex flex-col gap-2">
+
+      <a href="#" class="group block bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+            <div>
+              <div class="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">payments-api</div>
+              <div class="text-xs text-gray-500 mt-0.5">payments-api.sdlc.threesix.ai</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-400">v12-checkout-flow</div>
+              <div class="text-gray-600">milestone</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-700 group-hover:text-gray-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </a>
+
+      <a href="#" class="group block bg-gray-900 border border-gray-800 hover:border-gray-600 rounded-lg px-4 py-3 transition-colors">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full bg-green-500 flex-shrink-0"></div>
+            <div>
+              <div class="text-sm font-medium text-white group-hover:text-indigo-300 transition-colors">payment-processor</div>
+              <div class="text-xs text-gray-500 mt-0.5">payment-processor.sdlc.threesix.ai</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-4 text-right">
+            <div class="text-xs text-gray-500">
+              <div class="text-gray-600">no active milestone</div>
+            </div>
+            <svg class="w-4 h-4 text-gray-700 group-hover:text-gray-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <div class="mt-6 text-xs text-gray-700">
+      47 projects · updated by reconcile pipeline · <span class="text-gray-600">2 min ago</span>
+    </div>
+  </div>
+</div>
+
+<!-- EMPTY STATE -->
+<div id="state-empty" class="hidden">
+  <div class="max-w-3xl">
+    <div class="mb-6">
+      <div class="flex items-center gap-3 mb-1">
+        <span class="text-gray-500 text-xs">sdlc hub</span>
+        <span class="text-gray-700">·</span>
+        <span class="text-gray-500 text-xs">localhost</span>
+      </div>
+      <h1 class="text-xl font-semibold text-white">Projects</h1>
+    </div>
+
+    <div class="relative mb-6">
+      <input
+        type="text"
+        placeholder="filter projects…"
+        class="w-full bg-gray-900 border border-gray-800 rounded px-3 py-2 text-sm text-gray-200 placeholder-gray-600 focus:outline-none"
+      />
+      <span class="absolute right-3 top-2.5 text-gray-600 text-xs">0 projects</span>
+    </div>
+
+    <div class="border border-gray-800 rounded-lg p-8 text-center">
+      <div class="text-gray-600 text-sm mb-4">No projects configured.</div>
+      <div class="text-xs text-gray-700 font-mono bg-gray-900 rounded px-4 py-3 inline-block text-left">
+        <div class="text-gray-500 mb-1"># ~/.sdlc/hub.yaml</div>
+        <div class="text-gray-400">projects:</div>
+        <div class="text-gray-400 pl-4">- name: my-project</div>
+        <div class="text-gray-400 pl-6">url: http://localhost:3001</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showState(state) {
+  ['local','cluster','empty'].forEach(s => {
+    document.getElementById('state-' + s).classList.add('hidden');
+    const tab = document.getElementById('tab-' + s);
+    tab.className = 'px-4 py-1.5 rounded text-xs border transition-colors border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-400';
+  });
+  document.getElementById('state-' + state).classList.remove('hidden');
+  const active = document.getElementById('tab-' + state);
+  active.className = 'px-4 py-1.5 rounded text-xs border transition-colors border-indigo-600 bg-indigo-900/40 text-indigo-300';
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+slug: v37-project-hub
+title: Project Hub — live navigator for local and cluster sdlc instances
+features:
+- hub-server-mode
+- hub-heartbeat-client
+- hub-ui
+- page-title-fix
+created_at: 2026-03-04T21:02:33.184313Z
+updated_at: 2026-03-04T22:03:49.584569Z
+released_at: 2026-03-04T22:03:49.584569Z
+prepared_at: 2026-03-04T21:09:54.799522Z
+schema_version: 1

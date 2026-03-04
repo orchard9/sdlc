@@ -1,6 +1,8 @@
 pub mod auth;
 pub mod embed;
 pub mod error;
+pub mod heartbeat;
+pub mod hub;
 pub mod proxy;
 pub mod routes;
 pub mod state;
@@ -51,8 +53,14 @@ async fn log_request(
 /// Used by `serve()` and available for integration testing.
 ///
 /// `port` is the local port the server is listening on (0 in tests).
+/// `hub_mode` activates hub routes and the hub registry in AppState.
 pub fn build_router(root: std::path::PathBuf, port: u16) -> Router {
     build_router_from_state(state::AppState::new_with_port(root, port))
+}
+
+/// Build the axum Router in hub mode (project navigator).
+pub fn build_hub_router(root: std::path::PathBuf, port: u16) -> Router {
+    build_router_from_state(state::AppState::new_with_port_hub(root, port))
 }
 
 /// Build the axum Router with a pre-configured tunnel token and optional app
@@ -626,6 +634,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/app-tunnel/port",
             put(routes::app_tunnel::set_app_port),
         )
+        // Hub mode routes — always registered; handlers return 503 in project mode
+        .route("/api/hub/heartbeat", post(routes::hub::heartbeat))
+        .route("/api/hub/projects", get(routes::hub::list_projects))
+        .route("/api/hub/events", get(routes::hub::hub_sse_events))
         .fallback(proxy::proxy_handler)
         .layer(TraceLayer::new_for_http())
         .layer(cors)
@@ -670,9 +682,33 @@ pub async fn serve_on(
     open_browser: bool,
     initial_tunnel: Option<(tunnel::Tunnel, String)>,
 ) -> anyhow::Result<()> {
+    serve_on_with_mode(root, listener, open_browser, initial_tunnel, false).await
+}
+
+/// Start the SDLC server in hub mode on a pre-bound listener.
+/// Hub mode activates the project navigator registry instead of project routes.
+pub async fn serve_on_hub(
+    root: PathBuf,
+    listener: tokio::net::TcpListener,
+    open_browser: bool,
+) -> anyhow::Result<()> {
+    serve_on_with_mode(root, listener, open_browser, None, true).await
+}
+
+async fn serve_on_with_mode(
+    root: PathBuf,
+    listener: tokio::net::TcpListener,
+    open_browser: bool,
+    initial_tunnel: Option<(tunnel::Tunnel, String)>,
+    hub_mode: bool,
+) -> anyhow::Result<()> {
     let actual_port = listener.local_addr()?.port();
 
-    tracing::info!(port = actual_port, "SDLC server started");
+    if hub_mode {
+        tracing::info!(port = actual_port, "SDLC hub server started");
+    } else {
+        tracing::info!(port = actual_port, "SDLC server started");
+    }
 
     if open_browser {
         let url = format!("http://localhost:{actual_port}");
@@ -682,7 +718,11 @@ pub async fn serve_on(
     }
 
     tracing::debug!("initializing app state");
-    let app_state = state::AppState::new_with_port(root, actual_port);
+    let app_state = if hub_mode {
+        state::AppState::new_with_port_hub(root, actual_port)
+    } else {
+        state::AppState::new_with_port(root, actual_port)
+    };
     tracing::debug!("app state ready");
 
     if let Some((tun, token)) = initial_tunnel {

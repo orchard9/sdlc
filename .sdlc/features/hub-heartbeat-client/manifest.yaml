@@ -1,0 +1,102 @@
+slug: hub-heartbeat-client
+title: Hub heartbeat client — project instances announce themselves every 30s
+description: Background task in each sdlc-server project instance that POSTs to SDLC_HUB_URL every 30s with project name, URL, active milestone, feature count, and agent-running status. Best-effort — never blocks server startup or request handling.
+phase: released
+created_at: 2026-03-04T21:02:43.269408Z
+updated_at: 2026-03-04T21:37:00.527602Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/spec.md
+  created_at: 2026-03-04T21:28:28.258840Z
+  approved_at: 2026-03-04T21:28:45.119507Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/design.md
+  created_at: 2026-03-04T21:29:17.662243Z
+  approved_at: 2026-03-04T21:29:17.670139Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/tasks.md
+  created_at: 2026-03-04T21:29:37.022728Z
+  approved_at: 2026-03-04T21:29:37.030303Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/qa-plan.md
+  created_at: 2026-03-04T21:29:57.198874Z
+  approved_at: 2026-03-04T21:29:57.207089Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/review.md
+  created_at: 2026-03-04T21:35:37.723219Z
+  approved_at: 2026-03-04T21:35:45.914613Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/audit.md
+  created_at: 2026-03-04T21:36:20.246155Z
+  approved_at: 2026-03-04T21:36:20.254417Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/hub-heartbeat-client/qa-results.md
+  created_at: 2026-03-04T21:36:41.823731Z
+  approved_at: 2026-03-04T21:36:48.688615Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T21:02:43.269408Z
+  exited: 2026-03-04T21:28:45.121325Z
+- phase: specified
+  entered: 2026-03-04T21:28:45.121325Z
+  exited: 2026-03-04T21:29:57.208612Z
+- phase: planned
+  entered: 2026-03-04T21:29:57.208612Z
+  exited: 2026-03-04T21:30:03.139873Z
+- phase: ready
+  entered: 2026-03-04T21:30:03.139873Z
+  exited: 2026-03-04T21:30:06.164446Z
+- phase: implementation
+  entered: 2026-03-04T21:30:06.164446Z
+  exited: 2026-03-04T21:35:45.918638Z
+- phase: review
+  entered: 2026-03-04T21:35:45.918638Z
+  exited: 2026-03-04T21:35:53.656279Z
+- phase: audit
+  entered: 2026-03-04T21:35:53.656279Z
+  exited: 2026-03-04T21:36:20.258420Z
+- phase: qa
+  entered: 2026-03-04T21:36:20.258420Z
+  exited: 2026-03-04T21:36:48.697682Z
+- phase: merge
+  entered: 2026-03-04T21:36:48.697682Z
+  exited: 2026-03-04T21:37:00.527602Z
+- phase: released
+  entered: 2026-03-04T21:37:00.527602Z
+  exited: null
+dependencies:
+- hub-server-mode
+archived: false
+schema_version: 3

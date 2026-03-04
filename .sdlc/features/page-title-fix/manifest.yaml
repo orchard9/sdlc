@@ -1,0 +1,137 @@
+slug: page-title-fix
+title: Page title — sdlc — {project-name} in browser tabs
+description: 'Inject project name into HTML title at serve time so browser tabs read ''sdlc — {project-name}'' instead of ''sdlc''. Hub title: ''sdlc hub''. Read from .sdlc/state.yaml at request time via AppState.'
+phase: released
+created_at: 2026-03-04T21:02:43.282751Z
+updated_at: 2026-03-04T21:24:12.206491Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/page-title-fix/spec.md
+  created_at: 2026-03-04T21:13:25.565256Z
+  approved_at: 2026-03-04T21:13:28.292524Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/page-title-fix/design.md
+  created_at: 2026-03-04T21:13:59.025541Z
+  approved_at: 2026-03-04T21:13:59.032677Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/page-title-fix/tasks.md
+  created_at: 2026-03-04T21:14:11.797427Z
+  approved_at: 2026-03-04T21:14:11.805637Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/page-title-fix/qa-plan.md
+  created_at: 2026-03-04T21:14:30.744923Z
+  approved_at: 2026-03-04T21:14:30.752084Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/page-title-fix/review.md
+  created_at: 2026-03-04T21:23:09.219615Z
+  approved_at: 2026-03-04T21:23:09.227613Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/page-title-fix/audit.md
+  created_at: 2026-03-04T21:23:42.709876Z
+  approved_at: 2026-03-04T21:23:42.716991Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/page-title-fix/qa-results.md
+  created_at: 2026-03-04T21:24:06.286232Z
+  approved_at: 2026-03-04T21:24:06.293774Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Update embed.rs — inject dynamic title into index.html
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:14:43.380988Z
+  started_at: 2026-03-04T21:14:49.637529Z
+  completed_at: 2026-03-04T21:22:44.606959Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update frontend/index.html base title
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:14:43.386558Z
+  started_at: 2026-03-04T21:22:44.613951Z
+  completed_at: 2026-03-04T21:22:44.618967Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify build and tests pass
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:14:43.391512Z
+  started_at: 2026-03-04T21:22:44.625555Z
+  completed_at: 2026-03-04T21:22:44.630719Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'UAT: hub page title shows ''sdlc — sdlc'' instead of ''sdlc hub'' — embed.rs compute_title() called without hub-mode context so it reads from state.yaml and returns the project name instead of ''sdlc hub'''
+  description: null
+  status: pending
+  created_at: 2026-03-04T22:03:11.033399Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T21:02:43.282751Z
+  exited: 2026-03-04T21:13:28.296845Z
+- phase: specified
+  entered: 2026-03-04T21:13:28.296845Z
+  exited: 2026-03-04T21:14:30.753588Z
+- phase: planned
+  entered: 2026-03-04T21:14:30.753588Z
+  exited: 2026-03-04T21:14:36.274189Z
+- phase: ready
+  entered: 2026-03-04T21:14:36.274189Z
+  exited: 2026-03-04T21:14:36.281956Z
+- phase: implementation
+  entered: 2026-03-04T21:14:36.281956Z
+  exited: 2026-03-04T21:23:09.232543Z
+- phase: review
+  entered: 2026-03-04T21:23:09.232543Z
+  exited: 2026-03-04T21:23:15.566322Z
+- phase: audit
+  entered: 2026-03-04T21:23:15.566322Z
+  exited: 2026-03-04T21:23:42.721850Z
+- phase: qa
+  entered: 2026-03-04T21:23:42.721850Z
+  exited: 2026-03-04T21:24:06.298393Z
+- phase: merge
+  entered: 2026-03-04T21:24:06.298393Z
+  exited: 2026-03-04T21:24:12.206491Z
+- phase: released
+  entered: 2026-03-04T21:24:12.206491Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

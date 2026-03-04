@@ -3,6 +3,8 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{broadcast, Mutex, RwLock};
 
+use crate::hub::HubRegistry;
+
 use crate::auth::TunnelConfig;
 use crate::telemetry::TelemetryStore;
 use crate::tunnel::Tunnel;
@@ -366,6 +368,9 @@ pub struct AppState {
     /// Generated at startup from OS CSPRNG, never persisted to disk.
     /// Injected into every tool subprocess as SDLC_AGENT_TOKEN.
     pub agent_token: Arc<String>,
+    /// Hub mode project registry. `None` in normal project mode, `Some` when the
+    /// `--hub` flag is active; `None` in normal project mode.
+    pub hub_registry: Option<Arc<Mutex<HubRegistry>>>,
 }
 
 /// Generate a 32-char hex token (128-bit entropy) from the OS CSPRNG.
@@ -466,8 +471,33 @@ impl AppState {
             telemetry,
             _watcher_handles: Arc::new(WatcherGuard(Vec::new())),
             agent_token: Arc::new(generate_agent_token()),
+            hub_registry: None,
             root,
         }
+    }
+
+    /// Build hub-mode AppState (with HubRegistry) and spawn watcher tasks.
+    /// Used by `build_hub_router` for the project navigator hub server.
+    pub fn new_with_port_hub(root: PathBuf, port: u16) -> Self {
+        let persist_path = crate::hub::default_persist_path();
+        tracing::debug!(path = %persist_path.display(), "initializing hub registry");
+        let hub = Arc::new(Mutex::new(HubRegistry::new(persist_path)));
+        let mut state = Self::new_with_port(root, port);
+        state.hub_registry = Some(hub.clone());
+
+        // Spawn the sweep task now that the registry is populated.
+        if tokio::runtime::Handle::try_current().is_ok() {
+            tokio::spawn(async move {
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+                    let mut reg = hub.lock().await;
+                    reg.sweep();
+                }
+            });
+            tracing::debug!("hub sweep task spawned");
+        }
+
+        state
     }
 
     pub fn new_with_port(root: PathBuf, port: u16) -> Self {
@@ -680,7 +710,13 @@ impl AppState {
                 .abort_handle(),
             );
 
-            tracing::debug!("all 8 watcher tasks spawned");
+            // Spawn hub heartbeat task (no-op if SDLC_HUB_URL is not set).
+            if let Some(hb_handle) = crate::heartbeat::spawn_heartbeat_task(&state) {
+                handles.push(hb_handle);
+                tracing::debug!("hub heartbeat task spawned");
+            }
+
+            tracing::debug!("all watcher tasks spawned");
             // WatcherGuard aborts all tasks when AppState is dropped — including
             // in integration tests where the runtime shuts down after each test.
             return Self {

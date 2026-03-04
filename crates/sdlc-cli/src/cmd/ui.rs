@@ -30,6 +30,9 @@ pub enum UiSubcommand {
         /// Start the orchestrator daemon and execute scheduled actions
         #[arg(long)]
         run_actions: bool,
+        /// Start in hub mode — project navigator, no project required
+        #[arg(long)]
+        hub: bool,
     },
     /// List all running UI instances
     List,
@@ -59,14 +62,23 @@ pub fn run(
     run_actions: bool,
 ) -> Result<()> {
     match subcommand {
-        None => run_start(root, port, no_open, no_tunnel, tick_rate, run_actions),
+        None => run_start(
+            root,
+            port,
+            no_open,
+            no_tunnel,
+            tick_rate,
+            run_actions,
+            false,
+        ),
         Some(UiSubcommand::Start {
             port: p,
             no_open: n,
             no_tunnel: nt,
             tick_rate: tr,
             run_actions: ra,
-        }) => run_start(root, p, n, nt, tr, ra),
+            hub,
+        }) => run_start(root, p, n, nt, tr, ra, hub),
         Some(UiSubcommand::List) => run_list(),
         Some(UiSubcommand::Kill { name }) => run_kill(name.as_deref(), root),
         Some(UiSubcommand::Open { name }) => run_open(name.as_deref(), root),
@@ -84,7 +96,13 @@ fn run_start(
     no_tunnel: bool,
     tick_rate: u64,
     run_actions: bool,
+    hub_mode: bool,
 ) -> Result<()> {
+    // Hub mode: skip update scaffolding and project config load.
+    if hub_mode {
+        return run_start_hub(root, port, no_open);
+    }
+
     let use_tunnel = !no_tunnel;
     // --- Step 1: auto-update scaffolding ---
     eprintln!("sdlc ui: running update...");
@@ -177,6 +195,55 @@ fn run_start(
                 res = sdlc_server::serve_on(root_buf, listener, !no_open, None) => res,
                 _ = tokio::signal::ctrl_c() => Ok(()),
             }
+        };
+
+        let _ = record_clone.remove();
+        result
+    })
+}
+
+/// Start the server in hub mode — project navigator, no project config required.
+fn run_start_hub(root: &Path, port: u16, no_open: bool) -> Result<()> {
+    let name = "hub";
+    let root_buf = root.to_path_buf();
+    let rt = tokio::runtime::Runtime::new()?;
+
+    // Prune stale hub records.
+    if let Ok(Some(record)) = ui_registry::find_by_name(name) {
+        if ui_registry::is_pid_alive(record.pid) {
+            return Err(anyhow!(
+                "Hub is already running at {} (PID {})\n\
+                 Kill it first with: kill {}",
+                record.url,
+                record.pid,
+                record.pid
+            ));
+        }
+        let _ = record.remove();
+    }
+
+    rt.block_on(async move {
+        let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await?;
+        let actual_port = listener.local_addr()?.port();
+        let pid = std::process::id();
+        let local_url = format!("http://localhost:{actual_port}");
+
+        let record = ui_registry::UiRecord {
+            project: name.to_string(),
+            root: root_buf.clone(),
+            pid,
+            port: actual_port,
+            url: local_url.clone(),
+            started_at: chrono::Utc::now(),
+        };
+        record.write().map_err(|e| anyhow!("{e}"))?;
+        let record_clone = record.clone();
+
+        println!("SDLC Hub → {local_url}  (PID {pid})");
+
+        let result = tokio::select! {
+            res = sdlc_server::serve_on_hub(root_buf, listener, !no_open) => res,
+            _ = tokio::signal::ctrl_c() => Ok(()),
         };
 
         let _ = record_clone.remove();

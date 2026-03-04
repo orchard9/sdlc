@@ -1,0 +1,1 @@
+I want something that will work both locally and in the cluster. Locally I often run this project with sdlc UI in multiple places and I want to see a listing that helps me organize it/navigate it.
