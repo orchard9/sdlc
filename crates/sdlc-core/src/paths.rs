@@ -340,6 +340,24 @@ pub fn user_sdlc_dir() -> Result<PathBuf> {
     Ok(user_home()?.join(".sdlc"))
 }
 
+// ---------------------------------------------------------------------------
+// Spike paths
+// ---------------------------------------------------------------------------
+
+pub const SPIKES_DIR: &str = ".sdlc/spikes";
+
+pub fn spike_dir(root: &Path, slug: &str) -> PathBuf {
+    root.join(SPIKES_DIR).join(slug)
+}
+
+pub fn spike_state_path(root: &Path, slug: &str) -> PathBuf {
+    spike_dir(root, slug).join("state.yaml")
+}
+
+pub fn spike_findings_path(root: &Path, slug: &str) -> PathBuf {
+    spike_dir(root, slug).join("findings.md")
+}
+
 pub fn user_ui_record_path(name: &str) -> Result<PathBuf> {
     Ok(user_sdlc_dir()?.join(format!("{name}.yaml")))
 }

@@ -10,6 +10,9 @@ use crate::state::AppState;
 #[folder = "$SDLC_FRONTEND_DIST"]
 struct FrontendAssets;
 
+/// Returns `"sdlc hub"` in hub mode, or `"sdlc — {project}"` in project mode.
+/// Called from `static_handler` with the hub-mode check already applied.
+///
 /// Compute the page title from the project's .sdlc/state.yaml.
 /// Returns "sdlc — {project}" when a project name is present,
 /// or "sdlc" as a safe fallback when the name is absent or unreadable.
@@ -65,7 +68,11 @@ pub async fn static_handler(State(app): State<AppState>, uri: axum::http::Uri) -
     match <FrontendAssets as Embed>::get("index.html") {
         Some(content) => {
             let html = String::from_utf8_lossy(&content.data).into_owned();
-            let title = compute_title(&app.root);
+            let title = if app.hub_registry.is_some() {
+                "sdlc hub".to_string()
+            } else {
+                compute_title(&app.root)
+            };
             let html = inject_title(&html, &title);
             (
                 StatusCode::OK,

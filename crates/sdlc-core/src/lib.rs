@@ -27,6 +27,7 @@ pub mod rules;
 pub mod score;
 pub mod search;
 pub mod secrets;
+pub mod spikes;
 pub mod state;
 pub mod task;
 pub mod telegram;
