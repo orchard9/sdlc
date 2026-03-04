@@ -329,6 +329,16 @@ impl ResultMessage {
             | ResultMessage::ErrorMaxStructuredOutputRetries(r) => r.num_turns,
         }
     }
+
+    pub fn stop_reason(&self) -> Option<&str> {
+        match self {
+            ResultMessage::Success(r) => r.stop_reason.as_deref(),
+            ResultMessage::ErrorDuringExecution(r)
+            | ResultMessage::ErrorMaxTurns(r)
+            | ResultMessage::ErrorMaxBudgetUsd(r)
+            | ResultMessage::ErrorMaxStructuredOutputRetries(r) => r.stop_reason.as_deref(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -531,4 +541,69 @@ pub struct McpServerConfig {
     pub args: Vec<String>,
     /// Additional environment variables for the server process
     pub env: HashMap<String, String>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_result_usage() -> ResultUsage {
+        ResultUsage {
+            input_tokens: 10,
+            output_tokens: 5,
+            cache_creation_input_tokens: None,
+            cache_read_input_tokens: None,
+        }
+    }
+
+    #[test]
+    fn stop_reason_success_with_reason() {
+        let msg = ResultMessage::Success(ResultSuccess {
+            session_id: "s1".to_string(),
+            result: "ok".to_string(),
+            duration_ms: 100,
+            duration_api_ms: 80,
+            is_error: false,
+            num_turns: 1,
+            stop_reason: Some("end_turn".to_string()),
+            total_cost_usd: 0.001,
+            usage: make_result_usage(),
+            uuid: None,
+        });
+        assert_eq!(msg.stop_reason(), Some("end_turn"));
+    }
+
+    #[test]
+    fn stop_reason_success_without_reason() {
+        let msg = ResultMessage::Success(ResultSuccess {
+            session_id: "s1".to_string(),
+            result: "ok".to_string(),
+            duration_ms: 100,
+            duration_api_ms: 80,
+            is_error: false,
+            num_turns: 1,
+            stop_reason: None,
+            total_cost_usd: 0.001,
+            usage: make_result_usage(),
+            uuid: None,
+        });
+        assert_eq!(msg.stop_reason(), None);
+    }
+
+    #[test]
+    fn stop_reason_error_max_turns() {
+        let msg = ResultMessage::ErrorMaxTurns(ResultError {
+            session_id: "s2".to_string(),
+            duration_ms: 200,
+            duration_api_ms: 180,
+            is_error: true,
+            num_turns: 50,
+            stop_reason: Some("max_turns".to_string()),
+            total_cost_usd: 0.05,
+            usage: make_result_usage(),
+            errors: vec![],
+            uuid: None,
+        });
+        assert_eq!(msg.stop_reason(), Some("max_turns"));
+    }
 }

@@ -9,7 +9,7 @@ use axum::{
 };
 use claude_agent::{
     query,
-    types::{ContentBlock, SystemPayload, ToolResultContent, UserContentBlock},
+    types::{ContentBlock, ResultMessage, SystemPayload, ToolResultContent, UserContentBlock},
     McpServerConfig, Message, PermissionMode, QueryOptions,
 };
 use std::collections::HashMap;
@@ -79,6 +79,138 @@ mod tests {
         AssistantContent, AssistantMessage, ContentBlock, ResultMessage, ResultSuccess,
         ResultUsage, TokenUsage, ToolProgressMessage,
     };
+
+    // -------------------------------------------------------------------------
+    // Token injection logic tests (no DB, no live agent required)
+    // -------------------------------------------------------------------------
+
+    /// Simulate the injection block from spawn_agent_run so we can test the
+    /// map-mutation logic in isolation.
+    fn inject_token_into_opts(opts: &mut QueryOptions, token: Option<&str>) {
+        if let Some(t) = token {
+            opts.env
+                .entry("CLAUDE_CODE_OAUTH_TOKEN".to_string())
+                .or_insert_with(|| t.to_string());
+            for srv in &mut opts.mcp_servers {
+                srv.env
+                    .entry("CLAUDE_CODE_OAUTH_TOKEN".to_string())
+                    .or_insert_with(|| t.to_string());
+            }
+        }
+    }
+
+    #[test]
+    fn inject_token_sets_subprocess_env() {
+        let mut opts = QueryOptions::default();
+        inject_token_into_opts(&mut opts, Some("tok_pool"));
+        assert_eq!(
+            opts.env.get("CLAUDE_CODE_OAUTH_TOKEN").map(String::as_str),
+            Some("tok_pool"),
+            "pool token must be injected into opts.env"
+        );
+    }
+
+    #[test]
+    fn inject_token_sets_mcp_server_env() {
+        use claude_agent::McpServerConfig;
+        let mut opts = QueryOptions {
+            mcp_servers: vec![McpServerConfig {
+                name: "sdlc".into(),
+                command: "sdlc".into(),
+                args: vec!["mcp".into()],
+                env: HashMap::new(),
+            }],
+            ..Default::default()
+        };
+        inject_token_into_opts(&mut opts, Some("tok_pool"));
+        assert_eq!(
+            opts.mcp_servers[0]
+                .env
+                .get("CLAUDE_CODE_OAUTH_TOKEN")
+                .map(String::as_str),
+            Some("tok_pool"),
+            "pool token must be injected into each MCP server env"
+        );
+    }
+
+    #[test]
+    fn inject_token_does_not_overwrite_existing_caller_token() {
+        use claude_agent::McpServerConfig;
+        let mut opts = QueryOptions {
+            mcp_servers: vec![McpServerConfig {
+                name: "sdlc".into(),
+                command: "sdlc".into(),
+                args: vec!["mcp".into()],
+                env: {
+                    let mut m = HashMap::new();
+                    m.insert(
+                        "CLAUDE_CODE_OAUTH_TOKEN".to_string(),
+                        "caller_tok".to_string(),
+                    );
+                    m
+                },
+            }],
+            env: {
+                let mut m = HashMap::new();
+                m.insert(
+                    "CLAUDE_CODE_OAUTH_TOKEN".to_string(),
+                    "caller_tok".to_string(),
+                );
+                m
+            },
+            ..Default::default()
+        };
+        inject_token_into_opts(&mut opts, Some("pool_tok"));
+        assert_eq!(
+            opts.env.get("CLAUDE_CODE_OAUTH_TOKEN").map(String::as_str),
+            Some("caller_tok"),
+            "caller-provided token in opts.env must not be overwritten by pool token"
+        );
+        assert_eq!(
+            opts.mcp_servers[0]
+                .env
+                .get("CLAUDE_CODE_OAUTH_TOKEN")
+                .map(String::as_str),
+            Some("caller_tok"),
+            "caller-provided token in MCP server env must not be overwritten by pool token"
+        );
+    }
+
+    #[test]
+    fn inject_none_leaves_opts_unchanged() {
+        let mut opts = QueryOptions::default();
+        inject_token_into_opts(&mut opts, None);
+        assert!(
+            !opts.env.contains_key("CLAUDE_CODE_OAUTH_TOKEN"),
+            "no injection should occur when pool returns None"
+        );
+    }
+
+    #[tokio::test]
+    async fn checkout_from_pool_disabled_returns_none() {
+        use crate::credential_pool::OptionalCredentialPool;
+        let lock: std::sync::Arc<std::sync::OnceLock<OptionalCredentialPool>> =
+            std::sync::Arc::new(std::sync::OnceLock::new());
+        lock.set(OptionalCredentialPool::Disabled).ok();
+        let result = checkout_from_pool(&lock).await;
+        assert!(
+            result.is_none(),
+            "checkout_from_pool must return None when pool is Disabled"
+        );
+    }
+
+    #[tokio::test]
+    async fn checkout_from_pool_uninitialised_returns_none() {
+        use crate::credential_pool::OptionalCredentialPool;
+        let lock: std::sync::Arc<std::sync::OnceLock<OptionalCredentialPool>> =
+            std::sync::Arc::new(std::sync::OnceLock::new());
+        // Lock is intentionally left empty (pool not yet initialised).
+        let result = checkout_from_pool(&lock).await;
+        assert!(
+            result.is_none(),
+            "checkout_from_pool must return None when OnceLock is not yet set"
+        );
+    }
 
     #[test]
     fn extract_slug_from_key_parses_correctly() {
@@ -234,6 +366,47 @@ mod tests {
             "timestamps should be monotonically non-decreasing: {ts1_str} > {ts2_str}"
         );
     }
+
+    /// Verify that `session_id()` and `stop_reason()` on `ResultMessage` return
+    /// the values we would capture into `RunRecord`.
+    #[test]
+    fn result_message_session_id_and_stop_reason_accessible() {
+        let msg = make_result_message();
+        if let Message::Result(ref r) = msg {
+            assert_eq!(r.session_id(), "test-session");
+            assert_eq!(r.stop_reason(), Some("end_turn"));
+        } else {
+            panic!("expected Message::Result");
+        }
+    }
+
+    /// Verify that a `ResultMessage` without a stop_reason returns `None`.
+    #[test]
+    fn result_message_stop_reason_none_when_absent() {
+        let msg = Message::Result(ResultMessage::Success(ResultSuccess {
+            session_id: "s-xyz".to_string(),
+            result: "done".to_string(),
+            duration_ms: 50,
+            duration_api_ms: 40,
+            is_error: false,
+            num_turns: 2,
+            stop_reason: None,
+            total_cost_usd: 0.002,
+            usage: ResultUsage {
+                input_tokens: 5,
+                output_tokens: 3,
+                cache_creation_input_tokens: None,
+                cache_read_input_tokens: None,
+            },
+            uuid: None,
+        }));
+        if let Message::Result(ref r) = msg {
+            assert_eq!(r.stop_reason(), None);
+            assert_eq!(r.session_id(), "s-xyz");
+        } else {
+            panic!("expected Message::Result");
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -250,7 +423,7 @@ mod tests {
 pub(crate) async fn spawn_agent_run(
     key: String,
     prompt: String,
-    opts: QueryOptions,
+    mut opts: QueryOptions,
     app: &AppState,
     run_type: &str,
     label: &str,
@@ -269,6 +442,22 @@ pub(crate) async fn spawn_agent_run(
         }
     }
     // Lock dropped here — the task is not yet spawned.
+
+    // Inject credential-pool token into QueryOptions before spawning.
+    // Uses entry().or_insert_with() so a token already set by the caller is preserved.
+    {
+        let token = checkout_from_pool(&app.credential_pool).await;
+        if let Some(ref t) = token {
+            opts.env
+                .entry("CLAUDE_CODE_OAUTH_TOKEN".to_string())
+                .or_insert_with(|| t.clone());
+            for srv in &mut opts.mcp_servers {
+                srv.env
+                    .entry("CLAUDE_CODE_OAUTH_TOKEN".to_string())
+                    .or_insert_with(|| t.clone());
+            }
+        }
+    }
 
     // Create the broadcast channel and build the RunRecord before taking the lock.
     let run_id = generate_run_id();
@@ -291,6 +480,8 @@ pub(crate) async fn spawn_agent_run(
         turns: None,
         error: None,
         prompt: prompt_preview,
+        session_id: None,
+        stop_reason: None,
     };
 
     let (tx, _) = tokio::sync::broadcast::channel::<String>(512);
@@ -313,7 +504,10 @@ pub(crate) async fn spawn_agent_run(
         let mut accumulated_events: Vec<serde_json::Value> = Vec::new();
         let mut final_cost: Option<f64> = None;
         let mut final_turns: Option<u64> = None;
+        let mut final_session_id: Option<String> = None;
+        let mut final_stop_reason: Option<String> = None;
         let mut is_error = false;
+        let mut is_max_turns = false;
         let mut error_msg: Option<String> = None;
 
         // Per-message timeout: prevents the task from hanging if the agent stops emitting.
@@ -340,9 +534,12 @@ pub(crate) async fn spawn_agent_run(
 
                         if let Message::Result(ref r) = message {
                             is_error = r.is_error();
+                            is_max_turns = matches!(r, ResultMessage::ErrorMaxTurns(_));
                             final_cost = Some(r.total_cost_usd());
                             final_turns = Some(r.num_turns() as u64);
-                            if is_error {
+                            final_session_id = Some(r.session_id().to_string());
+                            final_stop_reason = r.stop_reason().map(|s| s.to_string());
+                            if is_error && !is_max_turns {
                                 error_msg = r.result_text().map(|s| s.to_string());
                             }
                             info!(key = %key_clone, message_count, "agent run completed");
@@ -382,7 +579,14 @@ pub(crate) async fn spawn_agent_run(
         }
 
         // Determine final status
-        let status = if is_error { "failed" } else { "completed" };
+        // ErrorMaxTurns is "paused" (turn budget exhausted, resumable) — not a failure.
+        let status = if is_max_turns {
+            "paused"
+        } else if is_error {
+            "failed"
+        } else {
+            "completed"
+        };
         let completed_at = chrono::Utc::now().to_rfc3339();
 
         // Update the record AND clone it for persistence in a single lock acquisition
@@ -395,6 +599,8 @@ pub(crate) async fn spawn_agent_run(
                 rec.cost_usd = final_cost;
                 rec.turns = final_turns;
                 rec.error = error_msg.clone();
+                rec.session_id = final_session_id.clone();
+                rec.stop_reason = final_stop_reason.clone();
                 rec.clone()
             } else {
                 // Fallback: create a minimal record for persistence if it's missing.
@@ -411,6 +617,8 @@ pub(crate) async fn spawn_agent_run(
                     turns: final_turns,
                     error: error_msg.clone(),
                     prompt: None,
+                    session_id: final_session_id.clone(),
+                    stop_reason: final_stop_reason.clone(),
                 }
             }
         };
@@ -447,6 +655,8 @@ pub(crate) async fn spawn_agent_run(
             id: run_id_clone,
             key: key_clone.clone(),
             status: status.to_string(),
+            session_id: final_session_id,
+            stop_reason: final_stop_reason,
         });
 
         // Emit changelog events — non-fatal; done in a blocking task to avoid
@@ -596,6 +806,8 @@ async fn stop_run_by_key(key: &str, app: &AppState) -> Json<serde_json::Value> {
                     id,
                     key: key.to_string(),
                     status: "stopped".to_string(),
+                    session_id: None,
+                    stop_reason: None,
                 });
             }
 
@@ -654,6 +866,30 @@ pub(crate) fn sdlc_ponder_query_options(
         "mcp__playwright__browser_wait_for".into(),
     ]);
     opts
+}
+
+/// Check out a token from the pool using only the `OnceLock` reference.
+///
+/// Returns `None` (never errors) when:
+/// - The pool has not been initialised yet (`OnceLock` empty).
+/// - The pool is `Disabled`.
+/// - The pool is active but has no available credentials.
+/// - The DB returns an error (logged at `error!` level).
+async fn checkout_from_pool(
+    pool: &std::sync::Arc<std::sync::OnceLock<crate::credential_pool::OptionalCredentialPool>>,
+) -> Option<String> {
+    let pool = pool.get()?;
+    match pool.checkout().await {
+        Ok(Some(cred)) => Some(cred.token),
+        Ok(None) => {
+            warn!("credential pool empty — running with ambient auth");
+            None
+        }
+        Err(e) => {
+            error!(error = %e, "credential pool checkout failed — running with ambient auth");
+            None
+        }
+    }
 }
 
 /// Check out a Claude OAuth token from the credential pool, if available.
@@ -917,8 +1153,11 @@ pub async fn fail_milestone_uat(
 #[derive(serde::Deserialize)]
 pub struct HumanUatBody {
     pub verdict: sdlc_core::milestone::UatVerdict,
+    #[serde(default)]
     pub tests_total: u32,
+    #[serde(default)]
     pub tests_passed: u32,
+    #[serde(default)]
     pub tests_failed: u32,
     #[serde(default)]
     pub notes: String,

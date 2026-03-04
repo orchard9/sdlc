@@ -50,6 +50,10 @@ pub struct RunRecord {
     pub error: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub session_id: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub stop_reason: Option<String>,
 }
 
 /// Generate a timestamp-based run ID: "20260227-143022-abc"
@@ -216,6 +220,8 @@ pub enum SseMessage {
         id: String,
         key: String,
         status: String,
+        session_id: Option<String>,
+        stop_reason: Option<String>,
     },
     /// A vision alignment agent run completed.
     VisionAlignCompleted,

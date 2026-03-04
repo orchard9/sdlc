@@ -80,12 +80,20 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             .to_string();
             Some(Ok(Event::default().event("run").data(data)))
         }
-        Ok(SseMessage::RunFinished { id, key, status }) => {
+        Ok(SseMessage::RunFinished {
+            id,
+            key,
+            status,
+            session_id,
+            stop_reason,
+        }) => {
             let data = serde_json::json!({
                 "type": "run_finished",
                 "id": id,
                 "key": key,
                 "status": status,
+                "session_id": session_id,
+                "stop_reason": stop_reason,
             })
             .to_string();
             Some(Ok(Event::default().event("run").data(data)))
