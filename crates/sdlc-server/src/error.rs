@@ -45,6 +45,19 @@ impl std::fmt::Display for UnauthorizedError {
 
 impl std::error::Error for UnauthorizedError {}
 
+/// Private sentinel error type used to carry an explicit HTTP 413 Payload Too
+/// Large through the `anyhow::Error` chain.
+#[derive(Debug)]
+struct PayloadTooLargeError(String);
+
+impl std::fmt::Display for PayloadTooLargeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for PayloadTooLargeError {}
+
 /// Private sentinel for 422 Unprocessable Entity with a custom JSON body.
 #[derive(Debug)]
 struct UnprocessableJsonError(serde_json::Value);
@@ -90,6 +103,11 @@ impl AppError {
     pub fn unprocessable_json(body: serde_json::Value) -> Self {
         Self(UnprocessableJsonError(body).into())
     }
+
+    /// Construct a 413 Payload Too Large error.
+    pub fn payload_too_large(msg: impl Into<String>) -> Self {
+        Self(PayloadTooLargeError(msg.into()).into())
+    }
 }
 
 impl IntoResponse for AppError {
@@ -109,6 +127,10 @@ impl IntoResponse for AppError {
         }
         if let Some(u) = self.0.downcast_ref::<UnprocessableJsonError>() {
             return (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(u.0.clone())).into_response();
+        }
+        if let Some(p) = self.0.downcast_ref::<PayloadTooLargeError>() {
+            let body = serde_json::json!({ "error": p.0.clone() });
+            return (StatusCode::PAYLOAD_TOO_LARGE, axum::Json(body)).into_response();
         }
 
         // Manifest errors carry a `fix_hint` that should appear alongside the

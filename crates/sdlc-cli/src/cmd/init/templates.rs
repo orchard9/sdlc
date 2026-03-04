@@ -513,6 +513,8 @@ export function exit(code: number): never {
 }
 "#;
 
+pub const TOOL_SHARED_AGENT_TS: &str = include_str!("../../../../../.sdlc/tools/_shared/agent.ts");
+
 pub const TOOL_AMA_TS: &str = r#"/**
  * AMA — Ask Me Anything
  * =====================

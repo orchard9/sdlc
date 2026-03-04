@@ -140,6 +140,12 @@ pub fn ponder_sessions_dir(root: &Path, slug: &str) -> PathBuf {
     ponder_dir(root, slug).join("sessions")
 }
 
+/// Returns the directory where binary media files are stored for a ponder entry.
+/// Path: `.sdlc/roadmap/<slug>/media/`
+pub fn ponder_media_dir(root: &Path, slug: &str) -> PathBuf {
+    ponder_dir(root, slug).join("media")
+}
+
 pub fn ponder_session_path(root: &Path, slug: &str, n: u32) -> PathBuf {
     ponder_sessions_dir(root, slug).join(format!("session-{n:03}.md"))
 }
@@ -430,6 +436,15 @@ mod tests {
         assert_eq!(
             codex_skills_dir(root),
             PathBuf::from("/tmp/proj/.agents/skills")
+        );
+    }
+
+    #[test]
+    fn ponder_media_dir_path() {
+        let root = Path::new("/tmp/proj");
+        assert_eq!(
+            ponder_media_dir(root, "my-idea"),
+            PathBuf::from("/tmp/proj/.sdlc/roadmap/my-idea/media")
         );
     }
 

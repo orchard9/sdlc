@@ -1,5 +1,6 @@
-use axum::extract::{Path, State};
-use axum::Json;
+use axum::extract::{Multipart, Path, State};
+use axum::response::Response;
+use axum::{http::header, Json};
 
 use crate::error::AppError;
 use crate::state::AppState;
@@ -308,4 +309,202 @@ pub async fn get_ponder_session(
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
 
     Ok(Json(result))
+}
+
+// ---------------------------------------------------------------------------
+// Binary media upload and serve
+// ---------------------------------------------------------------------------
+
+/// Returns the MIME type for an allowed ponder image extension, or `None` if
+/// the file type is not permitted.  Only PNG, JPEG, GIF, and WebP are accepted.
+fn ponder_mime_for_ext(name: &str) -> Option<&'static str> {
+    let ext = name.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
+    match ext.as_str() {
+        "png" => Some("image/png"),
+        "jpg" | "jpeg" => Some("image/jpeg"),
+        "gif" => Some("image/gif"),
+        "webp" => Some("image/webp"),
+        _ => None,
+    }
+}
+
+/// Validate that a media filename is safe (no path traversal, no separators).
+fn validate_media_filename(filename: &str) -> Result<(), AppError> {
+    if filename.contains('/') || filename.contains('\\') || filename.contains("..") {
+        return Err(AppError::bad_request(
+            "invalid filename: must not contain path separators or '..'",
+        ));
+    }
+    Ok(())
+}
+
+const MAX_MEDIA_BYTES: usize = 10 * 1024 * 1024; // 10 MB
+
+/// POST /api/roadmap/:slug/media — upload a binary image into the ponder workspace.
+///
+/// Accepts `multipart/form-data` with a field named `file`.
+/// Allowed types: PNG, JPEG, GIF, WebP.  Maximum size: 10 MB.
+pub async fn upload_ponder_media(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+    mut multipart: Multipart,
+) -> Result<Json<serde_json::Value>, AppError> {
+    // Find the "file" field in the multipart body.
+    let mut found_filename: Option<String> = None;
+    let mut found_bytes: Option<Vec<u8>> = None;
+
+    while let Some(field) = multipart
+        .next_field()
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("multipart error: {e}")))?
+    {
+        if field.name() != Some("file") {
+            continue;
+        }
+
+        let filename = field
+            .file_name()
+            .map(|s| s.to_string())
+            .ok_or_else(|| AppError::bad_request("missing filename in multipart field"))?;
+
+        // Security: reject path-traversal filenames early.
+        validate_media_filename(&filename)?;
+
+        // Type guard: only allowed image extensions.
+        if ponder_mime_for_ext(&filename).is_none() {
+            return Err(AppError::bad_request(
+                "unsupported file type: only PNG, JPEG, GIF, WebP are allowed",
+            ));
+        }
+
+        // Accumulate bytes with a size cap.
+        let raw = field
+            .bytes()
+            .await
+            .map_err(|e| AppError(anyhow::anyhow!("failed to read field bytes: {e}")))?;
+
+        if raw.len() > MAX_MEDIA_BYTES {
+            return Err(AppError::payload_too_large("file too large: maximum 10 MB"));
+        }
+
+        found_filename = Some(filename);
+        found_bytes = Some(raw.to_vec());
+        break;
+    }
+
+    let filename = found_filename
+        .ok_or_else(|| AppError::bad_request("no 'file' field found in multipart body"))?;
+    let bytes = found_bytes.unwrap();
+
+    // Write to disk.
+    let media_dir = sdlc_core::paths::ponder_media_dir(&app.root, &slug);
+    tokio::fs::create_dir_all(&media_dir)
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("failed to create media dir: {e}")))?;
+
+    let dest = media_dir.join(&filename);
+    // Atomic write: write to a .tmp file, then rename into place.
+    let tmp = dest.with_extension(format!(
+        "{}.tmp",
+        dest.extension().unwrap_or_default().to_string_lossy()
+    ));
+    tokio::fs::write(&tmp, &bytes)
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("failed to write temp file: {e}")))?;
+    tokio::fs::rename(&tmp, &dest)
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("failed to rename media file: {e}")))?;
+
+    // Notify the frontend via SSE.
+    let _ = app.event_tx.send(crate::state::SseMessage::Update);
+
+    let url = format!("/api/roadmap/{slug}/media/{filename}");
+    Ok(Json(serde_json::json!({
+        "slug": slug,
+        "filename": filename,
+        "url": url,
+    })))
+}
+
+/// GET /api/roadmap/:slug/media/:filename — serve a binary media file.
+pub async fn serve_ponder_media(
+    State(app): State<AppState>,
+    Path((slug, filename)): Path<(String, String)>,
+) -> Result<Response, AppError> {
+    validate_media_filename(&filename)?;
+
+    let content_type = ponder_mime_for_ext(&filename)
+        .ok_or_else(|| AppError::bad_request("unsupported file type"))?;
+
+    let path = sdlc_core::paths::ponder_media_dir(&app.root, &slug).join(&filename);
+
+    let bytes = tokio::fs::read(&path)
+        .await
+        .map_err(|_| AppError::not_found("media file not found"))?;
+
+    let response = Response::builder()
+        .status(axum::http::StatusCode::OK)
+        .header(header::CONTENT_TYPE, content_type)
+        .body(axum::body::Body::from(bytes))
+        .map_err(|e| AppError(anyhow::anyhow!("failed to build response: {e}")))?;
+
+    Ok(response)
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mime_png() {
+        assert_eq!(ponder_mime_for_ext("photo.png"), Some("image/png"));
+    }
+
+    #[test]
+    fn mime_jpeg() {
+        assert_eq!(ponder_mime_for_ext("photo.jpg"), Some("image/jpeg"));
+        assert_eq!(ponder_mime_for_ext("photo.jpeg"), Some("image/jpeg"));
+    }
+
+    #[test]
+    fn mime_gif() {
+        assert_eq!(ponder_mime_for_ext("anim.gif"), Some("image/gif"));
+    }
+
+    #[test]
+    fn mime_webp() {
+        assert_eq!(ponder_mime_for_ext("diagram.webp"), Some("image/webp"));
+    }
+
+    #[test]
+    fn mime_case_insensitive() {
+        assert_eq!(ponder_mime_for_ext("photo.PNG"), Some("image/png"));
+        assert_eq!(ponder_mime_for_ext("photo.JPEG"), Some("image/jpeg"));
+    }
+
+    #[test]
+    fn mime_rejected_types() {
+        assert_eq!(ponder_mime_for_ext("malware.exe"), None);
+        assert_eq!(ponder_mime_for_ext("notes.txt"), None);
+        assert_eq!(ponder_mime_for_ext("noextension"), None);
+        assert_eq!(ponder_mime_for_ext("doc.pdf"), None);
+    }
+
+    #[test]
+    fn filename_traversal_rejected() {
+        assert!(validate_media_filename("../manifest.yaml").is_err());
+        assert!(validate_media_filename("subdir/evil.png").is_err());
+        assert!(validate_media_filename("..\\etc\\passwd").is_err());
+    }
+
+    #[test]
+    fn filename_valid_accepted() {
+        assert!(validate_media_filename("screenshot.png").is_ok());
+        assert!(validate_media_filename("diagram-v2.webp").is_ok());
+        assert!(validate_media_filename("photo_01.jpeg").is_ok());
+    }
 }

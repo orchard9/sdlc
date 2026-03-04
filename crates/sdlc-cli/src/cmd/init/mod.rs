@@ -19,9 +19,9 @@ use templates::{
 use templates::{
     TOOL_AMA_CONFIG_YAML, TOOL_AMA_README_MD, TOOL_AMA_TS, TOOL_DEV_DRIVER_README_MD,
     TOOL_DEV_DRIVER_TS, TOOL_QUALITY_CHECK_CONFIG_YAML, TOOL_QUALITY_CHECK_README_MD,
-    TOOL_QUALITY_CHECK_TS, TOOL_SHARED_CONFIG_TS, TOOL_SHARED_LOG_TS, TOOL_SHARED_RUNTIME_TS,
-    TOOL_SHARED_TYPES_TS, TOOL_STATIC_TOOLS_MD, TOOL_TELEGRAM_RECAP_CONFIG_YAML,
-    TOOL_TELEGRAM_RECAP_README_MD, TOOL_TELEGRAM_RECAP_TS,
+    TOOL_QUALITY_CHECK_TS, TOOL_SHARED_AGENT_TS, TOOL_SHARED_CONFIG_TS, TOOL_SHARED_LOG_TS,
+    TOOL_SHARED_RUNTIME_TS, TOOL_SHARED_TYPES_TS, TOOL_STATIC_TOOLS_MD,
+    TOOL_TELEGRAM_RECAP_CONFIG_YAML, TOOL_TELEGRAM_RECAP_README_MD, TOOL_TELEGRAM_RECAP_TS,
 };
 
 /// Version of the sdlc binary embedded at compile time.
@@ -424,7 +424,8 @@ fn build_sdlc_section_inner(project_name: &str) -> String {
         - `/sdlc-recruit <role>` — recruit an expert thought partner as a persistent agent\n\
         - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions\n\
         - `/sdlc-spike <slug> — <need>; [see <ref>]` — research, prototype, validate, and report; produces working prototype + findings in `.sdlc/spikes/<slug>/findings.md`\n\
-        - `/sdlc-convo-mine [file or text]` — mine conversation dumps for signal; apply 5 perspective lenses, group themes, launch parallel ponder sessions per group\n\n\
+        - `/sdlc-convo-mine [file or text]` — mine conversation dumps for signal; apply 5 perspective lenses, group themes, launch parallel ponder sessions per group\n\
+        - `/sdlc-recap [slug]` — state-aware session recap with forward motion — synthesizes progress, classifies remaining work, and creates tasks or ponder entries so no session ends without a concrete next step\n\n\
         ### Tool Suite\n\n\
         <!-- sdlc:tools -->\n\
         Project-scoped TypeScript tools in `.sdlc/tools/` — callable by agents and humans\n\
@@ -685,6 +686,7 @@ pub fn write_core_tools(root: &Path) -> anyhow::Result<()> {
         ("log.ts", TOOL_SHARED_LOG_TS),
         ("config.ts", TOOL_SHARED_CONFIG_TS),
         ("runtime.ts", TOOL_SHARED_RUNTIME_TS),
+        ("agent.ts", TOOL_SHARED_AGENT_TS),
     ];
     for (filename, content) in shared_files {
         let path = shared_dir.join(filename);

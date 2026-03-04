@@ -204,12 +204,11 @@ Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 **<N>/<total> steps passed**
 ```
 
-## Step 5 — Flip milestone state
+## Step 5 — Flip milestone state for passing runs
 
-**Verdict rules:**
+**Verdict rules (for Pass/PassWithTasks only — failures go to Step 5B):**
 - All tests pass → **Pass**
 - Some tests fail but only tasks created, none blocking → **PassWithTasks**
-- Blocking failures remain after task creation → **Failed**
 
 **On Pass or PassWithTasks:**
 
@@ -217,21 +216,87 @@ Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 sdlc milestone complete <slug>
 ```
 
-**On Failed:** do NOT call `milestone complete`. Call the fail endpoint to signal the outcome:
+Then skip to Step 9.
 
-```bash
-curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail
-```
+## Step 5B — Triage failures
 
-The milestone stays in `Verifying`. Fix the feature tasks, then re-run this command.
+For each failed test, classify it into exactly one category:
 
-## Step 6 — Final report
+| Classification | Signal | Example |
+|---|---|---|
+| **Fixable** | Assertion fails on a value the agent can change; route returns wrong status; missing CSS class | Wrong button label, off-by-one count, missing aria attribute |
+| **Escalation** | Missing env var; server unreachable; unclear requirement; needs human judgment | `STRIPE_KEY` not set, auth service down, requirement contradicts spec |
+| **Complex** | Wrong architectural approach; feature design doesn't match reality; multiple interacting failures | Feature built for old data model, entire flow broken, 4+ failing tests with shared root cause |
+
+Collect classifications before proceeding.
+
+## Step 6 — Pathway 1: Fix and Retry
+
+**If ALL failures are classified as Fixable:**
+
+1. Fix the code (targeted changes — max 3 files, no structural rewrites)
+2. Rerun the spec:
+   ```bash
+   cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json
+   ```
+3. Re-parse `playwright-report/results.json` for updated counts
+4. If all pass → verdict is **FixedAndPassed** → proceed to Step 9
+5. If still failing after **2 total fix cycles** → reclassify remaining failures and fall through to Pathway 2 or 3
+
+## Step 7 — Pathway 2: Escalate
+
+**If any failure is Escalation AND none are Complex:**
+
+1. Create tasks for any Fixable items:
+   ```bash
+   sdlc task add <feature-slug> "UAT: <test title> — <one-line description>"
+   ```
+2. Create an escalation for each Escalation-class failure:
+   ```bash
+   sdlc escalate create --kind blocker --title "UAT blocker: <description>" \
+     --context "<full error context from results.json>" --feature <feature-slug>
+   ```
+3. Signal milestone failure:
+   ```bash
+   curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail
+   ```
+4. Proceed to Step 9 with verdict **Escalated**
+
+## Step 8 — Pathway 3: Recap and Propose
+
+**If any failure is Complex:**
+
+1. Create tasks for any Fixable items:
+   ```bash
+   sdlc task add <feature-slug> "UAT: <test title> — <one-line description>"
+   ```
+2. Gather project state:
+   ```bash
+   sdlc status --json
+   ```
+3. For each Complex failure, synthesize the root cause and create a ponder entry:
+   ```bash
+   sdlc ponder create "<problem-as-question>" --brief "<context: what failed, why it's architectural, what needs rethinking>"
+   ```
+4. Commit completed work:
+   ```bash
+   git add -A && git commit -m "uat: partial progress on <slug>, ponder sessions proposed for complex failures"
+   ```
+5. Signal milestone failure:
+   ```bash
+   curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail
+   ```
+6. Proceed to Step 9 with verdict **Recapped**
+
+## Step 9 — Final report
 
 | Verdict | State after | Next |
 |---|---|---|
 | Pass | `Released` | Commit `summary.md` and `uat_results.md` |
 | PassWithTasks | `Released` | Commit results; `/sdlc-run <task-owning-feature-slug>` next cycle |
-| Failed | `Verifying` (unchanged) | `/sdlc-run <first-blocking-feature-slug>` — fix, then re-run `/sdlc-milestone-uat <slug>` |
+| FixedAndPassed | `Released` | Commit results (retry succeeded) |
+| Escalated | `Verifying` (unchanged) | `**Next:** resolve escalation <id>, then /sdlc-milestone-uat <slug>` |
+| Recapped | `Verifying` (unchanged) | `**Next:** /sdlc-ponder <first-ponder-slug>` |
 
 Always end output with exactly one **Next:** line showing the command to run.
 "#;
@@ -252,19 +317,22 @@ Use this playbook to run a milestone's acceptance test using Playwright — Mode
    - **Selector break** (element not found, locator timeout) → fix spec locator and rerun once.
    - **Code bug** (assertion failure, bad response) → `sdlc task add <feature-slug> "UAT: <test> — <reason>"`, continue.
 4. Write `summary.md` to `.sdlc/milestones/<slug>/uat-runs/<date>-<id>/`:
-   - Verdict: Pass | PassWithTasks | Failed
+   - Verdict: Pass | PassWithTasks | FixedAndPassed | Escalated | Recapped
    - Tests: `<passed>/<total>`
    - Tasks created: list or none
    - Results: Playwright JSON summary
 5. Write `uat_results.md` to `.sdlc/milestones/<slug>/uat_results.md` (signed checklist).
-6. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On Failed: do NOT call milestone complete — call `curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail` to signal the failure, then leave in Verifying.
+6. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On failure — triage each failure:
+   - **Fixable**: fix code (max 3 files), rerun (max 2 cycles). If fixed → FixedAndPassed → `sdlc milestone complete <slug>`.
+   - **Escalation** (any, no Complex): `sdlc task add` for fixables, `sdlc escalate create` for blockers, call `uat/fail`. **Next:** resolve escalation, then re-run UAT.
+   - **Complex** (any): `sdlc task add` for fixables, `sdlc ponder create "<question>"` for each complex failure, `git commit`, call `uat/fail`. **Next:** `/sdlc-ponder <slug>`.
 
 ## Key Rules
 
 - Playwright is the user: exercise the real UI, don't read code.
 - Selector breaks are spec bugs — fix them; code bugs become tasks.
-- Never pause to ask — decide and act on every failure.
-- Always forward: create tasks for issues, never revert state.
+- Never pause to ask — triage and act on every failure.
+- Always forward: fix-and-retry, escalate, or propose — never strand the human.
 "#;
 
 const SDLC_MILESTONE_UAT_SKILL: &str = r#"---
@@ -283,9 +351,12 @@ Use this skill to run a milestone's acceptance test via Playwright.
 1. Load milestone: `sdlc milestone info <slug> --json`.
 2. **Mode A** — if `frontend/e2e/milestones/<slug>.spec.ts` exists: run `cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json`, parse `playwright-report/results.json`.
 3. **Mode B** — if no spec: navigate each `acceptance_test.md` checklist item via Playwright MCP browser tools, write `frontend/e2e/milestones/<slug>.spec.ts` using `getByRole`/`getByTestId` locators, run and fix until passing, then continue to Mode A synthesis.
-4. For each failure: selector break → fix spec + rerun; code bug → `sdlc task add <feature-slug> "..."`.
-5. Write `summary.md` to `.sdlc/milestones/<slug>/uat-runs/<date>-<id>/` with Verdict (Pass/PassWithTasks/Failed), test counts, tasks created, and Playwright results.
-6. Write `uat_results.md` to `.sdlc/milestones/<slug>/`. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On Failed: call `curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail` to signal the failure, then leave in Verifying.
+4. For each failure: selector break → fix spec + rerun; code bug → classify as Fixable / Escalation / Complex.
+5. Write `summary.md` to `.sdlc/milestones/<slug>/uat-runs/<date>-<id>/` with Verdict (Pass/PassWithTasks/FixedAndPassed/Escalated/Recapped), test counts, tasks created, and Playwright results.
+6. Write `uat_results.md` to `.sdlc/milestones/<slug>/`. On Pass or PassWithTasks: `sdlc milestone complete <slug>`. On failure — triage and act:
+   - **All Fixable**: fix code (≤3 files), rerun (max 2 cycles). If fixed → `sdlc milestone complete <slug>`.
+   - **Any Escalation**: create tasks + `sdlc escalate create` for blockers + `curl uat/fail`. Next: resolve + re-run.
+   - **Any Complex**: create tasks + `sdlc ponder create` for complex failures + `git commit` + `curl uat/fail`. Next: `/sdlc-ponder <slug>`.
 "#;
 
 pub static SDLC_MILESTONE_UAT: CommandDef = CommandDef {

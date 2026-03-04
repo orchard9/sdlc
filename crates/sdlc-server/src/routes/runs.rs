@@ -892,22 +892,6 @@ async fn checkout_from_pool(
     }
 }
 
-/// Check out a Claude OAuth token from the credential pool, if available.
-pub(crate) async fn checkout_claude_token(app: &AppState) -> Option<String> {
-    let pool = app.credential_pool.get()?;
-    match pool.checkout().await {
-        Ok(Some(cred)) => Some(cred.token),
-        Ok(None) => {
-            warn!("credential pool has no active Claude credentials — running with ambient auth");
-            None
-        }
-        Err(e) => {
-            error!(error = %e, "credential pool checkout failed — running with ambient auth");
-            None
-        }
-    }
-}
-
 /// Build the standard sdlc MCP query options.
 pub(crate) fn sdlc_query_options(
     root: std::path::PathBuf,
@@ -984,7 +968,7 @@ pub async fn start_run(
             })
     };
 
-    let opts = sdlc_query_options(app.root.clone(), 200, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 200, None);
     let prompt = match context.as_deref() {
         Some(ctx) if !ctx.is_empty() => format!(
             "Drive feature '{}' through the sdlc state machine. \
@@ -1033,7 +1017,7 @@ pub async fn start_milestone_uat(
 
     // Start from the standard sdlc options, then extend with Playwright MCP so the
     // UAT agent can interact with a real browser during acceptance tests.
-    let mut opts = sdlc_query_options(app.root.clone(), 200, checkout_claude_token(&app).await);
+    let mut opts = sdlc_query_options(app.root.clone(), 200, None);
     opts.mcp_servers.push(McpServerConfig {
         name: "playwright".into(),
         command: "npx".into(),
@@ -1281,7 +1265,7 @@ pub async fn start_milestone_prepare(
 ) -> Result<Json<serde_json::Value>, AppError> {
     validate_slug(&slug)?;
     let key = format!("milestone-prepare:{slug}");
-    let opts = sdlc_query_options(app.root.clone(), 100, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 100, None);
     let prompt = format!(
         "Survey milestone '{slug}' using `sdlc project prepare --milestone {slug} --json`. \
          Parse the result: report project phase, milestone progress, gaps, and the wave plan. \
@@ -1324,7 +1308,7 @@ pub async fn start_milestone_run_wave(
 ) -> Result<Json<serde_json::Value>, AppError> {
     validate_slug(&slug)?;
     let key = format!("milestone-run-wave:{slug}");
-    let opts = sdlc_query_options(app.root.clone(), 200, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 200, None);
     let prompt = format!(
         "Execute the current wave of milestone '{slug}' in parallel. \
          Run `sdlc project prepare --milestone {slug} --json` to get the live wave plan. \
@@ -1648,8 +1632,7 @@ pub async fn start_ponder_chat(
         message_context = message_context,
     );
 
-    let mut opts =
-        sdlc_ponder_query_options(app.root.clone(), 100, checkout_claude_token(&app).await);
+    let mut opts = sdlc_ponder_query_options(app.root.clone(), 100, None);
     // Ponder sessions also need the ponder_chat tool available
     opts.allowed_tools
         .push("mcp__sdlc__sdlc_ponder_chat".into());
@@ -1778,7 +1761,7 @@ pub async fn commit_ponder(
         slug = slug,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 100, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 100, None);
     let label = format!("commit: {slug}");
     spawn_agent_run(run_key, prompt, opts, &app, "ponder", &label, None).await
 }
@@ -2111,9 +2094,9 @@ pub async fn start_investigation_chat(
     );
 
     let opts = if kind_str == "guideline" {
-        sdlc_guideline_query_options(app.root.clone(), 100, checkout_claude_token(&app).await)
+        sdlc_guideline_query_options(app.root.clone(), 100, None)
     } else {
-        sdlc_query_options(app.root.clone(), 100, checkout_claude_token(&app).await)
+        sdlc_query_options(app.root.clone(), 100, None)
     };
 
     let investigation_label = format!("investigate: {slug}");
@@ -2173,7 +2156,7 @@ pub async fn start_vision_align(
     body: Option<Json<AlignBody>>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "vision-align".to_string();
-    let opts = sdlc_query_options(app.root.clone(), 40, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 40, None);
     let direction_prefix = body
         .and_then(|Json(b)| b.direction)
         .filter(|d| !d.trim().is_empty())
@@ -2217,7 +2200,7 @@ pub async fn start_architecture_align(
     body: Option<Json<AlignBody>>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let key = "architecture-align".to_string();
-    let opts = sdlc_query_options(app.root.clone(), 40, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 40, None);
     let direction_prefix = body
         .and_then(|Json(b)| b.direction)
         .filter(|d| !d.trim().is_empty())
@@ -2263,7 +2246,7 @@ pub async fn start_team_recruit(
     let agents_dir = sdlc_core::paths::project_claude_agents_dir(&app.root)
         .to_string_lossy()
         .into_owned();
-    let opts = sdlc_query_options(app.root.clone(), 40, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 40, None);
     let prompt = format!(
         "You are recruiting a high-impact AI thought-partner team for this project.\n\n\
         Read context files to understand the project:\n\
@@ -2509,7 +2492,7 @@ pub async fn answer_ama(
         sources_text = sources_text,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 5, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 5, None);
     let label_prefix: String = question.chars().take(40).collect();
     let label = format!("AMA: {label_prefix}");
 
@@ -2634,7 +2617,7 @@ pub async fn agent_call(
          Use the available tools to fulfill this command. When the command is complete, stop."
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 200, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 200, None);
     let result = spawn_agent_run(
         body.key.clone(),
         prompt,
@@ -2820,7 +2803,7 @@ pub async fn reconfigure_quality_gates(
         - Hook status (installed at .githooks/pre-commit)\n\
         ".to_string();
 
-    let opts = sdlc_query_options(app.root.clone(), 10, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 10, None);
 
     let result = spawn_agent_run(
         key.clone(),
@@ -2901,7 +2884,7 @@ pub async fn fix_quality_issues(
         "
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 20, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 20, None);
 
     let result = spawn_agent_run(
         key.clone(),
@@ -2990,7 +2973,7 @@ pub async fn plan_tool(
         desc = body.description,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 15, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 15, None);
 
     let result = spawn_agent_run(
         key.clone(),
@@ -3062,7 +3045,7 @@ pub async fn build_tool(
         plan = body.plan,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 25, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 25, None);
 
     let result = spawn_agent_run(
         key.clone(),
@@ -3156,7 +3139,7 @@ pub async fn evolve_tool(
         existing_code = existing_code,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 20, checkout_claude_token(&app).await);
+    let opts = sdlc_query_options(app.root.clone(), 20, None);
 
     let result = spawn_agent_run(
         key.clone(),
@@ -3266,7 +3249,7 @@ pub async fn act_tool(
     let result = spawn_agent_run(
         key.clone(),
         prompt,
-        sdlc_query_options(app.root.clone(), 20, checkout_claude_token(&app).await),
+        sdlc_query_options(app.root.clone(), 20, None),
         &app,
         "tool_act",
         &label,

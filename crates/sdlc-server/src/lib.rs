@@ -204,6 +204,14 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/roadmap/{slug}/sessions/{n}",
             get(routes::roadmap::get_ponder_session),
         )
+        .route(
+            "/api/roadmap/{slug}/media",
+            post(routes::roadmap::upload_ponder_media),
+        )
+        .route(
+            "/api/roadmap/{slug}/media/{filename}",
+            get(routes::roadmap::serve_ponder_media),
+        )
         // Advisory (maturity-ladder codebase analysis)
         .route("/api/advisory", get(routes::advisory::get_advisory))
         .route(

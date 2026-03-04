@@ -19,6 +19,7 @@ mod sdlc_ponder_commit;
 mod sdlc_prepare;
 mod sdlc_pressure_test;
 mod sdlc_quality_fix;
+mod sdlc_recap;
 mod sdlc_recruit;
 mod sdlc_run;
 mod sdlc_run_wave;
@@ -73,4 +74,5 @@ pub static ALL_COMMANDS: &[&CommandDef] = &[
     &sdlc_spike::SDLC_SPIKE,
     &sdlc_init::SDLC_INIT,
     &sdlc_convo_mine::SDLC_CONVO_MINE,
+    &sdlc_recap::SDLC_RECAP,
 ];

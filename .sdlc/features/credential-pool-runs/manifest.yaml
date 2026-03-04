@@ -1,73 +1,109 @@
 slug: credential-pool-runs
 title: Credential pool runs — inject CLAUDE_CODE_OAUTH_TOKEN into every spawn_agent_run
 description: 'Integrate CredentialPool into spawn_agent_run: checkout a token before spawning, inject as CLAUDE_CODE_OAUTH_TOKEN env var, update last_used_at and use_count after run completes; fall back to ambient auth when pool is unavailable or empty'
-phase: draft
+phase: released
 created_at: 2026-03-04T21:02:47.158988Z
-updated_at: 2026-03-04T22:12:43.447747Z
+updated_at: 2026-03-04T23:57:57.119643Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:53:31.515505Z
+  approved_at: 2026-03-04T23:53:31.526927Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:53:35.416669Z
+  approved_at: 2026-03-04T23:53:35.423367Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:53:35.429819Z
+  approved_at: 2026-03-04T23:53:35.436630Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:53:35.442688Z
+  approved_at: 2026-03-04T23:53:35.448933Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:54:00.711281Z
+  approved_at: 2026-03-04T23:54:00.717765Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:57:02.300950Z
+  approved_at: 2026-03-04T23:57:02.308523Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-runs/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T23:57:53.965070Z
+  approved_at: 2026-03-04T23:57:53.972585Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: '[follow-up] Remove redundant checkout_claude_token calls from spawn_agent_run callers'
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:53:57.057311Z
+  started_at: null
+  completed_at: 2026-03-04T23:56:43.737206Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-04T21:02:47.158988Z
+  exited: 2026-03-04T23:53:31.530078Z
+- phase: specified
+  entered: 2026-03-04T23:53:31.530078Z
+  exited: 2026-03-04T23:53:35.450543Z
+- phase: planned
+  entered: 2026-03-04T23:53:35.450543Z
+  exited: 2026-03-04T23:53:41.629896Z
+- phase: ready
+  entered: 2026-03-04T23:53:41.629896Z
+  exited: 2026-03-04T23:53:41.659362Z
+- phase: implementation
+  entered: 2026-03-04T23:53:41.659362Z
+  exited: 2026-03-04T23:56:43.739926Z
+- phase: review
+  entered: 2026-03-04T23:56:43.739926Z
+  exited: 2026-03-04T23:56:53.291088Z
+- phase: audit
+  entered: 2026-03-04T23:56:53.291088Z
+  exited: 2026-03-04T23:57:02.312368Z
+- phase: qa
+  entered: 2026-03-04T23:57:02.312368Z
+  exited: 2026-03-04T23:57:53.977798Z
+- phase: merge
+  entered: 2026-03-04T23:57:53.977798Z
+  exited: 2026-03-04T23:57:57.119643Z
+- phase: released
+  entered: 2026-03-04T23:57:57.119643Z
   exited: null
 dependencies:
 - credential-pool-core

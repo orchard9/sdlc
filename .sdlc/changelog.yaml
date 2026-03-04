@@ -2058,3 +2058,197 @@
   slug: spike-rest-routes
   timestamp: 2026-03-04T22:18:54.488048Z
   metadata: {}
+- id: ev-0373
+  kind: qa_approved
+  slug: run-stop-reason-capture
+  timestamp: 2026-03-04T23:39:07.868374Z
+  metadata: {}
+- id: ev-0374
+  kind: feature_phase_advanced
+  slug: run-stop-reason-capture
+  timestamp: 2026-03-04T23:39:07.873382Z
+  metadata:
+    phase: merge
+- id: ev-0375
+  kind: feature_merged
+  slug: run-stop-reason-capture
+  timestamp: 2026-03-04T23:39:12.131560Z
+  metadata: {}
+- id: ev-0376
+  kind: milestone_wave_completed
+  slug: v39-run-max-turns-recovery
+  timestamp: 2026-03-04T23:39:32.644599Z
+  metadata:
+    run_key: milestone-run-wave:v39-run-max-turns-recovery
+- id: ev-0377
+  kind: feature_phase_advanced
+  slug: fix-missingsharedagentmoduleintoolinstallation
+  timestamp: 2026-03-04T23:41:04.759764Z
+  metadata:
+    phase: review
+- id: ev-0378
+  kind: feature_phase_advanced
+  slug: fix-missingsharedagentmoduleintoolinstallation
+  timestamp: 2026-03-04T23:41:33.085542Z
+  metadata:
+    phase: qa
+- id: ev-0379
+  kind: review_approved
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:42:14.894598Z
+  metadata: {}
+- id: ev-0380
+  kind: feature_phase_advanced
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:42:14.944046Z
+  metadata:
+    phase: review
+- id: ev-0381
+  kind: feature_phase_advanced
+  slug: fix-missingsharedagentmoduleintoolinstallation
+  timestamp: 2026-03-04T23:43:08.892551Z
+  metadata:
+    phase: merge
+- id: ev-0382
+  kind: feature_merged
+  slug: fix-missingsharedagentmoduleintoolinstallation
+  timestamp: 2026-03-04T23:43:17.211949Z
+  metadata: {}
+- id: ev-0383
+  kind: audit_approved
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:43:36.906291Z
+  metadata: {}
+- id: ev-0384
+  kind: feature_phase_advanced
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:43:36.910792Z
+  metadata:
+    phase: qa
+- id: ev-0385
+  kind: review_approved
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-04T23:44:21.859641Z
+  metadata: {}
+- id: ev-0386
+  kind: feature_phase_advanced
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-04T23:44:21.864608Z
+  metadata:
+    phase: review
+- id: ev-0387
+  kind: review_approved
+  slug: workspace-slug-utils
+  timestamp: 2026-03-04T23:44:29.584668Z
+  metadata: {}
+- id: ev-0388
+  kind: feature_phase_advanced
+  slug: workspace-slug-utils
+  timestamp: 2026-03-04T23:44:29.590076Z
+  metadata:
+    phase: review
+- id: ev-0389
+  kind: review_approved
+  slug: workspace-panel-slot-refactor
+  timestamp: 2026-03-04T23:44:32.767394Z
+  metadata: {}
+- id: ev-0390
+  kind: feature_phase_advanced
+  slug: workspace-panel-slot-refactor
+  timestamp: 2026-03-04T23:44:32.771644Z
+  metadata:
+    phase: review
+- id: ev-0391
+  kind: qa_approved
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:44:37.388355Z
+  metadata: {}
+- id: ev-0392
+  kind: feature_phase_advanced
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:44:37.431772Z
+  metadata:
+    phase: merge
+- id: ev-0393
+  kind: feature_merged
+  slug: ponder-text-file-preload
+  timestamp: 2026-03-04T23:44:42.007234Z
+  metadata: {}
+- id: ev-0394
+  kind: milestone_wave_completed
+  slug: v39-run-max-turns-recovery
+  timestamp: 2026-03-04T23:45:54.341660Z
+  metadata:
+    run_key: milestone-run-wave:v39-run-max-turns-recovery
+- id: ev-0395
+  kind: review_approved
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:54:00.719654Z
+  metadata: {}
+- id: ev-0396
+  kind: run_failed
+  slug: v40-workspace-ui-unification
+  timestamp: 2026-03-04T23:54:39.295902Z
+  metadata:
+    run_key: milestone-run-wave:v40-workspace-ui-unification
+- id: ev-0397
+  kind: run_failed
+  slug: v33-ponder-artifact-preload
+  timestamp: 2026-03-04T23:55:10.326900Z
+  metadata:
+    run_key: milestone-run-wave:v33-ponder-artifact-preload
+- id: ev-0398
+  kind: review_approved
+  slug: sdlc-recap-command
+  timestamp: 2026-03-04T23:55:16.787594Z
+  metadata: {}
+- id: ev-0399
+  kind: feature_phase_advanced
+  slug: sdlc-recap-command
+  timestamp: 2026-03-04T23:55:16.792296Z
+  metadata:
+    phase: review
+- id: ev-0400
+  kind: audit_approved
+  slug: sdlc-recap-command
+  timestamp: 2026-03-04T23:56:02.782840Z
+  metadata: {}
+- id: ev-0401
+  kind: feature_phase_advanced
+  slug: sdlc-recap-command
+  timestamp: 2026-03-04T23:56:02.788361Z
+  metadata:
+    phase: qa
+- id: ev-0402
+  kind: feature_phase_advanced
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:56:43.741615Z
+  metadata:
+    phase: review
+- id: ev-0403
+  kind: audit_approved
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:57:02.310272Z
+  metadata: {}
+- id: ev-0404
+  kind: feature_phase_advanced
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:57:02.313904Z
+  metadata:
+    phase: qa
+- id: ev-0405
+  kind: qa_approved
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:57:53.974485Z
+  metadata: {}
+- id: ev-0406
+  kind: feature_phase_advanced
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:57:53.979506Z
+  metadata:
+    phase: merge
+- id: ev-0407
+  kind: feature_merged
+  slug: credential-pool-runs
+  timestamp: 2026-03-04T23:57:57.123803Z
+  metadata: {}

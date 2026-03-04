@@ -117,91 +117,6 @@ active_features:
 - ponder-merge-list-ux
 active_directives: []
 history:
-- feature: fix-threaddetailactionsnotwiredup
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T01:31:12.347821Z
-  outcome: transition
-- feature: fix-threaddetailactionsnotwiredup
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T01:36:08.496180Z
-  outcome: merged
-- feature: dashboard-zone-layout
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T02:39:45.216638Z
-  outcome: transition
-- feature: dashboard-zone-layout
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T02:39:48.342260Z
-  outcome: transition
-- feature: dashboard-zone-layout
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T02:43:26.681541Z
-  outcome: transition
-- feature: dashboard-zone-layout
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T02:44:55.931879Z
-  outcome: merged
-- feature: dashboard-empty-states
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T02:51:30.554068Z
-  outcome: transition
-- feature: dashboard-empty-states
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T02:51:35.549096Z
-  outcome: transition
-- feature: dashboard-horizon-zone
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T02:52:18.498517Z
-  outcome: transition
-- feature: dashboard-horizon-zone
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T02:52:23.561764Z
-  outcome: transition
-- feature: dashboard-empty-states
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T02:54:04.105818Z
-  outcome: transition
-- feature: dashboard-horizon-zone
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T02:54:14.471490Z
-  outcome: transition
-- feature: ponder-session-card-preview
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T02:54:18.783517Z
-  outcome: transition
-- feature: ponder-session-card-preview
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T02:54:23.821331Z
-  outcome: transition
-- feature: dashboard-empty-states
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T02:55:29.153183Z
-  outcome: merged
-- feature: dashboard-horizon-zone
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T02:56:03.025697Z
-  outcome: merged
-- feature: uat-artifacts-storage
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T02:57:05.375161Z
-  outcome: transition
 - feature: uat-artifacts-storage
   action: implement_task
   phase: implementation
@@ -1117,6 +1032,91 @@ history:
   phase: implementation
   timestamp: 2026-03-04T22:22:11.723043Z
   outcome: transition
+- feature: run-stop-reason-capture
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T23:39:12.129104Z
+  outcome: merged
+- feature: fix-missingsharedagentmoduleintoolinstallation
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:41:10.018829Z
+  outcome: transition
+- feature: ponder-text-file-preload
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:42:20.103315Z
+  outcome: transition
+- feature: fix-missingsharedagentmoduleintoolinstallation
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T23:43:17.205809Z
+  outcome: merged
+- feature: unified-dialogue-panel
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:44:25.764409Z
+  outcome: transition
+- feature: workspace-slug-utils
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:44:34.330757Z
+  outcome: transition
+- feature: workspace-panel-slot-refactor
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:44:38.057483Z
+  outcome: transition
+- feature: ponder-text-file-preload
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T23:44:41.964299Z
+  outcome: merged
+- feature: sdlc-recap-command
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T23:49:17.888353Z
+  outcome: transition
+- feature: sdlc-recap-command
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T23:49:23.252758Z
+  outcome: transition
+- feature: uat-failure-pathways
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T23:49:28.894995Z
+  outcome: transition
+- feature: uat-failure-pathways
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T23:49:32.608733Z
+  outcome: transition
+- feature: credential-pool-runs
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T23:53:41.642961Z
+  outcome: transition
+- feature: credential-pool-runs
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T23:53:41.661103Z
+  outcome: transition
+- feature: sdlc-recap-command
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:55:24.487846Z
+  outcome: transition
+- feature: credential-pool-runs
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T23:56:53.292395Z
+  outcome: transition
+- feature: credential-pool-runs
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T23:57:57.121056Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1162,4 +1162,4 @@ active_ponders:
 - root-cause-sessions-dont-end
 - qa-test-tc12
 - test-ponder-entry-for-tc12-qa
-last_updated: 2026-03-04T22:47:11.057920Z
+last_updated: 2026-03-04T23:57:57.121058Z
