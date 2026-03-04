@@ -467,6 +467,9 @@ export const api = {
   createSecretsEnv: (body: { env: string; pairs: { key: string; value: string }[] }) =>
     request('/api/secrets/envs', { method: 'POST', body: JSON.stringify(body) }),
 
+  // Hub mode (multi-project registry)
+  getHubProjects: () => request<import('@/lib/types').HubProjectEntry[]>('/api/hub/projects'),
+
   // Auth tokens (named tunnel-access tokens)
   getAuthTokens: () => request<import('@/lib/types').AuthToken[]>('/api/auth/tokens'),
   createAuthToken: (name: string) =>

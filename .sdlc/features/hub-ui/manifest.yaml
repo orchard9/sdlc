@@ -1,0 +1,144 @@
+slug: hub-ui
+title: Hub UI — live project listing with filter, status dots, and card navigation
+description: 'React page served in hub mode at ''/'': filter input, live project cards (name, URL, status dot, milestone, feature count, agent badge), SSE subscription for live updates, empty state with config hint.'
+phase: merge
+created_at: 2026-03-04T21:02:43.276139Z
+updated_at: 2026-03-04T21:35:38.251627Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/hub-ui/spec.md
+  created_at: 2026-03-04T21:28:55.126203Z
+  approved_at: 2026-03-04T21:29:01.268699Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/hub-ui/design.md
+  created_at: 2026-03-04T21:29:58.852368Z
+  approved_at: 2026-03-04T21:30:02.201028Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/hub-ui/tasks.md
+  created_at: 2026-03-04T21:30:10.043162Z
+  approved_at: 2026-03-04T21:30:12.421727Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/hub-ui/qa-plan.md
+  created_at: 2026-03-04T21:30:37.547803Z
+  approved_at: 2026-03-04T21:30:40.248290Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/hub-ui/review.md
+  created_at: 2026-03-04T21:34:13.517948Z
+  approved_at: 2026-03-04T21:34:16.324634Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/hub-ui/audit.md
+  created_at: 2026-03-04T21:34:39.785713Z
+  approved_at: 2026-03-04T21:34:44.325463Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/hub-ui/qa-results.md
+  created_at: 2026-03-04T21:35:35.625505Z
+  approved_at: 2026-03-04T21:35:38.245674Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add HubProjectEntry, HubProjectStatus, HubSseEvent types to lib/types.ts
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:30:07.378244Z
+  started_at: 2026-03-04T21:30:49.056987Z
+  completed_at: 2026-03-04T21:30:56.573922Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add getHubProjects() and hub API methods to api/client.ts
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:30:07.385466Z
+  started_at: 2026-03-04T21:30:56.581707Z
+  completed_at: 2026-03-04T21:31:02.917597Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create useHubSSE hook for /api/hub/events SSE subscription
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:30:07.392209Z
+  started_at: 2026-03-04T21:31:02.924416Z
+  completed_at: 2026-03-04T21:31:21.042738Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create HubPage component with filter, project grid, and empty state
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:30:07.398393Z
+  started_at: 2026-03-04T21:31:21.050192Z
+  completed_at: 2026-03-04T21:31:49.258825Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Wire hub mode detection into App.tsx (useHubMode hook, conditional routing)
+  description: null
+  status: completed
+  created_at: 2026-03-04T21:30:07.403803Z
+  started_at: 2026-03-04T21:31:49.265608Z
+  completed_at: 2026-03-04T21:32:07.649097Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T21:02:43.276139Z
+  exited: 2026-03-04T21:29:01.270507Z
+- phase: specified
+  entered: 2026-03-04T21:29:01.270507Z
+  exited: 2026-03-04T21:30:40.250098Z
+- phase: planned
+  entered: 2026-03-04T21:30:40.250098Z
+  exited: 2026-03-04T21:30:42.466969Z
+- phase: ready
+  entered: 2026-03-04T21:30:42.466969Z
+  exited: 2026-03-04T21:30:44.799795Z
+- phase: implementation
+  entered: 2026-03-04T21:30:44.799795Z
+  exited: 2026-03-04T21:34:16.360052Z
+- phase: review
+  entered: 2026-03-04T21:34:16.360052Z
+  exited: 2026-03-04T21:34:19.095655Z
+- phase: audit
+  entered: 2026-03-04T21:34:19.095655Z
+  exited: 2026-03-04T21:34:44.597854Z
+- phase: qa
+  entered: 2026-03-04T21:34:44.597854Z
+  exited: 2026-03-04T21:35:38.251627Z
+- phase: merge
+  entered: 2026-03-04T21:35:38.251627Z
+  exited: null
+dependencies:
+- hub-server-mode
+archived: false
+schema_version: 3

@@ -1135,3 +1135,25 @@ export interface OrchestratorWebhookRoute {
 export interface ActionSseEvent {
   type: 'action_state_changed'
 }
+
+// ---------------------------------------------------------------------------
+// Hub types (hub mode — multi-project registry)
+// ---------------------------------------------------------------------------
+
+export type HubProjectStatus = 'online' | 'stale' | 'offline'
+
+export interface HubProjectEntry {
+  name: string
+  url: string
+  active_milestone: string | null
+  feature_count: number | null
+  agent_running: boolean | null
+  last_seen: string  // ISO-8601
+  status: HubProjectStatus
+}
+
+export interface HubSseEvent {
+  type: 'project_updated' | 'project_removed'
+  project?: HubProjectEntry
+  url?: string
+}

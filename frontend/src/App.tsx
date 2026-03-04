@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AgentRunProvider } from '@/contexts/AgentRunContext'
 import { SseProvider } from '@/contexts/SseContext'
@@ -25,8 +26,41 @@ import { SetupPage } from '@/pages/SetupPage'
 import { ActionsPage } from '@/pages/ActionsPage'
 import { ThreadsPage } from '@/pages/ThreadsPage'
 import { RunsPage } from '@/pages/RunsPage'
+import { HubPage } from '@/pages/HubPage'
+
+type HubMode = 'loading' | 'hub' | 'normal'
+
+/** Detect whether the server is running in hub mode by probing /api/hub/projects.
+ *  200 → hub mode; 503 or any error → normal mode. */
+function useHubMode(): HubMode {
+  const [mode, setMode] = useState<HubMode>('loading')
+
+  useEffect(() => {
+    fetch('/api/hub/projects', { method: 'GET' })
+      .then(res => {
+        setMode(res.ok ? 'hub' : 'normal')
+      })
+      .catch(() => setMode('normal'))
+  }, [])
+
+  return mode
+}
 
 export default function App() {
+  const hubMode = useHubMode()
+
+  if (hubMode === 'loading') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-border border-t-primary rounded-full animate-spin" />
+      </div>
+    )
+  }
+
+  if (hubMode === 'hub') {
+    return <HubPage />
+  }
+
   return (
     <BrowserRouter>
       <SseProvider>
