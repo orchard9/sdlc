@@ -371,6 +371,11 @@ pub struct AppState {
     /// Hub mode project registry. `None` in normal project mode, `Some` when the
     /// `--hub` flag is active; `None` in normal project mode.
     pub hub_registry: Option<Arc<Mutex<HubRegistry>>>,
+    /// PostgreSQL-backed Claude OAuth credential pool.
+    /// Initialized asynchronously at startup via a background task.
+    /// `None` (i.e. OnceLock not yet set) until initialization completes;
+    /// remains `Disabled` if `DATABASE_URL` is absent or the DB is unreachable.
+    pub credential_pool: Arc<std::sync::OnceLock<crate::credential_pool::OptionalCredentialPool>>,
 }
 
 /// Generate a 32-char hex token (128-bit entropy) from the OS CSPRNG.
@@ -472,6 +477,7 @@ impl AppState {
             _watcher_handles: Arc::new(WatcherGuard(Vec::new())),
             agent_token: Arc::new(generate_agent_token()),
             hub_registry: None,
+            credential_pool: Arc::new(std::sync::OnceLock::new()),
             root,
         }
     }
@@ -523,6 +529,16 @@ impl AppState {
                 } else {
                     tracing::warn!("telemetry store unavailable — events will not be persisted");
                 }
+            });
+        }
+
+        // Initialize the Claude credential pool asynchronously.
+        // Guard: only spawn if inside a Tokio runtime (skipped in sync unit tests).
+        if tokio::runtime::Handle::try_current().is_ok() {
+            let pool_cell = state.credential_pool.clone();
+            tokio::spawn(async move {
+                let pool = crate::credential_pool::OptionalCredentialPool::from_env().await;
+                let _ = pool_cell.set(pool);
             });
         }
 

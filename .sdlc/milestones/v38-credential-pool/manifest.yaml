@@ -1,9 +1,11 @@
 slug: v38-credential-pool
 title: Claude credential pool — PostgreSQL-backed round-robin token checkout for fleet agent runs
+vision: PostgreSQL-backed Claude credential pool for fleet agent runs. Claude OAuth tokens are stored once in Postgres; every agent run checks out a token by round-robin (SELECT FOR UPDATE SKIP LOCKED on last_used_at), injects it as CLAUDE_CODE_OAUTH_TOKEN into the subprocess, and releases it. Graceful degradation when the DB is unreachable or no tokens are configured. Shipped via Helm ExternalSecret so no per-pod credential setup is needed.
 features:
 - credential-pool-core
 - credential-pool-runs
 - credential-pool-helm
 created_at: 2026-03-04T21:02:35.628837Z
-updated_at: 2026-03-04T21:02:52.617224Z
+updated_at: 2026-03-04T22:13:07.734599Z
+prepared_at: 2026-03-04T22:13:07.734599Z
 schema_version: 1

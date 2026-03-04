@@ -12,7 +12,7 @@ const TABS = [
   {
     label: 'Plan',
     icon: Lightbulb,
-    roots: ['/feedback', '/ponder', '/investigations', '/evolve', '/guidelines', '/knowledge'],
+    roots: ['/feedback', '/ponder', '/investigations', '/evolve', '/guidelines', '/spikes', '/knowledge'],
     exact: null,
   },
   {

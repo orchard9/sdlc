@@ -1,38 +1,39 @@
 slug: credential-pool-core
 title: Credential pool core — CredentialPool struct, schema, round-robin checkout
-phase: draft
+description: 'Postgres-backed CredentialPool struct: CREATE TABLE claude_credentials (id, account_name, token, last_used_at, use_count), round-robin checkout via SELECT FOR UPDATE SKIP LOCKED, connection pool with graceful no-op when DATABASE_URL is absent'
+phase: implementation
 created_at: 2026-03-04T21:02:47.151504Z
-updated_at: 2026-03-04T21:02:47.151504Z
+updated_at: 2026-03-04T22:22:11.721580Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-core/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T22:21:03.914572Z
+  approved_at: 2026-03-04T22:21:05.457489Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-core/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T22:21:35.729097Z
+  approved_at: 2026-03-04T22:21:35.735890Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-core/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T22:21:51.515627Z
+  approved_at: 2026-03-04T22:21:51.523297Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/credential-pool-core/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-04T22:22:05.192567Z
+  approved_at: 2026-03-04T22:22:05.199927Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
@@ -60,13 +61,79 @@ artifacts:
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Expand credential_pool.rs — add OptionalCredentialPool enum with from_env() and checkout(), tracing calls
+  description: null
+  status: completed
+  created_at: 2026-03-04T22:22:19.143272Z
+  started_at: 2026-03-04T22:22:24.034928Z
+  completed_at: 2026-03-04T22:23:54.152978Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Declare pub mod credential_pool in lib.rs or main.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T22:22:19.149973Z
+  started_at: 2026-03-04T22:23:54.163674Z
+  completed_at: 2026-03-04T22:23:54.169996Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add unit test disabled_pool_returns_none
+  description: null
+  status: completed
+  created_at: 2026-03-04T22:22:19.155635Z
+  started_at: 2026-03-04T22:23:57.285120Z
+  completed_at: 2026-03-04T22:23:57.291618Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add integration tests gated on TEST_DATABASE_URL
+  description: null
+  status: completed
+  created_at: 2026-03-04T22:22:19.161341Z
+  started_at: 2026-03-04T22:23:57.298301Z
+  completed_at: 2026-03-04T22:23:57.304325Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Run cargo test and clippy, confirm clean
+  description: null
+  status: pending
+  created_at: 2026-03-04T22:22:19.166866Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Commit all code changes
+  description: null
+  status: pending
+  created_at: 2026-03-04T22:22:19.173389Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-04T21:02:47.151504Z
+  exited: 2026-03-04T22:21:05.459343Z
+- phase: specified
+  entered: 2026-03-04T22:21:05.459343Z
+  exited: 2026-03-04T22:22:05.201397Z
+- phase: planned
+  entered: 2026-03-04T22:22:05.201397Z
+  exited: 2026-03-04T22:22:08.589660Z
+- phase: ready
+  entered: 2026-03-04T22:22:08.589660Z
+  exited: 2026-03-04T22:22:11.721580Z
+- phase: implementation
+  entered: 2026-03-04T22:22:11.721580Z
   exited: null
 dependencies: []
 archived: false

@@ -402,7 +402,7 @@ pub async fn research_knowledge(
 
     let topic = body.topic.unwrap_or_else(|| slug.clone());
     let prompt = build_research_prompt(&slug, &title, &topic, &app.root);
-    let mut opts = sdlc_query_options(app.root.clone(), 20);
+    let mut opts = sdlc_query_options(app.root.clone(), 20, None);
     opts.allowed_tools.push("WebSearch".into());
     opts.allowed_tools.push("WebFetch".into());
 
@@ -507,7 +507,7 @@ Report the number of actions taken in a final line: `ACTIONS_TAKEN: <n>`
         root = root.display()
     );
 
-    let opts = sdlc_query_options(root, 50);
+    let opts = sdlc_query_options(root, 50, None);
 
     let result = spawn_agent_run(
         "knowledge:maintain".to_string(),
@@ -583,7 +583,7 @@ Project root: {root}
         root = root.display()
     );
 
-    let opts = sdlc_query_options(root, 20);
+    let opts = sdlc_query_options(root, 20, None);
 
     let result = spawn_agent_run(
         run_key,
@@ -737,7 +737,7 @@ pub async fn ask_knowledge(
         .trim_matches('-')
         .to_string();
 
-    let mut opts = sdlc_query_options(app.root.clone(), 20);
+    let mut opts = sdlc_query_options(app.root.clone(), 20, None);
     opts.allowed_tools.push("WebSearch".into());
     opts.allowed_tools.push("WebFetch".into());
 

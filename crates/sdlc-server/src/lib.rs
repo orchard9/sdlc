@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod credential_pool;
 pub mod embed;
 pub mod error;
 pub mod heartbeat;
@@ -310,6 +311,13 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/investigation/{slug}/chat/current",
             delete(routes::runs::stop_investigation_chat),
+        )
+        // Spikes
+        .route("/api/spikes", get(routes::spikes::list_spikes))
+        .route("/api/spikes/{slug}", get(routes::spikes::get_spike))
+        .route(
+            "/api/spikes/{slug}/promote",
+            post(routes::spikes::promote_spike),
         )
         // Artifacts
         .route(
@@ -633,6 +641,21 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route(
             "/api/app-tunnel/port",
             put(routes::app_tunnel::set_app_port),
+        )
+        // Credential pool (Claude OAuth token management)
+        .route(
+            "/api/credential-pool",
+            get(routes::credential_pool::get_status),
+        )
+        .route(
+            "/api/credential-pool/credentials",
+            get(routes::credential_pool::list_credentials)
+                .post(routes::credential_pool::add_credential),
+        )
+        .route(
+            "/api/credential-pool/credentials/{id}",
+            patch(routes::credential_pool::patch_credential)
+                .delete(routes::credential_pool::delete_credential),
         )
         // Hub mode routes — always registered; handlers return 503 in project mode
         .route("/api/hub/heartbeat", post(routes::hub::heartbeat))

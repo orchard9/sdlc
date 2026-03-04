@@ -27,6 +27,7 @@ import { ActionsPage } from '@/pages/ActionsPage'
 import { ThreadsPage } from '@/pages/ThreadsPage'
 import { RunsPage } from '@/pages/RunsPage'
 import { HubPage } from '@/pages/HubPage'
+import { SpikePage } from '@/pages/SpikePage'
 
 type HubMode = 'loading' | 'hub' | 'normal'
 
@@ -85,6 +86,8 @@ export default function App() {
             <Route path="/guidelines/:slug" element={<GuidelinePage />} />
             <Route path="/knowledge" element={<KnowledgePage />} />
             <Route path="/knowledge/:slug" element={<KnowledgePage />} />
+            <Route path="/spikes" element={<SpikePage />} />
+            <Route path="/spikes/:slug" element={<SpikePage />} />
             <Route path="/secrets" element={<SecretsPage />} />
             <Route path="/tools" element={<ToolsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />

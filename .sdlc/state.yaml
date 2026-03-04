@@ -111,78 +111,12 @@ active_features:
 - activity-compact-markdown
 - activity-run-init-column
 - fix-activitytimeseriesoverflowsagentsidebar
+- slack-bot-core
+- slack-context-capture
+- slack-feedback-endpoint
+- ponder-merge-list-ux
 active_directives: []
 history:
-- feature: feedback-enrich
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T00:59:57.574278Z
-  outcome: merged
-- feature: telegram-bot-message-store
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T01:00:00.007017Z
-  outcome: transition
-- feature: telegram-digest-cron
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T01:01:44.885344Z
-  outcome: merged
-- feature: telegram-bot-message-store
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T01:08:25.200471Z
-  outcome: merged
-- feature: fix-changelogpollinginfinitelooponnulllastvisitat
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T01:18:44.791474Z
-  outcome: transition
-- feature: fix-changelogpollinginfinitelooponnulllastvisitat
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T01:18:51.273790Z
-  outcome: transition
-- feature: fix-changelogpollinginfinitelooponnulllastvisitat
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T01:20:02.674105Z
-  outcome: transition
-- feature: fix-changelogpollinginfinitelooponnulllastvisitat
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T01:21:09.857580Z
-  outcome: merged
-- feature: fix-threaddetailactionsnotwiredup
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T01:23:52.240416Z
-  outcome: transition
-- feature: fix-threaddetailactionsnotwiredup
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T01:24:02.845911Z
-  outcome: transition
-- feature: fix-recentactivityscrollablefixedheightbelowstats
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T01:24:32.060236Z
-  outcome: transition
-- feature: fix-recentactivityscrollablefixedheightbelowstats
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T01:24:42.238703Z
-  outcome: transition
-- feature: fix-recentactivityscrollablefixedheightbelowstats
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T01:26:36.309535Z
-  outcome: transition
-- feature: fix-recentactivityscrollablefixedheightbelowstats
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T01:27:28.560408Z
-  outcome: merged
 - feature: fix-threaddetailactionsnotwiredup
   action: implement_task
   phase: audit
@@ -1113,6 +1047,76 @@ history:
   phase: released
   timestamp: 2026-03-04T21:37:07.806244Z
   outcome: merged
+- feature: spike-cli-commands
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T22:11:04.543027Z
+  outcome: transition
+- feature: spike-cli-commands
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T22:11:04.552978Z
+  outcome: transition
+- feature: spike-rest-routes
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T22:12:05.036061Z
+  outcome: transition
+- feature: spike-rest-routes
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T22:12:12.427075Z
+  outcome: transition
+- feature: spike-ui-page
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T22:13:53.452681Z
+  outcome: transition
+- feature: spike-ui-page
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T22:13:58.834279Z
+  outcome: transition
+- feature: spike-cli-commands
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T22:14:05.488691Z
+  outcome: transition
+- feature: spike-cli-commands
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T22:16:33.302079Z
+  outcome: merged
+- feature: spike-ui-page
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T22:16:48.524513Z
+  outcome: transition
+- feature: spike-rest-routes
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-04T22:17:35.010337Z
+  outcome: transition
+- feature: spike-ui-page
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T22:18:02.389036Z
+  outcome: merged
+- feature: spike-rest-routes
+  action: merge
+  phase: released
+  timestamp: 2026-03-04T22:18:54.485335Z
+  outcome: merged
+- feature: credential-pool-core
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-04T22:22:08.591169Z
+  outcome: transition
+- feature: credential-pool-core
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-04T22:22:11.723043Z
+  outcome: transition
 blocked: []
 milestones:
 - v01-directive-core
@@ -1148,19 +1152,14 @@ milestones:
 - v29-tunnel-auth
 - v30-ponder-merge
 - v31-activity-feed-polish
+- v39-slack-bot-tool
+- v39-run-max-turns-recovery
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
 - i-want-to-be-able-to-optionally-use-open
 - routing-requests-properly
-- ponder-ui-should-be-able-to-preload-arti
-- when-uats-fail-we-should-have-multiple-p
-- ponder-root-cause-and-evolve-and-all-wor
-- slack-bot-tool
-- react-to-agent-activity-failures
 - root-cause-sessions-dont-end
-- workspace-layout-improvements
 - qa-test-tc12
 - test-ponder-entry-for-tc12-qa
-- park-milestones
-last_updated: 2026-03-04T21:37:07.806245Z
+last_updated: 2026-03-04T22:47:11.057920Z

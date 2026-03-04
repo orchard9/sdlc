@@ -1137,6 +1137,24 @@ export interface ActionSseEvent {
 }
 
 // ---------------------------------------------------------------------------
+// Spike types
+// ---------------------------------------------------------------------------
+
+export type SpikeVerdict = 'ADOPT' | 'ADAPT' | 'REJECT'
+
+export interface SpikeSummary {
+  slug: string
+  title: string
+  verdict: SpikeVerdict
+  date: string
+  the_question: string
+  ponder_slug?: string
+  knowledge_slug?: string
+}
+
+export type SpikeDetail = SpikeSummary
+
+// ---------------------------------------------------------------------------
 // Hub types (hub mode — multi-project registry)
 // ---------------------------------------------------------------------------
 

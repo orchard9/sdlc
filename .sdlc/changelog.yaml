@@ -1944,3 +1944,117 @@
   slug: hub-ui
   timestamp: 2026-03-04T21:37:07.808526Z
   metadata: {}
+- id: ev-0352
+  kind: review_approved
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:14:01.627491Z
+  metadata: {}
+- id: ev-0353
+  kind: feature_phase_advanced
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:14:01.632545Z
+  metadata:
+    phase: review
+- id: ev-0354
+  kind: audit_approved
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:14:22.931188Z
+  metadata: {}
+- id: ev-0355
+  kind: feature_phase_advanced
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:14:22.935177Z
+  metadata:
+    phase: qa
+- id: ev-0356
+  kind: qa_approved
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:16:29.965875Z
+  metadata: {}
+- id: ev-0357
+  kind: feature_phase_advanced
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:16:29.975253Z
+  metadata:
+    phase: merge
+- id: ev-0358
+  kind: feature_merged
+  slug: spike-cli-commands
+  timestamp: 2026-03-04T22:16:33.304781Z
+  metadata: {}
+- id: ev-0359
+  kind: review_approved
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:16:40.924312Z
+  metadata: {}
+- id: ev-0360
+  kind: feature_phase_advanced
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:16:40.929800Z
+  metadata:
+    phase: review
+- id: ev-0361
+  kind: audit_approved
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:17:14.808562Z
+  metadata: {}
+- id: ev-0362
+  kind: feature_phase_advanced
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:17:14.813256Z
+  metadata:
+    phase: qa
+- id: ev-0363
+  kind: review_approved
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:17:28.736182Z
+  metadata: {}
+- id: ev-0364
+  kind: feature_phase_advanced
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:17:28.741288Z
+  metadata:
+    phase: review
+- id: ev-0365
+  kind: qa_approved
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:17:56.577235Z
+  metadata: {}
+- id: ev-0366
+  kind: feature_phase_advanced
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:17:56.582284Z
+  metadata:
+    phase: merge
+- id: ev-0367
+  kind: feature_merged
+  slug: spike-ui-page
+  timestamp: 2026-03-04T22:18:02.391116Z
+  metadata: {}
+- id: ev-0368
+  kind: audit_approved
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:18:06.799618Z
+  metadata: {}
+- id: ev-0369
+  kind: feature_phase_advanced
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:18:06.805435Z
+  metadata:
+    phase: qa
+- id: ev-0370
+  kind: qa_approved
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:18:43.878808Z
+  metadata: {}
+- id: ev-0371
+  kind: feature_phase_advanced
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:18:43.884356Z
+  metadata:
+    phase: merge
+- id: ev-0372
+  kind: feature_merged
+  slug: spike-rest-routes
+  timestamp: 2026-03-04T22:18:54.488048Z
+  metadata: {}

@@ -11,8 +11,8 @@ use cmd::{
     knowledge::KnowledgeSubcommand, milestone::MilestoneSubcommand,
     orchestrate::OrchestrateSubcommand, platform::PlatformSubcommand, ponder::PonderSubcommand,
     project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
-    secrets::SecretsSubcommand, task::TaskSubcommand, telegram::TelegramSubcommand,
-    thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
+    secrets::SecretsSubcommand, spike::SpikeSubcommand, task::TaskSubcommand,
+    telegram::TelegramSubcommand, thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -104,6 +104,12 @@ enum Commands {
     Investigate {
         #[command(subcommand)]
         subcommand: InvestigateSubcommand,
+    },
+
+    /// Manage spike findings (list, show, promote)
+    Spike {
+        #[command(subcommand)]
+        subcommand: SpikeSubcommand,
     },
 
     /// Manage the project knowledge base
@@ -281,6 +287,7 @@ fn main() {
         Commands::Milestone { subcommand } => cmd::milestone::run(&root, subcommand, cli.json),
         Commands::Ponder { subcommand } => cmd::ponder::run(&root, subcommand, cli.json),
         Commands::Investigate { subcommand } => cmd::investigate::run(&root, subcommand, cli.json),
+        Commands::Spike { subcommand } => cmd::spike::run(&root, subcommand, cli.json),
         Commands::Knowledge { subcommand } => cmd::knowledge::run(&root, subcommand, cli.json),
         Commands::Platform { subcommand } => cmd::platform::run(&root, subcommand, cli.json),
         Commands::Project { subcommand } => cmd::project::run(&root, subcommand, cli.json),

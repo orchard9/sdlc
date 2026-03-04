@@ -178,6 +178,10 @@ pub async fn run_tool(
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
 
     // Phase 2: branch on streaming flag
+    // When persist_interactions == Some(false) the tool has explicitly opted out
+    // of interaction recording (e.g. sensitive credential management tools).
+    let should_persist = meta.persist_interactions != Some(false);
+
     if meta.streaming == Some(true) {
         let interaction_id = generate_run_id();
         let record_init = sdlc_core::tool_interaction::ToolInteractionRecord {
@@ -192,7 +196,9 @@ pub async fn run_tool(
             notes: None,
             streaming_log: true,
         };
-        let _ = sdlc_core::tool_interaction::save_interaction(&root, &record_init);
+        if should_persist {
+            let _ = sdlc_core::tool_interaction::save_interaction(&root, &record_init);
+        }
 
         let event_tx = app.event_tx.clone();
         let iid = interaction_id.clone();
@@ -337,16 +343,20 @@ pub async fn run_tool(
                 "failed"
             };
 
-            // Update the persisted record
-            if let Ok(mut rec) =
-                sdlc_core::tool_interaction::load_interaction(&root_task, &tool_name, &iid)
-            {
-                rec.status = final_status.to_string();
-                rec.completed_at = Some(chrono::Utc::now().to_rfc3339());
-                rec.result = final_result;
-                let _ = sdlc_core::tool_interaction::save_interaction(&root_task, &rec);
+            // Update the persisted record (only if this tool persists interactions)
+            if should_persist {
+                if let Ok(mut rec) =
+                    sdlc_core::tool_interaction::load_interaction(&root_task, &tool_name, &iid)
+                {
+                    rec.status = final_status.to_string();
+                    rec.completed_at = Some(chrono::Utc::now().to_rfc3339());
+                    rec.result = final_result;
+                    let _ = sdlc_core::tool_interaction::save_interaction(&root_task, &rec);
+                }
+                sdlc_core::tool_interaction::enforce_interaction_retention(
+                    &root_task, &tool_name, 200,
+                );
             }
-            sdlc_core::tool_interaction::enforce_interaction_retention(&root_task, &tool_name, 200);
 
             if final_status == "completed" {
                 let _ = event_tx.send(SseMessage::ToolRunCompleted {
@@ -371,7 +381,7 @@ pub async fn run_tool(
         ));
     }
 
-    // --- Non-streaming (synchronous) path — unchanged behavior ---
+    // --- Non-streaming (synchronous) path ---
     let result = tokio::task::spawn_blocking(move || {
         let script = script_path;
 
@@ -389,7 +399,9 @@ pub async fn run_tool(
             notes: None,
             streaming_log: false,
         };
-        let _ = sdlc_core::tool_interaction::save_interaction(&root, &record);
+        if should_persist {
+            let _ = sdlc_core::tool_interaction::save_interaction(&root, &record);
+        }
 
         let stdin_json = serde_json::to_string(&input)
             .map_err(|e| AppError(anyhow::anyhow!("failed to serialize tool input: {e}")))?;
@@ -416,8 +428,10 @@ pub async fn run_tool(
         record.status = status.to_string();
         record.completed_at = Some(chrono::Utc::now().to_rfc3339());
         record.result = Some(output.clone());
-        let _ = sdlc_core::tool_interaction::save_interaction(&root, &record);
-        sdlc_core::tool_interaction::enforce_interaction_retention(&root, &name, 200);
+        if should_persist {
+            let _ = sdlc_core::tool_interaction::save_interaction(&root, &record);
+            sdlc_core::tool_interaction::enforce_interaction_retention(&root, &name, 200);
+        }
 
         Ok(output)
     })
@@ -711,7 +725,7 @@ pub async fn agent_call(
     };
 
     let max_turns = body.max_turns.unwrap_or(20).min(100);
-    let opts = crate::routes::runs::sdlc_query_options(app.root.clone(), max_turns);
+    let opts = crate::routes::runs::sdlc_query_options(app.root.clone(), max_turns, None);
     let run_key = format!("tool-agent:{}", generate_run_id());
 
     // Spawn the agent run — this inserts a (tx, abort_handle) into agent_runs synchronously.
@@ -1002,7 +1016,7 @@ pub async fn agent_dispatch(
     }
 
     let max_turns = body.max_turns.unwrap_or(40).min(100);
-    let opts = crate::routes::runs::sdlc_query_options(app.root.clone(), max_turns);
+    let opts = crate::routes::runs::sdlc_query_options(app.root.clone(), max_turns, None);
 
     // spawn_agent_run returns 409 if a run with body.run_key is already in flight.
     let result = crate::routes::runs::spawn_agent_run(

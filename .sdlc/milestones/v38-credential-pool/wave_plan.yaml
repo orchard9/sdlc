@@ -1,0 +1,28 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: credential-pool-core
+    title: Credential pool core — CredentialPool struct, schema, round-robin checkout
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true
+- number: 2
+  label: Planning
+  items:
+  - slug: credential-pool-helm
+    title: Credential pool Helm — ExternalSecret, DATABASE_URL injection into project pods
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by:
+    - credential-pool-core
+  - slug: credential-pool-runs
+    title: Credential pool runs — inject CLAUDE_CODE_OAUTH_TOKEN into every spawn_agent_run
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by:
+    - credential-pool-core
+  needs_worktrees: false

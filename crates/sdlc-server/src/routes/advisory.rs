@@ -204,7 +204,7 @@ findings:
 7. Output a concise summary of what you found, grouped by stage, to help the developer decide what to ponder next."#
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 40);
+    let opts = sdlc_query_options(app.root.clone(), 40, None);
 
     spawn_agent_run(
         "advisory".to_string(),

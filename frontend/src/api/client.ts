@@ -467,6 +467,12 @@ export const api = {
   createSecretsEnv: (body: { env: string; pairs: { key: string; value: string }[] }) =>
     request('/api/secrets/envs', { method: 'POST', body: JSON.stringify(body) }),
 
+  // Spikes
+  getSpikes: () => request<import('@/lib/types').SpikeSummary[]>('/api/spikes'),
+  getSpike: (slug: string) => request<import('@/lib/types').SpikeDetail>(`/api/spikes/${encodeURIComponent(slug)}`),
+  promoteSpike: (slug: string) =>
+    request<{ ponder_slug: string }>(`/api/spikes/${encodeURIComponent(slug)}/promote`, { method: 'POST' }),
+
   // Hub mode (multi-project registry)
   getHubProjects: () => request<import('@/lib/types').HubProjectEntry[]>('/api/hub/projects'),
 

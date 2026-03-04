@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, FolderKanban, Milestone, Search, Lightbulb, Microscope, Lock, Wrench,
   TrendingUp, MessagesSquare, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText,
-  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight, BarChart2,
+  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight, BarChart2, FlaskConical,
 } from 'lucide-react'
 
 const navGroups = [
@@ -24,6 +24,7 @@ const navGroups = [
       { path: '/investigations', label: 'Root Cause', icon: Microscope, exact: false },
       { path: '/evolve', label: 'Evolve', icon: TrendingUp, exact: false },
       { path: '/guidelines', label: 'Guidelines', icon: BookMarked, exact: false },
+      { path: '/spikes', label: 'Spikes', icon: FlaskConical, exact: false },
       { path: '/knowledge', label: 'Knowledge', icon: Library, exact: false },
     ],
   },

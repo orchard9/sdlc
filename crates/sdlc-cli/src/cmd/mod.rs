@@ -23,6 +23,7 @@ pub mod project;
 pub mod query;
 pub mod score;
 pub mod secrets;
+pub mod spike;
 pub mod state;
 pub mod task;
 pub mod telegram;
