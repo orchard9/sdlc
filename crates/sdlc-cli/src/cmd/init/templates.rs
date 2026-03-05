@@ -163,7 +163,9 @@ Never keep a flaky or low-value test just to preserve coverage numbers.
 ## 6. Using sdlc
 
 All state lives in `.sdlc/` YAML files. **Never edit them directly** — use the CLI.
-Direct edits cause deserialization failures and corrupt state.
+Direct edits cause deserialization failures and corrupt state (e.g. hand-written tasks
+lack the `id`, `created_at`, `started_at`, `completed_at` fields the CLI always populates,
+triggering "missing field `id`" schema errors on next load).
 
 | Action | Command |
 |---|---|
@@ -182,6 +184,7 @@ Direct edits cause deserialization failures and corrupt state.
 | Show feature | `sdlc feature show <slug> --json` |
 | List tasks | `sdlc task list <slug>` |
 | Project state | `sdlc state` |
+| Parallel work queue | `sdlc parallel-work --json` |
 | Survey milestone waves | `sdlc project prepare [--milestone <slug>]` |
 | Mark milestone prepared | `sdlc milestone mark-prepared <slug>` |
 | Project phase | `sdlc project status` |
@@ -198,6 +201,13 @@ Direct edits cause deserialization failures and corrupt state.
 
 Phases advance automatically from artifact approvals — never call `sdlc feature transition`.
 The only files you write directly are Markdown artifacts to `output_path`.
+
+**`create_tasks` is a two-part action:**
+1. Write `tasks.md` to `output_path`, draft and approve it.
+2. Run `sdlc task add <slug> "<title>"` for EACH task — this creates the task records with
+   proper IDs and timestamps. Without this step, `sdlc task list` returns empty and
+   `implement_task` has nothing to act on. Tasks written directly to `manifest.yaml`
+   will fail schema validation ("missing field `id`").
 
 ## 7. SDLC Tool Suite
 

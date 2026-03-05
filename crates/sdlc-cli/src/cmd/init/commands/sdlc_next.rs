@@ -47,10 +47,21 @@ Key fields: `action`, `message`, `output_path`, `current_phase`, `is_heavy`, `ga
 
 ### 4. Execute the directive
 
-For **artifact creation** (`create_spec`, `create_design`, `create_tasks`, `create_qa_plan`, `create_review`, `create_audit`):
+For **artifact creation** (`create_spec`, `create_design`, `create_qa_plan`, `create_review`, `create_audit`):
 1. Run `sdlc feature show <slug> --json` for context
 2. Read existing artifacts in `.sdlc/features/<slug>/`
 3. Write a thorough Markdown artifact to `output_path`
+
+For **`create_tasks`** — this is a two-part action, not just a Markdown write:
+1. Run `sdlc feature show <slug> --json` and read `design.md` for context
+2. Write `.sdlc/features/<slug>/tasks.md` — a detailed task breakdown in Markdown
+3. Call `sdlc artifact draft <slug> tasks` then `sdlc artifact approve <slug> tasks`
+4. After approval, create each task record via CLI:
+   ```bash
+   sdlc task add <slug> "<task title>"
+   ```
+   Repeat for every task. **NEVER write tasks directly to `manifest.yaml`** — the CLI assigns IDs and timestamps; hand-written YAML fails schema validation.
+5. Verify with `sdlc task list <slug>` — tasks should appear before `implement_task` is the directive.
 
 For `create_design` on a **UI feature**, also write `mockup.html` in the same directory:
 - Single self-contained file — inline `<style>` and `<script>`, no CDN or external resources
@@ -109,11 +120,16 @@ Use this playbook to drive the next SDLC directive for a feature.
    - If one is not provided, run `sdlc next` and pick a feature.
 2. Run `sdlc next --for <slug> --json`.
 3. Parse directive fields: `action`, `message`, `output_path`, `current_phase`, `is_heavy`, `gates`.
-4. For creation actions:
+4. For creation actions (all except `create_tasks`):
    - Read feature context and existing artifacts.
    - Write the required artifact to `output_path`.
    - Mark it draft with `sdlc artifact draft <slug> <artifact_type>`.
    - For `create_design` on a UI feature: also write `mockup.html` (self-contained, inline CSS/JS, named `<section id="screen-*">` blocks, navigation bar). Reference it from `design.md`: `[Mockup](mockup.html)`.
+4a. For `create_tasks` (two-part — artifact + CLI task records):
+   - Write `tasks.md` to `output_path` with a full task breakdown.
+   - `sdlc artifact draft <slug> tasks` → `sdlc artifact approve <slug> tasks`.
+   - Then for EACH task: `sdlc task add <slug> "<task title>"`.
+   - Verify with `sdlc task list <slug>`. **NEVER write tasks to `manifest.yaml` directly.**
 5. For approval actions (`approve_spec`, `approve_design`, `approve_tasks`, `approve_qa_plan`, `approve_merge`):
    - Read the artifact at `output_path`, verify it is complete and correct.
    - Run `sdlc artifact approve <slug> <artifact_type>` autonomously.
@@ -143,8 +159,9 @@ Use this skill when a user asks for the next SDLC action for a feature.
 2. Run `sdlc next --for <slug> --json`.
 3. Follow the directive fields (`action`, `message`, `output_path`, `gates`).
 4. For approval or dependency gates, surface context and wait for explicit user approval.
-5. For creation actions, write the requested artifact at `output_path`.
+5. For creation actions (all except `create_tasks`): write the requested artifact at `output_path`. Draft then approve.
    For `create_design` on a UI feature: also produce `mockup.html` — self-contained HTML5 (no external resources), with a nav bar and named `<section id="screen-*">` blocks for each UI state. Reference it from `design.md`: `[Mockup](mockup.html)`.
+5a. For `create_tasks`: write `tasks.md` to `output_path` → draft → approve → then run `sdlc task add <slug> "<title>"` for EACH task. NEVER write tasks to `manifest.yaml` directly — missing IDs will fail schema validation.
 6. For implementation actions, complete the next pending task.
 7. Run `sdlc next --for <slug>` to confirm what comes next.
 "#;

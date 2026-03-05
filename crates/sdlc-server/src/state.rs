@@ -3,10 +3,12 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, OnceLock};
 use tokio::sync::{broadcast, Mutex, RwLock};
 
+use sdlc_core::orchestrator::OrchestratorBackend;
+use sdlc_core::TelemetryBackend;
+
 use crate::hub::HubRegistry;
 
 use crate::auth::TunnelConfig;
-use crate::telemetry::TelemetryStore;
 use crate::tunnel::Tunnel;
 
 /// Entry in the active-runs map: the broadcast sender for SSE subscribers
@@ -360,12 +362,15 @@ pub struct AppState {
     pub app_tunnel_handle: Arc<Mutex<Option<Tunnel>>>,
     /// HTTP client for reverse-proxying app tunnel requests.
     pub http_client: reqwest::Client,
-    /// Telemetry store for persisting raw agent events across restarts.
-    /// Populated asynchronously at startup via a background `spawn_blocking` task
-    /// to avoid blocking the tokio runtime during redb WAL recovery.
-    /// `None` (i.e. OnceLock not yet set) until the background open completes;
-    /// remains empty if `.sdlc/telemetry.redb` cannot be opened (graceful degradation).
-    pub telemetry: Arc<OnceLock<Arc<TelemetryStore>>>,
+    /// Telemetry backend for persisting raw agent events across restarts.
+    /// Populated asynchronously at startup via a background task.
+    /// Uses redb (local) or PostgreSQL (cluster) depending on `DATABASE_URL`.
+    /// `None` until the background open completes; graceful degradation if unavailable.
+    pub telemetry: Arc<OnceLock<Arc<dyn TelemetryBackend>>>,
+    /// Orchestrator backend for action, webhook, and route storage.
+    /// Populated asynchronously at startup alongside `telemetry`.
+    /// Uses redb (local) or PostgreSQL (cluster) depending on `DATABASE_URL`.
+    pub orchestrator: Arc<OnceLock<Arc<dyn OrchestratorBackend>>>,
     /// Abort guards for background file-watcher tasks.
     /// `WatcherGuard` calls `.abort()` on every handle when dropped, so all
     /// watcher loops are cancelled when `AppState` goes out of scope.
@@ -415,6 +420,19 @@ fn generate_agent_token() -> String {
 }
 
 impl AppState {
+    /// Return the orchestrator backend, or a 503 error if not yet initialized.
+    pub fn orchestrator_backend(
+        &self,
+    ) -> Result<
+        std::sync::Arc<dyn sdlc_core::orchestrator::OrchestratorBackend>,
+        crate::error::AppError,
+    > {
+        self.orchestrator
+            .get()
+            .cloned()
+            .ok_or_else(|| crate::error::AppError(anyhow::anyhow!("orchestrator not ready")))
+    }
+
     /// Construct AppState without spawning watcher tasks.
     /// All test code uses this path — watcher tasks are only needed in the
     /// production server process (via `new_with_port` → `build_router`).
@@ -448,10 +466,17 @@ impl AppState {
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .expect("infallible: reqwest client construction");
-        // Telemetry is NOT opened here — `new_with_port` spawns a background
-        // task to open it via `spawn_blocking` so WAL recovery on large redb
-        // files does not block the tokio runtime during startup.
-        let telemetry: Arc<OnceLock<Arc<TelemetryStore>>> = Arc::new(OnceLock::new());
+        // Telemetry is opened in a background task (can have large WAL on big files).
+        let telemetry: Arc<OnceLock<Arc<dyn TelemetryBackend>>> = Arc::new(OnceLock::new());
+        // Orchestrator is opened synchronously when not using postgres (it's always small).
+        // When DATABASE_URL is set, new_with_port's background task sets it instead.
+        let orchestrator: Arc<OnceLock<Arc<dyn OrchestratorBackend>>> = Arc::new(OnceLock::new());
+        if std::env::var("DATABASE_URL").is_err() {
+            let db_path = sdlc_core::paths::orchestrator_db_path(&root);
+            if let Ok(db) = sdlc_core::orchestrator::ActionDb::open(&db_path) {
+                let _ = orchestrator.set(Arc::new(db) as Arc<dyn OrchestratorBackend>);
+            }
+        }
         // Pre-populate named tokens from .sdlc/auth.yaml so the auth gate is
         // active immediately on startup — before the first watcher tick fires.
         tracing::debug!("loading auth config");
@@ -480,6 +505,7 @@ impl AppState {
             app_tunnel_handle: Arc::new(Mutex::new(None)),
             http_client,
             telemetry,
+            orchestrator,
             _watcher_handles: Arc::new(WatcherGuard(Vec::new())),
             agent_token: Arc::new(generate_agent_token()),
             hub_registry: None,
@@ -516,26 +542,53 @@ impl AppState {
         let state = Self::build_base_state(root, port);
         let tx = state.event_tx.clone();
 
-        // Open the telemetry DB in a background task so redb WAL recovery on
-        // large files does not block the tokio worker thread at startup.
+        // Open storage backends in a background task.
         // Guard: only spawn if inside a Tokio runtime (skipped in sync unit tests).
         if tokio::runtime::Handle::try_current().is_ok() {
-            let telemetry_cell = state.telemetry.clone();
             let telemetry_path = state.root.join(".sdlc").join("telemetry.redb");
-            tokio::spawn(async move {
-                tracing::debug!(path = %telemetry_path.display(), "opening telemetry store (background)");
-                let result = tokio::task::spawn_blocking(move || {
-                    TelemetryStore::open(&telemetry_path).ok().map(Arc::new)
-                })
-                .await
-                .unwrap_or(None);
-                if let Some(store) = result {
-                    let _ = telemetry_cell.set(store);
-                    tracing::debug!("telemetry store ready");
-                } else {
-                    tracing::warn!("telemetry store unavailable — events will not be persisted");
-                }
-            });
+
+            if let Ok(url) = std::env::var("DATABASE_URL") {
+                // Postgres path: connect, migrate, set both backends.
+                // Orchestrator redb was set synchronously in build_base_state; postgres
+                // overrides it via OnceLock (will silently fail if already set — postgres
+                // wins only in fresh cluster environments where no prior set happened).
+                let telemetry_cell = state.telemetry.clone();
+                let orchestrator_cell = state.orchestrator.clone();
+                tracing::debug!("DATABASE_URL detected — connecting postgres backends");
+                tokio::spawn(async move {
+                    match sqlx::PgPool::connect(&url).await {
+                        Ok(pool) => {
+                            if let Err(e) = sqlx::migrate!("./migrations").run(&pool).await {
+                                tracing::warn!(error = %e, "postgres migration failed — using redb fallback");
+                                open_redb_telemetry(telemetry_cell, telemetry_path).await;
+                                return;
+                            }
+                            use crate::{
+                                pg_orchestrator::PgOrchestratorBackend,
+                                pg_telemetry::PgTelemetryBackend,
+                            };
+                            let _ = telemetry_cell
+                                .set(Arc::new(PgTelemetryBackend::new(pool.clone()))
+                                    as Arc<dyn TelemetryBackend>);
+                            let _ = orchestrator_cell
+                                .set(Arc::new(PgOrchestratorBackend::new(pool))
+                                    as Arc<dyn OrchestratorBackend>);
+                            tracing::info!("postgres backends ready");
+                        }
+                        Err(e) => {
+                            tracing::warn!(error = %e, "postgres connect failed — using redb");
+                            open_redb_telemetry(telemetry_cell, telemetry_path).await;
+                        }
+                    }
+                });
+            } else {
+                // Redb path: orchestrator already set synchronously in build_base_state.
+                // Open telemetry in background (can be slow on large files with WAL recovery).
+                let telemetry_cell = state.telemetry.clone();
+                tokio::spawn(async move {
+                    open_redb_telemetry(telemetry_cell, telemetry_path).await;
+                });
+            }
         }
 
         // Initialize the Claude credential pool asynchronously.
@@ -824,6 +877,27 @@ async fn scan_tools_snapshot(
         None
     } else {
         latest.map(|mtime| (count, mtime))
+    }
+}
+
+/// Open the redb telemetry backend in a background blocking task and set the OnceLock.
+async fn open_redb_telemetry(
+    cell: Arc<OnceLock<Arc<dyn TelemetryBackend>>>,
+    path: std::path::PathBuf,
+) {
+    tracing::debug!(path = %path.display(), "opening redb telemetry backend");
+    let result = tokio::task::spawn_blocking(move || {
+        crate::telemetry::TelemetryStore::open(&path)
+            .ok()
+            .map(|s| Arc::new(s) as Arc<dyn TelemetryBackend>)
+    })
+    .await
+    .unwrap_or(None);
+    if let Some(t) = result {
+        let _ = cell.set(t);
+        tracing::debug!("redb telemetry backend ready");
+    } else {
+        tracing::warn!("telemetry backend unavailable — events will not be persisted");
     }
 }
 

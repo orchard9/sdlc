@@ -182,41 +182,6 @@ pub struct Config {
     /// UI can pre-populate the port input across restarts.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub app_port: Option<u16>,
-    /// Telegram bot integration configuration.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub telegram: Option<TelegramConfigYaml>,
-}
-
-// ---------------------------------------------------------------------------
-// TelegramConfigYaml — optional YAML config for Telegram bot integration
-// ---------------------------------------------------------------------------
-
-/// YAML-deserialized Telegram config (all fields optional; merged with env vars).
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-pub struct TelegramConfigYaml {
-    /// Bot token — overridden by TELEGRAM_BOT_TOKEN env var if set.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub bot_token: Option<String>,
-    /// Long-poll timeout in seconds (default 30).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub poll_timeout_secs: Option<u64>,
-    /// Path to the SQLite messages database (default: .sdlc/telegram/messages.db).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub db_path: Option<String>,
-
-    // --- Digest-specific fields ---
-    /// Chat IDs to query for the digest (e.g. ["-1001234567890"]).
-    #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub chat_ids: Vec<String>,
-    /// Time window in hours (default: 24).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub window_hours: Option<u32>,
-    /// Email subject prefix (default: "[sdlc Digest]").
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub subject_prefix: Option<String>,
-    /// Maximum messages per chat (default: 100).
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub max_messages_per_chat: Option<u32>,
 }
 
 fn default_version() -> u32 {
@@ -236,7 +201,6 @@ impl Config {
             quality: None,
             sdlc_version: None,
             app_port: None,
-            telegram: None,
         }
     }
 

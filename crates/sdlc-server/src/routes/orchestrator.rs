@@ -58,20 +58,12 @@ pub async fn register_route(
         return Err(AppError::bad_request("input_template must be non-empty"));
     }
 
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     let path = body.path.clone();
     let tool_name = body.tool_name.clone();
     let input_template = body.input_template.clone();
 
     let result = tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path).map_err(|e| {
-            (
-                false,
-                anyhow::anyhow!("failed to open orchestrator DB: {e}"),
-            )
-        })?;
-
         let route = sdlc_core::orchestrator::WebhookRoute::new(&path, &tool_name, &input_template);
         let created_at = route.created_at;
         let id = route.id;
@@ -79,7 +71,7 @@ pub async fn register_route(
         let route_tool = route.tool_name.clone();
         let route_template = route.input_template.clone();
 
-        db.insert_route(&route).map_err(|e| {
+        backend.insert_route(&route).map_err(|e| {
             let is_conflict = e.to_string().contains("duplicate webhook route path");
             (is_conflict, anyhow::anyhow!("{e}"))
         })?;
@@ -111,12 +103,9 @@ pub async fn register_route(
 /// Returns all registered webhook routes as a JSON array, sorted by
 /// `created_at` ascending.
 pub async fn list_routes(State(app): State<AppState>) -> Result<Json<serde_json::Value>, AppError> {
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     let result = tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
-            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
-        let routes = db.list_routes().map_err(|e| anyhow::anyhow!("{e}"))?;
+        let routes = backend.list_routes().map_err(|e| anyhow::anyhow!("{e}"))?;
         let json: Vec<serde_json::Value> = routes
             .iter()
             .map(|r| {
@@ -193,12 +182,9 @@ fn action_to_json(action: &sdlc_core::orchestrator::Action) -> serde_json::Value
 pub async fn list_actions(
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     let result = tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
-            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
-        let actions = db.list_all().map_err(|e| anyhow::anyhow!("{e}"))?;
+        let actions = backend.list_all().map_err(|e| anyhow::anyhow!("{e}"))?;
         let json: Vec<serde_json::Value> = actions.iter().map(action_to_json).collect();
         Ok::<_, anyhow::Error>(serde_json::json!(json))
     })
@@ -248,7 +234,7 @@ pub async fn create_action(
         return Err(AppError::bad_request("tool_input must be a JSON object"));
     }
 
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     let label = body.label.clone();
     let tool_name = body.tool_name.clone();
     let tool_input = body.tool_input.clone();
@@ -256,9 +242,6 @@ pub async fn create_action(
     let recurrence = body.recurrence_secs.map(std::time::Duration::from_secs);
 
     let result = tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
-            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
         let action = sdlc_core::orchestrator::Action::new_scheduled(
             label,
             tool_name,
@@ -266,7 +249,9 @@ pub async fn create_action(
             next_tick_at,
             recurrence,
         );
-        db.insert(&action).map_err(|e| anyhow::anyhow!("{e}"))?;
+        backend
+            .insert(&action)
+            .map_err(|e| anyhow::anyhow!("{e}"))?;
         Ok::<_, anyhow::Error>(action_to_json(&action))
     })
     .await
@@ -294,16 +279,11 @@ pub async fn delete_action(
         .parse::<uuid::Uuid>()
         .map_err(|_| AppError::bad_request(format!("'{id}' is not a valid UUID")))?;
 
-    let root = app.root.clone();
-    tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
-            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
-        db.delete(uuid).map_err(|e| anyhow::anyhow!("{e}"))
-    })
-    .await
-    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
-    .map_err(AppError)?;
+    let backend = app.orchestrator_backend()?;
+    tokio::task::spawn_blocking(move || backend.delete(uuid).map_err(|e| anyhow::anyhow!("{e}")))
+        .await
+        .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
+        .map_err(AppError)?;
 
     Ok(StatusCode::NO_CONTENT)
 }
@@ -375,18 +355,12 @@ pub async fn patch_action(
         MaybeAbsent::Present(Some(secs)) => Some(Some(std::time::Duration::from_secs(secs))),
     };
 
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     let label = body.label.clone();
 
     let result = tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path).map_err(|e| {
-            (
-                false,
-                anyhow::anyhow!("failed to open orchestrator DB: {e}"),
-            )
-        })?;
-        db.update_label_and_recurrence(uuid, label, recurrence)
+        backend
+            .update_label_and_recurrence(uuid, label, recurrence)
             .map_err(|e| {
                 let not_found = e.to_string().contains("not found");
                 (not_found, anyhow::anyhow!("{e}"))
@@ -420,12 +394,11 @@ pub async fn delete_route(
         .parse::<uuid::Uuid>()
         .map_err(|_| AppError::bad_request(format!("'{id}' is not a valid UUID")))?;
 
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
-            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
-        db.delete_route(uuid).map_err(|e| anyhow::anyhow!("{e}"))
+        backend
+            .delete_route(uuid)
+            .map_err(|e| anyhow::anyhow!("{e}"))
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))?
@@ -459,12 +432,9 @@ pub async fn list_webhook_events(
     Query(params): Query<WebhookEventsQuery>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let limit = params.limit;
-    let root = app.root.clone();
+    let backend = app.orchestrator_backend()?;
     let result = tokio::task::spawn_blocking(move || {
-        let db_path = sdlc_core::paths::orchestrator_db_path(&root);
-        let db = sdlc_core::orchestrator::ActionDb::open(&db_path)
-            .map_err(|e| anyhow::anyhow!("failed to open orchestrator DB: {e}"))?;
-        let events = db
+        let events = backend
             .list_webhook_events()
             .map_err(|e| anyhow::anyhow!("{e}"))?;
         let json: Vec<serde_json::Value> = events

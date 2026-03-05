@@ -17,8 +17,7 @@ use axum::{
     response::IntoResponse,
     Json,
 };
-use sdlc_core::orchestrator::{ActionDb, WebhookEvent, WebhookEventOutcome, WebhookPayload};
-use sdlc_core::paths::orchestrator_db_path;
+use sdlc_core::orchestrator::{WebhookEvent, WebhookEventOutcome, WebhookPayload};
 
 use crate::state::AppState;
 
@@ -56,10 +55,18 @@ pub async fn receive_webhook(
     let payload = WebhookPayload::new(route_path.clone(), body.to_vec(), content_type.clone());
     let id = payload.id;
 
-    let db_path = orchestrator_db_path(&app.root);
+    let backend = match app.orchestrator_backend() {
+        Ok(b) => b,
+        Err(_) => {
+            return (
+                StatusCode::SERVICE_UNAVAILABLE,
+                Json(serde_json::json!({ "error": "orchestrator not ready" })),
+            )
+                .into_response();
+        }
+    };
     let result = tokio::task::spawn_blocking(move || {
-        let db = ActionDb::open(&db_path)?;
-        db.insert_webhook(&payload)?;
+        backend.insert_webhook(&payload)?;
 
         // Best-effort: record a WebhookEvent for the arrival. Do not fail the
         // request if event logging fails -- the payload is already stored safely.
@@ -69,7 +76,7 @@ pub async fn receive_webhook(
             body_bytes,
             WebhookEventOutcome::Received,
         );
-        if let Err(e) = db.insert_webhook_event(&event) {
+        if let Err(e) = backend.insert_webhook_event(&event) {
             tracing::warn!(error = %e, "Failed to record webhook arrival event");
         }
 

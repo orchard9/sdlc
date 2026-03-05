@@ -13,6 +13,7 @@ mod sdlc_init;
 mod sdlc_knowledge;
 mod sdlc_milestone_uat;
 mod sdlc_next;
+mod sdlc_organize_parallel;
 mod sdlc_plan;
 mod sdlc_ponder;
 mod sdlc_ponder_commit;
@@ -59,6 +60,7 @@ pub static ALL_COMMANDS: &[&CommandDef] = &[
     &sdlc_empathy::SDLC_EMPATHY,
     &sdlc_prepare::SDLC_PREPARE,
     &sdlc_run_wave::SDLC_RUN_WAVE,
+    &sdlc_organize_parallel::SDLC_ORGANIZE_PARALLEL,
     &sdlc_tool_run::SDLC_TOOL_RUN,
     &sdlc_tool_build::SDLC_TOOL_BUILD,
     &sdlc_skill_build::SDLC_SKILL_BUILD,

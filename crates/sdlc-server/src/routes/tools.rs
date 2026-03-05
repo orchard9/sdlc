@@ -875,7 +875,17 @@ fn inject_missing_secrets(meta: &mut serde_json::Value) {
         .map(|s| s.env_var.clone())
         .collect();
 
-    obj.insert("missing_secrets".into(), serde_json::json!(missing));
+    obj.insert("missing_secrets".into(), serde_json::json!(missing.clone()));
+
+    // If this tool requires setup and all secrets are present, mark it as ready.
+    if obj
+        .get("requires_setup")
+        .and_then(|v| v.as_bool())
+        .unwrap_or(false)
+        && missing.is_empty()
+    {
+        obj.entry("setup_done").or_insert(serde_json::json!(true));
+    }
 }
 
 /// Validate that a tool name contains only safe characters.

@@ -12,7 +12,7 @@ use cmd::{
     orchestrate::OrchestrateSubcommand, platform::PlatformSubcommand, ponder::PonderSubcommand,
     project::ProjectSubcommand, query::QuerySubcommand, score::ScoreSubcommand,
     secrets::SecretsSubcommand, spike::SpikeSubcommand, task::TaskSubcommand,
-    telegram::TelegramSubcommand, thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
+    thread::ThreadSubcommand, tool::ToolCommand, ui::UiSubcommand,
 };
 use std::path::PathBuf;
 
@@ -57,6 +57,9 @@ enum Commands {
 
     /// Show the single highest-priority actionable item (milestone order → feature order)
     Focus,
+
+    /// Show up to 4 parallel work items across active milestones (same logic as dashboard)
+    ParallelWork,
 
     /// Manage features
     Feature {
@@ -209,12 +212,6 @@ enum Commands {
     /// Archive a feature
     Archive { slug: String },
 
-    /// Telegram bot integration: poll for messages and store them locally
-    Telegram {
-        #[command(subcommand)]
-        subcommand: TelegramSubcommand,
-    },
-
     /// Run as an MCP stdio server (used by claude-agent)
     Mcp,
 
@@ -279,6 +276,7 @@ fn main() {
         Commands::State => cmd::state::run(&root, cli.json),
         Commands::Next { feature } => cmd::next::run(&root, feature.as_deref(), cli.json),
         Commands::Focus => cmd::focus::run(&root, cli.json),
+        Commands::ParallelWork => cmd::parallel_work::run(&root, cli.json),
         Commands::Feature { subcommand } => cmd::feature::run(&root, subcommand, cli.json),
         Commands::Backlog { subcommand } => cmd::backlog::run(&root, subcommand, cli.json),
         Commands::Artifact { subcommand } => cmd::artifact::run(&root, subcommand, cli.json),
@@ -310,7 +308,6 @@ fn main() {
         Commands::Archive { slug } => {
             cmd::feature::run(&root, FeatureSubcommand::Archive { slug }, cli.json)
         }
-        Commands::Telegram { subcommand } => cmd::telegram::run(&root, subcommand),
         Commands::Mcp => cmd::mcp::run(&root),
         Commands::Agent { subcommand } => cmd::agent::run(&root, subcommand, cli.json),
         Commands::Ui {

@@ -14,7 +14,9 @@ use std::{
 use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use clap::Subcommand;
-use sdlc_core::orchestrator::{Action, ActionDb, ActionStatus, WebhookPayload};
+use sdlc_core::orchestrator::{
+    Action, ActionDb, ActionStatus, OrchestratorBackend, WebhookPayload,
+};
 
 use crate::output::print_table;
 
@@ -71,16 +73,18 @@ pub fn run(
             at,
             every,
         }) => {
-            let db = ActionDb::open(&db_path).with_context(|| {
-                format!("failed to open orchestrator DB at {}", db_path.display())
-            })?;
-            run_add(&db, &label, &tool, &input, &at, every)
+            let db: Box<dyn OrchestratorBackend> =
+                Box::new(ActionDb::open(&db_path).with_context(|| {
+                    format!("failed to open orchestrator DB at {}", db_path.display())
+                })?);
+            run_add(db.as_ref(), &label, &tool, &input, &at, every)
         }
         Some(OrchestrateSubcommand::List { status }) => {
-            let db = ActionDb::open(&db_path).with_context(|| {
-                format!("failed to open orchestrator DB at {}", db_path.display())
-            })?;
-            run_list(&db, status.as_deref())
+            let db: Box<dyn OrchestratorBackend> =
+                Box::new(ActionDb::open(&db_path).with_context(|| {
+                    format!("failed to open orchestrator DB at {}", db_path.display())
+                })?);
+            run_list(db.as_ref(), status.as_deref())
         }
     }
 }
@@ -125,6 +129,10 @@ pub fn run_daemon(root: &Path, tick_rate_secs: u64) -> Result<()> {
 
 /// Execute one tick of the orchestrator: dispatch all due Pending actions,
 /// then dispatch all pending webhook payloads.
+///
+/// This is the **local/redb-only** daemon path. In cluster mode the server
+/// handles orchestration using the postgres backend; this function is not used
+/// in that context.
 ///
 /// Opens and closes the redb file around each individual operation so that
 /// route handlers (which also call `ActionDb::open` via `spawn_blocking`) can
@@ -328,7 +336,7 @@ fn rescheduled(action: &Action, interval: Duration) -> Action {
 // ---------------------------------------------------------------------------
 
 fn run_add(
-    db: &ActionDb,
+    db: &dyn OrchestratorBackend,
     label: &str,
     tool: &str,
     input: &str,
@@ -386,7 +394,7 @@ fn parse_at(s: &str) -> Result<DateTime<Utc>> {
 // List
 // ---------------------------------------------------------------------------
 
-fn run_list(db: &ActionDb, status_filter: Option<&str>) -> Result<()> {
+fn run_list(db: &dyn OrchestratorBackend, status_filter: Option<&str>) -> Result<()> {
     let actions = db.list_all().context("failed to list actions")?;
 
     let actions: Vec<_> = if let Some(filter) = status_filter {

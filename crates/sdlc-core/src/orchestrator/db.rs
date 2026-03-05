@@ -648,6 +648,87 @@ impl ActionDb {
 }
 
 // ---------------------------------------------------------------------------
+// OrchestratorBackend impl — delegates to inherent methods above
+// ---------------------------------------------------------------------------
+
+use super::backend::OrchestratorBackend;
+
+impl OrchestratorBackend for ActionDb {
+    fn insert(&self, action: &Action) -> Result<()> {
+        self.insert(action)
+    }
+
+    fn set_status(&self, id: Uuid, status: ActionStatus) -> Result<()> {
+        self.set_status(id, status)
+    }
+
+    fn range_due(&self, now: DateTime<Utc>) -> Result<Vec<Action>> {
+        self.range_due(now)
+    }
+
+    fn startup_recovery(&self, max_age: std::time::Duration) -> Result<u32> {
+        self.startup_recovery(max_age)
+    }
+
+    fn delete(&self, id: Uuid) -> Result<()> {
+        self.delete(id)
+    }
+
+    fn update_label_and_recurrence(
+        &self,
+        id: Uuid,
+        label: Option<String>,
+        recurrence: Option<Option<std::time::Duration>>,
+    ) -> Result<Action> {
+        self.update_label_and_recurrence(id, label, recurrence)
+    }
+
+    fn list_all(&self) -> Result<Vec<Action>> {
+        self.list_all()
+    }
+
+    fn insert_webhook(&self, payload: &WebhookPayload) -> Result<()> {
+        self.insert_webhook(payload)
+    }
+
+    fn all_pending_webhooks(&self) -> Result<Vec<WebhookPayload>> {
+        self.all_pending_webhooks()
+    }
+
+    fn delete_webhook(&self, id: Uuid) -> Result<()> {
+        self.delete_webhook(id)
+    }
+
+    fn insert_route(&self, route: &WebhookRoute) -> Result<()> {
+        self.insert_route(route)
+    }
+
+    fn list_routes(&self) -> Result<Vec<WebhookRoute>> {
+        self.list_routes()
+    }
+
+    fn find_route_by_path(&self, path: &str) -> Result<Option<WebhookRoute>> {
+        self.find_route_by_path(path)
+    }
+
+    fn delete_route(&self, id: Uuid) -> Result<()> {
+        self.delete_route(id)
+    }
+
+    fn insert_webhook_event(&self, event: &WebhookEvent) -> Result<()> {
+        self.insert_webhook_event(event)
+    }
+
+    fn list_webhook_events(&self) -> Result<Vec<WebhookEvent>> {
+        self.list_webhook_events()
+    }
+
+    fn webhook_event_count(&self) -> Result<u64> {
+        self.webhook_event_count()
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 

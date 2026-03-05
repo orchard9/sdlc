@@ -1,5 +1,6 @@
 use anyhow::Context as _;
 use redb::{Database, ReadableTable, TableDefinition};
+use sdlc_core::telemetry_backend::{RunSummary, TelemetryBackend};
 use serde_json::Value;
 use std::collections::HashMap;
 use std::path::Path;
@@ -7,18 +8,6 @@ use std::sync::{Arc, Mutex};
 
 /// Table: composite key (run_id, seq) → JSON string
 const EVENTS: TableDefinition<(&str, u64), &str> = TableDefinition::new("events");
-
-/// Aggregated stats for a single run.
-#[derive(Debug, serde::Serialize)]
-pub struct RunSummary {
-    pub tool_calls: u64,
-    pub tool_errors: u64,
-    pub tools_used: HashMap<String, u64>,
-    pub subagents_spawned: u64,
-    pub subagent_tokens: u64,
-    pub total_cost_usd: Option<f64>,
-    pub total_turns: Option<u64>,
-}
 
 /// `TelemetryStore` persists raw agent events to a `redb` database so they
 /// survive server restarts and support per-run queries.
@@ -210,6 +199,27 @@ impl TelemetryStore {
             }
         }
         Ok(summary)
+    }
+}
+
+impl TelemetryBackend for TelemetryStore {
+    fn append_raw(&self, run_id: &str, event: serde_json::Value) -> anyhow::Result<()> {
+        self.append_raw(run_id, event)
+    }
+
+    fn events_for_run(&self, run_id: &str) -> anyhow::Result<Vec<serde_json::Value>> {
+        self.events_for_run(run_id)
+    }
+
+    fn summary_for_run(&self, run_id: &str) -> anyhow::Result<RunSummary> {
+        self.summary_for_run(run_id)
+    }
+
+    fn prune_runs_not_in(
+        &self,
+        keep_ids: &std::collections::HashSet<String>,
+    ) -> anyhow::Result<()> {
+        self.prune_runs_not_in(keep_ids)
     }
 }
 

@@ -209,16 +209,12 @@ impl IntoResponse for AppError {
                 SdlcError::Blocked(_) => StatusCode::CONFLICT,
                 SdlcError::NoToolRuntime => StatusCode::SERVICE_UNAVAILABLE,
                 SdlcError::ToolFailed(_) => StatusCode::UNPROCESSABLE_ENTITY,
-                SdlcError::TelegramTokenMissing | SdlcError::TelegramApi(_) => {
-                    StatusCode::BAD_REQUEST
-                }
                 // Manifest errors are handled above with early returns; these
                 // arms are unreachable but required for exhaustiveness.
                 SdlcError::ManifestParseFailed { .. } | SdlcError::ManifestIncompatible { .. } => {
                     StatusCode::UNPROCESSABLE_ENTITY
                 }
-                SdlcError::Sqlite(_)
-                | SdlcError::Search(_)
+                SdlcError::Search(_)
                 | SdlcError::Io(_)
                 | SdlcError::Yaml(_)
                 | SdlcError::Json(_)

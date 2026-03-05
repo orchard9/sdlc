@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y pkg-config libssl-dev && rm -rf /var/li
 # Copy workspace files
 COPY Cargo.toml Cargo.lock rust-toolchain.toml ./
 COPY crates/ crates/
+# Copy tool sources embedded via include_str! in templates.rs
+COPY .sdlc/tools/ .sdlc/tools/
 
 # Copy pre-built frontend so rust-embed picks it up
 COPY --from=frontend /app/frontend/dist crates/sdlc-server/frontend/dist

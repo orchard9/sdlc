@@ -16,6 +16,9 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
         let config = sdlc_core::config::Config::load(&root)?;
         let classifier = sdlc_core::classifier::Classifier::new(sdlc_core::rules::default_rules());
 
+        // Classify all features once — reused for both feature_summaries and parallel_work.
+        let mut next_actions: std::collections::HashMap<String, sdlc_core::types::ActionType> =
+            std::collections::HashMap::new();
         let feature_summaries: Vec<serde_json::Value> = features
             .iter()
             .map(|f| {
@@ -26,6 +29,7 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
                     root: &root,
                 };
                 let classification = classifier.classify(&ctx);
+                next_actions.insert(f.slug.clone(), classification.action);
                 serde_json::json!({
                     "slug": f.slug,
                     "title": f.title,
@@ -40,6 +44,9 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
                 })
             })
             .collect();
+
+        let parallel_work =
+            sdlc_core::parallel_work::select_parallel_work(&milestones, &features, &next_actions);
 
         let milestone_summaries: Vec<serde_json::Value> = milestones
             .iter()
@@ -77,6 +84,7 @@ pub async fn get_state(State(app): State<AppState>) -> Result<Json<serde_json::V
             "features": feature_summaries,
             "milestones": milestone_summaries,
             "escalations": escalation_summaries,
+            "parallel_work": parallel_work,
             "last_updated": state.last_updated,
         }))
     })

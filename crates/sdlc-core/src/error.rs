@@ -158,15 +158,6 @@ pub enum SdlcError {
     #[error("orchestrator DB error: {0}")]
     OrchestratorDb(String),
 
-    #[error("Telegram bot token is not configured. Set the TELEGRAM_BOT_TOKEN environment variable or add telegram.bot_token to .sdlc/config.yaml")]
-    TelegramTokenMissing,
-
-    #[error("Telegram API error: {0}")]
-    TelegramApi(String),
-
-    #[error("SQLite error: {0}")]
-    Sqlite(String),
-
     /// A manifest file exists but contains invalid YAML syntax.
     #[error("{path}: cannot parse YAML: {message}")]
     ManifestParseFailed { path: String, message: String },

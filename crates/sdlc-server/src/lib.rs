@@ -4,6 +4,9 @@ pub mod embed;
 pub mod error;
 pub mod heartbeat;
 pub mod hub;
+pub mod pg_common;
+pub mod pg_orchestrator;
+pub mod pg_telemetry;
 pub mod proxy;
 pub mod routes;
 pub mod state;
@@ -72,6 +75,18 @@ pub fn build_router_for_test(
     app_tunnel_host: Option<String>,
 ) -> Router {
     let app_state = state::AppState::new_for_test(root);
+    // Seed storage backends synchronously for tests (no background task in test mode).
+    let db_path = sdlc_core::paths::orchestrator_db_path(&app_state.root);
+    if let Ok(db) = sdlc_core::orchestrator::ActionDb::open(&db_path) {
+        let _ = app_state.orchestrator.set(std::sync::Arc::new(db)
+            as std::sync::Arc<dyn sdlc_core::orchestrator::OrchestratorBackend>);
+    }
+    let telemetry_path = app_state.root.join(".sdlc").join("telemetry.redb");
+    if let Ok(store) = crate::telemetry::TelemetryStore::open(&telemetry_path) {
+        let _ = app_state
+            .telemetry
+            .set(std::sync::Arc::new(store) as std::sync::Arc<dyn sdlc_core::TelemetryBackend>);
+    }
     if let Some(token) = tunnel_token {
         let mut cfg = auth::TunnelConfig::with_token(token);
         if let Some(host) = app_tunnel_host {
