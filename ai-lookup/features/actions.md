@@ -7,7 +7,7 @@
 
 ## Summary
 
-The Actions feature is the orchestrator control plane: a UI page (`ActionsPage`) that manages **scheduled actions** (run a tool at a time, optionally recurring), **webhook routes** (map an incoming HTTP path to a tool), and **webhook event history** (audit log of received payloads). The backend is a redb-backed daemon (`sdlc orchestrate`) with a REST API and SSE push.
+The Actions feature is the orchestrator control plane: a UI page (`ActionsPage`) that manages **scheduled actions** (run a tool at a time, optionally recurring), **webhook routes** (map an incoming HTTP path to a tool), and **webhook event history** (audit log of received payloads). The backend is a pluggable-storage daemon: redb by default (zero external dependencies), postgres when `DATABASE_URL` is set. (`sdlc orchestrate`) with a REST API and SSE push.
 
 ---
 
@@ -26,7 +26,7 @@ The Actions feature is the orchestrator control plane: a UI page (`ActionsPage`)
 | API | `crates/sdlc-server/src/routes/orchestrator.rs` | `DELETE /api/orchestrator/webhooks/routes/{id}` |
 | API | `crates/sdlc-server/src/routes/orchestrator.rs` | `GET /api/orchestrator/webhooks/events?limit=N` |
 | API | `crates/sdlc-server/src/routes/webhooks.rs:37` | `POST /webhooks/{route}` — external webhook ingestion |
-| Data | `crates/sdlc-core/src/orchestrator/db.rs:1` | `ActionDb` — redb storage layer |
+| Data | `crates/sdlc-core/src/orchestrator/db.rs:1` | `ActionDb` — redb storage layer (default; postgres when `DATABASE_URL` set) |
 | SSE | `crates/sdlc-server/src/state.rs:406` | Sentinel file watcher → `ActionStateChanged` |
 
 ---
@@ -117,7 +117,7 @@ Outcome `kind` values: `received` | `no_route` | `routed` | `dispatch_error`
 
 ---
 
-## Storage (redb tables)
+## Storage (redb tables — default backend)
 
 | Table | Key | Purpose |
 |-------|-----|---------|

@@ -258,6 +258,16 @@ export interface EscalationDetail extends EscalationSummary {
   resolution: string | null
 }
 
+export type ParallelWorkItemKind =
+  | { type: 'feature'; slug: string; next_action: ActionType }
+  | { type: 'uat' }
+
+export type ParallelWorkItem = {
+  milestone_slug: string
+  milestone_title: string
+  command: string
+} & ParallelWorkItemKind
+
 export interface ProjectState {
   project: string
   active_features: string[]
@@ -266,6 +276,7 @@ export interface ProjectState {
   features: FeatureSummary[]
   milestones: MilestoneSummary[]
   escalations: EscalationSummary[]
+  parallel_work?: ParallelWorkItem[]
   last_updated: string
 }
 

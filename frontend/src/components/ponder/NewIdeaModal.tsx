@@ -1,15 +1,20 @@
 import { useEffect, useRef, useState } from 'react'
-import { X, Plus, Link } from 'lucide-react'
+import { X, Plus, Link, UploadCloud, FileText } from 'lucide-react'
 import { api } from '@/api/client'
+import { titleToSlug } from '../../lib/slug'
+import { cn, formatBytes } from '@/lib/utils'
 
-function titleToSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40)
+// Accepted file extensions for text preload
+const ACCEPTED_EXTS = new Set([
+  '.md', '.txt', '.html', '.svg', '.js', '.ts', '.tsx', '.jsx',
+  '.rs', '.py', '.go', '.json', '.yaml', '.yml', '.toml', '.css', '.sh',
+])
+
+function isAccepted(file: File): boolean {
+  const parts = file.name.split('.')
+  if (parts.length < 2) return false
+  const ext = '.' + parts[parts.length - 1].toLowerCase()
+  return ACCEPTED_EXTS.has(ext)
 }
 
 interface NewIdeaModalProps {
@@ -38,18 +43,26 @@ export function NewIdeaModal({
   // Track whether the user has manually edited the slug (breaks auto-derive)
   const slugManuallyEdited = useRef(false)
 
+  // File attachment state (T1)
+  const [attachedFiles, setAttachedFiles] = useState<File[]>([])
+  const [isDragOver, setIsDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
   const titleRef = useRef<HTMLInputElement>(null)
 
   // Reset state when modal opens
   useEffect(() => {
     if (open) {
       setTitle(initialTitle ?? '')
-      setSlug(initialSlug ?? titleToSlug(initialTitle ?? ''))
+      setSlug(initialSlug ?? titleToSlug(initialTitle ?? '').slice(0, 40))
       setBrief(initialBrief ?? '')
       setRefs([''])
       setError(null)
       setSubmitting(false)
       slugManuallyEdited.current = !!initialSlug
+      // Reset file state on re-open (T1)
+      setAttachedFiles([])
+      setIsDragOver(false)
       // Auto-focus the title input
       setTimeout(() => titleRef.current?.focus(), 0)
     }
@@ -68,7 +81,7 @@ export function NewIdeaModal({
   const handleTitleChange = (value: string) => {
     setTitle(value)
     if (!slugManuallyEdited.current) {
-      setSlug(titleToSlug(value))
+      setSlug(titleToSlug(value).slice(0, 40))
     }
   }
 
@@ -90,6 +103,20 @@ export function NewIdeaModal({
       const next = prev.filter((_, i) => i !== index)
       return next.length === 0 ? [''] : next
     })
+  }
+
+  // T1: file attachment helpers
+  const handleFilesAdded = (files: FileList | null) => {
+    if (!files) return
+    const accepted = Array.from(files).filter(isAccepted)
+    setAttachedFiles(prev => {
+      const existing = new Set(prev.map(f => f.name))
+      return [...prev, ...accepted.filter(f => !existing.has(f.name))]
+    })
+  }
+
+  const handleRemoveFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,9 +142,19 @@ export function NewIdeaModal({
         })
       }
 
-      const seed = brief.trim()
-        ? `${title.trim()}\n\n${brief.trim()}`
-        : title.trim()
+      // T4: capture attached text files as scrapbook artifacts
+      for (const file of attachedFiles) {
+        const content = await file.text()
+        await api.capturePonderArtifact(slug.trim(), { filename: file.name, content })
+      }
+
+      // T4: include preloaded file names in the chat seed message
+      const fileNames = attachedFiles.map(f => f.name).join(', ')
+      const seed = [
+        title.trim(),
+        brief.trim(),
+        fileNames ? `Preloaded files: ${fileNames}` : '',
+      ].filter(Boolean).join('\n\n')
       api.startPonderChat(slug.trim(), seed).catch(() => {})
 
       onCreated(slug.trim())
@@ -245,6 +282,89 @@ export function NewIdeaModal({
                 Add reference
               </button>
             </div>
+          </div>
+
+          {/* T2: Files section */}
+          <div className="space-y-1.5">
+            <label className="text-xs font-medium text-muted-foreground">
+              Files <span className="text-muted-foreground/50">(optional)</span>
+            </label>
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".md,.txt,.html,.svg,.js,.ts,.tsx,.jsx,.rs,.py,.go,.json,.yaml,.yml,.toml,.css,.sh"
+              className="hidden"
+              onChange={e => {
+                handleFilesAdded(e.target.files)
+                // Reset so the same file can be re-selected after removal
+                e.target.value = ''
+              }}
+            />
+            {/* Drop zone */}
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Attach files"
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click() }}
+              onDragOver={e => { e.preventDefault(); setIsDragOver(true) }}
+              onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget as Node)) setIsDragOver(false) }}
+              onDrop={e => {
+                e.preventDefault()
+                setIsDragOver(false)
+                handleFilesAdded(e.dataTransfer.files)
+              }}
+              className={cn(
+                'cursor-pointer flex flex-col items-center gap-1 py-4 px-3 border border-dashed rounded-lg transition-colors select-none',
+                isDragOver
+                  ? 'border-primary/60 bg-primary/5'
+                  : 'border-border hover:border-primary/40 hover:bg-muted/30',
+              )}
+            >
+              <UploadCloud className="w-4 h-4 text-muted-foreground/50" />
+              <p className="text-xs text-muted-foreground">
+                {isDragOver ? 'Release to attach' : 'Drop files here or click to browse'}
+              </p>
+              <p className="text-[10px] text-muted-foreground/50">
+                .md .txt .html .svg .js .ts .tsx .jsx .rs .py .go .json .yaml .toml .css .sh
+              </p>
+            </div>
+            {/* T3: File chips */}
+            {attachedFiles.length > 0 && (
+              <div className="space-y-1.5 pt-0.5">
+                {attachedFiles.map((file, i) => {
+                  const isLarge = file.size > 500 * 1024
+                  return (
+                    <div
+                      key={i}
+                      className="flex items-center gap-2 px-2.5 py-1.5 bg-muted/40 border border-border rounded-lg text-xs"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-primary/70 shrink-0" />
+                      <span className="flex-1 text-foreground font-medium truncate">{file.name}</span>
+                      <span className="text-muted-foreground shrink-0">{formatBytes(file.size)}</span>
+                      {isLarge && (
+                        <span
+                          className="text-amber-500 shrink-0 text-[10px]"
+                          title="Large file — will be included but may use significant agent context"
+                        >
+                          ⚠
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveFile(i)}
+                        className="shrink-0 p-0.5 text-muted-foreground/50 hover:text-muted-foreground transition-colors"
+                        aria-label={`Remove ${file.name}`}
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
 
           {/* Error */}

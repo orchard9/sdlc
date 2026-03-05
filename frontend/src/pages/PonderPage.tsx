@@ -10,6 +10,7 @@ import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
 import { TeamRow } from '@/components/ponder/TeamRow'
 import { OrientationStrip } from '@/components/ponder/OrientationStrip'
 import { NewIdeaModal } from '@/components/ponder/NewIdeaModal'
+import { WorkspaceShell } from '@/components/layout/WorkspaceShell'
 import {
   Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Sparkles, SlidersHorizontal,
   MessageSquare, ChevronLeft, ChevronRight,
@@ -23,6 +24,7 @@ function clampW(val: number, min: number, maxPct: number, containerWidth: number
   return Math.min(Math.max(val, min), containerWidth * maxPct)
 }
 import { cn } from '@/lib/utils'
+import { titleToSlug } from '@/lib/slug'
 import type { AdvisoryHistory, AdvisorySseEvent, Finding, FindingStatus, MaturityStage, PonderDetail, PonderStatus, PonderSummary } from '@/lib/types'
 
 // ---------------------------------------------------------------------------
@@ -93,16 +95,6 @@ function EntryRow({
       )}
     </button>
   )
-}
-
-function titleToSlug(title: string): string {
-  return title
-    .toLowerCase()
-    .replace(/[^a-z0-9\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '')
-    .slice(0, 40)
 }
 
 // ---------------------------------------------------------------------------
@@ -197,7 +189,7 @@ function AdvisoryPanel({
     setCreating(true)
     let firstSlug: string | null = null
     for (const finding of findings) {
-      const slug = titleToSlug(finding.title)
+      const slug = titleToSlug(finding.title).slice(0, 40)
       try {
         await api.createPonderEntry({ slug, title: finding.title, brief: finding.description })
         const seed = finding.description ? `${finding.title}\n\n${finding.description}` : finding.title
@@ -527,7 +519,7 @@ function EntryDetailPane({
           className="shrink-0 border-l border-border flex flex-col min-h-0"
           style={{ width: `${workspaceWidth}px` }}
         >
-          <WorkspacePanel artifacts={entry.artifacts} />
+          <WorkspacePanel artifacts={entry.artifacts} mediaBaseUrl={`/api/roadmap/${entry.slug}/media`} />
         </div>
       </div>
 
@@ -542,7 +534,7 @@ function EntryDetailPane({
           />
         )}
         {mobileTab === 'files' && (
-          <WorkspacePanel artifacts={entry.artifacts} />
+          <WorkspacePanel artifacts={entry.artifacts} mediaBaseUrl={`/api/roadmap/${entry.slug}/media`} />
         )}
         {mobileTab === 'team' && (
           <div className="p-4 space-y-4">
@@ -720,144 +712,140 @@ export function PonderPage() {
   // Mobile: if slug is present, show detail only
   const showMobileDetail = !!slug
 
-  return (
-    <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex-1 flex min-h-0">
-        {/* Left pane: entry list */}
-        <div className={cn(
-          'w-72 shrink-0 border-r border-border flex flex-col bg-card',
-          showMobileDetail ? 'hidden md:flex' : 'flex',
-        )}>
-          {/* Header */}
-          <div className="px-3 pt-4 pb-2 flex items-center justify-between">
-            <h2 className="text-base font-semibold">Ponder</h2>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setShowSuggest(true)}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-                title="Suggest an idea"
-              >
-                <Sparkles className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setShowForm(true)}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
-                title="New Idea"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-          {/* Status labels */}
-          <div className="px-2 pb-2 space-y-0.5">
-            {STATUS_TABS.map(tab => {
-              const count = tab.value === 'all'
-                ? entries.length
-                : entries.filter(e => e.status === tab.value).length
-              return (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={cn(
-                    'w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
-                    activeTab === tab.value
-                      ? 'bg-accent text-accent-foreground'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
-                  )}
-                >
-                  <span>{tab.label}</span>
-                  <span className={cn(
-                    'tabular-nums',
-                    activeTab === tab.value ? 'text-accent-foreground/70' : 'text-muted-foreground/50',
-                  )}>
-                    {count}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          <div className="border-b border-border mx-3 mb-1" />
-
-          {/* Entry list */}
-          <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-            {loading ? (
-              <div className="space-y-2 px-1 pt-2">
-                <Skeleton width="w-full" className="h-12" />
-                <Skeleton width="w-full" className="h-12" />
-                <Skeleton width="w-full" className="h-12" />
-              </div>
-            ) : filtered.length === 0 ? (
-              <div className="text-center py-8 px-3">
-                <p className="text-xs text-muted-foreground">
-                  {activeTab === 'all'
-                    ? 'No ideas yet.'
-                    : `No ${activeTab} entries.`}
-                </p>
-                {activeTab === 'all' && !showForm && (
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
-                  >
-                    <Plus className="w-3 h-3" />
-                    New Idea
-                  </button>
-                )}
-              </div>
-            ) : (
-              filtered.map(entry => (
-                <EntryRow
-                  key={entry.slug}
-                  entry={entry}
-                  selected={entry.slug === slug}
-                  onSelect={() => navigate(`/ponder/${entry.slug}`)}
-                />
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* Right pane: detail */}
-        <div className={cn(
-          'flex-1 min-w-0',
-          showMobileDetail ? 'flex flex-col' : 'hidden md:flex md:flex-col',
-        )}>
-          {slug ? (
-            <EntryDetailPane
-              key={slug}
-              slug={slug}
-              onRefresh={load}
-              onBack={() => navigate('/ponder')}
-              prevSlug={prevSlug}
-              nextSlug={nextSlug}
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <Lightbulb className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Select an idea to explore</p>
-                <div className="flex items-center justify-center gap-2 mt-2">
-                  <button
-                    onClick={() => setShowSuggest(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-colors"
-                  >
-                    <Sparkles className="w-3 h-3" />
-                    Suggest an idea
-                  </button>
-                  <span className="text-xs text-muted-foreground/40">or</span>
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
-                  >
-                    <Plus className="w-3 h-3" />
-                    New idea
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+  const listPane = (
+    <>
+      {/* Header */}
+      <div className="px-3 pt-4 pb-2 flex items-center justify-between">
+        <h2 className="text-base font-semibold">Ponder</h2>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowSuggest(true)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            title="Suggest an idea"
+          >
+            <Sparkles className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setShowForm(true)}
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"
+            title="New Idea"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
         </div>
       </div>
+
+      {/* Status labels */}
+      <div className="px-2 pb-2 space-y-0.5">
+        {STATUS_TABS.map(tab => {
+          const count = tab.value === 'all'
+            ? entries.length
+            : entries.filter(e => e.status === tab.value).length
+          return (
+            <button
+              key={tab.value}
+              onClick={() => setActiveTab(tab.value)}
+              className={cn(
+                'w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+                activeTab === tab.value
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
+              )}
+            >
+              <span>{tab.label}</span>
+              <span className={cn(
+                'tabular-nums',
+                activeTab === tab.value ? 'text-accent-foreground/70' : 'text-muted-foreground/50',
+              )}>
+                {count}
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <div className="border-b border-border mx-3 mb-1" />
+
+      {/* Entry list */}
+      <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
+        {loading ? (
+          <div className="space-y-2 px-1 pt-2">
+            <Skeleton width="w-full" className="h-12" />
+            <Skeleton width="w-full" className="h-12" />
+            <Skeleton width="w-full" className="h-12" />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="text-center py-8 px-3">
+            <p className="text-xs text-muted-foreground">
+              {activeTab === 'all'
+                ? 'No ideas yet.'
+                : `No ${activeTab} entries.`}
+            </p>
+            {activeTab === 'all' && !showForm && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors whitespace-nowrap"
+              >
+                <Plus className="w-3 h-3" />
+                New Idea
+              </button>
+            )}
+          </div>
+        ) : (
+          filtered.map(entry => (
+            <EntryRow
+              key={entry.slug}
+              entry={entry}
+              selected={entry.slug === slug}
+              onSelect={() => navigate(`/ponder/${entry.slug}`)}
+            />
+          ))
+        )}
+      </div>
+    </>
+  )
+
+  const detailPane = slug ? (
+    <EntryDetailPane
+      key={slug}
+      slug={slug}
+      onRefresh={load}
+      onBack={() => navigate('/ponder')}
+      prevSlug={prevSlug}
+      nextSlug={nextSlug}
+    />
+  ) : (
+    <div className="flex items-center justify-center h-full text-muted-foreground">
+      <div className="text-center">
+        <Lightbulb className="w-8 h-8 mx-auto mb-3 opacity-30" />
+        <p className="text-sm">Select an idea to explore</p>
+        <div className="flex items-center justify-center gap-2 mt-2">
+          <button
+            onClick={() => setShowSuggest(true)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-colors"
+          >
+            <Sparkles className="w-3 h-3" />
+            Suggest an idea
+          </button>
+          <span className="text-xs text-muted-foreground/40">or</span>
+          <button
+            onClick={() => setShowForm(true)}
+            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+          >
+            <Plus className="w-3 h-3" />
+            New idea
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <>
+      <WorkspaceShell
+        showDetail={showMobileDetail}
+        listPane={listPane}
+        detailPane={detailPane}
+      />
 
       {/* Advisory panel */}
       {showSuggest && (
@@ -892,7 +880,7 @@ export function PonderPage() {
         initialSlug={prefillSlug ?? undefined}
         initialBrief={prefillBrief ?? undefined}
       />
-    </div>
+    </>
   )
 }
 

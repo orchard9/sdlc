@@ -1,5 +1,30 @@
 name: telegram-recap
-version: "1.1.0"
+version: "2.0.0"
 description: "Fetch and email a Telegram chat digest via Resend"
 # All secrets sourced from: sdlc secrets env export telegram
 # See README.md for full configuration reference.
+secrets:
+  - env_var: TELEGRAM_BOT_TOKEN
+    description: "Telegram bot API token (from @BotFather)"
+    required: true
+  - env_var: RESEND_API_KEY
+    description: "Resend API key (starts with re_*)"
+    required: true
+  - env_var: RESEND_FROM
+    description: "Verified sender address (e.g. digest@yourdomain.com)"
+    required: true
+  - env_var: RESEND_TO
+    description: "Recipient address(es), comma-separated"
+    required: true
+  - env_var: COUCHDB_URL
+    description: "CouchDB base URL for message persistence (optional)"
+    required: false
+  - env_var: COUCHDB_USER
+    description: "CouchDB username (optional)"
+    required: false
+  - env_var: COUCHDB_PASSWORD
+    description: "CouchDB password (optional)"
+    required: false
+  - env_var: WINDOW_HOURS
+    description: "Default digest window in hours (optional, default 24)"
+    required: false

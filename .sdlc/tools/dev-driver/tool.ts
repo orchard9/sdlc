@@ -1,43 +1,37 @@
 /**
  * Dev Driver
  * ==========
- * Finds the single most important next development action and dispatches it
- * asynchronously via the sdlc-server agent infrastructure. Designed to run on
- * a schedule (e.g. every 4 hours) via the sdlc orchestrator to make development
- * self-advancing.
+ * Reads the parallel work queue from the sdlc-server and dispatches all items
+ * simultaneously via the agent-dispatch infrastructure.
  *
- * WHAT IT DOES
- * ------------
- * --run:   Reads JSON from stdin: {} (no parameters)
- *          Applies a 5-level priority waterfall:
- *            1. Active runs  — if an agent run is in flight, exit waiting
- *            2. Quality      — if quality-check fails, exit quality_failing
- *            3. Features     — if features have active directives, dispatch /sdlc-next
- *            4. Wave         — if a milestone wave is ready, dispatch /sdlc-run-wave
- *            5. Idle         — nothing to do, exit idle
- *          Returns ToolResult<DevDriverOutput>.
+ * MODES
+ * -----
+ * multi (default): dispatch all parallel_work items (up to 4, max 1 UAT).
+ * single:          dispatch only the first item from parallel_work.
  *
- * --meta:  Writes ToolMeta JSON to stdout. Used by `sdlc tool sync`.
+ * Both modes use the same selection logic as the dashboard — items are
+ * computed by select_parallel_work() in sdlc-core (Rust) and returned as
+ * part of GET /api/state. This guarantees the dev-driver and dashboard
+ * always agree on what to work on next.
  *
- * KEY INVARIANT
- * -------------
- * Level 3 dispatches /sdlc-next (one step), NOT /sdlc-run (to completion).
- * The 4h recurrence IS the iteration rhythm. Each tick advances exactly one
- * feature by one directive. This keeps the developer in control.
+ * PRIORITY WATERFALL
+ * ------------------
+ * 1. Quality gate  — if quality-check fails, exit quality_failing (no dispatches).
+ * 2. Dispatch      — fetch parallel_work from server, dispatch each item.
+ *    - 409 Conflict = already running for that slot, skip silently.
+ * 3. Idle          — parallel_work is empty, nothing to do.
  *
  * DISPATCH
  * --------
- * Calls POST /api/tools/agent-dispatch on the local sdlc-server, which:
- *   - Creates a RunRecord (visible in the activity feed)
- *   - Streams SSE events to the frontend
- *   - Returns 409 Conflict if the same run key is already in flight
- * Requires SDLC_SERVER_URL and SDLC_AGENT_TOKEN (injected by the server).
+ * Calls POST /api/tools/agent-dispatch (SDLC_SERVER_URL required).
+ * Each slot uses a unique run_key so 409 Conflict provides dedup.
+ * No global "active run" check — per-slot 409s handle flight detection.
  *
  * HOW TO SKIP A FEATURE
  * ---------------------
- * Add a task to the feature with "skip:autonomous" in the title:
+ * Add a task with "skip:autonomous" in the title:
  *   sdlc task add <slug> --title "skip:autonomous: needs human review"
- * The dev-driver will exclude this feature from Level 3 until the task is removed.
+ * select_parallel_work() (Rust) excludes these features automatically.
  */
 
 import type { ToolMeta, ToolResult } from '../_shared/types.ts'
@@ -45,7 +39,7 @@ import { makeLogger } from '../_shared/log.ts'
 import { getArgs, readStdin, exit } from '../_shared/runtime.ts'
 import { runAgentDispatch } from '../_shared/agent.ts'
 import { execSync } from 'node:child_process'
-import { readFileSync, existsSync } from 'node:fs'
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 const log = makeLogger('dev-driver')
@@ -57,12 +51,19 @@ const log = makeLogger('dev-driver')
 export const meta: ToolMeta = {
   name: 'dev-driver',
   display_name: 'Dev Driver',
-  description: 'Finds the next development action and dispatches it — advances the project one step per tick',
-  version: '1.0.0',
+  description: 'Dispatches up to 4 parallel work items from the dashboard queue — advances all active milestones simultaneously',
+  version: '2.0.0',
   requires_setup: false,
   input_schema: {
     type: 'object',
-    properties: {},
+    properties: {
+      mode: {
+        type: 'string',
+        enum: ['multi', 'single'],
+        description: 'multi (default): dispatch all parallel_work items; single: dispatch first item only',
+        default: 'multi',
+      },
+    },
     additionalProperties: false,
   },
   output_schema: {
@@ -70,37 +71,39 @@ export const meta: ToolMeta = {
     properties: {
       action: {
         type: 'string',
-        enum: ['waiting', 'quality_failing', 'feature_advanced', 'wave_started', 'idle'],
+        enum: ['quality_failing', 'dispatched', 'idle'],
         description: 'What the dev-driver decided to do',
       },
-      reason: {
+      mode: {
         type: 'string',
-        description: 'Human-readable reason (present when action=waiting or idle)',
+        enum: ['multi', 'single'],
+        description: 'The mode used (present when action=dispatched)',
       },
       failed_checks: {
         type: 'array',
         items: { type: 'string' },
         description: 'Names of failed quality checks (present when action=quality_failing)',
       },
-      slug: {
-        type: 'string',
-        description: 'Feature slug that was advanced (present when action=feature_advanced)',
+      items: {
+        type: 'array',
+        description: 'Dispatched items (present when action=dispatched)',
+        items: {
+          type: 'object',
+          properties: {
+            milestone_slug: { type: 'string' },
+            type: { type: 'string', enum: ['feature', 'uat'] },
+            slug: { type: 'string' },
+            next_action: { type: 'string' },
+            command: { type: 'string' },
+            run_id: { type: 'string' },
+            status: { type: 'string', enum: ['dispatched', 'conflict'] },
+          },
+          required: ['milestone_slug', 'type', 'command', 'status'],
+        },
       },
-      phase: {
+      reason: {
         type: 'string',
-        description: 'Current phase of the feature (present when action=feature_advanced)',
-      },
-      directive: {
-        type: 'string',
-        description: 'The /sdlc-next command that was dispatched (present when action=feature_advanced)',
-      },
-      milestone: {
-        type: 'string',
-        description: 'Milestone slug that started (present when action=wave_started)',
-      },
-      run_id: {
-        type: 'string',
-        description: 'Server run ID for the dispatched agent (present when action=feature_advanced or wave_started)',
+        description: 'Human-readable reason (present when action=idle)',
       },
     },
     required: ['action'],
@@ -108,18 +111,41 @@ export const meta: ToolMeta = {
 }
 
 // ---------------------------------------------------------------------------
-// Output types
+// Types
 // ---------------------------------------------------------------------------
 
+type Mode = 'multi' | 'single'
+
+interface ParallelWorkItem {
+  milestone_slug: string
+  milestone_title: string
+  type: 'feature' | 'uat'
+  slug?: string
+  next_action?: string
+  command: string
+}
+
+interface ProjectState {
+  parallel_work: ParallelWorkItem[]
+}
+
+interface DispatchedItem {
+  milestone_slug: string
+  type: 'feature' | 'uat'
+  slug?: string
+  next_action?: string
+  command: string
+  run_id?: string
+  status: 'dispatched' | 'conflict'
+}
+
 type DevDriverOutput =
-  | { action: 'waiting'; reason: string }
   | { action: 'quality_failing'; failed_checks: string[] }
-  | { action: 'feature_advanced'; slug: string; phase: string; directive: string; run_id?: string }
-  | { action: 'wave_started'; milestone: string; run_id?: string }
+  | { action: 'dispatched'; mode: Mode; items: DispatchedItem[] }
   | { action: 'idle'; reason: string }
 
 // ---------------------------------------------------------------------------
-// Quality check (T3 - Level 2)
+// Quality check (unchanged from v1)
 // ---------------------------------------------------------------------------
 
 interface QCCheck {
@@ -133,6 +159,11 @@ interface QCResult {
   checks: QCCheck[]
 }
 
+function nodeRuntime(): string {
+  return process.env.SDLC_NODE_RUNTIME
+    ?? (process.versions.bun ? 'bun' : 'node')
+}
+
 function runQualityCheck(root: string): { failed: number; failedNames: string[] } {
   const toolPath = join(root, '.sdlc', 'tools', 'quality-check', 'tool.ts')
   if (!existsSync(toolPath)) {
@@ -140,7 +171,7 @@ function runQualityCheck(root: string): { failed: number; failedNames: string[] 
     return { failed: 0, failedNames: [] }
   }
   try {
-    const raw = execSync(`node ${toolPath} --run`, {
+    const raw = execSync(`${nodeRuntime()} ${toolPath} --run`, {
       input: '{}',
       encoding: 'utf8',
       cwd: root,
@@ -154,207 +185,130 @@ function runQualityCheck(root: string): { failed: number; failedNames: string[] 
       .map(c => c.name)
     return { failed: result.data.failed, failedNames }
   } catch (e) {
-    log.warn(`quality-check execution error: ${e} — treating as no failures`)
-    return { failed: 0, failedNames: [] }
+    log.error(`quality-check execution failed: ${e}`)
+    return { failed: -1, failedNames: ['quality-check-tool-error'] }
   }
 }
 
 // ---------------------------------------------------------------------------
-// Active run check (T8)
+// Fetch parallel work from server (replaces all CLI subprocess calls)
 // ---------------------------------------------------------------------------
 
-function hasActiveRuns(root: string): boolean {
+async function fetchParallelWork(serverUrl: string, token: string): Promise<ParallelWorkItem[]> {
+  const res = await fetch(`${serverUrl}/api/state`, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(10_000),
+  })
+  if (!res.ok) {
+    throw new Error(`GET /api/state failed: ${res.status} ${res.statusText}`)
+  }
+  let state: ProjectState
   try {
-    const raw = execSync('sdlc run list --status running --json', {
-      encoding: 'utf8',
-      cwd: root,
-      timeout: 10_000,
-    })
-    const runs = JSON.parse(raw)
-    return Array.isArray(runs) && runs.length > 0
+    state = (await res.json()) as ProjectState
   } catch {
-    // sdlc run list may not exist yet — skip this check gracefully
-    log.warn('sdlc run list not available — skipping active run check')
-    return false
+    throw new Error('GET /api/state returned invalid JSON')
+  }
+  if (!state.parallel_work) {
+    log.warn('parallel_work missing from /api/state response — server may be outdated')
+  }
+  return state.parallel_work ?? []
+}
+
+// ---------------------------------------------------------------------------
+// Dispatch a single work item via agent-dispatch
+// ---------------------------------------------------------------------------
+
+async function dispatchItem(item: ParallelWorkItem): Promise<DispatchedItem> {
+  const runKey = item.type === 'uat'
+    ? `dev-driver:uat:${item.milestone_slug}`
+    : `dev-driver:feature:${item.slug ?? item.milestone_slug}`
+
+  const label = item.type === 'uat'
+    ? `dev-driver: UAT ${item.milestone_slug}`
+    : `dev-driver: advance ${item.slug}`
+
+  const maxTurns = item.type === 'uat' ? 80 : 40
+
+  const r = await runAgentDispatch(item.command, runKey, label, { maxTurns })
+
+  return {
+    milestone_slug: item.milestone_slug,
+    type: item.type,
+    slug: item.slug,
+    next_action: item.next_action,
+    command: item.command,
+    run_id: r.run_id,
+    status: r.status === 'conflict' ? 'conflict' : 'dispatched',
   }
 }
 
 // ---------------------------------------------------------------------------
-// Feature selection (T3 - Level 3, T7, T9, T10)
-// ---------------------------------------------------------------------------
-
-interface FeatureDirective {
-  feature: string
-  current_phase: string
-  action: string
-  next_command: string
-}
-
-const ACTIVE_PHASES = new Set(['implementation', 'review', 'audit', 'qa'])
-
-function hasSkipTag(slug: string, root: string): boolean {
-  const tasksPath = join(root, '.sdlc', 'features', slug, 'tasks.md')
-  if (!existsSync(tasksPath)) return false
-  try {
-    const content = readFileSync(tasksPath, 'utf8')
-    return /skip:autonomous/i.test(content)
-  } catch {
-    return false
-  }
-}
-
-function findActionableFeature(root: string): FeatureDirective | null {
-  try {
-    const raw = execSync('sdlc next --json', {
-      encoding: 'utf8',
-      cwd: root,
-      timeout: 30_000,
-    })
-    const all = JSON.parse(raw) as FeatureDirective[]
-    const actionable = all
-      .filter(d => d.action !== 'done')
-      .filter(d => ACTIVE_PHASES.has(d.current_phase))
-      .filter(d => !hasSkipTag(d.feature, root))
-      .sort((a, b) => a.feature.localeCompare(b.feature))
-    return actionable[0] ?? null
-  } catch (e) {
-    log.warn(`sdlc next --json failed: ${e}`)
-    return null
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Wave detection (T3 - Level 4)
-// ---------------------------------------------------------------------------
-
-interface MilestoneInfo {
-  slug: string
-  status: string
-  features: { phase: string; status: string }[]
-  done: number
-  total: number
-}
-
-const WAVE_READY_PHASES = new Set(['planned', 'ready'])
-
-function findReadyWave(root: string): string | null {
-  try {
-    const raw = execSync('sdlc milestone list --json', {
-      encoding: 'utf8',
-      cwd: root,
-      timeout: 15_000,
-    })
-    const milestones = JSON.parse(raw) as MilestoneInfo[]
-    const ready = milestones
-      .filter(m => m.status !== 'released' && m.total > 0)
-      .filter(m =>
-        m.features.every(f =>
-          WAVE_READY_PHASES.has(f.phase) || f.phase === 'released'
-        )
-      )
-      .filter(m =>
-        m.features.some(f => WAVE_READY_PHASES.has(f.phase))
-      )
-      .sort((a, b) => a.slug.localeCompare(b.slug))
-    return ready[0]?.slug ?? null
-  } catch (e) {
-    log.warn(`sdlc milestone list failed: ${e}`)
-    return null
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Main run function (T1, T3, T5)
+// Main run function
 // ---------------------------------------------------------------------------
 
 export async function run(
-  _input: Record<string, never>,
+  input: { mode?: Mode },
   root: string,
 ): Promise<ToolResult<DevDriverOutput>> {
   const start = Date.now()
+  const mode: Mode = input.mode ?? 'multi'
 
-  // ── Level 1: Active run check ─────────────────────────────────────────────
-  // Replaces the TTL-based lock file. If any sdlc agent run is currently
-  // in flight (per `sdlc run list --status running`), wait for it to finish
-  // before dispatching another.
-  if (hasActiveRuns(root)) {
-    log.info('active sdlc agent run detected — waiting')
-    return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
+  const serverUrl = process.env.SDLC_SERVER_URL
+  const token = process.env.SDLC_AGENT_TOKEN
+
+  if (!serverUrl || !token) {
+    return {
+      ok: false,
+      error: 'SDLC_SERVER_URL and SDLC_AGENT_TOKEN are required (injected by sdlc-server)',
+      duration_ms: Date.now() - start,
+    }
   }
 
-  // ── Level 2: Quality check ────────────────────────────────────────────────
+  // ── Level 1: Quality gate ─────────────────────────────────────────────────
   log.info('running quality check')
   const qc = runQualityCheck(root)
-  if (qc.failed > 0) {
+  if (qc.failed !== 0) {
     log.info(`quality failing: ${qc.failedNames.join(', ')}`)
-    return { ok: true, data: { action: 'quality_failing', failed_checks: qc.failedNames }, duration_ms: Date.now() - start }
+    return {
+      ok: true,
+      data: { action: 'quality_failing', failed_checks: qc.failedNames },
+      duration_ms: Date.now() - start,
+    }
   }
   log.info('quality checks passed')
 
-  // ── Level 3: Features with active directives ──────────────────────────────
-  const feature = findActionableFeature(root)
-  if (feature) {
-    log.info(`advancing feature: ${feature.feature} (${feature.current_phase})`)
+  // ── Level 2: Fetch and dispatch parallel work ─────────────────────────────
+  log.info(`fetching parallel work (mode=${mode})`)
+  let allWork = await fetchParallelWork(serverUrl, token)
 
-    // Intentionally /sdlc-next — one step per tick, not /sdlc-run to completion.
-    // Dispatched via the server so the run appears in the activity feed with a
-    // RunRecord, SSE events, and exact flight detection (409 on duplicate key).
-    const r = await runAgentDispatch(
-      `/sdlc-next ${feature.feature}`,
-      `dev-driver:feature:${feature.feature}`,
-      `dev-driver: advance ${feature.feature}`,
-      { maxTurns: 40 },
-    )
-
-    if (r.status === 'conflict') {
-      log.info(`agent already running for ${feature.feature} — waiting`)
-      return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
-    }
-
-    log.info(`dispatched /sdlc-next ${feature.feature} (run_id: ${r.run_id})`)
+  if (allWork.length === 0) {
+    log.info('no parallel work available — idle')
     return {
       ok: true,
-      data: {
-        action: 'feature_advanced',
-        slug: feature.feature,
-        phase: feature.current_phase,
-        directive: feature.next_command || `/sdlc-next ${feature.feature}`,
-        run_id: r.run_id,
-      },
+      data: { action: 'idle', reason: 'no actionable work found' },
       duration_ms: Date.now() - start,
     }
   }
 
-  // ── Level 4: Wave ready ───────────────────────────────────────────────────
-  const milestone = findReadyWave(root)
-  if (milestone) {
-    log.info(`wave ready for milestone: ${milestone}`)
+  // single mode: take only first item
+  const workSlots = mode === 'single' ? allWork.slice(0, 1) : allWork
 
-    const r = await runAgentDispatch(
-      `/sdlc-run-wave ${milestone}`,
-      `dev-driver:wave:${milestone}`,
-      `dev-driver: run wave ${milestone}`,
-      { maxTurns: 100 },
-    )
+  log.info(`dispatching ${workSlots.length} item(s)`)
 
-    if (r.status === 'conflict') {
-      log.info(`wave agent already running for ${milestone} — waiting`)
-      return { ok: true, data: { action: 'waiting', reason: 'agent run in progress' }, duration_ms: Date.now() - start }
+  // Dispatch all slots concurrently — 409s are handled per-slot inside dispatchItem
+  const dispatched = await Promise.all(workSlots.map(dispatchItem))
+
+  dispatched.forEach(d => {
+    if (d.status === 'conflict') {
+      log.info(`slot already running: ${d.command} — skipped`)
+    } else {
+      log.info(`dispatched: ${d.command} (run_id: ${d.run_id})`)
     }
+  })
 
-    log.info(`dispatched /sdlc-run-wave ${milestone} (run_id: ${r.run_id})`)
-    return {
-      ok: true,
-      data: { action: 'wave_started', milestone, run_id: r.run_id },
-      duration_ms: Date.now() - start,
-    }
-  }
-
-  // ── Level 5: Idle ─────────────────────────────────────────────────────────
-  log.info('no actionable work found — idle')
   return {
     ok: true,
-    data: { action: 'idle', reason: 'no actionable work found' },
+    data: { action: 'dispatched', mode, items: dispatched },
     duration_ms: Date.now() - start,
   }
 }
@@ -371,9 +325,15 @@ if (mode === '--meta') {
   exit(0)
 } else if (mode === '--run') {
   readStdin()
-    .then(raw => run(JSON.parse(raw || '{}') as Record<string, never>, root))
-    .then(result => { console.log(JSON.stringify(result)); exit(result.ok ? 0 : 1) })
-    .catch(e => { console.log(JSON.stringify({ ok: false, error: String(e) })); exit(1) })
+    .then(raw => run(JSON.parse(raw || '{}') as { mode?: Mode }, root))
+    .then(result => {
+      console.log(JSON.stringify(result))
+      exit(result.ok ? 0 : 1)
+    })
+    .catch(e => {
+      console.log(JSON.stringify({ ok: false, error: String(e) }))
+      exit(1)
+    })
 } else {
   console.error(`Unknown mode: ${mode}. Use --meta or --run.`)
   exit(1)

@@ -1,21 +1,16 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { FileText, Monitor, ChevronDown, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback, type ReactNode } from 'react'
+import { FileText, Monitor, Image, ChevronDown, X, Maximize2, ChevronLeft, ChevronRight } from 'lucide-react'
 import { ArtifactContent } from '@/components/shared/ArtifactContent'
 import { FullscreenModal } from '@/components/shared/FullscreenModal'
-import { AreaCards } from '@/components/investigation/AreaCards'
-import { OutputGate } from '@/components/investigation/OutputGate'
-import { SynthesisCard } from '@/components/investigation/SynthesisCard'
-import { LensCards } from '@/components/investigation/LensCards'
-import { EvolveOutputGate } from '@/components/investigation/EvolveOutputGate'
-import { GuidelineEvidenceCards } from '@/components/investigation/GuidelineEvidenceCards'
-import { GuidelineOutputGate } from '@/components/investigation/GuidelineOutputGate'
-import { cn } from '@/lib/utils'
-import type { PonderArtifact, InvestigationArtifact, InvestigationDetail } from '@/lib/types'
+import { cn, formatBytes } from '@/lib/utils'
+import type { PonderArtifact } from '@/lib/types'
 
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+const IMAGE_EXTS = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp'])
+
+function isImageArtifact(filename: string): boolean {
+  const dot = filename.lastIndexOf('.')
+  if (dot === -1) return false
+  return IMAGE_EXTS.has(filename.slice(dot).toLowerCase())
 }
 
 function relativeDate(iso: string): string {
@@ -37,12 +32,14 @@ function relativeDate(iso: string): string {
 interface Props {
   artifacts: PonderArtifact[]
   onClose?: () => void
-  phase?: string
-  kind?: string
-  investigation?: InvestigationDetail
+  phasePanel?: ReactNode
+  /** Base URL for serving binary media files, e.g. `/api/roadmap/my-slug/media`.
+   *  When provided, image artifacts are rendered as `<img>` thumbnails instead
+   *  of text content blocks. */
+  mediaBaseUrl?: string
 }
 
-export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation }: Props) {
+export function WorkspacePanel({ artifacts, onClose, phasePanel, mediaBaseUrl }: Props) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null)
   const [fullscreen, setFullscreen] = useState(false)
   const touchStartX = useRef<number | null>(null)
@@ -97,58 +94,10 @@ export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation 
         </div>
       )}
 
-      {/* Phase-aware panels (investigation only) */}
-      {kind === 'root_cause' && phase === 'investigate' && (
-        <div className="shrink-0 border-b border-border/40 px-0 py-0">
-          <AreaCards artifacts={artifacts as unknown as InvestigationArtifact[]} />
-        </div>
-      )}
-      {kind === 'root_cause' && phase === 'output' && investigation && (
+      {/* Phase-aware panel slot — provided by caller */}
+      {phasePanel && (
         <div className="shrink-0 border-b border-border/40">
-          <OutputGate investigation={investigation} />
-        </div>
-      )}
-      {kind === 'root_cause' && phase === 'synthesize' && (
-        <div className="shrink-0 border-b border-border/40">
-          <SynthesisCard artifacts={artifacts as unknown as InvestigationArtifact[]} confidence={investigation?.confidence ?? null} />
-        </div>
-      )}
-      {kind === 'evolve' && phase === 'analyze' && investigation && (
-        <div className="shrink-0 border-b border-border/40 px-0 py-0">
-          <LensCards lensScores={investigation.lens_scores} />
-        </div>
-      )}
-      {kind === 'evolve' && (phase === 'paths' || phase === 'roadmap') && (() => {
-        const filename = phase === 'paths' ? 'paths.md' : 'roadmap.md'
-        const artifact = artifacts.find(a => a.filename === filename)
-        return artifact?.content ? (
-          <div className="shrink-0 border-b border-border/40 overflow-auto max-h-48 px-3 py-2">
-            <ArtifactContent filename={filename} content={artifact.content} />
-          </div>
-        ) : null
-      })()}
-      {kind === 'evolve' && phase === 'output' && investigation && (
-        <div className="shrink-0 border-b border-border/40">
-          <EvolveOutputGate investigation={investigation} />
-        </div>
-      )}
-      {kind === 'guideline' && phase === 'evidence' && investigation && (
-        <div className="shrink-0 border-b border-border/40 px-0 py-0">
-          <GuidelineEvidenceCards evidenceCounts={investigation.evidence_counts} />
-        </div>
-      )}
-      {kind === 'guideline' && (phase === 'principles' || phase === 'draft') && (() => {
-        const filename = phase === 'principles' ? 'toc.md' : 'guideline-draft.md'
-        const artifact = artifacts.find(a => a.filename === filename)
-        return artifact?.content ? (
-          <div className="shrink-0 border-b border-border/40 overflow-auto max-h-48 px-3 py-2">
-            <ArtifactContent filename={filename} content={artifact.content} />
-          </div>
-        ) : null
-      })()}
-      {kind === 'guideline' && phase === 'publish' && investigation && (
-        <div className="shrink-0 border-b border-border/40">
-          <GuidelineOutputGate investigation={investigation} />
+          {phasePanel}
         </div>
       )}
 
@@ -177,6 +126,8 @@ export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation 
                 >
                   {/\.(html|htm)$/i.test(artifact.filename)
                     ? <Monitor className={cn('w-3.5 h-3.5 shrink-0 transition-colors', activeIndex === i ? 'text-primary' : 'text-muted-foreground/50')} />
+                    : isImageArtifact(artifact.filename)
+                    ? <Image className={cn('w-3.5 h-3.5 shrink-0 transition-colors', activeIndex === i ? 'text-primary' : 'text-muted-foreground/50')} />
                     : <FileText className={cn('w-3.5 h-3.5 shrink-0 transition-colors', activeIndex === i ? 'text-primary' : 'text-muted-foreground/50')} />
                   }
                   <span className="flex-1 text-sm font-mono truncate">{artifact.filename}</span>
@@ -235,7 +186,20 @@ export function WorkspacePanel({ artifacts, onClose, phase, kind, investigation 
           </div>
           {/* Scrollable content */}
           <div className="overflow-auto max-h-96 px-3 py-2">
-            {activeArtifact.content ? (
+            {mediaBaseUrl && isImageArtifact(activeArtifact.filename) ? (
+              <a
+                href={`${mediaBaseUrl}/${activeArtifact.filename}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block"
+              >
+                <img
+                  src={`${mediaBaseUrl}/${activeArtifact.filename}`}
+                  alt={activeArtifact.filename}
+                  className="max-h-80 w-auto object-contain rounded border border-border"
+                />
+              </a>
+            ) : activeArtifact.content ? (
               <ArtifactContent filename={activeArtifact.filename} content={activeArtifact.content} />
             ) : (
               <p className="text-xs text-muted-foreground/50 italic">No content</p>

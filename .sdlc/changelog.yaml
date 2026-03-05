@@ -2252,3 +2252,192 @@
   slug: credential-pool-runs
   timestamp: 2026-03-04T23:57:57.123803Z
   metadata: {}
+- id: ev-0408
+  kind: milestone_wave_completed
+  slug: v33-ponder-artifact-preload
+  timestamp: 2026-03-05T00:00:02.978027Z
+  metadata:
+    run_key: milestone-run-wave:v33-ponder-artifact-preload
+- id: ev-0409
+  kind: milestone_wave_completed
+  slug: v39-run-max-turns-recovery
+  timestamp: 2026-03-05T00:00:06.024315Z
+  metadata:
+    run_key: milestone-run-wave:v39-run-max-turns-recovery
+- id: ev-0410
+  kind: milestone_wave_completed
+  slug: v38-credential-pool
+  timestamp: 2026-03-05T00:00:28.366696Z
+  metadata:
+    run_key: milestone-run-wave:v38-credential-pool
+- id: ev-0411
+  kind: feature_phase_advanced
+  slug: workspace-panel-slot-refactor
+  timestamp: 2026-03-05T00:00:36.884676Z
+  metadata:
+    phase: qa
+- id: ev-0412
+  kind: audit_approved
+  slug: workspace-slug-utils
+  timestamp: 2026-03-05T00:01:03.757301Z
+  metadata: {}
+- id: ev-0413
+  kind: feature_phase_advanced
+  slug: workspace-slug-utils
+  timestamp: 2026-03-05T00:01:03.764463Z
+  metadata:
+    phase: qa
+- id: ev-0414
+  kind: audit_approved
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-05T00:01:31.155887Z
+  metadata: {}
+- id: ev-0415
+  kind: feature_phase_advanced
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-05T00:01:31.161982Z
+  metadata:
+    phase: qa
+- id: ev-0416
+  kind: qa_approved
+  slug: workspace-panel-slot-refactor
+  timestamp: 2026-03-05T00:01:38.667779Z
+  metadata: {}
+- id: ev-0417
+  kind: feature_phase_advanced
+  slug: workspace-panel-slot-refactor
+  timestamp: 2026-03-05T00:01:38.672477Z
+  metadata:
+    phase: merge
+- id: ev-0418
+  kind: feature_merged
+  slug: workspace-panel-slot-refactor
+  timestamp: 2026-03-05T00:01:42.195159Z
+  metadata: {}
+- id: ev-0419
+  kind: qa_approved
+  slug: workspace-slug-utils
+  timestamp: 2026-03-05T00:03:03.455903Z
+  metadata: {}
+- id: ev-0420
+  kind: feature_phase_advanced
+  slug: workspace-slug-utils
+  timestamp: 2026-03-05T00:03:03.462582Z
+  metadata:
+    phase: merge
+- id: ev-0421
+  kind: feature_merged
+  slug: workspace-slug-utils
+  timestamp: 2026-03-05T00:03:07.160235Z
+  metadata: {}
+- id: ev-0422
+  kind: qa_approved
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-05T00:03:16.421770Z
+  metadata: {}
+- id: ev-0423
+  kind: feature_phase_advanced
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-05T00:03:16.427410Z
+  metadata:
+    phase: merge
+- id: ev-0424
+  kind: feature_merged
+  slug: unified-dialogue-panel
+  timestamp: 2026-03-05T00:03:20.939971Z
+  metadata: {}
+- id: ev-0425
+  kind: milestone_wave_completed
+  slug: v40-workspace-ui-unification
+  timestamp: 2026-03-05T00:03:32.034860Z
+  metadata:
+    run_key: milestone-run-wave:v40-workspace-ui-unification
+- id: ev-0426
+  kind: milestone_wave_completed
+  slug: v38-credential-pool
+  timestamp: 2026-03-05T00:05:17.401774Z
+  metadata:
+    run_key: milestone-run-wave:v38-credential-pool
+- id: ev-0427
+  kind: run_failed
+  slug: v35-uat-failure-pathways
+  timestamp: 2026-03-05T00:06:08.986818Z
+  metadata:
+    run_key: milestone-run-wave:v35-uat-failure-pathways
+- id: ev-0428
+  kind: review_approved
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:07:08.836281Z
+  metadata: {}
+- id: ev-0429
+  kind: feature_phase_advanced
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:07:08.841152Z
+  metadata:
+    phase: review
+- id: ev-0430
+  kind: audit_approved
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:07:41.933006Z
+  metadata: {}
+- id: ev-0431
+  kind: feature_phase_advanced
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:07:41.937783Z
+  metadata:
+    phase: qa
+- id: ev-0432
+  kind: review_approved
+  slug: workspace-shell-component
+  timestamp: 2026-03-05T00:07:53.114289Z
+  metadata: {}
+- id: ev-0433
+  kind: feature_phase_advanced
+  slug: workspace-shell-component
+  timestamp: 2026-03-05T00:07:53.119584Z
+  metadata:
+    phase: review
+- id: ev-0434
+  kind: feature_phase_advanced
+  slug: workspace-shell-component
+  timestamp: 2026-03-05T00:08:08.877597Z
+  metadata:
+    phase: qa
+- id: ev-0435
+  kind: qa_approved
+  slug: workspace-shell-component
+  timestamp: 2026-03-05T00:09:06.166297Z
+  metadata: {}
+- id: ev-0436
+  kind: feature_phase_advanced
+  slug: workspace-shell-component
+  timestamp: 2026-03-05T00:09:06.172456Z
+  metadata:
+    phase: merge
+- id: ev-0437
+  kind: feature_merged
+  slug: workspace-shell-component
+  timestamp: 2026-03-05T00:09:10.986126Z
+  metadata: {}
+- id: ev-0438
+  kind: qa_approved
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:09:35.268058Z
+  metadata: {}
+- id: ev-0439
+  kind: feature_phase_advanced
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:09:35.273304Z
+  metadata:
+    phase: merge
+- id: ev-0440
+  kind: feature_merged
+  slug: create-workspace-modal
+  timestamp: 2026-03-05T00:09:45.797164Z
+  metadata: {}
+- id: ev-0441
+  kind: milestone_wave_completed
+  slug: v40-workspace-ui-unification
+  timestamp: 2026-03-05T00:10:11.658628Z
+  metadata:
+    run_key: milestone-run-wave:v40-workspace-ui-unification

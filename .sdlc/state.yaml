@@ -119,41 +119,6 @@ active_directives: []
 history:
 - feature: uat-artifacts-storage
   action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T02:57:09.677646Z
-  outcome: transition
-- feature: ponder-agent-web-tools
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:01:31.992730Z
-  outcome: transition
-- feature: ponder-agent-web-tools
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:01:34.971878Z
-  outcome: transition
-- feature: ponder-creation-modal
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:02:05.569108Z
-  outcome: transition
-- feature: ponder-creation-modal
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:02:08.464814Z
-  outcome: transition
-- feature: init-smarter-finish
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:03:23.364092Z
-  outcome: transition
-- feature: init-smarter-finish
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:03:26.903574Z
-  outcome: transition
-- feature: uat-artifacts-storage
-  action: implement_task
   phase: audit
   timestamp: 2026-03-03T03:04:44.651594Z
   outcome: transition
@@ -1117,6 +1082,41 @@ history:
   phase: released
   timestamp: 2026-03-04T23:57:57.121056Z
   outcome: merged
+- feature: workspace-panel-slot-refactor
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T00:01:42.191518Z
+  outcome: merged
+- feature: workspace-slug-utils
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T00:03:07.156647Z
+  outcome: merged
+- feature: unified-dialogue-panel
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T00:03:20.936731Z
+  outcome: merged
+- feature: create-workspace-modal
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T00:07:17.379796Z
+  outcome: transition
+- feature: workspace-shell-component
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T00:08:02.567071Z
+  outcome: transition
+- feature: workspace-shell-component
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T00:09:10.982555Z
+  outcome: merged
+- feature: create-workspace-modal
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T00:09:45.793913Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1162,4 +1162,6 @@ active_ponders:
 - root-cause-sessions-dont-end
 - qa-test-tc12
 - test-ponder-entry-for-tc12-qa
-last_updated: 2026-03-04T23:57:57.121058Z
+- artifact-share-capture
+- git-binary-hygiene
+last_updated: 2026-03-05T02:38:12.791060Z

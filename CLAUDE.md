@@ -24,9 +24,10 @@ To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX
 - **Language**: Rust (stable, see `rust-toolchain.toml`)
 - **Workspace crates**: `sdlc-core` (library), `sdlc-cli` (binary), `sdlc-server` (HTTP server)
 - **Frontend**: React + Vite in `frontend/` — embedded into `sdlc-server` at compile time
-- **State storage**: YAML files in `.sdlc/` — no database, no network
+- **State storage**: YAML files in `.sdlc/` for feature lifecycle — no external service required for local use
   - `.sdlc/features/<slug>/` — per-feature artifact Markdown files
   - `.sdlc/roadmap/<slug>/` — ponder (ideation) entries: manifest, team, scrapbook artifacts
+- **Embedded stores**: `telemetry.redb` + `orchestrator.db` (redb) by default; set `DATABASE_URL` for postgres in cluster mode
 
 ## Build & Test
 
@@ -289,3 +290,17 @@ Available Playwright tools in UAT agent runs:
 - Utility copy buttons (clipboard) are always present on command code blocks so agents can copy `/sdlc-run` and `/sdlc-next` commands in one click
 - All `/sdlc-*` commands end output with `**Next:** <command>` — one concrete next command, always present
 - `/sdlc-*` commands must orchestrate real work (multiple steps, decisions, synthesis) — a command that wraps a single CLI call is not a command, it's noise; delete it and fold the call into the preceding command's `**Next:**` output
+
+## Tool Ethos
+
+Tools are self-contained units of custom automation. They own 100% of their logic.
+
+- **No sdlc CLI delegation.** A tool never shells out to `sdlc <anything>`. It calls external
+  APIs directly (HTTP, SDK) and manages its own state.
+- **Actions are recurrence.** A tool is a stateless entry point. Scheduling is handled by
+  creating an orchestrator action (`sdlc orchestrate add`). The tool runs on demand; the
+  action makes it run on a cadence.
+- **Graceful degradation.** Optional external services (databases, caches) are non-fatal.
+  If unavailable, the tool falls back and continues. It logs the failure but does not error.
+- **Protocol: stdin JSON in, stdout JSON out.** All input via stdin, all output via stdout.
+  Logs go to stderr only.

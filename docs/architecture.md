@@ -74,7 +74,7 @@ sdlc/
 
 ## Data Layer
 
-All state is stored as YAML files in `.sdlc/` at the project root. No database. No network.
+State is stored in two layers: YAML files in `.sdlc/` for the core feature lifecycle, and embedded redb stores for telemetry and orchestrator data. No external service required for local use.
 
 ### `.sdlc/state.yaml`
 
@@ -150,6 +150,27 @@ Per-feature artifacts. Each is a Markdown file written by an agent or human.
 ├── audit.md
 └── qa-results.md
 ```
+
+### Embedded Stores (redb) — Default
+
+Two redb databases live alongside the YAML files:
+
+| File | Contents |
+|------|---------|
+| `.sdlc/telemetry.redb` | Raw agent run events — `(run_id, seq) → JSON`. Supports per-run queries and aggregated `RunSummary`. Pruned automatically by retention policy. |
+| `.sdlc/orchestrator.db` | Orchestrator actions, webhook payloads, webhook routes, and a webhook event ring buffer (cap: 500). |
+
+Both are opened lazily at server startup and degrade gracefully if unavailable (no crash, just no persistence).
+
+### Cluster Mode (postgres) — Optional
+
+Set `DATABASE_URL=postgres://...` to switch all embedded stores to PostgreSQL. Migrations run automatically at startup via `sqlx::migrate!`. The YAML layer is unchanged.
+
+| Env var | Effect |
+|---------|--------|
+| `DATABASE_URL` | Enables postgres for telemetry, orchestrator, and run records. If unset, redb is used. |
+
+This allows `sdlc ui` to work with zero external dependencies on a developer laptop, while a cluster deployment can share a single postgres instance across replicas.
 
 ---
 

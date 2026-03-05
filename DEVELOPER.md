@@ -4,6 +4,7 @@
 
 - [Rust](https://rustup.rs) (stable — see `rust-toolchain.toml`)
 - [Node.js ≥ 18](https://nodejs.org)
+- **PostgreSQL 14+** (optional — cluster mode only): set `DATABASE_URL=postgres://...` to use postgres for telemetry and orchestrator storage. Not needed for local `sdlc ui`.
 
 ## Install
 

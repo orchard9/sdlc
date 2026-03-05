@@ -18,11 +18,4 @@
     needs_worktree: false
     blocked_by:
     - credential-pool-core
-  - slug: credential-pool-runs
-    title: Credential pool runs — inject CLAUDE_CODE_OAUTH_TOKEN into every spawn_agent_run
-    phase: draft
-    action: create_spec
-    needs_worktree: false
-    blocked_by:
-    - credential-pool-core
   needs_worktrees: false
