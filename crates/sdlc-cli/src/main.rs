@@ -20,7 +20,7 @@ use std::path::PathBuf;
 #[command(
     name = "sdlc",
     about = "Deterministic SDLC state machine — manage features, artifacts, tasks, and milestones",
-    version,
+    version = env!("SDLC_GIT_VERSION"),
     propagate_version = true
 )]
 struct Cli {
