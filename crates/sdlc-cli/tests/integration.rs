@@ -3497,7 +3497,7 @@ fn orchestrator_two_actions_complete_in_one_tick() {
     // Insert two Pending actions scheduled in the near future, then drop the db
     // so run_one_tick can acquire the exclusive redb lock when it re-opens it.
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
-    let db_path = root.join(".sdlc/orchestrator.db");
+    let db_path = root.join(".sdlc/orchestrator.redb");
     {
         let db = ActionDb::open(&db_path).unwrap();
         let now = Utc::now();
@@ -3552,7 +3552,7 @@ fn orchestrator_startup_recovery_marks_stale_running_as_failed() {
     let root = dir.path();
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
 
-    let db_path = root.join(".sdlc/orchestrator.db");
+    let db_path = root.join(".sdlc/orchestrator.redb");
     let db = ActionDb::open(&db_path).unwrap();
 
     // Build a Running action whose updated_at is 10 minutes in the past.
@@ -3665,7 +3665,7 @@ fn run_one_tick_writes_sentinel_file() {
     let root = dir.path();
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
 
-    let db_path = root.join(".sdlc/orchestrator.db");
+    let db_path = root.join(".sdlc/orchestrator.redb");
     // Create the db file, then drop immediately so run_one_tick can open it.
     let _ = ActionDb::open(&db_path).unwrap();
 
@@ -3700,7 +3700,7 @@ fn run_one_tick_sentinel_updates_on_each_tick() {
     let root = dir.path();
     std::fs::create_dir_all(root.join(".sdlc")).unwrap();
 
-    let db_path = root.join(".sdlc/orchestrator.db");
+    let db_path = root.join(".sdlc/orchestrator.redb");
     // Create the db file, then drop immediately so run_one_tick can open it.
     let _ = ActionDb::open(&db_path).unwrap();
 

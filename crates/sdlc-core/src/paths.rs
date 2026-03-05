@@ -279,7 +279,7 @@ pub fn vision_md_path(root: &Path) -> PathBuf {
 }
 
 pub fn orchestrator_db_path(root: &Path) -> PathBuf {
-    root.join(SDLC_DIR).join("orchestrator.db")
+    root.join(SDLC_DIR).join("orchestrator.redb")
 }
 
 pub fn architecture_md_path(root: &Path) -> PathBuf {

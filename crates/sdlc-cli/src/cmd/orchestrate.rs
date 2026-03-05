@@ -139,7 +139,7 @@ pub fn run_daemon(root: &Path, tick_rate_secs: u64) -> Result<()> {
 /// acquire the exclusive redb lock between dispatches. Without this, holding
 /// the db open across a long tool execution blocks all concurrent API requests.
 ///
-/// `db_path` is the path to the `orchestrator.db` redb file.
+/// `db_path` is the path to the `orchestrator.redb` redb file.
 pub fn run_one_tick(root: &Path, db_path: &Path) -> Result<()> {
     // Phase 1: scheduled actions — load due list then release lock immediately.
     let now = Utc::now();

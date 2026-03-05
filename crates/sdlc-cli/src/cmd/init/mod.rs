@@ -825,6 +825,10 @@ pub fn write_core_tools(root: &Path) -> anyhow::Result<()> {
     // .gitignore — ensure index dirs are excluded
     append_gitignore_entry(root, ".sdlc/tools/*/index/")?;
 
+    // .gitignore — binary runtime databases (redb) must never be committed
+    append_gitignore_entry(root, ".sdlc/telemetry.redb")?;
+    append_gitignore_entry(root, ".sdlc/orchestrator.redb")?;
+
     // .gitignore — ensure plain env files are never committed
     // (.sdlc/secrets/envs/*.age and *.meta.yaml are safe to commit)
     append_gitignore_entry(root, ".env")?;

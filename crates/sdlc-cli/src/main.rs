@@ -186,7 +186,7 @@ enum Commands {
         /// Seconds between ticks (default 60)
         #[arg(long, default_value_t = 60)]
         tick_rate: u64,
-        /// Path to orchestrator DB (default: .sdlc/orchestrator.db)
+        /// Path to orchestrator DB (default: .sdlc/orchestrator.redb)
         #[arg(long)]
         db: Option<PathBuf>,
         #[command(subcommand)]
