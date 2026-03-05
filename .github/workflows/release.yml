@@ -74,11 +74,14 @@ jobs:
           tar czf "$ARCHIVE" -C "target/${{ matrix.target }}/dist" ponder
           echo "TARBALL=$ARCHIVE" >> $GITHUB_ENV
 
+      - name: Install cargo-deb and cargo-generate-rpm (GNU x86_64 only)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: cargo install cargo-deb cargo-generate-rpm
+
       - name: Build .deb (GNU x86_64 only)
         if: github.ref_type == 'tag' && matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          cargo install cargo-deb
           cargo deb -p sdlc-cli --target ${{ matrix.target }} --no-build --profile dist
           DEB_SRC=$(find target/debian -name '*.deb' | head -1)
           DEB="ponder-${VERSION}-${{ matrix.target }}.deb"
@@ -89,7 +92,6 @@ jobs:
         if: github.ref_type == 'tag' && matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
-          cargo install cargo-generate-rpm
           # generate-rpm resolves asset paths relative to crates/sdlc-cli,
           # so copy the binary from the target-triple dir to where it expects it
           mkdir -p target/dist
@@ -122,7 +124,7 @@ jobs:
       # ── Windows installer ────────────────────────────────────────────────────
 
       - name: Install WiX and cargo-wix (Windows)
-        if: github.ref_type == 'tag' && runner.os == 'Windows'
+        if: runner.os == 'Windows'
         shell: pwsh
         run: |
           winget install --id WiX.WiX --silent --accept-package-agreements --accept-source-agreements
