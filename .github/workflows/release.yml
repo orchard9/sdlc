@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+*'
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -37,7 +39,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: "release"
+          shared-key: "release-${{ matrix.target }}"
+          save-if: ${{ github.ref_type == 'branch' }}
 
       - name: Install cross-compilation toolchain (musl)
         if: runner.os == 'Linux'
@@ -64,7 +67,7 @@ jobs:
       # ── Linux packaging ──────────────────────────────────────────────────────
 
       - name: Package tar.gz (Linux/macOS)
-        if: runner.os != 'Windows'
+        if: github.ref_type == 'tag' && runner.os != 'Windows'
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           ARCHIVE="ponder-${VERSION}-${{ matrix.target }}.tar.gz"
@@ -72,7 +75,7 @@ jobs:
           echo "TARBALL=$ARCHIVE" >> $GITHUB_ENV
 
       - name: Build .deb (GNU x86_64 only)
-        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        if: github.ref_type == 'tag' && matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           cargo install cargo-deb
@@ -83,7 +86,7 @@ jobs:
           echo "DEB=$DEB" >> $GITHUB_ENV
 
       - name: Build .rpm (GNU x86_64 only)
-        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        if: github.ref_type == 'tag' && matrix.target == 'x86_64-unknown-linux-gnu'
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           cargo install cargo-generate-rpm
@@ -100,7 +103,7 @@ jobs:
       # ── macOS DMG ────────────────────────────────────────────────────────────
 
       - name: Build .dmg (macOS)
-        if: runner.os == 'macOS'
+        if: github.ref_type == 'tag' && runner.os == 'macOS'
         run: |
           VERSION="${GITHUB_REF_NAME#v}"
           brew install create-dmg
@@ -119,14 +122,14 @@ jobs:
       # ── Windows installer ────────────────────────────────────────────────────
 
       - name: Install WiX and cargo-wix (Windows)
-        if: runner.os == 'Windows'
+        if: github.ref_type == 'tag' && runner.os == 'Windows'
         shell: pwsh
         run: |
           winget install --id WiX.WiX --silent --accept-package-agreements --accept-source-agreements
           cargo install cargo-wix
 
       - name: Build WiX installer (Windows)
-        if: runner.os == 'Windows'
+        if: github.ref_type == 'tag' && runner.os == 'Windows'
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v', ''
@@ -139,7 +142,7 @@ jobs:
           echo "INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Package zip (Windows, alongside installer)
-        if: runner.os == 'Windows'
+        if: github.ref_type == 'tag' && runner.os == 'Windows'
         shell: pwsh
         run: |
           $version = $env:GITHUB_REF_NAME -replace '^v', ''
@@ -150,7 +153,7 @@ jobs:
       # ── Upload artifacts ─────────────────────────────────────────────────────
 
       - name: Collect assets (Unix)
-        if: runner.os != 'Windows'
+        if: github.ref_type == 'tag' && runner.os != 'Windows'
         run: |
           mkdir -p artifacts
           [ -n "${TARBALL:-}" ] && cp "$TARBALL" artifacts/ || true
@@ -159,7 +162,7 @@ jobs:
           [ -n "${DMG:-}"     ] && cp "$DMG"     artifacts/ || true
 
       - name: Collect assets (Windows)
-        if: runner.os == 'Windows'
+        if: github.ref_type == 'tag' && runner.os == 'Windows'
         shell: pwsh
         run: |
           New-Item -ItemType Directory -Force -Path artifacts | Out-Null
@@ -167,6 +170,7 @@ jobs:
           if ($env:ZIPFILE)   { Copy-Item $env:ZIPFILE   artifacts/ }
 
       - name: Upload artifacts
+        if: github.ref_type == 'tag'
         uses: actions/upload-artifact@v4
         with:
           name: ponder-${{ matrix.target }}
@@ -174,7 +178,7 @@ jobs:
 
   release:
     needs: build
-    if: always() && !cancelled()
+    if: github.ref_type == 'tag' && !cancelled()
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
