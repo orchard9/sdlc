@@ -28,7 +28,7 @@ Run a milestone's acceptance test using Playwright. Detects whether an e2e spec 
 ## Step 1 — Load the milestone
 
 ```bash
-sdlc milestone info <slug> --json
+ponder milestone info <slug> --json
 ```
 
 Extract `title`, `vision`, and `acceptance_test` content. If no acceptance test, stop.
@@ -213,7 +213,7 @@ Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 **On Pass or PassWithTasks:**
 
 ```bash
-sdlc milestone complete <slug>
+ponder milestone complete <slug>
 ```
 
 Then skip to Step 9.

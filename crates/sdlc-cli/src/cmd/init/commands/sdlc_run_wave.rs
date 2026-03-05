@@ -76,7 +76,7 @@ Check the result:
 
 ### 8. Run UAT automatically when all waves are done
 
-When prepare returns no remaining waves and the milestone is `Verifying`, use the `Skill` tool to execute `sdlc-milestone-uat` with args `<slug>` — do **not** print a Next suggestion or stop here. The UAT skill will write results, call `sdlc milestone complete` on pass, and end with its own `**Next:**` line.
+When prepare returns no remaining waves and the milestone is `Verifying`, use the `Skill` tool to execute `sdlc-milestone-uat` with args `<slug>` — do **not** print a Next suggestion or stop here. The UAT skill will write results, execute `ponder milestone complete <slug>` on pass, and end with its own `**Next:**` line.
 
 ### 9. Next
 
