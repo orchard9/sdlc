@@ -5,6 +5,7 @@ edition.workspace = true
 license.workspace = true
 description = "Deterministic SDLC orchestration CLI"
 repository.workspace = true
+authors.workspace = true
 homepage = "https://github.com/orchard9/sdlc"
 
 [[bin]]
@@ -40,3 +41,24 @@ assert_cmd = "2"
 tempfile = { workspace = true }
 predicates = "3"
 serde_yaml = { workspace = true }
+
+[package.metadata.deb]
+name = "ponder"
+maintainer = "orchard9"
+extended-description = "Deterministic feature lifecycle state machine"
+section = "utils"
+assets = [
+  ["target/release/ponder", "usr/bin/ponder", "755"],
+  ["target/release/ponder", "usr/bin/sdlc", "755"],
+]
+
+[package.metadata.generate-rpm]
+name = "ponder"
+[[package.metadata.generate-rpm.assets]]
+source = "../../target/dist/ponder"
+dest = "/usr/bin/ponder"
+mode = "755"
+[[package.metadata.generate-rpm.assets]]
+source = "../../target/dist/ponder"
+dest = "/usr/bin/sdlc"
+mode = "755"

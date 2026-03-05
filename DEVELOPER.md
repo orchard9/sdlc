@@ -5,6 +5,22 @@
 - [Rust](https://rustup.rs) (stable — see `rust-toolchain.toml`)
 - [Node.js ≥ 18](https://nodejs.org)
 - **PostgreSQL 14+** (optional — cluster mode only): set `DATABASE_URL=postgres://...` to use postgres for telemetry and orchestrator storage. Not needed for local `sdlc ui`.
+- [just](https://github.com/casey/just) (task runner)
+
+**Bootstrap from scratch (no tooling installed yet):**
+
+Use `install-deps.ps1` — a single PowerShell script that installs Rust, Node.js, and `just` for you.
+
+```bash
+# Linux / macOS (requires pwsh — install once)
+sudo apt install powershell   # or: brew install --cask powershell
+pwsh install-deps.ps1
+
+# Windows (pwsh is built-in on Win10+)
+pwsh install-deps.ps1
+```
+
+Then open a new shell and run `just install`.
 
 ## Install
 
@@ -16,7 +32,7 @@ just install
 
 Builds the frontend, installs `ponder` to `~/.cargo/bin`, creates the `sdlc` alias, and installs `orch-tunnel`.
 
-Install `just` first if you don't have it:
+Install `just` manually if you prefer:
 ```bash
 cargo install just   # or: brew install just  |  winget install just
 ```
@@ -24,9 +40,11 @@ cargo install just   # or: brew install just  |  winget install just
 **Other recipes:**
 
 ```bash
+just deps    # print bootstrap instructions (install-deps.ps1 / packaging-deps.ps1)
 just build   # build without installing
 just test    # cargo test --all (skips npm build)
 just lint    # clippy + tsc
+just dist    # build platform packages (.tar.gz, .deb, .rpm on Linux) — requires pwsh packaging-deps.ps1 first
 just clean   # remove build artifacts
 just         # list all recipes
 ```

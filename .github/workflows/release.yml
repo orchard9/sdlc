@@ -16,15 +16,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - target: aarch64-apple-darwin
-            os: macos-latest
-          - target: x86_64-apple-darwin
-            os: macos-13
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
           - target: aarch64-unknown-linux-musl
             os: ubuntu-latest
-            linker: gcc-aarch64-linux-gnu
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+          - target: aarch64-apple-darwin
+            os: macos-latest
           - target: x86_64-pc-windows-msvc
             os: windows-latest
 
@@ -36,16 +35,15 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - name: Install musl tools (x86_64)
-        if: matrix.target == 'x86_64-unknown-linux-musl'
-        run: sudo apt-get install -y musl-tools
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "release"
 
-      - name: Install aarch64 musl cross-compiler
-        if: matrix.target == 'aarch64-unknown-linux-musl'
-        run: |
-          sudo apt-get install -y gcc-aarch64-linux-gnu musl-tools
-          echo '[target.aarch64-unknown-linux-musl]' >> ~/.cargo/config.toml
-          echo 'linker = "aarch64-linux-gnu-gcc"' >> ~/.cargo/config.toml
+      - name: Install cross-compilation toolchain (musl)
+        if: runner.os == 'Linux'
+        uses: taiki-e/setup-cross-toolchain-action@v1
+        with:
+          target: ${{ matrix.target }}
 
       - name: Install Node.js
         uses: actions/setup-node@v4
@@ -61,27 +59,118 @@ jobs:
         run: cargo build --profile dist --bin ponder --target ${{ matrix.target }}
         env:
           SDLC_NO_NPM: "1"
+          RUSTFLAGS: ${{ runner.os == 'Windows' && '-Ctarget-feature=+crt-static' || '' }}
 
-      - name: Package (Unix)
+      # ── Linux packaging ──────────────────────────────────────────────────────
+
+      - name: Package tar.gz (Linux/macOS)
         if: runner.os != 'Windows'
         run: |
-          ARCHIVE="ponder-${{ matrix.target }}.tar.gz"
+          VERSION="${GITHUB_REF_NAME#v}"
+          ARCHIVE="ponder-${VERSION}-${{ matrix.target }}.tar.gz"
           tar czf "$ARCHIVE" -C "target/${{ matrix.target }}/dist" ponder
-          echo "ASSET=$ARCHIVE" >> $GITHUB_ENV
+          echo "TARBALL=$ARCHIVE" >> $GITHUB_ENV
 
-      - name: Package (Windows)
+      - name: Build .deb (GNU x86_64 only)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cargo install cargo-deb
+          cargo deb -p sdlc-cli --target ${{ matrix.target }} --no-build --profile dist
+          DEB_SRC=$(find target/debian -name '*.deb' | head -1)
+          DEB="ponder-${VERSION}-${{ matrix.target }}.deb"
+          cp "$DEB_SRC" "$DEB"
+          echo "DEB=$DEB" >> $GITHUB_ENV
+
+      - name: Build .rpm (GNU x86_64 only)
+        if: matrix.target == 'x86_64-unknown-linux-gnu'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cargo install cargo-generate-rpm
+          # generate-rpm resolves asset paths relative to crates/sdlc-cli,
+          # so copy the binary from the target-triple dir to where it expects it
+          mkdir -p target/dist
+          cp target/${{ matrix.target }}/dist/ponder target/dist/ponder
+          cd crates/sdlc-cli && cargo generate-rpm --profile dist
+          RPM_SRC=$(find target/generate-rpm -name '*.rpm' | head -1)
+          RPM="ponder-${VERSION}-${{ matrix.target }}.rpm"
+          cp "$RPM_SRC" "../../$RPM"
+          echo "RPM=$RPM" >> $GITHUB_ENV
+
+      # ── macOS DMG ────────────────────────────────────────────────────────────
+
+      - name: Build .dmg (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          brew install create-dmg
+          mkdir -p dmg-contents
+          cp target/${{ matrix.target }}/dist/ponder dmg-contents/ponder
+          DMG="ponder-${VERSION}-${{ matrix.target }}.dmg"
+          create-dmg \
+            --volname "Ponder" \
+            --window-size 400 200 \
+            --icon-size 80 \
+            --no-internet-enable \
+            "$DMG" \
+            dmg-contents/
+          echo "DMG=$DMG" >> $GITHUB_ENV
+
+      # ── Windows installer ────────────────────────────────────────────────────
+
+      - name: Install WiX and cargo-wix (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $Archive = "ponder-${{ matrix.target }}.zip"
-          Compress-Archive -Path "target/${{ matrix.target }}/dist/ponder.exe" -DestinationPath $Archive
-          echo "ASSET=$Archive" | Out-File -FilePath $env:GITHUB_ENV -Append
+          winget install --id WiX.WiX --silent --accept-package-agreements --accept-source-agreements
+          cargo install cargo-wix
 
-      - name: Upload artifact
+      - name: Build WiX installer (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          $root = $PWD.Path
+          Set-Location crates/sdlc-cli
+          cargo wix -p sdlc-cli --nocapture --no-build --target-bin-dir "$root/target/${{ matrix.target }}/dist"
+          $msi = Get-ChildItem "$root/target/wix" -Filter '*.msi' | Select-Object -First 1 -ExpandProperty FullName
+          $installer = "ponder-$version-${{ matrix.target }}.msi"
+          Copy-Item $msi "$root/$installer"
+          echo "INSTALLER=$installer" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - name: Package zip (Windows, alongside installer)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = $env:GITHUB_REF_NAME -replace '^v', ''
+          $Archive = "ponder-$version-${{ matrix.target }}.zip"
+          Compress-Archive -Path "target/${{ matrix.target }}/dist/ponder.exe" -DestinationPath $Archive
+          echo "ZIPFILE=$Archive" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      # ── Upload artifacts ─────────────────────────────────────────────────────
+
+      - name: Collect assets (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          mkdir -p artifacts
+          [ -n "${TARBALL:-}" ] && cp "$TARBALL" artifacts/ || true
+          [ -n "${DEB:-}"     ] && cp "$DEB"     artifacts/ || true
+          [ -n "${RPM:-}"     ] && cp "$RPM"     artifacts/ || true
+          [ -n "${DMG:-}"     ] && cp "$DMG"     artifacts/ || true
+
+      - name: Collect assets (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          if ($env:INSTALLER) { Copy-Item $env:INSTALLER artifacts/ }
+          if ($env:ZIPFILE)   { Copy-Item $env:ZIPFILE   artifacts/ }
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ponder-${{ matrix.target }}
-          path: ${{ env.ASSET }}
+          path: artifacts/
 
   release:
     needs: build
