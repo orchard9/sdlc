@@ -2,6 +2,9 @@
 # Install just: cargo install just  |  brew install just  |  winget install just
 # Usage: just <recipe>
 
+# Use PowerShell 7 on Windows
+set windows-shell := ["pwsh.exe", "-NoLogo", "-Command"]
+
 # Show available recipes
 default:
     @just --list
@@ -68,7 +71,7 @@ _symlink:
 
 [windows]
 _symlink:
-    #!powershell
+    #!pwsh
     $ponder = (Get-Command ponder -ErrorAction Stop).Source
     $sdlc   = Join-Path (Split-Path $ponder) "sdlc.exe"
     if (Test-Path $sdlc) { Remove-Item $sdlc }
