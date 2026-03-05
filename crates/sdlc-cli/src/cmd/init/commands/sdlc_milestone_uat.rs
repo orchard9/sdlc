@@ -33,7 +33,24 @@ ponder milestone info <slug> --json
 
 Extract `title`, `vision`, and `acceptance_test` content. If no acceptance test, stop.
 
-## Step 2 — Mode detection
+## Step 2 — Start the web client (if testing a frontend)
+
+If the milestone's acceptance test exercises a browser UI, start a dedicated UAT instance of the frontend on a fixed port so there is no ambiguity about which server Playwright is talking to.
+
+Pick port **3999** (or the next available port if 3999 is in use). Start the frontend dev server on that port using whatever start command the project uses (check `package.json` scripts — typically `npm run dev` or `npm run start` with a `PORT` or `--port` argument). Redirect output to `/tmp/uat-web-client.log`.
+
+Wait up to 20 seconds for the server to respond at `http://localhost:3999/`. If it does not respond, print the last 20 lines of `/tmp/uat-web-client.log` as a hard blocker and stop.
+
+All Playwright navigation in this skill must use `http://localhost:PORT` as the base URL — never guess or reuse a port that was already running.
+
+> **Cleanup**: When the session ends (pass, fail, or error), kill the process and remove the log:
+> ```bash
+> kill $(cat /tmp/uat-web-client.pid) 2>/dev/null; rm -f /tmp/uat-web-client.pid /tmp/uat-web-client.log
+> ```
+
+---
+
+## Step 3 — Mode detection
 
 Check whether the e2e spec exists:
 
@@ -153,7 +170,7 @@ Once the spec runs (passing or with stable failures), proceed to **Mode A Step A
 
 ---
 
-## Step 3 — Write summary.md
+## Step 4 — Write summary.md
 
 Create the run directory and write the summary:
 
@@ -182,7 +199,7 @@ Passed: <n> | Failed: <n> | Skipped: <n>
 | <test title> | Selector break | Fixed locator — rerun passed |
 ```
 
-## Step 4 — Write uat_results.md
+## Step 5 — Write uat_results.md
 
 Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 
@@ -204,9 +221,9 @@ Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 **<N>/<total> steps passed**
 ```
 
-## Step 5 — Flip milestone state for passing runs
+## Step 6 — Flip milestone state for passing runs
 
-**Verdict rules (for Pass/PassWithTasks only — failures go to Step 5B):**
+**Verdict rules (for Pass/PassWithTasks only — failures go to Step 6B):**
 - All tests pass → **Pass**
 - Some tests fail but only tasks created, none blocking → **PassWithTasks**
 
@@ -216,9 +233,9 @@ Write the signed checklist to `.sdlc/milestones/<slug>/uat_results.md`:
 ponder milestone complete <slug>
 ```
 
-Then skip to Step 9.
+Then skip to Step 10.
 
-## Step 5B — Triage failures
+## Step 6B — Triage failures
 
 For each failed test, classify it into exactly one category:
 
@@ -230,7 +247,7 @@ For each failed test, classify it into exactly one category:
 
 Collect classifications before proceeding.
 
-## Step 6 — Pathway 1: Fix and Retry
+## Step 7 — Pathway 1: Fix and Retry
 
 **If ALL failures are classified as Fixable:**
 
@@ -240,10 +257,10 @@ Collect classifications before proceeding.
    cd frontend && npx playwright test e2e/milestones/<slug>.spec.ts --reporter=json
    ```
 3. Re-parse `playwright-report/results.json` for updated counts
-4. If all pass → verdict is **FixedAndPassed** → proceed to Step 9
+4. If all pass → verdict is **FixedAndPassed** → proceed to Step 10
 5. If still failing after **2 total fix cycles** → reclassify remaining failures and fall through to Pathway 2 or 3
 
-## Step 7 — Pathway 2: Escalate
+## Step 8 — Pathway 2: Escalate
 
 **If any failure is Escalation AND none are Complex:**
 
@@ -260,9 +277,9 @@ Collect classifications before proceeding.
    ```bash
    curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail
    ```
-4. Proceed to Step 9 with verdict **Escalated**
+4. Proceed to Step 10 with verdict **Escalated**
 
-## Step 8 — Pathway 3: Recap and Propose
+## Step 9 — Pathway 3: Recap and Propose
 
 **If any failure is Complex:**
 
@@ -286,9 +303,9 @@ Collect classifications before proceeding.
    ```bash
    curl -s -X POST http://localhost:7777/api/milestone/<slug>/uat/fail
    ```
-6. Proceed to Step 9 with verdict **Recapped**
+6. Proceed to Step 10 with verdict **Recapped**
 
-## Step 9 — Final report
+## Step 10 — Final report
 
 | Verdict | State after | Next |
 |---|---|---|
