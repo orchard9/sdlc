@@ -1,0 +1,16 @@
+{
+  "id": "20260305-175041-hfh",
+  "key": "fix-walkdirectorytreetofindsdlcroot",
+  "run_type": "feature",
+  "target": "fix-walkdirectorytreetofindsdlcroot",
+  "label": "fix-walkdirectorytreetofindsdlcroot",
+  "status": "completed",
+  "started_at": "2026-03-05T17:50:41.403301859+00:00",
+  "completed_at": "2026-03-05T17:51:21.694651997+00:00",
+  "cost_usd": 0.30454899999999996,
+  "turns": 10,
+  "error": null,
+  "prompt": "Drive feature 'fix-walkdirectorytreetofindsdlcroot' through the sdlc state machine. Run `sdlc next --for fix-walkdirectorytreetofindsdlcroot --json` to get the next action, execute it, then loop until done or a HITL gate is reached.",
+  "session_id": "8b03dea2-fe2d-4b6f-818c-0acb27f7a0f1",
+  "stop_reason": "end_turn"
+}

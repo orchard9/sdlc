@@ -1,0 +1,109 @@
+slug: fix-walkdirectorytreetofindsdlcroot
+title: Fix Walkdirectorytreetofindsdlcroot
+description: |-
+  Root cause: `crates/sdlc-cli/src/root.rs:resolve_root` falls back directly to `std::env::current_dir()` instead of walking ancestor directories to find the nearest `.sdlc/` directory.
+
+  Problem: When `sdlc` is run from a project subdirectory, `resolve_root` returns the current working directory directly without searching parent directories for a `.sdlc/` folder. This causes the CLI to report that the project is not initialized, even though a valid `.sdlc/` directory exists in a parent directory. LLM agents frequently run commands from non-root directories, making this a common failure mode.
+
+  Original report:
+  If you run ponder on the command line and you're in a project subdirectory and not the root, you'll get an error saying you need to run sdlc init. Claude and other LLMs constantly forget what directory they're in. The code should walk the directory tree until it finds the right .sdlc directory.
+phase: released
+created_at: 2026-03-05T17:46:11.211459036Z
+updated_at: 2026-03-05T17:51:14.913405685Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/spec.md
+  created_at: 2026-03-05T17:46:42.804894015Z
+  approved_at: 2026-03-05T17:46:45.541920765Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-05T17:46:49.082757859Z
+  waive_reason: Single-function change in one file; no architecture decisions or UI. The spec fully describes the algorithm.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/tasks.md
+  created_at: 2026-03-05T17:46:56.906912702Z
+  approved_at: 2026-03-05T17:46:59.916576624Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/qa-plan.md
+  created_at: 2026-03-05T17:47:09.324388996Z
+  approved_at: 2026-03-05T17:47:11.561556998Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/review.md
+  created_at: 2026-03-05T17:48:38.533321332Z
+  approved_at: 2026-03-05T17:48:44.973742613Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/audit.md
+  created_at: 2026-03-05T17:49:02.081736191Z
+  approved_at: 2026-03-05T17:49:04.204904460Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-walkdirectorytreetofindsdlcroot/qa-results.md
+  created_at: 2026-03-05T17:49:20.922328236Z
+  approved_at: 2026-03-05T17:49:24.919878580Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T17:46:11.211459036Z
+  exited: 2026-03-05T17:46:45.543683051Z
+- phase: specified
+  entered: 2026-03-05T17:46:45.543683051Z
+  exited: 2026-03-05T17:47:11.562915290Z
+- phase: planned
+  entered: 2026-03-05T17:47:11.562915290Z
+  exited: 2026-03-05T17:47:13.840256557Z
+- phase: ready
+  entered: 2026-03-05T17:47:13.840256557Z
+  exited: 2026-03-05T17:47:16.145211827Z
+- phase: implementation
+  entered: 2026-03-05T17:47:16.145211827Z
+  exited: 2026-03-05T17:48:44.979100270Z
+- phase: review
+  entered: 2026-03-05T17:48:44.979100270Z
+  exited: 2026-03-05T17:48:47.107047626Z
+- phase: audit
+  entered: 2026-03-05T17:48:47.107047626Z
+  exited: 2026-03-05T17:49:04.210028625Z
+- phase: qa
+  entered: 2026-03-05T17:49:04.210028625Z
+  exited: 2026-03-05T17:49:24.924478860Z
+- phase: merge
+  entered: 2026-03-05T17:49:24.924478860Z
+  exited: 2026-03-05T17:51:14.913405685Z
+- phase: released
+  entered: 2026-03-05T17:51:14.913405685Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3
