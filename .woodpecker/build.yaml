@@ -30,10 +30,9 @@ steps:
       - |
         echo "Restarting all sdlc-server deployments..."
         for ns in $(kubectl get namespaces -o name | grep "namespace/sdlc-" | sed 's|namespace/||'); do
-          slug="${ns#sdlc-}"
-          echo "  Restarting sdlc-server in $ns..."
-          kubectl rollout restart deployment/"sdlc-${slug}" -n "$ns" || true
-          kubectl rollout status deployment/"sdlc-${slug}" -n "$ns" --timeout=120s || true
+          echo "  Restarting $ns in namespace $ns..."
+          kubectl rollout restart deployment/"$ns" -n "$ns" || true
+          kubectl rollout status deployment/"$ns" -n "$ns" --timeout=120s || true
         done
         echo "Done."
     depends_on:
