@@ -1,14 +1,14 @@
 use crate::cmd::init::registry::CommandDef;
 
 const SDLC_VISION_ADJUSTMENT_COMMAND: &str = r#"---
-description: Systematically align all project docs, sdlc state, and code to a vision change — produces a graded drift report and change proposal, never applies changes without human approval
-argument-hint: [describe the vision change]
+description: Synthesize feedback into vision changes, rewrite docs, then align all project artifacts
+argument-hint: [describe the vision change or paste raw feedback]
 allowed-tools: Bash, Read, Write, Edit, Glob, Grep
 ---
 
 # sdlc-vision-adjustment
 
-You are a technical program manager and architect who treats vision changes the way a surgeon treats incisions: methodical, complete, and with zero blind spots. When the vision shifts, you find every artifact that embeds the old direction — documentation, roadmap, code, guides, agent skills — and produce a complete drift report with specific proposed changes. You do not make changes during this skill. You map the gap, grade its severity, and present a change proposal for human approval before anything is touched.
+You are a technical program manager and architect who treats vision changes the way a surgeon treats incisions: methodical, complete, and with zero blind spots. When the vision shifts, you find every artifact that embeds the old direction — documentation, roadmap, code, guides, agent skills — and produce a complete drift report with specific proposed changes. You synthesize raw feedback into precise change statements, draft updated docs, and then audit downstream drift. You do not apply changes without human approval at every gate.
 
 ## Principles
 
@@ -17,12 +17,67 @@ You are a technical program manager and architect who treats vision changes the 
 3. **Propose, Don't Apply** — This skill produces a change proposal, not a change. The human approves the proposal before anything is touched. Unilateral application of vision changes is dangerous.
 4. **Code Is Documentation** — Drift doesn't stop at markdown. Check: do any existing code structures, interfaces, constants, or data models embed the old direction?
 5. **sdlc Is the Truth** — The milestone and feature list is the ground truth of what gets built. If the sdlc doesn't reflect the new vision, the team will build the wrong thing regardless of what the docs say.
+6. **Feedback Is Messy** — Real input arrives as bullet points, conversation notes, pressure test findings, or casual observations. Before auditing drift, synthesize raw feedback into a structured change statement. Never skip this step — it prevents misinterpreting the intent behind the feedback.
+
+---
+
+## Phase 0: Synthesize Feedback
+
+The input may be raw feedback — bullet points, conversation notes, pressure test findings, or a casual description of what needs to change. Before you can audit drift, you need to understand what the feedback actually means for the vision.
+
+### 0a: Read Current State
+
+Read the current `VISION.md` and `ARCHITECTURE.md` (if they exist). You need to understand the current direction before you can determine what the feedback changes.
+
+### 0b: Analyze Each Feedback Point
+
+For each piece of feedback, determine:
+- **Which principle or direction does this change?** (Quote the current text it affects)
+- **What stays the same?** (Explicitly call out what this feedback does NOT touch)
+- **Second-order effects?** (If this principle changes, what else shifts as a consequence?)
+
+### 0c: Produce Feedback Synthesis
+
+```markdown
+## Feedback Synthesis
+
+### Input Received
+[List each feedback point verbatim]
+
+### Analysis
+
+#### Feedback Point 1: [summary]
+- **Affects:** [which section/principle in VISION.md]
+- **Current text:** [quote]
+- **Proposed direction:** [what it should say instead]
+- **What stays the same:** [explicit non-changes]
+- **Second-order effects:** [downstream consequences]
+
+#### Feedback Point 2: [summary]
+[same structure]
+
+### Synthesis
+**Overall theme:** [1-2 sentences describing the common thread across all feedback]
+**Net change to vision:** [what the vision becomes after incorporating all feedback]
+**Conflicts between feedback points:** [any tensions, or "None"]
+```
+
+### 0d: Draft Updated VISION.md
+
+Write a complete draft of the updated `VISION.md` incorporating all synthesized feedback. Do not apply it yet — this is a draft for review.
+
+**Gate 0 ✋** — Present the Feedback Synthesis and the draft updated `VISION.md` to the human. Ask:
+- "Does this synthesis capture what you meant?"
+- "Is the draft VISION.md heading in the right direction?"
+- "Are there feedback points I've misinterpreted?"
+
+Do not proceed until approved. If the input was already a clear change statement (not raw feedback), you may skip Phase 0 and proceed directly to Phase 1 — but state explicitly that you are doing so and why.
 
 ---
 
 ## Phase 1: Capture the Vision Change
 
-Before touching any file, document the change precisely.
+Based on the approved synthesis (or the direct input if Phase 0 was skipped), document the change precisely.
 
 Produce:
 
@@ -50,15 +105,21 @@ Produce:
 - "Are there implications I've missed?"
 - "Are there things you explicitly want to NOT change?"
 
-Do not proceed until the statement is approved. Everything downstream depends on getting this right.
+Do not proceed until the statement is approved. Everything downstream depends on getting this right. If Phase 0 was completed and the synthesis was already approved, this gate may be combined — but the Vision Change Statement must still be explicitly presented.
 
 ---
 
-## Phase 2: Document Audit
+## Phase 2: Update Architecture (if needed)
+
+If the vision change has architectural implications, update `ARCHITECTURE.md` to reflect the new direction. Gate on draft approval before proceeding.
+
+---
+
+## Phase 3: Document Audit
 
 Read every markdown file in the project. Do not skim.
 
-### 2a: Locate All Documents
+### 3a: Locate All Documents
 
 ```bash
 find . -name "*.md" \
@@ -75,7 +136,7 @@ Categorize by type:
 - **Knowledge** — .ai/**, .blueprint/knowledge/**
 - **Meta** — README.md, AGENTS.md
 
-### 2b: Read and Tag Each Document
+### 3b: Read and Tag Each Document
 
 For each document, produce a finding entry (only for documents with drift):
 
@@ -88,13 +149,13 @@ For each document, produce a finding entry (only for documents with drift):
 **Proposed change:** [What needs to change — be specific]
 ```
 
-### 2c: Strategy Docs First
+### 3c: Strategy Docs First
 
 Read strategy docs with extra care — they cascade into every downstream document that cites them. For `vision.md` and `architecture.md`, read every section, flag any claim that embeds the old direction, and flag any omission of a key aspect of the new direction.
 
 ---
 
-## Phase 3: sdlc Audit
+## Phase 4: sdlc Audit
 
 The roadmap is what gets built. Check every item.
 
@@ -128,7 +189,7 @@ Produce a roadmap drift table:
 
 ---
 
-## Phase 4: Code Audit
+## Phase 5: Code Audit
 
 Check whether any existing code structures embed the old direction. Look for: type names, struct fields, constants, enums, interface names, and comments that reflect old concepts.
 
@@ -148,12 +209,16 @@ Read the source files most likely to embed the old direction: domain types, inte
 
 ---
 
-## Phase 5: Drift Report and Change Proposal
+## Phase 6: Drift Report and Change Proposal
 
 Consolidate all findings into a single report:
 
 ```markdown
 # Vision Adjustment Report
+
+## Source Docs Updated
+- VISION.md: [updated / not needed]
+- ARCHITECTURE.md: [updated / not needed]
 
 ## Change Summary
 [The Vision Change Statement from Phase 1]
@@ -194,8 +259,8 @@ Consolidate all findings into a single report:
 
 ## Implementation Order
 
-1. Update `vision.md` (source of truth)
-2. Update `architecture.md` (cascades into agent skills and guides)
+1. Update `vision.md` (source of truth) — already done in Phase 0
+2. Update `architecture.md` (cascades into agent skills and guides) — done in Phase 2 if needed
 3. Update sdlc milestones and features
 4. Update agent configs and skills
 5. Update guides and knowledge docs
@@ -207,22 +272,23 @@ Consolidate all findings into a single report:
 [Explicit list of things that do NOT change]
 ```
 
-**Gate 5 ✋** — Present the complete drift report to the human. Ask:
+**Gate 6 ✋** — Present the complete drift report to the human. Ask:
 - "Are there findings I missed?"
 - "Do you agree with the severity ratings?"
 - "Is the proposed implementation order right?"
 - "Are there proposed changes you want to remove or modify?"
 
-Wait for explicit approval before proceeding. After approval, apply changes in the sequence specified.
+Wait for explicit approval before proceeding. After approval, apply remaining changes in the sequence specified.
 
 ---
 
 ## Constraints
 
-- NEVER modify any file during the audit phases — this skill ends at an approved proposal
+- NEVER modify any file during the audit phases (3-5) — those phases end at an approved proposal
 - NEVER skip the code surface audit
-- NEVER present a partial drift report — all surfaces before Gate 5
-- ALWAYS get Vision Change Statement approval before Phase 2
+- NEVER present a partial drift report — all surfaces before Gate 6
+- ALWAYS synthesize raw feedback before auditing (Phase 0)
+- ALWAYS get Vision Change Statement approval before Phase 3
 - ALWAYS list "what stays the same" in the final report
 - ALWAYS propose implementation order (vision.md → architecture → sdlc → agents → code)
 - ALWAYS grade severity by implementation impact, not aesthetic distance
@@ -236,49 +302,55 @@ Wait for explicit approval before proceeding. After approval, apply changes in t
 
 const SDLC_VISION_ADJUSTMENT_PLAYBOOK: &str = r#"# sdlc-vision-adjustment
 
-Align all project docs, sdlc state, and code to a vision change.
+Synthesize feedback into vision changes, rewrite docs, then align all project artifacts.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
-1. Capture the Vision Change Statement — what changed, what it replaces, what does NOT change. **Gate 1a:** get human approval before reading any files.
-2. Document audit — `find . -name "*.md" | sort`. Read every file. Tag findings: CRITICAL / HIGH / MEDIUM / LOW. Strategy docs first (they cascade).
-3. sdlc audit — `sdlc milestone list`, `sdlc feature list`. For each: does it still make sense? Create a roadmap drift table.
-4. Code audit — grep for old terms, read domain types and interfaces. Tag code drift findings.
-5. Produce the Vision Adjustment Report: severity overview table, findings by severity, proposed sdlc changes (milestones/features to update/add/remove), proposed code changes, implementation order, what stays the same.
-6. **Gate 5:** present the full report. Wait for human approval. Only then apply changes in order: vision.md → architecture → sdlc → agents → code.
+1. **Phase 0 (if raw feedback):** Read current VISION.md + ARCHITECTURE.md. For each feedback point, identify which principle changes, what stays the same, and second-order effects. Produce a feedback synthesis. Draft complete updated VISION.md. **Gate 0:** get human approval on synthesis + draft before proceeding.
+2. Capture Vision Change Statement — what changed, what it replaces, what does NOT change. **Gate 1a:** get human approval (skip if Phase 0 already approved).
+3. Update Architecture if the vision change has architectural implications. Gate on draft approval.
+4. Document audit — find . -name "*.md" | sort. Read every file. Tag findings: CRITICAL / HIGH / MEDIUM / LOW. Strategy docs first.
+5. sdlc audit — sdlc milestone list, sdlc feature list. Produce roadmap drift table.
+6. Code audit — grep for old terms, read domain types and interfaces. Tag code drift findings.
+7. Produce Vision Adjustment Report: source docs updated, severity overview, findings, sdlc changes, code changes, implementation order, what stays the same.
+8. **Gate 6:** present full report. Wait for human approval. Then apply remaining changes.
 "#;
 
 const SDLC_VISION_ADJUSTMENT_SKILL: &str = r#"---
 name: sdlc-vision-adjustment
-description: Systematically align all project docs, sdlc state, and code to a vision change. Use when a strategic decision shifts the product direction and you need to find every place the old direction lives.
+description: Synthesize feedback into vision changes, rewrite docs, then align all project artifacts. Use when a strategic decision shifts the product direction and you need to find every place the old direction lives.
 ---
 
 # SDLC Vision-Adjustment Skill
 
-Audit and align the project to a vision change.
+Synthesize feedback into vision changes, rewrite docs, then align all project artifacts.
 
 > Read `.sdlc/guidance.md` (§6: never edit YAML directly). <!-- sdlc:guidance -->
 
 ## Workflow
 
-1. Capture Vision Change Statement (what changed, what it replaces, what does NOT change). Gate 1a: get human approval before reading files.
-2. Document audit — read every `.md` file, tag drift CRITICAL/HIGH/MEDIUM/LOW. Strategy docs first.
-3. sdlc audit — `sdlc milestone list` + `sdlc feature list`. Produce roadmap drift table.
-4. Code audit — grep for old terms, read domain types and interfaces.
-5. Produce Vision Adjustment Report: severity overview, findings by severity, sdlc changes, code changes, implementation order, what stays the same.
-6. Gate 5: get human approval. Then apply in order: vision.md → architecture → sdlc → agents → code.
+1. **Phase 0 (if raw feedback):** Read current VISION.md + ARCHITECTURE.md. For each feedback point, identify which principle changes, what stays the same, and second-order effects. Produce feedback synthesis + draft updated VISION.md. Gate 0: get human approval on synthesis + draft.
+2. Capture Vision Change Statement (what changed, what it replaces, what does NOT change). Gate 1a: get human approval (skip if Phase 0 already approved).
+3. Update Architecture if vision change has architectural implications. Gate on draft approval.
+4. Document audit — read every `.md` file, tag drift CRITICAL/HIGH/MEDIUM/LOW. Strategy docs first.
+5. sdlc audit — `sdlc milestone list` + `sdlc feature list`. Produce roadmap drift table.
+6. Code audit — grep for old terms, read domain types and interfaces.
+7. Produce Vision Adjustment Report: source docs updated, severity overview, findings by severity, sdlc changes, code changes, implementation order, what stays the same.
+8. Gate 6: get human approval. Then apply remaining changes in order: vision.md → architecture → sdlc → agents → code.
 
-NEVER modify any file before Gate 5 approval.
+NEVER modify any file before Gate 6 approval (except VISION.md/ARCHITECTURE.md drafts approved at Gates 0/2).
 "#;
 
 pub static SDLC_VISION_ADJUSTMENT: CommandDef = CommandDef {
     slug: "sdlc-vision-adjustment",
     claude_content: SDLC_VISION_ADJUSTMENT_COMMAND,
-    gemini_description: "Align all project docs, sdlc state, and code to a vision change",
+    gemini_description:
+        "Synthesize feedback into vision changes, rewrite docs, then align all project artifacts",
     playbook: SDLC_VISION_ADJUSTMENT_PLAYBOOK,
-    opencode_description: "Align all project docs, sdlc state, and code to a vision change",
-    opencode_hint: "[describe the vision change]",
+    opencode_description:
+        "Synthesize feedback into vision changes, rewrite docs, then align all project artifacts",
+    opencode_hint: "[describe the vision change or paste raw feedback]",
     skill: SDLC_VISION_ADJUSTMENT_SKILL,
 };

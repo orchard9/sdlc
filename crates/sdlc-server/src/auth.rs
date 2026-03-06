@@ -104,6 +104,11 @@ pub async fn auth_middleware(
         return next.run(req).await;
     }
 
+    // Health check — always public so k8s probes work without auth.
+    if req.uri().path() == "/api/health" {
+        return next.run(req).await;
+    }
+
     // Feedback widget endpoint — always public regardless of token or host.
     if req.uri().path().starts_with("/__sdlc/") {
         return next.run(req).await;

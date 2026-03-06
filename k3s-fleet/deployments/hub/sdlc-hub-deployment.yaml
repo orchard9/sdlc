@@ -22,7 +22,7 @@ spec:
       containers:
         - name: sdlc-server
           image: ghcr.io/orchard9/sdlc:latest
-          args: ["serve", "--hub", "--port", "8080"]
+          args: ["ui", "start", "--port", "8080", "--no-open", "--no-tunnel", "--hub"]
           ports:
             - containerPort: 8080
               protocol: TCP
