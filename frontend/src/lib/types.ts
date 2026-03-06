@@ -1224,3 +1224,32 @@ export interface FleetAgentSummary {
   total_active_runs: number
   projects_with_agents: number
 }
+
+// ---------------------------------------------------------------------------
+// Webhook payload inspector types
+// ---------------------------------------------------------------------------
+
+export interface WebhookPayloadItem {
+  id: string
+  route_id: string
+  received_at: string
+  headers: Record<string, string>
+  body: string
+  content_type: string | null
+  status: 'pending' | 'delivered' | 'failed'
+}
+
+// ---------------------------------------------------------------------------
+// Subagent exchange types
+// ---------------------------------------------------------------------------
+
+export interface PairedSubagentExchange {
+  id: string
+  description: string | null
+  status: string
+  isComplete: boolean
+  summary: string | null
+  lastToolName: string | null
+  totalTokens: number | null
+  durationMs: number | null
+}

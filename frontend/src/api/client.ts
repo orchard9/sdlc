@@ -502,4 +502,12 @@ export const api = {
     }),
   deleteAuthToken: (name: string) =>
     request(`/api/auth/tokens/${encodeURIComponent(name)}`, { method: 'DELETE' }),
+
+  // Webhook payload inspector
+  queryWebhookPayloads: (route: string, params: { since?: string; limit?: number }) =>
+    request<import('@/lib/types').WebhookPayloadItem[]>(`/api/webhooks/${encodeURIComponent(route)}/payloads?${new URLSearchParams(
+      Object.entries(params).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])
+    )}`),
+  replayWebhookPayload: (route: string, payloadId: string) =>
+    request<{ ok: boolean }>(`/api/webhooks/${encodeURIComponent(route)}/payloads/${payloadId}/replay`, { method: 'POST' }),
 }
