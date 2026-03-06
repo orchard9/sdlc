@@ -173,6 +173,7 @@ pub async fn login(State(app): State<AppState>) -> Response {
         ("response_type", "code"),
         ("scope", "openid email profile"),
         ("access_type", "online"),
+        ("prompt", "select_account"),
         ("state", state.as_str()),
     ];
     let query = params
