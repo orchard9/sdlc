@@ -131,7 +131,7 @@ export const api = {
   runTeamRecruit: () => request<{ status: string; run_id: string }>('/api/team/recruit', { method: 'POST' }),
 
   // Roadmap / Ponder
-  getRoadmap: () => request<import('@/lib/types').PonderSummary[]>('/api/roadmap'),
+  getRoadmap: (all?: boolean) => request<import('@/lib/types').PonderSummary[]>(`/api/roadmap${all ? '?all=true' : ''}`),
   getPonderEntry: (slug: string) => request<import('@/lib/types').PonderDetail>(`/api/roadmap/${slug}`),
   createPonderEntry: (data: { slug: string; title: string; brief?: string }) =>
     request<{ slug: string; title: string; status: string }>('/api/roadmap', { method: 'POST', body: JSON.stringify(data) }),
@@ -475,6 +475,23 @@ export const api = {
 
   // Hub mode (multi-project registry)
   getHubProjects: () => request<import('@/lib/types').HubProjectEntry[]>('/api/hub/projects'),
+
+  // Fleet control plane (hub mode — fleet management)
+  getFleet: () => request<import('@/lib/types').FleetInstance[]>('/api/hub/fleet'),
+  getAvailable: () => request<import('@/lib/types').AvailableRepo[]>('/api/hub/available'),
+  getAgentSummary: () => request<import('@/lib/types').FleetAgentSummary>('/api/hub/agents'),
+  provision: (slug: string) =>
+    request<{ status: string }>('/api/hub/provision', {
+      method: 'POST',
+      body: JSON.stringify({ slug }),
+      headers: { 'Content-Type': 'application/json' },
+    }),
+  importRepo: (url: string, pat?: string) =>
+    request<{ status: string }>('/api/hub/import', {
+      method: 'POST',
+      body: JSON.stringify({ url, pat: pat || undefined }),
+      headers: { 'Content-Type': 'application/json' },
+    }),
 
   // Auth tokens (named tunnel-access tokens)
   getAuthTokens: () => request<import('@/lib/types').AuthToken[]>('/api/auth/tokens'),

@@ -115,129 +115,12 @@ active_features:
 - slack-context-capture
 - slack-feedback-endpoint
 - ponder-merge-list-ux
-- fix-walkdirectorytreetofindsdlcroot
+- fix-investigation-session-completion
+- fix-assistanttextblockmissingmarkdownrendering
+- fleet-native-oauth
+- fleet-deploy-hub
 active_directives: []
 history:
-- feature: uat-artifacts-storage
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:07:12.674617Z
-  outcome: merged
-- feature: ponder-agent-web-tools
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:07:25.031077Z
-  outcome: merged
-- feature: ponder-creation-modal
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:07:33.143146Z
-  outcome: transition
-- feature: ponder-creation-modal
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:10:16.907675Z
-  outcome: merged
-- feature: fleet-repo-scaffold
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:28:20.849738Z
-  outcome: transition
-- feature: fleet-repo-scaffold
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:28:24.293843Z
-  outcome: transition
-- feature: fleet-deploy-pipeline
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:28:43.454905Z
-  outcome: transition
-- feature: fleet-deploy-pipeline
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:28:47.846096Z
-  outcome: transition
-- feature: ponder-session-product-summary
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:28:50.308202Z
-  outcome: transition
-- feature: fleet-secrets-infra
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:29:17.458958Z
-  outcome: transition
-- feature: fleet-secrets-infra
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:29:20.896706Z
-  outcome: transition
-- feature: fleet-helm-chart
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:29:27.676981Z
-  outcome: transition
-- feature: fleet-helm-chart
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:29:32.444147Z
-  outcome: transition
-- feature: fleet-deploy-pipeline
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:30:14.533690Z
-  outcome: transition
-- feature: dev-driver-tool
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:30:26.031413Z
-  outcome: merged
-- feature: ponder-session-product-summary
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:30:32.893881Z
-  outcome: merged
-- feature: fleet-ingress-tls
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:30:49.051578Z
-  outcome: transition
-- feature: fleet-reconcile-pipeline
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:30:51.937750Z
-  outcome: transition
-- feature: fleet-ingress-tls
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:30:52.970477Z
-  outcome: transition
-- feature: fleet-repo-scaffold
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:30:56.486686Z
-  outcome: transition
-- feature: fleet-reconcile-pipeline
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:30:57.892853Z
-  outcome: transition
-- feature: fleet-secrets-infra
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:31:01.859465Z
-  outcome: transition
-- feature: fleet-bootstrap
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:31:07.040103Z
-  outcome: transition
-- feature: fleet-bootstrap
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:31:09.879589Z
-  outcome: transition
 - feature: fleet-deploy-pipeline
   action: merge
   phase: released
@@ -1098,26 +981,146 @@ history:
   phase: released
   timestamp: 2026-03-05T00:09:45.793913Z
   outcome: merged
-- feature: fix-walkdirectorytreetofindsdlcroot
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-05T17:47:13.841617739Z
-  outcome: transition
-- feature: fix-walkdirectorytreetofindsdlcroot
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-05T17:47:16.146561449Z
-  outcome: transition
-- feature: fix-walkdirectorytreetofindsdlcroot
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-05T17:48:47.108658750Z
-  outcome: transition
-- feature: fix-walkdirectorytreetofindsdlcroot
+- feature: fleet-auth-gate
   action: merge
   phase: released
-  timestamp: 2026-03-05T17:51:14.914740672Z
+  timestamp: 2026-03-05T08:39:47.725342Z
   outcome: merged
+- feature: fleet-management-ui
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T08:43:24.087884Z
+  outcome: merged
+- feature: fleet-management-api
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T08:46:56.664672Z
+  outcome: transition
+- feature: fleet-management-api
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T08:49:39.738148Z
+  outcome: merged
+- feature: slack-feedback-endpoint
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-05T17:35:39.486134Z
+  outcome: transition
+- feature: slack-feedback-endpoint
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-05T17:35:47.144204Z
+  outcome: transition
+- feature: fix-assistanttextblockmissingmarkdownrendering
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-05T17:37:09.109348Z
+  outcome: transition
+- feature: fix-assistanttextblockmissingmarkdownrendering
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-05T17:37:09.160701Z
+  outcome: transition
+- feature: fix-investigation-session-completion
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-05T17:37:31.733042Z
+  outcome: transition
+- feature: fix-investigation-session-completion
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-05T17:37:37.941233Z
+  outcome: transition
+- feature: fix-assistanttextblockmissingmarkdownrendering
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T17:37:48.272865Z
+  outcome: transition
+- feature: fix-assistanttextblockmissingmarkdownrendering
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T17:38:28.968632Z
+  outcome: merged
+- feature: ponder-merge-cli
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-05T17:49:49.611637Z
+  outcome: transition
+- feature: ponder-merge-cli
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-05T17:49:49.625106Z
+  outcome: transition
+- feature: ponder-merge-list-ux
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-05T17:51:01.760976Z
+  outcome: transition
+- feature: ponder-merge-list-ux
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-05T17:51:01.768439Z
+  outcome: transition
+- feature: fix-toolspage-url-routing
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T17:59:48.902257Z
+  outcome: merged
+- feature: ponder-merge-cli
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T18:38:34.950566Z
+  outcome: transition
+- feature: ponder-merge-list-ux
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T18:39:04.929491Z
+  outcome: transition
+- feature: ponder-merge-list-ux
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T18:40:56.329088Z
+  outcome: merged
+- feature: ponder-merge-cli
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T18:43:07.386690Z
+  outcome: merged
+- feature: fleet-native-oauth
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-05T23:09:14.821309Z
+  outcome: transition
+- feature: fleet-native-oauth
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-05T23:09:14.829732Z
+  outcome: transition
+- feature: fleet-native-oauth
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-05T23:16:39.179466Z
+  outcome: transition
+- feature: fleet-native-oauth
+  action: merge
+  phase: released
+  timestamp: 2026-03-05T23:17:35.984628Z
+  outcome: merged
+- feature: fleet-deploy-hub
+  action: implement_task
+  phase: planned
+  timestamp: 2026-03-06T00:16:35.552702Z
+  outcome: transition
+- feature: fleet-deploy-hub
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-06T00:16:35.561715Z
+  outcome: transition
+- feature: fleet-deploy-hub
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-06T00:16:35.569860Z
+  outcome: transition
 blocked: []
 milestones:
 - v01-directive-core
@@ -1160,9 +1163,9 @@ active_ponders:
 - i-want-a-bot-for-whats-app-to-send-me-no
 - i-want-to-be-able-to-optionally-use-open
 - routing-requests-properly
-- root-cause-sessions-dont-end
 - qa-test-tc12
 - test-ponder-entry-for-tc12-qa
 - artifact-share-capture
 - git-binary-hygiene
-last_updated: 2026-03-05T17:51:14.914743732Z
+- test-rich-input-modal-uat
+last_updated: 2026-03-06T00:16:35.569860Z

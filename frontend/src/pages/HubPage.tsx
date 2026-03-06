@@ -1,15 +1,47 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ChevronRight, Layers } from 'lucide-react'
+import {
+  ChevronRight,
+  Download,
+  Layers,
+  Play,
+  Search,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Cpu,
+} from 'lucide-react'
 import { api } from '@/api/client'
-import type { HubProjectEntry, HubProjectStatus } from '@/lib/types'
+import type {
+  HubProjectEntry,
+  FleetInstance,
+  FleetInstanceStatus,
+  AvailableRepo,
+  FleetAgentSummary,
+} from '@/lib/types'
 import { useHubSSE } from '@/hooks/useHubSSE'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
-// Status dot
+// Status dot for fleet instances
 // ---------------------------------------------------------------------------
 
-function StatusDot({ status }: { status: HubProjectStatus }) {
+function InstanceStatusDot({ status }: { status: FleetInstanceStatus }) {
+  return (
+    <span
+      className={cn(
+        'inline-block w-2.5 h-2.5 rounded-full flex-shrink-0',
+        status === 'healthy' && 'bg-green-500',
+        status === 'degraded' && 'bg-yellow-400',
+        status === 'failing' && 'bg-red-500',
+        status === 'unknown' && 'bg-zinc-500',
+      )}
+      title={status}
+    />
+  )
+}
+
+// Legacy status dot for heartbeat-based projects (fallback)
+function StatusDot({ status }: { status: 'online' | 'stale' | 'offline' }) {
   return (
     <span
       className={cn(
@@ -27,17 +59,78 @@ function StatusDot({ status }: { status: HubProjectStatus }) {
 // Agent badge
 // ---------------------------------------------------------------------------
 
-function AgentBadge() {
+function AgentBadge({ count }: { count?: number }) {
   return (
     <span className="flex items-center gap-1.5 text-green-400 text-xs">
       <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-      agent running
+      {count && count > 1 ? `${count} agents` : 'agent running'}
     </span>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Project card
+// Agent summary bar
+// ---------------------------------------------------------------------------
+
+function AgentSummaryBar({ summary }: { summary: FleetAgentSummary | null }) {
+  if (!summary) return null
+
+  return (
+    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
+      <Cpu className="w-4 h-4" />
+      {summary.total_active_runs > 0 ? (
+        <span>
+          {summary.total_active_runs} agent{summary.total_active_runs !== 1 ? 's' : ''} running
+          across {summary.projects_with_agents} project{summary.projects_with_agents !== 1 ? 's' : ''}
+        </span>
+      ) : (
+        <span>No active agents</span>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Fleet instance card
+// ---------------------------------------------------------------------------
+
+function FleetInstanceCard({ instance }: { instance: FleetInstance }) {
+  const handleClick = () => {
+    window.open(instance.url, '_blank')
+  }
+
+  return (
+    <button
+      onClick={handleClick}
+      className="text-left w-full bg-card border border-border rounded-xl p-4 hover:border-zinc-600 transition-colors cursor-pointer flex flex-col gap-2"
+    >
+      <div className="flex items-center gap-2.5">
+        <InstanceStatusDot status={instance.status} />
+        <span className="font-semibold text-sm flex-1 truncate">{instance.name}</span>
+        <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+      </div>
+      <div className="text-xs text-muted-foreground truncate pl-5">{instance.url}</div>
+      <div className="flex items-center gap-2 flex-wrap pl-5">
+        {instance.active_milestone && (
+          <span className="bg-muted/60 border border-border rounded px-1.5 py-0.5 text-xs text-muted-foreground">
+            {instance.active_milestone}
+          </span>
+        )}
+        {instance.feature_count !== null && instance.feature_count !== undefined && (
+          <span className="text-xs text-muted-foreground">
+            {instance.feature_count} {instance.feature_count === 1 ? 'feature' : 'features'}
+          </span>
+        )}
+        {instance.agent_running && (
+          <AgentBadge count={instance.active_agent_runs} />
+        )}
+      </div>
+    </button>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Legacy project card (heartbeat fallback)
 // ---------------------------------------------------------------------------
 
 function ProjectCard({ project }: { project: HubProjectEntry }) {
@@ -74,6 +167,162 @@ function ProjectCard({ project }: { project: HubProjectEntry }) {
 }
 
 // ---------------------------------------------------------------------------
+// Available repo card
+// ---------------------------------------------------------------------------
+
+function AvailableRepoCard({
+  repo,
+  isProvisioning,
+  error,
+  onStart,
+}: {
+  repo: AvailableRepo
+  isProvisioning: boolean
+  error: string | null
+  onStart: () => void
+}) {
+  return (
+    <div className="bg-card border border-border rounded-xl p-4 flex flex-col gap-2">
+      <div className="flex items-center gap-2.5">
+        <span className="font-semibold text-sm flex-1 truncate">{repo.name}</span>
+      </div>
+      {repo.description && (
+        <div className="text-xs text-muted-foreground line-clamp-2">{repo.description}</div>
+      )}
+      {error && (
+        <div className="flex items-center gap-1.5 text-xs text-red-400">
+          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+          <span className="truncate">{error}</span>
+        </div>
+      )}
+      <div className="mt-auto pt-1">
+        <button
+          onClick={onStart}
+          disabled={isProvisioning}
+          className={cn(
+            'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors',
+            isProvisioning
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer',
+          )}
+        >
+          {isProvisioning ? (
+            <>
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              Provisioning...
+            </>
+          ) : (
+            <>
+              <Play className="w-3.5 h-3.5" />
+              Start
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Import section
+// ---------------------------------------------------------------------------
+
+type ImportState = 'idle' | 'importing' | 'provisioning' | 'done' | 'error'
+
+function ImportSection() {
+  const [url, setUrl] = useState('')
+  const [pat, setPat] = useState('')
+  const [state, setState] = useState<ImportState>('idle')
+  const [error, setError] = useState<string | null>(null)
+
+  const handleImport = async () => {
+    if (!url.trim()) return
+    setState('importing')
+    setError(null)
+    try {
+      await api.importRepo(url.trim(), pat.trim() || undefined)
+      setState('provisioning')
+      // SSE will signal when provisioning is done, but show done state after a delay
+      setTimeout(() => {
+        setState('done')
+        setUrl('')
+        setPat('')
+        setTimeout(() => setState('idle'), 3000)
+      }, 5000)
+    } catch (err) {
+      setState('error')
+      setError(err instanceof Error ? err.message : 'Import failed')
+    }
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          value={url}
+          onChange={e => setUrl(e.target.value)}
+          placeholder="https://github.com/org/repo"
+          disabled={state === 'importing' || state === 'provisioning'}
+          className="flex-1 bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary transition-colors disabled:opacity-50"
+        />
+        <input
+          type="password"
+          value={pat}
+          onChange={e => setPat(e.target.value)}
+          placeholder="PAT (optional, for private repos)"
+          disabled={state === 'importing' || state === 'provisioning'}
+          className="sm:w-64 bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary transition-colors disabled:opacity-50"
+        />
+        <button
+          onClick={handleImport}
+          disabled={!url.trim() || state === 'importing' || state === 'provisioning'}
+          className={cn(
+            'flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap',
+            state === 'importing' || state === 'provisioning'
+              ? 'bg-muted text-muted-foreground cursor-not-allowed'
+              : state === 'done'
+                ? 'bg-green-600 text-white'
+                : 'bg-primary text-primary-foreground hover:bg-primary/90 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed',
+          )}
+        >
+          {state === 'importing' && (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Importing...
+            </>
+          )}
+          {state === 'provisioning' && (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              Provisioning...
+            </>
+          )}
+          {state === 'done' && (
+            <>
+              <CheckCircle2 className="w-4 h-4" />
+              Done
+            </>
+          )}
+          {(state === 'idle' || state === 'error') && (
+            <>
+              <Download className="w-4 h-4" />
+              Import
+            </>
+          )}
+        </button>
+      </div>
+      {state === 'error' && error && (
+        <div className="flex items-center gap-2 text-sm text-red-400">
+          <AlertCircle className="w-4 h-4 flex-shrink-0" />
+          {error}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Empty state
 // ---------------------------------------------------------------------------
 
@@ -90,23 +339,80 @@ function EmptyState() {
 }
 
 // ---------------------------------------------------------------------------
-// HubPage
+// Section header
+// ---------------------------------------------------------------------------
+
+function SectionHeader({ title, count }: { title: string; count: number }) {
+  return (
+    <div className="flex items-center gap-2 mb-3">
+      <h2 className="text-lg font-semibold">{title}</h2>
+      <span className="bg-muted border border-border rounded-full px-2.5 py-0.5 text-xs text-muted-foreground">
+        {count}
+      </span>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// HubPage — fleet control plane
 // ---------------------------------------------------------------------------
 
 export function HubPage() {
+  // Legacy heartbeat data (fallback)
   const [projects, setProjects] = useState<HubProjectEntry[]>([])
+
+  // Fleet data
+  const [instances, setInstances] = useState<FleetInstance[]>([])
+  const [available, setAvailable] = useState<AvailableRepo[]>([])
+  const [agentSummary, setAgentSummary] = useState<FleetAgentSummary | null>(null)
+
+  // UI state
   const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState(true)
+  const [fleetAvailable, setFleetAvailable] = useState(false)
+  const [provisioningSlugs, setProvisioningSlugs] = useState<Set<string>>(new Set())
+  const [provisionErrors, setProvisionErrors] = useState<Record<string, string>>({})
 
-  // Initial load
+  // Initial load — fetch all data in parallel
   useEffect(() => {
-    api.getHubProjects()
-      .then(setProjects)
-      .catch(() => setProjects([]))
-      .finally(() => setLoading(false))
+    let cancelled = false
+
+    async function load() {
+      // Try fleet endpoints first
+      const fleetPromise = api.getFleet().catch(() => null)
+      const availablePromise = api.getAvailable().catch(() => null)
+      const agentPromise = api.getAgentSummary().catch(() => null)
+      // Always load heartbeat fallback
+      const projectsPromise = api.getHubProjects().catch(() => [])
+
+      const [fleetData, availData, agentData, projectData] = await Promise.all([
+        fleetPromise,
+        availablePromise,
+        agentPromise,
+        projectsPromise,
+      ])
+
+      if (cancelled) return
+
+      if (fleetData) {
+        setInstances(fleetData)
+        setFleetAvailable(true)
+      }
+      if (availData) {
+        setAvailable(availData)
+      }
+      if (agentData) {
+        setAgentSummary(agentData)
+      }
+      setProjects(projectData)
+      setLoading(false)
+    }
+
+    load()
+    return () => { cancelled = true }
   }, [])
 
-  // SSE live updates
+  // SSE callbacks — legacy
   const onProjectUpdated = useCallback((project: HubProjectEntry) => {
     setProjects(prev => {
       const idx = prev.findIndex(p => p.url === project.url)
@@ -123,6 +429,44 @@ export function HubPage() {
     setProjects(prev => prev.filter(p => p.url !== url))
   }, [])
 
+  // SSE callbacks — fleet
+  const onFleetUpdated = useCallback((instance: FleetInstance) => {
+    setInstances(prev => {
+      const idx = prev.findIndex(i => i.namespace === instance.namespace)
+      if (idx >= 0) {
+        const next = [...prev]
+        next[idx] = instance
+        return next
+      }
+      return [instance, ...prev]
+    })
+  }, [])
+
+  const onFleetProvisioned = useCallback((instance: FleetInstance) => {
+    // Add to instances
+    setInstances(prev => {
+      const idx = prev.findIndex(i => i.namespace === instance.namespace)
+      if (idx >= 0) {
+        const next = [...prev]
+        next[idx] = instance
+        return next
+      }
+      return [instance, ...prev]
+    })
+    // Remove from available
+    setAvailable(prev => prev.filter(r => r.name !== instance.name))
+    // Clear provisioning state
+    setProvisioningSlugs(prev => {
+      const next = new Set(prev)
+      next.delete(instance.name)
+      return next
+    })
+  }, [])
+
+  const onFleetAgentStatus = useCallback((summary: FleetAgentSummary) => {
+    setAgentSummary(summary)
+  }, [])
+
   const onRecompute = useCallback(
     (updater: (projects: HubProjectEntry[]) => HubProjectEntry[]) => {
       setProjects(updater)
@@ -130,11 +474,56 @@ export function HubPage() {
     [],
   )
 
-  useHubSSE({ onProjectUpdated, onProjectRemoved }, onRecompute)
+  useHubSSE(
+    { onProjectUpdated, onProjectRemoved, onFleetUpdated, onFleetProvisioned, onFleetAgentStatus },
+    onRecompute,
+  )
+
+  // Provision handler
+  const handleProvision = useCallback(async (slug: string) => {
+    setProvisioningSlugs(prev => new Set(prev).add(slug))
+    setProvisionErrors(prev => {
+      const next = { ...prev }
+      delete next[slug]
+      return next
+    })
+    try {
+      await api.provision(slug)
+    } catch (err) {
+      // Remove provisioning state and show error
+      setProvisioningSlugs(prev => {
+        const next = new Set(prev)
+        next.delete(slug)
+        return next
+      })
+      setProvisionErrors(prev => ({
+        ...prev,
+        [slug]: err instanceof Error ? err.message : 'Provisioning failed',
+      }))
+    }
+  }, [])
 
   // Filter
   const lowerFilter = filter.toLowerCase()
-  const visible = lowerFilter
+
+  const visibleInstances = lowerFilter
+    ? instances.filter(
+        i =>
+          i.name.toLowerCase().includes(lowerFilter) ||
+          i.url.toLowerCase().includes(lowerFilter),
+      )
+    : instances
+
+  const visibleAvailable = lowerFilter
+    ? available.filter(
+        r =>
+          r.name.toLowerCase().includes(lowerFilter) ||
+          (r.description || '').toLowerCase().includes(lowerFilter),
+      )
+    : available
+
+  // Legacy fallback: use projects if fleet API not available
+  const visibleProjects = lowerFilter
     ? projects.filter(
         p =>
           p.name.toLowerCase().includes(lowerFilter) ||
@@ -142,10 +531,21 @@ export function HubPage() {
       )
     : projects
 
-  const countLabel =
-    lowerFilter
-      ? `${visible.length} of ${projects.length} project${projects.length !== 1 ? 's' : ''}`
-      : `${projects.length} project${projects.length !== 1 ? 's' : ''}`
+  const totalCount = fleetAvailable
+    ? instances.length + available.length
+    : projects.length
+
+  const visibleCount = fleetAvailable
+    ? visibleInstances.length + visibleAvailable.length
+    : visibleProjects.length
+
+  const countLabel = lowerFilter
+    ? `${visibleCount} of ${totalCount} project${totalCount !== 1 ? 's' : ''}`
+    : `${totalCount} project${totalCount !== 1 ? 's' : ''}`
+
+  const hasAnyContent = fleetAvailable
+    ? instances.length > 0 || available.length > 0
+    : projects.length > 0
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -154,20 +554,25 @@ export function HubPage() {
         <div className="flex items-center gap-3 mb-6">
           <h1 className="text-2xl font-bold">Projects</h1>
           <span className="bg-muted border border-border rounded-full px-3 py-0.5 text-xs text-muted-foreground">
-            {projects.length}
+            {totalCount}
           </span>
         </div>
 
-        {/* Filter */}
-        <div className="mb-2">
+        {/* Search — autofocused, search-first design */}
+        <div className="mb-2 relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             value={filter}
             onChange={e => setFilter(e.target.value)}
-            placeholder="Filter projects..."
-            className="w-full max-w-sm bg-muted/50 border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary transition-colors"
+            placeholder="Search projects..."
+            autoFocus
+            className="w-full max-w-sm bg-muted/50 border border-border rounded-lg pl-9 pr-3 py-2 text-sm outline-none focus:border-primary transition-colors"
           />
         </div>
+
+        {/* Agent summary bar */}
+        {fleetAvailable && <AgentSummaryBar summary={agentSummary} />}
 
         {/* Count line */}
         {!loading && (
@@ -179,11 +584,65 @@ export function HubPage() {
           <div className="flex items-center justify-center py-20">
             <div className="w-6 h-6 border-2 border-border border-t-primary rounded-full animate-spin" />
           </div>
-        ) : projects.length === 0 ? (
+        ) : !hasAnyContent ? (
           <EmptyState />
+        ) : fleetAvailable ? (
+          <div className="space-y-8">
+            {/* Running Instances */}
+            {(visibleInstances.length > 0 || !lowerFilter) && (
+              <section>
+                <SectionHeader title="Running" count={visibleInstances.length} />
+                {visibleInstances.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {visibleInstances.map(instance => (
+                      <FleetInstanceCard key={instance.namespace} instance={instance} />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No instances running. Start one from available repos below.
+                  </p>
+                )}
+              </section>
+            )}
+
+            {/* Available Repos */}
+            {(visibleAvailable.length > 0 || !lowerFilter) && (
+              <section>
+                <SectionHeader title="Available" count={visibleAvailable.length} />
+                <p className="text-xs text-muted-foreground mb-3">
+                  Start deploys an sdlc workspace for this repo in the fleet.
+                </p>
+                {visibleAvailable.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {visibleAvailable.map(repo => (
+                      <AvailableRepoCard
+                        key={repo.slug}
+                        repo={repo}
+                        isProvisioning={provisioningSlugs.has(repo.slug)}
+                        error={provisionErrors[repo.slug] ?? null}
+                        onStart={() => handleProvision(repo.slug)}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    All repos have running instances.
+                  </p>
+                )}
+              </section>
+            )}
+
+            {/* Import */}
+            <section>
+              <h2 className="text-lg font-semibold mb-3">Import External Repo</h2>
+              <ImportSection />
+            </section>
+          </div>
         ) : (
+          /* Legacy heartbeat-based view (fleet API not available) */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {visible.map(project => (
+            {visibleProjects.map(project => (
               <ProjectCard key={project.url} project={project} />
             ))}
           </div>

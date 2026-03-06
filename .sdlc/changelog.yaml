@@ -2442,40 +2442,243 @@
   metadata:
     run_key: milestone-run-wave:v40-workspace-ui-unification
 - id: ev-0442
-  kind: review_approved
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:48:44.975928702Z
-  metadata: {}
+  kind: feature_phase_advanced
+  slug: fleet-auth-gate
+  timestamp: 2026-03-05T08:38:55.304751Z
+  metadata:
+    phase: qa
 - id: ev-0443
   kind: feature_phase_advanced
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:48:44.981468231Z
+  slug: fleet-auth-gate
+  timestamp: 2026-03-05T08:39:35.405486Z
   metadata:
-    phase: review
+    phase: merge
 - id: ev-0444
-  kind: audit_approved
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:49:04.207159750Z
+  kind: feature_merged
+  slug: fleet-auth-gate
+  timestamp: 2026-03-05T08:39:47.731967Z
   metadata: {}
 - id: ev-0445
   kind: feature_phase_advanced
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:49:04.211890212Z
+  slug: fleet-management-ui
+  timestamp: 2026-03-05T08:43:15.162805Z
   metadata:
-    phase: qa
+    phase: merge
 - id: ev-0446
-  kind: qa_approved
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:49:24.922004059Z
+  kind: feature_merged
+  slug: fleet-management-ui
+  timestamp: 2026-03-05T08:43:24.090890Z
   metadata: {}
 - id: ev-0447
   kind: feature_phase_advanced
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:49:24.926377999Z
+  slug: fleet-management-api
+  timestamp: 2026-03-05T08:46:06.345412Z
+  metadata:
+    phase: review
+- id: ev-0448
+  kind: feature_phase_advanced
+  slug: fleet-management-api
+  timestamp: 2026-03-05T08:47:28.251438Z
+  metadata:
+    phase: qa
+- id: ev-0449
+  kind: feature_phase_advanced
+  slug: fleet-management-api
+  timestamp: 2026-03-05T08:49:29.246408Z
   metadata:
     phase: merge
-- id: ev-0448
+- id: ev-0450
   kind: feature_merged
-  slug: fix-walkdirectorytreetofindsdlcroot
-  timestamp: 2026-03-05T17:51:14.917253435Z
+  slug: fleet-management-api
+  timestamp: 2026-03-05T08:49:39.745407Z
+  metadata: {}
+- id: ev-0451
+  kind: milestone_wave_completed
+  slug: v42-fleet-control-plane
+  timestamp: 2026-03-05T08:50:18.649076Z
+  metadata:
+    run_key: milestone-run-wave:v42-fleet-control-plane
+- id: ev-0452
+  kind: feature_phase_advanced
+  slug: fix-assistanttextblockmissingmarkdownrendering
+  timestamp: 2026-03-05T17:37:42.528148Z
+  metadata:
+    phase: review
+- id: ev-0453
+  kind: feature_phase_advanced
+  slug: fix-assistanttextblockmissingmarkdownrendering
+  timestamp: 2026-03-05T17:38:03.256682Z
+  metadata:
+    phase: qa
+- id: ev-0454
+  kind: feature_phase_advanced
+  slug: fix-assistanttextblockmissingmarkdownrendering
+  timestamp: 2026-03-05T17:38:23.044986Z
+  metadata:
+    phase: merge
+- id: ev-0455
+  kind: feature_merged
+  slug: fix-assistanttextblockmissingmarkdownrendering
+  timestamp: 2026-03-05T17:38:28.973739Z
+  metadata: {}
+- id: ev-0456
+  kind: feature_phase_advanced
+  slug: fix-toolspage-url-routing
+  timestamp: 2026-03-05T17:58:36.586902Z
+  metadata:
+    phase: review
+- id: ev-0457
+  kind: feature_phase_advanced
+  slug: fix-toolspage-url-routing
+  timestamp: 2026-03-05T17:59:09.967103Z
+  metadata:
+    phase: qa
+- id: ev-0458
+  kind: feature_phase_advanced
+  slug: fix-toolspage-url-routing
+  timestamp: 2026-03-05T17:59:41.790979Z
+  metadata:
+    phase: merge
+- id: ev-0459
+  kind: feature_merged
+  slug: fix-toolspage-url-routing
+  timestamp: 2026-03-05T17:59:48.905677Z
+  metadata: {}
+- id: ev-0460
+  kind: run_failed
+  slug: fix-run-lifecycle
+  timestamp: 2026-03-05T17:59:56.469621Z
+  metadata:
+    run_key: milestone-run-wave:fix-run-lifecycle
+- id: ev-0461
+  kind: milestone_wave_completed
+  slug: fix-mobile-layouts
+  timestamp: 2026-03-05T18:00:04.868817Z
+  metadata:
+    run_key: milestone-run-wave:fix-mobile-layouts
+- id: ev-0462
+  kind: run_failed
+  slug: v39-slack-bot-tool
+  timestamp: 2026-03-05T18:06:14.224758Z
+  metadata:
+    run_key: milestone-run-wave:v39-slack-bot-tool
+- id: ev-0463
+  kind: review_approved
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:38:28.141689Z
+  metadata: {}
+- id: ev-0464
+  kind: feature_phase_advanced
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:38:28.148170Z
+  metadata:
+    phase: review
+- id: ev-0465
+  kind: review_approved
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:38:59.900383Z
+  metadata: {}
+- id: ev-0466
+  kind: feature_phase_advanced
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:38:59.909421Z
+  metadata:
+    phase: review
+- id: ev-0467
+  kind: audit_approved
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:39:21.890410Z
+  metadata: {}
+- id: ev-0468
+  kind: feature_phase_advanced
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:39:21.895727Z
+  metadata:
+    phase: qa
+- id: ev-0469
+  kind: audit_approved
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:39:32.083251Z
+  metadata: {}
+- id: ev-0470
+  kind: feature_phase_advanced
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:39:32.113862Z
+  metadata:
+    phase: qa
+- id: ev-0471
+  kind: qa_approved
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:40:50.502203Z
+  metadata: {}
+- id: ev-0472
+  kind: feature_phase_advanced
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:40:50.507472Z
+  metadata:
+    phase: merge
+- id: ev-0473
+  kind: feature_merged
+  slug: ponder-merge-list-ux
+  timestamp: 2026-03-05T18:40:56.332514Z
+  metadata: {}
+- id: ev-0474
+  kind: qa_approved
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:43:01.003446Z
+  metadata: {}
+- id: ev-0475
+  kind: feature_phase_advanced
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:43:01.011240Z
+  metadata:
+    phase: merge
+- id: ev-0476
+  kind: feature_merged
+  slug: ponder-merge-cli
+  timestamp: 2026-03-05T18:43:07.390252Z
+  metadata: {}
+- id: ev-0477
+  kind: milestone_wave_completed
+  slug: v30-ponder-merge
+  timestamp: 2026-03-05T18:43:40.955541Z
+  metadata:
+    run_key: milestone-run-wave:v30-ponder-merge
+- id: ev-0478
+  kind: review_approved
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:16:32.686161Z
+  metadata: {}
+- id: ev-0479
+  kind: feature_phase_advanced
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:16:32.691898Z
+  metadata:
+    phase: review
+- id: ev-0480
+  kind: audit_approved
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:17:07.745136Z
+  metadata: {}
+- id: ev-0481
+  kind: feature_phase_advanced
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:17:07.750Z
+  metadata:
+    phase: qa
+- id: ev-0482
+  kind: qa_approved
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:17:30.985345Z
+  metadata: {}
+- id: ev-0483
+  kind: feature_phase_advanced
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:17:31.000054Z
+  metadata:
+    phase: merge
+- id: ev-0484
+  kind: feature_merged
+  slug: fleet-native-oauth
+  timestamp: 2026-03-05T23:17:35.987188Z
   metadata: {}

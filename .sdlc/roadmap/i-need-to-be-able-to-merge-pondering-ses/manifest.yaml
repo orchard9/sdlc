@@ -1,13 +1,13 @@
 slug: i-need-to-be-able-to-merge-pondering-ses
 title: I need to be able to merge pondering sessions together
-status: converging
+status: committed
 created_at: 2026-03-03T05:43:36.307803Z
-updated_at: 2026-03-04T00:37:42.396345Z
+updated_at: 2026-03-05T17:32:57.219242Z
 committed_at: 2026-03-04T00:36:28.680294Z
 committed_to:
 - v30-ponder-merge
-sessions: 3
+sessions: 4
 orientation:
-  current: Design is complete and frozen. Two sessions resolved all tensions. Status update to 'converging' applied. Ready for /sdlc-ponder-commit.
-  next: Run /sdlc-ponder-commit i-need-to-be-able-to-merge-pondering-ses to crystallize into a feature.
-  commit: Met — all open questions resolved, implementation scope bounded, pre-conditions finalized.
+  current: 'Session 4 expanded scope with a multi-session iteration workflow question. This session scopes that signal: is it in-scope for v30-ponder-merge, or does it belong in a separate ponder? The committed merge CLI design is frozen and correct for v1.'
+  next: Proceed with /sdlc-run ponder-merge-cli — the merge CLI is independently valuable regardless of the broader workflow question. Capture the staging/branching idea as a new ponder if Jordan wants to explore it.
+  commit: Already committed. Session 4's broader signal is noted but does not block or change the merge CLI scope.

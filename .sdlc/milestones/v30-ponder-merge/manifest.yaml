@@ -1,8 +1,9 @@
 slug: v30-ponder-merge
 title: Ponder Merge — consolidate fragmented ponder entries
+vision: Agents and humans can merge duplicate or related ponder entries into one — sessions copied, artifacts prefixed, source parked with a forwarding pointer — keeping the roadmap clean as the idea space grows.
 features:
 - ponder-merge-cli
+- ponder-merge-list-ux
 created_at: 2026-03-04T00:37:08.745909Z
-updated_at: 2026-03-04T00:37:12.627610Z
-vision: Agents and humans can merge duplicate or related ponder entries into one — sessions copied, artifacts prefixed, source parked with a forwarding pointer — keeping the roadmap clean as the idea space grows.
+updated_at: 2026-03-05T17:32:00.926313Z
 schema_version: 1

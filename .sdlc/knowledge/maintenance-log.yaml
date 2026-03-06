@@ -74,3 +74,11 @@ actions:
   action_type: harvest_create
   slug: ponder-agent-activity-display-improvements
   detail: harvested from ponder/agent-activity-display-improvements
+- timestamp: 2026-03-05T17:32:05.238240Z
+  action_type: harvest_update
+  slug: ponder-i-need-to-be-able-to-merge-pondering-ses
+  detail: harvested from ponder/i-need-to-be-able-to-merge-pondering-ses
+- timestamp: 2026-03-05T17:32:06.500038Z
+  action_type: harvest_create
+  slug: ponder-root-cause-sessions-dont-end
+  detail: harvested from ponder/root-cause-sessions-dont-end

@@ -1,5 +1,4 @@
 /target
-target/
 /frontend/node_modules
 /frontend/dist
 /frontend/playwright-report/
@@ -26,10 +25,4 @@ target/
 
 # UAT screenshots (ephemeral)
 /*.png
-
-# dist artifacts
-/*.tar.gz
-/*.zip
-/*.deb
-/*.rpm
-/*.dmg
+.sdlc/orchestrator.redb

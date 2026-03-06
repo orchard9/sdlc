@@ -4,6 +4,7 @@ vision: Runs that get stuck or exit misleadingly never show green — orphaned r
 features:
 - fix-run-startup-recovery
 - fix-uat-fail-signaling
+- fix-investigation-session-completion
 created_at: 2026-03-03T05:30:00Z
-updated_at: 2026-03-03T05:30:00Z
+updated_at: 2026-03-05T17:32:02.638611Z
 schema_version: 1

@@ -73,6 +73,7 @@ Use `sdlc next --for <slug> --json` to get the next directive. The JSON output t
 - `/sdlc-empathy <subject>` — deep user perspective interviews before decisions
 - `/sdlc-spike <slug> — <need>; [see <ref>]` — research, prototype, validate, and report; produces working prototype + findings in `.sdlc/spikes/<slug>/findings.md`
 - `/sdlc-convo-mine [file or text]` — mine conversation dumps for signal; apply 5 perspective lenses, group themes, launch parallel ponder sessions per group
+- `/sdlc-recap [slug]` — state-aware session recap with forward motion — synthesizes progress, classifies remaining work, and creates tasks or ponder entries so no session ends without a concrete next step
 
 ### Tool Suite
 
@@ -131,7 +132,7 @@ Exact subcommands. Anything not listed here does not exist — do not guess.
 | `sdlc comment` | `create` · `list` · `resolve` |
 | `sdlc score` | `set` |
 | `sdlc next` | _(no subcommands — use `--for <slug>` and `--json` flags)_ |
-| `sdlc ponder` | `create` · `list` · `show` · `capture` · `team add` · `team list` · `update` · `archive` · `artifacts` |
+| `sdlc ponder` | `create` · `list` · `show` · `capture` · `merge` · `team add` · `team list` · `update` · `archive` · `artifacts` |
 
 ---
 

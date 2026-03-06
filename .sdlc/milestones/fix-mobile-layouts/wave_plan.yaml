@@ -1,14 +1,8 @@
 - number: 1
   label: Planning
   items:
-  - slug: fix-threadspage-mobile-layout
-    title: ThreadsPage mobile layout fix
-    phase: draft
-    action: create_spec
-    needs_worktree: false
-    blocked_by: []
-  - slug: fix-toolspage-mobile-nav
-    title: ToolsPage mobile back navigation fix
+  - slug: fix-toolspage-url-routing
+    title: ToolsPage URL routing — replace useState selection with useParams/useNavigate
     phase: draft
     action: create_spec
     needs_worktree: false

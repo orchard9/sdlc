@@ -1,4 +1,5 @@
 import type { PairedAssistantText } from '@/lib/types'
+import { CompactMarkdown } from '@/components/shared/CompactMarkdown'
 
 interface AssistantTextBlockProps {
   event: PairedAssistantText
@@ -9,9 +10,7 @@ export function AssistantTextBlock({ event }: AssistantTextBlockProps) {
 
   return (
     <div className="py-1">
-      <p className="text-xs text-foreground/90 whitespace-pre-wrap leading-relaxed">
-        {event.text}
-      </p>
+      <CompactMarkdown content={event.text} className="text-foreground/90" />
     </div>
   )
 }

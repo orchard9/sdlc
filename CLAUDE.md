@@ -201,6 +201,7 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 | `/sdlc-run-wave <milestone>` | Execute Wave 1 features in parallel, advance to next wave |
 | `/sdlc-pressure-test <milestone>` | Pressure-test milestone against user perspectives |
 | `/sdlc-milestone-uat <milestone>` | Run acceptance test for a milestone |
+| `/sdlc-fit-impact <proposal>` | Evaluate a proposed change against vision, docs, and patterns — go/no-go with blast radius |
 | `/sdlc-enterprise-readiness` | Production readiness analysis |
 | `/sdlc-setup-quality-gates` | Set up pre-commit hooks |
 | `/sdlc-quality-fix` | Fix failing quality-check results — triages by failure count and applies fix-forward / fix-all / remediate |

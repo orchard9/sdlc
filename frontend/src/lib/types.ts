@@ -525,6 +525,8 @@ export interface PonderSummary {
   updated_at: string
   committed_at: string | null
   committed_to: string[]
+  merged_into: string | null
+  merged_from: string[]
   last_session_preview?: string | null
 }
 
@@ -705,6 +707,9 @@ export interface PonderDetail {
   updated_at: string
   committed_at: string | null
   committed_to: string[]
+  merged_into: string | null
+  merged_from: string[]
+  redirect_banner: string | null
   team: PonderTeamMember[]
   artifacts: PonderArtifact[]
 }
@@ -1182,7 +1187,40 @@ export interface HubProjectEntry {
 }
 
 export interface HubSseEvent {
-  type: 'project_updated' | 'project_removed'
+  type: 'project_updated' | 'project_removed' | 'fleet_updated' | 'fleet_provisioned' | 'fleet_agent_status'
   project?: HubProjectEntry
+  instance?: FleetInstance
   url?: string
+  agent_summary?: FleetAgentSummary
+}
+
+// ---------------------------------------------------------------------------
+// Fleet control plane types (hub mode — fleet management)
+// ---------------------------------------------------------------------------
+
+export type FleetInstanceStatus = 'healthy' | 'degraded' | 'failing' | 'unknown'
+
+export interface FleetInstance {
+  name: string
+  url: string
+  namespace: string
+  status: FleetInstanceStatus
+  pod_status: string
+  active_milestone: string | null
+  feature_count: number | null
+  agent_running: boolean
+  active_agent_runs: number
+  created_at: string
+}
+
+export interface AvailableRepo {
+  name: string
+  slug: string
+  description: string | null
+  url: string
+}
+
+export interface FleetAgentSummary {
+  total_active_runs: number
+  projects_with_agents: number
 }

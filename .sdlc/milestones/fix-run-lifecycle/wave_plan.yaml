@@ -1,6 +1,12 @@
 - number: 1
   label: Implementation
   items:
+  - slug: fix-investigation-session-completion
+    title: Fix investigation session completion — root-cause and evolve output phases
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
   - slug: fix-uat-fail-signaling
     title: UAT fail endpoint and skill template for explicit failure signaling
     phase: implementation

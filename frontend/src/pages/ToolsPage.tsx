@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import { api } from '@/api/client'
 import { ToolCard } from '@/components/tools/ToolCard'
 import { AmaThreadPanel } from '@/components/tools/AmaThreadPanel'
@@ -1325,22 +1326,26 @@ function ToolRunPanel({ tool, onReload, onBack }: ToolRunPanelProps) {
 // ---------------------------------------------------------------------------
 
 export function ToolsPage() {
+  const { name } = useParams<{ name?: string }>()
+  const navigate = useNavigate()
   const [tools, setTools] = useState<ToolMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [selectedName, setSelectedName] = useState<string | null>(null)
   const [showCreateModal, setShowCreateModal] = useState(false)
-  const selectedNameRef = useRef(selectedName)
-  selectedNameRef.current = selectedName
 
-  const load = useCallback((selectAfterLoad?: string) => {
+  const navigateRef = useRef(navigate)
+  navigateRef.current = navigate
+  const nameRef = useRef(name)
+  nameRef.current = name
+
+  const load = useCallback((navigateAfterLoad?: string) => {
     api.listTools()
       .then(data => {
         setTools(data)
-        if (selectAfterLoad) {
-          setSelectedName(selectAfterLoad)
-        } else if (data.length > 0 && !selectedNameRef.current) {
-          setSelectedName(data[0].name)
+        if (navigateAfterLoad) {
+          navigateRef.current(`/tools/${navigateAfterLoad}`)
+        } else if (data.length > 0 && !nameRef.current && window.innerWidth >= 768) {
+          navigateRef.current(`/tools/${data[0].name}`, { replace: true })
         }
       })
       .catch(err => setError(err.message))
@@ -1349,7 +1354,7 @@ export function ToolsPage() {
 
   useEffect(() => { load() }, [load])
 
-  const selectedTool = tools.find(t => t.name === selectedName) ?? null
+  const selectedTool = tools.find(t => t.name === name) ?? null
 
   if (loading) {
     return (
@@ -1412,8 +1417,8 @@ export function ToolsPage() {
               <ToolCard
                 key={tool.name}
                 tool={tool}
-                selected={tool.name === selectedName}
-                onSelect={() => setSelectedName(tool.name)}
+                selected={tool.name === name}
+                onSelect={() => navigate(`/tools/${tool.name}`)}
               />
             ))
           )}
@@ -1426,7 +1431,7 @@ export function ToolsPage() {
         !selectedTool ? 'hidden md:flex items-center justify-center' : 'flex flex-col',
       )}>
         {selectedTool ? (
-          <ToolRunPanel tool={selectedTool} onReload={(name) => { setLoading(true); load(name) }} onBack={() => setSelectedName(null)} />
+          <ToolRunPanel tool={selectedTool} onReload={(toolName) => { setLoading(true); load(toolName) }} onBack={() => navigate('/tools')} />
         ) : (
           <div className="text-center">
             <Wrench className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />

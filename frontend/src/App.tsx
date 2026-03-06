@@ -90,6 +90,7 @@ export default function App() {
             <Route path="/spikes/:slug" element={<SpikePage />} />
             <Route path="/secrets" element={<SecretsPage />} />
             <Route path="/tools" element={<ToolsPage />} />
+            <Route path="/tools/:name" element={<ToolsPage />} />
             <Route path="/feedback" element={<FeedbackPage />} />
             <Route path="/threads" element={<ThreadsPage />} />
             <Route path="/threads/:slug" element={<ThreadsPage />} />

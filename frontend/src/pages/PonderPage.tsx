@@ -13,7 +13,7 @@ import { NewIdeaModal } from '@/components/ponder/NewIdeaModal'
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell'
 import {
   Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Sparkles, SlidersHorizontal,
-  MessageSquare, ChevronLeft, ChevronRight,
+  MessageSquare, ChevronLeft, ChevronRight, ArrowUpRight, Eye, EyeOff,
 } from 'lucide-react'
 
 const WORKSPACE_WIDTH_LS_KEY = 'ponder_workspace_width'
@@ -52,6 +52,7 @@ function EntryRow({
   selected: boolean
   onSelect: () => void
 }) {
+  const isMerged = !!entry.merged_into
   return (
     <button
       onClick={onSelect}
@@ -60,38 +61,49 @@ function EntryRow({
         selected
           ? 'bg-accent text-accent-foreground'
           : 'hover:bg-accent/40 text-foreground',
+        isMerged && 'opacity-50',
       )}
     >
       <div className="flex items-center gap-2 mb-0.5">
         <span className="text-sm font-medium truncate">{entry.title}</span>
         <StatusBadge status={entry.status} />
       </div>
-      <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
-        {entry.sessions > 0 ? (
-          <span className="text-muted-foreground/60">
-            {entry.sessions} {entry.sessions === 1 ? 'session' : 'sessions'}
-          </span>
-        ) : (
-          <span className="text-muted-foreground/40 italic">no sessions yet</span>
-        )}
-        {entry.team_size > 0 && (
-          <span className="flex items-center gap-0.5">
-            <Users className="w-3 h-3" />
-            {entry.team_size}
-          </span>
-        )}
-      </div>
-      {entry.last_session_preview && (
-        <p className="text-xs text-muted-foreground/50 line-clamp-1 mt-0.5 italic">
-          {entry.last_session_preview}
-        </p>
-      )}
-      {entry.tags.length > 0 && (
-        <div className="flex flex-wrap gap-1 mt-1">
-          {entry.tags.map(t => (
-            <span key={t} className="text-xs text-muted-foreground/70">#{t}</span>
-          ))}
+      {isMerged && (
+        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+          <ArrowUpRight className="w-3 h-3" />
+          <span>merged into {entry.merged_into}</span>
         </div>
+      )}
+      {!isMerged && (
+        <>
+          <div className="flex items-center gap-2.5 text-xs text-muted-foreground">
+            {entry.sessions > 0 ? (
+              <span className="text-muted-foreground/60">
+                {entry.sessions} {entry.sessions === 1 ? 'session' : 'sessions'}
+              </span>
+            ) : (
+              <span className="text-muted-foreground/40 italic">no sessions yet</span>
+            )}
+            {entry.team_size > 0 && (
+              <span className="flex items-center gap-0.5">
+                <Users className="w-3 h-3" />
+                {entry.team_size}
+              </span>
+            )}
+          </div>
+          {entry.last_session_preview && (
+            <p className="text-xs text-muted-foreground/50 line-clamp-1 mt-0.5 italic">
+              {entry.last_session_preview}
+            </p>
+          )}
+          {entry.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {entry.tags.map(t => (
+                <span key={t} className="text-xs text-muted-foreground/70">#{t}</span>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </button>
   )
@@ -455,6 +467,22 @@ function EntryDetailPane({
 
   return (
     <div className="h-full flex flex-col min-h-0 relative overflow-hidden">
+      {/* Merge redirect banner */}
+      {entry.merged_into && (
+        <div className="shrink-0 flex items-center gap-2 px-4 py-2.5 bg-blue-500/10 border-b border-blue-500/20 text-sm text-blue-300">
+          <ArrowUpRight className="w-4 h-4 shrink-0" />
+          <span>
+            This entry was merged into{' '}
+            <button
+              onClick={() => navigate(`/ponder/${entry.merged_into}`)}
+              className="font-medium underline underline-offset-2 hover:text-blue-200 transition-colors"
+            >
+              {entry.merged_into}
+            </button>
+          </span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="shrink-0 flex items-center gap-2 px-4 pt-4 pb-3 border-b border-border/50">
         <button
@@ -673,16 +701,17 @@ export function PonderPage() {
   const [activeTab, setActiveTab] = useState<PonderStatus | 'all'>('all')
   const [showForm, setShowForm] = useState(false)
   const [showSuggest, setShowSuggest] = useState(false)
+  const [showMerged, setShowMerged] = useState(false)
   const [prefillTitle, setPrefillTitle] = useState<string | null>(null)
   const [prefillSlug, setPrefillSlug] = useState<string | null>(null)
   const [prefillBrief, setPrefillBrief] = useState<string | null>(null)
 
   const load = useCallback(() => {
-    api.getRoadmap()
+    api.getRoadmap(showMerged)
       .then(data => setEntries(data))
       .catch(() => { })
       .finally(() => setLoading(false))
-  }, [])
+  }, [showMerged])
 
   useEffect(() => { load() }, [load])
   useSSE(load)
@@ -718,6 +747,18 @@ export function PonderPage() {
       <div className="px-3 pt-4 pb-2 flex items-center justify-between">
         <h2 className="text-base font-semibold">Ponder</h2>
         <div className="flex items-center gap-1">
+          <button
+            onClick={() => setShowMerged(v => !v)}
+            className={cn(
+              'p-1.5 rounded-lg transition-colors',
+              showMerged
+                ? 'text-foreground bg-accent/60'
+                : 'text-muted-foreground hover:text-foreground hover:bg-accent/50',
+            )}
+            title={showMerged ? 'Hide merged entries' : 'Show merged entries'}
+          >
+            {showMerged ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+          </button>
           <button
             onClick={() => setShowSuggest(true)}
             className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors"

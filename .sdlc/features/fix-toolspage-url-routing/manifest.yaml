@@ -1,72 +1,126 @@
 slug: fix-toolspage-url-routing
 title: ToolsPage URL routing — replace useState selection with useParams/useNavigate
-phase: draft
+phase: released
 created_at: 2026-03-04T00:37:39.714965Z
-updated_at: 2026-03-04T00:37:39.714965Z
+updated_at: 2026-03-05T17:59:48.900668Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:52:45.321582Z
+  approved_at: 2026-03-05T17:52:48.715646Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:53:06.559406Z
+  approved_at: 2026-03-05T17:53:09.786124Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:53:22.383989Z
+  approved_at: 2026-03-05T17:53:24.999903Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:53:39.357020Z
+  approved_at: 2026-03-05T17:53:44.232098Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:58:33.530249Z
+  approved_at: 2026-03-05T17:58:36.582554Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:59:06.576174Z
+  approved_at: 2026-03-05T17:59:09.963517Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/fix-toolspage-url-routing/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:59:38.958905Z
+  approved_at: 2026-03-05T17:59:41.787443Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add /tools/:name route to App.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:56:55.251205Z
+  started_at: null
+  completed_at: 2026-03-05T17:57:16.088903Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Replace useState with useParams/useNavigate in ToolsPage.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:56:56.123602Z
+  started_at: null
+  completed_at: 2026-03-05T17:58:02.381967Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update tool creation/reload flow to use navigation
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:56:56.758558Z
+  started_at: null
+  completed_at: 2026-03-05T17:58:02.616513Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-04T00:37:39.714965Z
+  exited: 2026-03-05T17:52:48.717321Z
+- phase: specified
+  entered: 2026-03-05T17:52:48.717321Z
+  exited: 2026-03-05T17:53:44.233930Z
+- phase: planned
+  entered: 2026-03-05T17:53:44.233930Z
+  exited: 2026-03-05T17:54:00Z
+- phase: ready
+  entered: 2026-03-05T17:54:00Z
+  exited: 2026-03-05T17:54:01Z
+- phase: implementation
+  entered: 2026-03-05T17:54:01Z
+  exited: 2026-03-05T17:58:36.584150Z
+- phase: review
+  entered: 2026-03-05T17:58:36.584150Z
+  exited: 2026-03-05T17:59:30Z
+- phase: audit
+  entered: 2026-03-05T17:59:30Z
+  exited: 2026-03-05T17:59:09.965186Z
+- phase: qa
+  entered: 2026-03-05T17:59:09.965186Z
+  exited: 2026-03-05T17:59:41.789044Z
+- phase: merge
+  entered: 2026-03-05T17:59:41.789044Z
+  exited: 2026-03-05T17:59:48.900668Z
+- phase: released
+  entered: 2026-03-05T17:59:48.900668Z
   exited: null
 dependencies: []
 archived: false

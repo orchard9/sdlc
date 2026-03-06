@@ -1,72 +1,135 @@
 slug: ponder-merge-cli
 title: sdlc ponder merge — CLI command and core data model
-phase: draft
+phase: released
 created_at: 2026-03-04T00:37:10.804576Z
-updated_at: 2026-03-04T00:37:10.804576Z
+updated_at: 2026-03-05T18:43:07.384705Z
 artifacts:
 - artifact_type: spec
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/spec.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:49:02.342806Z
+  approved_at: 2026-03-05T17:49:10.273942Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: design
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/design.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:49:18.061498Z
+  approved_at: 2026-03-05T17:49:22.275282Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: tasks
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/tasks.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:49:28.059903Z
+  approved_at: 2026-03-05T17:49:28.065203Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_plan
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/qa-plan.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T17:49:42.816384Z
+  approved_at: 2026-03-05T17:49:42.822152Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: review
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/review.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T18:38:06.536218Z
+  approved_at: 2026-03-05T18:38:28.138759Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: audit
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/audit.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T18:39:31.998776Z
+  approved_at: 2026-03-05T18:39:32.068806Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
 - artifact_type: qa_results
-  status: missing
+  status: approved
   path: .sdlc/features/ponder-merge-cli/qa-results.md
-  created_at: null
-  approved_at: null
+  created_at: 2026-03-05T18:42:53.154505Z
+  approved_at: 2026-03-05T18:43:00.999845Z
   rejected_at: null
   rejection_reason: null
   approved_by: null
-tasks: []
+tasks:
+- id: T1
+  title: Add data model fields and error variant
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:49:32.990411Z
+  started_at: 2026-03-05T17:49:55.156687Z
+  completed_at: 2026-03-05T18:34:02.868907Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement merge_entries core function
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:49:32.995885Z
+  started_at: 2026-03-05T18:34:02.881329Z
+  completed_at: 2026-03-05T18:34:02.887082Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add CLI Merge subcommand
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:49:33.001183Z
+  started_at: 2026-03-05T18:34:02.895025Z
+  completed_at: 2026-03-05T18:37:51.500214Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update list and show commands
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:49:33.006275Z
+  started_at: 2026-03-05T18:37:51.594165Z
+  completed_at: 2026-03-05T18:37:51.646332Z
+  blocker: null
+  depends_on: []
 comments: []
 next_comment_seq: 0
 blockers: []
 phase_history:
 - phase: draft
   entered: 2026-03-04T00:37:10.804576Z
+  exited: 2026-03-05T17:49:10.276439Z
+- phase: specified
+  entered: 2026-03-05T17:49:10.276439Z
+  exited: 2026-03-05T17:49:42.823846Z
+- phase: planned
+  entered: 2026-03-05T17:49:42.823846Z
+  exited: 2026-03-05T17:49:49.609199Z
+- phase: ready
+  entered: 2026-03-05T17:49:49.609199Z
+  exited: 2026-03-05T17:49:49.623059Z
+- phase: implementation
+  entered: 2026-03-05T17:49:49.623059Z
+  exited: 2026-03-05T18:38:28.146059Z
+- phase: review
+  entered: 2026-03-05T18:38:28.146059Z
+  exited: 2026-03-05T18:38:34.949116Z
+- phase: audit
+  entered: 2026-03-05T18:38:34.949116Z
+  exited: 2026-03-05T18:39:32.109998Z
+- phase: qa
+  entered: 2026-03-05T18:39:32.109998Z
+  exited: 2026-03-05T18:43:01.008349Z
+- phase: merge
+  entered: 2026-03-05T18:43:01.008349Z
+  exited: 2026-03-05T18:43:07.384705Z
+- phase: released
+  entered: 2026-03-05T18:43:07.384705Z
   exited: null
 dependencies: []
 archived: false
