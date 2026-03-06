@@ -75,6 +75,11 @@ pub async fn create_invite(
         .await
         .map_err(AppError::bad_request)?;
 
+    // Fire-and-forget OTP email delivery (if notify is configured).
+    if let Some(client) = app.notify_client.clone() {
+        client.send_otp_background(record.email.clone(), otp.clone());
+    }
+
     let response = serde_json::json!({
         "id": record.id,
         "email": record.email,

@@ -6,6 +6,7 @@ pub mod fleet;
 pub mod heartbeat;
 pub mod hub;
 pub mod invite;
+pub mod notify;
 pub mod oauth;
 pub mod pg_common;
 pub mod pg_orchestrator;

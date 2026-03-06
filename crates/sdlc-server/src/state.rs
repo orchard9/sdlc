@@ -410,6 +410,9 @@ pub struct AppState {
     /// OTP invite store for hub mode. Initialized asynchronously at startup.
     /// `None` (OnceLock not set) until initialization completes.
     pub invite_store: Arc<OnceLock<crate::invite::InviteStore>>,
+    /// Notify email client for hub mode. `None` when `NOTIFY_URL` env var is unset
+    /// (dev mode — OTP codes are only returned in the API response body).
+    pub notify_client: Option<Arc<crate::notify::NotifyClient>>,
 }
 
 /// Generate a 32-char hex token (128-bit entropy) from the OS CSPRNG.
@@ -568,6 +571,7 @@ impl AppState {
             oauth_config: None,
             credential_pool: Arc::new(std::sync::OnceLock::new()),
             invite_store: Arc::new(OnceLock::new()),
+            notify_client: None,
             root,
         }
     }
@@ -619,6 +623,15 @@ impl AppState {
                 let _ = invite_cell.set(store);
                 tracing::info!("invite store ready");
             });
+        }
+
+        // Initialize notify client for OTP email delivery (hub mode only).
+        // Absent in dev (NOTIFY_URL unset) — OTP codes are returned in API response only.
+        if let Some(client) = crate::notify::NotifyClient::from_env() {
+            tracing::info!("notify client configured for OTP delivery");
+            state.notify_client = Some(Arc::new(client));
+        } else {
+            tracing::info!("NOTIFY_URL not set — OTP emails disabled (dev mode)");
         }
 
         // Spawn the sweep task now that the registry is populated.
