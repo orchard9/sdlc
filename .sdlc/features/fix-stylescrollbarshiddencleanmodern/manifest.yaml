@@ -1,0 +1,111 @@
+slug: fix-stylescrollbarshiddencleanmodern
+title: Fix Stylescrollbarshiddencleanmodern
+description: |-
+  Root cause: index.css has no scrollbar CSS rules — neither webkit pseudo-elements (`::-webkit-scrollbar`) nor the standard `scrollbar-width: none` / `scrollbar-color` properties — so the browser renders default platform scrollbars everywhere.
+
+  Problem: The frontend has no scrollbar styling applied globally or on scrollable containers. Native OS scrollbars appear throughout the app (sidebars, panels, modals, logs, markdown content, etc.), looking inconsistent and clashing with the dark minimal design aesthetic. This affects every scrollable surface in the UI.
+
+  Original report:
+  all scrollbars need to be styled to be hidden/clean/modern
+phase: released
+created_at: 2026-03-04T23:01:14.500823Z
+updated_at: 2026-03-04T23:04:54.617684Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/spec.md
+  created_at: 2026-03-04T23:01:53.343321Z
+  approved_at: 2026-03-04T23:01:58.017758Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T23:02:09.566443Z
+  waive_reason: CSS-only global rule addition — no UI states or mockup needed
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/tasks.md
+  created_at: 2026-03-04T23:02:22.525724Z
+  approved_at: 2026-03-04T23:02:27.597089Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/qa-plan.md
+  created_at: 2026-03-04T23:02:42.521450Z
+  approved_at: 2026-03-04T23:02:47.284060Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/review.md
+  created_at: 2026-03-04T23:03:41.266256Z
+  approved_at: 2026-03-04T23:03:45.712288Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T23:04:04.655849Z
+  waive_reason: Pure CSS cosmetic change — no security surface, no data handling, no auth changes
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-stylescrollbarshiddencleanmodern/qa-results.md
+  created_at: 2026-03-04T23:04:40.319557Z
+  approved_at: 2026-03-04T23:04:44.689605Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T23:01:14.500823Z
+  exited: 2026-03-04T23:01:58.019902Z
+- phase: specified
+  entered: 2026-03-04T23:01:58.019902Z
+  exited: 2026-03-04T23:02:47.289438Z
+- phase: planned
+  entered: 2026-03-04T23:02:47.289438Z
+  exited: 2026-03-04T23:02:56.906863Z
+- phase: ready
+  entered: 2026-03-04T23:02:56.906863Z
+  exited: 2026-03-04T23:03:05.606101Z
+- phase: implementation
+  entered: 2026-03-04T23:03:05.606101Z
+  exited: 2026-03-04T23:03:45.714274Z
+- phase: review
+  entered: 2026-03-04T23:03:45.714274Z
+  exited: 2026-03-04T23:03:55.593063Z
+- phase: audit
+  entered: 2026-03-04T23:03:55.593063Z
+  exited: 2026-03-04T23:04:04.657605Z
+- phase: qa
+  entered: 2026-03-04T23:04:04.657605Z
+  exited: 2026-03-04T23:04:44.691498Z
+- phase: merge
+  entered: 2026-03-04T23:04:44.691498Z
+  exited: 2026-03-04T23:04:54.617684Z
+- phase: released
+  entered: 2026-03-04T23:04:54.617684Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

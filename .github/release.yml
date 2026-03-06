@@ -1,0 +1,16 @@
+changelog:
+  exclude:
+    labels:
+      - chore
+  categories:
+    - title: Features
+      labels:
+        - feat
+        - enhancement
+    - title: Bug Fixes
+      labels:
+        - fix
+        - bug
+    - title: Other Changes
+      labels:
+        - "*"

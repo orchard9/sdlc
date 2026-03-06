@@ -1,0 +1,16 @@
+- number: 1
+  label: Review
+  items:
+  - slug: sdlc-recap-command
+    title: sdlc-recap command — state-aware session recap with forward motion
+    phase: qa
+    action: run_qa
+    needs_worktree: true
+    blocked_by: []
+  - slug: uat-failure-pathways
+    title: UAT failure triage and 3 pathways in milestone-uat template
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

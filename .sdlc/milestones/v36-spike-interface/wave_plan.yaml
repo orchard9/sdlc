@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: spike-cli-commands
+    title: Spike CLI — list, show, promote subcommands
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: spike-rest-routes
+    title: Spike REST routes — list, detail, and promote endpoints
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: spike-ui-page
+    title: Spike UI — list, detail, and promote views with sidebar nav
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

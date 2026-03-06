@@ -1,0 +1,6 @@
+apiVersion: v2
+name: couchdb
+description: CouchDB for Telegram message persistence
+type: application
+version: 1.0.0
+appVersion: "3.3"

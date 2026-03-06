@@ -1,0 +1,76 @@
+slug: slack-bot-core
+title: 'Slack bot runtime: TypeScript/Bolt HTTP mode, config schema, HMAC verification, multi-project routing, Block Kit disambiguation'
+phase: specified
+created_at: 2026-03-04T22:46:42.552342Z
+updated_at: 2026-03-05T17:35:43.579988Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/slack-bot-core/spec.md
+  created_at: 2026-03-05T17:35:33.827629Z
+  approved_at: 2026-03-05T17:35:43.567721Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/slack-bot-core/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/slack-bot-core/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/slack-bot-core/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/slack-bot-core/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/slack-bot-core/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/slack-bot-core/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:46:42.552342Z
+  exited: 2026-03-05T17:35:43.579988Z
+- phase: specified
+  entered: 2026-03-05T17:35:43.579988Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

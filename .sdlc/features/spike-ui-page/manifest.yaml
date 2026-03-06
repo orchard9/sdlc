@@ -1,0 +1,182 @@
+slug: spike-ui-page
+title: Spike UI — list, detail, and promote views with sidebar nav
+description: React SpikePage with three views (list, detail, promote) — verdict badges, ADOPT next-step hints, REJECT auto-filed indicators, ponder lineage links, empty state explainer. Sidebar nav in Explore group.
+phase: released
+created_at: 2026-03-04T17:51:51.605033Z
+updated_at: 2026-03-04T22:18:02.387527Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/spike-ui-page/spec.md
+  created_at: 2026-03-04T22:10:57.977948Z
+  approved_at: 2026-03-04T22:11:06.029937Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/spike-ui-page/design.md
+  created_at: 2026-03-04T22:12:55.932716Z
+  approved_at: 2026-03-04T22:12:56.129503Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/spike-ui-page/tasks.md
+  created_at: 2026-03-04T22:13:24.454310Z
+  approved_at: 2026-03-04T22:13:24.470218Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/spike-ui-page/qa-plan.md
+  created_at: 2026-03-04T22:13:49.157397Z
+  approved_at: 2026-03-04T22:13:49.165093Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/spike-ui-page/review.md
+  created_at: 2026-03-04T22:16:40.913398Z
+  approved_at: 2026-03-04T22:16:40.922531Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/spike-ui-page/audit.md
+  created_at: 2026-03-04T22:17:14.786929Z
+  approved_at: 2026-03-04T22:17:14.803633Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/spike-ui-page/qa-results.md
+  created_at: 2026-03-04T22:17:52.193449Z
+  approved_at: 2026-03-04T22:17:56.574637Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add frontend/src/pages/SpikePage.tsx — list view with verdict badge rows (ADOPT/ADAPT/REJECT/IN_PROGRESS colors)
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:23.992984Z
+  started_at: 2026-03-04T22:14:09.116481Z
+  completed_at: 2026-03-04T22:16:08.282372Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'ADAPT rows: inline ''promote to ponder →'' affordance; ADOPT rows: ''findings →'' + next-step hint chip (''Next: /sdlc-hypothetical-planning''); REJECT rows: auto-filed badge (no action button)'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:23.998917Z
+  started_at: 2026-03-04T22:16:08.294973Z
+  completed_at: 2026-03-04T22:16:08.300681Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Detail view: breadcrumb, verdict badge, findings rendered as structured sections, ''Promote to Ponder'' button (ADAPT only)'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:24.005036Z
+  started_at: 2026-03-04T22:16:08.308350Z
+  completed_at: 2026-03-04T22:16:08.314071Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Promote view: what-gets-carried checklist, editable ponder slug input, primary action, CLI hint, success → navigate to /ponder/<slug>'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:24.010155Z
+  started_at: 2026-03-04T22:16:08.320696Z
+  completed_at: 2026-03-04T22:16:08.326379Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: 'Add sidebar link in Explore group: Zap icon, label ''Spikes'', route /spikes'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:24.014824Z
+  started_at: 2026-03-04T22:16:08.333744Z
+  completed_at: 2026-03-04T22:16:08.338941Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Add /spikes and /spikes/:slug routes to App router; add to BottomTabBar mobile Explore roots
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:24.019593Z
+  started_at: 2026-03-04T22:16:08.345854Z
+  completed_at: 2026-03-04T22:16:08.351314Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] ADOPT spike detail: show ''What''s next'' section with ''/sdlc-hypothetical-planning <slug>'' hint and explanation — ADOPT means the approach is proven, not that it''s implemented'
+  description: null
+  status: completed
+  created_at: 2026-03-04T20:56:16.136569Z
+  started_at: 2026-03-04T22:16:08.358097Z
+  completed_at: 2026-03-04T22:16:08.363656Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] After promote, spike row shows ''Ponder: <slug>'' as a link — trace the spike→ponder lineage in the list view (uses ponder_slug from state.yaml)'
+  description: null
+  status: completed
+  created_at: 2026-03-04T20:56:16.141826Z
+  started_at: 2026-03-04T22:16:08.371432Z
+  completed_at: 2026-03-04T22:16:08.376880Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Empty state: not just blank — explain what spikes are, show ''/sdlc-spike <slug> — <need>'' format example, link to docs'
+  description: null
+  status: completed
+  created_at: 2026-03-04T20:56:16.147033Z
+  started_at: 2026-03-04T22:16:08.383465Z
+  completed_at: 2026-03-04T22:16:08.389425Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T17:51:51.605033Z
+  exited: 2026-03-04T22:11:06.032470Z
+- phase: specified
+  entered: 2026-03-04T22:11:06.032470Z
+  exited: 2026-03-04T22:13:49.166630Z
+- phase: planned
+  entered: 2026-03-04T22:13:49.166630Z
+  exited: 2026-03-04T22:13:53.451268Z
+- phase: ready
+  entered: 2026-03-04T22:13:53.451268Z
+  exited: 2026-03-04T22:13:58.832852Z
+- phase: implementation
+  entered: 2026-03-04T22:13:58.832852Z
+  exited: 2026-03-04T22:16:40.927700Z
+- phase: review
+  entered: 2026-03-04T22:16:40.927700Z
+  exited: 2026-03-04T22:16:48.522827Z
+- phase: audit
+  entered: 2026-03-04T22:16:48.522827Z
+  exited: 2026-03-04T22:17:14.811293Z
+- phase: qa
+  entered: 2026-03-04T22:17:14.811293Z
+  exited: 2026-03-04T22:17:56.580281Z
+- phase: merge
+  entered: 2026-03-04T22:17:56.580281Z
+  exited: 2026-03-04T22:18:02.387527Z
+- phase: released
+  entered: 2026-03-04T22:18:02.387527Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

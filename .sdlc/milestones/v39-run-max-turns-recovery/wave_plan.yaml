@@ -1,0 +1,10 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: run-max-turns-resume
+    title: Paused (turn limit) UX and Resume action for investigation and ponder runs
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

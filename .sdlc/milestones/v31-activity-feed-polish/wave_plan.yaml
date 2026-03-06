@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: activity-compact-markdown
+    title: CompactMarkdown component — markdown rendering across all activity feed cards
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: activity-run-init-column
+    title: 'RunInitCard header: row layout → column layout'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: activity-subagent-cards
+    title: Subagent input/output cards in activity feed
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

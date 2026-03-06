@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: slack-bot-core
+    title: 'Slack bot runtime: TypeScript/Bolt HTTP mode, config schema, HMAC verification, multi-project routing, Block Kit disambiguation'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: slack-context-capture
+    title: 'Context-windowed capture: conversations.history, message filtering, user ID resolution, markdown rendering, enriched payload'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: slack-feedback-endpoint
+    title: 'sdlc-server /api/feedback endpoint: receive normalized Slack payload and create feedback threads'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

@@ -1,0 +1,10 @@
+slug: spike-session-flow
+title: Conversational Spike Flow — chat-while-working + in-UI verdict
+status: converging
+created_at: 2026-03-04T22:51:46.169570Z
+updated_at: 2026-03-04T23:01:12.259816Z
+sessions: 2
+orientation:
+  current: All decisions resolved. Design is complete and ready to commit.
+  next: Run /sdlc-ponder-commit spike-session-flow to distribute into milestones and features.
+  commit: READY — all open questions resolved, architecture approved.

@@ -1,0 +1,11 @@
+slug: webhook-payload-insight
+title: Webhook Payload Insight & Replay UI
+status: committed
+created_at: 2026-03-05T06:09:32.889291Z
+updated_at: 2026-03-05T06:25:18.612915Z
+committed_at: 2026-03-05T06:25:18.612915Z
+sessions: 1
+orientation:
+  current: UI design shaped — mockup complete with 3 states, key decisions captured, two open questions flagged
+  next: 'Implement: add store_only chip + Inspect button to WebhookRoutesSection in ActionsPage, wire to payload inspector panel'
+  commit: Backend endpoint GET /api/webhooks/{route}/data and POST /api/webhooks/{route}/replay/{id} are implemented and returning data

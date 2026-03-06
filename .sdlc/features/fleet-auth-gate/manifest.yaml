@@ -1,0 +1,155 @@
+slug: fleet-auth-gate
+title: Shared Google auth gate for all sdlc-*.threesix.ai instances
+description: Shared Traefik forward-auth middleware gating all *.sdlc.threesix.ai instances with Google OAuth and service tokens for M2M
+phase: released
+created_at: 2026-03-05T06:55:30.357038Z
+updated_at: 2026-03-05T19:09:04.431415Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/spec.md
+  created_at: 2026-03-05T08:32:37.982980Z
+  approved_at: 2026-03-05T08:32:46.981920Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/design.md
+  created_at: 2026-03-05T08:33:34.603340Z
+  approved_at: 2026-03-05T08:33:40.479968Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/tasks.md
+  created_at: 2026-03-05T08:34:04.303165Z
+  approved_at: 2026-03-05T08:34:08.797421Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/qa-plan.md
+  created_at: 2026-03-05T08:34:31.328046Z
+  approved_at: 2026-03-05T08:34:34.331721Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/review.md
+  created_at: 2026-03-05T08:38:07.402804Z
+  approved_at: 2026-03-05T08:38:11.132758Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/audit.md
+  created_at: 2026-03-05T08:38:51.164799Z
+  approved_at: 2026-03-05T08:38:55.301015Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fleet-auth-gate/qa-results.md
+  created_at: 2026-03-05T08:39:28.965662Z
+  approved_at: 2026-03-05T08:39:35.401462Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create shared Traefik middleware sdlc-google-auth pointing to hub oauth2-proxy
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.122829Z
+  started_at: null
+  completed_at: 2026-03-05T08:35:13.328686Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Apply middleware to v18 fleet-reconcile Helm template so new project ingresses auto-get auth
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.127968Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:24.267060Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Retrofit existing sdlc-sdlc ingress to use the shared middleware
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.133095Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:51.403203Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Test: unauthenticated request to sdlc-sdlc.threesix.ai redirects to Google sign-in'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.137855Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:59.410015Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: '[user-gap] Session expiry and logout — configure oauth2-proxy cookie TTL and expose logout endpoint'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:51.733692Z
+  started_at: null
+  completed_at: 2026-03-05T08:37:22.501217Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: '[user-gap] Service token path — bearer token auth that bypasses oauth2-proxy for machine-to-machine API calls'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:51.738752Z
+  started_at: null
+  completed_at: 2026-03-05T08:37:33.060099Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:55:30.357038Z
+  exited: 2026-03-05T08:32:47.007940Z
+- phase: specified
+  entered: 2026-03-05T08:32:47.007940Z
+  exited: 2026-03-05T08:34:34.334095Z
+- phase: planned
+  entered: 2026-03-05T08:34:34.334095Z
+  exited: 2026-03-05T08:34:44.661399Z
+- phase: ready
+  entered: 2026-03-05T08:34:44.661399Z
+  exited: 2026-03-05T08:34:52.987599Z
+- phase: implementation
+  entered: 2026-03-05T08:34:52.987599Z
+  exited: 2026-03-05T08:38:11.137361Z
+- phase: review
+  entered: 2026-03-05T08:38:11.137361Z
+  exited: 2026-03-05T08:38:16.608454Z
+- phase: audit
+  entered: 2026-03-05T08:38:16.608454Z
+  exited: 2026-03-05T08:38:55.302805Z
+- phase: qa
+  entered: 2026-03-05T08:38:55.302805Z
+  exited: 2026-03-05T08:39:35.403510Z
+- phase: merge
+  entered: 2026-03-05T08:39:35.403510Z
+  exited: 2026-03-05T08:39:47.703251Z
+- phase: released
+  entered: 2026-03-05T08:39:47.703251Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

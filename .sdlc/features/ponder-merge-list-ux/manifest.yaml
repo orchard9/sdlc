@@ -1,0 +1,172 @@
+slug: ponder-merge-list-ux
+title: ponder list/show UX for merged entries — filter and redirect banner
+phase: released
+created_at: 2026-03-04T22:46:43.576206Z
+updated_at: 2026-03-05T18:40:56.326530Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/spec.md
+  created_at: 2026-03-05T17:49:31.740712Z
+  approved_at: 2026-03-05T17:49:40.665340Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/design.md
+  created_at: 2026-03-05T17:50:13.798329Z
+  approved_at: 2026-03-05T17:50:13.806644Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/tasks.md
+  created_at: 2026-03-05T17:50:32.682064Z
+  approved_at: 2026-03-05T17:50:32.688536Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/qa-plan.md
+  created_at: 2026-03-05T17:50:55.846647Z
+  approved_at: 2026-03-05T17:50:55.853149Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/review.md
+  created_at: 2026-03-05T18:38:59.890969Z
+  approved_at: 2026-03-05T18:38:59.897857Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/audit.md
+  created_at: 2026-03-05T18:39:21.882135Z
+  approved_at: 2026-03-05T18:39:21.888307Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/ponder-merge-list-ux/qa-results.md
+  created_at: 2026-03-05T18:40:50.492666Z
+  approved_at: 2026-03-05T18:40:50.499763Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add merged_into and merged_from fields to PonderEntry
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.243170Z
+  started_at: 2026-03-05T17:51:28.757067Z
+  completed_at: 2026-03-05T17:51:28.762527Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: CLI ponder list -- filter merged entries and add --all flag
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.247961Z
+  started_at: 2026-03-05T17:54:08.690365Z
+  completed_at: 2026-03-05T17:54:08.694485Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: CLI ponder show -- redirect banner for merged entries
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.252925Z
+  started_at: 2026-03-05T17:54:29.817896Z
+  completed_at: 2026-03-05T17:54:29.822024Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: REST GET /api/roadmap -- filter merged entries and add ?all query param
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.258273Z
+  started_at: 2026-03-05T17:54:57.991050Z
+  completed_at: 2026-03-05T17:54:57.996136Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: REST GET /api/roadmap/:slug -- include merge fields and redirect banner
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.263111Z
+  started_at: 2026-03-05T17:55:13.833106Z
+  completed_at: 2026-03-05T17:55:13.837437Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Frontend types and API client updates
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.267204Z
+  started_at: 2026-03-05T17:55:43.919110Z
+  completed_at: 2026-03-05T17:55:43.923519Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Frontend PonderPage -- filter merged entries and add toggle
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.272076Z
+  started_at: 2026-03-05T17:56:30.441632Z
+  completed_at: 2026-03-05T17:56:30.446174Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Frontend detail view -- redirect banner for merged entries
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:50:37.276117Z
+  started_at: 2026-03-05T17:56:43.241759Z
+  completed_at: 2026-03-05T17:56:43.245942Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:46:43.576206Z
+  exited: 2026-03-05T17:49:40.667528Z
+- phase: specified
+  entered: 2026-03-05T17:49:40.667528Z
+  exited: 2026-03-05T17:50:55.854951Z
+- phase: planned
+  entered: 2026-03-05T17:50:55.854951Z
+  exited: 2026-03-05T17:51:01.759212Z
+- phase: ready
+  entered: 2026-03-05T17:51:01.759212Z
+  exited: 2026-03-05T17:51:01.766968Z
+- phase: implementation
+  entered: 2026-03-05T17:51:01.766968Z
+  exited: 2026-03-05T18:38:59.906989Z
+- phase: review
+  entered: 2026-03-05T18:38:59.906989Z
+  exited: 2026-03-05T18:39:04.927942Z
+- phase: audit
+  entered: 2026-03-05T18:39:04.927942Z
+  exited: 2026-03-05T18:39:21.893381Z
+- phase: qa
+  entered: 2026-03-05T18:39:21.893381Z
+  exited: 2026-03-05T18:40:50.505387Z
+- phase: merge
+  entered: 2026-03-05T18:40:50.505387Z
+  exited: 2026-03-05T18:40:56.326530Z
+- phase: released
+  entered: 2026-03-05T18:40:56.326530Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

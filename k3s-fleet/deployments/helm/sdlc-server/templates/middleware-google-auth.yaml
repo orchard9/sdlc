@@ -1,0 +1,17 @@
+{{- if .Values.auth.enabled }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: sdlc-google-auth
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: sdlc-server
+    app.kubernetes.io/instance: {{ .Values.project.slug }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  forwardAuth:
+    address: http://sdlc-hub.sdlc-hub.svc.cluster.local/auth/verify
+    trustForwardHeader: true
+    authResponseHeaders:
+      - X-Auth-User
+{{- end }}

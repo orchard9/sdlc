@@ -1,0 +1,9 @@
+slug: v35-uat-failure-pathways
+title: UAT Failure Pathways — never stall on UAT failure
+vision: When a milestone UAT fails, the agent never stalls. It triages every failure into fix-and-retry, escalate, or recap-and-ponder — and acts before ending. The human returns to a clean state with concrete next steps.
+features:
+- uat-failure-pathways
+- sdlc-recap-command
+created_at: 2026-03-04T06:21:14.843231Z
+updated_at: 2026-03-04T06:21:53.651798Z
+schema_version: 1

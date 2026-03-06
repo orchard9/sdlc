@@ -1,0 +1,1 @@
+i want an interface to use the template for 'spike' - that can be used to turn a spike into a ponder

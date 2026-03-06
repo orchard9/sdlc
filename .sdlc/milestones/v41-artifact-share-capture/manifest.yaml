@@ -1,0 +1,8 @@
+slug: v41-artifact-share-capture
+title: Artifact Share & Capture — one-click copy and screenshot for artifacts and dialogue
+vision: Users can copy and capture any artifact or dialogue message in one click. No OS-level screenshot keybindings, no manual text selection, no manual cropping. Open a spec — click [MD] to copy its markdown, click [IMG] to copy it as an image ready to paste directly into Slack, email, or Discord. In a ponder session, hover any message and click copy to quote it anywhere. The sdlc UI becomes a first-class sharing surface, not just a viewing surface.
+features:
+- artifact-copy-capture
+created_at: 2026-03-05T03:39:33.468923Z
+updated_at: 2026-03-05T03:39:52.696244Z
+schema_version: 1

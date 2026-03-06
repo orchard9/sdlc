@@ -1,0 +1,112 @@
+slug: slack-feedback-endpoint
+title: 'sdlc-server /api/feedback endpoint: receive normalized Slack payload and create feedback threads'
+phase: implementation
+created_at: 2026-03-04T22:46:42.564585Z
+updated_at: 2026-03-05T17:35:47.142752Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/slack-feedback-endpoint/spec.md
+  created_at: 2026-03-05T17:34:13.674270Z
+  approved_at: 2026-03-05T17:34:17.163339Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/slack-feedback-endpoint/design.md
+  created_at: 2026-03-05T17:34:50.736155Z
+  approved_at: 2026-03-05T17:34:50.745429Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/slack-feedback-endpoint/tasks.md
+  created_at: 2026-03-05T17:35:07.029544Z
+  approved_at: 2026-03-05T17:35:07.038001Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/slack-feedback-endpoint/qa-plan.md
+  created_at: 2026-03-05T17:35:30.566367Z
+  approved_at: 2026-03-05T17:35:30.572801Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/slack-feedback-endpoint/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/slack-feedback-endpoint/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/slack-feedback-endpoint/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add SlackFeedbackPayload struct and receive_slack_feedback handler
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:35:10.301487Z
+  started_at: 2026-03-05T17:36:18.210130Z
+  completed_at: 2026-03-05T17:36:59.481307Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Register route in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:35:10.307308Z
+  started_at: 2026-03-05T17:36:59.493559Z
+  completed_at: 2026-03-05T17:37:07.599949Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add unit tests
+  description: null
+  status: in_progress
+  created_at: 2026-03-05T17:35:10.313553Z
+  started_at: 2026-03-05T17:37:07.609584Z
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:46:42.564585Z
+  exited: 2026-03-05T17:34:17.164944Z
+- phase: specified
+  entered: 2026-03-05T17:34:17.164944Z
+  exited: 2026-03-05T17:35:30.574463Z
+- phase: planned
+  entered: 2026-03-05T17:35:30.574463Z
+  exited: 2026-03-05T17:35:39.484716Z
+- phase: ready
+  entered: 2026-03-05T17:35:39.484716Z
+  exited: 2026-03-05T17:35:47.142752Z
+- phase: implementation
+  entered: 2026-03-05T17:35:47.142752Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

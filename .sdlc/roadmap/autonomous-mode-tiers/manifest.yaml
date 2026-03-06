@@ -1,0 +1,10 @@
+slug: autonomous-mode-tiers
+title: Three Operational Modes for Autonomous Work
+status: exploring
+created_at: 2026-03-05T03:45:06.930682Z
+updated_at: 2026-03-05T03:46:00.381904Z
+sessions: 1
+orientation:
+  current: Three modes named but not yet specified — zero-conflict, hybrid, enterprise-permissive
+  next: 'Define each mode''s concrete behavior: dispatch rules, parallelism cap, escalation path, config surface'
+  commit: Spec for how dev-driver and sdlc-run behave differently per mode, with config schema

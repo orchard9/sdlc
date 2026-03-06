@@ -1,0 +1,151 @@
+slug: slack-context-capture
+title: 'Context-windowed capture: conversations.history, message filtering, user ID resolution, markdown rendering, enriched payload'
+phase: planned
+created_at: 2026-03-04T22:46:42.558727Z
+updated_at: 2026-03-05T17:37:09.643673Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/slack-context-capture/spec.md
+  created_at: 2026-03-05T17:35:19.203252Z
+  approved_at: 2026-03-05T17:35:26.650156Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/slack-context-capture/design.md
+  created_at: 2026-03-05T17:36:04.111103Z
+  approved_at: 2026-03-05T17:36:09.947927Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/slack-context-capture/tasks.md
+  created_at: 2026-03-05T17:36:26.010018Z
+  approved_at: 2026-03-05T17:36:29.223545Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/slack-context-capture/qa-plan.md
+  created_at: 2026-03-05T17:37:02.298962Z
+  approved_at: 2026-03-05T17:37:09.642073Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/slack-context-capture/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/slack-context-capture/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/slack-context-capture/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create context.ts module with types and CaptureRequest/CaptureResult interfaces
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:32.727476Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement fetchHistory — conversations.history API call
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:34.476981Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement filterMessages — remove bots, trigger, system messages
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:34.635314Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Implement resolveUsers — user ID to display name resolution
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:34.746660Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Implement slackMrkdwnToMarkdown — Slack markup conversion
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:34.939431Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Implement renderMarkdown — full context rendering
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:35.413384Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Wire captureContext orchestrator function
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:35.823677Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Add shared types.ts for slack-bot tool
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:36:36.188149Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:46:42.558727Z
+  exited: 2026-03-05T17:35:26.652404Z
+- phase: specified
+  entered: 2026-03-05T17:35:26.652404Z
+  exited: 2026-03-05T17:37:09.643673Z
+- phase: planned
+  entered: 2026-03-05T17:37:09.643673Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

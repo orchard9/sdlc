@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: webhook-payload-inspector-ui
+    title: Webhook Payload Inspector UI — browse, inspect, and replay stored payloads
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

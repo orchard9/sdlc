@@ -1,0 +1,100 @@
+slug: run-stop-reason-capture
+title: Capture session_id and stop_reason in RunRecord and telemetry events
+phase: released
+created_at: 2026-03-04T06:05:30.532678Z
+updated_at: 2026-03-04T23:39:12.127186Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/spec.md
+  created_at: 2026-03-04T23:09:22.571179Z
+  approved_at: 2026-03-04T23:09:27.324939Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/design.md
+  created_at: 2026-03-04T23:09:55.138699Z
+  approved_at: 2026-03-04T23:09:57.775005Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/tasks.md
+  created_at: 2026-03-04T23:10:15.763479Z
+  approved_at: 2026-03-04T23:10:18.978682Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/qa-plan.md
+  created_at: 2026-03-04T23:10:36.558339Z
+  approved_at: 2026-03-04T23:10:36.564551Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/review.md
+  created_at: 2026-03-04T23:35:31.546273Z
+  approved_at: 2026-03-04T23:35:33.532598Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/audit.md
+  created_at: 2026-03-04T23:36:06.097503Z
+  approved_at: 2026-03-04T23:36:06.107194Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/run-stop-reason-capture/qa-results.md
+  created_at: 2026-03-04T23:39:07.845293Z
+  approved_at: 2026-03-04T23:39:07.860185Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:05:30.532678Z
+  exited: 2026-03-04T23:09:27.326918Z
+- phase: specified
+  entered: 2026-03-04T23:09:27.326918Z
+  exited: 2026-03-04T23:10:36.566245Z
+- phase: planned
+  entered: 2026-03-04T23:10:36.566245Z
+  exited: 2026-03-04T23:10:40.265270Z
+- phase: ready
+  entered: 2026-03-04T23:10:40.265270Z
+  exited: 2026-03-04T23:10:43.977096Z
+- phase: implementation
+  entered: 2026-03-04T23:10:43.977096Z
+  exited: 2026-03-04T23:35:33.537281Z
+- phase: review
+  entered: 2026-03-04T23:35:33.537281Z
+  exited: 2026-03-04T23:35:40.722018Z
+- phase: audit
+  entered: 2026-03-04T23:35:40.722018Z
+  exited: 2026-03-04T23:36:06.113290Z
+- phase: qa
+  entered: 2026-03-04T23:36:06.113290Z
+  exited: 2026-03-04T23:39:07.871739Z
+- phase: merge
+  entered: 2026-03-04T23:39:07.871739Z
+  exited: 2026-03-04T23:39:12.127186Z
+- phase: released
+  entered: 2026-03-04T23:39:12.127186Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

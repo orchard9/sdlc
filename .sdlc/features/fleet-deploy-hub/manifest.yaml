@@ -1,0 +1,180 @@
+slug: fleet-deploy-hub
+title: Deploy hub mode sdlc-server + DNS + ingress at sdlc.threesix.ai
+description: Create sdlc-hub namespace, deploy hub mode binary with native OAuth2, add Cloudflare DNS A record for sdlc.threesix.ai, wire Traefik IngressRoute and forwardAuth middleware.
+phase: implementation
+created_at: 2026-03-05T23:04:12.970976Z
+updated_at: 2026-03-06T00:16:35.568431Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-deploy-hub/spec.md
+  created_at: 2026-03-05T23:05:56.458084Z
+  approved_at: 2026-03-06T00:15:59.322630Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fleet-deploy-hub/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T00:16:05.210831Z
+  waive_reason: Infrastructure deployment — manifests already exist in k3s-fleet/deployments/hub/, spec covers all details
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fleet-deploy-hub/tasks.md
+  created_at: 2026-03-06T00:16:21.346209Z
+  approved_at: 2026-03-06T00:16:21.355455Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: waived
+  path: .sdlc/features/fleet-deploy-hub/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T00:16:24.705272Z
+  waive_reason: Infrastructure deployment — QA is the smoke test at the end
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fleet-deploy-hub/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fleet-deploy-hub/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fleet-deploy-hub/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create GCP OAuth2 client ID for sdlc.threesix.ai with callback URI https://sdlc.threesix.ai/auth/callback
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:41.855459Z
+  started_at: null
+  completed_at: 2026-03-06T00:16:40.064607Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Store GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SESSION_SECRET as k8s Secret in sdlc-hub namespace
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.861489Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: 'Create Cloudflare DNS A record: sdlc.threesix.ai -> 208.122.204.172'
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:41.866643Z
+  started_at: null
+  completed_at: 2026-03-06T00:16:54.848650Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create sdlc-hub namespace with hub mode deployment (SDLC_HUB=true, no git-sync sidecar)
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.872191Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update Helm middleware-google-auth.yaml — forwardAuth address from oauth2-proxy to http://sdlc-hub.sdlc-hub.svc.cluster.local:8080/auth/verify
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.877262Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Create Traefik IngressRoute for sdlc.threesix.ai pointing to hub service
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.881906Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Apply forwardAuth middleware to all sdlc-*.threesix.ai IngressRoutes (auth.enabled=true in Helm values)
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.887553Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Wire GITEA_URL, GITEA_API_TOKEN, WOODPECKER_URL, WOODPECKER_API_TOKEN into hub deployment env
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.892864Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T9
+  title: ServiceAccount + ClusterRole for hub pod — read-only access to namespaces and deployments
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.897720Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T10
+  title: 'Smoke test: curl -v https://sdlc.threesix.ai — expect 302 to Google sign-in'
+  description: null
+  status: pending
+  created_at: 2026-03-05T23:04:41.902464Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T23:04:12.970976Z
+  exited: 2026-03-06T00:15:59.324374Z
+- phase: specified
+  entered: 2026-03-06T00:15:59.324374Z
+  exited: 2026-03-06T00:16:35.551110Z
+- phase: planned
+  entered: 2026-03-06T00:16:35.551110Z
+  exited: 2026-03-06T00:16:35.560088Z
+- phase: ready
+  entered: 2026-03-06T00:16:35.560088Z
+  exited: 2026-03-06T00:16:35.568431Z
+- phase: implementation
+  entered: 2026-03-06T00:16:35.568431Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

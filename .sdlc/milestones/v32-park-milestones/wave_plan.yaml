@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: park-milestone-cli-api
+    title: Park/Unpark CLI commands and REST endpoints
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: park-milestone-core
+    title: Park/Unpark core data model — Parked status, parked_at field, compute_status priority
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: park-milestone-ui
+    title: Park/Unpark UI — three-section milestones page, filter from Horizon
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

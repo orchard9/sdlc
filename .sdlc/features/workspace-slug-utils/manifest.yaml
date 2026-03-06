@@ -1,0 +1,163 @@
+slug: workspace-slug-utils
+title: Extract titleToSlug to utils/slug.ts — eliminate 4-copy duplication
+phase: released
+created_at: 2026-03-04T22:47:41.663086Z
+updated_at: 2026-03-05T00:03:07.154522Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/spec.md
+  created_at: 2026-03-04T23:34:14.880728Z
+  approved_at: 2026-03-04T23:34:18.801448Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/design.md
+  created_at: 2026-03-04T23:34:36.573019Z
+  approved_at: 2026-03-04T23:34:36.582258Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/tasks.md
+  created_at: 2026-03-04T23:34:48.274100Z
+  approved_at: 2026-03-04T23:34:48.281013Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/qa-plan.md
+  created_at: 2026-03-04T23:35:02.888431Z
+  approved_at: 2026-03-04T23:35:02.896033Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/review.md
+  created_at: 2026-03-04T23:44:29.574473Z
+  approved_at: 2026-03-04T23:44:29.581880Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/audit.md
+  created_at: 2026-03-05T00:01:00.419720Z
+  approved_at: 2026-03-05T00:01:03.752600Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/workspace-slug-utils/qa-results.md
+  created_at: 2026-03-05T00:02:59.547899Z
+  approved_at: 2026-03-05T00:03:03.452876Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create frontend/src/lib/slug.ts with exported titleToSlug
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:25.990440Z
+  started_at: 2026-03-04T23:35:29.319633Z
+  completed_at: 2026-03-04T23:35:37.372994Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update NewIdeaModal.tsx to import from lib/slug
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:25.999315Z
+  started_at: 2026-03-04T23:35:37.382367Z
+  completed_at: 2026-03-04T23:36:10.427126Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update InvestigationPage.tsx to import from lib/slug
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:26.006583Z
+  started_at: 2026-03-04T23:36:10.433247Z
+  completed_at: 2026-03-04T23:36:39.092070Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update PonderPage.tsx to import from lib/slug
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:26.012435Z
+  started_at: 2026-03-04T23:36:39.153125Z
+  completed_at: 2026-03-04T23:37:10.276421Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update GuidelinePage.tsx to import from lib/slug
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:26.017311Z
+  started_at: 2026-03-04T23:37:10.282722Z
+  completed_at: 2026-03-04T23:37:50.568052Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Update EvolvePage.tsx to import from lib/slug
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:26.021952Z
+  started_at: 2026-03-04T23:37:56.697602Z
+  completed_at: 2026-03-04T23:38:22.101577Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Verify build passes
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:35:26.026219Z
+  started_at: 2026-03-04T23:38:22.364889Z
+  completed_at: 2026-03-04T23:44:06.897767Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:41.663086Z
+  exited: 2026-03-04T23:34:18.818151Z
+- phase: specified
+  entered: 2026-03-04T23:34:18.818151Z
+  exited: 2026-03-04T23:35:02.897780Z
+- phase: planned
+  entered: 2026-03-04T23:35:02.897780Z
+  exited: 2026-03-04T23:35:08.190148Z
+- phase: ready
+  entered: 2026-03-04T23:35:08.190148Z
+  exited: 2026-03-04T23:35:13.546384Z
+- phase: implementation
+  entered: 2026-03-04T23:35:13.546384Z
+  exited: 2026-03-04T23:44:29.588106Z
+- phase: review
+  entered: 2026-03-04T23:44:29.588106Z
+  exited: 2026-03-04T23:44:34.315464Z
+- phase: audit
+  entered: 2026-03-04T23:44:34.315464Z
+  exited: 2026-03-05T00:01:03.761809Z
+- phase: qa
+  entered: 2026-03-05T00:01:03.761809Z
+  exited: 2026-03-05T00:03:03.460133Z
+- phase: merge
+  entered: 2026-03-05T00:03:03.460133Z
+  exited: 2026-03-05T00:03:07.154522Z
+- phase: released
+  entered: 2026-03-05T00:03:07.154522Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -1,0 +1,145 @@
+slug: park-milestone-cli-api
+title: Park/Unpark CLI commands and REST endpoints
+phase: released
+created_at: 2026-03-04T06:05:17.868024Z
+updated_at: 2026-03-05T07:34:18.891736Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/spec.md
+  created_at: 2026-03-05T07:21:40.719199Z
+  approved_at: 2026-03-05T07:21:46.341982Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/design.md
+  created_at: 2026-03-05T07:22:07.471734Z
+  approved_at: 2026-03-05T07:22:07.478577Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/tasks.md
+  created_at: 2026-03-05T07:22:22.334386Z
+  approved_at: 2026-03-05T07:22:22.340153Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/qa-plan.md
+  created_at: 2026-03-05T07:22:40.313218Z
+  approved_at: 2026-03-05T07:22:40.322304Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/review.md
+  created_at: 2026-03-05T07:32:12.865001Z
+  approved_at: 2026-03-05T07:32:12.872907Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/audit.md
+  created_at: 2026-03-05T07:32:37.290155Z
+  approved_at: 2026-03-05T07:32:37.298303Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/park-milestone-cli-api/qa-results.md
+  created_at: 2026-03-05T07:34:13.039302Z
+  approved_at: 2026-03-05T07:34:13.048698Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add Parked variant and parked_at field to milestone core
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:56.142824Z
+  started_at: 2026-03-05T07:23:02.143354Z
+  completed_at: 2026-03-05T07:24:10.153302Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add park/unpark CLI subcommands
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:56.147389Z
+  started_at: 2026-03-05T07:24:13.776338Z
+  completed_at: 2026-03-05T07:26:57.423396Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add park/unpark REST endpoints
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:56.151779Z
+  started_at: 2026-03-05T07:27:01.054310Z
+  completed_at: 2026-03-05T07:28:13.728604Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update parallel_work to skip Parked milestones
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:56.155632Z
+  started_at: 2026-03-05T07:28:18.749768Z
+  completed_at: 2026-03-05T07:28:48.873932Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update guidance.md CLI reference table
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:56.159460Z
+  started_at: 2026-03-05T07:28:52.145229Z
+  completed_at: 2026-03-05T07:29:28.266186Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:05:17.868024Z
+  exited: 2026-03-05T07:21:46.344013Z
+- phase: specified
+  entered: 2026-03-05T07:21:46.344013Z
+  exited: 2026-03-05T07:22:40.324190Z
+- phase: planned
+  entered: 2026-03-05T07:22:40.324190Z
+  exited: 2026-03-05T07:22:46.126778Z
+- phase: ready
+  entered: 2026-03-05T07:22:46.126778Z
+  exited: 2026-03-05T07:22:51.646305Z
+- phase: implementation
+  entered: 2026-03-05T07:22:51.646305Z
+  exited: 2026-03-05T07:32:12.878270Z
+- phase: review
+  entered: 2026-03-05T07:32:12.878270Z
+  exited: 2026-03-05T07:32:18.548929Z
+- phase: audit
+  entered: 2026-03-05T07:32:18.548929Z
+  exited: 2026-03-05T07:32:37.303981Z
+- phase: qa
+  entered: 2026-03-05T07:32:37.303981Z
+  exited: 2026-03-05T07:34:13.054789Z
+- phase: merge
+  entered: 2026-03-05T07:34:13.054789Z
+  exited: 2026-03-05T07:34:18.891736Z
+- phase: released
+  entered: 2026-03-05T07:34:18.891736Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

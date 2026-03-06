@@ -1,0 +1,146 @@
+slug: spike-rest-routes
+title: Spike REST routes — list, detail, and promote endpoints
+description: REST routes at /api/spikes/* — GET list, GET detail with findings content, POST promote. Thin wrappers over sdlc_core::spikes, registered in the server router.
+phase: released
+created_at: 2026-03-04T17:51:51.605796Z
+updated_at: 2026-03-04T22:18:54.483113Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/spike-rest-routes/spec.md
+  created_at: 2026-03-04T22:10:19.582447Z
+  approved_at: 2026-03-04T22:10:25.904519Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/spike-rest-routes/design.md
+  created_at: 2026-03-04T22:11:07.757570Z
+  approved_at: 2026-03-04T22:11:12.096085Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/spike-rest-routes/tasks.md
+  created_at: 2026-03-04T22:11:33.883482Z
+  approved_at: 2026-03-04T22:11:37.369850Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/spike-rest-routes/qa-plan.md
+  created_at: 2026-03-04T22:11:56.007836Z
+  approved_at: 2026-03-04T22:11:58.495865Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/spike-rest-routes/review.md
+  created_at: 2026-03-04T22:17:25.703799Z
+  approved_at: 2026-03-04T22:17:28.733970Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/spike-rest-routes/audit.md
+  created_at: 2026-03-04T22:18:04.700925Z
+  approved_at: 2026-03-04T22:18:06.797294Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/spike-rest-routes/qa-results.md
+  created_at: 2026-03-04T22:18:40.740235Z
+  approved_at: 2026-03-04T22:18:43.876321Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Add crates/sdlc-server/src/routes/spikes.rs: GET /api/spikes (list), GET /api/spikes/:slug (detail + findings content)'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:15.339369Z
+  started_at: 2026-03-04T22:12:26.052847Z
+  completed_at: 2026-03-04T22:17:03.241112Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: 'Add POST /api/spikes/:slug/promote — body: { ponder_slug? } — returns { ponder_slug }'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:15.344719Z
+  started_at: 2026-03-04T22:17:03.248069Z
+  completed_at: 2026-03-04T22:17:03.252947Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: '[removed-scope] POST /api/spikes/:slug/reject-to-knowledge — removed; REJECT auto-files on list load, no explicit endpoint needed'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:15.349738Z
+  started_at: null
+  completed_at: 2026-03-04T21:58:37.894445Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register routes in server router and routes/mod.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:15.354571Z
+  started_at: 2026-03-04T22:17:03.259560Z
+  completed_at: 2026-03-04T22:17:03.264780Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: '[deferred] SSE SpikePromoted event — deferred; no consumer exists yet; add when an agent or UI panel actually subscribes'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:15.359025Z
+  started_at: null
+  completed_at: 2026-03-04T21:58:37.900995Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T17:51:51.605796Z
+  exited: 2026-03-04T22:10:25.906279Z
+- phase: specified
+  entered: 2026-03-04T22:10:25.906279Z
+  exited: 2026-03-04T22:11:58.497959Z
+- phase: planned
+  entered: 2026-03-04T22:11:58.497959Z
+  exited: 2026-03-04T22:12:05.034658Z
+- phase: ready
+  entered: 2026-03-04T22:12:05.034658Z
+  exited: 2026-03-04T22:12:12.424642Z
+- phase: implementation
+  entered: 2026-03-04T22:12:12.424642Z
+  exited: 2026-03-04T22:17:28.739219Z
+- phase: review
+  entered: 2026-03-04T22:17:28.739219Z
+  exited: 2026-03-04T22:17:35.008185Z
+- phase: audit
+  entered: 2026-03-04T22:17:35.008185Z
+  exited: 2026-03-04T22:18:06.803431Z
+- phase: qa
+  entered: 2026-03-04T22:18:06.803431Z
+  exited: 2026-03-04T22:18:43.882175Z
+- phase: merge
+  entered: 2026-03-04T22:18:43.882175Z
+  exited: 2026-03-04T22:18:54.483113Z
+- phase: released
+  entered: 2026-03-04T22:18:54.483113Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

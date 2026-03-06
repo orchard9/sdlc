@@ -1,0 +1,73 @@
+slug: endpoint-fallback-engine
+title: Endpoint fallback engine — spawn_agent_run retry loop, cooldown state tracking, error detection, SSE events, REST API
+phase: draft
+created_at: 2026-03-04T06:06:58.113818Z
+updated_at: 2026-03-04T06:06:58.113818Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/endpoint-fallback-engine/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:06:58.113818Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

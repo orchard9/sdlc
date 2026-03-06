@@ -1,0 +1,1 @@
+Create a spike flow that behaves similar to ponder — it spends some time working through the spike while sharing results in a conversation/chat interface. The user can watch and interact as it goes. Then, whenever the user is satisfied, they adopt, adapt, or reject it directly from the UI.

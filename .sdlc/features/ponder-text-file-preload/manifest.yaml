@@ -1,0 +1,163 @@
+slug: ponder-text-file-preload
+title: Text file preload in NewIdeaModal — attach .md, .html, .svg, and code files at ponder creation
+phase: released
+created_at: 2026-03-04T06:06:04.037920Z
+updated_at: 2026-03-04T23:44:41.929145Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/spec.md
+  created_at: 2026-03-04T23:34:52.447153Z
+  approved_at: 2026-03-04T23:34:57.605580Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/design.md
+  created_at: 2026-03-04T23:36:46.366620Z
+  approved_at: 2026-03-04T23:36:51.997700Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/tasks.md
+  created_at: 2026-03-04T23:37:19.185584Z
+  approved_at: 2026-03-04T23:37:23.295909Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/qa-plan.md
+  created_at: 2026-03-04T23:37:56.697467Z
+  approved_at: 2026-03-04T23:37:59.291478Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/review.md
+  created_at: 2026-03-04T23:41:34.510029Z
+  approved_at: 2026-03-04T23:42:14.884648Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/audit.md
+  created_at: 2026-03-04T23:43:33.577778Z
+  approved_at: 2026-03-04T23:43:36.904045Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/ponder-text-file-preload/qa-results.md
+  created_at: 2026-03-04T23:44:34.325928Z
+  approved_at: 2026-03-04T23:44:37.362760Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add file attachment state and helpers to NewIdeaModal
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:16.623272Z
+  started_at: 2026-03-04T23:38:26.019712Z
+  completed_at: 2026-03-04T23:40:39.617477Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add file input and drop zone UI
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:16.634068Z
+  started_at: 2026-03-04T23:40:39.627722Z
+  completed_at: 2026-03-04T23:40:39.634043Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Render attached file chips
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:16.661638Z
+  started_at: 2026-03-04T23:40:39.640987Z
+  completed_at: 2026-03-04T23:40:39.646188Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Capture files and update seed message in handleSubmit
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:16.719391Z
+  started_at: 2026-03-04T23:40:39.653386Z
+  completed_at: 2026-03-04T23:40:39.658543Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Verify zero-regression when no files are attached
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:16.804150Z
+  started_at: 2026-03-04T23:40:39.665178Z
+  completed_at: 2026-03-04T23:40:39.670757Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Extract formatBytes to @/lib/utils to eliminate duplication with WorkspacePanel
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:41:31.497190Z
+  started_at: 2026-03-04T23:41:42.252803Z
+  completed_at: 2026-03-04T23:42:01.458394Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: 'Server-side: sanitize filename in capture_content to prevent path traversal (ponder.rs)'
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:43:02.304695Z
+  started_at: 2026-03-04T23:43:11.530805Z
+  completed_at: 2026-03-04T23:43:11.536145Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:06:04.037920Z
+  exited: 2026-03-04T23:34:57.607067Z
+- phase: specified
+  entered: 2026-03-04T23:34:57.607067Z
+  exited: 2026-03-04T23:37:59.293479Z
+- phase: planned
+  entered: 2026-03-04T23:37:59.293479Z
+  exited: 2026-03-04T23:38:02.958001Z
+- phase: ready
+  entered: 2026-03-04T23:38:02.958001Z
+  exited: 2026-03-04T23:38:08.137994Z
+- phase: implementation
+  entered: 2026-03-04T23:38:08.137994Z
+  exited: 2026-03-04T23:42:14.915030Z
+- phase: review
+  entered: 2026-03-04T23:42:14.915030Z
+  exited: 2026-03-04T23:42:20.100635Z
+- phase: audit
+  entered: 2026-03-04T23:42:20.100635Z
+  exited: 2026-03-04T23:43:36.909034Z
+- phase: qa
+  entered: 2026-03-04T23:43:36.909034Z
+  exited: 2026-03-04T23:44:37.415902Z
+- phase: merge
+  entered: 2026-03-04T23:44:37.415902Z
+  exited: 2026-03-04T23:44:41.929145Z
+- phase: released
+  entered: 2026-03-04T23:44:41.929145Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

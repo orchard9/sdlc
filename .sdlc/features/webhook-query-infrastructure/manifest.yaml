@@ -1,0 +1,181 @@
+slug: webhook-query-infrastructure
+title: Webhook Query Infrastructure — store_only routes, secret verification, and payload query API
+phase: released
+created_at: 2026-03-05T06:24:41.433207Z
+updated_at: 2026-03-05T08:01:42.084666Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/spec.md
+  created_at: 2026-03-05T07:29:15.180970Z
+  approved_at: 2026-03-05T07:29:15.189889Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/design.md
+  created_at: 2026-03-05T07:29:43.247002Z
+  approved_at: 2026-03-05T07:29:43.256940Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/tasks.md
+  created_at: 2026-03-05T07:29:57.958461Z
+  approved_at: 2026-03-05T07:29:57.967790Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/qa-plan.md
+  created_at: 2026-03-05T07:30:12.018096Z
+  approved_at: 2026-03-05T07:30:12.027647Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/review.md
+  created_at: 2026-03-05T08:00:40.489605Z
+  approved_at: 2026-03-05T08:00:40.497746Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/audit.md
+  created_at: 2026-03-05T08:01:20.254848Z
+  approved_at: 2026-03-05T08:01:20.263353Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/webhook-query-infrastructure/qa-results.md
+  created_at: 2026-03-05T08:01:38.727272Z
+  approved_at: 2026-03-05T08:01:38.735145Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Add secret_token: Option<String> and store_only: bool to WebhookRoute in webhook.rs with builder methods with_secret_token() and with_store_only()'
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.497264Z
+  started_at: 2026-03-05T07:59:28.626187Z
+  completed_at: 2026-03-05T07:59:28.633410Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add query_webhooks(path, since, until, limit) to OrchestratorBackend trait in backend.rs — returns Vec<WebhookPayload> ordered by received_at ASC
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.501987Z
+  started_at: 2026-03-05T07:59:28.640274Z
+  completed_at: 2026-03-05T07:59:28.646108Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement query_webhooks for redb in db.rs — scan WEBHOOKS table, filter by route_path + time range, sort ASC, truncate to limit
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.506246Z
+  started_at: 2026-03-05T07:59:28.653892Z
+  completed_at: 2026-03-05T07:59:28.659105Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Implement query_webhooks for postgres in pg_orchestrator.rs using sqlx::query() runtime API
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.511461Z
+  started_at: 2026-03-05T07:59:28.665737Z
+  completed_at: 2026-03-05T07:59:28.671016Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Write migration 004_webhook_query.sql — ADD COLUMN secret_token TEXT, store_only BOOLEAN DEFAULT false; CREATE INDEX on (route_path, received_at)
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.516398Z
+  started_at: 2026-03-05T07:59:28.677502Z
+  completed_at: 2026-03-05T07:59:28.683302Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Update dispatch_webhook in orchestrate.rs — skip dispatch and return Ok(()) early if route.store_only
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.521037Z
+  started_at: 2026-03-05T07:59:28.690489Z
+  completed_at: 2026-03-05T07:59:28.696750Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Add secret verification to receive_webhook in routes/webhooks.rs — check X-Telegram-Bot-Api-Secret-Token or X-Webhook-Secret headers; reject 403 on mismatch
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.525381Z
+  started_at: 2026-03-05T07:59:28.704415Z
+  completed_at: 2026-03-05T07:59:28.709873Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Add GET /api/webhooks/{route}/data with WebhookQueryParams (since, until, limit) in routes/webhooks.rs — returns [{id, received_at, content_type, body}]; register in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.530116Z
+  started_at: 2026-03-05T07:59:28.716542Z
+  completed_at: 2026-03-05T07:59:28.722297Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Update RegisterRouteBody in routes/orchestrator.rs to accept secret_token and store_only; redact secret_token ('***') in list responses
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:08.534818Z
+  started_at: 2026-03-05T07:59:28.729210Z
+  completed_at: 2026-03-05T07:59:28.734192Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:24:41.433207Z
+  exited: 2026-03-05T07:29:15.191483Z
+- phase: specified
+  entered: 2026-03-05T07:29:15.191483Z
+  exited: 2026-03-05T07:30:12.029548Z
+- phase: planned
+  entered: 2026-03-05T07:30:12.029548Z
+  exited: 2026-03-05T07:30:15.384513Z
+- phase: ready
+  entered: 2026-03-05T07:30:15.384513Z
+  exited: 2026-03-05T07:30:16.808345Z
+- phase: implementation
+  entered: 2026-03-05T07:30:16.808345Z
+  exited: 2026-03-05T08:00:40.503965Z
+- phase: review
+  entered: 2026-03-05T08:00:40.503965Z
+  exited: 2026-03-05T08:00:44.902565Z
+- phase: audit
+  entered: 2026-03-05T08:00:44.902565Z
+  exited: 2026-03-05T08:01:20.268416Z
+- phase: qa
+  entered: 2026-03-05T08:01:20.268416Z
+  exited: 2026-03-05T08:01:38.740083Z
+- phase: merge
+  entered: 2026-03-05T08:01:38.740083Z
+  exited: 2026-03-05T08:01:42.084666Z
+- phase: released
+  entered: 2026-03-05T08:01:42.084666Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

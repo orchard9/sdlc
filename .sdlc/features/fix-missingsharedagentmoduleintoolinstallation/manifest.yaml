@@ -1,0 +1,129 @@
+slug: fix-missingsharedagentmoduleintoolinstallation
+title: Fix Missingsharedagentmoduleintoolinstallation
+description: |-
+  Root cause: `agent.ts` was added to the `_shared/` library in this repo but was not included in the `sdlc tool sync` / installation artifact that gets distributed to consumer projects, so consumer projects have the updated `dev-driver/tool.ts` that references it but not the file itself.
+
+  Problem: The dev-driver tool at `/Users/xist/.../buildbot/.sdlc/tools/dev-driver/tool.ts` imports `../_shared/agent.ts` which does not exist in that project's `_shared/` directory. This causes a hard crash on every `GET /api/tools` request, making the tools list endpoint completely broken for that user.
+
+  Original report:
+  2026-03-04T22:58:37.170637Z  INFO → method=GET path=/api/tools
+  node:internal/modules/cjs/loader:1421
+    const err = new Error(message);
+                ^
+
+  Error: Cannot find module '../_shared/agent.ts'
+  Require stack:
+  - /Users/xist/dev/MasqMain/subs/LivelyVideo/buildbot/.sdlc/tools/dev-driver/tool.ts
+      at node:internal/modules/cjs/loader:1421:15
+      at nextResolveSimple (/Users/xist/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1004)
+      at /Users/xist/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:3:2630
+      at /Users/xist/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:3:1542
+      at resolveTsPaths (/Users/xist/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:4:760)
+      at /Users/xist/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-D46fvsV_.cjs:4:1102
+      at m._resolveFilename (file:///Users/xist/.npm/_npx/fd45a72a545557e9/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+      at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+      at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+      at Module._load (node:internal/modules/cjs/loader:1227:37) {
+    code: 'MODULE_NOT_FOUND',
+    requireStack: [
+      '/Users/xist/dev/MasqMain/subs/LivelyVideo/buildbot/.sdlc/tools/dev-driver/tool.ts'
+    ]
+  }
+phase: released
+created_at: 2026-03-04T23:32:32.517140Z
+updated_at: 2026-03-04T23:43:17.202113Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/spec.md
+  created_at: 2026-03-04T23:34:32.337840Z
+  approved_at: 2026-03-04T23:34:36.636077Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/design.md
+  created_at: 2026-03-04T23:34:50.114268Z
+  approved_at: 2026-03-04T23:34:52.505896Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/tasks.md
+  created_at: 2026-03-04T23:35:06.907155Z
+  approved_at: 2026-03-04T23:35:09.215314Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/qa-plan.md
+  created_at: 2026-03-04T23:35:19.829383Z
+  approved_at: 2026-03-04T23:35:24.465134Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/review.md
+  created_at: 2026-03-04T23:41:01.372631Z
+  approved_at: 2026-03-04T23:41:04.755224Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/audit.md
+  created_at: 2026-03-04T23:41:30.634431Z
+  approved_at: 2026-03-04T23:41:33.081848Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-missingsharedagentmoduleintoolinstallation/qa-results.md
+  created_at: 2026-03-04T23:43:06.075928Z
+  approved_at: 2026-03-04T23:43:08.889042Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T23:32:32.517140Z
+  exited: 2026-03-04T23:34:36.638378Z
+- phase: specified
+  entered: 2026-03-04T23:34:36.638378Z
+  exited: 2026-03-04T23:35:24.468349Z
+- phase: planned
+  entered: 2026-03-04T23:35:24.468349Z
+  exited: 2026-03-04T23:35:31.770228Z
+- phase: ready
+  entered: 2026-03-04T23:35:31.770228Z
+  exited: 2026-03-04T23:35:37.751598Z
+- phase: implementation
+  entered: 2026-03-04T23:35:37.751598Z
+  exited: 2026-03-04T23:41:04.757462Z
+- phase: review
+  entered: 2026-03-04T23:41:04.757462Z
+  exited: 2026-03-04T23:41:10.016963Z
+- phase: audit
+  entered: 2026-03-04T23:41:10.016963Z
+  exited: 2026-03-04T23:41:33.083630Z
+- phase: qa
+  entered: 2026-03-04T23:41:33.083630Z
+  exited: 2026-03-04T23:43:08.890847Z
+- phase: merge
+  entered: 2026-03-04T23:43:08.890847Z
+  exited: 2026-03-04T23:43:17.202113Z
+- phase: released
+  entered: 2026-03-04T23:43:17.202113Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

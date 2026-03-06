@@ -1,0 +1,107 @@
+slug: fix-humanuatpasswithtasksskipsrelease
+title: Fix Humanuatpasswithtasksskipsrelease
+description: |-
+  Root cause: In submit_milestone_uat_human (runs.rs:1235), the release guard checks `verdict == UatVerdict::Pass` but does not include `UatVerdict::PassWithTasks`, so 'Pass with Tasks' submissions save the run record but never set released_at on the milestone.
+
+  Problem: When submitting a manual UAT with verdict 'Pass with Tasks', the milestone stays in Verifying status instead of advancing to Released. The UI shows the milestone stuck — it doesn't archive/refresh. Only an exact 'Pass' verdict triggers milestone.release().
+
+  Original report:
+  when I "Submit Manually" a UAT the milestones doesn't move to archive/refresh, it still stays there
+phase: released
+created_at: 2026-03-05T06:04:16.319907Z
+updated_at: 2026-03-05T06:09:33.197159Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/spec.md
+  created_at: 2026-03-05T06:04:57.807649Z
+  approved_at: 2026-03-05T06:05:00.477296Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/design.md
+  created_at: 2026-03-05T06:05:12.701616Z
+  approved_at: 2026-03-05T06:05:14.904928Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/tasks.md
+  created_at: 2026-03-05T06:05:24.325631Z
+  approved_at: 2026-03-05T06:05:26.726561Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/qa-plan.md
+  created_at: 2026-03-05T06:05:31.891633Z
+  approved_at: 2026-03-05T06:05:34.076734Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/review.md
+  created_at: 2026-03-05T06:08:56.145035Z
+  approved_at: 2026-03-05T06:08:58.536036Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/audit.md
+  created_at: 2026-03-05T06:09:13.027833Z
+  approved_at: 2026-03-05T06:09:15.467200Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-humanuatpasswithtasksskipsrelease/qa-results.md
+  created_at: 2026-03-05T06:09:23.385266Z
+  approved_at: 2026-03-05T06:09:25.566236Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:04:16.319907Z
+  exited: 2026-03-05T06:05:00.478928Z
+- phase: specified
+  entered: 2026-03-05T06:05:00.478928Z
+  exited: 2026-03-05T06:05:34.078701Z
+- phase: planned
+  entered: 2026-03-05T06:05:34.078701Z
+  exited: 2026-03-05T06:05:46.139203Z
+- phase: ready
+  entered: 2026-03-05T06:05:46.139203Z
+  exited: 2026-03-05T06:05:46.146531Z
+- phase: implementation
+  entered: 2026-03-05T06:05:46.146531Z
+  exited: 2026-03-05T06:08:58.537666Z
+- phase: review
+  entered: 2026-03-05T06:08:58.537666Z
+  exited: 2026-03-05T06:09:04.557076Z
+- phase: audit
+  entered: 2026-03-05T06:09:04.557076Z
+  exited: 2026-03-05T06:09:15.468853Z
+- phase: qa
+  entered: 2026-03-05T06:09:15.468853Z
+  exited: 2026-03-05T06:09:25.568061Z
+- phase: merge
+  entered: 2026-03-05T06:09:25.568061Z
+  exited: 2026-03-05T06:09:33.197159Z
+- phase: released
+  entered: 2026-03-05T06:09:33.197159Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: chat-bar-pinning
+    title: 'InputBar shrink-0: chat bar always anchors to the bottom'
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: layout-dead-code-cleanup
+    title: Delete BottomTabBar dead code and fix AgentPanelFab vestigial offset
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: tablet-breakpoint-shift
+    title: Shift layout breakpoint md→lg so tablet gets the mobile UX
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

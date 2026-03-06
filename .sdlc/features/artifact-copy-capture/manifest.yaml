@@ -1,0 +1,154 @@
+slug: artifact-copy-capture
+title: Artifact and Dialogue Copy & Screenshot
+phase: released
+created_at: 2026-03-05T03:38:55.994872Z
+updated_at: 2026-03-05T03:50:32.874515Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/spec.md
+  created_at: 2026-03-05T03:41:16.686071Z
+  approved_at: 2026-03-05T03:41:21.581675Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/design.md
+  created_at: 2026-03-05T03:44:13.153771Z
+  approved_at: 2026-03-05T03:44:26.050384Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/tasks.md
+  created_at: 2026-03-05T03:45:09.255583Z
+  approved_at: 2026-03-05T03:45:14.101686Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/qa-plan.md
+  created_at: 2026-03-05T03:45:37.863766Z
+  approved_at: 2026-03-05T03:45:42.040013Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/review.md
+  created_at: 2026-03-05T03:48:16.293648Z
+  approved_at: 2026-03-05T03:48:19.434895Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/audit.md
+  created_at: 2026-03-05T03:48:44.603222Z
+  approved_at: 2026-03-05T03:48:47.846790Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/artifact-copy-capture/qa-results.md
+  created_at: 2026-03-05T03:50:27.440625Z
+  approved_at: 2026-03-05T03:50:31.083735Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add label prop to CopyButton — extend CopyButton.tsx with optional label string rendered next to the icon; backward compatible with existing icon-only usages
+  description: null
+  status: completed
+  created_at: 2026-03-05T03:39:06.111162Z
+  started_at: null
+  completed_at: 2026-03-05T03:46:02.956333Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create CaptureButton component — html2canvas dynamic import; mode=copy (ClipboardItem) and mode=download (anchor click); copy falls back to download if clipboard write denied; idle/capturing/copied/failed states
+  description: null
+  status: completed
+  created_at: 2026-03-05T03:39:06.117850Z
+  started_at: null
+  completed_at: 2026-03-05T03:46:39.044752Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add copy/screenshot button cluster to WorkspacePanel artifact header — [MD] [IMG] [↓] buttons when artifact is active; ref on content div for capture; hide IMG and download for HTML artifacts
+  description: null
+  status: completed
+  created_at: 2026-03-05T03:39:06.124046Z
+  started_at: null
+  completed_at: 2026-03-05T03:47:33.470176Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add hover-reveal copy button to PartnerMessage dialogue bubbles — group wrapper, absolute-positioned CopyButton, opacity-0 group-hover:opacity-100; copy the message text content
+  description: null
+  status: completed
+  created_at: 2026-03-05T03:39:06.129694Z
+  started_at: null
+  completed_at: 2026-03-05T03:47:48.848720Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Mobile fallback for dialogue copy — detect touch capability; on touch devices render copy icon always visible instead of hover-reveal
+  description: null
+  status: completed
+  created_at: 2026-03-05T03:39:06.135761Z
+  started_at: null
+  completed_at: 2026-03-05T03:47:48.857486Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Graceful HTML artifact handling — hide IMG and download buttons for iframe-rendered HTML artifacts; document as known limitation in code comment
+  description: null
+  status: completed
+  created_at: 2026-03-05T03:39:06.141625Z
+  started_at: null
+  completed_at: 2026-03-05T03:47:48.865391Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T03:38:55.994872Z
+  exited: 2026-03-05T03:41:21.583585Z
+- phase: specified
+  entered: 2026-03-05T03:41:21.583585Z
+  exited: 2026-03-05T03:45:42.041570Z
+- phase: planned
+  entered: 2026-03-05T03:45:42.041570Z
+  exited: 2026-03-05T03:45:44.892637Z
+- phase: ready
+  entered: 2026-03-05T03:45:44.892637Z
+  exited: 2026-03-05T03:45:47.373914Z
+- phase: implementation
+  entered: 2026-03-05T03:45:47.373914Z
+  exited: 2026-03-05T03:48:19.440704Z
+- phase: review
+  entered: 2026-03-05T03:48:19.440704Z
+  exited: 2026-03-05T03:48:21.131532Z
+- phase: audit
+  entered: 2026-03-05T03:48:21.131532Z
+  exited: 2026-03-05T03:48:47.851510Z
+- phase: qa
+  entered: 2026-03-05T03:48:47.851510Z
+  exited: 2026-03-05T03:50:31.090477Z
+- phase: merge
+  entered: 2026-03-05T03:50:31.090477Z
+  exited: 2026-03-05T03:50:32.874515Z
+- phase: released
+  entered: 2026-03-05T03:50:32.874515Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

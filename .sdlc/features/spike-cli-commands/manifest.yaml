@@ -1,0 +1,137 @@
+slug: spike-cli-commands
+title: Spike CLI — list, show, promote subcommands
+description: sdlc spike subcommand with list | show | promote actions. Consumes sdlc_core::spikes. Tabular list output, full findings print, promote prints ponder slug with next-step hint.
+phase: released
+created_at: 2026-03-04T17:51:51.605782Z
+updated_at: 2026-03-04T22:16:33.300580Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/spike-cli-commands/spec.md
+  created_at: 2026-03-04T22:10:02.906807Z
+  approved_at: 2026-03-04T22:10:04.374147Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/spike-cli-commands/design.md
+  created_at: 2026-03-04T22:10:29.328130Z
+  approved_at: 2026-03-04T22:10:29.336015Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/spike-cli-commands/tasks.md
+  created_at: 2026-03-04T22:10:46.425173Z
+  approved_at: 2026-03-04T22:10:46.432573Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/spike-cli-commands/qa-plan.md
+  created_at: 2026-03-04T22:11:01.227369Z
+  approved_at: 2026-03-04T22:11:01.235443Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/spike-cli-commands/review.md
+  created_at: 2026-03-04T22:14:01.617620Z
+  approved_at: 2026-03-04T22:14:01.625595Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/spike-cli-commands/audit.md
+  created_at: 2026-03-04T22:14:22.922582Z
+  approved_at: 2026-03-04T22:14:22.929685Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/spike-cli-commands/qa-results.md
+  created_at: 2026-03-04T22:16:29.946853Z
+  approved_at: 2026-03-04T22:16:29.960994Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Add crates/sdlc-cli/src/cmd/spike.rs with spike list subcommand — tabular: slug | verdict | date | title'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:10.055342Z
+  started_at: 2026-03-04T22:11:08.883209Z
+  completed_at: 2026-03-04T22:13:40.386824Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add spike show <slug> subcommand — print full findings.md content
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:10.060443Z
+  started_at: 2026-03-04T22:13:40.397178Z
+  completed_at: 2026-03-04T22:13:40.403102Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add spike promote <slug> [--as <ponder-slug>] subcommand — calls promote_to_ponder, prints ponder slug, shows next-step hint
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:10.065502Z
+  started_at: 2026-03-04T22:13:40.410193Z
+  completed_at: 2026-03-04T22:13:40.415485Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register spike subcommand in crates/sdlc-cli/src/main.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:10.070197Z
+  started_at: 2026-03-04T22:13:40.422139Z
+  completed_at: 2026-03-04T22:13:40.427125Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T17:51:51.605782Z
+  exited: 2026-03-04T22:10:04.376063Z
+- phase: specified
+  entered: 2026-03-04T22:10:04.376063Z
+  exited: 2026-03-04T22:11:01.236886Z
+- phase: planned
+  entered: 2026-03-04T22:11:01.236886Z
+  exited: 2026-03-04T22:11:04.541163Z
+- phase: ready
+  entered: 2026-03-04T22:11:04.541163Z
+  exited: 2026-03-04T22:11:04.551226Z
+- phase: implementation
+  entered: 2026-03-04T22:11:04.551226Z
+  exited: 2026-03-04T22:14:01.630875Z
+- phase: review
+  entered: 2026-03-04T22:14:01.630875Z
+  exited: 2026-03-04T22:14:05.487418Z
+- phase: audit
+  entered: 2026-03-04T22:14:05.487418Z
+  exited: 2026-03-04T22:14:22.933601Z
+- phase: qa
+  entered: 2026-03-04T22:14:22.933601Z
+  exited: 2026-03-04T22:16:29.970885Z
+- phase: merge
+  entered: 2026-03-04T22:16:29.970885Z
+  exited: 2026-03-04T22:16:33.300580Z
+- phase: released
+  entered: 2026-03-04T22:16:33.300580Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

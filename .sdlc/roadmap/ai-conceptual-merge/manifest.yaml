@@ -1,0 +1,10 @@
+slug: ai-conceptual-merge
+title: AI-Powered Conceptual Merge with Acceptance Re-run
+status: exploring
+created_at: 2026-03-05T03:46:05.307256Z
+updated_at: 2026-03-05T03:46:53.736576Z
+sessions: 1
+orientation:
+  current: Novel capability proposed with real-world validation — Xist has done AI conceptual merges manually
+  next: 'Define the agent''s context package: what exactly goes in, what comes out, how is it triggered'
+  commit: 'Skill spec for AI conceptual merge: inputs, resolution protocol, acceptance re-run contract'

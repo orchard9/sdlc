@@ -1,0 +1,11 @@
+slug: v40-workspace-ui-unification
+title: Workspace UI Unification — shared shell, dialogue, and creation components
+features:
+- workspace-slug-utils
+- workspace-shell-component
+- workspace-panel-slot-refactor
+- unified-dialogue-panel
+- create-workspace-modal
+created_at: 2026-03-04T22:47:35.750197Z
+updated_at: 2026-03-04T22:47:48.556291Z
+schema_version: 1

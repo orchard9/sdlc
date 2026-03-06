@@ -1,0 +1,16 @@
+partners:
+- name: Priya Nair
+  role: State machine correctness, failure mode analysis
+  context: Distributed systems engineer — models failure modes at boundaries
+  agent: priya-nair
+  recruited_at: 2026-03-04T06:09:26.138578Z
+- name: Dan Reeves
+  role: Systems minimalist — challenge new primitives
+  context: Questions every new primitive — asks if existing mechanisms suffice
+  agent: dan-reeves
+  recruited_at: 2026-03-04T06:09:27.475699Z
+- name: Dana Cho
+  role: Product skeptic — scope and value check
+  context: Former Palantir/Salesforce — challenges every feature against the critical path
+  agent: dana-cho
+  recruited_at: 2026-03-04T06:09:28.486711Z

@@ -1,0 +1,157 @@
+slug: ponder-binary-image-support
+title: Binary image upload and render — multipart upload endpoint, file serve route, and image rendering in workspace
+phase: implementation
+created_at: 2026-03-04T06:06:04.717708Z
+updated_at: 2026-03-04T23:37:58.475910Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ponder-binary-image-support/spec.md
+  created_at: 2026-03-04T23:35:07.800290Z
+  approved_at: 2026-03-04T23:35:17.092150Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/ponder-binary-image-support/design.md
+  created_at: 2026-03-04T23:36:10.011638Z
+  approved_at: 2026-03-04T23:36:15.528478Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/ponder-binary-image-support/tasks.md
+  created_at: 2026-03-04T23:36:46.569420Z
+  approved_at: 2026-03-04T23:36:52.130358Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/ponder-binary-image-support/qa-plan.md
+  created_at: 2026-03-04T23:37:26.009064Z
+  approved_at: 2026-03-04T23:37:31.277406Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/ponder-binary-image-support/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/ponder-binary-image-support/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/ponder-binary-image-support/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add ponder_media_dir path helper to paths.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.709263Z
+  started_at: 2026-03-04T23:38:11.371472Z
+  completed_at: 2026-03-04T23:39:31.616996Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Enable multipart feature in axum dependency
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.728712Z
+  started_at: 2026-03-04T23:39:31.623964Z
+  completed_at: 2026-03-04T23:40:15.874411Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement ponder_mime_for_ext helper in roadmap.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.779702Z
+  started_at: 2026-03-04T23:40:15.880869Z
+  completed_at: 2026-03-04T23:42:29.107743Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Implement upload_ponder_media handler
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.812573Z
+  started_at: 2026-03-04T23:42:29.114773Z
+  completed_at: 2026-03-04T23:42:32.221002Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Implement serve_ponder_media handler
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.837850Z
+  started_at: 2026-03-04T23:42:32.229018Z
+  completed_at: 2026-03-04T23:42:34.643756Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Register upload and serve routes in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.856309Z
+  started_at: 2026-03-04T23:42:34.650672Z
+  completed_at: 2026-03-04T23:42:55.130058Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: 'Frontend: image detection and rendering in WorkspacePanel'
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:06.895029Z
+  started_at: 2026-03-04T23:42:55.138351Z
+  completed_at: 2026-03-04T23:44:10.052572Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Run tests and verify build
+  description: null
+  status: in_progress
+  created_at: 2026-03-04T23:38:06.914175Z
+  started_at: 2026-03-04T23:44:10.061364Z
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:06:04.717708Z
+  exited: 2026-03-04T23:35:17.094409Z
+- phase: specified
+  entered: 2026-03-04T23:35:17.094409Z
+  exited: 2026-03-04T23:37:31.311362Z
+- phase: planned
+  entered: 2026-03-04T23:37:31.311362Z
+  exited: 2026-03-04T23:37:50.568065Z
+- phase: ready
+  entered: 2026-03-04T23:37:50.568065Z
+  exited: 2026-03-04T23:37:58.475910Z
+- phase: implementation
+  entered: 2026-03-04T23:37:58.475910Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

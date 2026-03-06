@@ -1,0 +1,10 @@
+slug: v39-slack-bot-tool
+title: Slack bot with context-windowed capture for multi-project feedback routing
+vision: Any team member can @mention the bot in any Slack channel to instantly create a pre-contextualized feedback thread in the right sdlc project — the bot reads the last 100 messages, resolves usernames, renders them as markdown, and POSTs the full context to the configured project webhook. No form, no copy-paste, no lost conversation context. Multi-project routing via config.yaml with Block Kit disambiguation for ambiguous cases. Runs via HTTP Events API using existing sdlc tunnel for dev.
+features:
+- slack-bot-core
+- slack-context-capture
+- slack-feedback-endpoint
+created_at: 2026-03-04T22:46:37.137203Z
+updated_at: 2026-03-04T22:46:47.772072Z
+schema_version: 1

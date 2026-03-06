@@ -1,0 +1,191 @@
+slug: fleet-management-api
+title: Hub API endpoints for fleet listing, provisioning, and repo import
+description: Server endpoints for fleet discovery (k8s API), repo listing (Gitea API), instance provisioning (Woodpecker trigger), and external repo import
+phase: released
+created_at: 2026-03-05T06:55:30.343555Z
+updated_at: 2026-03-05T19:09:04.713235Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-management-api/spec.md
+  created_at: 2026-03-05T08:32:33.366070Z
+  approved_at: 2026-03-05T08:32:39.896893Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fleet-management-api/design.md
+  created_at: 2026-03-05T08:33:27.304883Z
+  approved_at: 2026-03-05T08:33:30.110184Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fleet-management-api/tasks.md
+  created_at: 2026-03-05T08:33:51.358817Z
+  approved_at: 2026-03-05T08:33:53.953012Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fleet-management-api/qa-plan.md
+  created_at: 2026-03-05T08:34:15.788029Z
+  approved_at: 2026-03-05T08:34:18.752937Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fleet-management-api/review.md
+  created_at: 2026-03-05T08:46:03.217980Z
+  approved_at: 2026-03-05T08:46:06.334716Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fleet-management-api/audit.md
+  created_at: 2026-03-05T08:47:24.962721Z
+  approved_at: 2026-03-05T08:47:28.235793Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fleet-management-api/qa-results.md
+  created_at: 2026-03-05T08:49:25.013692Z
+  approved_at: 2026-03-05T08:49:29.235451Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: GET /api/hub/fleet — query k8s API to list sdlc-* namespaces with deployment status, pod health, creation timestamp
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.376347Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:28.043321Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: GET /api/hub/repos — call Gitea API to list all orchard9 org repos
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.382567Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:28.538586Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: GET /api/hub/available — diff fleet vs repos to return repos without running instances
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.388204Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:29.103006Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: POST /api/hub/provision — trigger fleet-reconcile Woodpecker pipeline for a specific repo slug
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.394234Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:29.562332Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: POST /api/hub/import — call Gitea migrate API to import external repo then trigger provision
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.400278Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:30.479210Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Wire Gitea and Woodpecker API tokens into hub deployment as env vars from k8s secrets
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.406345Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:30.994167Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: ServiceAccount + RBAC for hub pod — read-only access to namespaces and deployments
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:26.412003Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:31.182633Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] Service token auth bypass — allow machine-to-machine API access with bearer tokens alongside oauth2-proxy browser sessions'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:41.527515Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:31.813032Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Namespace filter — exclude sdlc-tls and non-instance sdlc-* namespaces from fleet listing'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:41.533945Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:32.107696Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: '[user-gap] Fleet-wide agent status endpoint — GET /api/hub/agents returning aggregate active runs across all instances'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:41.539303Z
+  started_at: null
+  completed_at: 2026-03-05T08:45:32.389989Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:55:30.343555Z
+  exited: 2026-03-05T08:32:39.900862Z
+- phase: specified
+  entered: 2026-03-05T08:32:39.900862Z
+  exited: 2026-03-05T08:34:18.754613Z
+- phase: planned
+  entered: 2026-03-05T08:34:18.754613Z
+  exited: 2026-03-05T08:34:34.236516Z
+- phase: ready
+  entered: 2026-03-05T08:34:34.236516Z
+  exited: 2026-03-05T08:34:42.825499Z
+- phase: implementation
+  entered: 2026-03-05T08:34:42.825499Z
+  exited: 2026-03-05T08:46:06.339742Z
+- phase: review
+  entered: 2026-03-05T08:46:06.339742Z
+  exited: 2026-03-05T08:46:56.643669Z
+- phase: audit
+  entered: 2026-03-05T08:46:56.643669Z
+  exited: 2026-03-05T08:47:28.244901Z
+- phase: qa
+  entered: 2026-03-05T08:47:28.244901Z
+  exited: 2026-03-05T08:49:29.240470Z
+- phase: merge
+  entered: 2026-03-05T08:49:29.240470Z
+  exited: 2026-03-05T08:49:39.733619Z
+- phase: released
+  entered: 2026-03-05T08:49:39.733619Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

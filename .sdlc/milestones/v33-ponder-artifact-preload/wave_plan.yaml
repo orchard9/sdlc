@@ -1,0 +1,10 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: ponder-binary-image-support
+    title: Binary image upload and render — multipart upload endpoint, file serve route, and image rendering in workspace
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

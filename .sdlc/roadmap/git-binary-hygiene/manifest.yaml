@@ -1,0 +1,10 @@
+slug: git-binary-hygiene
+title: Git Binary File Hygiene
+status: exploring
+created_at: 2026-03-05T02:38:12.789515Z
+updated_at: 2026-03-05T02:39:37.383295Z
+sessions: 1
+orientation:
+  current: Raw signal — binary files in git without .gitattributes, plus misleading file extension on orchestrator.db
+  next: 'Confirm the scope: what files need .gitattributes treatment, should they be gitignored or LFS''d, and should orchestrator.db be renamed?'
+  commit: Decision on gitignore vs LFS + naming fix + sdlc init behavior + migration path for existing repos

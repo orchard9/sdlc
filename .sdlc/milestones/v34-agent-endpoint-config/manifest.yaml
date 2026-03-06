@@ -1,0 +1,25 @@
+slug: v34-agent-endpoint-config
+title: Agent Endpoint Config — named endpoints, fallback chains, and per-milestone model routing
+features:
+- endpoint-config-core
+- endpoint-fallback-engine
+- endpoints-page-ui
+- milestone-chain-override
+vision: |
+  Users can define named model endpoints (e.g. opus-primary, sonnet-main, haiku-cheap),
+  build ordered fallback chains, route specific action types to different models, and
+  override the default chain per milestone. When an agent run hits a rate limit or
+  overloaded error, the server automatically retries with the next endpoint in the chain.
+  A dedicated Endpoints page shows live health/cooldown status for every configured
+  endpoint. Parallel wave runs recover from quota exhaustion without manual intervention.
+acceptance_test: |
+  1. Configure three endpoints (opus, sonnet, haiku) and a default chain in config.yaml
+  2. Set a per-milestone chain override on one milestone
+  3. Set an action_chains override for implement_task → opus chain
+  4. Run a feature — verify the correct model is used based on resolution priority
+  5. Simulate a rate limit — verify automatic fallback to the next endpoint
+  6. Open the Endpoints page — verify all endpoints show with live status indicators
+  7. Verify cooldown recovery — after TTL, endpoint becomes available again
+created_at: 2026-03-04T06:06:54.228319Z
+updated_at: 2026-03-04T06:07:03.024873Z
+schema_version: 1

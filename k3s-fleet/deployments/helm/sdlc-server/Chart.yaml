@@ -1,0 +1,6 @@
+apiVersion: v2
+name: sdlc-server
+description: Helm chart for deploying sdlc-server project pods with git-sync sidecar and optional PostgreSQL credential pool injection.
+type: application
+version: 0.1.0
+appVersion: "latest"

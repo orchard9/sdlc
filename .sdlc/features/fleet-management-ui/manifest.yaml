@@ -1,0 +1,191 @@
+slug: fleet-management-ui
+title: React control plane UI — running instances, available repos, import flow
+description: React control plane dashboard — search-first running/available views, one-click provisioning, import flow, fleet-wide agent status
+phase: released
+created_at: 2026-03-05T06:55:30.350027Z
+updated_at: 2026-03-05T19:09:05.282845Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-management-ui/spec.md
+  created_at: 2026-03-05T08:32:29.342818Z
+  approved_at: 2026-03-05T08:32:31.637849Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fleet-management-ui/design.md
+  created_at: 2026-03-05T08:33:16.212669Z
+  approved_at: 2026-03-05T08:33:18.918517Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fleet-management-ui/tasks.md
+  created_at: 2026-03-05T08:33:39.653854Z
+  approved_at: 2026-03-05T08:33:42.014641Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fleet-management-ui/qa-plan.md
+  created_at: 2026-03-05T08:34:01.335418Z
+  approved_at: 2026-03-05T08:34:04.985803Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fleet-management-ui/review.md
+  created_at: 2026-03-05T08:36:52.271783Z
+  approved_at: 2026-03-05T08:36:58.901274Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fleet-management-ui/audit.md
+  created_at: 2026-03-05T08:38:03.022842Z
+  approved_at: 2026-03-05T08:38:05.586352Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fleet-management-ui/qa-results.md
+  created_at: 2026-03-05T08:43:12.303389Z
+  approved_at: 2026-03-05T08:43:15.159022Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Fleet dashboard page — three sections: running instances, available repos, import'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.091355Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:23.046665Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Running instances section — cards with project name, URL, pod status, active milestone, agent badge. Data from GET /api/hub/fleet
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.097396Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:23.426431Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Available repos section — cards for repos without instances, Start button triggers POST /api/hub/provision
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.102676Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:23.849110Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Import section — URL input, optional PAT input, Import button calls POST /api/hub/import with progress feedback
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.108270Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:24.309938Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: SSE integration — FleetUpdated event, live status updates without polling
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.113297Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:24.793264Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Search and filter — client-side text filter across running and available sections
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:15:08.118231Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:25.205099Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[user-gap] Search-first design — autofocus search input, instant filter, search is the primary interaction for 80+ repos'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:51.717812Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:25.737089Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: '[user-gap] First-time user context — one-liner explaining what an sdlc instance is and what Start does'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:51.723884Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:26.119804Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: '[user-gap] Fleet-wide agent activity summary — show count of active agent runs across all instances at the top of the dashboard'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:19:51.728809Z
+  started_at: null
+  completed_at: 2026-03-05T08:36:26.467383Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: '[review-finding] Show inline error message when provision POST fails instead of silently reverting to Start button'
+  description: null
+  status: completed
+  created_at: 2026-03-05T08:36:55.944241Z
+  started_at: null
+  completed_at: 2026-03-05T08:37:36.806170Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:55:30.350027Z
+  exited: 2026-03-05T08:32:31.643028Z
+- phase: specified
+  entered: 2026-03-05T08:32:31.643028Z
+  exited: 2026-03-05T08:34:04.987553Z
+- phase: planned
+  entered: 2026-03-05T08:34:04.987553Z
+  exited: 2026-03-05T08:34:10.122739Z
+- phase: ready
+  entered: 2026-03-05T08:34:10.122739Z
+  exited: 2026-03-05T08:34:15.561004Z
+- phase: implementation
+  entered: 2026-03-05T08:34:15.561004Z
+  exited: 2026-03-05T08:37:36.811244Z
+- phase: review
+  entered: 2026-03-05T08:37:36.811244Z
+  exited: 2026-03-05T08:37:41.676037Z
+- phase: audit
+  entered: 2026-03-05T08:37:41.676037Z
+  exited: 2026-03-05T08:38:05.591618Z
+- phase: qa
+  entered: 2026-03-05T08:38:05.591618Z
+  exited: 2026-03-05T08:43:15.160775Z
+- phase: merge
+  entered: 2026-03-05T08:43:15.160775Z
+  exited: 2026-03-05T08:43:24.086374Z
+- phase: released
+  entered: 2026-03-05T08:43:24.086374Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

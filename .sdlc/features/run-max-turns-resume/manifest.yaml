@@ -1,0 +1,157 @@
+slug: run-max-turns-resume
+title: Paused (turn limit) UX and Resume action for investigation and ponder runs
+phase: implementation
+created_at: 2026-03-04T06:05:31.420608Z
+updated_at: 2026-03-04T23:11:58.826553Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/run-max-turns-resume/spec.md
+  created_at: 2026-03-04T23:09:58.254741Z
+  approved_at: 2026-03-04T23:10:05.713587Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/run-max-turns-resume/design.md
+  created_at: 2026-03-04T23:10:53.199581Z
+  approved_at: 2026-03-04T23:10:55.118183Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/run-max-turns-resume/tasks.md
+  created_at: 2026-03-04T23:11:21.381212Z
+  approved_at: 2026-03-04T23:11:24.094294Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/run-max-turns-resume/qa-plan.md
+  created_at: 2026-03-04T23:11:51.485296Z
+  approved_at: 2026-03-04T23:11:53.398584Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/run-max-turns-resume/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/run-max-turns-resume/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/run-max-turns-resume/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add session_id and stop_reason fields to RunRecord
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:12:06.672669Z
+  started_at: 2026-03-04T23:12:09.239381Z
+  completed_at: 2026-03-04T23:12:51.560833Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Capture session_id, stop_reason, is_max_turns in spawn_agent_run; set status=paused for ErrorMaxTurns
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:12:06.678253Z
+  started_at: null
+  completed_at: 2026-03-04T23:12:51.569692Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add POST /api/ponder/:slug/chat/resume endpoint
+  description: null
+  status: in_progress
+  created_at: 2026-03-04T23:12:06.682785Z
+  started_at: 2026-03-04T23:13:00.576427Z
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add POST /api/investigation/:slug/chat/resume endpoint
+  description: null
+  status: in_progress
+  created_at: 2026-03-04T23:12:06.687515Z
+  started_at: 2026-03-04T23:13:59.676240Z
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update RunStatus type and RunRecord interface in frontend types.ts
+  description: null
+  status: pending
+  created_at: 2026-03-04T23:12:06.692440Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Update RunCard to show paused state, amber icon, label suffix, and Resume button
+  description: null
+  status: pending
+  created_at: 2026-03-04T23:12:06.697127Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T7
+  title: Add resumePonderChat and resumeInvestigationChat to API client
+  description: null
+  status: pending
+  created_at: 2026-03-04T23:12:06.701837Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Write unit and integration tests
+  description: null
+  status: pending
+  created_at: 2026-03-04T23:12:06.706300Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:05:31.420608Z
+  exited: 2026-03-04T23:10:05.715726Z
+- phase: specified
+  entered: 2026-03-04T23:10:05.715726Z
+  exited: 2026-03-04T23:11:53.400771Z
+- phase: planned
+  entered: 2026-03-04T23:11:53.400771Z
+  exited: 2026-03-04T23:11:57.031881Z
+- phase: ready
+  entered: 2026-03-04T23:11:57.031881Z
+  exited: 2026-03-04T23:11:58.826553Z
+- phase: implementation
+  entered: 2026-03-04T23:11:58.826553Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

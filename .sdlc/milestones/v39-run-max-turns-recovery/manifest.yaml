@@ -1,0 +1,9 @@
+slug: v39-run-max-turns-recovery
+title: Run Max-Turns Recovery — resume from paused agent runs
+features:
+- run-stop-reason-capture
+- run-max-turns-resume
+created_at: 2026-03-04T22:46:41.299456Z
+updated_at: 2026-03-04T22:46:41.299897Z
+vision: "Agents that hit the turn limit can be resumed with one click; the UI correctly labels them as paused, not failed"
+schema_version: 1

@@ -1,0 +1,145 @@
+slug: sdlc-recap-command
+title: sdlc-recap command — state-aware session recap with forward motion
+phase: released
+created_at: 2026-03-04T06:21:47.106268Z
+updated_at: 2026-03-05T08:14:04.259482Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/spec.md
+  created_at: 2026-03-04T23:47:20.352751Z
+  approved_at: 2026-03-04T23:47:25.791350Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/design.md
+  created_at: 2026-03-04T23:48:13.709713Z
+  approved_at: 2026-03-04T23:48:17.606811Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/tasks.md
+  created_at: 2026-03-04T23:48:46.694213Z
+  approved_at: 2026-03-04T23:48:49.627844Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/qa-plan.md
+  created_at: 2026-03-04T23:49:10.587460Z
+  approved_at: 2026-03-04T23:49:14.127278Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/review.md
+  created_at: 2026-03-04T23:55:13.403538Z
+  approved_at: 2026-03-04T23:55:16.785640Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/audit.md
+  created_at: 2026-03-04T23:55:58.861477Z
+  approved_at: 2026-03-04T23:56:02.780763Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/sdlc-recap-command/qa-results.md
+  created_at: 2026-03-05T08:13:44.471416Z
+  approved_at: 2026-03-05T08:13:54.830118Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create sdlc_recap.rs command module with 4 platform variants
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:32.734641Z
+  started_at: null
+  completed_at: 2026-03-04T23:50:23.108468Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Register SDLC_RECAP in commands/mod.rs ALL_COMMANDS array
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:32.739046Z
+  started_at: null
+  completed_at: 2026-03-04T23:50:43.623914Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add /sdlc-recap to AGENTS.md consumer commands in mod.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:32.743331Z
+  started_at: null
+  completed_at: 2026-03-04T23:51:00.915894Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add sdlc-recap to GUIDANCE_MD_CONTENT command table in templates.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:32.747811Z
+  started_at: null
+  completed_at: 2026-03-04T23:51:56.398719Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Build and lint verification
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:32.751964Z
+  started_at: null
+  completed_at: 2026-03-04T23:54:22.593259Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:21:47.106268Z
+  exited: 2026-03-04T23:47:25.793791Z
+- phase: specified
+  entered: 2026-03-04T23:47:25.793791Z
+  exited: 2026-03-04T23:49:14.129029Z
+- phase: planned
+  entered: 2026-03-04T23:49:14.129029Z
+  exited: 2026-03-04T23:49:17.886843Z
+- phase: ready
+  entered: 2026-03-04T23:49:17.886843Z
+  exited: 2026-03-04T23:49:23.251233Z
+- phase: implementation
+  entered: 2026-03-04T23:49:23.251233Z
+  exited: 2026-03-04T23:55:16.790457Z
+- phase: review
+  entered: 2026-03-04T23:55:16.790457Z
+  exited: 2026-03-04T23:55:24.485097Z
+- phase: audit
+  entered: 2026-03-04T23:55:24.485097Z
+  exited: 2026-03-04T23:56:02.786488Z
+- phase: qa
+  entered: 2026-03-04T23:56:02.786488Z
+  exited: 2026-03-05T08:13:54.873771Z
+- phase: merge
+  entered: 2026-03-05T08:13:54.873771Z
+  exited: 2026-03-05T08:14:04.259482Z
+- phase: released
+  entered: 2026-03-05T08:14:04.259482Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

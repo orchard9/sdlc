@@ -1,0 +1,10 @@
+slug: a2a-auth-interactions
+title: A2A Auth & interactions
+status: exploring
+created_at: 2026-03-05T06:01:24.823160Z
+updated_at: 2026-03-05T06:06:15.158336Z
+sessions: 1
+orientation:
+  current: Architecture shaped — three-phase migration from token auth to a2api-backed identity, with A2A protocol compliance as Phase 3. Key decisions locked. Phase 1 is ready to build.
+  next: 'Confirm a2api exposes a token introspection endpoint (or if JWT decode is the only path). Then build Phase 1: token attribution in auth.rs.'
+  commit: Phase 1 (token attribution) is small enough to commit immediately as a standalone feature. Phases 2-3 commit when a2api introspection endpoint is confirmed and a second cluster user exists.

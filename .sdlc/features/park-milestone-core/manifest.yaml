@@ -1,0 +1,136 @@
+slug: park-milestone-core
+title: Park/Unpark core data model — Parked status, parked_at field, compute_status priority
+phase: released
+created_at: 2026-03-04T06:05:17.294710Z
+updated_at: 2026-03-05T07:31:14.048742Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/park-milestone-core/spec.md
+  created_at: 2026-03-05T07:21:28.715147Z
+  approved_at: 2026-03-05T07:21:34.650547Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/park-milestone-core/design.md
+  created_at: 2026-03-05T07:21:53.717427Z
+  approved_at: 2026-03-05T07:21:53.723147Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/park-milestone-core/tasks.md
+  created_at: 2026-03-05T07:22:07.129060Z
+  approved_at: 2026-03-05T07:22:07.135960Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/park-milestone-core/qa-plan.md
+  created_at: 2026-03-05T07:22:27.018985Z
+  approved_at: 2026-03-05T07:22:27.026488Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/park-milestone-core/review.md
+  created_at: 2026-03-05T07:29:42.766733Z
+  approved_at: 2026-03-05T07:29:42.774717Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/park-milestone-core/audit.md
+  created_at: 2026-03-05T07:30:06.470448Z
+  approved_at: 2026-03-05T07:30:06.477526Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/park-milestone-core/qa-results.md
+  created_at: 2026-03-05T07:31:07.235149Z
+  approved_at: 2026-03-05T07:31:07.241676Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add Parked variant and parked_at field to milestone.rs
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:11.022507Z
+  started_at: 2026-03-05T07:23:20.837510Z
+  completed_at: 2026-03-05T07:23:20.841729Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update parallel_work.rs to skip parked milestones
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:11.027441Z
+  started_at: 2026-03-05T07:23:32.164791Z
+  completed_at: 2026-03-05T07:23:32.169664Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add unit tests for park/unpark
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:11.031751Z
+  started_at: 2026-03-05T07:24:02.427627Z
+  completed_at: 2026-03-05T07:24:02.454649Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify build and clippy
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:22:11.035813Z
+  started_at: 2026-03-05T07:29:14.550507Z
+  completed_at: 2026-03-05T07:29:14.557257Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:05:17.294710Z
+  exited: 2026-03-05T07:21:34.652172Z
+- phase: specified
+  entered: 2026-03-05T07:21:34.652172Z
+  exited: 2026-03-05T07:22:27.028444Z
+- phase: planned
+  entered: 2026-03-05T07:22:27.028444Z
+  exited: 2026-03-05T07:22:32.434151Z
+- phase: ready
+  entered: 2026-03-05T07:22:32.434151Z
+  exited: 2026-03-05T07:22:37.602426Z
+- phase: implementation
+  entered: 2026-03-05T07:22:37.602426Z
+  exited: 2026-03-05T07:29:42.781837Z
+- phase: review
+  entered: 2026-03-05T07:29:42.781837Z
+  exited: 2026-03-05T07:29:49.549334Z
+- phase: audit
+  entered: 2026-03-05T07:29:49.549334Z
+  exited: 2026-03-05T07:30:06.486946Z
+- phase: qa
+  entered: 2026-03-05T07:30:06.486946Z
+  exited: 2026-03-05T07:31:07.246837Z
+- phase: merge
+  entered: 2026-03-05T07:31:07.246837Z
+  exited: 2026-03-05T07:31:14.048742Z
+- phase: released
+  entered: 2026-03-05T07:31:14.048742Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

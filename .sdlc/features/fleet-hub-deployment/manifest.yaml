@@ -1,0 +1,164 @@
+slug: fleet-hub-deployment
+title: Deploy hub mode sdlc-server at sdlc.threesix.ai with Google OAuth via oauth2-proxy
+description: Deploy hub mode ponder binary at sdlc.threesix.ai behind Google OAuth via oauth2-proxy — the fleet's authenticated front door
+phase: released
+created_at: 2026-03-05T06:55:30.335617Z
+updated_at: 2026-03-05T19:09:01.652102Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/spec.md
+  created_at: 2026-03-05T08:32:26.866298Z
+  approved_at: 2026-03-05T08:32:32.438283Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/design.md
+  created_at: 2026-03-05T08:33:06.390160Z
+  approved_at: 2026-03-05T08:33:10.288394Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/tasks.md
+  created_at: 2026-03-05T08:33:32.263418Z
+  approved_at: 2026-03-05T08:33:34.892992Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/qa-plan.md
+  created_at: 2026-03-05T08:33:59.972315Z
+  approved_at: 2026-03-05T08:34:02.853216Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/review.md
+  created_at: 2026-03-05T08:35:56.038870Z
+  approved_at: 2026-03-05T08:36:00.287679Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/audit.md
+  created_at: 2026-03-05T08:36:39.921762Z
+  approved_at: 2026-03-05T08:36:47.025695Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fleet-hub-deployment/qa-results.md
+  created_at: 2026-03-05T08:37:31.555051Z
+  approved_at: 2026-03-05T08:37:34.574683Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create Google OAuth client ID in GCP for sdlc.threesix.ai with allowed domains livelyideo.tv, masq.me, virtualcommunities.ai
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:14.133155Z
+  started_at: null
+  completed_at: 2026-03-05T08:34:31.480356Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Store OAuth client ID and secret as k8s Secret in hub namespace
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:14.138385Z
+  started_at: null
+  completed_at: 2026-03-05T08:35:24.028556Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Deploy oauth2-proxy — Google provider, allowed email domains, cookie secret
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:14.143535Z
+  started_at: null
+  completed_at: 2026-03-05T08:35:24.513468Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create Traefik IngressRoute for sdlc.threesix.ai with forward-auth middleware pointing to oauth2-proxy
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:14.148601Z
+  started_at: null
+  completed_at: 2026-03-05T08:35:24.970783Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Deploy hub mode sdlc-server (SDLC_HUB=true) as separate deployment from sdlc-sdlc
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:14.153525Z
+  started_at: null
+  completed_at: 2026-03-05T08:35:25.494343Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: 'Helm chart: hub values block with oauth2-proxy config and forward-auth middleware template'
+  description: null
+  status: completed
+  created_at: 2026-03-05T07:07:14.158447Z
+  started_at: null
+  completed_at: 2026-03-05T08:35:25.812056Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: '[audit-A6] Add securityContext hardening (runAsNonRoot, readOnlyRootFilesystem) to hub deployments'
+  description: null
+  status: pending
+  created_at: 2026-03-05T08:36:44.097621Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:55:30.335617Z
+  exited: 2026-03-05T08:32:32.440508Z
+- phase: specified
+  entered: 2026-03-05T08:32:32.440508Z
+  exited: 2026-03-05T08:34:02.854856Z
+- phase: planned
+  entered: 2026-03-05T08:34:02.854856Z
+  exited: 2026-03-05T08:34:09.314205Z
+- phase: ready
+  entered: 2026-03-05T08:34:09.314205Z
+  exited: 2026-03-05T08:34:15.892476Z
+- phase: implementation
+  entered: 2026-03-05T08:34:15.892476Z
+  exited: 2026-03-05T08:36:00.293258Z
+- phase: review
+  entered: 2026-03-05T08:36:00.293258Z
+  exited: 2026-03-05T08:36:07.538637Z
+- phase: audit
+  entered: 2026-03-05T08:36:07.538637Z
+  exited: 2026-03-05T08:36:47.030781Z
+- phase: qa
+  entered: 2026-03-05T08:36:47.030781Z
+  exited: 2026-03-05T08:37:34.578660Z
+- phase: merge
+  entered: 2026-03-05T08:37:34.578660Z
+  exited: 2026-03-05T08:37:40.547314Z
+- phase: released
+  entered: 2026-03-05T08:37:40.547314Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

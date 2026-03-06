@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Artifact Copy & Screenshot — Mockup</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0e0f14;color:#d0d4e0;font-family:ui-monospace,'Cascadia Code','SF Mono',Consolas,monospace;font-size:13px;padding:24px}
+  nav{display:flex;gap:0;border-bottom:1px solid #1e2030;margin-bottom:24px}
+  nav button{padding:8px 16px;background:none;border:none;border-bottom:2px solid transparent;color:#606880;font:inherit;cursor:pointer;font-size:12px;transition:.15s}
+  nav button.active{color:#d0d4e0;border-bottom-color:#7c6af7}
+  section{display:none}
+  section.active{display:block}
+  .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:3px;border:1px solid #1e2030;background:#151720;color:#606880;margin-bottom:16px}
+  /* artifact panel */
+  .panel{border:1px solid #1e2030;border-radius:8px;overflow:hidden;display:flex;height:460px}
+  .sidebar{width:160px;border-right:1px solid #1e2030;flex-shrink:0}
+  .sidebar-header{padding:8px 12px;border-bottom:1px solid #1e2030;font-size:10px;color:#505468;text-transform:uppercase;letter-spacing:.06em}
+  .artifact-item{display:flex;align-items:center;gap:8px;padding:7px 10px;font-size:11px;color:#606880;cursor:pointer;border-radius:4px;margin:4px 6px}
+  .artifact-item:hover{background:#161825}
+  .artifact-item.active{background:rgba(124,106,247,.1);border:1px solid rgba(124,106,247,.2);color:#a097f7}
+  .artifact-item svg{width:12px;height:12px;flex-shrink:0}
+  .main{flex:1;display:flex;flex-direction:column;min-width:0}
+  /* artifact header — THE KEY AREA */
+  .artifact-header{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #1e2030;background:#111320}
+  .artifact-header svg{width:13px;height:13px;color:#505468;flex-shrink:0}
+  .artifact-header .name{font-size:12px;font-weight:500;color:#b0b8d0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .artifact-header .meta{font-size:10px;color:#404660}
+  /* BUTTON CLUSTER */
+  .btn-cluster{display:flex;align-items:center;gap:4px;margin-left:8px}
+  .btn-action{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:4px;border:1px solid #1e2030;background:#131522;color:#505468;cursor:pointer;font:inherit;font-size:10px;font-weight:500;transition:.12s}
+  .btn-action:hover{background:#1a1d2e;border-color:#2a2d40;color:#b0b8d0}
+  .btn-action svg{width:11px;height:11px}
+  .btn-action.icon-only{padding:4px 6px}
+  .btn-action.copied{background:#0a1a10;border-color:#1a4020;color:#4ade80}
+  .btn-action.capturing{color:#404660}
+  .btn-action.capturing svg{animation:spin 1s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  /* content */
+  .artifact-body{flex:1;overflow:auto;padding:20px 24px}
+  .artifact-body h1{font-size:15px;font-weight:600;color:#dde2f0;margin-bottom:6px}
+  .artifact-body h2{font-size:13px;font-weight:600;color:#c0c8dc;margin:16px 0 6px}
+  .artifact-body p{color:#808898;line-height:1.6;margin-bottom:10px}
+  .artifact-body ul{color:#7a8290;line-height:1.8;padding-left:18px}
+  .artifact-body code{background:#151720;border:1px solid #1e2030;padding:1px 5px;border-radius:3px;font-size:11px;color:#9088e0}
+  .codeblock{background:#111320;border:1px solid #1e2030;border-radius:5px;padding:12px;font-size:11px;color:#7a8290;line-height:1.6;margin-top:10px}
+  /* dialogue */
+  .session-divider{display:flex;align-items:center;gap:12px;padding:12px 16px}
+  .session-divider .line{flex:1;height:1px;background:#1a1d2a}
+  .session-divider span{font-size:10px;color:#3a3d50;white-space:nowrap}
+  .msg-row{display:flex;gap:10px;align-items:flex-start;padding:6px 16px}
+  .avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;margin-top:2px}
+  .avatar.agent{background:#1e1542;border:1px solid #3d2a9f;color:#a097f7}
+  .avatar.user{background:#1a1f2a;border:1px solid #2a3040;color:#9098b0}
+  .msg-body{flex:1;min-width:0}
+  .msg-meta{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+  .msg-name{font-size:10px;font-weight:600;color:#a097f7}
+  .msg-name.user-name{color:#7a8898}
+  .msg-time{font-size:9px;color:#3a3d50}
+  .bubble{position:relative;background:#111520;border:1px solid #1a1e2e;border-radius:6px;padding:10px 36px 10px 12px;font-size:12px;color:#808898;line-height:1.5}
+  .bubble.user-bubble{background:#0e1018;border-color:#171a24}
+  /* copy icon — hover reveal */
+  .bubble .copy-icon{position:absolute;top:6px;right:6px;padding:4px;border-radius:4px;border:1px solid #1e2030;background:#131522;color:#404660;cursor:pointer;opacity:0;transition:.12s;display:flex;align-items:center}
+  .bubble .copy-icon:hover{color:#9098b0;background:#1a1d2e}
+  .bubble .copy-icon.always-visible{opacity:1}
+  .msg-row:hover .copy-icon{opacity:1}
+  .bubble .copy-icon svg{width:11px;height:11px}
+  /* feedback states table */
+  .states-grid{display:grid;gap:20px;max-width:560px}
+  .state-label{font-size:10px;color:#404660;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px}
+  .state-row{display:flex;align-items:center;gap:12px}
+  .state-note{font-size:10px;color:#3a3d50}
+  .dialogue-panel{border:1px solid #1e2030;border-radius:8px;overflow:hidden;max-width:620px}
+  .toggle-row{display:flex;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid #1e2030;background:#0e0f14}
+  .toggle-label{font-size:10px;color:#505468}
+  .toggle{display:flex;background:#111320;border:1px solid #1e2030;border-radius:4px;overflow:hidden}
+  .toggle button{padding:3px 10px;border:none;background:none;font:inherit;font-size:10px;color:#505468;cursor:pointer}
+  .toggle button.active{background:#1a1d2e;color:#b0b8d0}
+</style>
+</head>
+<body>
+
+<div class="badge">⚠ Design Prototype — not production code</div>
+
+<nav>
+  <button class="active" onclick="show('artifact')">State A — Artifact Viewer</button>
+  <button onclick="show('dialogue')">State B — Dialogue Hover Copy</button>
+  <button onclick="show('feedback')">State C — Button Feedback States</button>
+</nav>
+
+<!-- ===================== STATE A: Artifact Viewer ===================== -->
+<section id="screen-artifact" class="active">
+  <p style="font-size:11px;color:#505468;margin-bottom:14px">Artifact panel — [MD] [IMG] [↓] cluster always visible in header when artifact is open.</p>
+  <div class="panel">
+    <div class="sidebar">
+      <div class="sidebar-header">Artifacts</div>
+      <div class="artifact-item active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        spec.md
+      </div>
+      <div class="artifact-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        design.md
+      </div>
+      <div class="artifact-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        tasks.md
+      </div>
+      <div class="artifact-item">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82V15.18a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+        mockup.html
+      </div>
+    </div>
+    <div class="main">
+      <div class="artifact-header">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+        <span class="name">spec.md</span>
+        <span class="meta">2.4 KB · Approved</span>
+        <!-- BUTTON CLUSTER — always visible for markdown artifacts -->
+        <div class="btn-cluster">
+          <button class="btn-action" id="btn-md" onclick="flashCopied('btn-md')" title="Copy markdown">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+            MD
+          </button>
+          <button class="btn-action" id="btn-img" onclick="flashCapture('btn-img')" title="Copy as image">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            IMG
+          </button>
+          <button class="btn-action icon-only" title="Download PNG">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="artifact-body">
+        <h1>Specification: Artifact and Dialogue Copy &amp; Screenshot</h1>
+        <p style="font-size:11px;color:#404660;margin-bottom:14px">Status: Approved · v1.0 · 2026-03-05</p>
+        <h2>Problem</h2>
+        <p>The sdlc UI renders artifacts and ponder dialogues beautifully but provides no path to extract that content for sharing. Users resort to OS-level screenshot keybindings and manual text selection.</p>
+        <h2>User Stories</h2>
+        <ul>
+          <li>Copy raw markdown from any artifact in one click</li>
+          <li>Copy rendered artifact as image for Slack / Discord</li>
+          <li>Copy individual dialogue messages from ponder sessions</li>
+        </ul>
+        <h2>Technical Approach</h2>
+        <div class="codeblock">
+          Copy MD  → navigator.clipboard.writeText(artifact.content)<br>
+          Copy IMG → html2canvas(el) → ClipboardItem({ 'image/png': blob })<br>
+          Download → html2canvas(el) → canvas.toDataURL() → anchor.click()
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size:10px;color:#3a3d50;margin-top:8px">Click [MD] or [IMG] to see the feedback state animation.</p>
+</section>
+
+<!-- ===================== STATE B: Dialogue Hover ===================== -->
+<section id="screen-dialogue">
+  <p style="font-size:11px;color:#505468;margin-bottom:14px">Ponder session — hover a message bubble to reveal the copy icon. Toggle mobile mode to see always-visible variant.</p>
+  <div class="dialogue-panel">
+    <div class="session-divider">
+      <div class="line"></div>
+      <span>Session 2 · 2h ago</span>
+      <div class="line"></div>
+    </div>
+    <div class="msg-row">
+      <div class="avatar agent">M</div>
+      <div class="msg-body">
+        <div class="msg-meta"><span class="msg-name">Maya Chen · UX Engineer</span><span class="msg-time">session 2</span></div>
+        <div class="bubble" id="bubble1">
+          The copy button placement matters as much as its existence. Hover-reveal on individual messages keeps visual noise low. For artifact files, always-visible in the header — users are in intentional view mode.
+          <button class="copy-icon" id="ci1" onclick="flashCopyIcon('ci1')" title="Copy message">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="msg-row">
+      <div class="avatar user">J</div>
+      <div class="msg-body">
+        <div class="msg-meta"><span class="msg-name user-name">Jordan</span><span class="msg-time">user</span></div>
+        <div class="bubble user-bubble" id="bubble2">
+          What about the screenshot button specifically? That's the 💰 feature for me — I have screenshot keybindings memorized I use them so much.
+          <button class="copy-icon" id="ci2" onclick="flashCopyIcon('ci2')" title="Copy message">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="msg-row">
+      <div class="avatar agent">T</div>
+      <div class="msg-body">
+        <div class="msg-meta"><span class="msg-name">Tavish Reid · Platform Eng</span><span class="msg-time">session 2</span></div>
+        <div class="bubble" id="bubble3">
+          html2canvas → ClipboardItem({'image/png': blob}). Dynamic import — no initial bundle impact. One caveat: iframes won't capture. HTML mockup viewer excluded from image capture. Acceptable tradeoff.
+          <button class="copy-icon" id="ci3" onclick="flashCopyIcon('ci3')" title="Copy message">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="toggle-row">
+      <span class="toggle-label">Simulate device:</span>
+      <div class="toggle">
+        <button class="active" onclick="setMobile(false,this)">Desktop (hover)</button>
+        <button onclick="setMobile(true,this)">Mobile (always visible)</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== STATE C: Feedback States ===================== -->
+<section id="screen-feedback">
+  <p style="font-size:11px;color:#505468;margin-bottom:20px">All button feedback states — idle, capturing, copied, fallback, message copied.</p>
+  <div class="states-grid">
+    <div>
+      <div class="state-label">MD — idle</div>
+      <div class="state-row">
+        <button class="btn-action">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          MD
+        </button>
+      </div>
+    </div>
+    <div>
+      <div class="state-label">MD — copied ✓</div>
+      <div class="state-row">
+        <button class="btn-action copied">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Copied
+        </button>
+        <span class="state-note">2s then reverts to idle</span>
+      </div>
+    </div>
+    <div>
+      <div class="state-label">IMG — capturing</div>
+      <div class="state-row">
+        <button class="btn-action capturing">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Capturing…
+        </button>
+        <span class="state-note">typically &lt;200ms</span>
+      </div>
+    </div>
+    <div>
+      <div class="state-label">IMG — copied ✓</div>
+      <div class="state-row">
+        <button class="btn-action copied">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          Copied
+        </button>
+        <span class="state-note">paste directly into Slack/Discord</span>
+      </div>
+    </div>
+    <div>
+      <div class="state-label">IMG — clipboard denied (auto-download fallback)</div>
+      <div class="state-row">
+        <button class="btn-action copied">
+          <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+          Saved
+        </button>
+        <span class="state-note">file downloaded, no error shown</span>
+      </div>
+    </div>
+    <div>
+      <div class="state-label">Message copy — idle (hover reveals icon)</div>
+      <div class="state-row" style="position:relative;display:inline-flex">
+        <div style="background:#111520;border:1px solid #1a1e2e;border-radius:6px;padding:10px 36px 10px 12px;font-size:12px;color:#808898;position:relative">
+          Some message text here…
+          <button style="position:absolute;top:6px;right:6px;padding:4px;border-radius:4px;border:1px solid #1e2030;background:#131522;color:#404660;cursor:pointer;display:flex;align-items:center">
+            <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function show(id){
+  document.querySelectorAll('section').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'))
+  document.getElementById('screen-'+id).classList.add('active')
+  const idx={'artifact':0,'dialogue':1,'feedback':2}[id]
+  document.querySelectorAll('nav button')[idx].classList.add('active')
+}
+function flashCopied(id){
+  const btn=document.getElementById(id)
+  const orig=btn.innerHTML
+  btn.classList.add('copied')
+  btn.innerHTML='<svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Copied'
+  setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig},2000)
+}
+function flashCapture(id){
+  const btn=document.getElementById(id)
+  const orig=btn.innerHTML
+  btn.classList.add('capturing')
+  btn.innerHTML='<svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>Capturing…'
+  setTimeout(()=>{
+    btn.classList.remove('capturing')
+    btn.classList.add('copied')
+    btn.innerHTML='<svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>Copied'
+    setTimeout(()=>{btn.classList.remove('copied');btn.innerHTML=orig},2000)
+  },400)
+}
+function flashCopyIcon(id){
+  const btn=document.getElementById(id)
+  btn.innerHTML='<svg width="11" height="11" fill="none" stroke="#4ade80" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>'
+  btn.style.borderColor='#1a4020';btn.style.background='#0a1a10';btn.style.color='#4ade80'
+  setTimeout(()=>{
+    btn.innerHTML='<svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>'
+    btn.style.borderColor='';btn.style.background='';btn.style.color=''
+  },2000)
+}
+function setMobile(on,btn){
+  document.querySelectorAll('.toggle button').forEach(b=>b.classList.remove('active'))
+  btn.classList.add('active')
+  document.querySelectorAll('.copy-icon').forEach(el=>{
+    el.classList.toggle('always-visible',on)
+  })
+}
+</script>
+</body>
+</html>

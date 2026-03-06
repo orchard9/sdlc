@@ -1,0 +1,156 @@
+slug: workspace-shell-component
+title: WorkspaceShell — shared two-pane list/detail page layout component
+phase: released
+created_at: 2026-03-04T22:47:41.669923Z
+updated_at: 2026-03-05T00:09:10.980593Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/workspace-shell-component/spec.md
+  created_at: 2026-03-04T23:34:34.882461Z
+  approved_at: 2026-03-04T23:34:42.535196Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/workspace-shell-component/design.md
+  created_at: 2026-03-04T23:35:12.332058Z
+  approved_at: 2026-03-04T23:35:16.441684Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/workspace-shell-component/tasks.md
+  created_at: 2026-03-04T23:35:38.664969Z
+  approved_at: 2026-03-04T23:35:41.647260Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/workspace-shell-component/qa-plan.md
+  created_at: 2026-03-04T23:36:06.146254Z
+  approved_at: 2026-03-04T23:36:08.260784Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/workspace-shell-component/review.md
+  created_at: 2026-03-05T00:07:51.376601Z
+  approved_at: 2026-03-05T00:07:53.112104Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/workspace-shell-component/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-05T00:08:08.873564Z
+  waive_reason: Pure structural layout refactor — WorkspaceShell is a presentational React component with no data fetching, no authentication, no API calls, and no user input handling. It wraps ReactNode props in div containers with Tailwind classes. There is zero security surface to audit.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/workspace-shell-component/qa-results.md
+  created_at: 2026-03-05T00:09:00.981001Z
+  approved_at: 2026-03-05T00:09:06.163199Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create WorkspaceShell component
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:28.796061Z
+  started_at: 2026-03-04T23:36:32.642387Z
+  completed_at: 2026-03-04T23:36:47.032554Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Refactor PonderPage to use WorkspaceShell
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:28.823261Z
+  started_at: 2026-03-04T23:36:47.162775Z
+  completed_at: 2026-03-04T23:38:10.996734Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Refactor EvolvePage to use WorkspaceShell
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:28.857269Z
+  started_at: 2026-03-04T23:38:11.068735Z
+  completed_at: 2026-03-04T23:42:03.159440Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Refactor InvestigationPage to use WorkspaceShell
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:28.902428Z
+  started_at: 2026-03-04T23:42:03.182693Z
+  completed_at: 2026-03-05T00:06:04.675415Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Refactor GuidelinePage to use WorkspaceShell
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:28.926580Z
+  started_at: 2026-03-05T00:06:08.287725Z
+  completed_at: 2026-03-05T00:06:59.506543Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Verify TypeScript build passes
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:28.958118Z
+  started_at: 2026-03-05T00:07:01.299022Z
+  completed_at: 2026-03-05T00:07:17.433698Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:41.669923Z
+  exited: 2026-03-04T23:34:42.537505Z
+- phase: specified
+  entered: 2026-03-04T23:34:42.537505Z
+  exited: 2026-03-04T23:36:08.262408Z
+- phase: planned
+  entered: 2026-03-04T23:36:08.262408Z
+  exited: 2026-03-04T23:36:12.396745Z
+- phase: ready
+  entered: 2026-03-04T23:36:12.396745Z
+  exited: 2026-03-04T23:36:18.207813Z
+- phase: implementation
+  entered: 2026-03-04T23:36:18.207813Z
+  exited: 2026-03-05T00:07:53.117294Z
+- phase: review
+  entered: 2026-03-05T00:07:53.117294Z
+  exited: 2026-03-05T00:08:02.520600Z
+- phase: audit
+  entered: 2026-03-05T00:08:02.520600Z
+  exited: 2026-03-05T00:08:08.875461Z
+- phase: qa
+  entered: 2026-03-05T00:08:08.875461Z
+  exited: 2026-03-05T00:09:06.170078Z
+- phase: merge
+  entered: 2026-03-05T00:09:06.170078Z
+  exited: 2026-03-05T00:09:10.980593Z
+- phase: released
+  entered: 2026-03-05T00:09:10.980593Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

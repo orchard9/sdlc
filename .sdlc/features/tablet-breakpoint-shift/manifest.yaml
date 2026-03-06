@@ -1,0 +1,100 @@
+slug: tablet-breakpoint-shift
+title: Shift layout breakpoint md→lg so tablet gets the mobile UX
+phase: released
+created_at: 2026-03-04T22:47:47.339331Z
+updated_at: 2026-03-04T23:10:27.280322Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/spec.md
+  created_at: 2026-03-04T23:04:19.419186Z
+  approved_at: 2026-03-04T23:04:24.273121Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/design.md
+  created_at: 2026-03-04T23:04:46.791043Z
+  approved_at: 2026-03-04T23:04:49.032667Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/tasks.md
+  created_at: 2026-03-04T23:05:02.866290Z
+  approved_at: 2026-03-04T23:05:04.887265Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/qa-plan.md
+  created_at: 2026-03-04T23:05:26.317179Z
+  approved_at: 2026-03-04T23:05:27.982901Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/review.md
+  created_at: 2026-03-04T23:09:11.476765Z
+  approved_at: 2026-03-04T23:09:13.883006Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/audit.md
+  created_at: 2026-03-04T23:09:34.814110Z
+  approved_at: 2026-03-04T23:09:36.567650Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/tablet-breakpoint-shift/qa-results.md
+  created_at: 2026-03-04T23:10:20.557537Z
+  approved_at: 2026-03-04T23:10:22.598274Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:47.339331Z
+  exited: 2026-03-04T23:04:24.274551Z
+- phase: specified
+  entered: 2026-03-04T23:04:24.274551Z
+  exited: 2026-03-04T23:05:27.984482Z
+- phase: planned
+  entered: 2026-03-04T23:05:27.984482Z
+  exited: 2026-03-04T23:05:31.461062Z
+- phase: ready
+  entered: 2026-03-04T23:05:31.461062Z
+  exited: 2026-03-04T23:05:34.955799Z
+- phase: implementation
+  entered: 2026-03-04T23:05:34.955799Z
+  exited: 2026-03-04T23:09:13.890132Z
+- phase: review
+  entered: 2026-03-04T23:09:13.890132Z
+  exited: 2026-03-04T23:09:17.987151Z
+- phase: audit
+  entered: 2026-03-04T23:09:17.987151Z
+  exited: 2026-03-04T23:09:36.571952Z
+- phase: qa
+  entered: 2026-03-04T23:09:36.571952Z
+  exited: 2026-03-04T23:10:22.604366Z
+- phase: merge
+  entered: 2026-03-04T23:10:22.604366Z
+  exited: 2026-03-04T23:10:27.280322Z
+- phase: released
+  entered: 2026-03-04T23:10:27.280322Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

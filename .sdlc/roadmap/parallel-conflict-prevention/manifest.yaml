@@ -1,0 +1,10 @@
+slug: parallel-conflict-prevention
+title: File and Concept Impact Pre-flight
+status: exploring
+created_at: 2026-03-05T03:44:16.635464Z
+updated_at: 2026-03-05T03:45:03.903096Z
+sessions: 1
+orientation:
+  current: Raw signal from conversation — file overlap detection as a parallelism gate
+  next: 'Interrogate mechanism: how does a milestone declare or predict its file footprint?'
+  commit: Clear problem statement + proposed detection mechanism + integration point with select_parallel_work()

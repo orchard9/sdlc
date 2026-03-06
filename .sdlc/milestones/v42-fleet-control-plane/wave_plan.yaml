@@ -1,0 +1,17 @@
+milestone: v42-fleet-control-plane
+waves:
+  - number: 1
+    label: "Native OAuth2 (code)"
+    slugs:
+      - fleet-native-oauth
+  - number: 2
+    label: "Deploy hub + auth gate"
+    slugs:
+      - fleet-deploy-hub
+  - number: 3
+    label: "Already shipped"
+    slugs:
+      - fleet-hub-deployment
+      - fleet-auth-gate
+      - fleet-management-api
+      - fleet-management-ui

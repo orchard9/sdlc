@@ -1,0 +1,20 @@
+id: 20260305-040727-qqq
+tool_name: telegram-recap
+created_at: 2026-03-05T04:07:27.782199+00:00
+completed_at: 2026-03-05T04:07:28.233705+00:00
+input:
+  dry_run: false
+result:
+  data:
+    chat_count: 0
+    dry_run: false
+    period_end: 2026-03-05T04:07:27.000Z
+    period_start: 2026-03-04T04:07:27.000Z
+    sent_to: []
+    total_messages: 0
+  duration_ms: 423
+  ok: true
+status: completed
+tags: []
+notes: null
+streaming_log: false

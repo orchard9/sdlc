@@ -1,0 +1,16 @@
+id: "20260305-173416-qwx"
+milestone_slug: v23-ponder-rich-input
+started_at: "2026-03-05T17:34:16Z"
+completed_at: "2026-03-05T17:39:00Z"
+verdict: pass
+tests_total: 8
+tests_passed: 8
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v23-ponder-rich-input/uat-runs/20260305-173416-qwx/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v23-ponder-rich-input/uat-runs/20260305-173416-qwx/01-modal-opens.png
+  - .sdlc/milestones/v23-ponder-rich-input/uat-runs/20260305-173416-qwx/02-slug-auto-derives.png
+  - .sdlc/milestones/v23-ponder-rich-input/uat-runs/20260305-173416-qwx/03-form-filled.png
+  - .sdlc/milestones/v23-ponder-rich-input/uat-runs/20260305-173416-qwx/04-ponder-created.png
+  - .sdlc/milestones/v23-ponder-rich-input/uat-runs/20260305-173416-qwx/05-escape-closes-modal.png

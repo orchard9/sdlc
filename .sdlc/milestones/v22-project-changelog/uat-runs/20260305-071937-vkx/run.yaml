@@ -1,0 +1,18 @@
+id: "20260305-071937-vkx"
+milestone_slug: v22-project-changelog
+started_at: "2026-03-05T07:19:37Z"
+completed_at: "2026-03-05T07:26:00Z"
+verdict: pass_with_tasks
+tests_total: 7
+tests_passed: 5
+tests_failed: 0
+tests_partial: 2
+tasks_created: 0
+tasks_preexisting: 3
+summary_path: .sdlc/milestones/v22-project-changelog/uat-runs/20260305-071937-vkx/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v22-project-changelog/uat-runs/20260305-071937-vkx/01-first-visit-dashboard.png
+  - .sdlc/milestones/v22-project-changelog/uat-runs/20260305-071937-vkx/02-after-dismiss.png
+  - .sdlc/milestones/v22-project-changelog/uat-runs/20260305-071937-vkx/03-returning-user-banner.png
+  - .sdlc/milestones/v22-project-changelog/uat-runs/20260305-071937-vkx/04-dismiss-persistence.png
+  - .sdlc/milestones/v22-project-changelog/uat-runs/20260305-071937-vkx/05-failed-run-link.png

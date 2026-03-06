@@ -1,0 +1,107 @@
+slug: fix-assistanttextblockmissingmarkdownrendering
+title: Fix Assistanttextblockmissingmarkdownrendering
+description: |-
+  Root cause: AssistantTextBlock.tsx uses a plain <p> element to display event.text instead of using the CompactMarkdown component that already exists in the codebase and handles code fences, inline code, and other markdown features.
+
+  Problem: The AssistantTextBlock component in the agent activity feed renders agent output as plain text using a <p> tag with whitespace-pre-wrap. Markdown syntax like code blocks, bold, lists, and inline code appears as raw text instead of being rendered as formatted HTML.
+
+  Original report:
+  the markdown in the agent activity should render as code blocks
+phase: released
+created_at: 2026-03-05T17:35:34.555212Z
+updated_at: 2026-03-05T17:38:28.950765Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/spec.md
+  created_at: 2026-03-05T17:36:24.762453Z
+  approved_at: 2026-03-05T17:36:27.983234Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/design.md
+  created_at: 2026-03-05T17:36:37.122853Z
+  approved_at: 2026-03-05T17:36:39.676119Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/tasks.md
+  created_at: 2026-03-05T17:36:45.776283Z
+  approved_at: 2026-03-05T17:36:48.509683Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/qa-plan.md
+  created_at: 2026-03-05T17:36:59.396986Z
+  approved_at: 2026-03-05T17:37:02.052862Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/review.md
+  created_at: 2026-03-05T17:37:38.548160Z
+  approved_at: 2026-03-05T17:37:42.519549Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/audit.md
+  created_at: 2026-03-05T17:38:00.770114Z
+  approved_at: 2026-03-05T17:38:03.252873Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-assistanttextblockmissingmarkdownrendering/qa-results.md
+  created_at: 2026-03-05T17:38:20.314401Z
+  approved_at: 2026-03-05T17:38:23.041328Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T17:35:34.555212Z
+  exited: 2026-03-05T17:36:27.985387Z
+- phase: specified
+  entered: 2026-03-05T17:36:27.985387Z
+  exited: 2026-03-05T17:37:02.054490Z
+- phase: planned
+  entered: 2026-03-05T17:37:02.054490Z
+  exited: 2026-03-05T17:37:09.107438Z
+- phase: ready
+  entered: 2026-03-05T17:37:09.107438Z
+  exited: 2026-03-05T17:37:09.159225Z
+- phase: implementation
+  entered: 2026-03-05T17:37:09.159225Z
+  exited: 2026-03-05T17:37:42.523826Z
+- phase: review
+  entered: 2026-03-05T17:37:42.523826Z
+  exited: 2026-03-05T17:37:48.248645Z
+- phase: audit
+  entered: 2026-03-05T17:37:48.248645Z
+  exited: 2026-03-05T17:38:03.254726Z
+- phase: qa
+  entered: 2026-03-05T17:38:03.254726Z
+  exited: 2026-03-05T17:38:23.042933Z
+- phase: merge
+  entered: 2026-03-05T17:38:23.042933Z
+  exited: 2026-03-05T17:38:28.950765Z
+- phase: released
+  entered: 2026-03-05T17:38:28.950765Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

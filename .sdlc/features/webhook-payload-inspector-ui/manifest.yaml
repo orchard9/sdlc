@@ -1,0 +1,145 @@
+slug: webhook-payload-inspector-ui
+title: Webhook Payload Inspector UI — browse, inspect, and replay stored payloads
+phase: released
+created_at: 2026-03-05T06:24:41.441247Z
+updated_at: 2026-03-05T08:20:46.222456Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/spec.md
+  created_at: 2026-03-05T08:09:18.519689Z
+  approved_at: 2026-03-05T08:09:28.625675Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/design.md
+  created_at: 2026-03-05T08:10:14.927536Z
+  approved_at: 2026-03-05T08:10:16.274178Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/tasks.md
+  created_at: 2026-03-05T08:10:35.465266Z
+  approved_at: 2026-03-05T08:10:36.949613Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/qa-plan.md
+  created_at: 2026-03-05T08:11:02.876819Z
+  approved_at: 2026-03-05T08:11:04.086608Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/review.md
+  created_at: 2026-03-05T08:17:39.555702Z
+  approved_at: 2026-03-05T08:17:40.806705Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/audit.md
+  created_at: 2026-03-05T08:18:11.267678Z
+  approved_at: 2026-03-05T08:18:12.484859Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/webhook-payload-inspector-ui/qa-results.md
+  created_at: 2026-03-05T08:20:35.291346Z
+  approved_at: 2026-03-05T08:20:40.692224Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Add store_only: boolean and secret_token?: string fields to OrchestratorWebhookRoute type in frontend/src/lib/types.ts'
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:16.053926Z
+  started_at: 2026-03-05T08:11:35.890281Z
+  completed_at: 2026-03-05T08:11:49.673663Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add api.queryWebhookPayloads(route, since, until, limit) and api.replayWebhookPayload(route, id) methods to frontend/src/api/client.ts
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:16.059633Z
+  started_at: 2026-03-05T08:11:54.042954Z
+  completed_at: 2026-03-05T08:12:19.324061Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update WebhookRoutesSection in ActionsPage — show 'store-only' chip and 'Inspect' button on routes where store_only=true; dispatch routes unchanged
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:16.064666Z
+  started_at: 2026-03-05T08:12:23.827466Z
+  completed_at: 2026-03-05T08:13:20.023266Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: 'Build WebhookPayloadInspector component — two-pane: time chips + payload list (left), JSON viewer + copy/replay controls (right); replay result footer strip on success'
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:16.070118Z
+  started_at: 2026-03-05T08:13:25.274472Z
+  completed_at: 2026-03-05T08:14:17.079664Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add POST /api/webhooks/{route}/replay/{id} endpoint in routes/webhooks.rs — loads payload by id, dispatches raw_body through registered tool, returns {ok, run_id}; register in lib.rs
+  description: null
+  status: completed
+  created_at: 2026-03-05T06:25:16.074963Z
+  started_at: 2026-03-05T08:14:21.258869Z
+  completed_at: 2026-03-05T08:17:03.166575Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T06:24:41.441247Z
+  exited: 2026-03-05T08:09:28.638855Z
+- phase: specified
+  entered: 2026-03-05T08:09:28.638855Z
+  exited: 2026-03-05T08:11:04.099644Z
+- phase: planned
+  entered: 2026-03-05T08:11:04.099644Z
+  exited: 2026-03-05T08:11:14.141403Z
+- phase: ready
+  entered: 2026-03-05T08:11:14.141403Z
+  exited: 2026-03-05T08:11:21.521267Z
+- phase: implementation
+  entered: 2026-03-05T08:11:21.521267Z
+  exited: 2026-03-05T08:17:40.852158Z
+- phase: review
+  entered: 2026-03-05T08:17:40.852158Z
+  exited: 2026-03-05T08:17:48.829659Z
+- phase: audit
+  entered: 2026-03-05T08:17:48.829659Z
+  exited: 2026-03-05T08:18:12.535779Z
+- phase: qa
+  entered: 2026-03-05T08:18:12.535779Z
+  exited: 2026-03-05T08:20:40.745567Z
+- phase: merge
+  entered: 2026-03-05T08:20:40.745567Z
+  exited: 2026-03-05T08:20:46.222456Z
+- phase: released
+  entered: 2026-03-05T08:20:46.222456Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

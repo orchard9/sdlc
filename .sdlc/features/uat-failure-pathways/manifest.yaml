@@ -1,0 +1,154 @@
+slug: uat-failure-pathways
+title: UAT failure triage and 3 pathways in milestone-uat template
+phase: released
+created_at: 2026-03-04T06:21:46.515340Z
+updated_at: 2026-03-05T08:15:52.590973Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/spec.md
+  created_at: 2026-03-04T23:47:21.667652Z
+  approved_at: 2026-03-04T23:47:23.494678Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/design.md
+  created_at: 2026-03-04T23:48:21.749916Z
+  approved_at: 2026-03-04T23:48:21.755743Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/tasks.md
+  created_at: 2026-03-04T23:48:51.699202Z
+  approved_at: 2026-03-04T23:48:51.705386Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/qa-plan.md
+  created_at: 2026-03-04T23:49:23.728764Z
+  approved_at: 2026-03-04T23:49:23.735126Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/review.md
+  created_at: 2026-03-05T08:13:32.485067Z
+  approved_at: 2026-03-05T08:13:33.673832Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/audit.md
+  created_at: 2026-03-05T08:14:32.722221Z
+  approved_at: 2026-03-05T08:14:33.913366Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/uat-failure-pathways/qa-results.md
+  created_at: 2026-03-05T08:15:42.624587Z
+  approved_at: 2026-03-05T08:15:43.766432Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Update sdlc_milestone_uat.rs COMMAND — triage + 3 pathways (Steps 5-9)
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:44.740972Z
+  started_at: 2026-03-04T23:49:53.781672Z
+  completed_at: 2026-03-04T23:50:38.411097Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update sdlc_milestone_uat.rs PLAYBOOK and SKILL variants
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:44.745422Z
+  started_at: 2026-03-04T23:50:38.417587Z
+  completed_at: 2026-03-04T23:51:25.667352Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create sdlc_recap.rs with 4 platform variants
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:44.749433Z
+  started_at: 2026-03-04T23:51:25.674122Z
+  completed_at: 2026-03-04T23:54:51.505052Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Register sdlc_recap in mod.rs ALL_COMMANDS
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:44.753694Z
+  started_at: null
+  completed_at: 2026-03-04T23:54:51.514601Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add /sdlc-recap to GUIDANCE_MD_CONTENT table in templates.rs
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:44.757692Z
+  started_at: null
+  completed_at: 2026-03-04T23:54:51.522786Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Build verification and sdlc update install
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:49:44.761525Z
+  started_at: 2026-03-04T23:54:56.660582Z
+  completed_at: 2026-03-05T08:12:50.019004Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T06:21:46.515340Z
+  exited: 2026-03-04T23:47:23.497243Z
+- phase: specified
+  entered: 2026-03-04T23:47:23.497243Z
+  exited: 2026-03-04T23:49:23.736587Z
+- phase: planned
+  entered: 2026-03-04T23:49:23.736587Z
+  exited: 2026-03-04T23:49:28.893527Z
+- phase: ready
+  entered: 2026-03-04T23:49:28.893527Z
+  exited: 2026-03-04T23:49:32.607238Z
+- phase: implementation
+  entered: 2026-03-04T23:49:32.607238Z
+  exited: 2026-03-05T08:13:33.719664Z
+- phase: review
+  entered: 2026-03-05T08:13:33.719664Z
+  exited: 2026-03-05T08:14:05.538208Z
+- phase: audit
+  entered: 2026-03-05T08:14:05.538208Z
+  exited: 2026-03-05T08:14:33.971137Z
+- phase: qa
+  entered: 2026-03-05T08:14:33.971137Z
+  exited: 2026-03-05T08:15:43.807100Z
+- phase: merge
+  entered: 2026-03-05T08:15:43.807100Z
+  exited: 2026-03-05T08:15:52.590973Z
+- phase: released
+  entered: 2026-03-05T08:15:52.590973Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

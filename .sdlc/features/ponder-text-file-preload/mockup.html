@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponder Text File Preload — Mockup</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+
+  /* Nav */
+  nav { display: flex; gap: 8px; padding: 12px 16px; background: #1a1f2e; border-bottom: 1px solid #2d3348; position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
+  nav a { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 500; text-decoration: none; color: #94a3b8; border: 1px solid transparent; transition: all .15s; }
+  nav a:hover, nav a.active { background: #2d3348; color: #e2e8f0; border-color: #3d4460; }
+
+  section { display: none; padding: 40px 20px; min-height: calc(100vh - 53px); align-items: center; justify-content: center; }
+  section.visible { display: flex; }
+
+  /* Modal card */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; }
+  .modal { background: #1a1f2e; border: 1px solid #2d3348; border-radius: 12px; width: 100%; max-width: 520px; max-height: 85vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,0.5); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #2d3348; flex-shrink: 0; }
+  .modal-header span { font-size: 14px; font-weight: 600; }
+  .close-btn { background: none; border: none; color: #64748b; cursor: pointer; padding: 2px; border-radius: 4px; }
+  .close-btn:hover { color: #e2e8f0; }
+  .modal-body { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+  .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #2d3348; background: #1a1f2e; border-radius: 0 0 12px 12px; flex-shrink: 0; }
+
+  /* Form fields */
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  label { font-size: 11px; font-weight: 500; color: #64748b; }
+  label .opt { opacity: .6; }
+  input[type="text"], textarea { width: 100%; padding: 8px 12px; font-size: 13px; background: rgba(255,255,255,.05); border: 1px solid #2d3348; border-radius: 8px; color: #e2e8f0; outline: none; transition: border-color .15s; font-family: inherit; }
+  input[type="text"]:focus, textarea:focus { border-color: rgba(99,102,241,.5); box-shadow: 0 0 0 3px rgba(99,102,241,.1); }
+  input.mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #94a3b8; }
+  textarea { resize: none; }
+
+  /* References */
+  .ref-row { display: flex; align-items: center; gap: 8px; }
+  .ref-input-wrap { flex: 1; display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: rgba(255,255,255,.05); border: 1px solid #2d3348; border-radius: 8px; transition: border-color .15s; }
+  .ref-input-wrap:focus-within { border-color: rgba(99,102,241,.5); }
+  .ref-input-wrap input { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; color: #e2e8f0; }
+  .link-icon { width: 14px; height: 14px; color: #475569; flex-shrink: 0; }
+  .icon-btn { background: none; border: none; color: #475569; cursor: pointer; padding: 4px; border-radius: 4px; }
+  .icon-btn:hover { color: #94a3b8; }
+  .add-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #64748b; cursor: pointer; background: none; border: none; padding: 2px 0; }
+  .add-btn:hover { color: #e2e8f0; }
+
+  /* Drop zone */
+  .drop-zone { border: 1px dashed #2d3348; border-radius: 8px; padding: 16px; text-align: center; cursor: pointer; transition: all .15s; }
+  .drop-zone:hover { border-color: rgba(99,102,241,.4); background: rgba(99,102,241,.03); }
+  .drop-zone.drag-over { border-color: rgba(99,102,241,.6); background: rgba(99,102,241,.07); }
+  .drop-zone svg { display: block; margin: 0 auto 4px; color: #475569; }
+  .drop-zone p { font-size: 12px; color: #64748b; }
+  .drop-zone .ext-hint { font-size: 10px; color: #475569; margin-top: 2px; }
+
+  /* File chips */
+  .file-list { display: flex; flex-direction: column; gap: 6px; }
+  .file-chip { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: rgba(255,255,255,.04); border: 1px solid #2d3348; border-radius: 6px; font-size: 12px; }
+  .file-chip .file-icon { color: #6366f1; flex-shrink: 0; }
+  .file-chip .file-name { flex: 1; color: #cbd5e1; font-weight: 500; }
+  .file-chip .file-size { color: #64748b; font-size: 11px; }
+  .file-chip .warn { color: #f59e0b; font-size: 10px; margin-left: 2px; }
+  .file-chip .remove { background: none; border: none; color: #475569; cursor: pointer; padding: 2px; border-radius: 4px; margin-left: auto; }
+  .file-chip .remove:hover { color: #e2e8f0; }
+
+  /* Buttons */
+  .btn-ghost { background: none; border: none; padding: 6px 12px; font-size: 13px; color: #64748b; cursor: pointer; border-radius: 6px; }
+  .btn-ghost:hover { color: #e2e8f0; }
+  .btn-primary { padding: 6px 16px; font-size: 13px; font-weight: 500; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; }
+  .btn-primary:hover { background: #5254cc; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Spinner */
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: white; border-radius: 50%; animation: spin .6s linear infinite; margin-right: 6px; vertical-align: middle; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Progress bar for submitting state */
+  .progress-bar { height: 2px; background: #2d3348; border-radius: 1px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #6366f1; border-radius: 1px; transition: width .3s; }
+
+  /* Scene wrapper */
+  .scene { position: relative; width: 100%; max-width: 560px; }
+  .scene-label { font-size: 11px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: .05em; margin-bottom: 12px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#screen-empty" class="active" onclick="show('screen-empty',this)">Empty state</a>
+  <a href="#screen-with-files" onclick="show('screen-with-files',this)">Files attached</a>
+  <a href="#screen-drag-over" onclick="show('screen-drag-over',this)">Drag over</a>
+  <a href="#screen-large-file" onclick="show('screen-large-file',this)">Large file warning</a>
+  <a href="#screen-submitting" onclick="show('screen-submitting',this)">Submitting</a>
+</nav>
+
+<!-- Screen: Empty state (no files yet) -->
+<section id="screen-empty" class="visible">
+  <div class="scene">
+    <div class="scene-label">Empty state — no files attached</div>
+    <div class="modal">
+      <div class="modal-header">
+        <span>New Idea</span>
+        <button class="close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Title</label>
+          <input type="text" value="Redesign ponder workspace layout" />
+        </div>
+        <div class="field">
+          <label>Slug</label>
+          <input type="text" class="mono" value="redesign-ponder-workspace-layout" />
+        </div>
+        <div class="field">
+          <label>Description <span class="opt">(optional)</span></label>
+          <textarea rows="4" placeholder="Expand on the idea…"></textarea>
+        </div>
+        <div class="field">
+          <label>References <span class="opt">(optional)</span></label>
+          <div class="ref-row">
+            <div class="ref-input-wrap">
+              <svg class="link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <input placeholder="https://…" />
+            </div>
+            <div style="width:28px"></div>
+          </div>
+          <button class="add-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add reference
+          </button>
+        </div>
+        <div class="field">
+          <label>Files <span class="opt">(optional)</span></label>
+          <div class="drop-zone">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <p>Drop files here or click to browse</p>
+            <div class="ext-hint">.md .txt .html .svg .js .ts .tsx .jsx .rs .py .go .json .yaml .toml .css .sh</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost">Cancel</button>
+        <button class="btn-primary">Create Idea</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Files attached -->
+<section id="screen-with-files">
+  <div class="scene">
+    <div class="scene-label">Files attached — two files selected</div>
+    <div class="modal">
+      <div class="modal-header">
+        <span>New Idea</span>
+        <button class="close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Title</label>
+          <input type="text" value="Redesign ponder workspace layout" />
+        </div>
+        <div class="field">
+          <label>Slug</label>
+          <input type="text" class="mono" value="redesign-ponder-workspace-layout" />
+        </div>
+        <div class="field">
+          <label>Description <span class="opt">(optional)</span></label>
+          <textarea rows="3" placeholder="Expand on the idea…"></textarea>
+        </div>
+        <div class="field">
+          <label>References <span class="opt">(optional)</span></label>
+          <button class="add-btn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add reference
+          </button>
+        </div>
+        <div class="field">
+          <label>Files <span class="opt">(optional)</span></label>
+          <div class="drop-zone">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <p>Drop more files or click to browse</p>
+            <div class="ext-hint">.md .txt .html .svg .js .ts .tsx .jsx .rs .py …</div>
+          </div>
+          <div class="file-list">
+            <div class="file-chip">
+              <svg class="file-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="file-name">spec.md</span>
+              <span class="file-size">4.2 KB</span>
+              <button class="remove">✕</button>
+            </div>
+            <div class="file-chip">
+              <svg class="file-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="file-name">notes.txt</span>
+              <span class="file-size">1.1 KB</span>
+              <button class="remove">✕</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost">Cancel</button>
+        <button class="btn-primary">Create Idea</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Drag over state -->
+<section id="screen-drag-over">
+  <div class="scene">
+    <div class="scene-label">Drag over — drop zone active</div>
+    <div class="modal">
+      <div class="modal-header">
+        <span>New Idea</span>
+        <button class="close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Title</label>
+          <input type="text" value="Redesign ponder workspace layout" />
+        </div>
+        <div class="field">
+          <label>Slug</label>
+          <input type="text" class="mono" value="redesign-ponder-workspace-layout" />
+        </div>
+        <div class="field">
+          <label>Description <span class="opt">(optional)</span></label>
+          <textarea rows="3" placeholder="Expand on the idea…"></textarea>
+        </div>
+        <div class="field">
+          <label>Files <span class="opt">(optional)</span></label>
+          <div class="drop-zone drag-over" style="border-style:solid;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <p style="color:#818cf8; font-weight:500;">Release to attach</p>
+            <div class="ext-hint">.md .txt .html .svg .js .ts .tsx .jsx .rs .py …</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost">Cancel</button>
+        <button class="btn-primary">Create Idea</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Large file warning -->
+<section id="screen-large-file">
+  <div class="scene">
+    <div class="scene-label">Large file warning (&gt;500 KB)</div>
+    <div class="modal">
+      <div class="modal-header">
+        <span>New Idea</span>
+        <button class="close-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Title</label>
+          <input type="text" value="Redesign ponder workspace layout" />
+        </div>
+        <div class="field">
+          <label>Slug</label>
+          <input type="text" class="mono" value="redesign-ponder-workspace-layout" />
+        </div>
+        <div class="field">
+          <label>Files <span class="opt">(optional)</span></label>
+          <div class="drop-zone">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <p>Drop more files or click to browse</p>
+          </div>
+          <div class="file-list">
+            <div class="file-chip">
+              <svg class="file-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="file-name">big-export.json</span>
+              <span class="file-size">1.2 MB</span>
+              <span class="warn" title="Large file — will be included but may use significant context">⚠</span>
+              <button class="remove">✕</button>
+            </div>
+            <div class="file-chip">
+              <svg class="file-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="file-name">notes.md</span>
+              <span class="file-size">3.8 KB</span>
+              <button class="remove">✕</button>
+            </div>
+          </div>
+          <p style="font-size:11px; color:#f59e0b; margin-top:4px;">⚠ big-export.json is large and may use significant agent context.</p>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost">Cancel</button>
+        <button class="btn-primary">Create Idea</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Submitting -->
+<section id="screen-submitting">
+  <div class="scene">
+    <div class="scene-label">Submitting — uploading files then starting chat</div>
+    <div class="modal">
+      <div class="modal-header">
+        <span>New Idea</span>
+        <button class="close-btn" disabled style="opacity:.4">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Title</label>
+          <input type="text" value="Redesign ponder workspace layout" disabled style="opacity:.6" />
+        </div>
+        <div class="field">
+          <label>Slug</label>
+          <input type="text" class="mono" value="redesign-ponder-workspace-layout" disabled style="opacity:.6" />
+        </div>
+        <div class="field">
+          <label>Files <span class="opt">(optional)</span></label>
+          <div class="file-list">
+            <div class="file-chip" style="opacity:.7">
+              <svg class="file-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="file-name">spec.md</span>
+              <span class="file-size">4.2 KB</span>
+              <span style="margin-left:auto; font-size:10px; color:#22c55e;">✓ captured</span>
+            </div>
+            <div class="file-chip">
+              <svg class="file-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span class="file-name">notes.txt</span>
+              <span class="file-size">1.1 KB</span>
+              <span class="spinner"></span>
+            </div>
+          </div>
+        </div>
+        <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" disabled style="opacity:.4">Cancel</button>
+        <button class="btn-primary" disabled><span class="spinner"></span>Creating…</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function show(id, link) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('visible'))
+  document.getElementById(id).classList.add('visible')
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'))
+  link.classList.add('active')
+  return false
+}
+// Handle hash on load
+window.addEventListener('DOMContentLoaded', () => {
+  const hash = location.hash.replace('#', '')
+  if (hash) {
+    const el = document.getElementById(hash)
+    const link = document.querySelector(`a[href="#${hash}"]`)
+    if (el && link) show(hash, link)
+  }
+})
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+partners:
+- name: Yuki Tanaka
+  role: Streaming UX Engineer
+  context: Built Linear's live activity views and Vercel's deployment log streaming. Knows exactly what makes long-running agent work feel interactive vs. opaque.
+  agent: /tmp/yuki-tanaka-agent.md
+  recruited_at: 2026-03-04T22:52:45.191671Z
+- name: Sam Okeke
+  role: Developer Tools PM & Skeptic
+  context: Ships minimal, focused developer tools. Will challenge whether chat-while-running earns its complexity.
+  agent: /tmp/sam-okeke-agent.md
+  recruited_at: 2026-03-04T22:52:56.975532Z

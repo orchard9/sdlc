@@ -1,0 +1,16 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: create-workspace-modal
+    title: CreateWorkspaceModal — shared creation form with configurable fields
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  - slug: workspace-shell-component
+    title: WorkspaceShell — shared two-pane list/detail page layout component
+    phase: implementation
+    action: implement_task
+    needs_worktree: true
+    blocked_by: []
+  needs_worktrees: true

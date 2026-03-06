@@ -1,0 +1,23 @@
+image:
+  repository: couchdb
+  tag: "3.3"
+  pullPolicy: IfNotPresent
+
+credentials:
+  user: admin
+  password: ""  # set at install time: --set credentials.password=<value>
+
+storage:
+  size: 5Gi
+  storageClass: ""  # leave empty to use cluster default
+
+service:
+  port: 5984
+
+resources:
+  requests:
+    memory: "256Mi"
+    cpu: "100m"
+  limits:
+    memory: "512Mi"
+    cpu: "500m"

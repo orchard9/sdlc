@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Artifact Share & Capture — Design Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            border: 'hsl(240 5% 15%)',
+            background: 'hsl(224 14% 7%)',
+            foreground: 'hsl(220 9% 88%)',
+            muted: 'hsl(240 5% 12%)',
+            'muted-foreground': 'hsl(240 5% 52%)',
+            primary: 'hsl(250 91% 66%)',
+            accent: 'hsl(240 5% 14%)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: hsl(224 14% 7%); color: hsl(220 9% 88%); font-family: ui-monospace, 'Cascadia Code', 'SF Mono', Consolas, monospace; }
+    .tab-btn { transition: all 0.15s; }
+    .tab-btn.active { color: hsl(220 9% 88%); border-bottom-color: hsl(250 91% 66%); }
+    .tab-btn:not(.active) { color: hsl(240 5% 48%); border-bottom-color: transparent; }
+    .copy-action { opacity: 0; transition: opacity 0.15s; }
+    .msg-row:hover .copy-action { opacity: 1; }
+    .tooltip { position: relative; }
+    .tooltip::after { content: attr(data-tip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%); background: hsl(240 5% 18%); color: hsl(220 9% 80%); font-size: 10px; white-space: nowrap; padding: 2px 6px; border-radius: 4px; border: 1px solid hsl(240 5% 22%); pointer-events: none; opacity: 0; transition: opacity 0.1s; z-index: 50; }
+    .tooltip:hover::after { opacity: 1; }
+    .check-flash { animation: flash 0.3s ease-out; }
+    @keyframes flash { 0% { color: hsl(142 76% 55%); } 100% { color: inherit; } }
+  </style>
+</head>
+<body class="p-6 text-sm">
+
+  <div class="text-xs text-yellow-400 border border-yellow-900 rounded px-3 py-1 inline-block mb-6">
+    ⚠ Design Prototype — not production code
+  </div>
+
+  <!-- Tab switcher -->
+  <div class="flex gap-0 border-b border-[hsl(240_5%_15%)] mb-8">
+    <button onclick="show('artifact')" id="tab-artifact" class="tab-btn active px-4 py-2 text-xs font-medium border-b-2">
+      State A — Artifact Viewer (with copy/screenshot)
+    </button>
+    <button onclick="show('dialogue')" id="tab-dialogue" class="tab-btn px-4 py-2 text-xs font-medium border-b-2">
+      State B — Dialogue Message (hover copy)
+    </button>
+    <button onclick="show('feedback')" id="tab-feedback" class="tab-btn px-4 py-2 text-xs font-medium border-b-2">
+      State C — Copied ✓ (feedback states)
+    </button>
+  </div>
+
+  <!-- =========================================================
+       STATE A: Artifact Viewer
+  ========================================================= -->
+  <div id="state-artifact">
+    <p class="text-xs text-[hsl(240_5%_48%)] mb-4">Artifact panel with always-visible copy/screenshot buttons in the header.</p>
+
+    <div class="flex gap-4 h-[520px]">
+      <!-- Sidebar: artifact list -->
+      <div class="w-44 shrink-0 border border-[hsl(240_5%_15%)] rounded-lg overflow-hidden">
+        <div class="px-3 py-2 border-b border-[hsl(240_5%_15%)] text-[10px] text-[hsl(240_5%_48%)] uppercase tracking-wider">Artifacts</div>
+        <div class="space-y-0.5 p-1.5">
+          <div class="flex items-center gap-2 px-2 py-1.5 rounded bg-[hsl(250_91%_66%_/_0.12)] border border-[hsl(250_91%_66%_/_0.25)] text-[hsl(250_91%_80%)]">
+            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-xs truncate">spec.md</span>
+          </div>
+          <div class="flex items-center gap-2 px-2 py-1.5 rounded text-[hsl(240_5%_52%)] hover:bg-[hsl(240_5%_12%)]">
+            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-xs truncate">design.md</span>
+          </div>
+          <div class="flex items-center gap-2 px-2 py-1.5 rounded text-[hsl(240_5%_52%)] hover:bg-[hsl(240_5%_12%)]">
+            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            <span class="text-xs truncate">tasks.md</span>
+          </div>
+          <div class="flex items-center gap-2 px-2 py-1.5 rounded text-[hsl(240_5%_52%)] hover:bg-[hsl(240_5%_12%)]">
+            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.069A1 1 0 0121 8.82V15.18a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"/></svg>
+            <span class="text-xs truncate">mockup.html</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main artifact content area -->
+      <div class="flex-1 border border-[hsl(240_5%_15%)] rounded-lg overflow-hidden flex flex-col">
+        <!-- Artifact header — KEY: copy/screenshot buttons always visible here -->
+        <div class="flex items-center gap-2 px-3 py-2 border-b border-[hsl(240_5%_15%)] bg-[hsl(240_5%_10%)]">
+          <svg class="w-3.5 h-3.5 text-[hsl(240_5%_48%)] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          <span class="text-xs font-medium text-[hsl(220_9%_75%)] flex-1">spec.md</span>
+          <span class="text-[10px] text-[hsl(240_5%_42%)]">3.2 KB · Approved</span>
+
+          <!-- COPY / SCREENSHOT BUTTON CLUSTER — always visible -->
+          <div class="flex items-center gap-1 ml-2">
+            <!-- Copy markdown button -->
+            <button
+              class="tooltip flex items-center gap-1.5 px-2 py-1 rounded border border-[hsl(240_5%_18%)] bg-[hsl(240_5%_13%)] hover:bg-[hsl(240_5%_17%)] text-[hsl(240_5%_52%)] hover:text-[hsl(220_9%_75%)] transition-colors"
+              data-tip="Copy markdown"
+              onclick="this.innerHTML='<svg class=\'w-3 h-3\' fill=\'none\' stroke=\'hsl(142,76%,55%)\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 13l4 4L19 7\'/></svg><span class=\'text-[10px] font-medium\' style=\'color:hsl(142,76%,55%)\'>Copied</span>'; setTimeout(()=>this.innerHTML='<svg class=\'w-3 h-3\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z\'/></svg><span class=\'text-[10px] font-medium\'>MD</span>',2000)"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              <span class="text-[10px] font-medium">MD</span>
+            </button>
+            <!-- Copy image button -->
+            <button
+              class="tooltip flex items-center gap-1.5 px-2 py-1 rounded border border-[hsl(240_5%_18%)] bg-[hsl(240_5%_13%)] hover:bg-[hsl(240_5%_17%)] text-[hsl(240_5%_52%)] hover:text-[hsl(220_9%_75%)] transition-colors"
+              data-tip="Copy as image"
+              onclick="this.innerHTML='<svg class=\'w-3 h-3\' fill=\'none\' stroke=\'hsl(142,76%,55%)\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M5 13l4 4L19 7\'/></svg><span class=\'text-[10px] font-medium\' style=\'color:hsl(142,76%,55%)\'>Copied</span>'; setTimeout(()=>this.innerHTML='<svg class=\'w-3 h-3\' fill=\'none\' stroke=\'currentColor\' viewBox=\'0 0 24 24\'><path stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z\'/></svg><span class=\'text-[10px] font-medium\'>IMG</span>',2000)"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              <span class="text-[10px] font-medium">IMG</span>
+            </button>
+            <!-- Download PNG button (secondary) -->
+            <button
+              class="tooltip flex items-center gap-1 px-1.5 py-1 rounded border border-[hsl(240_5%_15%)] bg-transparent hover:bg-[hsl(240_5%_13%)] text-[hsl(240_5%_42%)] hover:text-[hsl(240_5%_60%)] transition-colors"
+              data-tip="Download PNG"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Artifact content (rendered markdown) -->
+        <div class="flex-1 overflow-auto px-5 py-4">
+          <h1 class="text-base font-semibold mb-3 text-[hsl(220_9%_92%)]">Specification: Artifact Share & Capture</h1>
+          <div class="text-xs text-[hsl(240_5%_48%)] mb-4">Status: Approved · v1.2 · 2026-03-04</div>
+
+          <h2 class="text-sm font-semibold mb-2 mt-4 text-[hsl(220_9%_85%)]">Overview</h2>
+          <p class="text-[hsl(240_5%_68%)] leading-relaxed mb-3">
+            Users need one-click copy and capture on all major artifact surfaces.
+            Currently sharing requires OS-level screenshot tools or manual text selection.
+          </p>
+
+          <h2 class="text-sm font-semibold mb-2 mt-4 text-[hsl(220_9%_85%)]">User Stories</h2>
+          <ul class="space-y-1.5 text-[hsl(240_5%_65%)]">
+            <li class="flex gap-2"><span class="text-[hsl(250_91%_70%)]">→</span> Copy raw markdown from any artifact in one click</li>
+            <li class="flex gap-2"><span class="text-[hsl(250_91%_70%)]">→</span> Copy rendered artifact as image for Slack / Discord</li>
+            <li class="flex gap-2"><span class="text-[hsl(250_91%_70%)]">→</span> Copy individual dialogue messages from ponder sessions</li>
+          </ul>
+
+          <h2 class="text-sm font-semibold mb-2 mt-4 text-[hsl(220_9%_85%)]">Technical Approach</h2>
+          <div class="bg-[hsl(240_5%_10%)] border border-[hsl(240_5%_15%)] rounded p-3 font-mono text-[11px] text-[hsl(240_5%_65%)]">
+            Copy MD → navigator.clipboard.writeText(artifact.content)<br/>
+            Copy IMG → html2canvas(el) → ClipboardItem({ 'image/png': blob })<br/>
+            Download → html2canvas(el) → canvas.toDataURL() → anchor.click()
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-[10px] text-[hsl(240_5%_35%)] mt-3">
+      Click [MD] or [IMG] buttons above to see the copied feedback state. Hover buttons for tooltip labels.
+    </p>
+  </div>
+
+  <!-- =========================================================
+       STATE B: Dialogue Message with hover copy
+  ========================================================= -->
+  <div id="state-dialogue" class="hidden">
+    <p class="text-xs text-[hsl(240_5%_48%)] mb-4">Ponder session dialogue — hover over any message to reveal the copy action. Try hovering the messages below.</p>
+
+    <div class="max-w-2xl border border-[hsl(240_5%_15%)] rounded-lg overflow-hidden">
+      <!-- Session divider -->
+      <div class="flex items-center gap-3 px-4 py-3">
+        <div class="flex-1 h-px bg-[hsl(240_5%_15%)]"></div>
+        <span class="text-[10px] text-[hsl(240_5%_40%)] font-medium whitespace-nowrap">Session 3 · 2h ago</span>
+        <div class="flex-1 h-px bg-[hsl(240_5%_15%)]"></div>
+      </div>
+
+      <div class="px-4 pb-4 space-y-3">
+        <!-- Agent message (partner) — hover to copy -->
+        <div class="msg-row group flex gap-3 items-start">
+          <div class="shrink-0 w-6 h-6 rounded-full bg-[hsl(250_91%_30%)] border border-[hsl(250_91%_40%)] flex items-center justify-center text-[9px] font-bold text-[hsl(250_91%_80%)]">M</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-[10px] font-semibold text-[hsl(250_91%_72%)]">Maya Chen · UX Engineer</span>
+              <span class="text-[9px] text-[hsl(240_5%_40%)]">session 3</span>
+            </div>
+            <div class="relative bg-[hsl(240_5%_11%)] border border-[hsl(240_5%_16%)] rounded-lg px-3 py-2 text-xs text-[hsl(240_5%_68%)] leading-relaxed">
+              The copy button placement matters as much as its existence. Hover-reveal on individual messages is the right call for dialogue — it doesn't clutter the reading experience. But for artifact files, put it in the header, always visible.
+
+              <!-- Copy action — hover reveal -->
+              <button
+                class="copy-action absolute top-1.5 right-1.5 p-1 rounded border border-[hsl(240_5%_20%)] bg-[hsl(240_5%_14%)] hover:bg-[hsl(240_5%_18%)] text-[hsl(240_5%_50%)] hover:text-[hsl(240_5%_75%)] transition-colors"
+                title="Copy message"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- User message — hover to copy -->
+        <div class="msg-row group flex gap-3 items-start">
+          <div class="shrink-0 w-6 h-6 rounded-full bg-[hsl(210_15%_25%)] border border-[hsl(210_15%_35%)] flex items-center justify-center text-[9px] font-bold text-[hsl(210_15%_75%)]">J</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-[10px] font-semibold text-[hsl(220_9%_70%)]">Jordan</span>
+              <span class="text-[9px] text-[hsl(240_5%_40%)]">user</span>
+            </div>
+            <div class="relative bg-[hsl(240_5%_9%)] border border-[hsl(240_5%_14%)] rounded-lg px-3 py-2 text-xs text-[hsl(240_5%_68%)] leading-relaxed">
+              What about the screenshot button specifically? That's the 💰 feature for me.
+
+              <button
+                class="copy-action absolute top-1.5 right-1.5 p-1 rounded border border-[hsl(240_5%_20%)] bg-[hsl(240_5%_14%)] hover:bg-[hsl(240_5%_18%)] text-[hsl(240_5%_50%)] hover:text-[hsl(240_5%_75%)] transition-colors"
+                title="Copy message"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Agent response — hover to copy -->
+        <div class="msg-row group flex gap-3 items-start">
+          <div class="shrink-0 w-6 h-6 rounded-full bg-[hsl(250_91%_30%)] border border-[hsl(250_91%_40%)] flex items-center justify-center text-[9px] font-bold text-[hsl(250_91%_80%)]">T</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-baseline gap-2 mb-1">
+              <span class="text-[10px] font-semibold text-[hsl(250_91%_72%)]">Tavish Reid · Platform Eng</span>
+              <span class="text-[9px] text-[hsl(240_5%_40%)]">session 3</span>
+            </div>
+            <div class="relative bg-[hsl(240_5%_11%)] border border-[hsl(240_5%_16%)] rounded-lg px-3 py-2 text-xs text-[hsl(240_5%_68%)] leading-relaxed">
+              html2canvas → ClipboardItem({'image/png': blob}). Dynamic import so it doesn't inflate initial bundle. One caveat: iframes won't capture — the HTML mockup viewer will be excluded. Acceptable tradeoff.
+
+              <button
+                class="copy-action absolute top-1.5 right-1.5 p-1 rounded border border-[hsl(240_5%_20%)] bg-[hsl(240_5%_14%)] hover:bg-[hsl(240_5%_18%)] text-[hsl(240_5%_50%)] hover:text-[hsl(240_5%_75%)] transition-colors"
+                title="Copy message"
+              >
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-[10px] text-[hsl(240_5%_35%)] mt-3">Hover each message bubble to reveal the copy icon. Icon appears in top-right corner of the bubble.</p>
+  </div>
+
+  <!-- =========================================================
+       STATE C: Feedback states (copied / failed)
+  ========================================================= -->
+  <div id="state-feedback" class="hidden">
+    <p class="text-xs text-[hsl(240_5%_48%)] mb-6">Button feedback states — what the user sees after clicking.</p>
+
+    <div class="space-y-6 max-w-lg">
+      <!-- MD copied -->
+      <div>
+        <p class="text-[10px] text-[hsl(240_5%_42%)] uppercase tracking-wider mb-2">MD — copied successfully</p>
+        <div class="flex items-center gap-1">
+          <button class="flex items-center gap-1.5 px-2 py-1 rounded border border-[hsl(142_76%_30%)] bg-[hsl(142_76%_10%)] text-[hsl(142_76%_55%)]">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span class="text-[10px] font-medium">Copied</span>
+          </button>
+          <span class="text-[10px] text-[hsl(240_5%_40%)]">← 2s then reverts to MD</span>
+        </div>
+      </div>
+
+      <!-- IMG copied -->
+      <div>
+        <p class="text-[10px] text-[hsl(240_5%_42%)] uppercase tracking-wider mb-2">IMG — copied successfully</p>
+        <div class="flex items-center gap-1">
+          <button class="flex items-center gap-1.5 px-2 py-1 rounded border border-[hsl(142_76%_30%)] bg-[hsl(142_76%_10%)] text-[hsl(142_76%_55%)]">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+            <span class="text-[10px] font-medium">Copied</span>
+          </button>
+          <span class="text-[10px] text-[hsl(240_5%_40%)]">← 2s then reverts to IMG</span>
+        </div>
+      </div>
+
+      <!-- In-progress (capturing) -->
+      <div>
+        <p class="text-[10px] text-[hsl(240_5%_42%)] uppercase tracking-wider mb-2">IMG — capturing (html2canvas async)</p>
+        <div class="flex items-center gap-1">
+          <button class="flex items-center gap-1.5 px-2 py-1 rounded border border-[hsl(240_5%_20%)] bg-[hsl(240_5%_13%)] text-[hsl(240_5%_55%)]" disabled>
+            <svg class="w-3 h-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+            <span class="text-[10px] font-medium">Capturing…</span>
+          </button>
+          <span class="text-[10px] text-[hsl(240_5%_40%)]">← typically &lt;200ms</span>
+        </div>
+      </div>
+
+      <!-- Error state -->
+      <div>
+        <p class="text-[10px] text-[hsl(240_5%_42%)] uppercase tracking-wider mb-2">IMG — clipboard permission denied</p>
+        <div class="flex items-center gap-1">
+          <button class="flex items-center gap-1.5 px-2 py-1 rounded border border-[hsl(0_72%_30%)] bg-[hsl(0_72%_10%)] text-[hsl(0_72%_65%)]">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="text-[10px] font-medium">Failed — download instead?</span>
+          </button>
+          <span class="text-[10px] text-[hsl(240_5%_40%)]">← fallback to download</span>
+        </div>
+      </div>
+
+      <!-- Message copy feedback (inline, small) -->
+      <div>
+        <p class="text-[10px] text-[hsl(240_5%_42%)] uppercase tracking-wider mb-2">Dialogue message — copied</p>
+        <div class="flex items-center gap-2">
+          <button class="p-1 rounded border border-[hsl(142_76%_30%)] bg-[hsl(142_76%_10%)] text-[hsl(142_76%_55%)]">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+          </button>
+          <span class="text-[10px] text-[hsl(240_5%_40%)]">← reverts in 2s, same pattern as existing CopyButton</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function show(tab) {
+      ['artifact', 'dialogue', 'feedback'].forEach(t => {
+        document.getElementById('state-' + t).classList.toggle('hidden', t !== tab)
+        const btn = document.getElementById('tab-' + t)
+        btn.classList.toggle('active', t === tab)
+        btn.classList.toggle('tab-btn', true)
+      })
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Spike Interface — Design Prototype</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'SF Mono', 'Fira Code', monospace; }
+    .verdict-adopt { background: #052e16; color: #4ade80; border-color: #166534; }
+    .verdict-adapt { background: #1c1700; color: #facc15; border-color: #713f12; }
+    .verdict-reject { background: #1c0a0a; color: #f87171; border-color: #7f1d1d; }
+    .verdict-pending { background: #0f172a; color: #94a3b8; border-color: #334155; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 p-8">
+
+  <div class="text-xs text-yellow-400 border border-yellow-900 rounded px-3 py-1 inline-block mb-6">
+    ⚠ Design Prototype — not production code
+  </div>
+
+  <!-- State tabs -->
+  <div class="flex gap-2 mb-8">
+    <button onclick="showState('list')" id="tab-list" class="px-3 py-1 text-xs rounded border border-gray-700 bg-gray-900 text-gray-300 hover:border-gray-500 cursor-pointer">List View</button>
+    <button onclick="showState('detail')" id="tab-detail" class="px-3 py-1 text-xs rounded border border-gray-700 bg-gray-900 text-gray-300 hover:border-gray-500 cursor-pointer">Detail View (ADAPT)</button>
+    <button onclick="showState('promote')" id="tab-promote" class="px-3 py-1 text-xs rounded border border-gray-700 bg-gray-900 text-gray-300 hover:border-gray-500 cursor-pointer">Promote → Ponder</button>
+  </div>
+
+  <!-- STATE: List View -->
+  <div id="state-list">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-lg font-semibold text-white">Spikes</h1>
+        <p class="text-xs text-gray-500 mt-1">Time-boxed technical investigations. Each spike answers one question and produces a working prototype.</p>
+      </div>
+      <button class="px-3 py-1.5 text-xs rounded bg-gray-800 border border-gray-700 text-gray-300 hover:border-gray-500 flex items-center gap-2">
+        <span class="text-gray-500">▸</span> Run spike
+        <span class="text-gray-600 text-[10px] ml-1">/sdlc-spike</span>
+      </button>
+    </div>
+
+    <div class="space-y-2">
+      <!-- Spike 1 — ADOPT -->
+      <div class="rounded-lg border border-gray-800 bg-gray-900 px-4 py-3 flex items-center gap-4 hover:border-gray-700 cursor-pointer group">
+        <span class="text-xs px-2 py-0.5 rounded border verdict-adopt font-semibold">ADOPT</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-white truncate">redb-vs-sled-embedded-db</div>
+          <div class="text-xs text-gray-500 mt-0.5 truncate">We need an embedded key-value store so that orchestrator state persists across restarts without a network dependency.</div>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-600 shrink-0">
+          <span>2026-02-28</span>
+          <span class="text-gray-800">→</span>
+          <span class="text-gray-500 group-hover:text-gray-400">findings →</span>
+        </div>
+      </div>
+
+      <!-- Spike 2 — ADAPT -->
+      <div class="rounded-lg border border-yellow-900/50 bg-gray-900 px-4 py-3 flex items-center gap-4 hover:border-yellow-900 cursor-pointer group ring-1 ring-yellow-900/20">
+        <span class="text-xs px-2 py-0.5 rounded border verdict-adapt font-semibold">ADAPT</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-white truncate">playwright-mcp-uat</div>
+          <div class="text-xs text-gray-500 mt-0.5 truncate">We need browser automation for milestone acceptance tests so that UAT runs are deterministic and repeatable without human interaction.</div>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-600 shrink-0">
+          <span>2026-03-01</span>
+          <span class="text-gray-800">→</span>
+          <span class="text-yellow-700 group-hover:text-yellow-600">promote to ponder →</span>
+        </div>
+      </div>
+
+      <!-- Spike 3 — REJECT -->
+      <div class="rounded-lg border border-gray-800 bg-gray-900 px-4 py-3 flex items-center gap-4 hover:border-gray-700 cursor-pointer group">
+        <span class="text-xs px-2 py-0.5 rounded border verdict-reject font-semibold">REJECT</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-white truncate">turso-sqlite-remote</div>
+          <div class="text-xs text-gray-500 mt-0.5 truncate">We need a lightweight remote-compatible database so that sdlc-server can persist state without running Postgres in small deployments.</div>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-600 shrink-0">
+          <span>2026-03-02</span>
+          <span class="text-gray-800">→</span>
+          <span class="text-gray-500 group-hover:text-gray-400">findings →</span>
+        </div>
+      </div>
+
+      <!-- Spike 4 — Pending (in progress) -->
+      <div class="rounded-lg border border-gray-800 bg-gray-900/50 px-4 py-3 flex items-center gap-4 cursor-pointer group opacity-70">
+        <span class="text-xs px-2 py-0.5 rounded border verdict-pending font-semibold">IN PROGRESS</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm text-gray-400 truncate">openai-structured-outputs</div>
+          <div class="text-xs text-gray-600 mt-0.5 truncate">We need structured JSON output from LLM calls so that agent responses can be parsed reliably without brittle regex extraction.</div>
+        </div>
+        <div class="flex items-center gap-3 text-xs text-gray-600 shrink-0">
+          <span>2026-03-04</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-6 text-xs text-gray-700 flex gap-4">
+      <span>4 spikes total</span>
+      <span>·</span>
+      <span class="text-green-900">1 adopted</span>
+      <span>·</span>
+      <span class="text-yellow-900">1 adapting</span>
+      <span>·</span>
+      <span class="text-red-900">1 rejected</span>
+    </div>
+  </div>
+
+  <!-- STATE: Detail View (ADAPT spike) -->
+  <div id="state-detail" class="hidden">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-gray-600 mb-6">
+      <span class="hover:text-gray-400 cursor-pointer">Spikes</span>
+      <span>/</span>
+      <span class="text-gray-400">playwright-mcp-uat</span>
+    </div>
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-6">
+      <div>
+        <div class="flex items-center gap-3 mb-2">
+          <span class="text-xs px-2 py-0.5 rounded border verdict-adapt font-semibold">ADAPT</span>
+          <span class="text-xs text-gray-600">2026-03-01</span>
+        </div>
+        <h1 class="text-lg font-semibold text-white">playwright-mcp-uat</h1>
+        <p class="text-xs text-gray-500 mt-1 max-w-xl">We need browser automation for milestone acceptance tests so that UAT runs are deterministic and repeatable without human interaction.</p>
+      </div>
+      <button onclick="showState('promote')" class="px-3 py-1.5 text-xs rounded bg-yellow-950 border border-yellow-800 text-yellow-400 hover:border-yellow-600 hover:bg-yellow-900/30 flex items-center gap-2 shrink-0">
+        Promote to Ponder →
+      </button>
+    </div>
+
+    <!-- Findings card -->
+    <div class="rounded-lg border border-gray-800 bg-gray-900 overflow-hidden">
+      <div class="px-4 py-2 border-b border-gray-800 flex items-center justify-between">
+        <span class="text-xs text-gray-500 font-medium">findings.md</span>
+        <span class="text-xs text-gray-700">.sdlc/spikes/playwright-mcp-uat/findings.md</span>
+      </div>
+      <div class="p-4 space-y-4 text-xs text-gray-300 leading-relaxed max-h-[420px] overflow-y-auto">
+        <div>
+          <div class="text-gray-600 uppercase text-[10px] tracking-wider mb-1">The Question</div>
+          <p>Can Playwright MCP provide reliable browser automation for milestone UAT runs within Claude agent sessions without requiring a persistent browser service?</p>
+        </div>
+        <div>
+          <div class="text-gray-600 uppercase text-[10px] tracking-wider mb-1">Success Criteria</div>
+          <p>Agent can navigate to localhost UI, interact with elements, and capture screenshot evidence in a single agent session without external service coordination.</p>
+        </div>
+        <div>
+          <div class="text-gray-600 uppercase text-[10px] tracking-wider mb-1">Candidates Evaluated</div>
+          <div class="rounded border border-gray-800 overflow-hidden mt-1">
+            <table class="w-full text-[11px]">
+              <thead class="bg-gray-800/50">
+                <tr>
+                  <th class="text-left px-3 py-1.5 text-gray-500 font-normal">Candidate</th>
+                  <th class="text-left px-3 py-1.5 text-gray-500 font-normal">Verdict</th>
+                  <th class="text-left px-3 py-1.5 text-gray-500 font-normal">Reason</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-800">
+                <tr>
+                  <td class="px-3 py-1.5 text-yellow-400">Playwright MCP</td>
+                  <td class="px-3 py-1.5">adapt</td>
+                  <td class="px-3 py-1.5 text-gray-400">Works but needs screenshot/DOM capture protocol extension for evidence collection</td>
+                </tr>
+                <tr>
+                  <td class="px-3 py-1.5 text-gray-400">Selenium Grid</td>
+                  <td class="px-3 py-1.5 text-red-400">eliminated</td>
+                  <td class="px-3 py-1.5 text-gray-400">Requires persistent external service — defeats self-contained deployment</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div>
+          <div class="text-gray-600 uppercase text-[10px] tracking-wider mb-1">Risks and Open Questions</div>
+          <ul class="space-y-1 text-gray-400">
+            <li>• MCP tool list injection per-run: how do we ensure UAT runs get Playwright tools without leaking to other agent types?</li>
+            <li>• Screenshot artifact persistence: agent captures screenshots to /tmp — we need a mechanism to copy evidence to .sdlc/milestones/&lt;slug&gt;/uat/</li>
+            <li>• Browser install on CI: npx playwright install needs to run in the pipeline; no current mechanism for this in woodpecker config</li>
+            <li>• Port binding conflicts: UAT agent needs to know what port sdlc-server is running on at test time</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATE: Promote to Ponder -->
+  <div id="state-promote" class="hidden">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-2 text-xs text-gray-600 mb-6">
+      <span class="hover:text-gray-400 cursor-pointer">Spikes</span>
+      <span>/</span>
+      <span class="hover:text-gray-400 cursor-pointer">playwright-mcp-uat</span>
+      <span>/</span>
+      <span class="text-gray-400">Promote to Ponder</span>
+    </div>
+
+    <div class="max-w-xl">
+      <h1 class="text-lg font-semibold text-white mb-1">Promote spike to ponder workspace</h1>
+      <p class="text-xs text-gray-500 mb-6">The spike's findings and open questions will be seeded into the new ponder. The ponder starts oriented around what the spike couldn't resolve.</p>
+
+      <!-- What will be carried forward -->
+      <div class="rounded-lg border border-gray-800 bg-gray-900 mb-4 overflow-hidden">
+        <div class="px-4 py-2 border-b border-gray-800">
+          <span class="text-xs text-gray-500 font-medium">What gets carried forward</span>
+        </div>
+        <div class="p-4 space-y-3 text-xs">
+          <div class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <div>
+              <div class="text-gray-300">spike-findings.md</div>
+              <div class="text-gray-600">Full findings report — winner rationale, what the prototype proved</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <div>
+              <div class="text-gray-300">open-questions.md</div>
+              <div class="text-gray-600">Extracted "Risks and Open Questions" section — the ponder's starting territory</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-green-600 mt-0.5">✓</span>
+            <div>
+              <div class="text-gray-300">Ponder title</div>
+              <div class="text-gray-600">Seeded from spike's "The Question"</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-3">
+            <span class="text-gray-700 mt-0.5">—</span>
+            <div>
+              <div class="text-gray-600">Prototype code</div>
+              <div class="text-gray-700">Stays in /tmp — not carried (ephemeral)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ponder slug field -->
+      <div class="mb-4">
+        <label class="text-xs text-gray-500 block mb-1">Ponder slug</label>
+        <div class="flex items-center gap-2">
+          <input
+            type="text"
+            value="playwright-mcp-uat"
+            class="flex-1 bg-gray-900 border border-gray-700 rounded px-3 py-1.5 text-sm text-white focus:outline-none focus:border-yellow-700"
+          />
+          <span class="text-xs text-gray-600">editable</span>
+        </div>
+        <div class="text-[11px] text-gray-700 mt-1">Will create ponder at .sdlc/roadmap/playwright-mcp-uat/</div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex items-center gap-3">
+        <button class="px-4 py-2 text-sm rounded bg-yellow-950 border border-yellow-800 text-yellow-300 hover:bg-yellow-900/40 hover:border-yellow-600">
+          Promote to Ponder →
+        </button>
+        <span class="text-xs text-gray-600">or run: <code class="text-gray-500">sdlc spike promote playwright-mcp-uat</code></span>
+      </div>
+
+      <!-- CLI equivalent hint -->
+      <div class="mt-6 rounded border border-gray-800 bg-gray-900/50 px-4 py-3">
+        <div class="text-[10px] text-gray-600 uppercase tracking-wider mb-2">CLI equivalent</div>
+        <code class="text-xs text-gray-400">sdlc spike promote playwright-mcp-uat</code>
+        <div class="text-[11px] text-gray-700 mt-1">Creates ponder, seeds artifacts, prints ponder slug</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showState(s) {
+      ['list','detail','promote'].forEach(id => {
+        document.getElementById('state-' + id).classList.add('hidden');
+        document.getElementById('tab-' + id).classList.remove('border-gray-400','text-white');
+        document.getElementById('tab-' + id).classList.add('border-gray-700','text-gray-300');
+      });
+      document.getElementById('state-' + s).classList.remove('hidden');
+      document.getElementById('tab-' + s).classList.add('border-gray-400','text-white');
+      document.getElementById('tab-' + s).classList.remove('border-gray-700','text-gray-300');
+    }
+    showState('list');
+  </script>
+</body>
+</html>

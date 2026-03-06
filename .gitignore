@@ -26,3 +26,6 @@
 # UAT screenshots (ephemeral)
 /*.png
 .sdlc/orchestrator.redb
+
+# Ephemeral agent run records
+.sdlc/.runs/

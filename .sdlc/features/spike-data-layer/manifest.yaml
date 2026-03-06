@@ -1,0 +1,164 @@
+slug: spike-data-layer
+title: Spike data layer — list, load, promote, and reject-to-knowledge
+description: Core Rust data layer in sdlc-core/src/spikes.rs. Parses verdict, date, title, and 'The Question' directly from findings.md headers — no separate manifest.yaml. REJECT verdict auto-triggers store_in_knowledge on list load (background, no explicit API call needed). promote_to_ponder records the resulting ponder slug back into a lightweight .sdlc/spikes/<slug>/state.yaml (verdict + ponder_slug only — not full manifest).
+phase: released
+created_at: 2026-03-04T17:51:51.605779Z
+updated_at: 2026-03-04T21:09:36.007441Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/spike-data-layer/spec.md
+  created_at: 2026-03-04T21:02:22.022549Z
+  approved_at: 2026-03-04T21:02:29.717383Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/spike-data-layer/design.md
+  created_at: 2026-03-04T21:03:11.467559Z
+  approved_at: 2026-03-04T21:03:14.725275Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/spike-data-layer/tasks.md
+  created_at: 2026-03-04T21:03:28.880661Z
+  approved_at: 2026-03-04T21:03:28.887688Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/spike-data-layer/qa-plan.md
+  created_at: 2026-03-04T21:03:48.000794Z
+  approved_at: 2026-03-04T21:03:48.009761Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/spike-data-layer/review.md
+  created_at: 2026-03-04T21:07:14.837993Z
+  approved_at: 2026-03-04T21:07:14.846852Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/spike-data-layer/audit.md
+  created_at: 2026-03-04T21:08:06.688626Z
+  approved_at: 2026-03-04T21:08:06.695332Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/spike-data-layer/qa-results.md
+  created_at: 2026-03-04T21:09:30.949607Z
+  approved_at: 2026-03-04T21:09:30.958238Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: 'Add SpikeEntry struct: slug, title, verdict (ADOPT/ADAPT/REJECT/None), date, the_question'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.404414Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.497230Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement list(root) — reads .sdlc/spikes/*/findings.md headers, returns Vec<SpikeEntry>
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.409408Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.504659Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Implement load_findings(root, slug) — returns raw findings.md content
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.414855Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.510895Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Implement promote_to_ponder(root, slug, ponder_slug_override) — creates ponder entry, seeds spike-findings.md and open-questions.md, records ponder_slug back into spike manifest
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.419817Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.517609Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Auto-call store_in_knowledge during list() when verdict=REJECT and no knowledge entry exists yet — background, no explicit caller or REST endpoint needed
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.424550Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.524597Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: 'Store minimal state in .sdlc/spikes/<slug>/state.yaml: verdict + ponder_slug only — all other metadata parsed from findings.md at read time'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.429259Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.532564Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: 'Unit tests: parse findings.md headers, extract sections, promote creates correct ponder artifacts'
+  description: null
+  status: completed
+  created_at: 2026-03-04T17:52:03.434343Z
+  started_at: null
+  completed_at: 2026-03-04T21:06:53.539556Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T17:51:51.605779Z
+  exited: 2026-03-04T21:02:29.719100Z
+- phase: specified
+  entered: 2026-03-04T21:02:29.719100Z
+  exited: 2026-03-04T21:03:48.011325Z
+- phase: planned
+  entered: 2026-03-04T21:03:48.011325Z
+  exited: 2026-03-04T21:03:52.470029Z
+- phase: ready
+  entered: 2026-03-04T21:03:52.470029Z
+  exited: 2026-03-04T21:03:56.958071Z
+- phase: implementation
+  entered: 2026-03-04T21:03:56.958071Z
+  exited: 2026-03-04T21:07:14.852092Z
+- phase: review
+  entered: 2026-03-04T21:07:14.852092Z
+  exited: 2026-03-04T21:07:20.049310Z
+- phase: audit
+  entered: 2026-03-04T21:07:20.049310Z
+  exited: 2026-03-04T21:08:06.698880Z
+- phase: qa
+  entered: 2026-03-04T21:08:06.698880Z
+  exited: 2026-03-04T21:09:30.962138Z
+- phase: merge
+  entered: 2026-03-04T21:09:30.962138Z
+  exited: 2026-03-04T21:09:36.007441Z
+- phase: released
+  entered: 2026-03-04T21:09:36.007441Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -1,0 +1,17 @@
+id: "20260305-082939-kvr"
+milestone_slug: v24-knowledge-research
+started_at: "2026-03-05T08:29:39Z"
+completed_at: "2026-03-05T08:35:00Z"
+verdict: pass
+tests_total: 7
+tests_passed: 7
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/01-knowledge-page-loads.png
+  - .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/03-research-modal-open.png
+  - .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/04-modal-closed-escape.png
+  - .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/05-research-started-empty-topic.png
+  - .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/06-research-custom-topic.png
+  - .sdlc/milestones/v24-knowledge-research/uat-runs/20260305-082939-kvr/06-research-custom-topic-submitted.png

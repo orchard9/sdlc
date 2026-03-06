@@ -1,0 +1,124 @@
+slug: layout-dead-code-cleanup
+title: Delete BottomTabBar dead code and fix AgentPanelFab vestigial offset
+phase: released
+created_at: 2026-03-04T22:47:47.346059Z
+updated_at: 2026-03-04T23:05:40.252799Z
+artifacts:
+- artifact_type: spec
+  status: waived
+  path: .sdlc/features/layout-dead-code-cleanup/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T23:03:40.585073Z
+  waive_reason: Pure dead-code removal and vestigial style fix — no behavior change, no new logic, no spec needed.
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/layout-dead-code-cleanup/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T23:03:45.585684Z
+  waive_reason: Two-line dead code deletion and a CSS class swap — no design needed.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/layout-dead-code-cleanup/tasks.md
+  created_at: 2026-03-04T23:03:54.807987Z
+  approved_at: 2026-03-04T23:03:56.561021Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/layout-dead-code-cleanup/qa-plan.md
+  created_at: 2026-03-04T23:04:06.491628Z
+  approved_at: 2026-03-04T23:04:06.498047Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/layout-dead-code-cleanup/review.md
+  created_at: 2026-03-04T23:05:14.797036Z
+  approved_at: 2026-03-04T23:05:16.697624Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/layout-dead-code-cleanup/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-04T23:05:24.476Z
+  waive_reason: Dead code deletion and CSS class change — zero security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/layout-dead-code-cleanup/qa-results.md
+  created_at: 2026-03-04T23:05:34.336631Z
+  approved_at: 2026-03-04T23:05:36.451498Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Delete BottomTabBar.tsx dead code file
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:04:25.874880Z
+  started_at: 2026-03-04T23:04:28.161432Z
+  completed_at: 2026-03-04T23:04:32.463870Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Fix AgentPanelFab vestigial bottom-[56px] offset to bottom-4
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:04:25.879714Z
+  started_at: 2026-03-04T23:04:34.121645Z
+  completed_at: 2026-03-04T23:04:39.804399Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:47.346059Z
+  exited: 2026-03-04T23:03:40.587668Z
+- phase: specified
+  entered: 2026-03-04T23:03:40.587668Z
+  exited: 2026-03-04T23:04:06.499634Z
+- phase: planned
+  entered: 2026-03-04T23:04:06.499634Z
+  exited: 2026-03-04T23:04:13.567116Z
+- phase: ready
+  entered: 2026-03-04T23:04:13.567116Z
+  exited: 2026-03-04T23:04:17.529440Z
+- phase: implementation
+  entered: 2026-03-04T23:04:17.529440Z
+  exited: 2026-03-04T23:05:16.702405Z
+- phase: review
+  entered: 2026-03-04T23:05:16.702405Z
+  exited: 2026-03-04T23:05:20.278754Z
+- phase: audit
+  entered: 2026-03-04T23:05:20.278754Z
+  exited: 2026-03-04T23:05:24.477870Z
+- phase: qa
+  entered: 2026-03-04T23:05:24.477870Z
+  exited: 2026-03-04T23:05:36.456507Z
+- phase: merge
+  entered: 2026-03-04T23:05:36.456507Z
+  exited: 2026-03-04T23:05:40.252799Z
+- phase: released
+  entered: 2026-03-04T23:05:40.252799Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

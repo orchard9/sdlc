@@ -1,0 +1,2 @@
+- First open question about scope
+- Second open question about timing

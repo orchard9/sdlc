@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spike UI Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e5e5e5; height: 100vh; display: flex; flex-direction: column; }
+  nav { background: #1a1a1a; border-bottom: 1px solid #2a2a2a; padding: 10px 16px; display: flex; gap: 12px; align-items: center; }
+  nav a { color: #888; text-decoration: none; font-size: 13px; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+  nav a.active, nav a:hover { background: #2a2a2a; color: #e5e5e5; }
+  nav span { color: #444; font-size: 13px; }
+  section { display: none; flex: 1; overflow: hidden; }
+  section.active { display: flex; }
+
+  /* Two-pane layout */
+  .pane-left { width: 288px; border-right: 1px solid #2a2a2a; background: #141414; display: flex; flex-direction: column; flex-shrink: 0; }
+  .pane-right { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+  .pane-header { padding: 16px 12px 8px; }
+  .pane-header h2 { font-size: 14px; font-weight: 600; }
+
+  /* Verdict filter tabs */
+  .filter-tabs { padding: 0 8px 8px; display: flex; flex-direction: column; gap: 2px; }
+  .filter-tab { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; justify-content: space-between; color: #888; background: none; border: none; color: #888; }
+  .filter-tab.active { background: #2a2a2a; color: #e5e5e5; }
+  .filter-tab span.count { color: #555; }
+
+  .divider { border-top: 1px solid #2a2a2a; margin: 0 12px 4px; }
+
+  /* Spike rows */
+  .spike-list { flex: 1; overflow-y: auto; padding: 4px 8px; display: flex; flex-direction: column; gap: 2px; }
+  .spike-row { padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background .15s; }
+  .spike-row:hover { background: rgba(255,255,255,0.04); }
+  .spike-row.selected { background: rgba(255,255,255,0.07); }
+  .spike-row-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .spike-title { font-size: 13px; font-weight: 500; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spike-question { font-size: 11px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .spike-date { font-size: 10px; color: #555; }
+  .spike-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+
+  /* Verdict badge */
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 6px; border-radius: 4px; letter-spacing: .03em; }
+  .badge-adopt { background: rgba(34,197,94,.15); color: #4ade80; }
+  .badge-adapt { background: rgba(234,179,8,.15); color: #facc15; }
+  .badge-reject { background: rgba(239,68,68,.15); color: #f87171; }
+
+  /* Inline affordances */
+  .chip { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: #1e2a1e; color: #4ade80; border: 1px solid rgba(74,222,128,.2); }
+  .promote-link { font-size: 11px; color: #facc15; text-decoration: none; cursor: pointer; }
+  .promote-link:hover { text-decoration: underline; }
+  .knowledge-badge { font-size: 10px; padding: 2px 7px; border-radius: 4px; background: rgba(239,68,68,.1); color: #f87171; border: 1px solid rgba(248,113,113,.2); }
+  .ponder-link { font-size: 10px; color: #888; text-decoration: none; }
+  .ponder-link:hover { color: #e5e5e5; }
+
+  /* Right pane detail */
+  .detail-header { padding: 16px 20px 12px; border-bottom: 1px solid #2a2a2a; }
+  .breadcrumb { font-size: 11px; color: #555; margin-bottom: 8px; }
+  .breadcrumb span { color: #888; }
+  .detail-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  .detail-question { font-size: 13px; color: #aaa; font-style: italic; }
+  .detail-date { font-size: 11px; color: #555; margin-top: 6px; }
+
+  .detail-body { padding: 20px; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; }
+  .section-card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; padding: 16px; }
+  .section-title { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: #666; margin-bottom: 10px; }
+  .section-body { font-size: 13px; color: #bbb; line-height: 1.6; }
+  .code-hint { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; background: #0d0d0d; border: 1px solid #2a2a2a; border-radius: 6px; padding: 8px 12px; color: #a3e635; display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .copy-btn { font-size: 10px; color: #555; background: #2a2a2a; border: none; border-radius: 4px; padding: 2px 8px; cursor: pointer; }
+  .copy-btn:hover { color: #e5e5e5; }
+  .promote-btn { margin-top: 12px; padding: 8px 16px; background: #facc15; color: #0f0f0f; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; }
+  .promote-btn:hover { background: #fde047; }
+  .knowledge-section-badge { display: inline-flex; align-items: center; gap: 6px; padding: 6px 12px; background: rgba(239,68,68,.1); border: 1px solid rgba(248,113,113,.2); border-radius: 8px; color: #f87171; font-size: 12px; }
+  .lineage-link { font-size: 12px; color: #6366f1; text-decoration: none; }
+  .lineage-link:hover { text-decoration: underline; }
+
+  /* Empty state */
+  .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; text-align: center; }
+  .empty-icon { width: 48px; height: 48px; opacity: .25; margin-bottom: 16px; }
+  .empty-title { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+  .empty-body { font-size: 13px; color: #666; line-height: 1.7; max-width: 360px; }
+  .empty-code { font-family: monospace; font-size: 12px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 6px; padding: 10px 14px; color: #a3e635; margin-top: 14px; }
+
+  /* No-selection placeholder */
+  .placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #555; }
+  .placeholder p { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="active" onclick="show('screen-list')">List View</a>
+  <span>|</span>
+  <a href="#" onclick="show('screen-detail-adopt')">Detail — ADOPT</a>
+  <span>|</span>
+  <a href="#" onclick="show('screen-detail-adapt')">Detail — ADAPT</a>
+  <span>|</span>
+  <a href="#" onclick="show('screen-detail-reject')">Detail — REJECT</a>
+  <span>|</span>
+  <a href="#" onclick="show('screen-empty')">Empty State</a>
+</nav>
+
+<!-- SCREEN: List View -->
+<section id="screen-list" class="active">
+  <div class="pane-left">
+    <div class="pane-header"><h2>Spikes</h2></div>
+    <div class="filter-tabs">
+      <button class="filter-tab active">All <span class="count">3</span></button>
+      <button class="filter-tab">ADOPT <span class="count">1</span></button>
+      <button class="filter-tab">ADAPT <span class="count">1</span></button>
+      <button class="filter-tab">REJECT <span class="count">1</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="spike-list">
+
+      <!-- ADOPT row -->
+      <div class="spike-row selected" onclick="show('screen-detail-adopt')">
+        <div class="spike-row-top">
+          <span class="spike-title">Playwright MCP latency</span>
+          <span class="badge badge-adopt">ADOPT</span>
+        </div>
+        <div class="spike-question">"Can Playwright MCP handle 20 concurrent sessions without degrading..."</div>
+        <div class="spike-meta">
+          <span class="spike-date">2026-02-28</span>
+          <span class="chip">Next: /sdlc-hypothetical-planning</span>
+        </div>
+      </div>
+
+      <!-- ADAPT row (already promoted) -->
+      <div class="spike-row" onclick="show('screen-detail-adapt')">
+        <div class="spike-row-top">
+          <span class="spike-title">OpenAI endpoint fallback</span>
+          <span class="badge badge-adapt">ADAPT</span>
+        </div>
+        <div class="spike-question">"Can we fall back to OpenAI when Anthropic is unavailable?"</div>
+        <div class="spike-meta">
+          <span class="spike-date">2026-02-25</span>
+          <a class="ponder-link" href="#">Ponder: endpoint-fallback-engine</a>
+        </div>
+      </div>
+
+      <!-- REJECT row -->
+      <div class="spike-row" onclick="show('screen-detail-reject')">
+        <div class="spike-row-top">
+          <span class="spike-title">GraphQL gateway</span>
+          <span class="badge badge-reject">REJECT</span>
+        </div>
+        <div class="spike-question">"Should we expose a GraphQL layer instead of REST?"</div>
+        <div class="spike-meta">
+          <span class="spike-date">2026-02-20</span>
+          <span class="knowledge-badge">Stored in Knowledge</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div class="pane-right">
+    <div class="placeholder">
+      <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 01-.659 1.591L11.25 14.5m7.5 0l-4.091-4.091a2.25 2.25 0 01-.659-1.591V3.104m-7.5 11.396h7.5"/></svg>
+      <p>Select a spike to view details</p>
+    </div>
+  </div>
+</section>
+
+<!-- SCREEN: Detail — ADOPT -->
+<section id="screen-detail-adopt">
+  <div class="pane-left">
+    <div class="pane-header"><h2>Spikes</h2></div>
+    <div class="filter-tabs">
+      <button class="filter-tab active">All <span class="count">3</span></button>
+      <button class="filter-tab">ADOPT <span class="count">1</span></button>
+      <button class="filter-tab">ADAPT <span class="count">1</span></button>
+      <button class="filter-tab">REJECT <span class="count">1</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="spike-list">
+      <div class="spike-row selected">
+        <div class="spike-row-top">
+          <span class="spike-title">Playwright MCP latency</span>
+          <span class="badge badge-adopt">ADOPT</span>
+        </div>
+        <div class="spike-question">"Can Playwright MCP handle 20 concurrent sessions..."</div>
+        <div class="spike-meta"><span class="spike-date">2026-02-28</span><span class="chip">Next: /sdlc-hypothetical-planning</span></div>
+      </div>
+      <div class="spike-row">
+        <div class="spike-row-top"><span class="spike-title">OpenAI endpoint fallback</span><span class="badge badge-adapt">ADAPT</span></div>
+        <div class="spike-meta"><span class="spike-date">2026-02-25</span></div>
+      </div>
+      <div class="spike-row">
+        <div class="spike-row-top"><span class="spike-title">GraphQL gateway</span><span class="badge badge-reject">REJECT</span></div>
+        <div class="spike-meta"><span class="spike-date">2026-02-20</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pane-right">
+    <div class="detail-header">
+      <div class="breadcrumb">Spikes / <span>Playwright MCP latency</span></div>
+      <div class="detail-title">Playwright MCP latency <span class="badge badge-adopt">ADOPT</span></div>
+      <div class="detail-question">"Can Playwright MCP handle 20 concurrent sessions without degrading p95 response time?"</div>
+      <div class="detail-date">2026-02-28</div>
+    </div>
+    <div class="detail-body">
+      <div class="section-card">
+        <div class="section-title">What's Next</div>
+        <div class="section-body">
+          ADOPT means the approach is proven — not yet implemented. The spike answered the question; now plan the build.
+        </div>
+        <div class="code-hint">
+          /sdlc-hypothetical-planning playwright-mcp-latency
+          <button class="copy-btn">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREEN: Detail — ADAPT -->
+<section id="screen-detail-adapt">
+  <div class="pane-left">
+    <div class="pane-header"><h2>Spikes</h2></div>
+    <div class="filter-tabs">
+      <button class="filter-tab active">All <span class="count">3</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="spike-list">
+      <div class="spike-row">
+        <div class="spike-row-top"><span class="spike-title">Playwright MCP latency</span><span class="badge badge-adopt">ADOPT</span></div>
+        <div class="spike-meta"><span class="spike-date">2026-02-28</span></div>
+      </div>
+      <div class="spike-row selected">
+        <div class="spike-row-top"><span class="spike-title">OpenAI endpoint fallback</span><span class="badge badge-adapt">ADAPT</span></div>
+        <div class="spike-question">"Can we fall back to OpenAI when Anthropic is unavailable?"</div>
+        <div class="spike-meta"><span class="spike-date">2026-02-25</span><a class="ponder-link" href="#">Ponder: endpoint-fallback-engine</a></div>
+      </div>
+      <div class="spike-row">
+        <div class="spike-row-top"><span class="spike-title">GraphQL gateway</span><span class="badge badge-reject">REJECT</span></div>
+        <div class="spike-meta"><span class="spike-date">2026-02-20</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pane-right">
+    <div class="detail-header">
+      <div class="breadcrumb">Spikes / <span>OpenAI endpoint fallback</span></div>
+      <div class="detail-title">OpenAI endpoint fallback <span class="badge badge-adapt">ADAPT</span></div>
+      <div class="detail-question">"Can we fall back to OpenAI when Anthropic is unavailable?"</div>
+      <div class="detail-date">2026-02-25</div>
+    </div>
+    <div class="detail-body">
+      <div class="section-card">
+        <div class="section-title">Ponder Entry</div>
+        <div class="section-body">
+          This spike has already been promoted to a Ponder entry.
+        </div>
+        <a class="lineage-link" href="#" style="margin-top:8px;display:inline-block;">→ endpoint-fallback-engine</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREEN: Detail — REJECT -->
+<section id="screen-detail-reject">
+  <div class="pane-left">
+    <div class="pane-header"><h2>Spikes</h2></div>
+    <div class="filter-tabs">
+      <button class="filter-tab active">All <span class="count">3</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="spike-list">
+      <div class="spike-row">
+        <div class="spike-row-top"><span class="spike-title">Playwright MCP latency</span><span class="badge badge-adopt">ADOPT</span></div>
+        <div class="spike-meta"><span class="spike-date">2026-02-28</span></div>
+      </div>
+      <div class="spike-row">
+        <div class="spike-row-top"><span class="spike-title">OpenAI endpoint fallback</span><span class="badge badge-adapt">ADAPT</span></div>
+        <div class="spike-meta"><span class="spike-date">2026-02-25</span></div>
+      </div>
+      <div class="spike-row selected">
+        <div class="spike-row-top"><span class="spike-title">GraphQL gateway</span><span class="badge badge-reject">REJECT</span></div>
+        <div class="spike-question">"Should we expose a GraphQL layer instead of REST?"</div>
+        <div class="spike-meta"><span class="spike-date">2026-02-20</span><span class="knowledge-badge">Stored in Knowledge</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="pane-right">
+    <div class="detail-header">
+      <div class="breadcrumb">Spikes / <span>GraphQL gateway</span></div>
+      <div class="detail-title">GraphQL gateway <span class="badge badge-reject">REJECT</span></div>
+      <div class="detail-question">"Should we expose a GraphQL layer instead of REST?"</div>
+      <div class="detail-date">2026-02-20</div>
+    </div>
+    <div class="detail-body">
+      <div class="section-card">
+        <div class="section-title">Stored in Knowledge</div>
+        <div class="section-body">
+          This spike was rejected. The findings have been filed in the knowledge base for future reference.
+        </div>
+        <a class="lineage-link" href="#" style="margin-top:10px;display:inline-block;">
+          <span class="knowledge-section-badge">📚 graphql-gateway-rejection</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SCREEN: Empty State -->
+<section id="screen-empty">
+  <div class="pane-left">
+    <div class="pane-header"><h2>Spikes</h2></div>
+    <div class="filter-tabs">
+      <button class="filter-tab active">All <span class="count">0</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="empty-state" style="flex:1">
+      <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 01-.659 1.591L11.25 14.5m7.5 0l-4.091-4.091a2.25 2.25 0 01-.659-1.591V3.104m-7.5 11.396h7.5"/></svg>
+      <div class="empty-title">No spikes yet</div>
+      <div class="empty-body">Spikes are time-boxed investigations that answer one question. When done, you get ADOPT, ADAPT, or REJECT.</div>
+      <div class="empty-code">/sdlc-spike &lt;slug&gt; — &lt;the question&gt;</div>
+    </div>
+  </div>
+  <div class="pane-right">
+    <div class="placeholder">
+      <svg class="empty-icon" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 01-.659 1.591L11.25 14.5m7.5 0l-4.091-4.091a2.25 2.25 0 01-.659-1.591V3.104m-7.5 11.396h7.5"/></svg>
+      <p>Select a spike to view details</p>
+    </div>
+  </div>
+</section>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('nav a').forEach((a, i) => {
+      const screens = ['screen-list','screen-detail-adopt','screen-detail-adapt','screen-detail-reject','screen-empty'];
+      a.classList.toggle('active', screens[i] === id);
+    });
+  }
+</script>
+</body>
+</html>

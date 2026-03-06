@@ -1,0 +1,12 @@
+slug: v36-spike-interface
+title: Spike Interface — surface spikes, promote to ponder, file rejects to knowledge
+vision: After running a spike, your findings are immediately visible in the web UI — verdict badges, one-liner needs, full structured findings on click. ADAPT spikes promote to a pre-seeded ponder in one step (findings + open questions carried forward). REJECT spikes auto-file to the knowledge base with no manual action. ADOPT spikes show a clear next-step hint toward hypothetical planning. Nothing is lost; nothing requires manual filing.
+features:
+- spike-ui-page
+- spike-data-layer
+- spike-cli-commands
+- spike-rest-routes
+created_at: 2026-03-04T17:51:30.028816Z
+updated_at: 2026-03-04T21:58:54.668274Z
+prepared_at: 2026-03-04T21:58:54.668274Z
+schema_version: 1

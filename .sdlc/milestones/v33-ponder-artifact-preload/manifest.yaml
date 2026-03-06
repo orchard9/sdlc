@@ -1,0 +1,13 @@
+slug: v33-ponder-artifact-preload
+title: Ponder Artifact Preload — attach files at creation and serve binary assets
+features:
+- ponder-text-file-preload
+- ponder-binary-image-support
+created_at: 2026-03-04T06:06:00.231887Z
+updated_at: 2026-03-04T06:06:09.297638Z
+schema_version: 1
+vision: >-
+  Users can bring material — docs, diagrams, code sketches, screenshots — to an
+  idea at creation time. The ponder agent has immediate context and the workspace
+  is a collaborative scratchpad from the first moment. Phase 1 covers text files
+  (frontend-only). Phase 2 adds binary image upload, serve, and render.

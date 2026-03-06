@@ -1,0 +1,161 @@
+slug: create-workspace-modal
+title: CreateWorkspaceModal — shared creation form with configurable fields
+phase: released
+created_at: 2026-03-04T22:47:41.690499Z
+updated_at: 2026-03-05T00:09:45.791944Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/create-workspace-modal/spec.md
+  created_at: 2026-03-04T23:34:35.616103Z
+  approved_at: 2026-03-04T23:34:42.969157Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/create-workspace-modal/design.md
+  created_at: 2026-03-04T23:36:24.608116Z
+  approved_at: 2026-03-04T23:36:30.075436Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/create-workspace-modal/tasks.md
+  created_at: 2026-03-04T23:37:07.029647Z
+  approved_at: 2026-03-04T23:37:10.224481Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/create-workspace-modal/qa-plan.md
+  created_at: 2026-03-04T23:37:50.567812Z
+  approved_at: 2026-03-04T23:37:59.664083Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/create-workspace-modal/review.md
+  created_at: 2026-03-05T00:07:01.934809Z
+  approved_at: 2026-03-05T00:07:08.834115Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/create-workspace-modal/audit.md
+  created_at: 2026-03-05T00:07:39.568382Z
+  approved_at: 2026-03-05T00:07:41.929693Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/create-workspace-modal/qa-results.md
+  created_at: 2026-03-05T00:09:28.606079Z
+  approved_at: 2026-03-05T00:09:35.265436Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create CreateWorkspaceModal component
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:20.141500Z
+  started_at: 2026-03-04T23:38:22.975763Z
+  completed_at: 2026-03-04T23:39:11.319515Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update NewIdeaModal to use CreateWorkspaceModal
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:20.174223Z
+  started_at: 2026-03-04T23:39:11.326904Z
+  completed_at: 2026-03-04T23:40:50.329448Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Replace InvestigationPage inline form
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:20.199255Z
+  started_at: 2026-03-04T23:41:00.485094Z
+  completed_at: 2026-03-04T23:41:48.993224Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Replace EvolvePage inline form
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:20.238565Z
+  started_at: 2026-03-04T23:41:49.015034Z
+  completed_at: 2026-03-04T23:44:06.605384Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Replace GuidelinePage inline form
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:20.278847Z
+  started_at: 2026-03-04T23:44:06.615339Z
+  completed_at: 2026-03-05T00:06:02.219600Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: TypeScript and lint validation
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:38:20.347110Z
+  started_at: null
+  completed_at: 2026-03-05T00:06:21.662313Z
+  blocker: null
+  depends_on: []
+comments:
+- id: C1
+  author: null
+  body: 'T2 decision: NewIdeaModal has grown to include ponder-text-file-preload file attachment features (drag-and-drop, file chips, multi-file upload). Refactoring it to use CreateWorkspaceModal would require extending the shared component with file upload support that is Ponder-specific. Decision: NewIdeaModal stays as-is and owns its own form implementation. CreateWorkspaceModal targets the three investigation-type pages (InvestigationPage, EvolvePage, GuidelinePage) which have identical simple inline forms with no custom extensions.'
+  flag: null
+  target:
+    kind: feature
+  created_at: 2026-03-04T23:40:56.454776Z
+next_comment_seq: 1
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:41.690499Z
+  exited: 2026-03-04T23:34:42.971470Z
+- phase: specified
+  entered: 2026-03-04T23:34:42.971470Z
+  exited: 2026-03-04T23:37:59.665764Z
+- phase: planned
+  entered: 2026-03-04T23:37:59.665764Z
+  exited: 2026-03-04T23:38:06.642185Z
+- phase: ready
+  entered: 2026-03-04T23:38:06.642185Z
+  exited: 2026-03-04T23:38:11.952875Z
+- phase: implementation
+  entered: 2026-03-04T23:38:11.952875Z
+  exited: 2026-03-05T00:07:08.839164Z
+- phase: review
+  entered: 2026-03-05T00:07:08.839164Z
+  exited: 2026-03-05T00:07:17.377703Z
+- phase: audit
+  entered: 2026-03-05T00:07:17.377703Z
+  exited: 2026-03-05T00:07:41.935709Z
+- phase: qa
+  entered: 2026-03-05T00:07:41.935709Z
+  exited: 2026-03-05T00:09:35.271053Z
+- phase: merge
+  entered: 2026-03-05T00:09:35.271053Z
+  exited: 2026-03-05T00:09:45.791944Z
+- phase: released
+  entered: 2026-03-05T00:09:45.791944Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

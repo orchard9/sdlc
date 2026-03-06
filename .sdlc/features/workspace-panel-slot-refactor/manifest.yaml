@@ -1,0 +1,147 @@
+slug: workspace-panel-slot-refactor
+title: WorkspacePanel slot-based refactor — replace 8-branch conditional with phasePanel prop
+phase: released
+created_at: 2026-03-04T22:47:41.676509Z
+updated_at: 2026-03-05T00:01:42.189671Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/workspace-panel-slot-refactor/spec.md
+  created_at: 2026-03-04T23:34:19.542344Z
+  approved_at: 2026-03-04T23:34:26.819755Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/workspace-panel-slot-refactor/design.md
+  created_at: 2026-03-04T23:34:50.985882Z
+  approved_at: 2026-03-04T23:34:50.993310Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/workspace-panel-slot-refactor/tasks.md
+  created_at: 2026-03-04T23:35:20.012239Z
+  approved_at: 2026-03-04T23:35:20.020840Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/workspace-panel-slot-refactor/qa-plan.md
+  created_at: 2026-03-04T23:35:43.015980Z
+  approved_at: 2026-03-04T23:35:43.024323Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/workspace-panel-slot-refactor/review.md
+  created_at: 2026-03-04T23:44:32.758512Z
+  approved_at: 2026-03-04T23:44:32.765353Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/workspace-panel-slot-refactor/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-05T00:00:36.880247Z
+  waive_reason: UI refactor only — replaces 8-branch conditional in WorkspacePanel with a phasePanel slot prop. No network calls, no auth logic, no data handling, no security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/workspace-panel-slot-refactor/qa-results.md
+  created_at: 2026-03-05T00:01:34.911187Z
+  approved_at: 2026-03-05T00:01:38.665395Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Refactor WorkspacePanel to accept phasePanel slot
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:07.506229Z
+  started_at: 2026-03-04T23:36:16.687336Z
+  completed_at: 2026-03-04T23:36:41.839235Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update InvestigationPage callers
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:07.513364Z
+  started_at: 2026-03-04T23:36:48.407073Z
+  completed_at: 2026-03-04T23:37:50.568375Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Update EvolvePage callers
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:07.518896Z
+  started_at: 2026-03-04T23:37:59.717863Z
+  completed_at: 2026-03-04T23:43:30.664370Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Update GuidelinePage callers
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:07.524087Z
+  started_at: 2026-03-04T23:43:30.672466Z
+  completed_at: 2026-03-04T23:43:30.677543Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: TypeScript clean compile
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:07.528934Z
+  started_at: 2026-03-04T23:43:40.358340Z
+  completed_at: 2026-03-04T23:43:48.932439Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:41.676509Z
+  exited: 2026-03-04T23:34:26.822683Z
+- phase: specified
+  entered: 2026-03-04T23:34:26.822683Z
+  exited: 2026-03-04T23:35:43.026027Z
+- phase: planned
+  entered: 2026-03-04T23:35:43.026027Z
+  exited: 2026-03-04T23:35:48.625684Z
+- phase: ready
+  entered: 2026-03-04T23:35:48.625684Z
+  exited: 2026-03-04T23:35:55.522646Z
+- phase: implementation
+  entered: 2026-03-04T23:35:55.522646Z
+  exited: 2026-03-04T23:44:32.769873Z
+- phase: review
+  entered: 2026-03-04T23:44:32.769873Z
+  exited: 2026-03-04T23:44:38.044254Z
+- phase: audit
+  entered: 2026-03-04T23:44:38.044254Z
+  exited: 2026-03-05T00:00:36.882737Z
+- phase: qa
+  entered: 2026-03-05T00:00:36.882737Z
+  exited: 2026-03-05T00:01:38.670466Z
+- phase: merge
+  entered: 2026-03-05T00:01:38.670466Z
+  exited: 2026-03-05T00:01:42.189671Z
+- phase: released
+  entered: 2026-03-05T00:01:42.189671Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

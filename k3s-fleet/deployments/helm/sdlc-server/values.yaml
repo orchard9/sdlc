@@ -1,0 +1,37 @@
+project:
+  slug: ""          # Kubernetes-safe identifier, used in namespace + subdomain
+  repo: ""          # Gitea repo path: <org>/<repo>
+  branch: main      # Branch git-sync tracks
+
+gitea:
+  url: http://100.79.2.8:30300
+  externalSecret:
+    secretStore: gcp-secret-manager
+    gsmKey: sdlc-fleet-gitea
+
+ingress:
+  domain: sdlc.threesix.ai
+  tlsSecretName: sdlc-wildcard-tls
+
+auth:
+  enabled: false                    # Enable Google OAuth gate via hub native forwardAuth
+
+image:
+  server: ghcr.io/orchard9/sdlc:latest
+  gitSync: registry.k8s.io/git-sync/git-sync:v4
+
+resources:
+  server:
+    requests: { cpu: 50m, memory: 64Mi }
+    limits:   { cpu: 500m, memory: 256Mi }
+  gitSync:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits:   { cpu: 100m, memory: 64Mi }
+
+postgres:
+  externalSecret:
+    # GCP Secret Manager key for the shared Postgres connection string.
+    # Secret must have a field named `database_url` with a value like:
+    #   postgresql://appuser:<pass>@postgres.databases.svc.cluster.local:5432/appdb?sslmode=disable
+    # Leave empty to disable credential pool (agents run with ambient auth).
+    gsmKey: ""

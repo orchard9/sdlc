@@ -1,0 +1,145 @@
+slug: unified-dialogue-panel
+title: UnifiedDialoguePanel — shared conversation thread, input bar, and SSE subscription
+phase: released
+created_at: 2026-03-04T22:47:41.683689Z
+updated_at: 2026-03-05T00:03:20.934555Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/spec.md
+  created_at: 2026-03-04T23:34:36.390932Z
+  approved_at: 2026-03-04T23:34:48.205673Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/design.md
+  created_at: 2026-03-04T23:35:39.776495Z
+  approved_at: 2026-03-04T23:35:44.307140Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/tasks.md
+  created_at: 2026-03-04T23:36:09.085524Z
+  approved_at: 2026-03-04T23:36:12.370601Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/qa-plan.md
+  created_at: 2026-03-04T23:36:44.327108Z
+  approved_at: 2026-03-04T23:36:47.866811Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/review.md
+  created_at: 2026-03-04T23:44:17.975570Z
+  approved_at: 2026-03-04T23:44:21.857678Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/audit.md
+  created_at: 2026-03-05T00:01:23.178948Z
+  approved_at: 2026-03-05T00:01:31.153120Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/unified-dialogue-panel/qa-results.md
+  created_at: 2026-03-05T00:03:09.987837Z
+  approved_at: 2026-03-05T00:03:16.419076Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create UnifiedDialoguePanel shared component
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:58.528571Z
+  started_at: 2026-03-04T23:37:10.875857Z
+  completed_at: 2026-03-04T23:38:24.402998Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Refactor DialoguePanel.tsx to thin wrapper
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:58.534052Z
+  started_at: 2026-03-04T23:38:24.419439Z
+  completed_at: 2026-03-04T23:39:43.336358Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Refactor InvestigationDialoguePanel.tsx to thin wrapper
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:58.539039Z
+  started_at: 2026-03-04T23:39:43.343665Z
+  completed_at: 2026-03-04T23:40:02.183357Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify frontend build and types
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:58.543810Z
+  started_at: 2026-03-04T23:40:02.192573Z
+  completed_at: 2026-03-04T23:41:13.216347Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Run backend tests
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:36:58.549413Z
+  started_at: 2026-03-04T23:41:13.227798Z
+  completed_at: 2026-03-04T23:43:30.847555Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:41.683689Z
+  exited: 2026-03-04T23:34:48.208157Z
+- phase: specified
+  entered: 2026-03-04T23:34:48.208157Z
+  exited: 2026-03-04T23:36:47.870037Z
+- phase: planned
+  entered: 2026-03-04T23:36:47.870037Z
+  exited: 2026-03-04T23:36:51.736894Z
+- phase: ready
+  entered: 2026-03-04T23:36:51.736894Z
+  exited: 2026-03-04T23:36:53.686001Z
+- phase: implementation
+  entered: 2026-03-04T23:36:53.686001Z
+  exited: 2026-03-04T23:44:21.862908Z
+- phase: review
+  entered: 2026-03-04T23:44:21.862908Z
+  exited: 2026-03-04T23:44:25.762948Z
+- phase: audit
+  entered: 2026-03-04T23:44:25.762948Z
+  exited: 2026-03-05T00:01:31.159525Z
+- phase: qa
+  entered: 2026-03-05T00:01:31.159525Z
+  exited: 2026-03-05T00:03:16.425139Z
+- phase: merge
+  entered: 2026-03-05T00:03:16.425139Z
+  exited: 2026-03-05T00:03:20.934555Z
+- phase: released
+  entered: 2026-03-05T00:03:20.934555Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

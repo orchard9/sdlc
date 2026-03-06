@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CreateWorkspaceModal Mockup</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; }
+    nav { display: flex; gap: 0; background: #1a1f2e; border-bottom: 1px solid #2d3348; padding: 0 1rem; }
+    nav a { padding: 0.75rem 1rem; font-size: 0.8rem; text-decoration: none; color: #94a3b8; border-bottom: 2px solid transparent; cursor: pointer; }
+    nav a.active, nav a:hover { color: #e2e8f0; border-bottom-color: #6366f1; }
+    section { display: none; padding: 2rem; }
+    section.active { display: flex; align-items: center; justify-content: center; min-height: calc(100vh - 44px); }
+
+    /* Modal */
+    .modal-backdrop { position: relative; width: 100%; max-width: 560px; }
+    .modal-card { background: #1a1f2e; border: 1px solid #2d3348; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.6); overflow: hidden; display: flex; flex-direction: column; max-height: 85vh; }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid #2d3348; flex-shrink: 0; }
+    .modal-header h2 { font-size: 0.875rem; font-weight: 600; }
+    .close-btn { background: none; border: none; cursor: pointer; color: #64748b; padding: 2px; display: flex; align-items: center; justify-content: center; border-radius: 4px; }
+    .close-btn:hover { color: #e2e8f0; }
+    .modal-body { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; overflow-y: auto; flex: 1; }
+    .modal-footer { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding: 1rem 1.25rem; border-top: 1px solid #2d3348; background: #1a1f2e; flex-shrink: 0; }
+
+    /* Form fields */
+    .field { display: flex; flex-direction: column; gap: 0.375rem; }
+    .field label { font-size: 0.75rem; font-weight: 500; color: #94a3b8; }
+    .field label span { color: #475569; }
+    .field input, .field textarea { width: 100%; padding: 0.5rem 0.75rem; font-size: 0.875rem; background: rgba(255,255,255,0.05); border: 1px solid #2d3348; border-radius: 8px; color: #e2e8f0; outline: none; font-family: inherit; }
+    .field input:focus, .field textarea:focus { border-color: rgba(99,102,241,0.5); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    .field input.mono, .field textarea.mono { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 0.75rem; color: #94a3b8; }
+    .field textarea { resize: none; }
+    .field input::placeholder, .field textarea::placeholder { color: #475569; }
+
+    /* References */
+    .ref-row { display: flex; align-items: center; gap: 0.5rem; }
+    .ref-input-wrap { flex: 1; display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid #2d3348; border-radius: 8px; }
+    .ref-input-wrap svg { color: #475569; flex-shrink: 0; }
+    .ref-input-wrap input { flex: 1; background: transparent; border: none; outline: none; font-size: 0.875rem; color: #e2e8f0; font-family: inherit; }
+    .ref-input-wrap input::placeholder { color: #475569; }
+    .add-ref-btn { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: #64748b; background: none; border: none; cursor: pointer; padding: 0.25rem 0; }
+    .add-ref-btn:hover { color: #e2e8f0; }
+    .icon-btn-sm { background: none; border: none; cursor: pointer; padding: 4px; color: #475569; border-radius: 4px; }
+    .icon-btn-sm:hover { color: #94a3b8; background: rgba(255,255,255,0.05); }
+    .placeholder-space { width: 28px; flex-shrink: 0; }
+
+    /* Buttons */
+    .btn-cancel { font-size: 0.875rem; color: #64748b; background: none; border: none; cursor: pointer; padding: 0.375rem 0.75rem; }
+    .btn-cancel:hover { color: #e2e8f0; }
+    .btn-primary { font-size: 0.875rem; font-weight: 500; background: #6366f1; color: #fff; border: none; border-radius: 8px; padding: 0.375rem 1rem; cursor: pointer; }
+    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Error */
+    .error-msg { font-size: 0.75rem; color: #ef4444; }
+
+    /* Page background hint */
+    .page-bg-hint { font-size: 0.75rem; color: #334155; text-align: center; margin-top: 1rem; }
+
+    /* SVG icons inline */
+    .icon { width: 14px; height: 14px; display: inline-block; vertical-align: middle; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a class="active" onclick="showSection('screen-ponder')">New Idea (Ponder)</a>
+    <a onclick="showSection('screen-rootcause')">New Root Cause</a>
+    <a onclick="showSection('screen-evolve')">New Evolve Session</a>
+    <a onclick="showSection('screen-guideline')">New Guideline</a>
+    <a onclick="showSection('screen-submitting')">Submitting State</a>
+  </nav>
+
+  <!-- Screen 1: New Idea (Ponder) -->
+  <section id="screen-ponder" class="active">
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>New Idea</h2>
+          <button class="close-btn" aria-label="Close">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label>Title</label>
+            <input type="text" value="Unified workspace creation UX" placeholder="What are you thinking about?" />
+          </div>
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" class="mono" value="unified-workspace-creation-ux" placeholder="slug" />
+          </div>
+          <div class="field">
+            <label>Description <span>(optional)</span></label>
+            <textarea rows="5" placeholder="Expand on the idea — what's the context, what's the problem, what are you hoping to explore?">All four workspace creation flows have duplicated form logic. Extract into a shared modal component that each page configures via props.</textarea>
+          </div>
+          <div class="field">
+            <label>References <span>(optional)</span></label>
+            <div style="display:flex;flex-direction:column;gap:0.5rem;">
+              <div class="ref-row">
+                <div class="ref-input-wrap">
+                  <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                  <input type="url" placeholder="https://..." />
+                </div>
+                <div class="placeholder-space"></div>
+              </div>
+              <button class="add-ref-btn">
+                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                Add reference
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-primary">Create Idea</button>
+        </div>
+      </div>
+      <p class="page-bg-hint">PonderPage — uses fields: brief, references</p>
+    </div>
+  </section>
+
+  <!-- Screen 2: New Root Cause -->
+  <section id="screen-rootcause">
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>New Root Cause</h2>
+          <button class="close-btn" aria-label="Close">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label>Title</label>
+            <input type="text" value="Deploy pipeline fails on re-tag" placeholder="What broke?" />
+          </div>
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" class="mono" value="deploy-pipeline-fails-on-re-tag" placeholder="slug" />
+          </div>
+          <div class="field">
+            <label>Context</label>
+            <textarea rows="5" placeholder="Describe what broke, when it started, what you've already tried…">Re-tagging a release causes the Woodpecker pipeline to skip the deploy step silently. First noticed after v38 release.</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-primary">Create</button>
+        </div>
+      </div>
+      <p class="page-bg-hint">InvestigationPage — uses fields: context (required)</p>
+    </div>
+  </section>
+
+  <!-- Screen 3: New Evolve Session -->
+  <section id="screen-evolve">
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>New Evolve Session</h2>
+          <button class="close-btn" aria-label="Close">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label>Title</label>
+            <input type="text" value="Reduce modal creation duplication" placeholder="What are you improving?" />
+          </div>
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" class="mono" value="reduce-modal-creation-duplication" placeholder="slug" />
+          </div>
+          <div class="field">
+            <label>Scope <span>(optional)</span></label>
+            <input type="text" class="mono" value="frontend/src/pages/" placeholder="scope — e.g. crates/sdlc-server/src/ (optional)" />
+          </div>
+          <div class="field">
+            <label>Context</label>
+            <textarea rows="4" placeholder="What are you improving? What's wrong with the current state?">Four pages have duplicated creation forms with identical slug derivation, state management, and submit guard logic. Extract to shared component.</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-primary">Create</button>
+        </div>
+      </div>
+      <p class="page-bg-hint">EvolvePage — uses fields: scope (optional), context (required)</p>
+    </div>
+  </section>
+
+  <!-- Screen 4: New Guideline -->
+  <section id="screen-guideline">
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>New Guideline</h2>
+          <button class="close-btn" aria-label="Close">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="field">
+            <label>Title</label>
+            <input type="text" value="Shared form components over per-page duplication" placeholder="What recurring problem are you codifying?" />
+          </div>
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" class="mono" value="shared-form-over-per-page" placeholder="slug" />
+          </div>
+          <div class="field">
+            <label>Scope <span>(optional)</span></label>
+            <input type="text" class="mono" value="frontend/src/" placeholder="scope — files or modules this applies to (optional)" />
+          </div>
+          <div class="field">
+            <label>Context</label>
+            <textarea rows="4" placeholder="Why does this keep going wrong? What triggered this investigation?">Each new workspace page re-implements the same creation form. Extract shared component pattern was established with SearchModal, AlignModal, etc. but not followed for creation forms.</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel">Cancel</button>
+          <button class="btn-primary">Create</button>
+        </div>
+      </div>
+      <p class="page-bg-hint">GuidelinePage — uses fields: scope (optional), context (required)</p>
+    </div>
+  </section>
+
+  <!-- Screen 5: Submitting state -->
+  <section id="screen-submitting">
+    <div class="modal-backdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h2>New Idea</h2>
+          <button class="close-btn" aria-label="Close" disabled style="opacity:0.3">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+        <div class="modal-body" style="opacity:0.6">
+          <div class="field">
+            <label>Title</label>
+            <input type="text" value="Unified workspace creation UX" disabled />
+          </div>
+          <div class="field">
+            <label>Slug</label>
+            <input type="text" class="mono" value="unified-workspace-creation-ux" disabled />
+          </div>
+          <div class="field">
+            <label>Description <span>(optional)</span></label>
+            <textarea rows="5" disabled>All four workspace creation flows have duplicated form logic.</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" disabled style="opacity:0.4">Cancel</button>
+          <button class="btn-primary" disabled>Creating…</button>
+        </div>
+      </div>
+      <p class="page-bg-hint">Submitting state — form disabled, button shows "Creating…"</p>
+    </div>
+  </section>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+slug: fix-investigation-session-completion
+title: Fix investigation session completion — root-cause and evolve output phases
+phase: implementation
+created_at: 2026-03-05T17:31:59.897983Z
+updated_at: 2026-03-05T17:37:37.939915Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-investigation-session-completion/spec.md
+  created_at: 2026-03-05T17:36:23.245854Z
+  approved_at: 2026-03-05T17:36:26.319839Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-investigation-session-completion/design.md
+  created_at: 2026-03-05T17:36:53.411895Z
+  approved_at: 2026-03-05T17:36:53.419350Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-investigation-session-completion/tasks.md
+  created_at: 2026-03-05T17:37:04.867541Z
+  approved_at: 2026-03-05T17:37:04.875224Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-investigation-session-completion/qa-plan.md
+  created_at: 2026-03-05T17:37:25.482595Z
+  approved_at: 2026-03-05T17:37:25.628555Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fix-investigation-session-completion/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fix-investigation-session-completion/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fix-investigation-session-completion/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add --output-type flag to CLI investigate update command
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:37:08.305377Z
+  started_at: 2026-03-05T17:38:20.950990Z
+  completed_at: 2026-03-05T17:38:20.958161Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Allow --output-ref for evolve investigations in CLI
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:37:08.312375Z
+  started_at: 2026-03-05T17:38:20.964592Z
+  completed_at: 2026-03-05T17:38:20.969520Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Allow output_type and output_ref for evolve investigations in REST API
+  description: null
+  status: completed
+  created_at: 2026-03-05T17:37:08.317475Z
+  started_at: 2026-03-05T17:38:33.283199Z
+  completed_at: 2026-03-05T17:38:33.288417Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add tests for the new CLI and REST behavior
+  description: null
+  status: pending
+  created_at: 2026-03-05T17:37:08.322355Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T17:31:59.897983Z
+  exited: 2026-03-05T17:36:26.321355Z
+- phase: specified
+  entered: 2026-03-05T17:36:26.321355Z
+  exited: 2026-03-05T17:37:25.630226Z
+- phase: planned
+  entered: 2026-03-05T17:37:25.630226Z
+  exited: 2026-03-05T17:37:31.696344Z
+- phase: ready
+  entered: 2026-03-05T17:37:31.696344Z
+  exited: 2026-03-05T17:37:37.939915Z
+- phase: implementation
+  entered: 2026-03-05T17:37:37.939915Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

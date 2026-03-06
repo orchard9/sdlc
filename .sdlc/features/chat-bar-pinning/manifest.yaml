@@ -1,0 +1,118 @@
+slug: chat-bar-pinning
+title: 'InputBar shrink-0: chat bar always anchors to the bottom'
+phase: released
+created_at: 2026-03-04T22:47:47.331444Z
+updated_at: 2026-03-04T23:07:29.364043Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/spec.md
+  created_at: 2026-03-04T23:03:56.052953Z
+  approved_at: 2026-03-04T23:04:01.236042Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/design.md
+  created_at: 2026-03-04T23:04:24.272718Z
+  approved_at: 2026-03-04T23:04:28.962866Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/tasks.md
+  created_at: 2026-03-04T23:04:42.911864Z
+  approved_at: 2026-03-04T23:04:47.452328Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/qa-plan.md
+  created_at: 2026-03-04T23:05:04.993516Z
+  approved_at: 2026-03-04T23:05:10.751344Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/review.md
+  created_at: 2026-03-04T23:06:13.835462Z
+  approved_at: 2026-03-04T23:06:18.666Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/audit.md
+  created_at: 2026-03-04T23:06:39.617342Z
+  approved_at: 2026-03-04T23:06:45.819629Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/chat-bar-pinning/qa-results.md
+  created_at: 2026-03-04T23:07:20.836300Z
+  approved_at: 2026-03-04T23:07:25.601623Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add shrink-0 to InputBar in DialoguePanel
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:05:25.183467Z
+  started_at: 2026-03-04T23:05:27.257304Z
+  completed_at: 2026-03-04T23:05:40.005015Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add shrink-0 to InputBar in InvestigationDialoguePanel
+  description: null
+  status: completed
+  created_at: 2026-03-04T23:05:25.189034Z
+  started_at: 2026-03-04T23:05:41.891594Z
+  completed_at: 2026-03-04T23:05:49.521758Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-04T22:47:47.331444Z
+  exited: 2026-03-04T23:04:01.238191Z
+- phase: specified
+  entered: 2026-03-04T23:04:01.238191Z
+  exited: 2026-03-04T23:05:10.753218Z
+- phase: planned
+  entered: 2026-03-04T23:05:10.753218Z
+  exited: 2026-03-04T23:05:15.999822Z
+- phase: ready
+  entered: 2026-03-04T23:05:15.999822Z
+  exited: 2026-03-04T23:05:19.478945Z
+- phase: implementation
+  entered: 2026-03-04T23:05:19.478945Z
+  exited: 2026-03-04T23:06:18.670703Z
+- phase: review
+  entered: 2026-03-04T23:06:18.670703Z
+  exited: 2026-03-04T23:06:22.263662Z
+- phase: audit
+  entered: 2026-03-04T23:06:22.263662Z
+  exited: 2026-03-04T23:06:45.883475Z
+- phase: qa
+  entered: 2026-03-04T23:06:45.883475Z
+  exited: 2026-03-04T23:07:25.606791Z
+- phase: merge
+  entered: 2026-03-04T23:07:25.606791Z
+  exited: 2026-03-04T23:07:29.364043Z
+- phase: released
+  entered: 2026-03-04T23:07:29.364043Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

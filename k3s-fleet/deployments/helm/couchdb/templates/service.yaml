@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: couchdb
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: couchdb
+spec:
+  type: ClusterIP
+  selector:
+    app: couchdb
+  ports:
+    - name: http
+      port: {{ .Values.service.port }}
+      targetPort: 5984
+      protocol: TCP

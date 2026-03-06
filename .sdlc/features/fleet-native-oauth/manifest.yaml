@@ -1,0 +1,200 @@
+slug: fleet-native-oauth
+title: Built-in Google OAuth2 in sdlc-server hub mode — replace oauth2-proxy
+description: Add native OAuth2 route handlers (login, callback, verify, logout) to sdlc-server hub mode. Sessions via signed cookies scoped to .sdlc.threesix.ai. Eliminates oauth2-proxy sidecar — one process, zero external session stores.
+phase: released
+created_at: 2026-03-05T23:04:08.702707Z
+updated_at: 2026-03-05T23:17:35.983151Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/spec.md
+  created_at: 2026-03-05T23:05:56.440702Z
+  approved_at: 2026-03-05T23:08:20.474757Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/design.md
+  created_at: 2026-03-05T23:05:56.450830Z
+  approved_at: 2026-03-05T23:08:26.964765Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/tasks.md
+  created_at: 2026-03-05T23:08:49.990375Z
+  approved_at: 2026-03-05T23:08:49.998705Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/qa-plan.md
+  created_at: 2026-03-05T23:09:07.534010Z
+  approved_at: 2026-03-05T23:09:07.541823Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/review.md
+  created_at: 2026-03-05T23:16:22.806550Z
+  approved_at: 2026-03-05T23:16:32.683912Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/audit.md
+  created_at: 2026-03-05T23:17:07.735640Z
+  approved_at: 2026-03-05T23:17:07.742950Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fleet-native-oauth/qa-results.md
+  created_at: 2026-03-05T23:17:30.974867Z
+  approved_at: 2026-03-05T23:17:30.982901Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add oauth2 crate dependency to sdlc-server Cargo.toml
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.716114Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.479682Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create crates/sdlc-server/src/oauth.rs — OAuthConfig struct, 4 route handlers (login, callback, verify, logout)
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.722Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.488701Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: GET /auth/login — build Google authorize URL with state param, redirect
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.727336Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.496406Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: GET /auth/callback — exchange code for token, validate email domain against OAUTH_ALLOWED_DOMAINS, set signed session cookie on .sdlc.threesix.ai
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.733119Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.503352Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: GET /auth/verify — check session cookie, return 200 with X-Auth-User or 401 (Traefik forwardAuth endpoint)
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.738130Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.511004Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: POST /auth/logout — clear session cookie, redirect to /
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.743157Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.517935Z
+  blocker: null
+  depends_on: []
+- id: T7
+  title: 'Session cookie: HMAC-SHA256 signed, HttpOnly, Secure, SameSite=Lax, Domain=.sdlc.threesix.ai, 24h expiry'
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.748308Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.524278Z
+  blocker: null
+  depends_on: []
+- id: T8
+  title: Integrate with existing auth.rs — Bearer tokens still work alongside OAuth sessions for M2M
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.753539Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.530951Z
+  blocker: null
+  depends_on: []
+- id: T9
+  title: Wire OAuthConfig into AppState — init from GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, OAUTH_ALLOWED_DOMAINS, SESSION_SECRET env vars
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.758484Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.537517Z
+  blocker: null
+  depends_on: []
+- id: T10
+  title: Register /auth/* routes in build_router_from_state BEFORE auth middleware layer (login/callback must be public)
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.763672Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.544005Z
+  blocker: null
+  depends_on: []
+- id: T11
+  title: 'Unit tests: login redirect, callback domain validation, verify with valid/expired/missing cookie, logout clears cookie'
+  description: null
+  status: completed
+  created_at: 2026-03-05T23:04:30.769125Z
+  started_at: null
+  completed_at: 2026-03-05T23:15:14.550335Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-05T23:04:08.702707Z
+  exited: 2026-03-05T23:08:20.476898Z
+- phase: specified
+  entered: 2026-03-05T23:08:20.476898Z
+  exited: 2026-03-05T23:09:07.543410Z
+- phase: planned
+  entered: 2026-03-05T23:09:07.543410Z
+  exited: 2026-03-05T23:09:14.819815Z
+- phase: ready
+  entered: 2026-03-05T23:09:14.819815Z
+  exited: 2026-03-05T23:09:14.828255Z
+- phase: implementation
+  entered: 2026-03-05T23:09:14.828255Z
+  exited: 2026-03-05T23:16:32.689795Z
+- phase: review
+  entered: 2026-03-05T23:16:32.689795Z
+  exited: 2026-03-05T23:16:39.177885Z
+- phase: audit
+  entered: 2026-03-05T23:16:39.177885Z
+  exited: 2026-03-05T23:17:07.747872Z
+- phase: qa
+  entered: 2026-03-05T23:17:07.747872Z
+  exited: 2026-03-05T23:17:30.990788Z
+- phase: merge
+  entered: 2026-03-05T23:17:30.990788Z
+  exited: 2026-03-05T23:17:35.983151Z
+- phase: released
+  entered: 2026-03-05T23:17:35.983151Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

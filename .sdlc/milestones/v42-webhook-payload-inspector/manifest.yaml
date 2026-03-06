@@ -1,0 +1,9 @@
+slug: v42-webhook-payload-inspector
+title: Webhook Payload Inspector — browse, inspect, and replay stored webhook payloads
+vision: A developer working with store_only webhook routes can browse every stored payload for any time window, inspect its JSON body, and replay it through the registered tool — all from the Actions page. Debugging a misconfigured telegram-recap or any other webhook-driven tool takes seconds, not a curl session.
+features:
+  - webhook-query-infrastructure
+  - webhook-payload-inspector-ui
+created_at: 2026-03-05T06:24:36.133520Z
+updated_at: 2026-03-05T06:24:49.406920Z
+schema_version: 1

@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: ponder-merge-cli
+    title: sdlc ponder merge — CLI command and core data model
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: ponder-merge-list-ux
+    title: ponder list/show UX for merged entries — filter and redirect banner
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false
