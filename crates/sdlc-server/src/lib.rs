@@ -793,9 +793,11 @@ async fn serve_on_with_mode(
         let url = tun.url.clone();
         tracing::debug!("seeding tunnel state: {url}");
         *app_state.tunnel_handle.lock().await = Some(tun);
+        let oauth = app_state.tunnel_snapshot.read().await.oauth_enabled;
         *app_state.tunnel_snapshot.write().await = state::TunnelSnapshot {
             config: auth::TunnelConfig::with_token(token),
             url: Some(url),
+            oauth_enabled: oauth,
         };
         tracing::debug!("tunnel state seeded");
     }

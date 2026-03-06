@@ -65,9 +65,11 @@ pub async fn start_tunnel(State(app): State<AppState>) -> Result<Json<TunnelStat
 
     // Store handle, then atomically update the snapshot (url + auth config together).
     *app.tunnel_handle.lock().await = Some(tun);
+    let oauth = app.tunnel_snapshot.read().await.oauth_enabled;
     *app.tunnel_snapshot.write().await = TunnelSnapshot {
         config: TunnelConfig::with_token(token.clone()),
         url: Some(url.clone()),
+        oauth_enabled: oauth,
     };
 
     Ok(Json(TunnelStatus {
@@ -133,6 +135,7 @@ mod tests {
         *app.tunnel_snapshot.write().await = TunnelSnapshot {
             config: TunnelConfig::with_token("existing-token".into()),
             url: Some("https://fake.tunnel.threesix.ai".into()),
+            oauth_enabled: false,
         };
 
         // The guard checks tunnel_handle (None), not tunnel_url/config.

@@ -90,6 +90,7 @@ pub async fn auth_middleware(
     }
     let config = snap.config.clone();
     let app_tunnel_host = config.app_tunnel_host.clone();
+    let oauth_enabled = snap.oauth_enabled;
     drop(snap);
 
     // Local access is always allowed regardless of token.
@@ -126,13 +127,18 @@ pub async fn auth_middleware(
         }
     }
 
-    // Valid session cookie — allow if it matches any token.
+    // Valid session cookie — allow if it matches any tunnel token.
     if let Some(cookies) = req.headers().get("cookie").and_then(|v| v.to_str().ok()) {
         for part in cookies.split(';') {
-            if let Some(val) = part.trim().strip_prefix("sdlc_auth=") {
+            let trimmed = part.trim();
+            if let Some(val) = trimmed.strip_prefix("sdlc_auth=") {
                 if config.is_valid_token(val) {
                     return next.run(req).await;
                 }
+            }
+            // OAuth session cookie — if present, pass through (OAuth handlers validate it).
+            if oauth_enabled && trimmed.starts_with("sdlc_session=") {
+                return next.run(req).await;
             }
         }
     }
@@ -167,12 +173,19 @@ pub async fn auth_middleware(
         }
     }
 
-    // Unauthorized — JSON for API routes, HTML for everything else.
+    // Unauthorized — JSON for API routes, HTML/redirect for everything else.
     if req.uri().path().starts_with("/api/") {
         Response::builder()
             .status(401)
             .header("Content-Type", "application/json")
             .body(Body::from(r#"{"error":"unauthorized"}"#))
+            .expect("infallible: all header values are valid ASCII")
+    } else if oauth_enabled {
+        // OAuth mode: redirect to login page.
+        Response::builder()
+            .status(302)
+            .header("Location", "/auth/login")
+            .body(Body::empty())
             .expect("infallible: all header values are valid ASCII")
     } else {
         Response::builder()
@@ -225,7 +238,11 @@ mod tests {
     }
 
     fn test_app(config: TunnelConfig) -> Router {
-        let arc = Arc::new(RwLock::new(TunnelSnapshot { config, url: None }));
+        let arc = Arc::new(RwLock::new(TunnelSnapshot {
+            config,
+            url: None,
+            oauth_enabled: false,
+        }));
         Router::new()
             .route("/", get(ok_handler))
             .route("/api/state", get(ok_handler))

@@ -315,6 +315,9 @@ pub struct CitedEntry {
 pub struct TunnelSnapshot {
     pub config: TunnelConfig,
     pub url: Option<String>,
+    /// When `true`, the auth middleware redirects unauthenticated browser requests
+    /// to `/auth/login` instead of showing the QR-code page.
+    pub oauth_enabled: bool,
 }
 
 impl Default for TunnelSnapshot {
@@ -322,6 +325,7 @@ impl Default for TunnelSnapshot {
         Self {
             config: TunnelConfig::none(),
             url: None,
+            oauth_enabled: false,
         }
     }
 }
@@ -521,6 +525,7 @@ impl AppState {
             TunnelSnapshot {
                 config: crate::auth::TunnelConfig::with_tokens(all_tokens),
                 url: None,
+                oauth_enabled: false,
             }
         };
         Self {
@@ -576,6 +581,12 @@ impl AppState {
         if let Some(oauth_cfg) = crate::oauth::OAuthConfig::from_env() {
             tracing::info!("OAuth2 configured for hub mode");
             state.oauth_config = Some(Arc::new(oauth_cfg));
+            // Tell auth middleware to redirect to /auth/login instead of showing QR page.
+            state
+                .tunnel_snapshot
+                .try_write()
+                .expect("no contention during startup")
+                .oauth_enabled = true;
         } else {
             tracing::warn!("OAuth2 env vars not set — hub will run without Google auth");
         }
