@@ -20,8 +20,9 @@ COPY crates/ crates/
 # Copy tool sources embedded via include_str! in templates.rs
 COPY .sdlc/tools/ .sdlc/tools/
 
-# Copy pre-built frontend so rust-embed picks it up
-COPY --from=frontend /app/frontend/dist crates/sdlc-server/frontend/dist
+# Copy pre-built frontend so build.rs finds it at ../../frontend/dist
+# relative to crates/sdlc-server/
+COPY --from=frontend /app/frontend/dist frontend/dist
 
 # Build the ponder binary (sdlc-cli) in release mode
 # SDLC_NO_NPM=1 tells build.rs to skip npm (frontend already built)
