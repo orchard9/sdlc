@@ -19,6 +19,8 @@ spec:
         app.kubernetes.io/name: sdlc-server
         app.kubernetes.io/instance: {{ .Values.project.slug }}
     spec:
+      imagePullSecrets:
+        - name: ghcr-secret
       volumes:
         - name: workspace
           emptyDir: {}
@@ -26,9 +28,10 @@ spec:
         - name: git-sync-init
           image: {{ .Values.image.gitSync }}
           args:
-            - --repo=http://{{ .Values.gitea.url }}/{{ .Values.project.repo }}.git
+            - --repo={{ .Values.gitea.url }}/{{ .Values.project.repo }}.git
             - --ref={{ .Values.project.branch }}
             - --root=/workspace
+            - --link={{ .Values.project.slug }}
             - --one-time
           volumeMounts:
             - name: workspace
@@ -78,9 +81,10 @@ spec:
         - name: git-sync
           image: {{ .Values.image.gitSync }}
           args:
-            - --repo=http://{{ .Values.gitea.url }}/{{ .Values.project.repo }}.git
+            - --repo={{ .Values.gitea.url }}/{{ .Values.project.repo }}.git
             - --ref={{ .Values.project.branch }}
             - --root=/workspace
+            - --link={{ .Values.project.slug }}
             - --period=30s
           volumeMounts:
             - name: workspace

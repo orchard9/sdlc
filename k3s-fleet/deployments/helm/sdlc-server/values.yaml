@@ -18,7 +18,7 @@ auth:
 
 image:
   server: ghcr.io/orchard9/sdlc:latest
-  gitSync: registry.k8s.io/git-sync/git-sync:v4
+  gitSync: registry.k8s.io/git-sync/git-sync:v4.6.0
 
 resources:
   server:
