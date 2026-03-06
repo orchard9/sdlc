@@ -25,6 +25,9 @@ pub enum PonderSubcommand {
         /// Filter by status (exploring, converging, committed, parked)
         #[arg(long)]
         status: Option<String>,
+        /// Show all entries including merged ones (hidden by default)
+        #[arg(long)]
+        all: bool,
     },
     /// Show ponder entry details
     Show { slug: String },
@@ -61,6 +64,14 @@ pub enum PonderSubcommand {
         /// Milestone slugs this ponder was committed to (repeatable)
         #[arg(long = "committed-to")]
         committed_to: Vec<String>,
+    },
+    /// Merge a ponder entry into another
+    Merge {
+        /// Source entry to merge (will be parked)
+        source: String,
+        /// Target entry to merge into
+        #[arg(long)]
+        into: String,
     },
     /// Archive (park) a ponder entry
     Archive { slug: String },
@@ -118,7 +129,7 @@ pub fn run(root: &Path, subcmd: PonderSubcommand, json: bool) -> anyhow::Result<
         PonderSubcommand::Create { slug, title, brief } => {
             create(root, &slug, &title, brief.as_deref(), json)
         }
-        PonderSubcommand::List { status } => list(root, status.as_deref(), json),
+        PonderSubcommand::List { status, all } => list(root, status.as_deref(), all, json),
         PonderSubcommand::Show { slug } => show(root, &slug, json),
         PonderSubcommand::Capture {
             slug,
@@ -158,6 +169,7 @@ pub fn run(root: &Path, subcmd: PonderSubcommand, json: bool) -> anyhow::Result<
             &committed_to,
             json,
         ),
+        PonderSubcommand::Merge { source, into } => merge(root, &source, &into, json),
         PonderSubcommand::Archive { slug } => archive(root, &slug, json),
         PonderSubcommand::Artifacts { slug } => artifacts(root, &slug, json),
         PonderSubcommand::Session { subcommand } => match subcommand {
@@ -204,7 +216,7 @@ fn create(
     Ok(())
 }
 
-fn list(root: &Path, status_filter: Option<&str>, json: bool) -> anyhow::Result<()> {
+fn list(root: &Path, status_filter: Option<&str>, all: bool, json: bool) -> anyhow::Result<()> {
     let mut entries = PonderEntry::list(root).context("failed to list ponder entries")?;
 
     if let Some(status_str) = status_filter {
@@ -212,6 +224,11 @@ fn list(root: &Path, status_filter: Option<&str>, json: bool) -> anyhow::Result<
             .parse()
             .with_context(|| format!("invalid status: {status_str}"))?;
         entries.retain(|e| e.status == status);
+    }
+
+    // Hide merged entries by default; --all includes them
+    if !all {
+        entries.retain(|e| e.merged_into.is_none());
     }
 
     if json {
@@ -225,6 +242,7 @@ fn list(root: &Path, status_filter: Option<&str>, json: bool) -> anyhow::Result<
                     "tags": e.tags,
                     "sessions": e.sessions,
                     "created_at": e.created_at,
+                    "merged_into": e.merged_into,
                 })
             })
             .collect();
@@ -240,10 +258,15 @@ fn list(root: &Path, status_filter: Option<&str>, json: bool) -> anyhow::Result<
     let rows: Vec<Vec<String>> = entries
         .iter()
         .map(|e| {
+            let status_display = if let Some(target) = &e.merged_into {
+                format!("parked -> {target}")
+            } else {
+                e.status.to_string()
+            };
             vec![
                 e.slug.clone(),
                 e.title.clone(),
-                e.status.to_string(),
+                status_display,
                 e.tags.join(", "),
                 e.sessions.to_string(),
             ]
@@ -291,12 +314,21 @@ fn show(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
             "sessions": entry.sessions,
             "committed_at": entry.committed_at,
             "committed_to": entry.committed_to,
+            "merged_into": entry.merged_into,
+            "merged_from": entry.merged_from,
             "created_at": entry.created_at,
             "updated_at": entry.updated_at,
             "team": team_list,
             "artifacts": artifact_list,
         }))?;
         return Ok(());
+    }
+
+    // Redirect banner for merged entries
+    if let Some(target) = &entry.merged_into {
+        println!(
+            "Note: This entry was merged into '{target}'. Use `sdlc ponder show {target}` instead.\n"
+        );
     }
 
     println!("Ponder: {} — {}", entry.slug, entry.title);
@@ -533,6 +565,37 @@ fn archive(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
         }))?;
     } else {
         println!("Archived ponder entry '{slug}'.");
+    }
+    Ok(())
+}
+
+fn merge(root: &Path, source: &str, target: &str, json: bool) -> anyhow::Result<()> {
+    let result = sdlc_core::ponder::merge_entries(root, source, target)
+        .with_context(|| format!("failed to merge '{source}' into '{target}'"))?;
+
+    // Remove source from active_ponders in state.yaml
+    if let Ok(mut state) = State::load(root) {
+        state.remove_ponder(source);
+        state.save(root).context("failed to save state")?;
+    }
+
+    if json {
+        print_json(&serde_json::json!({
+            "source": source,
+            "target": target,
+            "sessions_copied": result.sessions_copied,
+            "artifacts_copied": result.artifacts_copied,
+            "team_members_copied": result.team_members_copied,
+        }))?;
+    } else {
+        println!(
+            "Merged '{}' into '{}': {} sessions, {} artifacts, {} team members copied",
+            source,
+            target,
+            result.sessions_copied,
+            result.artifacts_copied,
+            result.team_members_copied
+        );
     }
     Ok(())
 }

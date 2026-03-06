@@ -539,4 +539,44 @@ mod tests {
         assert_eq!(scores.coupling.as_deref(), Some("low"));
         assert!(scores.growth_readiness.is_none());
     }
+
+    #[test]
+    fn root_cause_output_fields() {
+        let (_dir, root) = setup();
+        let mut entry = create(
+            &root,
+            "rc-out",
+            "RC Out",
+            InvestigationKind::RootCause,
+            None,
+        )
+        .unwrap();
+        entry.output_type = Some("task".to_string());
+        entry.output_ref = Some("fix-auth-bug".to_string());
+        entry.confidence = Some(85);
+        save(&root, &entry).unwrap();
+
+        let loaded = load(&root, "rc-out").unwrap();
+        assert_eq!(loaded.output_type.as_deref(), Some("task"));
+        assert_eq!(loaded.output_ref.as_deref(), Some("fix-auth-bug"));
+        assert_eq!(loaded.confidence, Some(85));
+    }
+
+    #[test]
+    fn evolve_output_refs() {
+        let (_dir, root) = setup();
+        let mut entry = create(&root, "ev-out", "EV Out", InvestigationKind::Evolve, None).unwrap();
+        assert!(entry.output_refs.is_empty());
+
+        entry.output_refs.push("feature-a".to_string());
+        entry.output_refs.push("feature-b".to_string());
+        entry.output_ref = Some("feature-a".to_string());
+        entry.output_type = Some("task".to_string());
+        save(&root, &entry).unwrap();
+
+        let loaded = load(&root, "ev-out").unwrap();
+        assert_eq!(loaded.output_refs, vec!["feature-a", "feature-b"]);
+        assert_eq!(loaded.output_ref.as_deref(), Some("feature-a"));
+        assert_eq!(loaded.output_type.as_deref(), Some("task"));
+    }
 }

@@ -382,6 +382,22 @@ pub struct AppState {
     /// Hub mode project registry. `None` in normal project mode, `Some` when the
     /// `--hub` flag is active; `None` in normal project mode.
     pub hub_registry: Option<Arc<Mutex<HubRegistry>>>,
+    /// k8s client for fleet discovery. `None` when running outside k8s.
+    pub kube_client: Option<kube::Client>,
+    /// Gitea API base URL (from GITEA_URL env).
+    pub gitea_url: Option<String>,
+    /// Gitea API token (from GITEA_API_TOKEN env).
+    pub gitea_token: Option<String>,
+    /// Woodpecker CI API base URL (from WOODPECKER_URL env).
+    pub woodpecker_url: Option<String>,
+    /// Woodpecker CI API token (from WOODPECKER_API_TOKEN env).
+    pub woodpecker_token: Option<String>,
+    /// Comma-separated service tokens for machine-to-machine API access (from HUB_SERVICE_TOKENS env).
+    pub hub_service_tokens: Vec<String>,
+    /// Ingress domain for fleet URLs (from INGRESS_DOMAIN or default "sdlc.threesix.ai").
+    pub ingress_domain: String,
+    /// Google OAuth2 config for hub mode. `None` when OAuth env vars are not set.
+    pub oauth_config: Option<Arc<crate::oauth::OAuthConfig>>,
     /// PostgreSQL-backed Claude OAuth credential pool.
     /// Initialized asynchronously at startup via a background task.
     /// `None` (i.e. OnceLock not yet set) until initialization completes;
@@ -483,11 +499,27 @@ impl AppState {
         let initial_tokens: Vec<(String, String)> = sdlc_core::auth_config::load(&root)
             .map(|c| c.tokens.into_iter().map(|t| (t.name, t.token)).collect())
             .unwrap_or_default();
-        let initial_tunnel_snapshot = if initial_tokens.is_empty() {
+        // Also load hub service tokens (HUB_SERVICE_TOKENS env, comma-separated)
+        // into the auth token list so they work with the existing Bearer auth flow.
+        let hub_svc_tokens: Vec<(String, String)> = std::env::var("HUB_SERVICE_TOKENS")
+            .ok()
+            .map(|s| {
+                s.split(',')
+                    .map(|t| t.trim().to_string())
+                    .filter(|t| !t.is_empty())
+                    .enumerate()
+                    .map(|(i, t)| (format!("_hub_service_{i}"), t))
+                    .collect()
+            })
+            .unwrap_or_default();
+        let mut all_tokens = initial_tokens;
+        all_tokens.extend(hub_svc_tokens);
+
+        let initial_tunnel_snapshot = if all_tokens.is_empty() {
             TunnelSnapshot::default()
         } else {
             TunnelSnapshot {
-                config: crate::auth::TunnelConfig::with_tokens(initial_tokens),
+                config: crate::auth::TunnelConfig::with_tokens(all_tokens),
                 url: None,
             }
         };
@@ -509,6 +541,23 @@ impl AppState {
             _watcher_handles: Arc::new(WatcherGuard(Vec::new())),
             agent_token: Arc::new(generate_agent_token()),
             hub_registry: None,
+            kube_client: None,
+            gitea_url: std::env::var("GITEA_URL").ok(),
+            gitea_token: std::env::var("GITEA_API_TOKEN").ok(),
+            woodpecker_url: std::env::var("WOODPECKER_URL").ok(),
+            woodpecker_token: std::env::var("WOODPECKER_API_TOKEN").ok(),
+            hub_service_tokens: std::env::var("HUB_SERVICE_TOKENS")
+                .ok()
+                .map(|s| {
+                    s.split(',')
+                        .map(|t| t.trim().to_string())
+                        .filter(|t| !t.is_empty())
+                        .collect()
+                })
+                .unwrap_or_default(),
+            ingress_domain: std::env::var("INGRESS_DOMAIN")
+                .unwrap_or_else(|_| "sdlc.threesix.ai".to_string()),
+            oauth_config: None,
             credential_pool: Arc::new(std::sync::OnceLock::new()),
             root,
         }
@@ -522,6 +571,30 @@ impl AppState {
         let hub = Arc::new(Mutex::new(HubRegistry::new(persist_path)));
         let mut state = Self::new_with_port(root, port);
         state.hub_registry = Some(hub.clone());
+
+        // Initialize OAuth config from env vars (hub mode only).
+        if let Some(oauth_cfg) = crate::oauth::OAuthConfig::from_env() {
+            tracing::info!("OAuth2 configured for hub mode");
+            state.oauth_config = Some(Arc::new(oauth_cfg));
+        } else {
+            tracing::warn!("OAuth2 env vars not set — hub will run without Google auth");
+        }
+
+        // Initialize kube client for fleet discovery (in-cluster only).
+        match kube::Config::incluster() {
+            Ok(config) => match kube::Client::try_from(config) {
+                Ok(client) => {
+                    tracing::info!("k8s client initialized (in-cluster)");
+                    state.kube_client = Some(client);
+                }
+                Err(e) => {
+                    tracing::warn!(error = %e, "k8s client creation failed — fleet endpoints will return empty results");
+                }
+            },
+            Err(_) => {
+                tracing::info!("not running in k8s — fleet discovery disabled");
+            }
+        }
 
         // Spawn the sweep task now that the registry is populated.
         if tokio::runtime::Handle::try_current().is_ok() {

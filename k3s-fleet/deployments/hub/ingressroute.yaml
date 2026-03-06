@@ -1,0 +1,19 @@
+apiVersion: traefik.io/v1alpha1
+kind: IngressRoute
+metadata:
+  name: sdlc-hub
+  namespace: sdlc-hub
+  labels:
+    app.kubernetes.io/managed-by: sdlc-fleet
+spec:
+  entryPoints:
+    - websecure
+  routes:
+    # All traffic goes to the hub — /auth/* routes are public inside the app
+    - match: Host(`sdlc.threesix.ai`)
+      kind: Rule
+      services:
+        - name: sdlc-hub
+          port: 80
+  tls:
+    secretName: sdlc-wildcard-tls

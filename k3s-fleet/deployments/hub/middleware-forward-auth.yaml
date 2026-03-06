@@ -1,0 +1,13 @@
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: sdlc-hub-auth
+  namespace: sdlc-hub
+  labels:
+    app.kubernetes.io/managed-by: sdlc-fleet
+spec:
+  forwardAuth:
+    address: http://sdlc-hub.sdlc-hub.svc.cluster.local/auth/verify
+    trustForwardHeader: true
+    authResponseHeaders:
+      - X-Auth-User

@@ -229,6 +229,7 @@ impl IntoResponse for AppError {
                 SdlcError::InvalidKnowledgeStatus(_) | SdlcError::InvalidKnowledgeCode(_) => {
                     StatusCode::BAD_REQUEST
                 }
+                SdlcError::PonderMergeError(_) => StatusCode::UNPROCESSABLE_ENTITY,
             }
         } else {
             StatusCode::INTERNAL_SERVER_ERROR

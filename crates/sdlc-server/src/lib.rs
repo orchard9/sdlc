@@ -2,8 +2,10 @@ pub mod auth;
 pub mod credential_pool;
 pub mod embed;
 pub mod error;
+pub mod fleet;
 pub mod heartbeat;
 pub mod hub;
+pub mod oauth;
 pub mod pg_common;
 pub mod pg_orchestrator;
 pub mod pg_telemetry;
@@ -588,6 +590,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             post(routes::feedback::enrich_note),
         )
         .route("/api/feedback/to-ponder", post(routes::feedback::to_ponder))
+        .route(
+            "/api/feedback/slack",
+            post(routes::feedback::receive_slack_feedback),
+        )
         // Public feedback alias — always reachable through the app tunnel (no auth required).
         .route("/__sdlc/feedback", post(routes::feedback::add_note))
         // Feedback threads — contextual, append-only comment logs
@@ -684,6 +690,18 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/hub/heartbeat", post(routes::hub::heartbeat))
         .route("/api/hub/projects", get(routes::hub::list_projects))
         .route("/api/hub/events", get(routes::hub::hub_sse_events))
+        // Fleet management (hub mode only)
+        .route("/api/hub/fleet", get(routes::hub::fleet))
+        .route("/api/hub/repos", get(routes::hub::repos))
+        .route("/api/hub/available", get(routes::hub::available))
+        .route("/api/hub/provision", post(routes::hub::provision))
+        .route("/api/hub/import", post(routes::hub::import))
+        .route("/api/hub/agents", get(routes::hub::agents))
+        // OAuth2 routes (hub mode) — login/callback MUST be public (before auth layer)
+        .route("/auth/login", get(oauth::login))
+        .route("/auth/callback", get(oauth::callback))
+        .route("/auth/verify", get(oauth::verify))
+        .route("/auth/logout", post(oauth::logout))
         .fallback(proxy::proxy_handler)
         .layer(TraceLayer::new_for_http())
         .layer(cors)

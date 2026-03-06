@@ -1,9 +1,20 @@
-use axum::extract::{Multipart, Path, State};
+use axum::extract::{Multipart, Path, Query, State};
 use axum::response::Response;
 use axum::{http::header, Json};
 
 use crate::error::AppError;
 use crate::state::AppState;
+
+// ---------------------------------------------------------------------------
+// Query parameter types
+// ---------------------------------------------------------------------------
+
+#[derive(serde::Deserialize, Default)]
+pub struct ListPondersQuery {
+    /// When true, include merged entries in the list (hidden by default).
+    #[serde(default)]
+    pub all: Option<bool>,
+}
 
 // ---------------------------------------------------------------------------
 // Session route parameter types
@@ -18,12 +29,15 @@ pub struct SessionPath {
 /// GET /api/roadmap — list all ponder entries with artifact counts and team size.
 pub async fn list_ponders(
     State(app): State<AppState>,
+    Query(params): Query<ListPondersQuery>,
 ) -> Result<Json<serde_json::Value>, AppError> {
     let root = app.root.clone();
+    let show_all = params.all.unwrap_or(false);
     let result = tokio::task::spawn_blocking(move || {
         let entries = sdlc_core::ponder::PonderEntry::list(&root)?;
         let list: Vec<serde_json::Value> = entries
             .iter()
+            .filter(|e| show_all || e.merged_into.is_none())
             .map(|e| {
                 let artifact_count = sdlc_core::ponder::list_artifacts(&root, &e.slug)
                     .map(|a| a.len())
@@ -55,6 +69,8 @@ pub async fn list_ponders(
                     "updated_at": e.updated_at,
                     "committed_at": e.committed_at,
                     "committed_to": e.committed_to,
+                    "merged_into": e.merged_into,
+                    "merged_from": e.merged_from,
                     "last_session_preview": last_session_preview,
                 })
             })
@@ -99,6 +115,11 @@ pub async fn get_ponder(
             })
         });
 
+        let redirect_banner = entry
+            .merged_into
+            .as_ref()
+            .map(|target| format!("This entry was merged into '{target}'"));
+
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
             "slug": entry.slug,
             "title": entry.title,
@@ -108,6 +129,9 @@ pub async fn get_ponder(
             "orientation": orientation,
             "committed_at": entry.committed_at,
             "committed_to": entry.committed_to,
+            "merged_into": entry.merged_into,
+            "merged_from": entry.merged_from,
+            "redirect_banner": redirect_banner,
             "created_at": entry.created_at,
             "updated_at": entry.updated_at,
             "team": team.partners,

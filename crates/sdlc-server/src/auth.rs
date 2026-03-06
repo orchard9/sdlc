@@ -109,6 +109,11 @@ pub async fn auth_middleware(
         return next.run(req).await;
     }
 
+    // OAuth routes — always public (login/callback create sessions, verify is for Traefik).
+    if req.uri().path().starts_with("/auth/") {
+        return next.run(req).await;
+    }
+
     // App tunnel host: proxy requests bypass SDLC auth; /api/* still requires auth.
     if let Some(ref athost) = app_tunnel_host {
         if bare_host == athost && !req.uri().path().starts_with("/api/") {

@@ -87,6 +87,9 @@ pub enum SdlcError {
     #[error("invalid artifact filename '{0}': must not contain path separators or '..'")]
     InvalidArtifactFilename(String),
 
+    #[error("cannot merge ponder entry: {0}")]
+    PonderMergeError(String),
+
     #[error("duplicate team member: {0}")]
     DuplicateTeamMember(String),
 

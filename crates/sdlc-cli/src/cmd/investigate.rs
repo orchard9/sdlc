@@ -70,7 +70,10 @@ pub enum InvestigateSubcommand {
         /// Set the number of principles/TOC sections extracted (guideline)
         #[arg(long)]
         principles_count: Option<u32>,
-        /// Set the output reference path (guideline publish path or root-cause output ref)
+        /// Set the output type for root-cause investigations ("task" or "guideline")
+        #[arg(long)]
+        output_type: Option<String>,
+        /// Set the output reference path (guideline publish path, root-cause output ref, or evolve output ref)
         #[arg(long)]
         output_ref: Option<String>,
     },
@@ -139,6 +142,7 @@ pub fn run(root: &Path, subcmd: InvestigateSubcommand, json: bool) -> anyhow::Re
             lens,
             problem_statement,
             principles_count,
+            output_type,
             output_ref,
         } => update(
             root,
@@ -150,6 +154,7 @@ pub fn run(root: &Path, subcmd: InvestigateSubcommand, json: bool) -> anyhow::Re
             lens.as_deref(),
             problem_statement.as_deref(),
             principles_count,
+            output_type.as_deref(),
             output_ref.as_deref(),
             json,
         ),
@@ -355,6 +360,7 @@ fn update(
     lens: Option<&str>,
     problem_statement: Option<&str>,
     principles_count: Option<u32>,
+    output_type: Option<&str>,
     output_ref: Option<&str>,
     json: bool,
 ) -> anyhow::Result<()> {
@@ -365,11 +371,12 @@ fn update(
         && lens.is_none()
         && problem_statement.is_none()
         && principles_count.is_none()
+        && output_type.is_none()
         && output_ref.is_none()
     {
         anyhow::bail!(
             "nothing to update: provide --phase, --status, --scope, --confidence, --lens, \
-             --problem-statement, --principles-count, or --output-ref"
+             --problem-statement, --principles-count, --output-type, or --output-ref"
         );
     }
 
@@ -437,12 +444,19 @@ fn update(
         entry.principles_count = Some(pc);
         entry.updated_at = chrono::Utc::now();
     }
+    if let Some(ot) = output_type {
+        if entry.kind != InvestigationKind::RootCause {
+            anyhow::bail!("--output-type is only valid for root-cause investigations");
+        }
+        entry.output_type = Some(ot.to_string());
+        entry.updated_at = chrono::Utc::now();
+    }
     if let Some(oref) = output_ref {
         match entry.kind {
             InvestigationKind::Guideline => entry.publish_path = Some(oref.to_string()),
             InvestigationKind::RootCause => entry.output_ref = Some(oref.to_string()),
             InvestigationKind::Evolve => {
-                anyhow::bail!("--output-ref is not valid for evolve investigations; use the feature/milestone system")
+                entry.output_refs.push(oref.to_string());
             }
         }
         entry.updated_at = chrono::Utc::now();

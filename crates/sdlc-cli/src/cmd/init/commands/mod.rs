@@ -6,6 +6,7 @@ mod sdlc_cookbook;
 mod sdlc_cookbook_run;
 mod sdlc_empathy;
 mod sdlc_enterprise_readiness;
+mod sdlc_fit_impact;
 mod sdlc_guideline;
 mod sdlc_hypothetical_do;
 mod sdlc_hypothetical_planning;
@@ -56,6 +57,7 @@ pub static ALL_COMMANDS: &[&CommandDef] = &[
     &sdlc_ponder_commit::SDLC_PONDER_COMMIT,
     &sdlc_suggest::SDLC_SUGGEST,
     &sdlc_beat::SDLC_BEAT,
+    &sdlc_fit_impact::SDLC_FIT_IMPACT,
     &sdlc_recruit::SDLC_RECRUIT,
     &sdlc_empathy::SDLC_EMPATHY,
     &sdlc_prepare::SDLC_PREPARE,

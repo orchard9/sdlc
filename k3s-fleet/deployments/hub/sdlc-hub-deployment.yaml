@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sdlc-hub
+  namespace: sdlc-hub
+  labels:
+    app.kubernetes.io/name: sdlc-hub
+    app.kubernetes.io/managed-by: sdlc-fleet
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sdlc-hub
+  template:
+    metadata:
+      labels:
+        app: sdlc-hub
+    spec:
+      serviceAccountName: sdlc-hub
+      imagePullSecrets:
+        - name: ghcr-secret
+      containers:
+        - name: sdlc-server
+          image: ghcr.io/orchard9/sdlc:latest
+          args: ["serve", "--hub", "--port", "8080"]
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: SDLC_HUB
+              value: "true"
+            - name: SDLC_ROOT
+              value: /tmp/sdlc-hub
+            - name: INGRESS_DOMAIN
+              value: sdlc.threesix.ai
+            # Native OAuth2
+            - name: GOOGLE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-oauth
+                  key: google-client-id
+            - name: GOOGLE_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-oauth
+                  key: google-client-secret
+            - name: SESSION_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-oauth
+                  key: session-secret
+            - name: OAUTH_ALLOWED_DOMAINS
+              value: "livelyideo.tv,masq.me,virtualcommunities.ai"
+            # Fleet integrations
+            - name: GITEA_URL
+              value: http://gitea.threesix.svc.cluster.local
+            - name: GITEA_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-fleet-tokens
+                  key: gitea-api-token
+            - name: WOODPECKER_URL
+              value: http://woodpecker-server.woodpecker.svc.cluster.local:8000
+            - name: WOODPECKER_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-fleet-tokens
+                  key: woodpecker-api-token
+            - name: HUB_SERVICE_TOKENS
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-fleet-tokens
+                  key: hub-service-tokens
+                  optional: true
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 128Mi
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10

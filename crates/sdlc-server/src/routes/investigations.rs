@@ -246,22 +246,36 @@ pub async fn update_investigation(
             entry.updated_at = chrono::Utc::now();
         }
         if let Some(ot) = body.output_type {
-            if entry.kind != sdlc_core::investigation::InvestigationKind::RootCause {
-                return Err(sdlc_core::SdlcError::InvalidInvestigationKind(
-                    "output_type is only valid for root-cause".to_string(),
-                ));
+            match entry.kind {
+                sdlc_core::investigation::InvestigationKind::RootCause
+                | sdlc_core::investigation::InvestigationKind::Evolve => {
+                    entry.output_type = Some(ot);
+                    entry.updated_at = chrono::Utc::now();
+                }
+                _ => {
+                    return Err(sdlc_core::SdlcError::InvalidInvestigationKind(
+                        "output_type is only valid for root-cause and evolve".to_string(),
+                    ));
+                }
             }
-            entry.output_type = Some(ot);
-            entry.updated_at = chrono::Utc::now();
         }
         if let Some(or_) = body.output_ref {
-            if entry.kind != sdlc_core::investigation::InvestigationKind::RootCause {
-                return Err(sdlc_core::SdlcError::InvalidInvestigationKind(
-                    "output_ref is only valid for root-cause".to_string(),
-                ));
+            match entry.kind {
+                sdlc_core::investigation::InvestigationKind::RootCause => {
+                    entry.output_ref = Some(or_);
+                    entry.updated_at = chrono::Utc::now();
+                }
+                sdlc_core::investigation::InvestigationKind::Evolve => {
+                    entry.output_ref = Some(or_.clone());
+                    entry.output_refs.push(or_);
+                    entry.updated_at = chrono::Utc::now();
+                }
+                _ => {
+                    return Err(sdlc_core::SdlcError::InvalidInvestigationKind(
+                        "output_ref is only valid for root-cause and evolve".to_string(),
+                    ));
+                }
             }
-            entry.output_ref = Some(or_);
-            entry.updated_at = chrono::Utc::now();
         }
 
         sdlc_core::investigation::save(&root, &entry)?;

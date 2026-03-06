@@ -79,6 +79,12 @@ pub struct PonderEntry {
     pub sessions: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub orientation: Option<workspace::Orientation>,
+    /// Slug of the target entry this was merged into (set on source after merge).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub merged_into: Option<String>,
+    /// Slugs of source entries that were merged into this one (accumulated on target).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub merged_from: Vec<String>,
 }
 
 impl PonderEntry {
@@ -95,6 +101,8 @@ impl PonderEntry {
             tags: Vec::new(),
             sessions: 0,
             orientation: None,
+            merged_into: None,
+            merged_from: Vec::new(),
         }
     }
 
@@ -351,6 +359,186 @@ pub fn parse_session_meta(content: &str) -> Option<workspace::SessionMeta> {
 pub fn next_session_number(root: &Path, slug: &str) -> Result<u32> {
     ensure_ponder_exists(root, slug)?;
     workspace::next_session_number(&ponder_dir(root, slug))
+}
+
+// ---------------------------------------------------------------------------
+// Merge
+// ---------------------------------------------------------------------------
+
+/// Counts of items copied during a ponder merge operation.
+#[derive(Debug, Clone)]
+pub struct MergeResult {
+    pub sessions_copied: u32,
+    pub artifacts_copied: u32,
+    pub team_members_copied: u32,
+}
+
+/// Validate pre-conditions for merging source into target.
+fn validate_merge_preconditions(source: &PonderEntry, target: &PonderEntry) -> Result<()> {
+    if source.slug == target.slug {
+        return Err(SdlcError::PonderMergeError(
+            "cannot merge an entry into itself".to_string(),
+        ));
+    }
+    if source.status == PonderStatus::Committed {
+        return Err(SdlcError::PonderMergeError(format!(
+            "cannot merge committed entry '{}'",
+            source.slug
+        )));
+    }
+    if target.status == PonderStatus::Committed {
+        return Err(SdlcError::PonderMergeError(format!(
+            "cannot merge into committed entry '{}'",
+            target.slug
+        )));
+    }
+    if source.merged_into.is_some() {
+        return Err(SdlcError::PonderMergeError(format!(
+            "'{}' was already merged into '{}'",
+            source.slug,
+            source.merged_into.as_deref().unwrap_or("unknown")
+        )));
+    }
+    Ok(())
+}
+
+/// Merge a source ponder entry into a target. Returns counts of copied items.
+///
+/// Sessions are copied with a merge-origin header. Artifacts are copied with
+/// collision-prefix if needed. Team members are dedup-merged. The source is
+/// parked with a forwarding pointer.
+pub fn merge_entries(root: &Path, source_slug: &str, target_slug: &str) -> Result<MergeResult> {
+    let source = PonderEntry::load(root, source_slug)?;
+    let mut target = PonderEntry::load(root, target_slug)?;
+
+    validate_merge_preconditions(&source, &target)?;
+
+    let source_dir = ponder_dir(root, source_slug);
+    let target_dir = ponder_dir(root, target_slug);
+
+    // 1. Copy sessions
+    let sessions_copied = copy_sessions(&source_dir, &target_dir, source_slug)?;
+
+    // 2. Copy artifacts
+    let artifacts_copied = copy_artifacts(&source_dir, &target_dir, source_slug)?;
+
+    // 3. Merge team
+    let team_members_copied = merge_team(root, source_slug, target_slug)?;
+
+    // 4. Update target manifest
+    target.merged_from.push(source_slug.to_string());
+    for tag in &source.tags {
+        target.add_tag(tag);
+    }
+    target.sessions += sessions_copied;
+    target.updated_at = Utc::now();
+    target.save(root)?;
+
+    // 5. Park source with forwarding pointer
+    let mut source = PonderEntry::load(root, source_slug)?;
+    source.status = PonderStatus::Parked;
+    source.merged_into = Some(target_slug.to_string());
+    source.updated_at = Utc::now();
+    source.save(root)?;
+
+    Ok(MergeResult {
+        sessions_copied,
+        artifacts_copied,
+        team_members_copied,
+    })
+}
+
+/// Copy session files from source to target, prepending a merge header.
+fn copy_sessions(source_dir: &Path, target_dir: &Path, source_slug: &str) -> Result<u32> {
+    let sessions_dir = source_dir.join("sessions");
+    if !sessions_dir.exists() {
+        return Ok(0);
+    }
+
+    let mut copied = 0u32;
+    let mut session_files: Vec<_> = std::fs::read_dir(&sessions_dir)?
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path().extension().map(|ext| ext == "md").unwrap_or(false))
+        .collect();
+    session_files.sort_by_key(|e| e.file_name());
+
+    for entry in session_files {
+        let content = std::fs::read_to_string(entry.path())?;
+        // Extract original session number from filename (session-NNN.md)
+        let original_num = entry
+            .file_name()
+            .to_string_lossy()
+            .trim_start_matches("session-")
+            .trim_end_matches(".md")
+            .to_string();
+        let header = format!(
+            "<!-- merged from: {}, original session: {} -->\n",
+            source_slug, original_num
+        );
+        let merged_content = format!("{}{}", header, content);
+        workspace::write_session(target_dir, &merged_content)?;
+        copied += 1;
+    }
+
+    Ok(copied)
+}
+
+/// Copy non-manifest/team artifacts from source to target with collision prefix.
+fn copy_artifacts(source_dir: &Path, target_dir: &Path, source_slug: &str) -> Result<u32> {
+    let skip_names = ["manifest.yaml", "team.yaml"];
+    let skip_dirs = ["sessions"];
+    let mut copied = 0u32;
+
+    if !source_dir.exists() {
+        return Ok(0);
+    }
+
+    for entry in std::fs::read_dir(source_dir)? {
+        let entry = entry?;
+        let name = entry.file_name().to_string_lossy().into_owned();
+
+        // Skip manifest, team, and sessions directory
+        if skip_names.contains(&name.as_str()) || skip_dirs.contains(&name.as_str()) {
+            continue;
+        }
+
+        // Skip directories
+        if entry.file_type()?.is_dir() {
+            continue;
+        }
+
+        let target_name = if target_dir.join(&name).exists() {
+            format!("{}--{}", source_slug, name)
+        } else {
+            name.clone()
+        };
+
+        let data = std::fs::read(entry.path())?;
+        crate::io::atomic_write(&target_dir.join(&target_name), &data)?;
+        copied += 1;
+    }
+
+    Ok(copied)
+}
+
+/// Merge team members from source into target, skipping duplicates by name.
+fn merge_team(root: &Path, source_slug: &str, target_slug: &str) -> Result<u32> {
+    let source_team = load_team(root, source_slug)?;
+    let mut target_team = load_team(root, target_slug)?;
+    let mut added = 0u32;
+
+    for member in source_team.partners {
+        if !target_team.partners.iter().any(|p| p.name == member.name) {
+            target_team.partners.push(member);
+            added += 1;
+        }
+    }
+
+    if added > 0 {
+        save_team(root, target_slug, &target_team)?;
+    }
+
+    Ok(added)
 }
 
 // ---------------------------------------------------------------------------
@@ -655,6 +843,182 @@ Both assume memory is the problem. Prove it first.
         let entry = PonderEntry::load(dir.path(), "idea").unwrap();
         assert_eq!(entry.sessions, 1);
         assert!(entry.orientation.is_none());
+    }
+
+    #[test]
+    fn merged_fields_serde_roundtrip() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut entry = PonderEntry::create(dir.path(), "src", "Source").unwrap();
+        entry.merged_into = Some("tgt".to_string());
+        entry.merged_from = vec!["other".to_string()];
+        entry.save(dir.path()).unwrap();
+
+        let loaded = PonderEntry::load(dir.path(), "src").unwrap();
+        assert_eq!(loaded.merged_into, Some("tgt".to_string()));
+        assert_eq!(loaded.merged_from, vec!["other".to_string()]);
+    }
+
+    #[test]
+    fn merged_fields_default_absent() {
+        // Existing entries without merged_into/merged_from should load cleanly
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let entry = PonderEntry::create(dir.path(), "old", "Old Entry").unwrap();
+        assert!(entry.merged_into.is_none());
+        assert!(entry.merged_from.is_empty());
+
+        let loaded = PonderEntry::load(dir.path(), "old").unwrap();
+        assert!(loaded.merged_into.is_none());
+        assert!(loaded.merged_from.is_empty());
+    }
+
+    #[test]
+    fn merge_entries_basic() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        PonderEntry::create(dir.path(), "src-entry", "Source").unwrap();
+        PonderEntry::create(dir.path(), "tgt-entry", "Target").unwrap();
+
+        // Add a session to source
+        log_session(
+            dir.path(),
+            "src-entry",
+            "---\nsession: 1\ntimestamp: 2026-01-01T00:00:00Z\n---\nSession content.",
+        )
+        .unwrap();
+
+        // Add an artifact to source
+        capture_content(dir.path(), "src-entry", "notes.md", "# Notes\nSome notes.").unwrap();
+
+        // Add a team member to source
+        add_team_member(
+            dir.path(),
+            "src-entry",
+            PonderTeamMember {
+                name: "kai".to_string(),
+                role: "Architect".to_string(),
+                context: "context".to_string(),
+                agent: "agent.md".to_string(),
+                recruited_at: Utc::now(),
+            },
+        )
+        .unwrap();
+
+        let result = merge_entries(dir.path(), "src-entry", "tgt-entry").unwrap();
+        assert_eq!(result.sessions_copied, 1);
+        assert_eq!(result.artifacts_copied, 1);
+        assert_eq!(result.team_members_copied, 1);
+
+        // Verify source is parked with forwarding pointer
+        let source = PonderEntry::load(dir.path(), "src-entry").unwrap();
+        assert_eq!(source.status, PonderStatus::Parked);
+        assert_eq!(source.merged_into, Some("tgt-entry".to_string()));
+
+        // Verify target has merged_from
+        let target = PonderEntry::load(dir.path(), "tgt-entry").unwrap();
+        assert_eq!(target.merged_from, vec!["src-entry"]);
+        assert_eq!(target.sessions, 1);
+
+        // Verify team was merged
+        let team = load_team(dir.path(), "tgt-entry").unwrap();
+        assert_eq!(team.partners.len(), 1);
+        assert_eq!(team.partners[0].name, "kai");
+    }
+
+    #[test]
+    fn merge_rejects_committed_source() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut src = PonderEntry::create(dir.path(), "c-src", "Source").unwrap();
+        src.update_status(PonderStatus::Committed);
+        src.save(dir.path()).unwrap();
+        PonderEntry::create(dir.path(), "c-tgt", "Target").unwrap();
+
+        let err = merge_entries(dir.path(), "c-src", "c-tgt").unwrap_err();
+        let msg = err.to_string();
+        assert!(msg.contains("cannot merge committed entry"), "got: {msg}");
+    }
+
+    #[test]
+    fn merge_rejects_committed_target() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        PonderEntry::create(dir.path(), "ct-src", "Source").unwrap();
+        let mut tgt = PonderEntry::create(dir.path(), "ct-tgt", "Target").unwrap();
+        tgt.update_status(PonderStatus::Committed);
+        tgt.save(dir.path()).unwrap();
+
+        let err = merge_entries(dir.path(), "ct-src", "ct-tgt").unwrap_err();
+        let msg = err.to_string();
+        assert!(
+            msg.contains("cannot merge into committed entry"),
+            "got: {msg}"
+        );
+    }
+
+    #[test]
+    fn merge_rejects_self_merge() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        PonderEntry::create(dir.path(), "self-m", "Self").unwrap();
+
+        let err = merge_entries(dir.path(), "self-m", "self-m").unwrap_err();
+        let msg = err.to_string();
+        assert!(
+            msg.contains("cannot merge an entry into itself"),
+            "got: {msg}"
+        );
+    }
+
+    #[test]
+    fn merge_rejects_already_merged() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        let mut src = PonderEntry::create(dir.path(), "am-src", "Source").unwrap();
+        src.merged_into = Some("elsewhere".to_string());
+        src.save(dir.path()).unwrap();
+        PonderEntry::create(dir.path(), "am-tgt", "Target").unwrap();
+
+        let err = merge_entries(dir.path(), "am-src", "am-tgt").unwrap_err();
+        let msg = err.to_string();
+        assert!(msg.contains("already merged"), "got: {msg}");
+    }
+
+    #[test]
+    fn merge_artifact_collision_prefix() {
+        let dir = TempDir::new().unwrap();
+        setup(&dir);
+
+        PonderEntry::create(dir.path(), "col-src", "Source").unwrap();
+        PonderEntry::create(dir.path(), "col-tgt", "Target").unwrap();
+
+        // Add same-named artifact to both
+        capture_content(dir.path(), "col-src", "notes.md", "source notes").unwrap();
+        capture_content(dir.path(), "col-tgt", "notes.md", "target notes").unwrap();
+
+        let result = merge_entries(dir.path(), "col-src", "col-tgt").unwrap();
+        assert_eq!(result.artifacts_copied, 1);
+
+        // Target should have both files
+        let tgt_dir = paths::ponder_dir(dir.path(), "col-tgt");
+        assert!(tgt_dir.join("notes.md").exists());
+        assert!(tgt_dir.join("col-src--notes.md").exists());
+
+        // Original target content preserved
+        let orig = std::fs::read_to_string(tgt_dir.join("notes.md")).unwrap();
+        assert_eq!(orig, "target notes");
+
+        // Prefixed file has source content
+        let prefixed = std::fs::read_to_string(tgt_dir.join("col-src--notes.md")).unwrap();
+        assert_eq!(prefixed, "source notes");
     }
 
     #[test]
