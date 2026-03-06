@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard, FolderKanban, Milestone, Search, Lightbulb, Microscope, Lock, Wrench,
   TrendingUp, MessagesSquare, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText,
-  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight, BarChart2, FlaskConical,
+  Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight, BarChart2, FlaskConical, HelpCircle,
 } from 'lucide-react'
 
 const navGroups = [
@@ -71,11 +71,13 @@ interface SidebarProps {
   onSearch?: () => void
   /** Called when the Fix Right Away button is clicked. */
   onFixRightAway?: () => void
+  /** Called when the Ask Ponder button is clicked. */
+  onAskPonder?: () => void
   /** Project name from config.project.name */
   projectName?: string
 }
 
-export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onFixRightAway, projectName = 'Ponder' }: SidebarProps) {
+export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onFixRightAway, onAskPonder, projectName = 'Ponder' }: SidebarProps) {
   const location = useLocation()
 
   return (
@@ -177,6 +179,22 @@ export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onF
             <>
               <span className="flex-1 text-left">Search</span>
               <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">⌘K</kbd>
+            </>
+          )}
+        </button>
+        <button
+          onClick={onAskPonder}
+          title={collapsed ? 'Ask Ponder' : undefined}
+          className={cn(
+            'w-full flex items-center rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors',
+            collapsed ? 'justify-center p-2' : 'gap-2.5 px-3 py-2',
+          )}
+        >
+          <HelpCircle className="w-4 h-4 shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="flex-1 text-left">Ask Ponder</span>
+              <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">⌘/</kbd>
             </>
           )}
         </button>

@@ -74,8 +74,6 @@ triggering "missing field `id`" schema errors on next load).
 | Parallel work queue | `sdlc parallel-work --json` |
 | Survey milestone waves | `sdlc project prepare [--milestone <slug>]` |
 | Mark milestone prepared | `sdlc milestone mark-prepared <slug>` |
-| Park milestone | `sdlc milestone park <slug>` |
-| Unpark milestone | `sdlc milestone unpark <slug>` |
 | Project phase | `sdlc project status` |
 | Escalate to human | `sdlc escalate create --kind <kind> --title "…" --context "…" [--feature <slug>]` |
 | List escalations | `sdlc escalate list` |

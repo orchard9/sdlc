@@ -1,0 +1,8 @@
+slug: v44-ask-ponder
+title: Ask Ponder — sidebar shortcut for how-it-works questions
+vision: A developer can press ⌘/ from anywhere in the app, ask 'how does X work?', and get a synthesized answer with source file citations — without leaving their current page. The answer streams inline in a modal, reusing the existing AMA code-search infrastructure. For longer explorations, one click opens the answer as a persistent thread.
+features:
+- ask-ponder-modal
+created_at: 2026-03-06T06:55:40.193594Z
+updated_at: 2026-03-06T06:56:00.250342Z
+schema_version: 1

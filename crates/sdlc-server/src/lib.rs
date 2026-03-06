@@ -697,6 +697,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/hub/available", get(routes::hub::available))
         .route("/api/hub/provision", post(routes::hub::provision))
         .route("/api/hub/import", post(routes::hub::import))
+        .route("/api/hub/create-repo", post(routes::hub::create_repo))
         .route("/api/hub/agents", get(routes::hub::agents))
         // OTP invite management (admin endpoints — behind auth middleware)
         .route(

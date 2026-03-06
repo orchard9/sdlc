@@ -698,6 +698,7 @@ export function PonderPage() {
   const navigate = useNavigate()
   const [entries, setEntries] = useState<PonderSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [listError, setListError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<PonderStatus | 'all'>('all')
   const [showForm, setShowForm] = useState(false)
   const [showSuggest, setShowSuggest] = useState(false)
@@ -708,8 +709,8 @@ export function PonderPage() {
 
   const load = useCallback(() => {
     api.getRoadmap(showMerged)
-      .then(data => setEntries(data))
-      .catch(() => { })
+      .then(data => { setEntries(data); setListError(null) })
+      .catch(() => setListError('Failed to load ponder entries'))
       .finally(() => setLoading(false))
   }, [showMerged])
 
@@ -814,6 +815,8 @@ export function PonderPage() {
             <Skeleton width="w-full" className="h-12" />
             <Skeleton width="w-full" className="h-12" />
           </div>
+        ) : listError ? (
+          <p className="text-xs text-destructive px-3 py-4">{listError}</p>
         ) : filtered.length === 0 ? (
           <div className="text-center py-8 px-3">
             <p className="text-xs text-muted-foreground">

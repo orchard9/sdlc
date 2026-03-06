@@ -136,6 +136,16 @@ any domain not in this list with a 403.
 - `woodpecker-api-token` — Woodpecker API token for provisioning
 - `hub-service-tokens` — comma-separated M2M bearer tokens (optional)
 
+**`sdlc-hub-notify`** (namespace: `sdlc-hub`)
+- `api-key` — notify send key for `sdlc-hub` account (scope: `mail.sdlc.threesix.ai`)
+
+```bash
+# Recreate if lost (key is in notify DB, not recoverable from admin API):
+kubectl create secret generic sdlc-hub-notify \
+  --namespace sdlc-hub \
+  --from-literal=api-key="<notify_send_...>"
+```
+
 ### Helm chart (`k3s-fleet/deployments/helm/sdlc-server/`)
 
 | File | Purpose |
@@ -187,6 +197,10 @@ any domain not in this list with a 403.
 | `WOODPECKER_URL` | Woodpecker server URL for provisioning |
 | `WOODPECKER_API_TOKEN` | Woodpecker API token |
 | `HUB_SERVICE_TOKENS` | M2M bearer tokens (optional) |
+| `NOTIFY_URL` | `https://notify.orchard9.ai` — OTP email delivery |
+| `NOTIFY_API_KEY` | notify send key (`sdlc-hub-notify` secret) |
+| `NOTIFY_HOST` | `mail.sdlc.threesix.ai` |
+| `NOTIFY_FROM` | `noreply@mail.sdlc.threesix.ai` (display: "Ponder") |
 
 ### Instance-only
 

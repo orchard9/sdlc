@@ -239,13 +239,14 @@ export function EvolvePage() {
   const navigate = useNavigate()
   const [entries, setEntries] = useState<InvestigationSummary[]>([])
   const [loading, setLoading] = useState(true)
+  const [listError, setListError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<InvestigationStatus | 'all'>('all')
   const [showModal, setShowModal] = useState(false)
 
   const load = useCallback(() => {
     api.getInvestigations('evolve')
-      .then(data => setEntries(data))
-      .catch(() => { })
+      .then(data => { setEntries(data); setListError(null) })
+      .catch(() => setListError('Failed to load evolve sessions'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -331,6 +332,8 @@ export function EvolvePage() {
             <Skeleton width="w-full" className="h-12" />
             <Skeleton width="w-full" className="h-12" />
           </div>
+        ) : listError ? (
+          <p className="text-xs text-destructive px-3 py-4">{listError}</p>
         ) : filtered.length === 0 ? (
           <div className="text-center py-8 px-3">
             <p className="text-xs text-muted-foreground">

@@ -5,6 +5,7 @@ import { AgentPanel } from './AgentPanel'
 import { AgentPanelFab } from './AgentPanelFab'
 import { SearchModal } from '@/components/shared/SearchModal'
 import { FixRightAwayModal } from '@/components/shared/FixRightAwayModal'
+import { AskPonderModal } from '@/components/shared/AskPonderModal'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { api } from '@/api/client'
 import { PanelRightOpen, ChevronLeft, MoreHorizontal } from 'lucide-react'
@@ -53,6 +54,7 @@ export function AppShell({ children }: AppShellProps) {
   })
   const [searchOpen, setSearchOpen] = useState(false)
   const [fixOpen, setFixOpen] = useState(false)
+  const [askOpen, setAskOpen] = useState(false)
   const [projectName, setProjectName] = useState<string>('Ponder')
   const { panelOpen, setPanelOpen } = useAgentRuns()
   const location = useLocation()
@@ -84,6 +86,10 @@ export function AppShell({ children }: AppShellProps) {
         e.preventDefault()
         setFixOpen(prev => !prev)
       }
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === '/') {
+        e.preventDefault()
+        setAskOpen(prev => !prev)
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
@@ -114,6 +120,7 @@ export function AppShell({ children }: AppShellProps) {
           onNavigate={() => setSidebarOpen(false)}
           onSearch={() => setSearchOpen(true)}
           onFixRightAway={() => setFixOpen(true)}
+          onAskPonder={() => setAskOpen(true)}
           projectName={projectName}
         />
       </div>
@@ -165,6 +172,7 @@ export function AppShell({ children }: AppShellProps) {
 
       <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
       <FixRightAwayModal open={fixOpen} onClose={() => setFixOpen(false)} />
+      <AskPonderModal open={askOpen} onClose={() => setAskOpen(false)} />
     </div>
   )
 }

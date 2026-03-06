@@ -1,0 +1,112 @@
+slug: hub-empty-state-replace
+title: Replace hub empty state — Add Project as primary action
+phase: released
+created_at: 2026-03-06T05:54:25.149871Z
+updated_at: 2026-03-06T06:27:37.435819Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/hub-empty-state-replace/spec.md
+  created_at: 2026-03-06T06:25:58.736073Z
+  approved_at: 2026-03-06T06:25:58.744670Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/hub-empty-state-replace/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T06:26:02.066228Z
+  waive_reason: Single component swap, ~15 lines. Spec fully describes the change. No new patterns, no mockup needed.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/hub-empty-state-replace/tasks.md
+  created_at: 2026-03-06T06:26:13.366986Z
+  approved_at: 2026-03-06T06:26:13.374547Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: waived
+  path: .sdlc/features/hub-empty-state-replace/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T06:26:17.375761Z
+  waive_reason: Single component replacement. No new API calls, no state machine, no async logic. Build check is sufficient.
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/hub-empty-state-replace/review.md
+  created_at: 2026-03-06T06:27:16.192704Z
+  approved_at: 2026-03-06T06:27:16.201056Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/hub-empty-state-replace/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T06:27:22.369463Z
+  waive_reason: Pure UI text replacement. No API surface, no auth logic, no data handling. No security findings possible.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/hub-empty-state-replace/qa-results.md
+  created_at: 2026-03-06T06:27:37.413449Z
+  approved_at: 2026-03-06T06:27:37.420954Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Replace EmptyState body in HubPage.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-06T06:26:13.382254Z
+  started_at: 2026-03-06T06:26:29.584813Z
+  completed_at: 2026-03-06T06:27:02.547220Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-06T05:54:25.149871Z
+  exited: 2026-03-06T06:25:58.746188Z
+- phase: specified
+  entered: 2026-03-06T06:25:58.746188Z
+  exited: 2026-03-06T06:26:26.538229Z
+- phase: ready
+  entered: 2026-03-06T06:26:26.538229Z
+  exited: 2026-03-06T06:26:26.547468Z
+- phase: implementation
+  entered: 2026-03-06T06:26:26.547468Z
+  exited: 2026-03-06T06:27:16.206023Z
+- phase: review
+  entered: 2026-03-06T06:27:16.206023Z
+  exited: 2026-03-06T06:27:22.370963Z
+- phase: audit
+  entered: 2026-03-06T06:27:22.370963Z
+  exited: 2026-03-06T06:27:28.069822Z
+- phase: qa
+  entered: 2026-03-06T06:27:28.069822Z
+  exited: 2026-03-06T06:27:37.426083Z
+- phase: merge
+  entered: 2026-03-06T06:27:37.426083Z
+  exited: 2026-03-06T06:27:37.435819Z
+- phase: released
+  entered: 2026-03-06T06:27:37.435819Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

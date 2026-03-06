@@ -1,0 +1,104 @@
+slug: tools-route-param-and-notfound
+title: 'Tools routing: rename param to toolId and add not-found state'
+phase: released
+created_at: 2026-03-06T06:51:14.097044Z
+updated_at: 2026-03-06T07:01:56.855639Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/tools-route-param-and-notfound/spec.md
+  created_at: 2026-03-06T06:55:16.637185Z
+  approved_at: 2026-03-06T06:55:28.472328Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/tools-route-param-and-notfound/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T06:55:34.203703Z
+  waive_reason: Pure code refactor — rename a route param and add an inline error string. No new UI components, layouts, or interaction patterns.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/tools-route-param-and-notfound/tasks.md
+  created_at: 2026-03-06T06:55:51.981691Z
+  approved_at: 2026-03-06T06:56:12.991746Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/tools-route-param-and-notfound/qa-plan.md
+  created_at: 2026-03-06T06:56:29.099734Z
+  approved_at: 2026-03-06T06:56:36.072891Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/tools-route-param-and-notfound/review.md
+  created_at: 2026-03-06T07:00:24.431927Z
+  approved_at: 2026-03-06T07:00:27.693411Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/tools-route-param-and-notfound/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-06T07:00:35.770004Z
+  waive_reason: Frontend-only route param rename and inline display of the URL param value. The toolId param is displayed as-is in an error message — no HTML injection risk in React (JSX escapes by default). No new API calls, no data access changes, no auth surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/tools-route-param-and-notfound/qa-results.md
+  created_at: 2026-03-06T07:01:49.614399Z
+  approved_at: 2026-03-06T07:01:53.579191Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-06T06:51:14.097044Z
+  exited: 2026-03-06T06:55:28.474072Z
+- phase: specified
+  entered: 2026-03-06T06:55:28.474072Z
+  exited: 2026-03-06T06:56:36.074771Z
+- phase: planned
+  entered: 2026-03-06T06:56:36.074771Z
+  exited: 2026-03-06T06:56:43.690846Z
+- phase: ready
+  entered: 2026-03-06T06:56:43.690846Z
+  exited: 2026-03-06T06:56:55.442354Z
+- phase: implementation
+  entered: 2026-03-06T06:56:55.442354Z
+  exited: 2026-03-06T07:00:27.699219Z
+- phase: review
+  entered: 2026-03-06T07:00:27.699219Z
+  exited: 2026-03-06T07:00:31.049317Z
+- phase: audit
+  entered: 2026-03-06T07:00:31.049317Z
+  exited: 2026-03-06T07:00:35.771784Z
+- phase: qa
+  entered: 2026-03-06T07:00:35.771784Z
+  exited: 2026-03-06T07:01:53.585403Z
+- phase: merge
+  entered: 2026-03-06T07:01:53.585403Z
+  exited: 2026-03-06T07:01:56.855639Z
+- phase: released
+  entered: 2026-03-06T07:01:56.855639Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

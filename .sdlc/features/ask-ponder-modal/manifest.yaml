@@ -1,0 +1,101 @@
+slug: ask-ponder-modal
+title: AskPonderModal — input, streaming answer, open-as-thread
+description: 'New modal component AskPonderModal.tsx with three states: input (textarea + Ask button), answering (source chips + streaming AmaAnswerPanel), answered (full answer + Open as Thread action). Reuses api.answerAma() and AmaAnswerPanel — no new backend. Wired into AppShell (askOpen state, ⌘/ shortcut) and Sidebar (HelpCircle button, onAskPonder prop).'
+phase: released
+created_at: 2026-03-06T06:55:54.125175Z
+updated_at: 2026-03-06T07:08:59.027287Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/spec.md
+  created_at: 2026-03-06T06:59:35.308320Z
+  approved_at: 2026-03-06T06:59:39.397909Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/design.md
+  created_at: 2026-03-06T07:01:10.382623Z
+  approved_at: 2026-03-06T07:01:10.393149Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/tasks.md
+  created_at: 2026-03-06T07:01:47.573140Z
+  approved_at: 2026-03-06T07:01:47.581073Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/qa-plan.md
+  created_at: 2026-03-06T07:02:20.049214Z
+  approved_at: 2026-03-06T07:02:20.057690Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/review.md
+  created_at: 2026-03-06T07:07:58.266237Z
+  approved_at: 2026-03-06T07:07:58.275174Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/audit.md
+  created_at: 2026-03-06T07:08:28.985170Z
+  approved_at: 2026-03-06T07:08:28.992218Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/ask-ponder-modal/qa-results.md
+  created_at: 2026-03-06T07:08:54.831391Z
+  approved_at: 2026-03-06T07:08:54.840294Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-06T06:55:54.125175Z
+  exited: 2026-03-06T06:59:39.399551Z
+- phase: specified
+  entered: 2026-03-06T06:59:39.399551Z
+  exited: 2026-03-06T07:02:20.059300Z
+- phase: planned
+  entered: 2026-03-06T07:02:20.059300Z
+  exited: 2026-03-06T07:02:51.472766Z
+- phase: ready
+  entered: 2026-03-06T07:02:51.472766Z
+  exited: 2026-03-06T07:03:02.616557Z
+- phase: implementation
+  entered: 2026-03-06T07:03:02.616557Z
+  exited: 2026-03-06T07:07:58.280324Z
+- phase: review
+  entered: 2026-03-06T07:07:58.280324Z
+  exited: 2026-03-06T07:08:00.478871Z
+- phase: audit
+  entered: 2026-03-06T07:08:00.478871Z
+  exited: 2026-03-06T07:08:28.997175Z
+- phase: qa
+  entered: 2026-03-06T07:08:28.997175Z
+  exited: 2026-03-06T07:08:54.845568Z
+- phase: merge
+  entered: 2026-03-06T07:08:54.845568Z
+  exited: 2026-03-06T07:08:59.027287Z
+- phase: released
+  entered: 2026-03-06T07:08:59.027287Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

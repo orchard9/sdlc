@@ -11,6 +11,10 @@ Available in shell for fleet/cluster operations:
 | `THREESIX_CLOUDFLARE_API_TOKEN` | Cloudflare API token (DNS/cert operations) |
 | `THREESIX_CLOUDFLARE_ZONE_ID` | Cloudflare zone ID for `threesix.ai` |
 
+## Test Emails
+
+Send test emails to `jordan@livelyvideo.tv`.
+
 ## Releasing
 
 To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX.Y.Z`), then watch `gh run list --repo orchard9/sdlc` and fix any workflow errors found.

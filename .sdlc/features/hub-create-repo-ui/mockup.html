@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CreateRepoSection Mockup</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #09090b; color: #fafafa; font-family: ui-monospace, 'Cascadia Code', monospace; font-size: 14px; }
+  nav { display: flex; gap: 8px; padding: 12px 20px; border-bottom: 1px solid #27272a; background: #111113; }
+  nav button { padding: 6px 14px; border-radius: 6px; border: 1px solid #3f3f46; background: #18181b; color: #a1a1aa; cursor: pointer; font-size: 12px; }
+  nav button.active { background: #3f3f46; color: #fafafa; border-color: #52525b; }
+  section { display: none; padding: 32px 24px; max-width: 800px; }
+  section.active { display: block; }
+  .card { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 24px; }
+  .section-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+  .section-hint { font-size: 12px; color: #71717a; margin-bottom: 16px; }
+  .input-row { display: flex; gap: 12px; align-items: flex-start; }
+  input[type=text] { flex: 1; background: #09090b; border: 1px solid #3f3f46; border-radius: 8px; padding: 8px 12px; color: #fafafa; font-size: 13px; outline: none; }
+  input[type=text]:focus { border-color: #a855f7; }
+  input[type=text]:disabled { opacity: 0.5; }
+  .hint { font-size: 11px; color: #52525b; margin-top: 6px; }
+  .btn { display: flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; border: none; font-size: 13px; font-weight: 500; cursor: pointer; white-space: nowrap; }
+  .btn-primary { background: #a855f7; color: white; }
+  .btn-primary:disabled { background: #3f3f46; color: #71717a; cursor: not-allowed; }
+  .btn-secondary { background: #27272a; color: #a1a1aa; border: 1px solid #3f3f46; }
+  .btn-ghost { background: transparent; color: #a1a1aa; border: 1px solid #3f3f46; }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .error { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #f87171; margin-top: 10px; }
+  .success-header { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #4ade80; margin-bottom: 20px; }
+  .instruction-label { font-size: 12px; color: #71717a; margin-bottom: 6px; }
+  .instruction-row { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .code-block { flex: 1; background: #09090b; border: 1px solid #27272a; border-radius: 6px; padding: 8px 12px; font-size: 12px; color: #e4e4e7; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .copy-btn { flex-shrink: 0; padding: 7px 12px; border-radius: 6px; border: 1px solid #3f3f46; background: #27272a; color: #a1a1aa; font-size: 12px; cursor: pointer; }
+  .copy-btn.copied { color: #4ade80; border-color: #4ade80; }
+  .caption { font-size: 12px; color: #71717a; margin-top: 4px; margin-bottom: 20px; line-height: 1.6; }
+  .spinner { width: 14px; height: 14px; border: 2px solid #52525b; border-top-color: #a855f7; border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .check { color: #4ade80; font-size: 16px; }
+</style>
+</head>
+<body>
+<nav>
+  <button class="active" onclick="show('idle')">Step 1 — Idle</button>
+  <button onclick="show('creating')">Step 1 — Creating</button>
+  <button onclick="show('done')">Step 2 — Instructions</button>
+  <button onclick="show('error')">Step 1 — Error</button>
+</nav>
+
+<!-- Idle -->
+<section id="screen-idle" class="active">
+  <h2 class="section-title">Add New Project</h2>
+  <p class="section-hint">Create a new Gitea repo and push your local project to the cluster.</p>
+  <div class="card">
+    <div class="input-row">
+      <input type="text" placeholder="project-name" value="" />
+      <button class="btn btn-primary" disabled>+ Create</button>
+    </div>
+    <p class="hint">lowercase letters, numbers, and hyphens</p>
+  </div>
+</section>
+
+<!-- Idle with value typed (active create) -->
+<section id="screen-creating">
+  <h2 class="section-title">Add New Project</h2>
+  <p class="section-hint">Create a new Gitea repo and push your local project to the cluster.</p>
+  <div class="card">
+    <div class="input-row">
+      <input type="text" value="my-new-project" disabled />
+      <button class="btn btn-primary" disabled>
+        <div class="spinner"></div>
+        Creating...
+      </button>
+    </div>
+    <p class="hint">lowercase letters, numbers, and hyphens</p>
+  </div>
+</section>
+
+<!-- Done / Instructions -->
+<section id="screen-done">
+  <h2 class="section-title">Add New Project</h2>
+  <p class="section-hint">Create a new Gitea repo and push your local project to the cluster.</p>
+  <div class="card">
+    <div class="success-header">
+      <span class="check">✓</span> my-new-project created
+    </div>
+
+    <p class="instruction-label">Add remote:</p>
+    <div class="instruction-row">
+      <div class="code-block">git remote add gitea http://claude-agent:gh_tok…@100.79.2.8:30300/orchard9/my-new-project.git</div>
+      <button class="copy-btn" onclick="copyCmd(this, 'git remote add gitea http://claude-agent:TOKEN@host/orchard9/my-new-project.git')">Copy</button>
+    </div>
+
+    <p class="instruction-label">Push:</p>
+    <div class="instruction-row">
+      <div class="code-block">git push gitea main</div>
+      <button class="copy-btn" onclick="copyCmd(this, 'git push gitea main')">Copy</button>
+    </div>
+
+    <p class="caption">This is your deployment remote — push here to update your cluster instance.</p>
+
+    <button class="btn btn-ghost btn-sm" onclick="show('idle')">+ Add another project</button>
+  </div>
+</section>
+
+<!-- Error -->
+<section id="screen-error">
+  <h2 class="section-title">Add New Project</h2>
+  <p class="section-hint">Create a new Gitea repo and push your local project to the cluster.</p>
+  <div class="card">
+    <div class="input-row">
+      <input type="text" value="my-new-project" />
+      <button class="btn btn-primary">+ Create</button>
+    </div>
+    <p class="hint">lowercase letters, numbers, and hyphens</p>
+    <div class="error">⚠ A repo named "my-new-project" already exists. Choose a different name.</div>
+  </div>
+</section>
+
+<script>
+function show(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+function copyCmd(btn, text) {
+  navigator.clipboard.writeText(text).catch(() => {});
+  const orig = btn.textContent;
+  btn.textContent = 'Copied!';
+  btn.classList.add('copied');
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 1500);
+}
+</script>
+</body>
+</html>

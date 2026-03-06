@@ -492,6 +492,12 @@ export const api = {
       body: JSON.stringify({ url, pat: pat || undefined }),
       headers: { 'Content-Type': 'application/json' },
     }),
+  createRepo: (name: string) =>
+    request<import('@/lib/types').CreateRepoResponse>('/api/hub/create-repo', {
+      method: 'POST',
+      body: JSON.stringify({ name }),
+      headers: { 'Content-Type': 'application/json' },
+    }),
 
   // Auth tokens (named tunnel-access tokens)
   getAuthTokens: () => request<import('@/lib/types').AuthToken[]>('/api/auth/tokens'),

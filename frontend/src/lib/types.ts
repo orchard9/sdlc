@@ -1198,31 +1198,38 @@ export interface HubSseEvent {
 // Fleet control plane types (hub mode — fleet management)
 // ---------------------------------------------------------------------------
 
-export type FleetInstanceStatus = 'healthy' | 'degraded' | 'failing' | 'unknown'
-
 export interface FleetInstance {
-  name: string
-  url: string
+  slug: string
   namespace: string
-  status: FleetInstanceStatus
-  pod_status: string
+  url: string
+  deployment_status: 'running' | 'pending' | 'failed' | 'unknown'
+  pod_healthy: boolean
   active_milestone: string | null
   feature_count: number | null
-  agent_running: boolean
-  active_agent_runs: number
-  created_at: string
+  agent_running: boolean | null
+  created_at: string | null
 }
 
 export interface AvailableRepo {
-  name: string
   slug: string
+  full_name: string
   description: string | null
-  url: string
+  clone_url: string
+  created_at: string | null
+  archived: boolean
+  can_provision: boolean
 }
 
 export interface FleetAgentSummary {
   total_active_runs: number
   projects_with_agents: number
+}
+
+export interface CreateRepoResponse {
+  repo_slug: string
+  push_url: string
+  gitea_url: string
+  provision_triggered: boolean
 }
 
 // ---------------------------------------------------------------------------

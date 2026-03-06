@@ -1,0 +1,11 @@
+slug: tools-routing
+title: 'Tools page: proper routing with tool IDs'
+status: committed
+created_at: 2026-03-06T06:38:15.756313Z
+updated_at: 2026-03-06T06:51:45.627916Z
+committed_at: 2026-03-06T06:51:22.629239Z
+sessions: 2
+orientation:
+  current: Committed to state machine. Milestone tools-routing-cleanup, feature tools-route-param-and-notfound created.
+  next: Run sdlc-run tools-route-param-and-notfound to implement
+  commit: Done — feature is in the state machine, ready to implement

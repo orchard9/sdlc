@@ -2972,6 +2972,7 @@ dependencies = [
  "k8s-openapi",
  "kube",
  "mime_guess",
+ "mockito",
  "open",
  "rand 0.8.5",
  "redb",

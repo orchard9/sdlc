@@ -1,0 +1,136 @@
+slug: hub-create-repo-ui
+title: 'CreateRepoModal — two-step UI: name form → instruction display'
+phase: released
+created_at: 2026-03-06T05:54:25.140328Z
+updated_at: 2026-03-06T06:14:37.185872Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/spec.md
+  created_at: 2026-03-06T06:10:18.464304Z
+  approved_at: 2026-03-06T06:10:18.473165Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/design.md
+  created_at: 2026-03-06T06:11:08.185622Z
+  approved_at: 2026-03-06T06:11:08.194495Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/tasks.md
+  created_at: 2026-03-06T06:11:22.277296Z
+  approved_at: 2026-03-06T06:11:22.286033Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/qa-plan.md
+  created_at: 2026-03-06T06:11:39.039897Z
+  approved_at: 2026-03-06T06:11:39.048495Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/review.md
+  created_at: 2026-03-06T06:13:57.562855Z
+  approved_at: 2026-03-06T06:13:57.572266Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/audit.md
+  created_at: 2026-03-06T06:14:18.696636Z
+  approved_at: 2026-03-06T06:14:18.705638Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/hub-create-repo-ui/qa-results.md
+  created_at: 2026-03-06T06:14:34.771185Z
+  approved_at: 2026-03-06T06:14:34.779908Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add CreateRepoResponse type to frontend/src/lib/types.ts
+  description: null
+  status: completed
+  created_at: 2026-03-06T06:11:22.294190Z
+  started_at: 2026-03-06T06:11:46.327741Z
+  completed_at: 2026-03-06T06:11:59.022665Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add createRepo() to frontend/src/api/client.ts
+  description: null
+  status: completed
+  created_at: 2026-03-06T06:11:22.301332Z
+  started_at: 2026-03-06T06:11:59.031294Z
+  completed_at: 2026-03-06T06:12:07.230277Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add CreateRepoSection component to HubPage.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-06T06:11:22.308451Z
+  started_at: 2026-03-06T06:12:07.239966Z
+  completed_at: 2026-03-06T06:12:45.374495Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Wire CreateRepoSection into fleet view as Add New Project section
+  description: null
+  status: completed
+  created_at: 2026-03-06T06:11:22.315958Z
+  started_at: 2026-03-06T06:12:45.383394Z
+  completed_at: 2026-03-06T06:13:00.023161Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-06T05:54:25.140328Z
+  exited: 2026-03-06T06:10:18.474881Z
+- phase: specified
+  entered: 2026-03-06T06:10:18.474881Z
+  exited: 2026-03-06T06:11:39.050223Z
+- phase: planned
+  entered: 2026-03-06T06:11:39.050223Z
+  exited: 2026-03-06T06:11:42.951258Z
+- phase: ready
+  entered: 2026-03-06T06:11:42.951258Z
+  exited: 2026-03-06T06:11:42.961333Z
+- phase: implementation
+  entered: 2026-03-06T06:11:42.961333Z
+  exited: 2026-03-06T06:13:57.578939Z
+- phase: review
+  entered: 2026-03-06T06:13:57.578939Z
+  exited: 2026-03-06T06:14:00.857545Z
+- phase: audit
+  entered: 2026-03-06T06:14:00.857545Z
+  exited: 2026-03-06T06:14:18.710611Z
+- phase: qa
+  entered: 2026-03-06T06:14:18.710611Z
+  exited: 2026-03-06T06:14:34.785220Z
+- phase: merge
+  entered: 2026-03-06T06:14:34.785220Z
+  exited: 2026-03-06T06:14:37.185872Z
+- phase: released
+  entered: 2026-03-06T06:14:37.185872Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

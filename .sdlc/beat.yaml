@@ -1,4 +1,13 @@
 beats:
+  - id: beat-003
+    scope: hub-onboarding
+    mode: evaluate
+    timestamp: 2026-03-05T00:00:00.000Z
+    verdict: on-track
+    concerns:
+      - "Empty state shows v1 heartbeat instructions (~/.sdlc/hub.yaml) — stale architecture visible to users; replace with Add Project button as primary action."
+      - "'Keep remotes in sync' framing is wrong — correct model is push-to-gitea=deploy (git-sync sidecar handles cluster side). Instruction screen copy must reflect this."
+      - "Reconcile pipeline trigger timing — create-repo route must call trigger_provision immediately after creation (mirror import route pattern), not wait for scheduled reconcile."
   - id: beat-001
     scope: project
     mode: evaluate

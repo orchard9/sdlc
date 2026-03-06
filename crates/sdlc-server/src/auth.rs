@@ -161,8 +161,11 @@ pub async fn auth_middleware(
     if let Some(query) = uri.query() {
         if let Some(val) = extract_auth_param(query) {
             if config.is_valid_token(val) {
-                let destination = strip_auth_param(uri.path(), query);
-                let cookie = format!("sdlc_auth={val}; HttpOnly; SameSite=Lax; Path=/");
+                let path_only = strip_auth_param(uri.path(), query);
+                let destination = format!("https://{host_value}{path_only}");
+                let cookie = format!(
+                    "sdlc_auth={val}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=2592000"
+                );
                 return Response::builder()
                     .status(302)
                     .header("Location", destination)
@@ -405,10 +408,12 @@ mod tests {
             .unwrap();
         assert_eq!(resp.status(), StatusCode::FOUND);
         let location = resp.headers().get("location").unwrap().to_str().unwrap();
-        assert_eq!(location, "/");
+        assert_eq!(location, "https://abc.trycloudflare.com/");
         let cookie = resp.headers().get("set-cookie").unwrap().to_str().unwrap();
         assert!(cookie.contains("sdlc_auth=secret"));
         assert!(cookie.contains("HttpOnly"));
+        assert!(cookie.contains("Secure"));
+        assert!(cookie.contains("Max-Age=2592000"));
     }
 
     #[tokio::test]

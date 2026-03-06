@@ -394,6 +394,99 @@ pub async fn import_repo(
 }
 
 // ---------------------------------------------------------------------------
+// Repo creation
+// ---------------------------------------------------------------------------
+
+/// Create a new empty repo in the orchard9 Gitea org.
+///
+/// Returns `FleetError::RepoAlreadyExists` if the name is taken (HTTP 409).
+pub async fn create_gitea_repo(
+    http_client: &reqwest::Client,
+    gitea_url: &str,
+    gitea_token: &str,
+    name: &str,
+) -> Result<GiteaRepo, FleetError> {
+    let url = format!("{gitea_url}/api/v1/orgs/orchard9/repos");
+
+    let body = serde_json::json!({
+        "name": name,
+        "private": false,
+        "auto_init": false,
+        "description": "",
+    });
+
+    let resp = http_client
+        .post(&url)
+        .header("Authorization", format!("token {gitea_token}"))
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| FleetError::GiteaUnavailable(e.to_string()))?;
+
+    let status = resp.status();
+    if status.as_u16() == 409 {
+        return Err(FleetError::RepoAlreadyExists(name.to_string()));
+    }
+    if !status.is_success() {
+        let detail = resp.text().await.unwrap_or_default();
+        return Err(FleetError::GiteaUnavailable(format!(
+            "create repo failed: HTTP {status}: {detail}"
+        )));
+    }
+
+    let api_repo: GiteaApiRepo = resp
+        .json()
+        .await
+        .map_err(|e| FleetError::GiteaUnavailable(e.to_string()))?;
+
+    Ok(GiteaRepo {
+        slug: api_repo.name,
+        full_name: api_repo.full_name,
+        description: api_repo.description,
+        clone_url: api_repo
+            .clone_url
+            .unwrap_or_else(|| api_repo.html_url.unwrap_or_default()),
+        created_at: api_repo.created_at,
+        archived: api_repo.archived,
+    })
+}
+
+/// Retrieve the login name of the authenticated Gitea user (admin token owner).
+pub async fn get_gitea_username(
+    http_client: &reqwest::Client,
+    gitea_url: &str,
+    gitea_token: &str,
+) -> Result<String, FleetError> {
+    let url = format!("{gitea_url}/api/v1/user");
+
+    let resp = http_client
+        .get(&url)
+        .header("Authorization", format!("token {gitea_token}"))
+        .send()
+        .await
+        .map_err(|e| FleetError::GiteaUnavailable(e.to_string()))?;
+
+    if !resp.status().is_success() {
+        let status = resp.status();
+        return Err(FleetError::GiteaUnavailable(format!(
+            "get user failed: HTTP {status}"
+        )));
+    }
+
+    #[derive(serde::Deserialize)]
+    struct UserResp {
+        login: String,
+    }
+
+    let user: UserResp = resp
+        .json()
+        .await
+        .map_err(|e| FleetError::GiteaUnavailable(e.to_string()))?;
+
+    Ok(user.login)
+}
+
+// ---------------------------------------------------------------------------
 // Errors
 // ---------------------------------------------------------------------------
 
@@ -413,6 +506,9 @@ pub enum FleetError {
 
     #[error("invalid request: {0}")]
     InvalidRequest(String),
+
+    #[error("repo already exists: {0}")]
+    RepoAlreadyExists(String),
 }
 
 impl FleetError {
@@ -425,6 +521,7 @@ impl FleetError {
             Self::WoodpeckerUnavailable(_) => StatusCode::BAD_GATEWAY,
             Self::RepoNotFound(_) => StatusCode::NOT_FOUND,
             Self::InvalidRequest(_) => StatusCode::BAD_REQUEST,
+            Self::RepoAlreadyExists(_) => StatusCode::CONFLICT,
         }
     }
 
@@ -436,6 +533,7 @@ impl FleetError {
             Self::WoodpeckerUnavailable(_) => "woodpecker_unavailable",
             Self::RepoNotFound(_) => "repo_not_found",
             Self::InvalidRequest(_) => "invalid_request",
+            Self::RepoAlreadyExists(_) => "repo_exists",
         }
     }
 
@@ -595,5 +693,95 @@ mod tests {
             FleetError::InvalidRequest("test".into()).status_code(),
             axum::http::StatusCode::BAD_REQUEST
         );
+        assert_eq!(
+            FleetError::RepoAlreadyExists("test".into()).status_code(),
+            axum::http::StatusCode::CONFLICT
+        );
+        assert_eq!(
+            FleetError::RepoAlreadyExists("test".into()).error_code(),
+            "repo_exists"
+        );
+    }
+
+    #[tokio::test]
+    async fn create_gitea_repo_success() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("POST", "/api/v1/orgs/orchard9/repos")
+            .with_status(201)
+            .with_header("content-type", "application/json")
+            .with_body(
+                r#"{
+                "name": "my-project",
+                "full_name": "orchard9/my-project",
+                "description": null,
+                "clone_url": "http://gitea/orchard9/my-project.git",
+                "html_url": "http://gitea/orchard9/my-project",
+                "created_at": null,
+                "archived": false
+            }"#,
+            )
+            .create_async()
+            .await;
+
+        let client = reqwest::Client::new();
+        let result = create_gitea_repo(&client, &server.url(), "token123", "my-project").await;
+
+        mock.assert_async().await;
+        let repo = result.expect("should succeed");
+        assert_eq!(repo.slug, "my-project");
+        assert_eq!(repo.full_name, "orchard9/my-project");
+    }
+
+    #[tokio::test]
+    async fn create_gitea_repo_conflict() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("POST", "/api/v1/orgs/orchard9/repos")
+            .with_status(409)
+            .with_body(r#"{"message":"repo already exists"}"#)
+            .create_async()
+            .await;
+
+        let client = reqwest::Client::new();
+        let result = create_gitea_repo(&client, &server.url(), "token123", "existing-repo").await;
+
+        mock.assert_async().await;
+        assert!(matches!(result, Err(FleetError::RepoAlreadyExists(_))));
+    }
+
+    #[tokio::test]
+    async fn get_gitea_username_success() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("GET", "/api/v1/user")
+            .with_status(200)
+            .with_header("content-type", "application/json")
+            .with_body(r#"{"login":"claude-agent","id":1}"#)
+            .create_async()
+            .await;
+
+        let client = reqwest::Client::new();
+        let result = get_gitea_username(&client, &server.url(), "token123").await;
+
+        mock.assert_async().await;
+        assert_eq!(result.expect("should succeed"), "claude-agent");
+    }
+
+    #[tokio::test]
+    async fn get_gitea_username_error() {
+        let mut server = mockito::Server::new_async().await;
+        let mock = server
+            .mock("GET", "/api/v1/user")
+            .with_status(401)
+            .with_body("unauthorized")
+            .create_async()
+            .await;
+
+        let client = reqwest::Client::new();
+        let result = get_gitea_username(&client, &server.url(), "bad-token").await;
+
+        mock.assert_async().await;
+        assert!(matches!(result, Err(FleetError::GiteaUnavailable(_))));
     }
 }

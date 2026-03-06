@@ -13,14 +13,15 @@ export function MilestoneDetail() {
   const { slug } = useParams<{ slug: string }>()
   const [milestone, setMilestone] = useState<MilestoneDetailType | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [reordering, setReordering] = useState(false)
   const { state } = useProjectState()
 
   const load = useCallback(() => {
     if (!slug) return
     api.getMilestone(slug)
-      .then(m => setMilestone(m))
-      .catch(() => {})
+      .then(m => { setMilestone(m); setError(null) })
+      .catch(() => setError('Could not load milestone'))
       .finally(() => setLoading(false))
   }, [slug])
 
@@ -57,10 +58,18 @@ export function MilestoneDetail() {
     }
   }
 
-  if (loading || !milestone) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-full p-6">
         <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+      </div>
+    )
+  }
+
+  if (error || !milestone) {
+    return (
+      <div className="flex items-center justify-center h-full p-6">
+        <p className="text-sm text-destructive">{error ?? 'Milestone not found'}</p>
       </div>
     )
   }

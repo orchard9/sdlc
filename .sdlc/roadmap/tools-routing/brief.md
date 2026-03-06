@@ -1,0 +1,1 @@
+The `/tools` section needs proper routing — some kind of stable tool identifier in the URL, e.g. `/tools/:toolid`. The current routing setup uses `:name` (the tool's slug/name) as the route param. But tool names can change (evolve, clone, rename), which breaks URLs.

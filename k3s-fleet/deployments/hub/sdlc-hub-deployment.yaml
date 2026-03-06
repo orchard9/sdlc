@@ -72,6 +72,18 @@ spec:
                   name: sdlc-hub-fleet-tokens
                   key: hub-service-tokens
                   optional: true
+            # OTP email delivery via notify
+            - name: NOTIFY_URL
+              value: https://notify.orchard9.ai
+            - name: NOTIFY_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-notify
+                  key: api-key
+            - name: NOTIFY_HOST
+              value: mail.sdlc.threesix.ai
+            - name: NOTIFY_FROM
+              value: "noreply@mail.sdlc.threesix.ai"
           resources:
             requests:
               cpu: 50m

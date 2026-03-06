@@ -119,108 +119,13 @@ active_features:
 - fix-assistanttextblockmissingmarkdownrendering
 - fleet-native-oauth
 - fleet-deploy-hub
+- hub-create-repo-api
+- hub-create-repo-ui
+- hub-empty-state-replace
+- tools-route-param-and-notfound
+- ask-ponder-modal
 active_directives: []
 history:
-- feature: fleet-deploy-pipeline
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:31:53.483901Z
-  outcome: merged
-- feature: fleet-secrets-infra
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:32:05.529447Z
-  outcome: merged
-- feature: fleet-repo-scaffold
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:32:07.555594Z
-  outcome: merged
-- feature: fleet-helm-chart
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:32:38.565874Z
-  outcome: transition
-- feature: fleet-helm-chart
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:34:30.950206Z
-  outcome: merged
-- feature: fleet-reconcile-pipeline
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:35:06.808749Z
-  outcome: transition
-- feature: fleet-ingress-tls
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:37:10.199445Z
-  outcome: transition
-- feature: fleet-bootstrap
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:37:22.317699Z
-  outcome: transition
-- feature: fleet-ingress-tls
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:39:53.188115Z
-  outcome: merged
-- feature: fleet-bootstrap
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:40:00.467099Z
-  outcome: merged
-- feature: uat-artifacts-ui
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T03:42:09.873855Z
-  outcome: transition
-- feature: uat-artifacts-ui
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T03:42:19.680135Z
-  outcome: transition
-- feature: fleet-reconcile-pipeline
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:42:30.240542Z
-  outcome: merged
-- feature: ponder-owner-nav
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:43:15.095961Z
-  outcome: transition
-- feature: ponder-owner-nav
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:44:55.671370Z
-  outcome: merged
-- feature: ponder-session-card-preview
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T03:45:04.472925Z
-  outcome: transition
-- feature: ponder-session-card-preview
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T03:47:30.802722Z
-  outcome: merged
-- feature: uat-artifacts-ui
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T04:54:02.595193Z
-  outcome: transition
-- feature: uat-artifacts-ui
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T04:55:23.707275Z
-  outcome: merged
-- feature: tool-agent-invocation
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:15:18.898060Z
-  outcome: transition
 - feature: tool-agent-invocation
   action: implement_task
   phase: implementation
@@ -1121,6 +1026,106 @@ history:
   phase: implementation
   timestamp: 2026-03-06T00:16:35.569860Z
   outcome: transition
+- feature: hub-create-repo-api
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-06T05:59:48.411144Z
+  outcome: transition
+- feature: hub-create-repo-api
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-06T05:59:53.130622Z
+  outcome: transition
+- feature: hub-create-repo-api
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-06T06:03:41.901796Z
+  outcome: transition
+- feature: hub-create-repo-api
+  action: merge
+  phase: released
+  timestamp: 2026-03-06T06:05:53.907546Z
+  outcome: merged
+- feature: hub-create-repo-ui
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-06T06:11:42.952786Z
+  outcome: transition
+- feature: hub-create-repo-ui
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-06T06:11:42.962876Z
+  outcome: transition
+- feature: hub-create-repo-ui
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-06T06:14:00.859099Z
+  outcome: transition
+- feature: hub-create-repo-ui
+  action: merge
+  phase: released
+  timestamp: 2026-03-06T06:14:37.187321Z
+  outcome: merged
+- feature: hub-empty-state-replace
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-06T06:26:26.539810Z
+  outcome: transition
+- feature: hub-empty-state-replace
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-06T06:26:26.548858Z
+  outcome: transition
+- feature: hub-empty-state-replace
+  action: implement_task
+  phase: qa
+  timestamp: 2026-03-06T06:27:28.071253Z
+  outcome: transition
+- feature: hub-empty-state-replace
+  action: merge
+  phase: released
+  timestamp: 2026-03-06T06:27:37.437128Z
+  outcome: merged
+- feature: tools-route-param-and-notfound
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-06T06:56:43.692327Z
+  outcome: transition
+- feature: tools-route-param-and-notfound
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-06T06:56:55.443855Z
+  outcome: transition
+- feature: tools-route-param-and-notfound
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-06T07:00:31.050901Z
+  outcome: transition
+- feature: tools-route-param-and-notfound
+  action: merge
+  phase: released
+  timestamp: 2026-03-06T07:01:56.857238Z
+  outcome: merged
+- feature: ask-ponder-modal
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-06T07:02:51.474811Z
+  outcome: transition
+- feature: ask-ponder-modal
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-06T07:03:02.618317Z
+  outcome: transition
+- feature: ask-ponder-modal
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-06T07:08:00.480453Z
+  outcome: transition
+- feature: ask-ponder-modal
+  action: merge
+  phase: released
+  timestamp: 2026-03-06T07:08:59.028733Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1158,6 +1163,9 @@ milestones:
 - v31-activity-feed-polish
 - v39-slack-bot-tool
 - v39-run-max-turns-recovery
+- v43-hub-project-onboarding
+- tools-routing-cleanup
+- v44-ask-ponder
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1168,4 +1176,4 @@ active_ponders:
 - artifact-share-capture
 - git-binary-hygiene
 - test-rich-input-modal-uat
-last_updated: 2026-03-06T00:16:35.569860Z
+last_updated: 2026-03-06T07:08:59.028735Z

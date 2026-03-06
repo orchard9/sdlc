@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AskPonderModal — Design</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #09090b; color: #fafafa; font-family: ui-monospace, 'Cascadia Code', monospace; font-size: 14px; }
+  nav { display: flex; gap: 1px; background: #27272a; border-bottom: 1px solid #27272a; position: sticky; top: 0; z-index: 10; }
+  nav a { padding: 10px 18px; color: #a1a1aa; text-decoration: none; font-size: 12px; font-weight: 500; background: #09090b; transition: color .15s; }
+  nav a:hover, nav a.active { color: #fafafa; background: #18181b; }
+  section { display: none; padding: 40px; }
+  section.active { display: flex; flex-direction: column; align-items: center; gap: 32px; }
+  .label { font-size: 11px; color: #52525b; text-transform: uppercase; letter-spacing: .08em; align-self: flex-start; max-width: 480px; width: 100%; }
+  .card { width: 100%; max-width: 480px; background: #18181b; border: 1px solid #27272a; border-radius: 12px; overflow: hidden; box-shadow: 0 25px 50px -12px rgba(0,0,0,.6); }
+  .card-header { padding: 16px; border-bottom: 1px solid #27272a; }
+  .card-header-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .title { font-size: 13px; font-weight: 600; }
+  .subtitle { font-size: 12px; color: #71717a; }
+  .subtitle.truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-body { padding: 16px; }
+  .card-footer { padding: 12px 16px; border-top: 1px solid #27272a; display: flex; align-items: center; justify-content: space-between; }
+  textarea { width: 100%; padding: 10px 12px; background: #09090b; border: 1px solid #3f3f46; border-radius: 8px; color: #fafafa; font-family: inherit; font-size: 13px; resize: none; outline: none; }
+  textarea::placeholder { color: #52525b; }
+  textarea:focus { border-color: #6366f1; box-shadow: 0 0 0 2px rgba(99,102,241,.2); }
+  .hint { font-size: 11px; color: #52525b; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: background .15s; }
+  .btn-primary { background: #6366f1; color: #fff; }
+  .btn-primary:hover { background: #4f46e5; }
+  .btn-outline { background: transparent; color: #a1a1aa; border: 1px solid #3f3f46; }
+  .btn-outline:hover { color: #fafafa; border-color: #52525b; }
+  .btn-outline-indigo { background: rgba(99,102,241,.08); color: #818cf8; border: 1px solid rgba(99,102,241,.25); }
+  .btn-outline-indigo:hover { background: rgba(99,102,241,.15); }
+  .btn-ghost { background: transparent; color: #71717a; padding: 0; }
+  .btn-ghost:hover { color: #fafafa; }
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(99,102,241,.3); border-top-color: #6366f1; border-radius: 50%; animation: spin .8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .pulse-dot { width: 6px; height: 6px; background: #818cf8; border-radius: 50%; animation: pulse 1.2s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .3; } }
+  .streaming-cursor { display: inline-block; width: 2px; height: 14px; background: #6366f1; animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 1px; }
+  @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
+  .sources { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #71717a; background: #27272a; border-radius: 4px; padding: 2px 8px; }
+  .chip svg { width: 11px; height: 11px; }
+  .answer { font-size: 13px; line-height: 1.6; color: #e4e4e7; }
+  .answer p + p { margin-top: 8px; }
+  .answer ol { padding-left: 16px; }
+  .answer li { margin-top: 4px; }
+  .answer code { font-size: 11px; background: #27272a; padding: 1px 5px; border-radius: 3px; color: #a5b4fc; }
+  .answer .dim { color: #71717a; font-size: 12px; margin-top: 8px; }
+  .sidebar-strip { width: 224px; background: #18181b; border: 1px solid #27272a; border-radius: 10px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+  .sidebar-btn { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #71717a; background: transparent; border: none; cursor: pointer; font-family: inherit; width: 100%; transition: background .15s, color .15s; }
+  .sidebar-btn:hover { background: rgba(255,255,255,.05); color: #fafafa; }
+  .sidebar-btn.new { color: #818cf8; background: rgba(99,102,241,.08); }
+  .sidebar-btn .flex1 { flex: 1; text-align: left; }
+  .kbd { font-size: 11px; background: #27272a; border: 1px solid #3f3f46; border-radius: 4px; padding: 1px 6px; color: #71717a; font-family: inherit; }
+  .kbd.indigo { background: rgba(99,102,241,.12); border-color: rgba(99,102,241,.25); color: #818cf8; }
+  .row-end { display: flex; justify-content: flex-end; }
+  .row-space { display: flex; align-items: center; justify-content: space-between; }
+  .gap { display: flex; gap: 8px; align-items: center; }
+  .status-row { display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#sidebar" class="active" onclick="show('sidebar',this)">Sidebar</a>
+  <a href="#input" onclick="show('input',this)">State: Input</a>
+  <a href="#answering" onclick="show('answering',this)">State: Answering</a>
+  <a href="#answered" onclick="show('answered',this)">State: Answered</a>
+</nav>
+
+<!-- Screen: Sidebar context -->
+<section id="screen-sidebar" class="active">
+  <div class="label">Sidebar — bottom utility strip (new button added)</div>
+  <div class="sidebar-strip">
+    <button class="sidebar-btn">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      <span class="flex1">Fix Right Away</span>
+      <kbd class="kbd">⌘⇧F</kbd>
+    </button>
+    <button class="sidebar-btn">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <span class="flex1">Search</span>
+      <kbd class="kbd">⌘K</kbd>
+    </button>
+    <button class="sidebar-btn new">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      <span class="flex1">Ask Ponder</span>
+      <kbd class="kbd indigo">⌘/</kbd>
+    </button>
+  </div>
+  <div class="label" style="color:#3f3f46">In production the Ask Ponder button matches the muted style of Fix Right Away and Search. Highlighted here for visibility.</div>
+</section>
+
+<!-- Screen: Input -->
+<section id="screen-input">
+  <div class="label">Modal — input state (autofocused, empty question)</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-row">
+        <svg class="icon" style="color:#818cf8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span class="title">Ask Ponder</span>
+      </div>
+      <span class="subtitle">Ask how a feature works, what a file does, or how things connect.</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+      <textarea rows="3" placeholder="How does Fix Right Away diagnose issues?&#10;How are agent runs streamed?&#10;What controls sidebar collapse state?"></textarea>
+      <div class="row-space">
+        <span class="hint">⌘↵ to ask</span>
+        <button class="btn btn-primary" style="opacity:.4;cursor:not-allowed">
+          <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          Ask
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="label">Modal — input state (question entered, Ask enabled)</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-row">
+        <svg class="icon" style="color:#818cf8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span class="title">Ask Ponder</span>
+      </div>
+      <span class="subtitle">Ask how a feature works, what a file does, or how things connect.</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+      <textarea rows="3">How does Fix Right Away diagnose issues?</textarea>
+      <div class="row-space">
+        <span class="hint">⌘↵ to ask</span>
+        <button class="btn btn-primary">
+          <svg style="width:14px;height:14px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          Ask
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Answering -->
+<section id="screen-answering">
+  <div class="label">Modal — answering state (streaming in progress)</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-row">
+        <svg class="icon" style="color:#818cf8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span class="title">Ask Ponder</span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;color:#818cf8;">
+          <span class="pulse-dot"></span>
+          Reading codebase…
+        </div>
+      </div>
+      <span class="subtitle truncate">"How does Fix Right Away diagnose issues?"</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:10px;max-height:260px;overflow-y:auto;">
+      <div class="sources">
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          FixRightAwayModal.tsx:84
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          routes/diagnose.rs:12
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          api/client.ts:236
+        </span>
+      </div>
+      <div class="answer">
+        <p>Fix Right Away uses a two-step flow. When you describe a bug, the frontend calls <code>POST /api/diagnose</code> with your description. The backend spawns a short-lived agent that scans recently-modified files, matches error patterns, and returns a structured<span class="streaming-cursor"></span></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Answered -->
+<section id="screen-answered">
+  <div class="label">Modal — answered state (complete, with footer actions)</div>
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-row">
+        <svg class="icon" style="color:#818cf8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        <span class="title">Ask Ponder</span>
+      </div>
+      <span class="subtitle truncate">"How does Fix Right Away diagnose issues?"</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:10px;max-height:280px;overflow-y:auto;">
+      <div class="sources">
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          FixRightAwayModal.tsx:84
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          routes/diagnose.rs:12
+        </span>
+        <span class="chip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          api/client.ts:236
+        </span>
+      </div>
+      <div class="answer">
+        <p>Fix Right Away is a two-step flow:</p>
+        <ol>
+          <li><strong>Diagnose</strong> — your description is sent to <code>POST /api/diagnose</code>. A short agent scans recently-modified files and returns a <code>DiagnoseResult</code> with root cause, affected files, and confidence score.</li>
+          <li><strong>Fix</strong> — once you confirm, a feature is created with the diagnosis as context and <code>startRun</code> is called immediately — the agent panel opens to show progress.</li>
+        </ol>
+        <p class="dim">If diagnosis fails, the modal falls back gracefully — it skips diagnosis and creates the feature with your raw description.</p>
+      </div>
+    </div>
+    <div class="card-footer">
+      <button class="btn btn-ghost" style="font-size:12px;">Ask another</button>
+      <div class="gap">
+        <button class="btn btn-outline" style="font-size:12px;">Open as Thread</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function show(id, el) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+    document.getElementById('screen-' + id).classList.add('active');
+    el.classList.add('active');
+  }
+</script>
+</body>
+</html>

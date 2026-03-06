@@ -1,0 +1,7 @@
+slug: tools-routing-cleanup
+title: Tools page routing cleanup — param naming and not-found state
+features:
+- tools-route-param-and-notfound
+created_at: 2026-03-06T06:51:08.884640Z
+updated_at: 2026-03-06T06:51:20.312639Z
+schema_version: 1

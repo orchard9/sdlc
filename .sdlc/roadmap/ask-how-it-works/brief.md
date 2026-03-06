@@ -1,0 +1,1 @@
+In the bottom left we have 'fix right away' and 'search'. Add something to ask how something works in the app — used to ask how features work, about the code, etc.

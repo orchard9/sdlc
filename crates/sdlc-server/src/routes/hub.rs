@@ -172,15 +172,10 @@ pub async fn fleet(State(app): State<AppState>) -> axum::response::Response {
                 instances
             };
 
-            let total = instances.len();
-            let mut resp = serde_json::json!({
-                "instances": instances,
-                "total": total,
-            });
             if let Some(w) = warning {
-                resp["warning"] = serde_json::Value::String(w.to_string());
+                tracing::warn!(warning = w, "fleet listing has degraded data");
             }
-            Json(resp).into_response()
+            Json(instances).into_response()
         }
         Err(e) => e.into_response(),
     }
@@ -239,12 +234,7 @@ pub async fn available(State(app): State<AppState>) -> axum::response::Response 
     };
 
     let avail = fleet::list_available_repos(&instances, &repos);
-    let total = avail.len();
-    Json(serde_json::json!({
-        "available": avail,
-        "total": total,
-    }))
-    .into_response()
+    Json(avail).into_response()
 }
 
 /// POST /api/hub/provision
@@ -383,6 +373,113 @@ pub async fn import(
     .into_response()
 }
 
+/// POST /api/hub/create-repo
+///
+/// Creates a new empty repo in the orchard9 Gitea org and returns HTTP push credentials.
+/// The caller can immediately add the returned `push_url` as a git remote and push.
+#[derive(serde::Deserialize)]
+pub struct CreateRepoRequest {
+    pub name: String,
+}
+
+pub async fn create_repo(
+    State(app): State<AppState>,
+    Json(req): Json<CreateRepoRequest>,
+) -> axum::response::Response {
+    if app.hub_registry.is_none() {
+        return not_hub_mode();
+    }
+
+    let (gitea_url, gitea_token) = match (&app.gitea_url, &app.gitea_token) {
+        (Some(url), Some(token)) => (url.as_str(), token.as_str()),
+        _ => return gitea_not_configured(),
+    };
+
+    // Validate: non-empty, lowercase alphanumeric + hyphens
+    if req.name.is_empty() {
+        return fleet::FleetError::InvalidRequest("name is required".into()).into_response();
+    }
+    let valid = req.name.len() <= 100
+        && req
+            .name
+            .chars()
+            .next()
+            .map(|c| c.is_ascii_alphanumeric())
+            .unwrap_or(false)
+        && req
+            .name
+            .chars()
+            .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-');
+    if !valid {
+        return fleet::FleetError::InvalidRequest(
+            "name must be lowercase alphanumeric with hyphens, max 100 chars".into(),
+        )
+        .into_response();
+    }
+
+    // Create the repo in Gitea
+    let repo =
+        match fleet::create_gitea_repo(&app.http_client, gitea_url, gitea_token, &req.name).await {
+            Ok(r) => r,
+            Err(e) => return e.into_response(),
+        };
+
+    // Get admin username to build the authenticated push URL
+    let username = match fleet::get_gitea_username(&app.http_client, gitea_url, gitea_token).await {
+        Ok(u) => u,
+        Err(e) => return e.into_response(),
+    };
+
+    // Build push URL: http://user:token@host/org/name.git
+    // Strip scheme from gitea_url to reconstruct with credentials
+    let push_url = {
+        let host_path = gitea_url
+            .trim_start_matches("https://")
+            .trim_start_matches("http://");
+        let scheme = if gitea_url.starts_with("https://") {
+            "https"
+        } else {
+            "http"
+        };
+        format!(
+            "{scheme}://{username}:{gitea_token}@{host_path}/orchard9/{}.git",
+            repo.slug
+        )
+    };
+
+    let gitea_web_url = format!("{gitea_url}/orchard9/{}", repo.slug);
+
+    // Trigger provisioning if Woodpecker is configured (fire-and-forget)
+    let provision_triggered = if let (Some(woodpecker_url), Some(woodpecker_token)) =
+        (&app.woodpecker_url, &app.woodpecker_token)
+    {
+        match fleet::trigger_provision(
+            &app.http_client,
+            woodpecker_url,
+            woodpecker_token,
+            &repo.slug,
+        )
+        .await
+        {
+            Ok(()) => true,
+            Err(e) => {
+                tracing::warn!(error = %e, "provision trigger failed after create-repo");
+                false
+            }
+        }
+    } else {
+        false
+    };
+
+    Json(serde_json::json!({
+        "repo_slug": repo.slug,
+        "push_url": push_url,
+        "gitea_url": gitea_web_url,
+        "provision_triggered": provision_triggered,
+    }))
+    .into_response()
+}
+
 /// GET /api/hub/agents
 pub async fn agents(State(app): State<AppState>) -> axum::response::Response {
     if app.hub_registry.is_none() {
@@ -405,11 +502,11 @@ pub async fn agents(State(app): State<AppState>) -> axum::response::Response {
         .map(|p| p.name.clone())
         .collect();
 
-    let active_count = active_projects.len();
+    let projects_with_agents = active_projects.len();
 
     Json(serde_json::json!({
-        "active_count": active_count,
-        "active_projects": active_projects,
+        "total_active_runs": projects_with_agents,
+        "projects_with_agents": projects_with_agents,
     }))
     .into_response()
 }

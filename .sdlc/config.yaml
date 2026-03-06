@@ -1,7 +1,7 @@
 version: 1
 project:
   name: Ponder
-  description: "Deterministic lifecycle governance for enterprise-scale autonomous services"
+  description: Deterministic lifecycle governance for enterprise-scale autonomous services
 phases:
   enabled:
   - draft
@@ -15,6 +15,10 @@ phases:
   - merge
   - released
   required_artifacts:
+    qa:
+    - audit
+    specified:
+    - spec
     merge:
     - qa_results
     planned:
@@ -26,10 +30,4 @@ phases:
     - review
     review:
     - review
-    qa:
-    - audit
-    specified:
-    - spec
-observability:
-  daily_budget_usd: 1000.0
-sdlc_version: 0.1.0
+sdlc_version: 0.1.2

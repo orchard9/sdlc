@@ -1326,7 +1326,7 @@ function ToolRunPanel({ tool, onReload, onBack }: ToolRunPanelProps) {
 // ---------------------------------------------------------------------------
 
 export function ToolsPage() {
-  const { name } = useParams<{ name?: string }>()
+  const { toolId } = useParams<{ toolId?: string }>()
   const navigate = useNavigate()
   const [tools, setTools] = useState<ToolMeta[]>([])
   const [loading, setLoading] = useState(true)
@@ -1335,8 +1335,8 @@ export function ToolsPage() {
 
   const navigateRef = useRef(navigate)
   navigateRef.current = navigate
-  const nameRef = useRef(name)
-  nameRef.current = name
+  const toolIdRef = useRef(toolId)
+  toolIdRef.current = toolId
 
   const load = useCallback((navigateAfterLoad?: string) => {
     api.listTools()
@@ -1344,7 +1344,7 @@ export function ToolsPage() {
         setTools(data)
         if (navigateAfterLoad) {
           navigateRef.current(`/tools/${navigateAfterLoad}`)
-        } else if (data.length > 0 && !nameRef.current && window.innerWidth >= 768) {
+        } else if (data.length > 0 && !toolIdRef.current && window.innerWidth >= 768) {
           navigateRef.current(`/tools/${data[0].name}`, { replace: true })
         }
       })
@@ -1354,7 +1354,7 @@ export function ToolsPage() {
 
   useEffect(() => { load() }, [load])
 
-  const selectedTool = tools.find(t => t.name === name) ?? null
+  const selectedTool = tools.find(t => t.name === toolId) ?? null
 
   if (loading) {
     return (
@@ -1417,7 +1417,7 @@ export function ToolsPage() {
               <ToolCard
                 key={tool.name}
                 tool={tool}
-                selected={tool.name === name}
+                selected={tool.name === toolId}
                 onSelect={() => navigate(`/tools/${tool.name}`)}
               />
             ))
@@ -1432,6 +1432,12 @@ export function ToolsPage() {
       )}>
         {selectedTool ? (
           <ToolRunPanel tool={selectedTool} onReload={(toolName) => { setLoading(true); load(toolName) }} onBack={() => navigate('/tools')} />
+        ) : toolId ? (
+          <div className="text-center">
+            <Wrench className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">Tool &apos;{toolId}&apos; not found.</p>
+            <p className="text-xs text-muted-foreground/60 mt-1">Select a tool from the list</p>
+          </div>
         ) : (
           <div className="text-center">
             <Wrench className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
