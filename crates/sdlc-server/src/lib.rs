@@ -5,6 +5,7 @@ pub mod error;
 pub mod fleet;
 pub mod heartbeat;
 pub mod hub;
+pub mod invite;
 pub mod oauth;
 pub mod pg_common;
 pub mod pg_orchestrator;
@@ -697,11 +698,19 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/hub/provision", post(routes::hub::provision))
         .route("/api/hub/import", post(routes::hub::import))
         .route("/api/hub/agents", get(routes::hub::agents))
+        // OTP invite management (admin endpoints — behind auth middleware)
+        .route(
+            "/api/invites",
+            get(routes::invites::list_invites).post(routes::invites::create_invite),
+        )
+        .route("/api/invites/{id}", delete(routes::invites::revoke_invite))
         // OAuth2 routes (hub mode) — login/callback MUST be public (before auth layer)
         .route("/auth/login", get(oauth::login))
         .route("/auth/callback", get(oauth::callback))
         .route("/auth/verify", get(oauth::verify))
         .route("/auth/logout", post(oauth::logout))
+        // OTP verify — public (alongside existing /auth/* routes, bypassed by auth middleware)
+        .route("/auth/otp", post(routes::invites::verify_otp))
         .fallback(proxy::proxy_handler)
         .layer(TraceLayer::new_for_http())
         .layer(cors)

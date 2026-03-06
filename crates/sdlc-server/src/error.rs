@@ -58,6 +58,19 @@ impl std::fmt::Display for PayloadTooLargeError {
 
 impl std::error::Error for PayloadTooLargeError {}
 
+/// Private sentinel error type used to carry an explicit HTTP 429 Too Many
+/// Requests through the `anyhow::Error` chain.
+#[derive(Debug)]
+struct TooManyRequestsError(String);
+
+impl std::fmt::Display for TooManyRequestsError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for TooManyRequestsError {}
+
 /// Private sentinel for 422 Unprocessable Entity with a custom JSON body.
 #[derive(Debug)]
 struct UnprocessableJsonError(serde_json::Value);
@@ -104,6 +117,11 @@ impl AppError {
         Self(UnprocessableJsonError(body).into())
     }
 
+    /// Construct a 429 Too Many Requests error.
+    pub fn too_many_requests(msg: impl Into<String>) -> Self {
+        Self(TooManyRequestsError(msg.into()).into())
+    }
+
     /// Construct a 413 Payload Too Large error.
     pub fn payload_too_large(msg: impl Into<String>) -> Self {
         Self(PayloadTooLargeError(msg.into()).into())
@@ -124,6 +142,10 @@ impl IntoResponse for AppError {
         if let Some(n) = self.0.downcast_ref::<NotFoundError>() {
             let body = serde_json::json!({ "error": n.0.clone() });
             return (StatusCode::NOT_FOUND, axum::Json(body)).into_response();
+        }
+        if let Some(t) = self.0.downcast_ref::<TooManyRequestsError>() {
+            let body = serde_json::json!({ "error": t.0.clone() });
+            return (StatusCode::TOO_MANY_REQUESTS, axum::Json(body)).into_response();
         }
         if let Some(u) = self.0.downcast_ref::<UnprocessableJsonError>() {
             return (StatusCode::UNPROCESSABLE_ENTITY, axum::Json(u.0.clone())).into_response();

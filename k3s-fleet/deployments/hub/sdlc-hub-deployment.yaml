@@ -50,7 +50,7 @@ spec:
                   name: sdlc-hub-oauth
                   key: session-secret
             - name: OAUTH_ALLOWED_DOMAINS
-              value: "livelyideo.tv,masq.me,virtualcommunities.ai"
+              value: "livelyvideo.tv,threesix.tv,masq.me,accretivetg.com"
             # Fleet integrations
             - name: GITEA_URL
               value: http://gitea.threesix.svc.cluster.local

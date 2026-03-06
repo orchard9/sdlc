@@ -18,6 +18,7 @@ pub mod feedback;
 pub mod hub;
 pub mod init;
 pub mod investigations;
+pub mod invites;
 pub mod knowledge;
 pub mod milestones;
 pub mod orchestrator;

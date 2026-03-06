@@ -407,6 +407,9 @@ pub struct AppState {
     /// `None` (i.e. OnceLock not yet set) until initialization completes;
     /// remains `Disabled` if `DATABASE_URL` is absent or the DB is unreachable.
     pub credential_pool: Arc<std::sync::OnceLock<crate::credential_pool::OptionalCredentialPool>>,
+    /// OTP invite store for hub mode. Initialized asynchronously at startup.
+    /// `None` (OnceLock not set) until initialization completes.
+    pub invite_store: Arc<OnceLock<crate::invite::InviteStore>>,
 }
 
 /// Generate a 32-char hex token (128-bit entropy) from the OS CSPRNG.
@@ -564,6 +567,7 @@ impl AppState {
                 .unwrap_or_else(|_| "sdlc.threesix.ai".to_string()),
             oauth_config: None,
             credential_pool: Arc::new(std::sync::OnceLock::new()),
+            invite_store: Arc::new(OnceLock::new()),
             root,
         }
     }
@@ -605,6 +609,16 @@ impl AppState {
             Err(_) => {
                 tracing::info!("not running in k8s — fleet discovery disabled");
             }
+        }
+
+        // Initialize invite store (memory or postgres depending on DATABASE_URL).
+        if tokio::runtime::Handle::try_current().is_ok() {
+            let invite_cell = state.invite_store.clone();
+            tokio::spawn(async move {
+                let store = crate::invite::InviteStore::from_env().await;
+                let _ = invite_cell.set(store);
+                tracing::info!("invite store ready");
+            });
         }
 
         // Spawn the sweep task now that the registry is populated.
