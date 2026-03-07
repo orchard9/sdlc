@@ -261,12 +261,29 @@ fn main() {
         _ => tracing::Level::WARN,
     };
 
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::from_default_env().add_directive(default_level.into()),
-        )
-        .with_target(false)
-        .init();
+    use tracing_subscriber::layer::SubscriberExt;
+    use tracing_subscriber::util::SubscriberInitExt;
+
+    let filter =
+        tracing_subscriber::EnvFilter::from_default_env().add_directive(default_level.into());
+    let fmt_layer = tracing_subscriber::fmt::layer().with_target(false);
+
+    if let Some(citadel_config) = sdlc_server::citadel::CitadelConfig::from_env() {
+        let citadel_layer = sdlc_server::citadel::CitadelLayer::new(citadel_config);
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(fmt_layer)
+            .with(citadel_layer)
+            .init();
+        // The flush background task is started later by start_citadel_flush()
+        // once a tokio runtime is available (inside serve_on / serve_on_hub).
+        // Events are buffered in the channel until then.
+    } else {
+        tracing_subscriber::registry()
+            .with(filter)
+            .with(fmt_layer)
+            .init();
+    }
 
     let root_path = cli.root.as_deref();
     let root = root::resolve_root(root_path);

@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod citadel;
 pub mod credential_pool;
 pub mod email;
 pub mod embed;
@@ -792,6 +793,10 @@ async fn serve_on_with_mode(
     hub_mode: bool,
 ) -> anyhow::Result<()> {
     let actual_port = listener.local_addr()?.port();
+
+    // Start the Citadel telemetry flush task now that tokio is running.
+    // No-op if PONDER_CITADEL_* env vars were not set.
+    citadel::start_citadel_flush();
 
     if hub_mode {
         tracing::info!(port = actual_port, "SDLC hub server started");

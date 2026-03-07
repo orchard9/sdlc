@@ -110,6 +110,11 @@ pub async fn auth_middleware(
         return next.run(req).await;
     }
 
+    // Hub heartbeat — pod-to-hub service call, no OAuth session available.
+    if req.uri().path() == "/api/hub/heartbeat" {
+        return next.run(req).await;
+    }
+
     // Feedback widget endpoint — always public regardless of token or host.
     if req.uri().path().starts_with("/__sdlc/") {
         return next.run(req).await;
@@ -233,7 +238,13 @@ fn strip_auth_param(path: &str, query: &str) -> String {
 mod tests {
     use super::*;
     use axum::http::StatusCode;
-    use axum::{body::Body, http::Request, middleware, routing::get, Router};
+    use axum::{
+        body::Body,
+        http::Request,
+        middleware,
+        routing::{get, post},
+        Router,
+    };
     use tower::ServiceExt;
 
     async fn ok_handler() -> &'static str {
@@ -250,6 +261,7 @@ mod tests {
             .route("/", get(ok_handler))
             .route("/api/state", get(ok_handler))
             .route("/__sdlc/feedback", get(ok_handler))
+            .route("/api/hub/heartbeat", post(ok_handler))
             .layer(middleware::from_fn_with_state(arc, auth_middleware))
     }
 
@@ -507,6 +519,22 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(resp.status(), StatusCode::UNAUTHORIZED);
+    }
+
+    #[tokio::test]
+    async fn heartbeat_bypasses_auth() {
+        let resp = test_app(TunnelConfig::with_token("secret".into()))
+            .oneshot(
+                Request::builder()
+                    .method("POST")
+                    .uri("/api/hub/heartbeat")
+                    .header("host", "sdlc.threesix.ai")
+                    .body(Body::empty())
+                    .unwrap(),
+            )
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), StatusCode::OK);
     }
 
     #[test]
