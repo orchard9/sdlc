@@ -1,0 +1,3 @@
+# state.yaml is a derived index rebuilt from .sdlc/ directory contents.
+# On conflict, accept ours then rebuild from disk via `sdlc state-rebuild`.
+.sdlc/state.yaml merge=sdlc-state

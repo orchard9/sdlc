@@ -307,6 +307,8 @@ Two-phase agent workflows (plan → act) follow the **Plan-Act Pattern** — see
 
 ## Playwright MCP for Milestone UAT
 
+**Playwright is UAT-only; always headless.** Never add Playwright MCP to ponder, investigation, advisory, or feature agent runs — `WebSearch`/`WebFetch` suffice for research. All Playwright configs (`.mcp.json`, `runs.rs`) must pass `--headless`.
+
 The UAT agent (`start_milestone_uat` in `runs.rs`) has browser automation available via Playwright MCP. The Playwright MCP server is registered in `.mcp.json` at the project root and injected into `QueryOptions` only for UAT runs.
 
 Available Playwright tools in UAT agent runs:
@@ -321,6 +323,10 @@ Available Playwright tools in UAT agent runs:
 **Prerequisite:** Playwright browsers must be installed: `npx playwright install`. This is a one-time developer setup step, not a build-time requirement.
 
 **Extending UAT tool access:** Follow the same pattern as `sdlc_guideline_query_options` — call `sdlc_query_options` and push additional entries to `opts.allowed_tools` and `opts.mcp_servers`. Never add Playwright tools to the base `sdlc_query_options`; they are UAT-only.
+
+## Agent File Authoring
+
+When writing agent-facing files (CLAUDE.md, guidance.md, skill templates, commands): be token-efficient. Use semantically dense words, proper nouns, and domain exemplars to anchor quality — e.g. "Knuth-quality" over "very high quality code", "Jobs-level UX" over "exceptional user experience".
 
 ## More Coding Conventions
 

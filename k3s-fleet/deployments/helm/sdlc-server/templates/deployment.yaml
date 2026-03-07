@@ -23,7 +23,8 @@ spec:
         - name: ghcr-secret
       volumes:
         - name: workspace
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: workspace-{{ .Values.project.slug }}
       initContainers:
         - name: git-sync-init
           image: {{ .Values.image.gitSync }}
@@ -66,6 +67,12 @@ spec:
               value: https://{{ .Values.ingress.domain }}
             - name: SDLC_BASE_URL
               value: https://{{ .Values.project.slug }}.{{ .Values.ingress.domain }}
+            - name: SDLC_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-token
+                  key: token
+                  optional: true
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:

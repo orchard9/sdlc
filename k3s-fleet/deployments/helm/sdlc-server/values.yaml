@@ -14,7 +14,7 @@ ingress:
   tlsSecretName: sdlc-wildcard-tls
 
 auth:
-  enabled: false                    # Enable Google OAuth gate via hub native forwardAuth
+  enabled: true                     # Google OAuth gate via hub forwardAuth (disable only for local dev)
 
 image:
   server: registry.threesix.ai/sdlc-base:latest
@@ -27,6 +27,10 @@ resources:
   gitSync:
     requests: { cpu: 10m, memory: 32Mi }
     limits:   { cpu: 100m, memory: 64Mi }
+
+storage:
+  storageClass: longhorn
+  size: 5Gi
 
 citadel:
   enabled: false        # Enable Citadel telemetry shipping

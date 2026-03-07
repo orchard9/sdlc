@@ -1,0 +1,1 @@
+the team page should be organized by project agents (agents that are located in the project root) and global agents located in ~/.*

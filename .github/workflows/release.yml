@@ -194,18 +194,40 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract version from tag
-        id: version
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+      - name: Docker metadata (tags + labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/orchard9/sdlc
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-,format=short
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: |
-            ghcr.io/orchard9/sdlc:latest
-            ghcr.io/orchard9/sdlc:${{ steps.version.outputs.version }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Rollout hub deployment
+        env:
+          KUBECONFIG_DATA: ${{ secrets.KUBE_CONFIG }}
+        run: |
+          if [ -z "$KUBECONFIG_DATA" ]; then
+            echo "KUBE_CONFIG secret not set — skipping hub rollout. Add it to enable automatic rollout."
+            exit 0
+          fi
+          mkdir -p ~/.kube
+          echo "$KUBECONFIG_DATA" | base64 -d > ~/.kube/config
+          chmod 600 ~/.kube/config
+          curl -sSLo kubectl "https://dl.k8s.io/release/v1.29.0/bin/linux/amd64/kubectl"
+          chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          kubectl rollout restart deployment/sdlc-hub -n sdlc-hub
+          kubectl rollout status deployment/sdlc-hub -n sdlc-hub --timeout=120s
 
   release:
     needs: build

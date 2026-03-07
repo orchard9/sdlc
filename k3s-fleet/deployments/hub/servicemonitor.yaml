@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: sdlc-hub
+  namespace: sdlc-hub
+  labels:
+    app.kubernetes.io/name: sdlc-hub
+    app.kubernetes.io/managed-by: sdlc-fleet
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: sdlc-hub
+  endpoints:
+    - port: http
+      path: /api/hub/metrics
+      interval: 30s

@@ -198,7 +198,11 @@ This is a live system with real users. Every change must leave the codebase heal
 
 **Quality bar:** if a change makes the code harder to reason about, makes logs less useful, or adds a failure mode with no clear recovery path — stop and reconsider. Simpler is always better.
 
-## 12. Project Guidelines
+## 12. Browser Automation
+
+**Playwright is UAT-only; always headless.** Never add Playwright MCP to ponder, investigation, advisory, or feature agent runs — `WebSearch`/`WebFetch` suffice for research. All Playwright configs must pass `--headless`.
+
+## 13. Project Guidelines
 
 Before writing implementation code, check if `.sdlc/guidelines/index.yaml` exists.
 If it does, read it and load any guidelines whose `scope` overlaps with the work at hand.

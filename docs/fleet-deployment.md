@@ -50,7 +50,7 @@ helm install sdlc-<slug> ./k3s-fleet/deployments/helm/sdlc-server/ \
   --set auth.enabled=true
 ```
 
-Instance pods are full autonomous development environments with two containers sharing a workspace volume:
+Instance pods are full autonomous development environments with two containers sharing a persistent workspace volume:
 
 - **sdlc-server** (main container) — serves the UI and API, runs agent orchestration. The image includes:
   - Ponder binary (state machine + web UI)
@@ -60,6 +60,8 @@ Instance pods are full autonomous development environments with two containers s
 - **git-sync** (sidecar) — keeps `/workspace/<slug>` in sync with the Gitea repo (30s poll)
 
 An init container does a one-time `git clone` so the server starts with data immediately.
+
+**Workspace storage:** Each project pod has a `PersistentVolumeClaim` (`workspace-<slug>`, 5Gi Longhorn by default) that survives pod restarts. Agent work-in-progress, redb databases, and uncommitted state are preserved across restarts. Storage class and size are configurable via `storage.storageClass` and `storage.size` in Helm values.
 
 **Image layering:** The base image (`registry.threesix.ai/sdlc-base:latest`, built from `Dockerfile.base`) includes ponder + Claude Code CLI + OpenCode CLI + Node.js + git + build tools. Projects extend it with a `Dockerfile.sdlc` in their repo root to add project-specific toolchains (Python, Go, etc.). When no `Dockerfile.sdlc` exists, the base image is used directly. The provision pipeline (`provision.yaml`) detects and builds project images automatically.
 
@@ -157,10 +159,11 @@ kubectl create secret generic sdlc-hub-notify \
 
 | File | Purpose |
 |------|---------|
-| `values.yaml` | Project slug, repo, auth toggle, image refs, resources |
-| `templates/deployment.yaml` | Two-container pod (sdlc-server + git-sync) |
+| `values.yaml` | Project slug, repo, auth toggle, image refs, resources, storage |
+| `templates/deployment.yaml` | Two-container pod (sdlc-server + git-sync) with PVC workspace |
+| `templates/pvc.yaml` | PersistentVolumeClaim (`workspace-<slug>`, Longhorn, 5Gi default) |
 | `templates/service.yaml` | ClusterIP service |
-| `templates/ingressroute.yaml` | `<slug>.sdlc.threesix.ai` with optional forwardAuth middleware |
+| `templates/ingressroute.yaml` | `<slug>.sdlc.threesix.ai` with forwardAuth middleware (on by default) |
 | `templates/middleware-google-auth.yaml` | ForwardAuth → hub `/auth/verify` (created when `auth.enabled`) |
 | `templates/external-secret-postgres.yaml` | Optional postgres credential from GCP Secret Manager |
 

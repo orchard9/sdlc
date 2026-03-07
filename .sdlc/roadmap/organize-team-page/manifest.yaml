@@ -1,0 +1,10 @@
+slug: organize-team-page
+title: organize "/team" page
+status: converging
+created_at: 2026-03-07T17:18:31.490702Z
+updated_at: 2026-03-07T17:20:40.865204Z
+sessions: 1
+orientation:
+  current: Idea is fully shaped — rename /agents to /team, keep two-section layout, frontend-only change
+  next: Commit to milestone and implement
+  commit: Jordan confirms the rename approach and scope
