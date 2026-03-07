@@ -1,0 +1,15 @@
+id: "20260307-161010-kvf"
+milestone_slug: v45-auto-specialize-setup
+started_at: "2026-03-07T16:10:10Z"
+completed_at: "2026-03-07T16:15:30Z"
+verdict: pass
+tests_total: 6
+tests_passed: 6
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v45-auto-specialize-setup/uat-runs/20260307-161010-kvf/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v45-auto-specialize-setup/uat-runs/20260307-161010-kvf/01-agents-two-tier-layout.png
+  - .sdlc/milestones/v45-auto-specialize-setup/uat-runs/20260307-161010-kvf/02-workstation-section.png
+  - .sdlc/milestones/v45-auto-specialize-setup/uat-runs/20260307-161010-kvf/03-workstation-empty-state.png
+  - .sdlc/milestones/v45-auto-specialize-setup/uat-runs/20260307-161010-kvf/04-standard-agents-visible.png

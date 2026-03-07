@@ -1,0 +1,16 @@
+id: 20260307-162213-xkm
+milestone_slug: v47-ponder-committed-flow
+started_at: "2026-03-07T16:22:13Z"
+completed_at: "2026-03-07T16:27:00Z"
+verdict: pass
+tests_total: 5
+tests_passed: 5
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v47-ponder-committed-flow/uat-runs/20260307-162213-xkm/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v47-ponder-committed-flow/uat-runs/20260307-162213-xkm/01-ponder-page-loaded.png
+  - .sdlc/milestones/v47-ponder-committed-flow/uat-runs/20260307-162213-xkm/02-converging-step-indicator.png
+  - .sdlc/milestones/v47-ponder-committed-flow/uat-runs/20260307-162213-xkm/03-committed-milestone-links.png
+  - .sdlc/milestones/v47-ponder-committed-flow/uat-runs/20260307-162213-xkm/04-parked-resume-button.png
+  - .sdlc/milestones/v47-ponder-committed-flow/uat-runs/20260307-162213-xkm/05-resumed-to-exploring.png
