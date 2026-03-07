@@ -50,11 +50,18 @@ helm install sdlc-<slug> ./k3s-fleet/deployments/helm/sdlc-server/ \
   --set auth.enabled=true
 ```
 
-Instance pods run two containers:
-- **sdlc-server** — serves the UI and API for one project
-- **git-sync** — keeps `/workspace/<slug>` in sync with the Gitea repo (30s poll)
+Instance pods are full autonomous development environments with two containers sharing a workspace volume:
+
+- **sdlc-server** (main container) — serves the UI and API, runs agent orchestration. The image includes:
+  - Ponder binary (state machine + web UI)
+  - Claude Code CLI and OpenCode CLI (for agent execution)
+  - Project toolchain (language runtimes, build tools — defined by `Dockerfile.sdlc` if present)
+  - Access to the credential pool for `CLAUDE_CODE_OAUTH_TOKEN` checkout
+- **git-sync** (sidecar) — keeps `/workspace/<slug>` in sync with the Gitea repo (30s poll)
 
 An init container does a one-time `git clone` so the server starts with data immediately.
+
+**Image layering:** The base image (`registry.threesix.ai/sdlc-base:latest`, built from `Dockerfile.base`) includes ponder + Claude Code CLI + OpenCode CLI + Node.js + git + build tools. Projects extend it with a `Dockerfile.sdlc` in their repo root to add project-specific toolchains (Python, Go, etc.). When no `Dockerfile.sdlc` exists, the base image is used directly. The provision pipeline (`provision.yaml`) detects and builds project images automatically.
 
 **Ingress:** `<slug>.sdlc.threesix.ai` via Traefik IngressRoute. When `auth.enabled=true`,
 requests pass through the `sdlc-google-auth` forwardAuth middleware before reaching the server.
@@ -104,7 +111,7 @@ Existing `auth.rs` Bearer token logic in project instances is unchanged.
 
 ### Allowed domains
 
-`OAUTH_ALLOWED_DOMAINS=livelyideo.tv,masq.me,virtualcommunities.ai`
+`OAUTH_ALLOWED_DOMAINS=livelyvideo.tv,threesix.tv,masq.me,accretivetg.com`
 
 The callback handler fetches the user's email from Google userinfo and rejects
 any domain not in this list with a 403.
@@ -209,4 +216,5 @@ kubectl create secret generic sdlc-hub-notify \
 | `SDLC_ROOT` | Path to project workspace (set by git-sync) |
 | `SDLC_HUB_URL` | Hub URL for heartbeat reporting |
 | `DATABASE_URL` | Postgres connection string (optional, enables cluster storage) |
-| `ANTHROPIC_API_KEY` | For agent runs |
+| `ANTHROPIC_API_KEY` | For agent runs (fallback — credential pool preferred in fleet) |
+| `CLAUDE_CODE_OAUTH_TOKEN` | Injected per agent run from credential pool (not set manually) |

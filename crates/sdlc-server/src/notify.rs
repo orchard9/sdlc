@@ -65,21 +65,15 @@ impl NotifyClient {
             format!("Ponder <{}>", self.from)
         };
 
-        let html = format!(
-            "<p>Your Ponder access code is: <strong>{otp}</strong></p>\
-             <p>This code expires in 48 hours. Do not share it.</p>"
-        );
-        let text = format!(
-            "Your Ponder access code is: {otp}\n\nThis code expires in 48 hours. Do not share it."
-        );
+        let content = crate::email::render_otp(email, otp);
 
         let body = json!({
             "to": email,
             "from": from,
             "content": {
-                "subject": format!("Your Ponder access code: {otp}"),
-                "html": html,
-                "text": text,
+                "subject": content.subject,
+                "html": content.html,
+                "text": content.text,
             },
             "meta": {
                 "host": self.host,

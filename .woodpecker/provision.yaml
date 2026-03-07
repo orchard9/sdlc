@@ -1,0 +1,111 @@
+# provision.yaml
+#
+# Provisions a new fleet pod for a project.
+# Triggered via Woodpecker API with PROVISION_SLUG parameter.
+#
+# Steps:
+# 1. Clone repo, detect Dockerfile.sdlc, build project image if present
+# 2. Helm install the sdlc-server chart into a new namespace
+# 3. Set up DNS (Cloudflare A record) + copy wildcard TLS cert
+
+when:
+  event: manual
+
+steps:
+  - name: clone-and-build
+    image: woodpeckerci/plugin-kaniko
+    commands:
+      - |
+        GITEA_URL="${GITEA_URL:-http://gitea.threesix.svc.cluster.local}"
+        REPO="${PROVISION_REPO:-orchard9/${PROVISION_SLUG}}"
+        SLUG="${PROVISION_SLUG}"
+
+        echo "Cloning $GITEA_URL/$REPO..."
+        git clone --depth 1 "$GITEA_URL/$REPO.git" /woodpecker/src/project-src 2>/dev/null || true
+
+        if [ -f /woodpecker/src/project-src/Dockerfile.sdlc ]; then
+          echo "Found Dockerfile.sdlc — building project image..."
+          /kaniko/executor \
+            --dockerfile=/woodpecker/src/project-src/Dockerfile.sdlc \
+            --context=/woodpecker/src/project-src \
+            --destination=registry.threesix.ai/sdlc-project-${SLUG}:latest \
+            --skip-tls-verify
+          echo "PROJECT_IMAGE=registry.threesix.ai/sdlc-project-${SLUG}:latest" > /woodpecker/src/image.env
+        else
+          echo "No Dockerfile.sdlc — using base image."
+          echo "PROJECT_IMAGE=registry.threesix.ai/sdlc-base:latest" > /woodpecker/src/image.env
+        fi
+
+  - name: helm-deploy
+    image: alpine/helm:3.14
+    commands:
+      - |
+        SLUG="${PROVISION_SLUG}"
+        NAMESPACE="sdlc-${SLUG}"
+        REPO="${PROVISION_REPO:-orchard9/${SLUG}}"
+        DOMAIN="sdlc.threesix.ai"
+
+        # Read image from previous step
+        . /woodpecker/src/image.env
+        IMAGE="${PROJECT_IMAGE:-registry.threesix.ai/sdlc-base:latest}"
+
+        echo "Deploying $SLUG to namespace $NAMESPACE with image $IMAGE..."
+        kubectl create namespace "$NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+
+        helm upgrade --install "sdlc-${SLUG}" \
+          ./k3s-fleet/deployments/helm/sdlc-server \
+          --namespace "$NAMESPACE" \
+          --set project.slug="$SLUG" \
+          --set project.repo="$REPO" \
+          --set image.server="$IMAGE" \
+          --set ingress.domain="$DOMAIN" \
+          --wait --timeout 120s
+
+        echo "Helm deploy complete for $SLUG."
+    depends_on:
+      - clone-and-build
+
+  - name: dns-and-tls
+    image: bitnami/kubectl:latest
+    commands:
+      - |
+        SLUG="${PROVISION_SLUG}"
+        NAMESPACE="sdlc-${SLUG}"
+        DOMAIN="sdlc.threesix.ai"
+        FQDN="${SLUG}.${DOMAIN}"
+        TLS_SOURCE_NS="sdlc-hub"
+        TLS_SECRET="sdlc-wildcard-tls"
+
+        # --- DNS setup (Cloudflare) ---
+        if [ -n "${CLOUDFLARE_API_TOKEN:-}" ] && [ -n "${CLOUDFLARE_ZONE_ID:-}" ]; then
+          INGRESS_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="ExternalIP")].address}' 2>/dev/null || echo "")
+          if [ -z "$INGRESS_IP" ]; then
+            INGRESS_IP=$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' 2>/dev/null || echo "")
+          fi
+
+          if [ -n "$INGRESS_IP" ]; then
+            echo "Creating A record: $FQDN -> $INGRESS_IP"
+            curl -sf -X POST \
+              "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/dns_records" \
+              -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+              -H "Content-Type: application/json" \
+              -d "{\"type\":\"A\",\"name\":\"${FQDN}\",\"content\":\"${INGRESS_IP}\",\"ttl\":300,\"proxied\":false}" \
+              || echo "DNS record may already exist."
+          else
+            echo "WARN: Could not determine ingress IP — skipping DNS."
+          fi
+        else
+          echo "WARN: Cloudflare not configured — skipping DNS setup."
+        fi
+
+        # --- Copy wildcard TLS cert ---
+        echo "Copying TLS secret from $TLS_SOURCE_NS to $NAMESPACE..."
+        kubectl get secret "$TLS_SECRET" -n "$TLS_SOURCE_NS" -o json \
+          | jq "del(.metadata.namespace,.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp)" \
+          | jq ".metadata.namespace = \"$NAMESPACE\"" \
+          | kubectl apply -f - \
+          || echo "WARN: TLS copy failed — pod will work without TLS until cert is manually applied."
+
+        echo "Provision complete: https://${SLUG}.sdlc.threesix.ai"
+    depends_on:
+      - helm-deploy

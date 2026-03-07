@@ -27,6 +27,11 @@ pub struct RegisterRouteBody {
     /// JSON template for the tool input. Use `{{payload}}` as the placeholder
     /// for the JSON-escaped webhook body.
     pub input_template: String,
+    /// When true, payloads are stored but never dispatched to the tool.
+    pub store_only: Option<bool>,
+    /// Optional shared secret. If set, incoming requests must supply a matching
+    /// `X-Webhook-Secret` header or the payload is rejected with 401.
+    pub secret_token: Option<String>,
 }
 
 /// `POST /api/orchestrator/webhooks/routes`
@@ -62,14 +67,22 @@ pub async fn register_route(
     let path = body.path.clone();
     let tool_name = body.tool_name.clone();
     let input_template = body.input_template.clone();
+    let store_only = body.store_only.unwrap_or(false);
+    let secret_token = body.secret_token.clone();
 
     let result = tokio::task::spawn_blocking(move || {
-        let route = sdlc_core::orchestrator::WebhookRoute::new(&path, &tool_name, &input_template);
+        let mut route =
+            sdlc_core::orchestrator::WebhookRoute::new(&path, &tool_name, &input_template);
+        route.store_only = store_only;
+        route.secret_token = secret_token;
+
         let created_at = route.created_at;
         let id = route.id;
         let route_path = route.path.clone();
         let route_tool = route.tool_name.clone();
         let route_template = route.input_template.clone();
+        let route_store_only = route.store_only;
+        let route_secret_set = route.secret_token.is_some();
 
         backend.insert_route(&route).map_err(|e| {
             let is_conflict = e.to_string().contains("duplicate webhook route path");
@@ -81,6 +94,8 @@ pub async fn register_route(
             "path": route_path,
             "tool_name": route_tool,
             "input_template": route_template,
+            "store_only": route_store_only,
+            "secret_token_set": route_secret_set,
             "created_at": created_at.to_rfc3339(),
         }))
     })
@@ -114,6 +129,8 @@ pub async fn list_routes(State(app): State<AppState>) -> Result<Json<serde_json:
                     "path": r.path,
                     "tool_name": r.tool_name,
                     "input_template": r.input_template,
+                    "store_only": r.store_only,
+                    "secret_token_set": r.secret_token.is_some(),
                     "created_at": r.created_at.to_rfc3339(),
                 })
             })

@@ -294,6 +294,22 @@ POST /api/run/:slug                                → generate directive for fe
 POST /api/init                                     → initialize project
 ```
 
+### Hub Routes (fleet mode only, `SDLC_HUB=true`)
+
+```
+GET  /auth/login                                   → Google OAuth redirect
+GET  /auth/callback                                → OAuth callback, set session cookie
+GET  /auth/verify                                  → ForwardAuth session check
+POST /auth/logout                                  → Clear session
+GET  /api/hub/fleet                                → k8s namespace/deployment discovery
+GET  /api/hub/repos                                → Gitea org repo listing
+POST /api/hub/provision                            → Trigger Woodpecker pipeline for new instance
+POST /api/hub/import                               → Mirror external repo into Gitea + auto-provision
+GET  /api/hub/credential-pool                      → List credential pool tokens
+POST /api/hub/credential-pool                      → Add token to pool
+DELETE /api/hub/credential-pool/:id                → Remove token from pool
+```
+
 ### Frontend Embedding
 
 The React frontend is compiled to `frontend/dist/` and embedded into the binary at compile time via `rust-embed`. Running `sdlc ui` serves the SPA from memory with no external file dependency.
@@ -341,6 +357,87 @@ Test structure:
 - `sdlc-server` — unit tests for route handlers and SSE serialization
 
 All integration tests run against real `.sdlc/` directory structures in temp directories — no mocking of the file system.
+
+---
+
+## Fleet Architecture
+
+When `DATABASE_URL` is set and the server runs in a k8s cluster, sdlc operates as a fleet of autonomous development environments.
+
+### Hub (`sdlc.threesix.ai`)
+
+The hub is a dedicated sdlc-server deployment running in hub mode (`SDLC_HUB=true`). It does not serve a project — it provides fleet-level services:
+
+- **Google OAuth SSO** — native login with session cookie on `.sdlc.threesix.ai` (covers all instances)
+- **ForwardAuth** — Traefik middleware verifies session cookies for all project instances
+- **Fleet discovery** — queries k8s API for `sdlc-*` namespaces + deployment health
+- **Repo listing** — queries Gitea API for available repos in the `orchard9` org
+- **Provisioning** — triggers Woodpecker CI pipeline to `helm install` new project instances
+- **Import** — mirrors external repos into Gitea and auto-provisions
+
+### Project Pods (`<slug>.sdlc.threesix.ai`)
+
+Each project instance runs in its own namespace (`sdlc-<slug>`) as a multi-container pod:
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  Pod: sdlc-<slug>                                       │
+│                                                         │
+│  ┌─────────────────────────────────┐  ┌──────────────┐  │
+│  │  sdlc-server (main container)   │  │  git-sync    │  │
+│  │  • Ponder state machine + UI    │  │  (sidecar)   │  │
+│  │  • Agent orchestration          │  │  • 30s poll   │  │
+│  │  • Claude Code CLI              │  │  • Gitea repo │  │
+│  │  • OpenCode CLI                 │  └──────┬───────┘  │
+│  │  • Project toolchain            │         │          │
+│  │    (from Dockerfile.sdlc)       │         │          │
+│  └──────────────┬──────────────────┘         │          │
+│                 │                             │          │
+│                 └──────── /workspace ─────────┘          │
+│                     (shared emptyDir volume)             │
+└─────────────────────────────────────────────────────────┘
+```
+
+### Image Layering (Target Architecture)
+
+Fleet pods use a two-layer image strategy:
+
+1. **Base image** (`ghcr.io/orchard9/sdlc:latest`) — contains ponder binary, Claude Code CLI, OpenCode CLI, git, and common tools
+2. **Project image** (optional `Dockerfile.sdlc`) — extends base with project-specific toolchain (e.g., Node.js, Python, Go, Rust)
+
+> **Current state:** The `Dockerfile` produces a minimal image (ponder binary only). The base image with Claude Code and OpenCode CLI is planned.
+
+```dockerfile
+# Example Dockerfile.sdlc for a Node.js project
+FROM ghcr.io/orchard9/sdlc:latest
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
+```
+
+When no `Dockerfile.sdlc` exists, the base image is used directly.
+
+### Credential Pool
+
+Agent runs require API credentials. Instead of per-pod API keys, the fleet uses a shared credential pool:
+
+- Pool of `CLAUDE_CODE_OAUTH_TOKEN` values stored in the hub's postgres database
+- `spawn_agent_run` checks out a token before each agent run, returns it on completion
+- Prevents token exhaustion from concurrent agent runs across the fleet
+- REST API: `GET/POST/DELETE /api/hub/credential-pool`
+
+### Provision Flow
+
+```
+Hub UI "Start" button
+  → POST /api/hub/provision { repo_slug: "my-project" }
+  → Validate repo exists in Gitea
+  → POST to Woodpecker CI API (trigger provision pipeline)
+  → Woodpecker runs: helm install sdlc-<slug> + DNS + TLS
+  → Pod starts, git-sync clones repo
+  → Instance accessible at <slug>.sdlc.threesix.ai
+```
+
+See `docs/fleet-deployment.md` for manifests, env vars, and DNS/TLS details.
 
 ---
 

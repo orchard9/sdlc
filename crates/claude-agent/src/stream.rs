@@ -4,11 +4,13 @@ use std::task::{Context, Poll};
 use futures::Stream;
 use tokio::sync::mpsc;
 
+use crate::error::AgentError;
 use crate::process::ClaudeProcess;
-use crate::types::{Message, QueryOptions};
+use crate::provider::AgentProvider;
+use crate::types::{AgentEvent, Message, QueryOptions};
 use crate::Result;
 
-// ─── QueryStream ──────────────────────────────────────────────────────────
+// ─── QueryStream (Claude-specific, backward-compatible) ──────────────────
 
 /// An async stream of [`Message`]s from a Claude subprocess.
 ///
@@ -93,6 +95,56 @@ impl QueryStream {
 
 impl Stream for QueryStream {
     type Item = Result<Message>;
+
+    fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
+        self.rx.poll_recv(cx)
+    }
+}
+
+// ─── AgentStream (provider-neutral) ──────────────────────────────────────
+
+/// Provider-neutral async stream of [`AgentEvent`]s.
+///
+/// Backed by a Tokio mpsc channel. The provider's `spawn()` method sends
+/// events through the channel; dropping the stream closes the receiver,
+/// which causes the provider task to exit.
+pub struct AgentStream {
+    rx: mpsc::Receiver<std::result::Result<AgentEvent, AgentError>>,
+}
+
+impl AgentStream {
+    /// Create a new `AgentStream` by spawning the given provider.
+    ///
+    /// The provider's `spawn()` returns a boxed future that captures `tx`;
+    /// we move that future into a `tokio::spawn` task so the provider
+    /// reference doesn't need `'static`.
+    pub fn new(prompt: String, opts: QueryOptions, provider: &dyn AgentProvider) -> Self {
+        let (tx, rx) = mpsc::channel(32);
+
+        // Call spawn() synchronously to get a Send + 'static future (it's Pin<Box<…>>),
+        // then move that future into the tokio task.
+        let fut = provider.spawn(prompt, opts, tx.clone());
+        tokio::spawn(async move {
+            if let Err(e) = fut.await {
+                let _ = tx.send(Err(e)).await;
+            }
+        });
+
+        AgentStream { rx }
+    }
+
+    /// Test-only constructor: wrap a raw mpsc receiver.
+    #[cfg(test)]
+    #[allow(dead_code)]
+    pub(crate) fn from_channel(
+        rx: mpsc::Receiver<std::result::Result<AgentEvent, AgentError>>,
+    ) -> Self {
+        Self { rx }
+    }
+}
+
+impl Stream for AgentStream {
+    type Item = std::result::Result<AgentEvent, AgentError>;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
         self.rx.poll_recv(cx)

@@ -62,6 +62,10 @@ spec:
           env:
             - name: SDLC_ROOT
               value: /workspace/{{ .Values.project.slug }}
+            - name: SDLC_HUB_URL
+              value: https://{{ .Values.ingress.domain }}
+            - name: SDLC_BASE_URL
+              value: https://{{ .Values.project.slug }}.{{ .Values.ingress.domain }}
             - name: ANTHROPIC_API_KEY
               valueFrom:
                 secretKeyRef:

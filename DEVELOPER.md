@@ -102,6 +102,67 @@ Open `http://localhost:5173`. Vite proxies `/api` to the Rust backend on port 31
 
 > **Stale server?** If a previous `sdlc ui` process is already bound to port 3141 (check with `sdlc list`), kill it first — it may be pointing at the wrong project or running an old binary.
 
+## Hub Dev Loop (Fleet UI)
+
+Test hub mode locally with Postgres and Gitea in Docker. sdlc-server runs natively for hot reload.
+
+**One-time setup:**
+
+```bash
+docker compose up -d
+./dev/setup-gitea.sh        # creates admin user, orchard9 org, prints API token
+mkdir -p /tmp/sdlc-hub/.sdlc
+```
+
+**Three terminals:**
+
+```bash
+# Terminal 1 — Postgres + Gitea
+docker compose up -d
+
+# Terminal 2 — Rust backend in hub mode
+SDLC_ROOT=/tmp/sdlc-hub \
+SDLC_HUB=true \
+GITEA_URL=http://localhost:7782 \
+GITEA_API_TOKEN=<from setup-gitea.sh> \
+DATABASE_URL=postgres://sdlc:sdlc@localhost:7781/sdlc \
+cargo watch -x 'run --bin ponder -- ui start --port 7778 --no-open --no-tunnel --hub'
+
+# Terminal 3 — Vite dev server
+cd frontend && npm run dev
+```
+
+Open `http://localhost:5173`. Auth is bypassed on localhost. Use **Import** (paste a clone URL) or **Create** (enter a repo name) in the hub UI to add repos — they're mirrored into the local Gitea automatically.
+
+To test a running project instance alongside the hub, start a second server pointed at the project:
+
+```bash
+SDLC_ROOT=/path/to/your-project \
+SDLC_HUB_URL=http://localhost:7778 \
+cargo run --bin ponder -- ui start --port 7777 --no-open --no-tunnel
+```
+
+The project instance sends heartbeats to the hub and appears in the fleet view.
+
+### Tier 2: Woodpecker CI (provision flow)
+
+The docker-compose stack includes Woodpecker server + agent for testing the full provision flow (hub UI "Start" button → pipeline → pod deploy). Woodpecker requires a Gitea OAuth app and its own setup:
+
+```bash
+# After docker compose up -d and setup-gitea.sh:
+./dev/setup-woodpecker.sh    # OAuth flow, API token, repo activation
+```
+
+Add the printed `WOODPECKER_URL` and `WOODPECKER_API_TOKEN` to your hub server env. Note: Woodpecker tokens are invalidated on server restart — re-run the script after `docker compose restart woodpecker-server`.
+
+The agent is configured with `WOODPECKER_BACKEND_DOCKER_NETWORK=sdlc_default` so pipeline containers can reach Gitea via Docker service names.
+
+**Tear down:**
+
+```bash
+docker compose down -v   # -v removes volumes (pgdata, gitea-data, woodpecker-data)
+```
+
 ## Going Deeper
 
 [`docs/architecture.md`](docs/architecture.md) — codebase layout, data schemas, classifier, REST API, contributing (rules, commands, action types).

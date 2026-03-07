@@ -1,11 +1,11 @@
 name: telegram-recap
-version: "2.0.0"
-description: "Fetch and email a Telegram chat digest via Resend"
+version: "3.0.0"
+description: "Fetch Telegram messages from the sdlc webhook store and email a daily digest via Resend"
 # All secrets sourced from: sdlc secrets env export telegram
 # See README.md for full configuration reference.
 secrets:
   - env_var: TELEGRAM_BOT_TOKEN
-    description: "Telegram bot API token (from @BotFather)"
+    description: "Telegram bot API token (from @BotFather) — used for setup verification only"
     required: true
   - env_var: RESEND_API_KEY
     description: "Resend API key (starts with re_*)"
@@ -16,14 +16,11 @@ secrets:
   - env_var: RESEND_TO
     description: "Recipient address(es), comma-separated"
     required: true
-  - env_var: COUCHDB_URL
-    description: "CouchDB base URL for message persistence (optional)"
+  - env_var: SDLC_SERVER_URL
+    description: "sdlc server URL (default: http://localhost:7777)"
     required: false
-  - env_var: COUCHDB_USER
-    description: "CouchDB username (optional)"
-    required: false
-  - env_var: COUCHDB_PASSWORD
-    description: "CouchDB password (optional)"
+  - env_var: TELEGRAM_WEBHOOK_ROUTE
+    description: "Webhook route name on the sdlc server (default: telegram)"
     required: false
   - env_var: WINDOW_HOURS
     description: "Default digest window in hours (optional, default 24)"

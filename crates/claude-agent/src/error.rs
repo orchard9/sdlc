@@ -1,5 +1,8 @@
 use thiserror::Error;
 
+/// Provider-neutral alias for the agent error type.
+pub type AgentError = ClaudeAgentError;
+
 #[derive(Debug, Error)]
 pub enum ClaudeAgentError {
     #[error("I/O error: {0}")]

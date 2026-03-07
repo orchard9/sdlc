@@ -427,6 +427,53 @@ impl ActionDb {
         Ok(())
     }
 
+    /// Query stored webhook payloads for a route within an optional time window.
+    ///
+    /// Full scan of `WEBHOOKS`, filter by exact `route_path` match and optional
+    /// `received_at` window, sort descending (newest first), take `limit`.
+    pub fn query_webhooks(
+        &self,
+        route_path: &str,
+        since: Option<DateTime<Utc>>,
+        until: Option<DateTime<Utc>>,
+        limit: usize,
+    ) -> Result<Vec<WebhookPayload>> {
+        let rt = self
+            .db
+            .begin_read()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+        let table = rt
+            .open_table(WEBHOOKS)
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+        let mut result = Vec::new();
+        for entry in table
+            .iter()
+            .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?
+        {
+            let (_, v) = entry.map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            let payload: WebhookPayload = serde_json::from_slice(v.value())
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+            if payload.route_path != route_path {
+                continue;
+            }
+            if let Some(s) = since {
+                if payload.received_at < s {
+                    continue;
+                }
+            }
+            if let Some(u) = until {
+                if payload.received_at > u {
+                    continue;
+                }
+            }
+            result.push(payload);
+        }
+        result.sort_by(|a, b| b.received_at.cmp(&a.received_at));
+        result.truncate(limit);
+        Ok(result)
+    }
+
     // -----------------------------------------------------------------------
     // Webhook route storage
     // -----------------------------------------------------------------------
@@ -697,6 +744,16 @@ impl OrchestratorBackend for ActionDb {
 
     fn delete_webhook(&self, id: Uuid) -> Result<()> {
         self.delete_webhook(id)
+    }
+
+    fn query_webhooks(
+        &self,
+        route_path: &str,
+        since: Option<DateTime<Utc>>,
+        until: Option<DateTime<Utc>>,
+        limit: usize,
+    ) -> Result<Vec<WebhookPayload>> {
+        self.query_webhooks(route_path, since, until, limit)
     }
 
     fn insert_route(&self, route: &WebhookRoute) -> Result<()> {
@@ -1261,5 +1318,96 @@ mod tests {
             assert_eq!(events.len(), 1);
             assert_eq!(events[0].route_path, "/hooks/pre-existing");
         }
+    }
+
+    // -----------------------------------------------------------------------
+    // query_webhooks tests
+    // -----------------------------------------------------------------------
+
+    fn make_payload(route_path: &str, received_at: DateTime<Utc>) -> WebhookPayload {
+        WebhookPayload {
+            id: Uuid::new_v4(),
+            route_path: route_path.to_string(),
+            raw_body: b"test".to_vec(),
+            content_type: Some("application/json".to_string()),
+            received_at,
+        }
+    }
+
+    #[test]
+    fn query_webhooks_filters_by_route_path() {
+        let (_dir, db) = open_tmp();
+        let now = Utc::now();
+
+        let p1 = make_payload("/github", now);
+        let p2 = make_payload("/github", now - CDur::seconds(1));
+        let p3 = make_payload("/stripe", now);
+
+        db.insert_webhook(&p1).unwrap();
+        db.insert_webhook(&p2).unwrap();
+        db.insert_webhook(&p3).unwrap();
+
+        let results = db.query_webhooks("/github", None, None, 100).unwrap();
+        assert_eq!(results.len(), 2);
+        for r in &results {
+            assert_eq!(r.route_path, "/github");
+        }
+
+        let stripe = db.query_webhooks("/stripe", None, None, 100).unwrap();
+        assert_eq!(stripe.len(), 1);
+        assert_eq!(stripe[0].id, p3.id);
+    }
+
+    #[test]
+    fn query_webhooks_filters_by_since() {
+        let (_dir, db) = open_tmp();
+        let now = Utc::now();
+        let old = make_payload("/hooks/test", now - CDur::hours(2));
+        let recent = make_payload("/hooks/test", now - CDur::minutes(5));
+
+        db.insert_webhook(&old).unwrap();
+        db.insert_webhook(&recent).unwrap();
+
+        let cutoff = now - CDur::hours(1);
+        let results = db
+            .query_webhooks("/hooks/test", Some(cutoff), None, 100)
+            .unwrap();
+        assert_eq!(results.len(), 1);
+        assert_eq!(results[0].id, recent.id);
+    }
+
+    #[test]
+    fn query_webhooks_respects_limit() {
+        let (_dir, db) = open_tmp();
+        let now = Utc::now();
+
+        for i in 0..5 {
+            let p = make_payload("/hooks/limit", now - CDur::seconds(i));
+            db.insert_webhook(&p).unwrap();
+        }
+
+        let results = db.query_webhooks("/hooks/limit", None, None, 3).unwrap();
+        assert_eq!(results.len(), 3);
+    }
+
+    #[test]
+    fn query_webhooks_returns_newest_first() {
+        let (_dir, db) = open_tmp();
+        let now = Utc::now();
+
+        let oldest = make_payload("/hooks/order", now - CDur::hours(3));
+        let middle = make_payload("/hooks/order", now - CDur::hours(2));
+        let newest = make_payload("/hooks/order", now - CDur::hours(1));
+
+        // Insert in arbitrary order
+        db.insert_webhook(&middle).unwrap();
+        db.insert_webhook(&oldest).unwrap();
+        db.insert_webhook(&newest).unwrap();
+
+        let results = db.query_webhooks("/hooks/order", None, None, 100).unwrap();
+        assert_eq!(results.len(), 3);
+        assert_eq!(results[0].id, newest.id, "first result must be newest");
+        assert_eq!(results[1].id, middle.id);
+        assert_eq!(results[2].id, oldest.id, "last result must be oldest");
     }
 }

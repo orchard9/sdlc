@@ -24,6 +24,21 @@ steps:
       username: anonymous
       password: anonymous
 
+  - name: build-base-image
+    image: woodpeckerci/plugin-kaniko
+    settings:
+      repo: registry.threesix.ai/sdlc-base
+      registry: registry.threesix.ai
+      dockerfile: Dockerfile.base
+      context: .
+      tags:
+        - latest
+        - ${CI_COMMIT_SHA:0:7}
+      username: anonymous
+      password: anonymous
+    depends_on:
+      - build-image
+
   - name: rollout-restart
     image: bitnami/kubectl:latest
     commands:

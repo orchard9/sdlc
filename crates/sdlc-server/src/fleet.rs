@@ -33,6 +33,11 @@ pub struct FleetInstance {
     pub active_milestone: Option<String>,
     pub feature_count: Option<u32>,
     pub agent_running: Option<bool>,
+    pub last_heartbeat_at: Option<DateTime<Utc>>,
+    pub heartbeat_status: Option<crate::hub::ProjectStatus>,
+    pub provision_status: Option<crate::hub::ProvisionState>,
+    #[serde(default)]
+    pub attention_reasons: Vec<String>,
 }
 
 /// A repo from the Gitea org.
@@ -80,9 +85,23 @@ pub async fn list_fleet_instances(
     hub_registry: Option<&tokio::sync::Mutex<crate::hub::HubRegistry>>,
     ingress_domain: &str,
 ) -> Result<Vec<FleetInstance>, FleetError> {
+    let mut heartbeat_by_url: std::collections::HashMap<String, crate::hub::ProjectEntry> =
+        std::collections::HashMap::new();
+    let mut provision_by_slug: std::collections::HashMap<String, crate::hub::ProvisionEntry> =
+        std::collections::HashMap::new();
+    if let Some(registry_lock) = hub_registry {
+        let registry = registry_lock.lock().await;
+        heartbeat_by_url = registry.projects.clone();
+        provision_by_slug = registry.provisions.clone();
+    }
+
     let client = match kube_client {
         Some(c) => c,
-        None => return Ok(Vec::new()),
+        None => {
+            let mut placeholders = provision_placeholders(&provision_by_slug);
+            placeholders.sort_by(|a, b| a.slug.cmp(&b.slug));
+            return Ok(placeholders);
+        }
     };
 
     use k8s_openapi::api::apps::v1::Deployment;
@@ -146,24 +165,148 @@ pub async fn list_fleet_instances(
             active_milestone: None,
             feature_count: None,
             agent_running: None,
+            last_heartbeat_at: None,
+            heartbeat_status: None,
+            provision_status: None,
+            attention_reasons: Vec::new(),
         };
 
-        // Merge heartbeat data from HubRegistry
-        if let Some(registry_lock) = hub_registry {
-            let registry = registry_lock.lock().await;
-            // Try to find matching entry by URL
-            if let Some(entry) = registry.projects.get(&url) {
-                instance.active_milestone = entry.active_milestone.clone();
-                instance.feature_count = entry.feature_count;
-                instance.agent_running = entry.agent_running;
-            }
+        if let Some(entry) = heartbeat_by_url.get(&url) {
+            instance.active_milestone = entry.active_milestone.clone();
+            instance.feature_count = entry.feature_count;
+            instance.agent_running = entry.agent_running;
+            instance.last_heartbeat_at = Some(entry.last_seen);
+            instance.heartbeat_status = Some(entry.status.clone());
         }
+        if let Some(provision) = provision_by_slug.get(&slug) {
+            instance.provision_status = Some(provision.status.clone());
+        }
+        decorate_attention(&mut instance);
+        instances.push(instance);
+    }
 
+    let known_slugs: std::collections::HashSet<String> = instances
+        .iter()
+        .map(|instance| instance.slug.clone())
+        .collect();
+    for placeholder in provision_by_slug.values() {
+        if known_slugs.contains(&placeholder.slug) {
+            continue;
+        }
+        let mut instance = FleetInstance {
+            slug: placeholder.slug.clone(),
+            namespace: format!("sdlc-{}", placeholder.slug),
+            url: placeholder.url.clone(),
+            deployment_status: match placeholder.status {
+                crate::hub::ProvisionState::Failed => DeploymentStatus::Failed,
+                crate::hub::ProvisionState::Ready => DeploymentStatus::Running,
+                crate::hub::ProvisionState::Requested
+                | crate::hub::ProvisionState::Provisioning => DeploymentStatus::Pending,
+            },
+            pod_healthy: matches!(placeholder.status, crate::hub::ProvisionState::Ready),
+            created_at: Some(placeholder.created_at),
+            active_milestone: None,
+            feature_count: None,
+            agent_running: None,
+            last_heartbeat_at: None,
+            heartbeat_status: None,
+            provision_status: Some(placeholder.status.clone()),
+            attention_reasons: Vec::new(),
+        };
+        if let Some(entry) = heartbeat_by_url.get(&placeholder.url) {
+            instance.active_milestone = entry.active_milestone.clone();
+            instance.feature_count = entry.feature_count;
+            instance.agent_running = entry.agent_running;
+            instance.last_heartbeat_at = Some(entry.last_seen);
+            instance.heartbeat_status = Some(entry.status.clone());
+        }
+        decorate_attention(&mut instance);
         instances.push(instance);
     }
 
     instances.sort_by(|a, b| a.slug.cmp(&b.slug));
     Ok(instances)
+}
+
+fn provision_placeholders(
+    provisions: &std::collections::HashMap<String, crate::hub::ProvisionEntry>,
+) -> Vec<FleetInstance> {
+    let mut instances = Vec::new();
+    for provision in provisions.values() {
+        let mut instance = FleetInstance {
+            slug: provision.slug.clone(),
+            namespace: format!("sdlc-{}", provision.slug),
+            url: provision.url.clone(),
+            deployment_status: match provision.status {
+                crate::hub::ProvisionState::Failed => DeploymentStatus::Failed,
+                crate::hub::ProvisionState::Ready => DeploymentStatus::Running,
+                crate::hub::ProvisionState::Requested
+                | crate::hub::ProvisionState::Provisioning => DeploymentStatus::Pending,
+            },
+            pod_healthy: matches!(provision.status, crate::hub::ProvisionState::Ready),
+            created_at: Some(provision.created_at),
+            active_milestone: None,
+            feature_count: None,
+            agent_running: None,
+            last_heartbeat_at: None,
+            heartbeat_status: None,
+            provision_status: Some(provision.status.clone()),
+            attention_reasons: Vec::new(),
+        };
+        decorate_attention(&mut instance);
+        instances.push(instance);
+    }
+    instances
+}
+
+fn decorate_attention(instance: &mut FleetInstance) {
+    instance.attention_reasons.clear();
+    match instance.deployment_status {
+        DeploymentStatus::Failed => {
+            instance
+                .attention_reasons
+                .push("Deployment failed in the cluster".to_string());
+        }
+        DeploymentStatus::Running if !instance.pod_healthy => {
+            instance
+                .attention_reasons
+                .push("Pod is running but not healthy".to_string());
+        }
+        DeploymentStatus::Pending => {
+            instance
+                .attention_reasons
+                .push("Provisioning is still in progress".to_string());
+        }
+        DeploymentStatus::Unknown if instance.provision_status.is_none() => {
+            instance
+                .attention_reasons
+                .push("Deployment state is unknown".to_string());
+        }
+        _ => {}
+    }
+    if let Some(status) = &instance.heartbeat_status {
+        match status {
+            crate::hub::ProjectStatus::Stale => instance
+                .attention_reasons
+                .push("Heartbeat is stale".to_string()),
+            crate::hub::ProjectStatus::Offline => instance
+                .attention_reasons
+                .push("Heartbeat is offline".to_string()),
+            crate::hub::ProjectStatus::Online => {}
+        }
+    } else if matches!(instance.deployment_status, DeploymentStatus::Running) {
+        instance
+            .attention_reasons
+            .push("No heartbeat has been received yet".to_string());
+    }
+    if matches!(
+        instance.provision_status,
+        Some(crate::hub::ProvisionState::Failed)
+    ) {
+        instance
+            .attention_reasons
+            .push("Latest provision attempt failed".to_string());
+    }
 }
 
 /// Extract deployment status and pod health from a k8s Deployment.
@@ -303,9 +446,33 @@ pub async fn trigger_provision(
     woodpecker_token: &str,
     repo_slug: &str,
 ) -> Result<(), FleetError> {
-    // Woodpecker API: POST /api/repos/{owner}/{repo}/pipelines
-    // The fleet-reconcile pipeline is on the sdlc repo itself.
-    let url = format!("{woodpecker_url}/api/repos/orchard9/sdlc/pipelines");
+    // Woodpecker 2.x API uses numeric repo IDs: POST /api/repos/{repo_id}/pipelines
+    // First look up the sdlc repo to get its ID.
+    let lookup_url = format!("{woodpecker_url}/api/repos/lookup/orchard9/sdlc");
+    let lookup_resp = http_client
+        .get(&lookup_url)
+        .header("Authorization", format!("Bearer {woodpecker_token}"))
+        .send()
+        .await
+        .map_err(|e| FleetError::WoodpeckerUnavailable(e.to_string()))?;
+
+    if !lookup_resp.status().is_success() {
+        let status = lookup_resp.status();
+        let detail = lookup_resp.text().await.unwrap_or_default();
+        return Err(FleetError::WoodpeckerUnavailable(format!(
+            "repo lookup failed HTTP {status}: {detail}"
+        )));
+    }
+
+    let repo: serde_json::Value = lookup_resp
+        .json()
+        .await
+        .map_err(|e| FleetError::WoodpeckerUnavailable(e.to_string()))?;
+    let repo_id = repo["id"]
+        .as_i64()
+        .ok_or_else(|| FleetError::WoodpeckerUnavailable("repo id not found".into()))?;
+
+    let url = format!("{woodpecker_url}/api/repos/{repo_id}/pipelines");
 
     let body = serde_json::json!({
         "branch": "main",
@@ -580,6 +747,10 @@ mod tests {
                 active_milestone: None,
                 feature_count: None,
                 agent_running: None,
+                last_heartbeat_at: None,
+                heartbeat_status: None,
+                provision_status: None,
+                attention_reasons: Vec::new(),
             },
             FleetInstance {
                 slug: "payments".into(),
@@ -591,6 +762,10 @@ mod tests {
                 active_milestone: None,
                 feature_count: None,
                 agent_running: None,
+                last_heartbeat_at: None,
+                heartbeat_status: None,
+                provision_status: None,
+                attention_reasons: Vec::new(),
             },
         ];
 

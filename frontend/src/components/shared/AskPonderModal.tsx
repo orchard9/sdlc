@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { HelpCircle } from 'lucide-react'
+import { Code2 } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { api } from '@/api/client'
+import type { AmaSource } from '@/lib/types'
 
 interface AskPonderModalProps {
   open: boolean
   onClose: () => void
 }
 
-type Step = 'input' | 'answering' | 'answered'
+type Step = 'input' | 'indexing' | 'answering' | 'answered'
 
 function toThreadId(question: string): string {
   return (
@@ -29,6 +30,7 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
 
   const [step, setStep] = useState<Step>('input')
   const [question, setQuestion] = useState('')
+  const [sources, setSources] = useState<AmaSource[]>([])
   const [runKey, setRunKey] = useState<string | null>(null)
   const [runId, setRunId] = useState<string | null>(null)
   const [answerText, setAnswerText] = useState('')
@@ -43,6 +45,7 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
     if (open) {
       setStep('input')
       setQuestion('')
+      setSources([])
       setRunKey(null)
       setRunId(null)
       setAnswerText('')
@@ -95,15 +98,42 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
     return () => es.close()
   }, [runKey, step])
 
+  const runSearch = async (q: string): Promise<AmaSource[]> => {
+    const result = await api.runTool('ama', { question: q }) as { ok?: boolean; data?: { sources?: AmaSource[] }; error?: string }
+    if (!result.ok) throw new Error(result.error ?? 'Search failed')
+    return result.data?.sources ?? []
+  }
+
   const handleAsk = async () => {
     const q = question.trim()
     if (!q) return
     setError(null)
     setAnswerText('')
     setStreamDone(false)
-    setStep('answering')
+    setSources([])
+
     try {
-      const res = await api.answerAma(q, [], { turnIndex: 0 })
+      // Step 1: search the index
+      let foundSources: AmaSource[]
+      try {
+        foundSources = await runSearch(q)
+      } catch (searchErr) {
+        const msg = searchErr instanceof Error ? searchErr.message : ''
+        // Index not built yet — run setup then retry
+        if (msg.toLowerCase().includes('index') || msg.toLowerCase().includes('not built') || msg.toLowerCase().includes('no such file')) {
+          setStep('indexing')
+          await api.setupTool('ama')
+          foundSources = await runSearch(q)
+        } else {
+          throw searchErr
+        }
+      }
+
+      setSources(foundSources)
+      setStep('answering')
+
+      // Step 2: synthesize answer
+      const res = await api.answerAma(q, foundSources, { turnIndex: 0 })
       setRunKey(res.run_key)
       setRunId(res.run_id)
     } catch (e) {
@@ -115,6 +145,7 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
   const handleAskAnother = () => {
     setStep('input')
     setAnswerText('')
+    setSources([])
     setRunKey(null)
     setRunId(null)
     setStreamDone(false)
@@ -130,7 +161,7 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
       await api.createAmaThread(threadId, question.trim())
       await api.addAmaThreadTurn(threadId, {
         question: question.trim(),
-        sources: [],
+        sources,
         run_id: runId ?? undefined,
       })
       navigate(`/threads/${threadId}`)
@@ -147,7 +178,7 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Ask Ponder"
+      aria-label="Ask Code"
       className="fixed inset-0 z-50 flex items-start justify-center pt-[12vh] bg-black/60"
       onClick={onClose}
     >
@@ -158,8 +189,14 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
         {/* Header */}
         <div className="px-4 pt-4 pb-3 border-b border-border">
           <div className="flex items-center gap-2 mb-0.5">
-            <HelpCircle className="w-4 h-4 text-primary" />
-            <span className="text-sm font-semibold">Ask Ponder</span>
+            <Code2 className="w-4 h-4 text-primary" />
+            <span className="text-sm font-semibold">Ask Code</span>
+            {step === 'indexing' && (
+              <span className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                Building index…
+              </span>
+            )}
             {step === 'answering' && (
               <span className="ml-auto flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="w-1.5 h-1.5 bg-primary rounded-full animate-pulse" />
@@ -172,7 +209,7 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
               Ask how a feature works, what a file does, or how things connect.
             </p>
           )}
-          {(step === 'answering' || step === 'answered') && (
+          {(step === 'indexing' || step === 'answering' || step === 'answered') && (
             <p className="text-xs text-muted-foreground truncate">
               "{question}"
             </p>
@@ -201,9 +238,22 @@ export function AskPonderModal({ open, onClose }: AskPonderModalProps) {
                 disabled={!question.trim()}
                 className="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-40"
               >
-                <HelpCircle className="w-3.5 h-3.5" />
+                <Code2 className="w-3.5 h-3.5" />
                 Ask
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Step: indexing */}
+        {step === 'indexing' && (
+          <div className="p-4">
+            <div className="flex items-center gap-3 text-muted-foreground py-4">
+              <span className="w-4 h-4 border-2 border-muted-foreground/30 border-t-amber-500 rounded-full animate-spin shrink-0" />
+              <div>
+                <p className="text-sm">Building code index…</p>
+                <p className="text-xs text-muted-foreground/60 mt-0.5">First time only — this takes a few seconds</p>
+              </div>
             </div>
           </div>
         )}

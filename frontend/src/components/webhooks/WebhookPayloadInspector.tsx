@@ -33,9 +33,22 @@ function formatTimestamp(iso: string): string {
   })
 }
 
-function estimateSize(body: unknown): string {
-  const json = typeof body === 'string' ? body : JSON.stringify(body)
-  const bytes = new Blob([json]).size
+function decodeBody(base64: string): string {
+  try {
+    const raw = atob(base64)
+    try {
+      return JSON.stringify(JSON.parse(raw), null, 2)
+    } catch {
+      return raw
+    }
+  } catch {
+    return base64
+  }
+}
+
+function estimateSize(base64: string): string {
+  // base64 encodes 3 bytes as 4 chars, so decoded byte count ≈ len * 3/4
+  const bytes = Math.floor(base64.length * 3 / 4)
   if (bytes < 1024) return `${bytes} B`
   return `${(bytes / 1024).toFixed(1)} KB`
 }
@@ -100,20 +113,13 @@ export function WebhookPayloadInspector({ route, onClose }: Props) {
 
   function handleCopy() {
     if (!selected) return
-    const text = typeof selected.body === 'string'
-      ? selected.body
-      : JSON.stringify(selected.body, null, 2)
-    navigator.clipboard.writeText(text).then(() => {
+    navigator.clipboard.writeText(decodeBody(selected.body)).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 1500)
     })
   }
 
-  const bodyText = selected
-    ? typeof selected.body === 'string'
-      ? selected.body
-      : JSON.stringify(selected.body, null, 2)
-    : ''
+  const bodyText = selected ? decodeBody(selected.body) : ''
 
   return (
     <div className="mt-3 border border-border rounded-lg overflow-hidden">

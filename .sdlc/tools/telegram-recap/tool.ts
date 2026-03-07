@@ -1,17 +1,16 @@
 /**
  * telegram-recap
  * ==============
- * Fetches Telegram messages via the Bot API, optionally persists them to CouchDB,
- * and emails a digest via Resend. Fully self-contained — no sdlc CLI calls.
+ * Fetches Telegram messages from the sdlc webhook store and emails a daily digest via Resend.
+ * Fully self-contained — no sdlc CLI calls.
  *
  * WHAT IT DOES
  * ------------
- * --setup:  Verifies TELEGRAM_BOT_TOKEN via getMe, checks Resend env vars,
- *           and optionally probes CouchDB (non-fatal if unavailable).
- *           Returns { ok: true, data: { bot_username, couchdb: '...' } }
+ * --setup:  Verifies TELEGRAM_BOT_TOKEN via getMe and checks SDLC_SERVER_URL reachability.
+ *           Returns { ok: true, data: { bot_username, webhook_store: 'reachable'|'unavailable' } }
  *
  * --run:    Reads JSON from stdin: { window_hours?, dry_run? }
- *           Calls Telegram getUpdates, optionally persists to CouchDB,
+ *           Queries stored webhook payloads from the sdlc server,
  *           builds digest, sends via Resend.
  *           Returns { ok: true, data: { total_messages, chat_count, ... } }
  *
@@ -19,14 +18,13 @@
  *
  * SECRETS (all from: sdlc secrets env export telegram)
  * -----------------------------------------------------
- * TELEGRAM_BOT_TOKEN   Required
- * RESEND_API_KEY       Required
- * RESEND_FROM          Required
- * RESEND_TO            Required (comma-separated)
- * COUCHDB_URL          Optional (e.g. http://couchdb.threesix.svc.cluster.local:5984)
- * COUCHDB_USER         Optional
- * COUCHDB_PASSWORD     Optional
- * WINDOW_HOURS         Optional (default 24)
+ * TELEGRAM_BOT_TOKEN       Required for setup only (getMe verification)
+ * RESEND_API_KEY           Required
+ * RESEND_FROM              Required
+ * RESEND_TO                Required (comma-separated)
+ * SDLC_SERVER_URL          Optional (default: http://localhost:7777)
+ * TELEGRAM_WEBHOOK_ROUTE   Optional (default: telegram)
+ * WINDOW_HOURS             Optional (default 24)
  */
 
 import type { ToolMeta as BaseToolMeta, ToolResult } from '../_shared/types.ts'
@@ -60,11 +58,11 @@ export const meta: ToolMeta = {
   name: 'telegram-recap',
   display_name: 'Telegram Recap',
   description:
-    'Fetch and email a Telegram chat digest — pulls messages from the configured window and sends via Resend',
-  version: '2.0.0',
+    'Fetch Telegram messages from the sdlc webhook store and email a daily digest via Resend',
+  version: '3.0.0',
   requires_setup: true,
   setup_description:
-    'Verifies TELEGRAM_BOT_TOKEN via getMe, checks Resend credentials, and probes optional CouchDB',
+    'Verifies TELEGRAM_BOT_TOKEN via getMe and checks SDLC_SERVER_URL reachability',
   secrets_env: 'telegram',
   input_schema: {
     type: 'object',
@@ -92,13 +90,12 @@ export const meta: ToolMeta = {
     },
   },
   secrets: [
-    { env_var: 'TELEGRAM_BOT_TOKEN', description: 'Telegram bot API token (from @BotFather)', required: true },
+    { env_var: 'TELEGRAM_BOT_TOKEN', description: 'Telegram bot API token (from @BotFather) — used for setup verification only', required: true },
     { env_var: 'RESEND_API_KEY', description: 'Resend API key (starts with re_*)', required: true },
     { env_var: 'RESEND_FROM', description: 'Verified sender address (e.g. digest@yourdomain.com)', required: true },
     { env_var: 'RESEND_TO', description: 'Recipient address(es), comma-separated', required: true },
-    { env_var: 'COUCHDB_URL', description: 'CouchDB URL for message persistence (optional)', required: false },
-    { env_var: 'COUCHDB_USER', description: 'CouchDB username (optional)', required: false },
-    { env_var: 'COUCHDB_PASSWORD', description: 'CouchDB password (optional)', required: false },
+    { env_var: 'SDLC_SERVER_URL', description: 'sdlc server URL (default: http://localhost:7777)', required: false },
+    { env_var: 'TELEGRAM_WEBHOOK_ROUTE', description: 'Webhook route name on the sdlc server (default: telegram)', required: false },
     { env_var: 'WINDOW_HOURS', description: 'Default digest window in hours (optional, default 24)', required: false },
   ],
   tags: ['telegram', 'email', 'digest'],
@@ -108,7 +105,7 @@ export const meta: ToolMeta = {
       icon: 'send',
       condition: '$.ok == true',
       prompt_template: 'Run the telegram-recap tool with dry_run: true to preview the digest.',
-      confirm: 'This will fetch messages and display the digest without sending email.',
+      confirm: 'This will fetch messages from the webhook store and display the digest without sending email.',
     },
   ],
 }
@@ -131,6 +128,16 @@ interface DigestOutput {
   sent_to: string[]
 }
 
+// Raw payload item returned by GET /api/webhooks/{route}/data
+interface WebhookPayloadItem {
+  id: string
+  route_path: string
+  received_at: string
+  content_type: string
+  body: string // base64-encoded
+}
+
+// Telegram Update shape — only the fields we need
 interface TelegramUpdate {
   update_id: number
   message?: {
@@ -153,118 +160,62 @@ interface TelegramMessage {
 }
 
 // ---------------------------------------------------------------------------
-// CouchDB helpers (graceful degradation)
+// Webhook store helpers
 // ---------------------------------------------------------------------------
 
-function couchdbAuth(): string | undefined {
-  const user = process.env.COUCHDB_USER
-  const pass = process.env.COUCHDB_PASSWORD
-  if (user && pass) {
-    return 'Basic ' + btoa(`${user}:${pass}`)
+/**
+ * Fetch stored Telegram webhook payloads from the sdlc server.
+ * GET /api/webhooks/{route}/data?since={iso}&limit=200
+ * Each item's `body` is base64-encoded Telegram Update JSON.
+ */
+async function fetchStoredPayloads(
+  serverUrl: string,
+  route: string,
+  since: string,
+): Promise<TelegramUpdate[]> {
+  const url = `${serverUrl}/api/webhooks/${route}/data?since=${encodeURIComponent(since)}&limit=200`
+  log.info(`Fetching webhook payloads: GET ${url}`)
+
+  let res: Response
+  try {
+    res = await fetch(url, { signal: AbortSignal.timeout(15000) })
+  } catch (e) {
+    throw new Error(`Failed to reach sdlc server at ${serverUrl}: ${e}`)
   }
-  return undefined
+
+  if (!res.ok) {
+    const txt = await res.text()
+    throw new Error(`Webhook store query failed (${res.status}): ${txt}`)
+  }
+
+  const items = await res.json() as WebhookPayloadItem[]
+  log.info(`Received ${items.length} webhook payload(s)`)
+
+  const updates: TelegramUpdate[] = []
+  for (const item of items) {
+    try {
+      const decoded = atob(item.body)
+      const update = JSON.parse(decoded) as TelegramUpdate
+      updates.push(update)
+    } catch (e) {
+      log.warn(`Skipping payload ${item.id}: failed to decode/parse body — ${e}`)
+    }
+  }
+
+  return updates
 }
 
-async function couchdbPing(baseUrl: string): Promise<boolean> {
+/**
+ * Check that the webhook store endpoint is reachable (no since param — just a probe).
+ */
+async function probeWebhookStore(serverUrl: string, route: string): Promise<boolean> {
   try {
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-    const auth = couchdbAuth()
-    if (auth) headers['Authorization'] = auth
-    const res = await fetch(baseUrl, { headers, signal: AbortSignal.timeout(5000) })
+    const url = `${serverUrl}/api/webhooks/${route}/data?limit=1`
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) })
     return res.ok
   } catch {
     return false
   }
-}
-
-async function couchdbEnsureDb(baseUrl: string, db: string): Promise<void> {
-  const url = `${baseUrl}/${db}`
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  const auth = couchdbAuth()
-  if (auth) headers['Authorization'] = auth
-  // PUT is idempotent — 201 = created, 412 = already exists, both are fine
-  await fetch(url, { method: 'PUT', headers, signal: AbortSignal.timeout(5000) })
-}
-
-async function couchdbUpsertMessages(baseUrl: string, db: string, messages: TelegramMessage[]): Promise<void> {
-  if (messages.length === 0) return
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  const auth = couchdbAuth()
-  if (auth) headers['Authorization'] = auth
-
-  // Fetch existing _revs to allow updates
-  const ids = messages.map(m => String(m.update_id))
-  const keysRes = await fetch(`${baseUrl}/${db}/_all_docs`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ keys: ids }),
-    signal: AbortSignal.timeout(10000),
-  })
-  const keysJson = keysRes.ok ? (await keysRes.json() as { rows: Array<{ id: string; value?: { rev: string }; error?: string }> }) : { rows: [] }
-  const revMap: Record<string, string> = {}
-  for (const row of keysJson.rows) {
-    if (row.value?.rev) revMap[row.id] = row.value.rev
-  }
-
-  const docs = messages.map(m => ({
-    _id: String(m.update_id),
-    ...(revMap[String(m.update_id)] ? { _rev: revMap[String(m.update_id)] } : {}),
-    ...m,
-  }))
-
-  const bulkRes = await fetch(`${baseUrl}/${db}/_bulk_docs`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ docs }),
-    signal: AbortSignal.timeout(10000),
-  })
-  if (bulkRes.ok) {
-    const bulkJson = await bulkRes.json() as Array<{ ok?: boolean; id?: string; error?: string }>
-    for (const r of bulkJson) {
-      if (!r.ok) log.warn(`Failed to upsert doc ${r.id}: ${r.error}`)
-    }
-  }
-}
-
-async function couchdbEnsureIndex(baseUrl: string, db: string): Promise<void> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  const auth = couchdbAuth()
-  if (auth) headers['Authorization'] = auth
-  // PUT _index is idempotent — safe to call on every run
-  await fetch(`${baseUrl}/${db}/_index`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      index: { fields: ['date'] },
-      name: 'by-date',
-      type: 'json',
-    }),
-    signal: AbortSignal.timeout(5000),
-  })
-}
-
-async function couchdbQueryWindow(
-  baseUrl: string,
-  db: string,
-  sinceTimestamp: number,
-): Promise<TelegramMessage[]> {
-  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
-  const auth = couchdbAuth()
-  if (auth) headers['Authorization'] = auth
-
-  const res = await fetch(`${baseUrl}/${db}/_find`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({
-      selector: { date: { $gte: sinceTimestamp } },
-      limit: 10000,
-      sort: [{ date: 'asc' }],
-    }),
-    signal: AbortSignal.timeout(10000),
-  })
-  if (!res.ok) return []
-  const json = await res.json() as { docs?: TelegramMessage[] }
-  return json.docs ?? []
 }
 
 // ---------------------------------------------------------------------------
@@ -282,33 +233,6 @@ async function telegramGetMe(token: string): Promise<{ username: string }> {
   const json = await res.json() as { ok: boolean; result?: { username?: string } }
   if (!json.ok) throw new Error('getMe returned ok=false')
   return { username: json.result?.username ?? 'unknown' }
-}
-
-async function telegramGetUpdates(token: string, offset?: number): Promise<TelegramUpdate[]> {
-  const body: Record<string, unknown> = { timeout: 0, allowed_updates: ['message'] }
-  if (offset !== undefined) body.offset = offset
-  const res = await fetch(`https://api.telegram.org/bot${token}/getUpdates`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-    signal: AbortSignal.timeout(30000),
-  })
-  if (!res.ok) {
-    const txt = await res.text()
-    throw new Error(`getUpdates failed (${res.status}): ${txt}`)
-  }
-  const json = await res.json() as { ok: boolean; result?: TelegramUpdate[] }
-  if (!json.ok) throw new Error('getUpdates returned ok=false')
-  return json.result ?? []
-}
-
-async function telegramAdvanceOffset(token: string, maxUpdateId: number): Promise<void> {
-  await fetch(`https://api.telegram.org/bot${token}/getUpdates`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ offset: maxUpdateId + 1, timeout: 0 }),
-    signal: AbortSignal.timeout(10000),
-  })
 }
 
 // ---------------------------------------------------------------------------
@@ -420,16 +344,17 @@ function escapeHtml(s: string): string {
 }
 
 // ---------------------------------------------------------------------------
-// setup() — verify credentials
+// setup() — verify credentials and reachability
 // ---------------------------------------------------------------------------
 
-export async function setup(): Promise<ToolResult<{ bot_username: string; couchdb: string }>> {
+export async function setup(): Promise<ToolResult<{ bot_username: string; webhook_store: string }>> {
   const start = Date.now()
   const token = process.env.TELEGRAM_BOT_TOKEN
   const resendKey = process.env.RESEND_API_KEY
   const resendFrom = process.env.RESEND_FROM
   const resendTo = process.env.RESEND_TO
-  const couchdbUrl = process.env.COUCHDB_URL
+  const serverUrl = process.env.SDLC_SERVER_URL ?? 'http://localhost:7777'
+  const route = process.env.TELEGRAM_WEBHOOK_ROUTE ?? 'telegram'
 
   if (!token) {
     return { ok: false, error: 'TELEGRAM_BOT_TOKEN is not set', duration_ms: Date.now() - start }
@@ -452,34 +377,30 @@ export async function setup(): Promise<ToolResult<{ bot_username: string; couchd
     return { ok: false, error: `Telegram getMe failed: ${e}`, duration_ms: Date.now() - start }
   }
 
-  let couchdbStatus = 'not_configured'
-  if (couchdbUrl) {
-    log.info(`Probing CouchDB at ${couchdbUrl}...`)
-    const reachable = await couchdbPing(couchdbUrl)
-    couchdbStatus = reachable ? 'connected' : 'unavailable'
-    log.info(`CouchDB: ${couchdbStatus}`)
-  }
+  log.info(`Probing sdlc webhook store at ${serverUrl}/api/webhooks/${route}/data...`)
+  const reachable = await probeWebhookStore(serverUrl, route)
+  const webhookStoreStatus = reachable ? 'reachable' : 'unavailable'
+  log.info(`Webhook store: ${webhookStoreStatus}`)
 
   return {
     ok: true,
-    data: { bot_username: botUsername, couchdb: couchdbStatus },
+    data: { bot_username: botUsername, webhook_store: webhookStoreStatus },
     duration_ms: Date.now() - start,
   }
 }
 
 // ---------------------------------------------------------------------------
-// run() — fetch, persist, digest, send
+// run() — fetch from webhook store, build digest, send
 // ---------------------------------------------------------------------------
 
 export async function run(input: Input): Promise<ToolResult<DigestOutput>> {
   const start = Date.now()
-  const token = process.env.TELEGRAM_BOT_TOKEN
   const resendKey = process.env.RESEND_API_KEY
   const resendFrom = process.env.RESEND_FROM
   const resendTo = process.env.RESEND_TO
-  const couchdbUrl = process.env.COUCHDB_URL
+  const serverUrl = process.env.SDLC_SERVER_URL ?? 'http://localhost:7777'
+  const route = process.env.TELEGRAM_WEBHOOK_ROUTE ?? 'telegram'
 
-  if (!token) return { ok: false, error: 'TELEGRAM_BOT_TOKEN is not set', duration_ms: Date.now() - start }
   if (!resendKey || !resendFrom || !resendTo) {
     return {
       ok: false,
@@ -492,45 +413,21 @@ export async function run(input: Input): Promise<ToolResult<DigestOutput>> {
   const dryRun = input.dry_run ?? false
   const now = Math.floor(Date.now() / 1000)
   const sinceTimestamp = now - windowHours * 3600
+  const sinceIso = new Date(sinceTimestamp * 1000).toISOString()
 
-  // 1. Fetch updates from Telegram
-  log.info('Fetching updates from Telegram...')
+  // 1. Fetch stored webhook payloads from the sdlc server
+  log.info(`Fetching stored webhook payloads since ${sinceIso} (window: ${windowHours}h)...`)
   let updates: TelegramUpdate[]
   try {
-    updates = await telegramGetUpdates(token)
+    updates = await fetchStoredPayloads(serverUrl, route, sinceIso)
   } catch (e) {
-    return { ok: false, error: `Telegram getUpdates failed: ${e}`, duration_ms: Date.now() - start }
+    return { ok: false, error: `Webhook store query failed: ${e}`, duration_ms: Date.now() - start }
   }
-  log.info(`Received ${updates.length} updates from Telegram`)
+  log.info(`Decoded ${updates.length} Telegram update(s) from webhook payloads`)
 
-  const freshMessages = buildMessages(updates)
-
-  // 2. CouchDB persistence + window query (optional, graceful degradation)
-  let windowMessages: TelegramMessage[]
-  const couchdbDb = 'telegram-messages'
-
-  if (couchdbUrl) {
-    const reachable = await couchdbPing(couchdbUrl)
-    if (reachable) {
-      log.info('CouchDB reachable — persisting and querying...')
-      try {
-        await couchdbEnsureDb(couchdbUrl, couchdbDb)
-        await couchdbEnsureIndex(couchdbUrl, couchdbDb)
-        await couchdbUpsertMessages(couchdbUrl, couchdbDb, freshMessages)
-        windowMessages = await couchdbQueryWindow(couchdbUrl, couchdbDb, sinceTimestamp)
-        log.info(`CouchDB: ${windowMessages.length} messages in window`)
-      } catch (e) {
-        log.warn(`CouchDB operation failed (falling back to current poll): ${e}`)
-        windowMessages = freshMessages.filter(m => m.date >= sinceTimestamp)
-      }
-    } else {
-      log.warn('CouchDB unavailable — using current poll only')
-      windowMessages = freshMessages.filter(m => m.date >= sinceTimestamp)
-    }
-  } else {
-    // No CouchDB — use current poll filtered to window
-    windowMessages = freshMessages.filter(m => m.date >= sinceTimestamp)
-  }
+  // 2. Build TelegramMessage list from updates
+  const windowMessages = buildMessages(updates)
+  log.info(`${windowMessages.length} message(s) with text content`)
 
   // 3. Build digest
   const { text: digestText, html: digestHtml, chatCount } = buildDigest(
@@ -559,9 +456,9 @@ export async function run(input: Input): Promise<ToolResult<DigestOutput>> {
     }
   }
 
-  const recipients = resendTo.split(',').map(s => s.trim()).filter(Boolean)
+  const recipients = resendTo.split(',').map((s: string) => s.trim()).filter(Boolean)
 
-  // 5. Send or dry-run
+  // 4. Send or dry-run
   if (dryRun) {
     log.info(`Dry run — digest preview:\n${digestText}`)
     return {
@@ -594,17 +491,6 @@ export async function run(input: Input): Promise<ToolResult<DigestOutput>> {
   }
 
   log.info('Digest sent successfully')
-
-  // 5. Advance Telegram offset — only after successful send to prevent message loss
-  if (updates.length > 0) {
-    const maxUpdateId = Math.max(...updates.map(u => u.update_id))
-    try {
-      await telegramAdvanceOffset(token, maxUpdateId)
-      log.info(`Advanced Telegram offset to ${maxUpdateId + 1}`)
-    } catch (e) {
-      log.warn(`Failed to advance Telegram offset: ${e}`)
-    }
-  }
 
   return {
     ok: true,

@@ -1,10 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '@/api/client'
 import { useSseContext } from '@/contexts/SseContext'
 import { cn } from '@/lib/utils'
 import { parseRecurrence, formatRecurrence } from '@/lib/recurrence'
-import { Loader2, AlertTriangle, Pencil, Trash2, Plus, Zap, Webhook, History } from 'lucide-react'
+import { Loader2, AlertTriangle, Pencil, Trash2, Plus, Zap, Webhook, History, Lock } from 'lucide-react'
 import type { OrchestratorAction, OrchestratorWebhookEvent, OrchestratorWebhookRoute, ToolMeta } from '@/lib/types'
+import { WebhookPayloadInspector } from '@/components/webhooks/WebhookPayloadInspector'
 
 // ---------------------------------------------------------------------------
 // Relative time helper
@@ -574,9 +575,11 @@ interface WebhookRoutesSectionProps {
   tools: ToolMeta[]
   onRefresh: () => void
   onRouteDeleted: (id: string) => void
+  inspectingRoute: OrchestratorWebhookRoute | null
+  onInspect: (route: OrchestratorWebhookRoute | null) => void
 }
 
-function WebhookRoutesSection({ routes, tools, onRefresh, onRouteDeleted }: WebhookRoutesSectionProps) {
+function WebhookRoutesSection({ routes, tools, onRefresh, onRouteDeleted, inspectingRoute, onInspect }: WebhookRoutesSectionProps) {
   const [showCreate, setShowCreate] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
@@ -626,30 +629,72 @@ function WebhookRoutesSection({ routes, tools, onRefresh, onRouteDeleted }: Webh
             </thead>
             <tbody className="divide-y divide-border">
               {routes.map(route => (
-                <tr
-                  key={route.id}
-                  className={cn('hover:bg-accent/20 transition-colors', deletingId === route.id && 'opacity-40')}
-                >
-                  <td className="px-4 py-3 font-mono text-xs text-foreground">{route.path}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{route.tool_name}</td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground font-mono truncate max-w-xs">
-                    {route.input_template.length > 60
-                      ? route.input_template.slice(0, 60) + '…'
-                      : route.input_template}
-                  </td>
-                  <td className="px-4 py-3 text-xs text-muted-foreground">
-                    {relativeTime(route.created_at)}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => handleDelete(route.id)}
-                      className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
-                      title="Delete route"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </td>
-                </tr>
+                <React.Fragment key={route.id}>
+                  <tr
+                    className={cn('hover:bg-accent/20 transition-colors', deletingId === route.id && 'opacity-40')}
+                  >
+                    <td className="px-4 py-3 font-mono text-xs text-foreground">
+                      <div className="flex items-center gap-1.5">
+                        {route.path}
+                        {route.secret_token_set && (
+                          <span title="Secret token set">
+                            <Lock className="w-3 h-3 text-muted-foreground" />
+                          </span>
+                        )}
+                        {route.store_only && (
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-muted text-muted-foreground border border-border">
+                            Store-only
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-xs text-muted-foreground">{route.tool_name}</td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground font-mono truncate max-w-xs">
+                      {route.store_only ? (
+                        <span className="italic text-muted-foreground/60">—</span>
+                      ) : (
+                        route.input_template.length > 60
+                          ? route.input_template.slice(0, 60) + '…'
+                          : route.input_template
+                      )}
+                    </td>
+                    <td className="px-4 py-3 text-xs text-muted-foreground">
+                      {relativeTime(route.created_at)}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center gap-1.5 justify-end">
+                        {route.store_only && (
+                          <button
+                            onClick={() => onInspect(inspectingRoute?.id === route.id ? null : route)}
+                            className={cn(
+                              'px-2.5 py-1 text-xs rounded transition-colors',
+                              inspectingRoute?.id === route.id
+                                ? 'bg-accent text-foreground'
+                                : 'bg-muted hover:bg-accent text-muted-foreground hover:text-foreground'
+                            )}
+                            title="Inspect stored payloads"
+                          >
+                            Inspect
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(route.id)}
+                          className="p-1 rounded hover:bg-red-500/10 text-muted-foreground hover:text-red-400 transition-colors"
+                          title="Delete route"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                  {inspectingRoute?.id === route.id && (
+                    <tr>
+                      <td colSpan={5} className="px-4 pb-4">
+                        <WebhookPayloadInspector route={route} onClose={() => onInspect(null)} />
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -742,6 +787,7 @@ export function ActionsPage() {
   const [tools, setTools] = useState<ToolMeta[]>([])
   const [loading, setLoading] = useState(true)
   const [dbUnavailable, setDbUnavailable] = useState(false)
+  const [inspectingRoute, setInspectingRoute] = useState<OrchestratorWebhookRoute | null>(null)
   const eventsLimit = useRef(20)
   const [eventsLimitState, setEventsLimitState] = useState(20)
 
@@ -852,6 +898,8 @@ export function ActionsPage() {
         tools={tools}
         onRefresh={refetchRoutes}
         onRouteDeleted={handleRouteDeleted}
+        inspectingRoute={inspectingRoute}
+        onInspect={setInspectingRoute}
       />
 
       <WebhookEventsSection

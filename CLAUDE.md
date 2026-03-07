@@ -23,6 +23,10 @@ To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX
 
 `Ponder` (`sdlc`) is a Rust CLI + library that implements a deterministic state machine for feature lifecycle management. It tracks features through structured phases, emits directives for AI consumers, and records approvals. It has no LLM calls — it is the state layer that agents operate against.
 
+## Dev Ports
+
+All local dev services use the 7777-7790 range: 7777 sdlc UI (`--port 7777`), 7778 hub backend, 7779 Vite dev server, 7781 Postgres, 7782 Gitea, 7783 Woodpecker.
+
 ## Stack
 
 - **Language**: Rust (stable, see `rust-toolchain.toml`)
@@ -32,6 +36,22 @@ To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX
   - `.sdlc/features/<slug>/` — per-feature artifact Markdown files
   - `.sdlc/roadmap/<slug>/` — ponder (ideation) entries: manifest, team, scrapbook artifacts
 - **Embedded stores**: `telemetry.redb` + `orchestrator.db` (redb) by default; set `DATABASE_URL` for postgres in cluster mode
+
+## Fleet Architecture (Cluster Mode)
+
+In cluster mode, sdlc runs as a fleet of autonomous dev environments behind a hub:
+
+- **Hub** (`sdlc.threesix.ai`, `SDLC_HUB=true`) — Google OAuth SSO, fleet discovery (k8s API), repo listing (Gitea), provisioning (Woodpecker pipeline → `helm install`)
+- **Project pods** (`<slug>.sdlc.threesix.ai`) — each namespace gets a pod with:
+  - sdlc-server (ponder + web UI + agent orchestration)
+  - Claude Code CLI + OpenCode CLI (agent execution)
+  - Project toolchain (from `Dockerfile.sdlc` extending base image)
+  - git-sync sidecar (30s poll from Gitea)
+  - Shared `/workspace` volume (emptyDir)
+- **Credential pool** — shared `CLAUDE_CODE_OAUTH_TOKEN` values in postgres, checked out per `spawn_agent_run`
+- **Image layering** (target) — base image (ponder + claude + opencode + git) → project extends via `Dockerfile.sdlc`. Current Dockerfile is minimal (ponder only).
+
+Key paths: `k3s-fleet/deployments/hub/` (hub manifests), `k3s-fleet/deployments/helm/sdlc-server/` (project helm chart), `crates/sdlc-server/src/routes/hub.rs` (hub routes), `crates/sdlc-server/src/fleet.rs` (fleet discovery + provisioning). See [`docs/local-fleet-stack.md`](docs/local-fleet-stack.md) for running the full hub + provision pipeline locally.
 
 ## Build & Test
 

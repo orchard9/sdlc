@@ -1,0 +1,16 @@
+partners:
+- name: Daniel Park
+  role: Multi-project developer
+  context: Runs 8-12 local dev environments simultaneously. Expert in the cognitive overhead of context switching. Cares about reducing friction between wanting to work on something and actually working on it.
+  agent: .claude/agents/daniel-park.md
+  recruited_at: 2026-03-07T07:10:13.419575Z
+- name: Maya Krishnamurthy
+  role: Developer portal architect
+  context: 'Built internal dev portals at Spotify and Airbnb. Deep experience with fleet dashboards and multi-user service catalogs. Philosophy: discoverability beats navigation.'
+  agent: .claude/agents/maya-krishnamurthy.md
+  recruited_at: 2026-03-07T07:10:19.780544Z
+- name: Priya Shah
+  role: Systems minimalist
+  context: Built CLI tooling at HashiCorp. Will always ask 'does this need a UI?' before reaching for one. Asks whether existing mechanisms can do the job before adding new ones.
+  agent: .claude/agents/priya-shah.md
+  recruited_at: 2026-03-07T07:10:19.786756Z

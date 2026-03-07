@@ -1,0 +1,76 @@
+# Local dev environment for hub mode.
+#
+# Provides Postgres and Gitea so you can test the fleet UI,
+# repo listing, and provision flow without a k8s cluster.
+#
+# sdlc-server runs natively via `cargo watch` for hot reload.
+# See DEVELOPER.md "Hub Dev Loop" for the full workflow.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    ports: ["7781:5432"]
+    environment:
+      POSTGRES_USER: sdlc
+      POSTGRES_PASSWORD: sdlc
+      POSTGRES_DB: sdlc
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./dev/init-postgres.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sdlc"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  gitea:
+    image: gitea/gitea:1.22
+    ports: ["7782:3000"]
+    environment:
+      GITEA__database__DB_TYPE: postgres
+      GITEA__database__HOST: postgres:5432
+      GITEA__database__NAME: gitea
+      GITEA__database__USER: sdlc
+      GITEA__database__PASSWD: sdlc
+      GITEA__server__ROOT_URL: http://localhost:7782
+      GITEA__server__DISABLE_SSH: "true"
+      GITEA__security__INSTALL_LOCK: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - gitea-data:/data
+
+  woodpecker-server:
+    image: woodpeckerci/woodpecker-server:latest
+    ports: ["7783:8000"]
+    environment:
+      WOODPECKER_LOG_LEVEL: "debug"
+      WOODPECKER_OPEN: "true"
+      WOODPECKER_ADMIN: "sdlc-admin"
+      WOODPECKER_HOST: http://localhost:7783
+      WOODPECKER_GITEA: "true"
+      WOODPECKER_GITEA_URL: http://gitea:3000
+      WOODPECKER_GITEA_CLIENT: "0f21e794-a606-4f14-a370-7a981783a415"
+      WOODPECKER_GITEA_SECRET: "gto_xuslfhk2zv2nghhofee2hu5gv2gej2k35dzzcunoaetdg7o4qvva"
+      WOODPECKER_AGENT_SECRET: "woodpecker-local-dev-secret"
+    depends_on: [gitea]
+    volumes:
+      - woodpecker-data:/var/lib/woodpecker
+
+  woodpecker-agent:
+    image: woodpeckerci/woodpecker-agent:latest
+    environment:
+      WOODPECKER_SERVER: "woodpecker-server:9000"
+      WOODPECKER_AGENT_SECRET: "woodpecker-local-dev-secret"
+      WOODPECKER_BACKEND_DOCKER_HOST: "unix:///var/run/docker.sock"
+      WOODPECKER_BACKEND_DOCKER_NETWORK: "sdlc_default"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ${HOME}/.kube/orchard9-k3sf.yaml:/root/.kube/config:ro
+    depends_on: [woodpecker-server]
+
+volumes:
+  pgdata:
+  gitea-data:
+  woodpecker-data:

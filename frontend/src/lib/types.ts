@@ -1119,6 +1119,8 @@ export interface OrchestratorWebhookRoute {
   tool_name: string
   input_template: string
   created_at: string
+  store_only: boolean
+  secret_token_set?: boolean  // server returns is_some() sentinel, never the actual value
 }
 
 export interface ActionSseEvent {
@@ -1159,12 +1161,63 @@ export interface HubProjectEntry {
   status: HubProjectStatus
 }
 
+export type ActivitySeverity = 'info' | 'success' | 'warning' | 'error'
+
+export interface HubSummary {
+  total_projects: number
+  online: number
+  degraded: number
+  provisioning: number
+  failed: number
+  active_agents: number
+  attention_count: number
+}
+
+export interface HubAttentionItem {
+  id: string
+  severity: ActivitySeverity
+  title: string
+  detail: string
+  slug: string | null
+  url: string | null
+}
+
+export interface HubActivityEntry {
+  id: string
+  kind: string
+  severity: ActivitySeverity
+  title: string
+  detail: string | null
+  slug: string | null
+  url: string | null
+  created_at: string
+}
+
+export interface ProvisionEntry {
+  slug: string
+  url: string
+  status: 'requested' | 'provisioning' | 'ready' | 'failed'
+  source: string
+  detail: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface HubSseEvent {
-  type: 'project_updated' | 'project_removed' | 'fleet_updated' | 'fleet_provisioned' | 'fleet_agent_status'
+  type:
+    | 'project_updated'
+    | 'project_removed'
+    | 'fleet_updated'
+    | 'fleet_provisioned'
+    | 'fleet_agent_status'
+    | 'provision_updated'
+    | 'activity_appended'
   project?: HubProjectEntry
   instance?: FleetInstance
   url?: string
   agent_summary?: FleetAgentSummary
+  provision?: ProvisionEntry
+  activity?: HubActivityEntry
 }
 
 // ---------------------------------------------------------------------------
@@ -1181,6 +1234,10 @@ export interface FleetInstance {
   feature_count: number | null
   agent_running: boolean | null
   created_at: string | null
+  last_heartbeat_at: string | null
+  heartbeat_status: HubProjectStatus | null
+  provision_status: 'requested' | 'provisioning' | 'ready' | 'failed' | null
+  attention_reasons: string[]
 }
 
 export interface AvailableRepo {
@@ -1211,12 +1268,10 @@ export interface CreateRepoResponse {
 
 export interface WebhookPayloadItem {
   id: string
-  route_id: string
+  route_path: string
   received_at: string
-  headers: Record<string, string>
-  body: string
   content_type: string | null
-  status: 'pending' | 'delivered' | 'failed'
+  body: string  // base64-encoded raw bytes from backend
 }
 
 // ---------------------------------------------------------------------------

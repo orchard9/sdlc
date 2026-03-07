@@ -71,6 +71,19 @@ pub trait OrchestratorBackend: Send + Sync {
     /// Silently succeeds if the ID does not exist (idempotent).
     fn delete_webhook(&self, id: Uuid) -> Result<()>;
 
+    /// Query stored webhook payloads for a route within an optional time window.
+    ///
+    /// - `route_path`: must start with `/` — exact match on stored `route_path`.
+    /// - `since` / `until`: inclusive bounds on `received_at`; `None` means unbounded.
+    /// - `limit`: maximum number of payloads to return (results are newest-first).
+    fn query_webhooks(
+        &self,
+        route_path: &str,
+        since: Option<DateTime<Utc>>,
+        until: Option<DateTime<Utc>>,
+        limit: usize,
+    ) -> Result<Vec<WebhookPayload>>;
+
     // -----------------------------------------------------------------------
     // Webhook route operations
     // -----------------------------------------------------------------------

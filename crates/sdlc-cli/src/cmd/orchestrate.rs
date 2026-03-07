@@ -205,6 +205,16 @@ fn dispatch_webhook(root: &Path, db_path: &Path, payload: WebhookPayload) -> Res
             Some(r) => r,
         };
 
+        // store_only routes: skip dispatch and leave payload in storage.
+        // The payload remains available for querying via GET /api/webhooks/{route}/data.
+        if route.store_only {
+            eprintln!(
+                "orchestrate: webhook [{}] is store_only — skipping dispatch",
+                payload.route_path
+            );
+            return Ok(());
+        }
+
         let tool_input = match route.render_input(&payload.raw_body) {
             Ok(v) => v,
             Err(e) => {

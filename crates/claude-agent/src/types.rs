@@ -1,6 +1,113 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+// ─── AgentEvent — provider-neutral event vocabulary ───────────────────────
+
+/// Provider-neutral event emitted by any agent backend.
+///
+/// Each variant maps 1:1 to the JSON shapes the frontend already consumes.
+/// `serde_json::to_value(&event)` produces the exact JSON the SSE stream expects.
+#[derive(Debug, Clone, Serialize)]
+#[serde(tag = "type", rename_all = "snake_case")]
+pub enum AgentEvent {
+    Init {
+        model: String,
+        tools_count: usize,
+        mcp_servers: Vec<String>,
+        timestamp: String,
+    },
+    Status {
+        status: String,
+        timestamp: String,
+    },
+    Assistant {
+        text: String,
+        tools: Vec<ToolCall>,
+        thinking: Vec<ThinkingBlock>,
+        timestamp: String,
+    },
+    User {
+        tool_results: Vec<ToolResultEvent>,
+        timestamp: String,
+    },
+    ToolProgress {
+        tool: String,
+        elapsed_seconds: f64,
+        timestamp: String,
+    },
+    ToolSummary {
+        summary: String,
+        timestamp: String,
+    },
+    SubagentStarted {
+        task_id: String,
+        tool_use_id: Option<String>,
+        description: String,
+        timestamp: String,
+    },
+    SubagentProgress {
+        task_id: String,
+        last_tool_name: Option<String>,
+        total_tokens: u64,
+        tool_uses: u64,
+        duration_ms: u64,
+        timestamp: String,
+    },
+    SubagentCompleted {
+        task_id: String,
+        status: String,
+        summary: String,
+        total_tokens: Option<u64>,
+        duration_ms: Option<u64>,
+        timestamp: String,
+    },
+    Result {
+        is_error: bool,
+        is_max_turns: bool,
+        text: String,
+        cost_usd: f64,
+        turns: u32,
+        session_id: Option<String>,
+        stop_reason: Option<String>,
+        timestamp: String,
+    },
+    StreamEvent {
+        timestamp: String,
+    },
+    AuthStatus {
+        is_authenticating: bool,
+        timestamp: String,
+    },
+    System {
+        timestamp: String,
+    },
+}
+
+/// A tool call within an assistant event.
+#[derive(Debug, Clone, Serialize)]
+pub struct ToolCall {
+    pub name: String,
+    pub input: serde_json::Value,
+}
+
+/// A thinking block within an assistant event.
+#[derive(Debug, Clone, Serialize)]
+pub struct ThinkingBlock {
+    #[serde(rename = "type")]
+    pub block_type: String,
+    pub thinking: String,
+}
+
+/// A tool result within a user event.
+#[derive(Debug, Clone, Serialize)]
+pub struct ToolResultEvent {
+    #[serde(rename = "type")]
+    pub event_type: String,
+    pub tool_use_id: String,
+    pub is_error: bool,
+    pub content: String,
+}
+
 // ─── Outer Message enum ───────────────────────────────────────────────────
 
 /// Every message emitted by `claude --output-format stream-json`.

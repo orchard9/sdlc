@@ -1,5 +1,12 @@
 import { useEffect, useRef } from 'react'
-import type { HubProjectEntry, HubSseEvent, FleetInstance, FleetAgentSummary } from '@/lib/types'
+import type {
+  HubProjectEntry,
+  HubSseEvent,
+  FleetInstance,
+  FleetAgentSummary,
+  ProvisionEntry,
+  HubActivityEntry,
+} from '@/lib/types'
 
 /** Compute hub project status based on last_seen age (mirrors server-side logic). */
 function statusForAge(lastSeen: string): 'online' | 'stale' | 'offline' {
@@ -16,6 +23,8 @@ export interface HubSseCallbacks {
   onFleetUpdated?: (instance: FleetInstance) => void
   onFleetProvisioned?: (instance: FleetInstance) => void
   onFleetAgentStatus?: (summary: FleetAgentSummary) => void
+  onProvisionUpdated?: (provision: ProvisionEntry) => void
+  onActivityAppended?: (activity: HubActivityEntry) => void
 }
 
 /**
@@ -93,6 +102,10 @@ export function useHubSSE(
                       callbacksRef.current.onFleetProvisioned?.(event.instance)
                     } else if (event.type === 'fleet_agent_status' && event.agent_summary) {
                       callbacksRef.current.onFleetAgentStatus?.(event.agent_summary)
+                    } else if (event.type === 'provision_updated' && event.provision) {
+                      callbacksRef.current.onProvisionUpdated?.(event.provision)
+                    } else if (event.type === 'activity_appended' && event.activity) {
+                      callbacksRef.current.onActivityAppended?.(event.activity)
                     }
                   } catch { /* malformed */ }
                 }

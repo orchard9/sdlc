@@ -1,0 +1,51 @@
+# Fleet base image: ponder + Claude Code + OpenCode + dev tools.
+#
+# This is the fat image used by fleet pods. It includes everything
+# needed for autonomous agent operation: CLI tools, git, Node.js,
+# and the ponder binary.
+#
+# Projects can extend this via Dockerfile.sdlc in their repo root.
+
+# Stage 1: Copy ponder from the lean image
+FROM registry.threesix.ai/sdlc-server:latest AS ponder-source
+
+# Stage 2: Fleet base
+FROM debian:bookworm-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl git git-lfs make build-essential \
+    openssh-client jq gnupg && rm -rf /var/lib/apt/lists/*
+
+# Node.js 22 (required for Claude Code npm package)
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+# Claude Code CLI
+RUN npm install -g @anthropic-ai/claude-code
+
+# OpenCode CLI (pre-built binary)
+RUN ARCH=$(dpkg --print-architecture) && \
+    case "$ARCH" in amd64) OC_ARCH="x86_64";; arm64) OC_ARCH="aarch64";; esac && \
+    curl -fsSL "https://github.com/opencode-ai/opencode/releases/latest/download/opencode-linux-${OC_ARCH}.tar.gz" \
+      | tar xz -C /usr/local/bin/ opencode
+
+# Ponder binary from lean build
+COPY --from=ponder-source /usr/local/bin/ponder /usr/local/bin/ponder
+
+# Non-root user + workspace
+RUN useradd -m -s /bin/bash -u 1000 ponder \
+    && mkdir -p /workspace \
+    && chown ponder:ponder /workspace
+
+# Git config for agent commits
+RUN git config --system user.name "ponder-agent" \
+    && git config --system user.email "agent@sdlc.threesix.ai" \
+    && git config --system --add safe.directory '*'
+
+EXPOSE 8080
+USER ponder
+WORKDIR /workspace
+
+ENTRYPOINT ["/usr/local/bin/ponder"]
+CMD ["ui", "start", "--port", "8080", "--no-open", "--no-tunnel"]

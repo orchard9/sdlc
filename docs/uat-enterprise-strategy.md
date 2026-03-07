@@ -196,9 +196,10 @@ export default defineConfig({
     ['json', { outputFile: 'playwright-results.json' }],
   ],
 
-  // Start sdlc server before tests, tear down after
+  // Start sdlc server before tests, tear down after.
+  // In fleet pods, the server is already running — set reuseExistingServer: true.
   webServer: {
-    command: 'cargo run --bin sdlc-server',
+    command: 'cargo run --bin ponder -- ui --port 8080 --no-open',
     url: 'http://localhost:8080/api/health',
     reuseExistingServer: !process.env.CI,
     timeout: 30_000,

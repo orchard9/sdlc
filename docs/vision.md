@@ -174,15 +174,31 @@ sdlc score show auth-login
 
 ---
 
-## What sdlc Is Not
+## What sdlc Is and Is Not
 
-**Not an AI dispatcher.** sdlc does not call agents, spawn subprocesses, or route work to AI backends. It emits structured directives (`sdlc next --json`) that consumers act on. The consumer decides what to run and how.
+**The binary is a pure state machine.** `sdlc` (the Rust binary) has no LLM calls, no agent SDK, no HTTP clients to AI backends. It reads YAML, evaluates rules, and emits structured directives. This makes it fast, testable, and portable.
 
-**Not an AI runtime.** It has no agent SDK, no prompt engineering, no LLM calls. It provides the state that consumers operate against.
+**The server hosts agent execution.** `sdlc-server` provides `spawn_agent_run` — a function that invokes Claude agents against the state machine's directives. In fleet mode, each project pod is a full autonomous development environment with AI CLI tools (Claude Code, OpenCode), project-specific toolchains, and access to a shared credential pool. The server orchestrates agent runs; the state machine provides the work queue.
 
 **Not a CI/CD system.** Gates are consumer hints, not enforcement mechanisms. sdlc doesn't replace GitHub Actions or Buildkite.
 
 **Not opinionated about consumers.** Any consumer that can read JSON and write Markdown files can work with sdlc. Claude, Gemini, GPT, a shell script, or a human — the interface is the same.
+
+---
+
+## Fleet: Autonomous Development at Scale
+
+When deployed to a cluster, sdlc becomes a fleet of autonomous development environments. Each project gets its own pod containing:
+
+- **Ponder** (sdlc-server) — the state machine, web UI, and agent orchestration
+- **AI CLI tools** — Claude Code and OpenCode for agent execution
+- **Project toolchain** — language runtimes, build tools, defined by the project's `Dockerfile.sdlc`
+- **Git-sync sidecar** — keeps the workspace in sync with the project's Gitea repo
+- **Credential pool access** — shared `CLAUDE_CODE_OAUTH_TOKEN` values checked out per agent run
+
+The hub (`sdlc.threesix.ai`) provides fleet discovery, Google OAuth SSO, repo provisioning, and the fleet dashboard. Each project is accessible at `<slug>.sdlc.threesix.ai`.
+
+This is the natural extension of the directive model: the state machine decides *what* to do, agents in fleet pods decide *how* to do it, and the hub provides the control plane for managing it all.
 
 ---
 

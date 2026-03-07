@@ -3,13 +3,231 @@ use axum::http::{header, HeaderMap, HeaderValue, StatusCode};
 use axum::response::sse::{Event, KeepAlive, Sse};
 use axum::response::IntoResponse;
 use axum::Json;
+use serde::Serialize;
 use std::convert::Infallible;
 use tokio_stream::wrappers::BroadcastStream;
 use tokio_stream::StreamExt as _;
 
 use crate::fleet;
-use crate::hub::{HeartbeatPayload, HubSseMessage};
+use crate::hub::{
+    ActivitySeverity, HeartbeatPayload, HubActivityEntry, HubSseMessage, ProjectStatus,
+    ProvisionState,
+};
 use crate::state::AppState;
+
+#[derive(Clone, Debug, Serialize)]
+pub struct HubSummary {
+    pub total_projects: usize,
+    pub online: usize,
+    pub degraded: usize,
+    pub provisioning: usize,
+    pub failed: usize,
+    pub active_agents: usize,
+    pub attention_count: usize,
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct HubAttentionItem {
+    pub id: String,
+    pub severity: ActivitySeverity,
+    pub title: String,
+    pub detail: String,
+    pub slug: Option<String>,
+    pub url: Option<String>,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum FleetBucket {
+    Online,
+    Degraded,
+    Provisioning,
+    Failed,
+}
+
+fn classify_instance(instance: &fleet::FleetInstance) -> FleetBucket {
+    if matches!(instance.deployment_status, fleet::DeploymentStatus::Failed)
+        || matches!(instance.provision_status, Some(ProvisionState::Failed))
+    {
+        FleetBucket::Failed
+    } else if matches!(
+        instance.provision_status,
+        Some(ProvisionState::Requested | ProvisionState::Provisioning)
+    ) || matches!(instance.deployment_status, fleet::DeploymentStatus::Pending)
+    {
+        FleetBucket::Provisioning
+    } else if !instance.attention_reasons.is_empty() {
+        FleetBucket::Degraded
+    } else {
+        FleetBucket::Online
+    }
+}
+
+fn build_summary(instances: &[fleet::FleetInstance]) -> HubSummary {
+    let mut online = 0usize;
+    let mut degraded = 0usize;
+    let mut provisioning = 0usize;
+    let mut failed = 0usize;
+    let mut active_agents = 0usize;
+
+    for instance in instances {
+        match classify_instance(instance) {
+            FleetBucket::Online => online += 1,
+            FleetBucket::Degraded => degraded += 1,
+            FleetBucket::Provisioning => provisioning += 1,
+            FleetBucket::Failed => failed += 1,
+        }
+        if instance.agent_running == Some(true) {
+            active_agents += 1;
+        }
+    }
+
+    HubSummary {
+        total_projects: instances.len(),
+        online,
+        degraded,
+        provisioning,
+        failed,
+        active_agents,
+        attention_count: build_attention_items(instances).len(),
+    }
+}
+
+fn build_attention_items(instances: &[fleet::FleetInstance]) -> Vec<HubAttentionItem> {
+    let mut items = Vec::new();
+    for instance in instances {
+        let bucket = classify_instance(instance);
+        if bucket == FleetBucket::Online {
+            continue;
+        }
+        let severity = match bucket {
+            FleetBucket::Failed => ActivitySeverity::Error,
+            FleetBucket::Provisioning | FleetBucket::Degraded => ActivitySeverity::Warning,
+            FleetBucket::Online => ActivitySeverity::Info,
+        };
+        let title = match bucket {
+            FleetBucket::Failed => format!("{} needs intervention", instance.slug),
+            FleetBucket::Provisioning => format!("{} is provisioning", instance.slug),
+            FleetBucket::Degraded => format!("{} is degraded", instance.slug),
+            FleetBucket::Online => format!("{} is online", instance.slug),
+        };
+        let detail = if !instance.attention_reasons.is_empty() {
+            instance.attention_reasons.join(" • ")
+        } else {
+            "Requires review".to_string()
+        };
+        items.push(HubAttentionItem {
+            id: format!("attention:{}", instance.slug),
+            severity,
+            title,
+            detail,
+            slug: Some(instance.slug.clone()),
+            url: Some(instance.url.clone()),
+        });
+    }
+    items
+}
+
+fn placeholder_instance(slug: &str, url: String, status: ProvisionState) -> fleet::FleetInstance {
+    let mut instance = fleet::FleetInstance {
+        slug: slug.to_string(),
+        namespace: format!("sdlc-{slug}"),
+        url,
+        deployment_status: match status {
+            ProvisionState::Failed => fleet::DeploymentStatus::Failed,
+            ProvisionState::Ready => fleet::DeploymentStatus::Running,
+            ProvisionState::Requested | ProvisionState::Provisioning => {
+                fleet::DeploymentStatus::Pending
+            }
+        },
+        pod_healthy: matches!(status, ProvisionState::Ready),
+        created_at: None,
+        active_milestone: None,
+        feature_count: None,
+        agent_running: None,
+        last_heartbeat_at: None,
+        heartbeat_status: None,
+        provision_status: Some(status),
+        attention_reasons: Vec::new(),
+    };
+    if matches!(instance.deployment_status, fleet::DeploymentStatus::Pending) {
+        instance
+            .attention_reasons
+            .push("Provisioning is still in progress".to_string());
+    }
+    if matches!(instance.deployment_status, fleet::DeploymentStatus::Failed) {
+        instance
+            .attention_reasons
+            .push("Latest provision attempt failed".to_string());
+    }
+    instance
+}
+
+async fn load_fleet_instances(
+    app: &AppState,
+) -> Result<Vec<fleet::FleetInstance>, axum::response::Response> {
+    let hub_lock = app.hub_registry.as_ref();
+    let instances = fleet::list_fleet_instances(
+        app.kube_client.as_ref(),
+        hub_lock.map(|h| h.as_ref()),
+        &app.ingress_domain,
+    )
+    .await
+    .map_err(|e| e.into_response())?;
+
+    if app.kube_client.is_none() {
+        if let Some(hub) = &app.hub_registry {
+            let registry = hub.lock().await;
+            let mut fallback: Vec<fleet::FleetInstance> = registry
+                .projects_sorted()
+                .iter()
+                .map(|p| {
+                    let mut instance = fleet::FleetInstance {
+                        slug: p.name.clone(),
+                        namespace: format!("sdlc-{}", p.name),
+                        url: p.url.clone(),
+                        deployment_status: fleet::DeploymentStatus::Unknown,
+                        pod_healthy: false,
+                        created_at: None,
+                        active_milestone: p.active_milestone.clone(),
+                        feature_count: p.feature_count,
+                        agent_running: p.agent_running,
+                        last_heartbeat_at: Some(p.last_seen),
+                        heartbeat_status: Some(p.status.clone()),
+                        provision_status: registry
+                            .provisions
+                            .get(&p.name)
+                            .map(|provision| provision.status.clone()),
+                        attention_reasons: Vec::new(),
+                    };
+                    if p.status != ProjectStatus::Online {
+                        instance.attention_reasons.push(match p.status {
+                            ProjectStatus::Stale => "Heartbeat is stale".to_string(),
+                            ProjectStatus::Offline => "Heartbeat is offline".to_string(),
+                            ProjectStatus::Online => String::new(),
+                        });
+                    }
+                    instance
+                })
+                .collect();
+            let existing: std::collections::HashSet<String> = fallback
+                .iter()
+                .map(|instance| instance.slug.clone())
+                .collect();
+            fallback.extend(
+                instances
+                    .into_iter()
+                    .filter(|instance| !existing.contains(&instance.slug)),
+            );
+            fallback.sort_by(|a, b| a.slug.cmp(&b.slug));
+            return Ok(fallback);
+        }
+    } else if let Some(hub) = &app.hub_registry {
+        let mut registry = hub.lock().await;
+        registry.reconcile_fleet(&instances);
+    }
+
+    Ok(instances)
+}
 
 /// POST /api/hub/heartbeat
 ///
@@ -81,6 +299,52 @@ pub async fn hub_sse_events(State(app): State<AppState>) -> impl axum::response:
             .to_string();
             Some(Ok(Event::default().event("hub").data(data)))
         }
+        Ok(HubSseMessage::FleetUpdated(instance)) => {
+            let data = serde_json::json!({
+                "type": "fleet_updated",
+                "instance": instance,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("hub").data(data)))
+        }
+        Ok(HubSseMessage::FleetProvisioned(instance)) => {
+            let data = serde_json::json!({
+                "type": "fleet_provisioned",
+                "instance": instance,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("hub").data(data)))
+        }
+        Ok(HubSseMessage::ProvisionUpdated(provision)) => {
+            let data = serde_json::json!({
+                "type": "provision_updated",
+                "provision": provision,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("hub").data(data)))
+        }
+        Ok(HubSseMessage::ActivityAppended(activity)) => {
+            let data = serde_json::json!({
+                "type": "activity_appended",
+                "activity": activity,
+            })
+            .to_string();
+            Some(Ok(Event::default().event("hub").data(data)))
+        }
+        Ok(HubSseMessage::FleetAgentStatus {
+            total_active_runs,
+            projects_with_agents,
+        }) => {
+            let data = serde_json::json!({
+                "type": "fleet_agent_status",
+                "agent_summary": {
+                    "total_active_runs": total_active_runs,
+                    "projects_with_agents": projects_with_agents,
+                },
+            })
+            .to_string();
+            Some(Ok(Event::default().event("hub").data(data)))
+        }
         Err(_) => None,
     });
 
@@ -131,53 +395,14 @@ pub async fn fleet(State(app): State<AppState>) -> axum::response::Response {
         return not_hub_mode();
     }
 
-    let hub_lock = app.hub_registry.as_ref();
-    match fleet::list_fleet_instances(
-        app.kube_client.as_ref(),
-        hub_lock.map(|h| h.as_ref()),
-        &app.ingress_domain,
-    )
-    .await
-    {
+    match load_fleet_instances(&app).await {
         Ok(instances) => {
-            let warning = if app.kube_client.is_none() {
-                Some("k8s not available — showing heartbeat data only")
-            } else {
-                None
-            };
-
-            // If no k8s client, fall back to heartbeat-only data
-            let instances = if app.kube_client.is_none() {
-                if let Some(hub) = &app.hub_registry {
-                    let registry = hub.lock().await;
-                    registry
-                        .projects_sorted()
-                        .iter()
-                        .map(|p| fleet::FleetInstance {
-                            slug: p.name.clone(),
-                            namespace: format!("sdlc-{}", p.name),
-                            url: p.url.clone(),
-                            deployment_status: fleet::DeploymentStatus::Unknown,
-                            pod_healthy: false,
-                            created_at: None,
-                            active_milestone: p.active_milestone.clone(),
-                            feature_count: p.feature_count,
-                            agent_running: p.agent_running,
-                        })
-                        .collect()
-                } else {
-                    instances
-                }
-            } else {
-                instances
-            };
-
-            if let Some(w) = warning {
-                tracing::warn!(warning = w, "fleet listing has degraded data");
+            if app.kube_client.is_none() {
+                tracing::warn!("fleet listing has degraded data");
             }
             Json(instances).into_response()
         }
-        Err(e) => e.into_response(),
+        Err(e) => e,
     }
 }
 
@@ -216,16 +441,9 @@ pub async fn available(State(app): State<AppState>) -> axum::response::Response 
         _ => return gitea_not_configured(),
     };
 
-    let hub_lock = app.hub_registry.as_ref();
-    let instances = match fleet::list_fleet_instances(
-        app.kube_client.as_ref(),
-        hub_lock.map(|h| h.as_ref()),
-        &app.ingress_domain,
-    )
-    .await
-    {
+    let instances = match load_fleet_instances(&app).await {
         Ok(i) => i,
-        Err(e) => return e.into_response(),
+        Err(e) => return e,
     };
 
     let repos = match fleet::list_gitea_repos(&app.http_client, gitea_url, gitea_token).await {
@@ -235,6 +453,43 @@ pub async fn available(State(app): State<AppState>) -> axum::response::Response 
 
     let avail = fleet::list_available_repos(&instances, &repos);
     Json(avail).into_response()
+}
+
+/// GET /api/hub/summary
+pub async fn summary(State(app): State<AppState>) -> axum::response::Response {
+    if app.hub_registry.is_none() {
+        return not_hub_mode();
+    }
+
+    match load_fleet_instances(&app).await {
+        Ok(instances) => Json(build_summary(&instances)).into_response(),
+        Err(e) => e,
+    }
+}
+
+/// GET /api/hub/attention
+pub async fn attention(State(app): State<AppState>) -> axum::response::Response {
+    if app.hub_registry.is_none() {
+        return not_hub_mode();
+    }
+
+    match load_fleet_instances(&app).await {
+        Ok(instances) => Json(build_attention_items(&instances)).into_response(),
+        Err(e) => e,
+    }
+}
+
+/// GET /api/hub/activity
+pub async fn activity(State(app): State<AppState>) -> axum::response::Response {
+    if app.hub_registry.is_none() {
+        return not_hub_mode();
+    }
+
+    let Some(hub) = &app.hub_registry else {
+        return Json(Vec::<HubActivityEntry>::new()).into_response();
+    };
+    let registry = hub.lock().await;
+    Json(registry.activity_recent(30)).into_response()
 }
 
 /// POST /api/hub/provision
@@ -293,6 +548,20 @@ pub async fn provision(
     {
         Ok(()) => {
             let _ = app.event_tx.send(crate::state::SseMessage::Update);
+            // Emit fleet SSE event so the UI spinner clears
+            if let Some(hub) = &app.hub_registry {
+                let url = format!("https://{}.{}", req.repo_slug, app.ingress_domain);
+                let mut registry = hub.lock().await;
+                let _ = registry.start_provision(&req.repo_slug, url.clone(), "start", None);
+                let _ =
+                    registry
+                        .event_tx
+                        .send(HubSseMessage::FleetProvisioned(placeholder_instance(
+                            &req.repo_slug,
+                            url,
+                            ProvisionState::Requested,
+                        )));
+            }
             Json(serde_json::json!({
                 "status": "provisioning",
                 "repo_slug": req.repo_slug,
@@ -307,7 +576,8 @@ pub async fn provision(
 #[derive(serde::Deserialize)]
 pub struct ImportRequest {
     pub clone_url: String,
-    pub repo_name: String,
+    /// Optional — derived from the last path segment of `clone_url` if omitted.
+    pub repo_name: Option<String>,
     pub auth_token: Option<String>,
 }
 
@@ -322,13 +592,25 @@ pub async fn import(
     if req.clone_url.is_empty() {
         return fleet::FleetError::InvalidRequest("clone_url is required".into()).into_response();
     }
-    if req.repo_name.is_empty() {
-        return fleet::FleetError::InvalidRequest("repo_name is required".into()).into_response();
-    }
     if !req.clone_url.starts_with("https://") && !req.clone_url.starts_with("http://") {
         return fleet::FleetError::InvalidRequest("clone_url must be an HTTP(S) URL".into())
             .into_response();
     }
+
+    let repo_name = req
+        .repo_name
+        .as_deref()
+        .filter(|s| !s.is_empty())
+        .map(String::from)
+        .unwrap_or_else(|| {
+            req.clone_url
+                .trim_end_matches('/')
+                .rsplit('/')
+                .next()
+                .unwrap_or("repo")
+                .trim_end_matches(".git")
+                .to_string()
+        });
 
     let (gitea_url, gitea_token) = match (&app.gitea_url, &app.gitea_token) {
         (Some(url), Some(token)) => (url.as_str(), token.as_str()),
@@ -340,7 +622,7 @@ pub async fn import(
         gitea_url,
         gitea_token,
         &req.clone_url,
-        &req.repo_name,
+        &repo_name,
         req.auth_token.as_deref(),
     )
     .await
@@ -362,6 +644,22 @@ pub async fn import(
         .await
         {
             tracing::warn!(error = %e, "provision trigger failed after import");
+        } else if let Some(hub) = &app.hub_registry {
+            let url = format!("https://{}.{}", imported.slug, app.ingress_domain);
+            let mut registry = hub.lock().await;
+            let _ = registry.start_provision(
+                &imported.slug,
+                url.clone(),
+                "import",
+                Some(format!("Imported from {}", req.clone_url)),
+            );
+            let _ = registry
+                .event_tx
+                .send(HubSseMessage::FleetProvisioned(placeholder_instance(
+                    &imported.slug,
+                    url,
+                    ProvisionState::Requested,
+                )));
         }
     }
 
@@ -471,6 +769,34 @@ pub async fn create_repo(
         false
     };
 
+    if let Some(hub) = &app.hub_registry {
+        let mut registry = hub.lock().await;
+        registry.push_activity(
+            "repo_created",
+            ActivitySeverity::Success,
+            format!("Created repo {}", repo.slug),
+            Some("Push your code to start the workspace".to_string()),
+            Some(repo.slug.clone()),
+            Some(gitea_web_url.clone()),
+        );
+        if provision_triggered {
+            let url = format!("https://{}.{}", repo.slug, app.ingress_domain);
+            let _ = registry.start_provision(
+                &repo.slug,
+                url.clone(),
+                "create",
+                Some("New project created from hub".to_string()),
+            );
+            let _ = registry
+                .event_tx
+                .send(HubSseMessage::FleetProvisioned(placeholder_instance(
+                    &repo.slug,
+                    url,
+                    ProvisionState::Requested,
+                )));
+        }
+    }
+
     Json(serde_json::json!({
         "repo_slug": repo.slug,
         "push_url": push_url,
@@ -498,7 +824,7 @@ pub async fn agents(State(app): State<AppState>) -> axum::response::Response {
     let active_projects: Vec<String> = registry
         .projects
         .values()
-        .filter(|p| p.agent_running == Some(true))
+        .filter(|p| p.agent_running == Some(true) && p.status != ProjectStatus::Offline)
         .map(|p| p.name.clone())
         .collect();
 

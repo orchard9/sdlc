@@ -29,3 +29,7 @@
 
 # Ephemeral agent run records
 .sdlc/.runs/
+
+# Local dev overrides
+docker-compose.override.yml
+docker-compose.env

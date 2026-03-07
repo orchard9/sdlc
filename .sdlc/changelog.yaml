@@ -3040,3 +3040,9 @@
   slug: rich-live-activity-renderer
   timestamp: 2026-03-07T07:26:55.655906Z
   metadata: {}
+- id: ev-0556
+  kind: milestone_wave_completed
+  slug: v39-run-max-turns-recovery
+  timestamp: 2026-03-06T19:11:21.590455Z
+  metadata:
+    run_key: milestone-run-wave:v39-run-max-turns-recovery

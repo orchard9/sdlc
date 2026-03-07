@@ -6,7 +6,7 @@ use tokio::sync::{broadcast, Mutex, RwLock};
 use sdlc_core::orchestrator::OrchestratorBackend;
 use sdlc_core::TelemetryBackend;
 
-use crate::hub::HubRegistry;
+use crate::hub::{HubRegistry, HubSseMessage, ProjectStatus};
 
 use crate::auth::TunnelConfig;
 use crate::tunnel::Tunnel;
@@ -413,6 +413,10 @@ pub struct AppState {
     /// Notify email client for hub mode. `None` when `NOTIFY_URL` env var is unset
     /// (dev mode — OTP codes are only returned in the API response body).
     pub notify_client: Option<Arc<crate::notify::NotifyClient>>,
+    /// Agent provider — controls which CLI backend (Claude, Codex) is used
+    /// for all `spawn_agent_run` calls. Defaults to `ClaudeProvider`.
+    /// Set via `AGENT_PROVIDER=codex` env var.
+    pub agent_provider: Arc<dyn claude_agent::AgentProvider>,
 }
 
 /// Generate a 32-char hex token (128-bit entropy) from the OS CSPRNG.
@@ -441,6 +445,29 @@ fn generate_agent_token() -> String {
                 .subsec_nanos();
             let pid = std::process::id();
             format!("{nanos:08x}{pid:08x}{nanos:08x}{pid:08x}")
+        }
+    }
+}
+
+/// Select the agent provider based on the `AGENT_PROVIDER` env var.
+/// Defaults to Claude if unset or unrecognized.
+fn select_agent_provider() -> Arc<dyn claude_agent::AgentProvider> {
+    match std::env::var("AGENT_PROVIDER")
+        .unwrap_or_default()
+        .to_lowercase()
+        .as_str()
+    {
+        "codex" => {
+            tracing::info!("Agent provider: codex");
+            Arc::new(claude_agent::CodexProvider)
+        }
+        "opencode" => {
+            tracing::info!("Agent provider: opencode");
+            Arc::new(claude_agent::OpenCodeProvider)
+        }
+        _ => {
+            tracing::debug!("Agent provider: claude (default)");
+            Arc::new(claude_agent::ClaudeProvider)
         }
     }
 }
@@ -572,6 +599,7 @@ impl AppState {
             credential_pool: Arc::new(std::sync::OnceLock::new()),
             invite_store: Arc::new(OnceLock::new()),
             notify_client: None,
+            agent_provider: select_agent_provider(),
             root,
         }
     }
@@ -636,14 +664,62 @@ impl AppState {
 
         // Spawn the sweep task now that the registry is populated.
         if tokio::runtime::Handle::try_current().is_ok() {
+            let hub_for_sweep = hub.clone();
             tokio::spawn(async move {
                 loop {
                     tokio::time::sleep(std::time::Duration::from_secs(15)).await;
-                    let mut reg = hub.lock().await;
+                    let mut reg = hub_for_sweep.lock().await;
                     reg.sweep();
                 }
             });
             tracing::debug!("hub sweep task spawned");
+        }
+
+        if tokio::runtime::Handle::try_current().is_ok() {
+            let hub_for_fleet = hub.clone();
+            let kube_client = state.kube_client.clone();
+            let ingress_domain = state.ingress_domain.clone();
+            tokio::spawn(async move {
+                loop {
+                    tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+                    let instances = match crate::fleet::list_fleet_instances(
+                        kube_client.as_ref(),
+                        Some(hub_for_fleet.as_ref()),
+                        &ingress_domain,
+                    )
+                    .await
+                    {
+                        Ok(instances) => instances,
+                        Err(err) => {
+                            tracing::warn!(error = %err, "hub fleet poll failed");
+                            continue;
+                        }
+                    };
+
+                    let (tx, projects_with_agents) = {
+                        let mut registry = hub_for_fleet.lock().await;
+                        registry.reconcile_fleet(&instances);
+                        let projects_with_agents = registry
+                            .projects
+                            .values()
+                            .filter(|project| {
+                                project.agent_running == Some(true)
+                                    && project.status != ProjectStatus::Offline
+                            })
+                            .count();
+                        (registry.event_tx.clone(), projects_with_agents)
+                    };
+
+                    for instance in instances {
+                        let _ = tx.send(HubSseMessage::FleetUpdated(instance));
+                    }
+                    let _ = tx.send(HubSseMessage::FleetAgentStatus {
+                        total_active_runs: projects_with_agents,
+                        projects_with_agents,
+                    });
+                }
+            });
+            tracing::debug!("hub fleet poll task spawned");
         }
 
         state

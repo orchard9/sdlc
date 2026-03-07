@@ -1,5 +1,5 @@
 use axum::{extract::State, Json};
-use claude_agent::{query, Message, PermissionMode, QueryOptions};
+use claude_agent::{query_with, types::AgentEvent, PermissionMode, QueryOptions};
 use serde::{Deserialize, Serialize};
 use tokio_stream::StreamExt as _;
 
@@ -172,16 +172,14 @@ For vague descriptions with no file paths, still search the codebase and set con
         description = description
     );
 
-    let mut stream = query(prompt, opts);
+    let mut stream = query_with(prompt, opts, app.agent_provider.as_ref());
     let mut result_text = String::new();
 
     let collect = async {
         while let Some(msg) = stream.next().await {
             match msg {
-                Ok(Message::Result(ref r)) => {
-                    if let Some(text) = r.result_text() {
-                        result_text = text.to_string();
-                    }
+                Ok(AgentEvent::Result { ref text, .. }) => {
+                    result_text = text.clone();
                     break;
                 }
                 Err(e) => {

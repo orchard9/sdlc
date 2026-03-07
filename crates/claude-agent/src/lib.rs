@@ -51,6 +51,7 @@
 //! - Agent runner (`runner.rs`): ✅ Week 4
 
 pub mod error;
+pub mod provider;
 pub mod runner;
 pub mod types;
 
@@ -61,14 +62,18 @@ pub mod stream;
 #[cfg(test)]
 mod tests;
 
-pub use error::ClaudeAgentError;
+pub use error::{AgentError, ClaudeAgentError};
+pub use provider::claude::ClaudeProvider;
+pub use provider::codex::CodexProvider;
+pub use provider::opencode::OpenCodeProvider;
+pub use provider::AgentProvider;
 pub use runner::{run as agent_run, RunConfig, RunResult};
 pub use session::SessionStore;
-pub use stream::QueryStream;
+pub use stream::{AgentStream, QueryStream};
 pub use types::{
-    AssistantContent, AssistantMessage, ContentBlock, Effort, McpServerConfig, Message,
+    AgentEvent, AssistantContent, AssistantMessage, ContentBlock, Effort, McpServerConfig, Message,
     PermissionMode, QueryOptions, ResultError, ResultMessage, ResultSuccess, SystemMessage,
-    SystemPayload, TokenUsage, UserMessage,
+    SystemPayload, ThinkingBlock, TokenUsage, ToolCall, ToolResultEvent, UserMessage,
 };
 
 /// Convenience `Result` alias for this crate.
@@ -91,4 +96,16 @@ pub type Result<T> = std::result::Result<T, ClaudeAgentError>;
 /// ```
 pub fn query(prompt: impl Into<String>, opts: QueryOptions) -> QueryStream {
     QueryStream::new(prompt.into(), opts)
+}
+
+/// Drive a query using a specific [`AgentProvider`].
+///
+/// Returns an [`AgentStream`] that yields provider-neutral [`AgentEvent`]
+/// values. Use this when you need to support multiple agent backends.
+pub fn query_with(
+    prompt: impl Into<String>,
+    opts: QueryOptions,
+    provider: &dyn AgentProvider,
+) -> AgentStream {
+    AgentStream::new(prompt.into(), opts, provider)
 }

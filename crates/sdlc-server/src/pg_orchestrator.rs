@@ -83,6 +83,8 @@ fn row_to_webhook_route(
     tool_name: String,
     input_template: String,
     created_at: DateTime<Utc>,
+    store_only: bool,
+    secret_token: Option<String>,
 ) -> WebhookRoute {
     WebhookRoute {
         id,
@@ -90,6 +92,8 @@ fn row_to_webhook_route(
         tool_name,
         input_template,
         created_at,
+        store_only,
+        secret_token,
     }
 }
 
@@ -529,6 +533,80 @@ impl OrchestratorBackend for PgOrchestratorBackend {
         })
     }
 
+    fn query_webhooks(
+        &self,
+        route_path: &str,
+        since: Option<DateTime<Utc>>,
+        until: Option<DateTime<Utc>>,
+        limit: usize,
+    ) -> Result<Vec<WebhookPayload>> {
+        let route_path = route_path.to_string();
+        let pool = self.pool.clone();
+        let limit_i64 = limit as i64;
+
+        crate::pg_common::block_on_pg(async move {
+            // Build query dynamically: always filter by route_path, optionally
+            // filter by since/until. Use positional params numbered from $2 onward.
+            let mut sql = String::from(
+                "SELECT id, route_path, raw_body, content_type, received_at \
+                 FROM orchestrator_webhooks WHERE route_path = $1",
+            );
+            let mut param_idx = 2usize;
+
+            if since.is_some() {
+                sql.push_str(&format!(" AND received_at >= ${param_idx}"));
+                param_idx += 1;
+            }
+            if until.is_some() {
+                sql.push_str(&format!(" AND received_at <= ${param_idx}"));
+                param_idx += 1;
+            }
+            sql.push_str(&format!(" ORDER BY received_at DESC LIMIT ${param_idx}"));
+
+            let mut q = sqlx::query(&sql).bind(&route_path);
+            if let Some(s) = since {
+                q = q.bind(s);
+            }
+            if let Some(u) = until {
+                q = q.bind(u);
+            }
+            q = q.bind(limit_i64);
+
+            let rows = q
+                .fetch_all(&pool)
+                .await
+                .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+
+            let mut result = Vec::new();
+            for row in rows {
+                use sqlx::Row;
+                let id: Uuid = row
+                    .try_get("id")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                let rp: String = row
+                    .try_get("route_path")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                let raw_body: Vec<u8> = row
+                    .try_get("raw_body")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                let content_type: Option<String> = row
+                    .try_get("content_type")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                let received_at: DateTime<Utc> = row
+                    .try_get("received_at")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                result.push(row_to_webhook_payload(
+                    id,
+                    rp,
+                    raw_body,
+                    content_type,
+                    received_at,
+                ));
+            }
+            Ok(result)
+        })
+    }
+
     // -----------------------------------------------------------------------
     // Webhook route operations
     // -----------------------------------------------------------------------
@@ -539,19 +617,23 @@ impl OrchestratorBackend for PgOrchestratorBackend {
         let tool_name = route.tool_name.clone();
         let input_template = route.input_template.clone();
         let created_at = route.created_at;
+        let store_only = route.store_only;
+        let secret_token = route.secret_token.clone();
         let pool = self.pool.clone();
 
         crate::pg_common::block_on_pg(async move {
             sqlx::query(
                 r#"INSERT INTO orchestrator_webhook_routes
-                   (id, path, tool_name, template, created_at)
-                   VALUES ($1, $2, $3, $4, $5)"#,
+                   (id, path, tool_name, template, created_at, store_only, secret_token)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7)"#,
             )
             .bind(id)
             .bind(&path)
             .bind(&tool_name)
             .bind(&input_template)
             .bind(created_at)
+            .bind(store_only)
+            .bind(secret_token.as_deref())
             .execute(&pool)
             .await
             .map_err(|e| {
@@ -580,7 +662,7 @@ impl OrchestratorBackend for PgOrchestratorBackend {
 
         crate::pg_common::block_on_pg(async move {
             let rows = sqlx::query(
-                "SELECT id, path, tool_name, template, created_at FROM orchestrator_webhook_routes ORDER BY created_at ASC",
+                "SELECT id, path, tool_name, template, created_at, store_only, secret_token FROM orchestrator_webhook_routes ORDER BY created_at ASC",
             )
             .fetch_all(&pool)
             .await
@@ -604,8 +686,20 @@ impl OrchestratorBackend for PgOrchestratorBackend {
                 let created_at: DateTime<Utc> = row
                     .try_get("created_at")
                     .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                let store_only: bool = row
+                    .try_get("store_only")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                let secret_token: Option<String> = row
+                    .try_get("secret_token")
+                    .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
                 result.push(row_to_webhook_route(
-                    id, path, tool_name, template, created_at,
+                    id,
+                    path,
+                    tool_name,
+                    template,
+                    created_at,
+                    store_only,
+                    secret_token,
                 ));
             }
             Ok(result)
@@ -618,7 +712,7 @@ impl OrchestratorBackend for PgOrchestratorBackend {
 
         crate::pg_common::block_on_pg(async move {
             let row = sqlx::query(
-                "SELECT id, path, tool_name, template, created_at FROM orchestrator_webhook_routes WHERE path = $1",
+                "SELECT id, path, tool_name, template, created_at, store_only, secret_token FROM orchestrator_webhook_routes WHERE path = $1",
             )
             .bind(&path)
             .fetch_optional(&pool)
@@ -644,8 +738,20 @@ impl OrchestratorBackend for PgOrchestratorBackend {
                     let created_at: DateTime<Utc> = row
                         .try_get("created_at")
                         .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                    let store_only: bool = row
+                        .try_get("store_only")
+                        .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
+                    let secret_token: Option<String> = row
+                        .try_get("secret_token")
+                        .map_err(|e| SdlcError::OrchestratorDb(e.to_string()))?;
                     Ok(Some(row_to_webhook_route(
-                        id, path, tool_name, template, created_at,
+                        id,
+                        path,
+                        tool_name,
+                        template,
+                        created_at,
+                        store_only,
+                        secret_token,
                     )))
                 }
             }

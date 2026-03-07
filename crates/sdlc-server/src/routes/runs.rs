@@ -7,11 +7,7 @@ use axum::{
     },
     Json,
 };
-use claude_agent::{
-    query,
-    types::{ContentBlock, ResultMessage, SystemPayload, ToolResultContent, UserContentBlock},
-    McpServerConfig, Message, PermissionMode, QueryOptions,
-};
+use claude_agent::{query_with, types::AgentEvent, McpServerConfig, PermissionMode, QueryOptions};
 use std::collections::HashMap;
 use std::convert::Infallible;
 use tokio::time::{timeout, Duration};
@@ -44,6 +40,7 @@ fn validate_slug(slug: &str) -> Result<(), AppError> {
 }
 
 /// Truncate text by character count (not bytes), preserving valid UTF-8.
+#[cfg(test)]
 fn truncate_chars(input: &str, max_chars: usize) -> String {
     match input.char_indices().nth(max_chars) {
         Some((idx, _)) => input[..idx].to_string(),
@@ -75,10 +72,12 @@ fn extract_slug_from_key(key: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use claude_agent::provider::claude::claude_message_to_event;
     use claude_agent::types::{
         AssistantContent, AssistantMessage, ContentBlock, ResultMessage, ResultSuccess,
         ResultUsage, TokenUsage, ToolProgressMessage,
     };
+    use claude_agent::Message;
 
     // -------------------------------------------------------------------------
     // Token injection logic tests (no DB, no live agent required)
@@ -299,9 +298,9 @@ mod tests {
     }
 
     #[test]
-    fn message_to_event_result_has_timestamp() {
+    fn claude_message_to_event_result_has_timestamp() {
         let msg = make_result_message();
-        let event = message_to_event(&msg);
+        let event = serde_json::to_value(claude_message_to_event(&msg)).unwrap();
         let ts = event["timestamp"]
             .as_str()
             .expect("timestamp should be a string");
@@ -311,9 +310,9 @@ mod tests {
     }
 
     #[test]
-    fn message_to_event_timestamp_ends_with_z() {
+    fn claude_message_to_event_timestamp_ends_with_z() {
         let msg = make_result_message();
-        let event = message_to_event(&msg);
+        let event = serde_json::to_value(claude_message_to_event(&msg)).unwrap();
         let ts = event["timestamp"]
             .as_str()
             .expect("timestamp should be a string");
@@ -324,9 +323,9 @@ mod tests {
     }
 
     #[test]
-    fn message_to_event_assistant_has_timestamp() {
+    fn claude_message_to_event_assistant_has_timestamp() {
         let msg = make_assistant_message();
-        let event = message_to_event(&msg);
+        let event = serde_json::to_value(claude_message_to_event(&msg)).unwrap();
         let ts = event["timestamp"]
             .as_str()
             .expect("timestamp should be a string");
@@ -335,9 +334,9 @@ mod tests {
     }
 
     #[test]
-    fn message_to_event_tool_progress_has_timestamp() {
+    fn claude_message_to_event_tool_progress_has_timestamp() {
         let msg = make_tool_progress_message();
-        let event = message_to_event(&msg);
+        let event = serde_json::to_value(claude_message_to_event(&msg)).unwrap();
         let ts = event["timestamp"]
             .as_str()
             .expect("timestamp should be a string");
@@ -346,11 +345,11 @@ mod tests {
     }
 
     #[test]
-    fn message_to_event_timestamps_are_monotonically_non_decreasing() {
+    fn claude_message_to_event_timestamps_are_monotonically_non_decreasing() {
         let msg1 = make_result_message();
         let msg2 = make_result_message();
-        let event1 = message_to_event(&msg1);
-        let event2 = message_to_event(&msg2);
+        let event1 = serde_json::to_value(claude_message_to_event(&msg1)).unwrap();
+        let event2 = serde_json::to_value(claude_message_to_event(&msg2)).unwrap();
         let ts1_str = event1["timestamp"]
             .as_str()
             .expect("first timestamp should be a string");
@@ -445,16 +444,17 @@ pub(crate) async fn spawn_agent_run(
 
     // Inject credential-pool token into QueryOptions before spawning.
     // Uses entry().or_insert_with() so a token already set by the caller is preserved.
+    // The env var name comes from the provider (e.g. CLAUDE_CODE_OAUTH_TOKEN for Claude,
+    // OPENAI_API_KEY for Codex).
     {
+        let cred_var = app.agent_provider.credential_env_var().to_string();
         let token = checkout_from_pool(&app.credential_pool).await;
         if let Some(ref t) = token {
             opts.env
-                .entry("CLAUDE_CODE_OAUTH_TOKEN".to_string())
+                .entry(cred_var.clone())
                 .or_insert_with(|| t.clone());
             for srv in &mut opts.mcp_servers {
-                srv.env
-                    .entry("CLAUDE_CODE_OAUTH_TOKEN".to_string())
-                    .or_insert_with(|| t.clone());
+                srv.env.entry(cred_var.clone()).or_insert_with(|| t.clone());
             }
         }
     }
@@ -495,11 +495,12 @@ pub(crate) async fn spawn_agent_run(
     let root = app.root.clone();
     let run_id_clone = run_id.clone();
     let telemetry_store = app.telemetry.get().cloned();
+    let provider = app.agent_provider.clone();
 
     tracing::debug!(key = %key, "spawn_agent_run: spawning agent task");
     let handle = tokio::spawn(async move {
         let tx = tx_task;
-        let mut stream = query(prompt, opts);
+        let mut stream = query_with(prompt, opts, provider.as_ref());
         let mut message_count: u64 = 0;
         let mut accumulated_events: Vec<serde_json::Value> = Vec::new();
         let mut final_cost: Option<f64> = None;
@@ -514,9 +515,12 @@ pub(crate) async fn spawn_agent_run(
         loop {
             match timeout(AGENT_MESSAGE_TIMEOUT, stream.next()).await {
                 Ok(Some(msg)) => match msg {
-                    Ok(message) => {
+                    Ok(agent_event) => {
                         message_count += 1;
-                        let event = message_to_event(&message);
+                        let event = match serde_json::to_value(&agent_event) {
+                            Ok(v) => v,
+                            Err(_) => continue,
+                        };
                         accumulated_events.push(event.clone());
                         if let Some(store) = &telemetry_store {
                             let store = store.clone();
@@ -532,15 +536,25 @@ pub(crate) async fn spawn_agent_run(
                         };
                         let _ = tx.send(json);
 
-                        if let Message::Result(ref r) = message {
-                            is_error = r.is_error();
-                            is_max_turns = matches!(r, ResultMessage::ErrorMaxTurns(_));
-                            final_cost = Some(r.total_cost_usd());
-                            final_turns = Some(r.num_turns() as u64);
-                            final_session_id = Some(r.session_id().to_string());
-                            final_stop_reason = r.stop_reason().map(|s| s.to_string());
+                        if let AgentEvent::Result {
+                            is_error: err,
+                            is_max_turns: mt,
+                            text: ref result_text,
+                            cost_usd,
+                            turns,
+                            ref session_id,
+                            ref stop_reason,
+                            ..
+                        } = agent_event
+                        {
+                            is_error = err;
+                            is_max_turns = mt;
+                            final_cost = Some(cost_usd);
+                            final_turns = Some(turns as u64);
+                            final_session_id = session_id.clone();
+                            final_stop_reason = stop_reason.clone();
                             if is_error && !is_max_turns {
-                                error_msg = r.result_text().map(|s| s.to_string());
+                                error_msg = Some(result_text.clone());
                             }
                             info!(key = %key_clone, message_count, "agent run completed");
                             break;
@@ -1339,157 +1353,8 @@ pub async fn stop_milestone_run_wave(
     stop_run_by_key(&key, &app).await
 }
 
-// ---------------------------------------------------------------------------
-// Message → JSON event conversion
-// ---------------------------------------------------------------------------
-
-fn message_to_event(msg: &Message) -> serde_json::Value {
-    let ts = chrono::Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true);
-    let mut event = match msg {
-        Message::System(sys) => match &sys.payload {
-            SystemPayload::Init(init) => serde_json::json!({
-                "type": "init",
-                "model": init.model,
-                "tools_count": init.tools.len(),
-                "mcp_servers": init.mcp_servers.iter().map(|s| &s.name).collect::<Vec<_>>()
-            }),
-            SystemPayload::Status(status) => serde_json::json!({
-                "type": "status",
-                "status": status.status,
-            }),
-            SystemPayload::TaskStarted(t) => serde_json::json!({
-                "type": "subagent_started",
-                "task_id": t.task_id,
-                "tool_use_id": t.tool_use_id,
-                "description": t.description,
-            }),
-            SystemPayload::TaskProgress(t) => serde_json::json!({
-                "type": "subagent_progress",
-                "task_id": t.task_id,
-                "last_tool_name": t.last_tool_name,
-                "total_tokens": t.usage.total_tokens,
-                "tool_uses": t.usage.tool_uses,
-                "duration_ms": t.usage.duration_ms,
-            }),
-            SystemPayload::TaskNotification(t) => serde_json::json!({
-                "type": "subagent_completed",
-                "task_id": t.task_id,
-                "status": t.status,
-                "summary": t.summary,
-                "total_tokens": t.usage.as_ref().map(|u| u.total_tokens),
-                "duration_ms": t.usage.as_ref().map(|u| u.duration_ms),
-            }),
-            _ => serde_json::json!({"type": "system"}),
-        },
-        Message::Assistant(asst) => {
-            let texts: Vec<&str> = asst
-                .message
-                .content
-                .iter()
-                .filter_map(|c| {
-                    if let ContentBlock::Text { text } = c {
-                        Some(text.as_str())
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-            let tools: Vec<serde_json::Value> = asst
-                .message
-                .content
-                .iter()
-                .filter_map(|c| {
-                    if let ContentBlock::ToolUse { name, input, .. } = c {
-                        Some(serde_json::json!({"name": name, "input": input}))
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-            let thinking: Vec<serde_json::Value> = asst
-                .message
-                .content
-                .iter()
-                .filter_map(|c| {
-                    if let ContentBlock::Thinking { thinking } = c {
-                        Some(serde_json::json!({"type": "thinking", "thinking": thinking}))
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-            serde_json::json!({
-                "type": "assistant",
-                "text": texts.join(""),
-                "tools": tools,
-                "thinking": thinking,
-            })
-        }
-        Message::User(user) => {
-            let tool_results: Vec<serde_json::Value> = user
-                .message
-                .content
-                .iter()
-                .filter_map(|c| {
-                    if let UserContentBlock::ToolResult {
-                        tool_use_id,
-                        content,
-                        is_error,
-                    } = c
-                    {
-                        let text = content
-                            .as_ref()
-                            .and_then(|blocks| {
-                                blocks
-                                    .iter()
-                                    .map(|b| {
-                                        let ToolResultContent::Text { text } = b;
-                                        text.as_str()
-                                    })
-                                    .next()
-                            })
-                            .unwrap_or("");
-                        let truncated = truncate_chars(text, DISPLAY_TRUNCATE_CHARS);
-                        Some(serde_json::json!({
-                            "type": "tool_result",
-                            "tool_use_id": tool_use_id,
-                            "is_error": is_error.unwrap_or(false),
-                            "content": truncated,
-                        }))
-                    } else {
-                        None
-                    }
-                })
-                .collect();
-            serde_json::json!({"type": "user", "tool_results": tool_results})
-        }
-        Message::Result(r) => serde_json::json!({
-            "type": "result",
-            "is_error": r.is_error(),
-            "text": r.result_text().unwrap_or(""),
-            "cost_usd": r.total_cost_usd(),
-            "turns": r.num_turns(),
-        }),
-        Message::ToolProgress(tp) => serde_json::json!({
-            "type": "tool_progress",
-            "tool": tp.tool_name,
-            "elapsed_seconds": tp.elapsed_time_seconds,
-        }),
-        Message::ToolUseSummary(ts) => serde_json::json!({
-            "type": "tool_summary",
-            "summary": ts.summary,
-        }),
-        Message::StreamEvent(_) => serde_json::json!({"type": "stream_event"}),
-        Message::AuthStatus(auth) => serde_json::json!({
-            "type": "auth_status",
-            "is_authenticating": auth.is_authenticating,
-        }),
-    };
-    if let Some(obj) = event.as_object_mut() {
-        obj.insert("timestamp".to_string(), serde_json::json!(ts));
-    }
-    event
-}
+// message_to_event() has been moved into claude_agent::provider::claude::claude_message_to_event().
+// AgentEvent is now serialized directly — it already carries the correct JSON shape with timestamps.
 
 // ---------------------------------------------------------------------------
 // Ponder chat endpoints
@@ -2404,7 +2269,7 @@ pub struct AmaAnswerRequest {
 /// Returns `{ status, run_id, run_key }`. The caller should subscribe to
 /// `GET /api/run/{run_key}/events` to stream the agent output.
 ///
-/// Returns 400 if question is empty or sources is empty.
+/// Returns 400 if question is empty.
 /// Returns 409 if an answer synthesis is already in flight for this question.
 pub async fn answer_ama(
     State(app): State<AppState>,
@@ -2414,10 +2279,6 @@ pub async fn answer_ama(
     if question.is_empty() {
         return Err(AppError::bad_request("question must not be empty"));
     }
-    if body.sources.is_empty() {
-        return Err(AppError::bad_request("sources must not be empty"));
-    }
-
     // Derive a stable, URL-safe run key from a hash of the question + turn index
     let hash = short_hash_question(&question);
     let turn = body.turn_index.unwrap_or(0);
@@ -2463,36 +2324,47 @@ pub async fn answer_ama(
     } else {
         String::new()
     };
+    let sources_section = if body.sources.is_empty() {
+        String::new()
+    } else {
+        format!(
+            "Search results ({n} relevant code locations):\n\
+             \n\
+             {sources_text}\n\
+             \n\
+             ---\n\
+             \n",
+            n = n,
+            sources_text = sources_text,
+        )
+    };
+
     let prompt = format!(
         "{thread_prefix}\
-         You are answering a developer question about this codebase using \
-         search results from the AMA tool.\n\
+         You are a codebase expert answering a developer question. \
+         You have full access to read any file in the project.\n\
          \n\
          Question: {question}\n\
          \n\
-         Search results ({n} sources):\n\
+         {sources_section}\
+         Use the search results above as starting points, then read the actual source \
+         files to give a complete and accurate answer. Follow imports, trace call chains, \
+         and read related files as needed — do not limit yourself to the excerpts alone.\n\
          \n\
-         {sources_text}\n\
-         \n\
-         ---\n\
-         \n\
-         Using ONLY the information in the search results above, write a clear, \
-         concise answer to the question.\n\
-         - If the results are sufficient, explain exactly what the code does and where\n\
-         - If the results are insufficient or seem stale, say so and suggest re-running setup\n\
+         Guidelines:\n\
+         - Read the relevant files; don't guess at code you haven't seen\n\
          - Reference specific file paths and line numbers in your answer\n\
-         - Do not make up code or behaviors not visible in the excerpts\n\
-         - Be concise — this is a quick developer answer, not an essay\n\
+         - Explain how things connect, not just what individual pieces do\n\
+         - Be concise and direct — this is a quick developer answer, not an essay\n\
          \n\
          Write only the answer. No preamble like \"Based on the search results...\". \
          Just directly answer the question.",
         thread_prefix = thread_prefix,
         question = question,
-        n = n,
-        sources_text = sources_text,
+        sources_section = sources_section,
     );
 
-    let opts = sdlc_query_options(app.root.clone(), 5, None);
+    let opts = sdlc_query_options(app.root.clone(), 25, None);
     let label_prefix: String = question.chars().take(40).collect();
     let label = format!("AMA: {label_prefix}");
 

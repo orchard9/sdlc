@@ -53,6 +53,13 @@ pub struct WebhookRoute {
     pub tool_name: String,
     pub input_template: String,
     pub created_at: DateTime<Utc>,
+    /// When true, payloads are stored but never dispatched to the tool.
+    #[serde(default)]
+    pub store_only: bool,
+    /// Optional shared secret. If set, incoming requests must supply a
+    /// matching `X-Webhook-Secret` header or the payload is rejected (401).
+    #[serde(default)]
+    pub secret_token: Option<String>,
 }
 
 impl WebhookRoute {
@@ -67,6 +74,8 @@ impl WebhookRoute {
             tool_name: tool_name.into(),
             input_template: input_template.into(),
             created_at: Utc::now(),
+            store_only: false,
+            secret_token: None,
         }
     }
 

@@ -17,13 +17,13 @@ auth:
   enabled: false                    # Enable Google OAuth gate via hub native forwardAuth
 
 image:
-  server: ghcr.io/orchard9/sdlc:latest
+  server: registry.threesix.ai/sdlc-base:latest
   gitSync: registry.k8s.io/git-sync/git-sync:v4.6.0
 
 resources:
   server:
-    requests: { cpu: 50m, memory: 64Mi }
-    limits:   { cpu: 500m, memory: 256Mi }
+    requests: { cpu: 100m, memory: 256Mi }
+    limits:   { cpu: "2", memory: 2Gi }
   gitSync:
     requests: { cpu: 10m, memory: 32Mi }
     limits:   { cpu: 100m, memory: 64Mi }

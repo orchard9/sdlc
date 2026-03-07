@@ -1,5 +1,6 @@
 pub mod auth;
 pub mod credential_pool;
+pub mod email;
 pub mod embed;
 pub mod error;
 pub mod fleet;
@@ -618,6 +619,16 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
             "/api/threads/{id}/promote",
             post(routes::threads::promote_thread),
         )
+        // Webhook payload inspector — query stored payloads and replay them.
+        // Must be before the wildcard ingestion route to avoid conflicts.
+        .route(
+            "/api/webhooks/{route}/data",
+            get(routes::webhooks::query_webhook_payloads),
+        )
+        .route(
+            "/api/webhooks/{route}/replay/{id}",
+            post(routes::webhooks::replay_webhook_payload),
+        )
         // Webhook ingestion — accepts raw payloads from external senders and stores in redb.
         .route("/webhooks/{route}", post(routes::webhooks::receive_webhook))
         // Orchestrator webhook event history
@@ -694,6 +705,9 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/hub/events", get(routes::hub::hub_sse_events))
         // Fleet management (hub mode only)
         .route("/api/hub/fleet", get(routes::hub::fleet))
+        .route("/api/hub/summary", get(routes::hub::summary))
+        .route("/api/hub/attention", get(routes::hub::attention))
+        .route("/api/hub/activity", get(routes::hub::activity))
         .route("/api/hub/repos", get(routes::hub::repos))
         .route("/api/hub/available", get(routes::hub::available))
         .route("/api/hub/provision", post(routes::hub::provision))

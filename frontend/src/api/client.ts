@@ -475,6 +475,9 @@ export const api = {
 
   // Hub mode (multi-project registry)
   getHubProjects: () => request<import('@/lib/types').HubProjectEntry[]>('/api/hub/projects'),
+  getHubSummary: () => request<import('@/lib/types').HubSummary>('/api/hub/summary'),
+  getHubAttention: () => request<import('@/lib/types').HubAttentionItem[]>('/api/hub/attention'),
+  getHubActivity: () => request<import('@/lib/types').HubActivityEntry[]>('/api/hub/activity'),
 
   // Fleet control plane (hub mode — fleet management)
   getFleet: () => request<import('@/lib/types').FleetInstance[]>('/api/hub/fleet'),
@@ -483,13 +486,13 @@ export const api = {
   provision: (slug: string) =>
     request<{ status: string }>('/api/hub/provision', {
       method: 'POST',
-      body: JSON.stringify({ slug }),
+      body: JSON.stringify({ repo_slug: slug }),
       headers: { 'Content-Type': 'application/json' },
     }),
   importRepo: (url: string, pat?: string) =>
     request<{ status: string }>('/api/hub/import', {
       method: 'POST',
-      body: JSON.stringify({ url, pat: pat || undefined }),
+      body: JSON.stringify({ clone_url: url, auth_token: pat || undefined }),
       headers: { 'Content-Type': 'application/json' },
     }),
   createRepo: (name: string) =>
@@ -515,5 +518,5 @@ export const api = {
       Object.entries(params).filter(([, v]) => v != null).map(([k, v]) => [k, String(v)])
     )}`),
   replayWebhookPayload: (route: string, payloadId: string) =>
-    request<{ ok: boolean }>(`/api/webhooks/${encodeURIComponent(route)}/payloads/${payloadId}/replay`, { method: 'POST' }),
+    request<{ ok: boolean }>(`/api/webhooks/${encodeURIComponent(route)}/replay/${payloadId}`, { method: 'POST' }),
 }
