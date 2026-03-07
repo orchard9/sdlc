@@ -1,0 +1,142 @@
+slug: activity-dead-code-cleanup
+title: Activity dead code cleanup — remove AgentLog and AgentEventLine
+phase: released
+created_at: 2026-03-07T07:15:27.252511Z
+updated_at: 2026-03-07T07:23:45.972273Z
+artifacts:
+- artifact_type: spec
+  status: waived
+  path: .sdlc/features/activity-dead-code-cleanup/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T07:17:23.430463Z
+  waive_reason: Pure dead-code removal refactor — no behavior change, no new surface area
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/activity-dead-code-cleanup/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T07:17:30.440670Z
+  waive_reason: Dead code removal — no new architecture or UI to design
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/activity-dead-code-cleanup/tasks.md
+  created_at: 2026-03-07T07:18:36.357984Z
+  approved_at: 2026-03-07T07:18:42.614631Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/activity-dead-code-cleanup/qa-plan.md
+  created_at: 2026-03-07T07:18:52.099990Z
+  approved_at: 2026-03-07T07:18:56.638478Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/activity-dead-code-cleanup/review.md
+  created_at: 2026-03-07T07:21:11.509043Z
+  approved_at: 2026-03-07T07:21:17.652838Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/activity-dead-code-cleanup/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T07:21:28.857215Z
+  waive_reason: Pure dead-code deletion — no new code, no security surface change
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/activity-dead-code-cleanup/qa-results.md
+  created_at: 2026-03-07T07:21:43.680925Z
+  approved_at: 2026-03-07T07:21:48.628224Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Replace AgentLog with RunActivityFeed in RunCard active-run path
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:19:14.552220Z
+  started_at: null
+  completed_at: 2026-03-07T07:19:47.734633Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Delete AgentLog.tsx and AgentEventLine.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:19:15.012662Z
+  started_at: null
+  completed_at: 2026-03-07T07:19:56.928538Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Remove AgentEvent type if unused
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:19:15.861856Z
+  started_at: null
+  completed_at: 2026-03-07T07:20:33.771995Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify build and no regressions
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:19:15.963209Z
+  started_at: null
+  completed_at: 2026-03-07T07:20:49.977180Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T07:15:27.252511Z
+  exited: 2026-03-07T07:17:23.432842Z
+- phase: specified
+  entered: 2026-03-07T07:17:23.432842Z
+  exited: 2026-03-07T07:18:56.640655Z
+- phase: planned
+  entered: 2026-03-07T07:18:56.640655Z
+  exited: 2026-03-07T07:19:02.161842Z
+- phase: ready
+  entered: 2026-03-07T07:19:02.161842Z
+  exited: 2026-03-07T07:19:02.173796Z
+- phase: implementation
+  entered: 2026-03-07T07:19:02.173796Z
+  exited: 2026-03-07T07:21:17.660708Z
+- phase: review
+  entered: 2026-03-07T07:21:17.660708Z
+  exited: 2026-03-07T07:21:22.698545Z
+- phase: audit
+  entered: 2026-03-07T07:21:22.698545Z
+  exited: 2026-03-07T07:21:28.858899Z
+- phase: qa
+  entered: 2026-03-07T07:21:28.858899Z
+  exited: 2026-03-07T07:21:48.634903Z
+- phase: merge
+  entered: 2026-03-07T07:21:48.634903Z
+  exited: 2026-03-07T07:23:45.972273Z
+- phase: released
+  entered: 2026-03-07T07:23:45.972273Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

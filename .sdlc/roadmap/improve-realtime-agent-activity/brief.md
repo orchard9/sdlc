@@ -1,0 +1,1 @@
+when i start a ponder, a new agent appears in the agent activity ui section. there is almost no information available regarding what the agent is actually doing while it's running. after the agent completes, the agent activity ui contains detailed info. we need to get that detailed info to appear while the agent is actually running.

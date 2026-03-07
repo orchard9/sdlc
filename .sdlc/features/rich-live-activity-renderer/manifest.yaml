@@ -1,0 +1,102 @@
+slug: rich-live-activity-renderer
+title: Rich live activity renderer — swap AgentLog for RunActivityFeed on active runs
+phase: released
+created_at: 2026-03-07T07:15:27.234528Z
+updated_at: 2026-03-07T07:26:55.642839Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/rich-live-activity-renderer/spec.md
+  created_at: 2026-03-07T07:17:56.864630Z
+  approved_at: 2026-03-07T07:18:02.511638Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/rich-live-activity-renderer/design.md
+  created_at: 2026-03-07T07:18:27.433319Z
+  approved_at: 2026-03-07T07:18:30.121358Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/rich-live-activity-renderer/tasks.md
+  created_at: 2026-03-07T07:18:38.824016Z
+  approved_at: 2026-03-07T07:18:41.447267Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/rich-live-activity-renderer/qa-plan.md
+  created_at: 2026-03-07T07:18:58.241913Z
+  approved_at: 2026-03-07T07:18:58.252371Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/rich-live-activity-renderer/review.md
+  created_at: 2026-03-07T07:20:58.102077Z
+  approved_at: 2026-03-07T07:21:00.959174Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/rich-live-activity-renderer/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T07:21:08.024105Z
+  waive_reason: Frontend-only renderer swap — no new data flows, no auth changes, no user input handling. Reuses existing components.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/rich-live-activity-renderer/qa-results.md
+  created_at: 2026-03-07T07:21:40.246962Z
+  approved_at: 2026-03-07T07:21:43.140185Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T07:15:27.234528Z
+  exited: 2026-03-07T07:18:02.514025Z
+- phase: specified
+  entered: 2026-03-07T07:18:02.514025Z
+  exited: 2026-03-07T07:18:58.254228Z
+- phase: planned
+  entered: 2026-03-07T07:18:58.254228Z
+  exited: 2026-03-07T07:19:01.141133Z
+- phase: ready
+  entered: 2026-03-07T07:19:01.141133Z
+  exited: 2026-03-07T07:19:04.128543Z
+- phase: implementation
+  entered: 2026-03-07T07:19:04.128543Z
+  exited: 2026-03-07T07:21:00.967458Z
+- phase: review
+  entered: 2026-03-07T07:21:00.967458Z
+  exited: 2026-03-07T07:21:03.674813Z
+- phase: audit
+  entered: 2026-03-07T07:21:03.674813Z
+  exited: 2026-03-07T07:21:08.026189Z
+- phase: qa
+  entered: 2026-03-07T07:21:08.026189Z
+  exited: 2026-03-07T07:21:43.144828Z
+- phase: merge
+  entered: 2026-03-07T07:21:43.144828Z
+  exited: 2026-03-07T07:26:55.642839Z
+- phase: released
+  entered: 2026-03-07T07:26:55.642839Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

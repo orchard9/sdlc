@@ -98,3 +98,7 @@ actions:
   action_type: harvest_create
   slug: ponder-auto-specialize-during-setup
   detail: harvested from ponder/auto-specialize-during-setup
+- timestamp: 2026-03-07T07:15:34.294646Z
+  action_type: harvest_create
+  slug: ponder-improve-realtime-agent-activity
+  detail: harvested from ponder/improve-realtime-agent-activity

@@ -1,0 +1,129 @@
+slug: activity-tile-navigation-links
+title: Activity tile navigation links — link each agent tile to its target entity
+phase: released
+created_at: 2026-03-07T07:15:27.243971Z
+updated_at: 2026-03-07T07:25:20.397787Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/activity-tile-navigation-links/spec.md
+  created_at: 2026-03-07T07:19:15.415135Z
+  approved_at: 2026-03-07T07:19:25.725750Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/activity-tile-navigation-links/design.md
+  created_at: 2026-03-07T07:20:20.827445Z
+  approved_at: 2026-03-07T07:20:26.589793Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/activity-tile-navigation-links/tasks.md
+  created_at: 2026-03-07T07:20:46.282717Z
+  approved_at: 2026-03-07T07:20:49.912970Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/activity-tile-navigation-links/qa-plan.md
+  created_at: 2026-03-07T07:21:06.387690Z
+  approved_at: 2026-03-07T07:21:09.771238Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/activity-tile-navigation-links/review.md
+  created_at: 2026-03-07T07:24:33.652712Z
+  approved_at: 2026-03-07T07:24:36.703349Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/activity-tile-navigation-links/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T07:24:47.177914Z
+  waive_reason: Frontend-only change adding React Router <Link> components. No new API calls, no user input handling, no data mutation. Route paths derived from existing server-side RunRecord fields via React Router which handles encoding.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/activity-tile-navigation-links/qa-results.md
+  created_at: 2026-03-07T07:25:11.610432Z
+  approved_at: 2026-03-07T07:25:14.750179Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create runTargetRoute utility
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:21:20.625963Z
+  started_at: null
+  completed_at: 2026-03-07T07:21:30.837536Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add navigation link to RunCard header
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:21:20.631406Z
+  started_at: null
+  completed_at: 2026-03-07T07:23:40.697669Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify TypeScript build passes
+  description: null
+  status: completed
+  created_at: 2026-03-07T07:21:20.636391Z
+  started_at: null
+  completed_at: 2026-03-07T07:24:03.686931Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T07:15:27.243971Z
+  exited: 2026-03-07T07:19:25.728373Z
+- phase: specified
+  entered: 2026-03-07T07:19:25.728373Z
+  exited: 2026-03-07T07:21:09.773570Z
+- phase: planned
+  entered: 2026-03-07T07:21:09.773570Z
+  exited: 2026-03-07T07:21:12.702926Z
+- phase: ready
+  entered: 2026-03-07T07:21:12.702926Z
+  exited: 2026-03-07T07:21:12.709916Z
+- phase: implementation
+  entered: 2026-03-07T07:21:12.709916Z
+  exited: 2026-03-07T07:24:36.711208Z
+- phase: review
+  entered: 2026-03-07T07:24:36.711208Z
+  exited: 2026-03-07T07:24:42.232714Z
+- phase: audit
+  entered: 2026-03-07T07:24:42.232714Z
+  exited: 2026-03-07T07:24:47.180330Z
+- phase: qa
+  entered: 2026-03-07T07:24:47.180330Z
+  exited: 2026-03-07T07:25:14.758233Z
+- phase: merge
+  entered: 2026-03-07T07:25:14.758233Z
+  exited: 2026-03-07T07:25:20.397787Z
+- phase: released
+  entered: 2026-03-07T07:25:20.397787Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

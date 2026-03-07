@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { Loader2, AlertCircle } from 'lucide-react'
 import { useRunTelemetry } from '@/hooks/useRunTelemetry'
 import { pairEvents } from './pairEvents'
@@ -45,6 +45,14 @@ export function RunActivityFeed({ runId, isRunning, events: eventsProp, prompt: 
     return pairEvents(telemetry.events, telemetry.prompt)
   }, [skipFetch, eventsProp, promptProp, telemetry])
 
+  const feedRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isRunning && feedRef.current) {
+      feedRef.current.scrollTop = feedRef.current.scrollHeight
+    }
+  }, [pairedEvents, isRunning])
+
   if (isLoading && !telemetry) {
     return (
       <div className="flex items-center gap-2 text-muted-foreground text-xs py-4 pl-2">
@@ -64,6 +72,14 @@ export function RunActivityFeed({ runId, isRunning, events: eventsProp, prompt: 
   }
 
   if (pairedEvents.length === 0) {
+    if (isRunning) {
+      return (
+        <div className="flex items-center gap-2 text-muted-foreground text-xs py-4 pl-2">
+          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          Spawning agent...
+        </div>
+      )
+    }
     return (
       <p className="text-xs text-muted-foreground/60 py-4 pl-2 italic">
         No activity recorded yet.
@@ -72,7 +88,7 @@ export function RunActivityFeed({ runId, isRunning, events: eventsProp, prompt: 
   }
 
   return (
-    <div className="space-y-2 py-1">
+    <div ref={feedRef} className={`space-y-2 py-1 ${isRunning ? 'max-h-80 overflow-y-auto' : ''}`}>
       {pairedEvents.map((event, i) => (
         <PairedEventRow key={i} event={event} />
       ))}

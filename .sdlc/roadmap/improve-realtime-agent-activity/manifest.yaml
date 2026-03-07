@@ -1,0 +1,13 @@
+slug: improve-realtime-agent-activity
+title: improve-realtime-agent-activity
+status: committed
+created_at: 2026-03-07T07:04:38.181351Z
+updated_at: 2026-03-07T07:15:34.289464Z
+committed_at: 2026-03-07T07:14:27.427259Z
+committed_to:
+- v46-realtime-activity-feed
+sessions: 2
+orientation:
+  current: All three changes scoped and decided — rich live renderer, navigation links, dead code cleanup. Pure frontend, no open blockers.
+  next: Commit to milestones — this is ready to execute.
+  commit: Owner confirmed direction ('yes to both'), added navigation link requirement, all changes scoped with zero open blockers.

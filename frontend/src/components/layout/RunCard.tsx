@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Loader2, CheckCircle2, XCircle, StopCircle, ChevronDown, ChevronRight, Square } from 'lucide-react'
-import { AgentLog } from '@/components/shared/AgentLog'
+import { Link } from 'react-router-dom'
+import { Loader2, CheckCircle2, XCircle, StopCircle, ChevronDown, ChevronRight, Square, ExternalLink } from 'lucide-react'
 import { RunActivityFeed } from '@/components/runs/RunActivityFeed'
 import { ActivityTimeSeries } from '@/components/runs/ActivityTimeSeries'
 import { useRunTelemetry } from '@/hooks/useRunTelemetry'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
-import type { AgentEvent, RunRecord, RunType } from '@/lib/types'
+import { runTargetRoute } from '@/lib/routing'
+import type { RawRunEvent, RunRecord, RunType } from '@/lib/types'
 
 function getStopDetails(run: RunRecord): { url: string; method: 'POST' | 'DELETE' } {
   switch (run.run_type as RunType) {
@@ -55,7 +56,7 @@ function formatTime(iso: string) {
 
 export function RunCard({ run, expanded, onToggle }: RunCardProps) {
   const { stopRun } = useAgentRuns()
-  const [liveEvents, setLiveEvents] = useState<AgentEvent[]>([])
+  const [liveEvents, setLiveEvents] = useState<RawRunEvent[]>([])
   const [stopping, setStopping] = useState(false)
   const eventSourceRef = useRef<EventSource | null>(null)
 
@@ -84,7 +85,7 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
 
     es.addEventListener('agent', (e) => {
       try {
-        const event = JSON.parse(e.data) as AgentEvent
+        const event = JSON.parse(e.data) as RawRunEvent
         setLiveEvents(prev => [...prev, event])
       } catch {
         // ignore parse errors
@@ -134,6 +135,21 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
               {run.turns != null && <span>· {run.turns} turns</span>}
               {run.error && <span className="text-red-400 truncate">· {run.error.slice(0, 40)}</span>}
             </div>
+            {(() => {
+              const route = runTargetRoute(run.run_type, run.target)
+              if (!route) return null
+              const label = route.slice(1) // strip leading /
+              return (
+                <Link
+                  to={route}
+                  onClick={e => e.stopPropagation()}
+                  className="inline-flex items-center gap-1 text-[10px] text-primary/70 hover:text-primary hover:underline mt-0.5"
+                >
+                  <ExternalLink className="w-2.5 h-2.5" />
+                  {label}
+                </Link>
+              )
+            })()}
           </div>
         </button>
         {isActive && (
@@ -160,9 +176,11 @@ export function RunCard({ run, expanded, onToggle }: RunCardProps) {
 
       {expanded && (
         <div className="px-3 pb-3 overflow-hidden">
-          {/* Active runs: live SSE log; completed/failed/stopped: rich telemetry feed with chart */}
           {isActive ? (
-            <AgentLog running={isActive} events={liveEvents} />
+            <div className="space-y-3">
+              <ActivityTimeSeries events={liveEvents} isRunning={true} />
+              <RunActivityFeed runId={run.id} isRunning={true} events={liveEvents} />
+            </div>
           ) : (
             <CompletedRunPanel runId={run.id} />
           )}

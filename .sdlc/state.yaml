@@ -127,68 +127,11 @@ active_features:
 - init-specialize-handoff
 - standard-agents-scaffolding
 - agents-page-two-tier
+- rich-live-activity-renderer
+- activity-tile-navigation-links
+- activity-dead-code-cleanup
 active_directives: []
 history:
-- feature: fix-threadspage-mobile-layout
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T11:18:02.729721Z
-  outcome: transition
-- feature: fix-threadspage-mobile-layout
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T11:18:08.371455Z
-  outcome: merged
-- feature: ponder-design-artifact-protocol
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T11:18:14.946405Z
-  outcome: transition
-- feature: design-create-action-html
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:18:40.064340Z
-  outcome: transition
-- feature: tool-state-primitives
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:18:41.321929Z
-  outcome: transition
-- feature: tool-state-primitives
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:18:41.329843Z
-  outcome: transition
-- feature: design-create-action-html
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:18:44.589227Z
-  outcome: transition
-- feature: tool-state-primitives
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T11:19:33.886918Z
-  outcome: transition
-- feature: beat-tool
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:20:08.816871Z
-  outcome: transition
-- feature: beat-tool
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:20:08.825950Z
-  outcome: transition
-- feature: fix-uat-fail-signaling
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T15:42:00.176332Z
-  outcome: transition
-- feature: fix-uat-fail-signaling
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T15:42:06.502810Z
-  outcome: transition
 - feature: fix-run-startup-recovery
   action: implement_task
   phase: ready
@@ -1129,6 +1072,66 @@ history:
   phase: released
   timestamp: 2026-03-07T06:31:31.387040Z
   outcome: merged
+- feature: rich-live-activity-renderer
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T07:19:01.143231Z
+  outcome: transition
+- feature: activity-dead-code-cleanup
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T07:19:02.163891Z
+  outcome: transition
+- feature: activity-dead-code-cleanup
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T07:19:02.175756Z
+  outcome: transition
+- feature: rich-live-activity-renderer
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T07:19:04.130835Z
+  outcome: transition
+- feature: rich-live-activity-renderer
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T07:21:03.677105Z
+  outcome: transition
+- feature: activity-tile-navigation-links
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T07:21:12.704189Z
+  outcome: transition
+- feature: activity-tile-navigation-links
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T07:21:12.711010Z
+  outcome: transition
+- feature: activity-dead-code-cleanup
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T07:21:22.700683Z
+  outcome: transition
+- feature: activity-dead-code-cleanup
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T07:23:45.979278Z
+  outcome: merged
+- feature: activity-tile-navigation-links
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T07:24:42.234947Z
+  outcome: transition
+- feature: activity-tile-navigation-links
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T07:25:20.402414Z
+  outcome: merged
+- feature: rich-live-activity-renderer
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T07:26:55.648370Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1170,6 +1173,7 @@ milestones:
 - tools-routing-cleanup
 - v44-ask-ponder
 - v45-auto-specialize-setup
+- v46-realtime-activity-feed
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1180,4 +1184,4 @@ active_ponders:
 - artifact-share-capture
 - git-binary-hygiene
 - test-rich-input-modal-uat
-last_updated: 2026-03-07T06:31:31.387129Z
+last_updated: 2026-03-07T07:26:55.648398Z

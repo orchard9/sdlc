@@ -365,33 +365,6 @@ export interface Classification {
 }
 
 // ---------------------------------------------------------------------------
-// Agent run events (SSE from /api/run/:slug/events)
-// ---------------------------------------------------------------------------
-
-export interface AgentEvent {
-  type: 'init' | 'assistant' | 'tool_progress' | 'tool_summary' | 'result' | 'error' | 'status' | 'system' | 'user' | 'stream_event' | 'auth_status' | 'not_running'
-  // init
-  model?: string
-  tools_count?: number
-  mcp_servers?: string[]
-  // assistant
-  text?: string
-  tools?: { name: string; input: unknown }[]
-  // tool_progress
-  tool?: string
-  elapsed_seconds?: number
-  // tool_summary
-  summary?: string
-  // result
-  is_error?: boolean
-  cost_usd?: number
-  turns?: number
-  // error / status
-  message?: string
-  status?: string
-}
-
-// ---------------------------------------------------------------------------
 // Ponder / Roadmap types
 // ---------------------------------------------------------------------------
 
