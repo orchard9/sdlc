@@ -28,132 +28,6 @@ fn git_try(root: &Path, args: &[&str]) -> anyhow::Result<(bool, String)> {
     Ok((out.status.success(), stdout))
 }
 
-/// Generate a brief commit message (<=120 chars) from the staged diff.
-fn generate_commit_message(root: &Path) -> anyhow::Result<String> {
-    // Get the diffstat for staged changes
-    let stat = git(root, &["diff", "--cached", "--stat"])?;
-    let name_only = git(root, &["diff", "--cached", "--name-only"])?;
-
-    let files: Vec<&str> = name_only.lines().collect();
-    let file_count = files.len();
-
-    // Classify the change type from file paths
-    let has_new = !git(root, &["diff", "--cached", "--diff-filter=A", "--name-only"])?
-        .is_empty();
-    let has_deleted = !git(root, &["diff", "--cached", "--diff-filter=D", "--name-only"])?
-        .is_empty();
-    let has_modified = !git(root, &["diff", "--cached", "--diff-filter=M", "--name-only"])?
-        .is_empty();
-
-    // Determine prefix verb
-    let verb = if has_new && !has_modified && !has_deleted {
-        "add"
-    } else if has_deleted && !has_new && !has_modified {
-        "remove"
-    } else {
-        "update"
-    };
-
-    // Find common directory components to summarize scope
-    let components: Vec<Vec<&str>> = files
-        .iter()
-        .map(|f| f.split('/').collect::<Vec<_>>())
-        .collect();
-
-    let scope = if file_count == 1 {
-        // Single file — use the filename
-        files[0]
-            .rsplit('/')
-            .next()
-            .unwrap_or(files[0])
-            .to_string()
-    } else {
-        // Find the deepest common prefix directory
-        let common = common_prefix(&components);
-        if common.is_empty() {
-            // No common prefix — summarize by extension or top-level dirs
-            let top_dirs: Vec<&str> = components
-                .iter()
-                .filter_map(|c| c.first().copied())
-                .collect::<std::collections::BTreeSet<_>>()
-                .into_iter()
-                .take(3)
-                .collect();
-            if top_dirs.len() == 1 {
-                top_dirs[0].to_string()
-            } else {
-                top_dirs.join(", ")
-            }
-        } else {
-            common
-        }
-    };
-
-    // Extract insertions/deletions from the stat summary (last line)
-    let stat_summary = stat
-        .lines()
-        .last()
-        .unwrap_or("")
-        .trim();
-
-    let mut parts = Vec::new();
-    if let Some(ins) = extract_number(stat_summary, "insertion") {
-        parts.push(format!("+{ins}"));
-    }
-    if let Some(del) = extract_number(stat_summary, "deletion") {
-        parts.push(format!("-{del}"));
-    }
-    let delta = if parts.is_empty() {
-        String::new()
-    } else {
-        format!(" ({})", parts.join("/"))
-    };
-
-    let file_note = if file_count > 1 {
-        format!(", {file_count} files")
-    } else {
-        String::new()
-    };
-
-    let msg = format!("{verb}: {scope}{file_note}{delta}");
-
-    // Truncate to 120 chars
-    if msg.len() > 120 {
-        Ok(format!("{}...", &msg[..117]))
-    } else {
-        Ok(msg)
-    }
-}
-
-/// Find the deepest common directory prefix from path components.
-fn common_prefix(components: &[Vec<&str>]) -> String {
-    if components.is_empty() {
-        return String::new();
-    }
-    let first = &components[0];
-    let mut depth = 0;
-    for i in 0..first.len().saturating_sub(1) {
-        // Don't include the filename — only directories
-        if components.iter().all(|c| c.len() > i + 1 && c[i] == first[i]) {
-            depth = i + 1;
-        } else {
-            break;
-        }
-    }
-    if depth == 0 {
-        String::new()
-    } else {
-        first[..depth].join("/")
-    }
-}
-
-/// Extract a number preceding a keyword like "insertion" or "deletion" from git stat summary.
-fn extract_number(line: &str, keyword: &str) -> Option<usize> {
-    let idx = line.find(keyword)?;
-    let before = line[..idx].trim();
-    before.rsplit(' ').next()?.parse().ok()
-}
-
 pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()> {
     // 1. Verify on main
     let branch = git(root, &["branch", "--show-current"])?;
@@ -179,15 +53,8 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
     // 3. Stage all changes
     git(root, &["add", "-A"])?;
 
-    // 4. Generate commit message if none provided
-    let generated;
-    let msg = match message {
-        Some(m) => m,
-        None => {
-            generated = generate_commit_message(root)?;
-            generated.as_str()
-        }
-    };
+    // 4. Commit
+    let msg = message.ok_or_else(|| anyhow::anyhow!("--message is required. Use /sdlc-commit to auto-generate a message via the agent."))?;
     git(root, &["commit", "-m", msg])?;
 
     let commit_sha = git(root, &["rev-parse", "--short", "HEAD"])?;
