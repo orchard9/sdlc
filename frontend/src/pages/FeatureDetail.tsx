@@ -7,7 +7,7 @@ import { ArtifactViewer } from '@/components/features/ArtifactViewer'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
 import { CopyButton } from '@/components/shared/CopyButton'
 import { HumanUatModal } from '@/components/shared/HumanUatModal'
-import { ArrowLeft, Play, Loader2, AlertTriangle } from 'lucide-react'
+import { ArrowLeft, Play, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { api } from '@/api/client'
 import { BlockedPanel } from '@/components/features/BlockedPanel'
@@ -103,10 +103,25 @@ export function FeatureDetail() {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <Link to="/" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4 transition-colors">
-        <ArrowLeft className="w-4 h-4" />
-        Back
-      </Link>
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-4">
+        {feature.milestone ? (
+          <>
+            <Link to="/milestones" className="hover:text-foreground transition-colors">Milestones</Link>
+            <span>/</span>
+            <Link to={`/milestones/${feature.milestone.slug}`} className="hover:text-foreground transition-colors truncate max-w-[200px]">
+              {feature.milestone.title}
+            </Link>
+            <span>/</span>
+            <span className="text-foreground truncate">{feature.title}</span>
+          </>
+        ) : (
+          <>
+            <Link to="/" className="hover:text-foreground transition-colors">Features</Link>
+            <span>/</span>
+            <span className="text-foreground truncate">{feature.title}</span>
+          </>
+        )}
+      </nav>
 
       <div className="flex items-start justify-between gap-4 mb-4">
         <div>
@@ -116,7 +131,12 @@ export function FeatureDetail() {
             <p className="text-sm text-muted-foreground mt-1">{feature.description}</p>
           )}
         </div>
-        <StatusBadge status={feature.phase} testId="phase-badge" />
+        <div className="flex items-center gap-2">
+          {feature.archived && (
+            <span className="text-xs px-2 py-0.5 rounded bg-muted text-muted-foreground border border-border">Archived</span>
+          )}
+          <StatusBadge status={feature.phase} testId="phase-badge" />
+        </div>
       </div>
 
       <PhaseProgressBar current={feature.phase} className="mb-6" />
@@ -198,11 +218,29 @@ export function FeatureDetail() {
         </div>
       )}
 
-      {classification && classification.action === 'done' && (
-        <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/30 rounded-xl mb-6">
-          <span className="text-xs font-medium text-green-400">Feature complete — no pending actions</span>
-        </div>
-      )}
+      {classification && classification.action === 'done' && (() => {
+        const releasedEntry = [...feature.phase_history].reverse().find(p => p.phase === 'released')
+        const releasedAt = releasedEntry?.entered ? new Date(releasedEntry.entered) : null
+        const createdAt = new Date(feature.created_at)
+        const journeyDays = releasedAt ? Math.max(1, Math.round((releasedAt.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24))) : null
+        return (
+          <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6">
+            <div className="flex items-center gap-2 mb-2">
+              <CheckCircle2 className="w-4 h-4 text-green-400" />
+              <span className="text-sm font-medium text-green-400">Released</span>
+            </div>
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              {releasedAt && <span>Released {releasedAt.toLocaleDateString()}</span>}
+              {journeyDays !== null && <span>{journeyDays}d journey</span>}
+              {feature.milestone && (
+                <Link to={`/milestones/${feature.milestone.slug}`} className="hover:text-foreground transition-colors">
+                  {feature.milestone.title}
+                </Link>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Artifacts */}
       <section data-testid="artifact-list" className="mb-6">

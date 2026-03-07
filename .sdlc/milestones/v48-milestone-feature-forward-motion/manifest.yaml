@@ -1,0 +1,9 @@
+slug: v48-milestone-feature-forward-motion
+title: Milestone & Feature Forward Motion — eliminate detail page dead-ends
+features:
+- milestone-detail-prepare-panel
+- feature-detail-milestone-context
+- milestone-list-clickable-features
+created_at: 2026-03-07T15:30:51.948862Z
+updated_at: 2026-03-07T15:31:00.554117Z
+schema_version: 1

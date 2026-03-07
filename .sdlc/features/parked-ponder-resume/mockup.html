@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parked Ponder Resume — Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e5e5e5; }
+  nav { display: flex; gap: 8px; padding: 12px 16px; background: #171717; border-bottom: 1px solid #262626; }
+  nav button { padding: 6px 14px; font-size: 13px; border: 1px solid #404040; border-radius: 6px; background: #262626; color: #a3a3a3; cursor: pointer; }
+  nav button.active { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+  section { display: none; padding: 24px; max-width: 700px; margin: 0 auto; }
+  section.visible { display: block; }
+  .header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #171717; border: 1px solid #262626; border-radius: 10px; margin-bottom: 20px; }
+  .header .title { flex: 1; }
+  .header .title h2 { font-size: 15px; font-weight: 600; }
+  .header .title p { font-size: 11px; color: #525252; font-family: monospace; }
+  .badge { padding: 2px 8px; font-size: 11px; font-weight: 600; border-radius: 4px; }
+  .badge.parked { background: #525252; color: #d4d4d4; }
+  .badge.exploring { background: #7c3aed; color: #fff; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: 8px; border: 1px solid; cursor: pointer; white-space: nowrap; }
+  .btn-resume { background: #059669; border-color: #059669; color: #fff; }
+  .btn-resume:hover { background: #047857; }
+  .btn-commit { background: #7c3aed; border-color: #7c3aed; color: #fff; }
+  .btn-gear { padding: 6px; border-radius: 8px; background: transparent; border: none; color: #525252; cursor: pointer; }
+  .empty-state { text-align: center; padding: 80px 20px; color: #525252; }
+  .empty-state p { margin-bottom: 8px; font-size: 13px; }
+  .empty-state .btn { margin-top: 12px; }
+  .play-icon { width: 12px; height: 12px; }
+  .annotation { margin-top: 16px; padding: 12px; background: #1a1a2e; border: 1px solid #2d2d5e; border-radius: 8px; font-size: 12px; color: #a78bfa; }
+</style>
+</head>
+<body>
+
+<nav>
+  <button class="active" onclick="show('screen-parked')">Parked State</button>
+  <button onclick="show('screen-resumed')">After Resume</button>
+  <button onclick="show('screen-empty')">Empty + Parked</button>
+</nav>
+
+<section id="screen-parked" class="visible">
+  <h3 style="font-size:13px; color:#737373; margin-bottom:12px;">Ponder detail — parked state</h3>
+  <div class="header">
+    <div class="title">
+      <h2>Iterate on milestone UI flow</h2>
+      <p>iterate-milestone-ui-flow</p>
+    </div>
+    <span class="badge parked">parked</span>
+    <button class="btn btn-resume">
+      <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Resume
+    </button>
+    <button class="btn-gear">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+    </button>
+  </div>
+  <div class="annotation">Resume button appears in place of the Commit button when status is parked. Green accent distinguishes it from the violet Commit action.</div>
+</section>
+
+<section id="screen-resumed">
+  <h3 style="font-size:13px; color:#737373; margin-bottom:12px;">Ponder detail — after clicking Resume</h3>
+  <div class="header">
+    <div class="title">
+      <h2>Iterate on milestone UI flow</h2>
+      <p>iterate-milestone-ui-flow</p>
+    </div>
+    <span class="badge exploring">exploring</span>
+    <button class="btn btn-commit">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/></svg>
+      Commit
+    </button>
+    <button class="btn-gear">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+    </button>
+  </div>
+  <div class="annotation">After resume: status flips to exploring, Commit button reappears, chat input and actions re-enable.</div>
+</section>
+
+<section id="screen-empty">
+  <h3 style="font-size:13px; color:#737373; margin-bottom:12px;">Empty dialogue state — parked ponder</h3>
+  <div class="header">
+    <div class="title">
+      <h2>Fix commit reference URL</h2>
+      <p>fix-commit-reference-url</p>
+    </div>
+    <span class="badge parked">parked</span>
+    <button class="btn btn-resume">
+      <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Resume
+    </button>
+    <button class="btn-gear">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg>
+    </button>
+  </div>
+  <div class="empty-state">
+    <p>No sessions yet.</p>
+    <p style="font-size:11px; color:#404040;">This ponder is parked. Resume to start exploring.</p>
+    <button class="btn btn-resume">
+      <svg class="play-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Resume exploring
+    </button>
+  </div>
+  <div class="annotation">In the empty dialogue state, a centered Resume button replaces the hidden "Start from title &amp; brief" button.</div>
+</section>
+
+<script>
+function show(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('visible'));
+  document.getElementById(id).classList.add('visible');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

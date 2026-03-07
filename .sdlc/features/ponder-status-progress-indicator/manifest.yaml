@@ -1,0 +1,129 @@
+slug: ponder-status-progress-indicator
+title: Ponder status step indicator — exploring, converging, committed progression
+phase: released
+created_at: 2026-03-07T15:23:42.753302Z
+updated_at: 2026-03-07T15:43:27.201625Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/ponder-status-progress-indicator/spec.md
+  created_at: 2026-03-07T15:39:10.420365Z
+  approved_at: 2026-03-07T15:39:13.102865Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/ponder-status-progress-indicator/design.md
+  created_at: 2026-03-07T15:39:37.573212Z
+  approved_at: 2026-03-07T15:40:16.570384Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/ponder-status-progress-indicator/tasks.md
+  created_at: 2026-03-07T15:40:26.833787Z
+  approved_at: 2026-03-07T15:40:29.478590Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/ponder-status-progress-indicator/qa-plan.md
+  created_at: 2026-03-07T15:40:44.559935Z
+  approved_at: 2026-03-07T15:40:47.001568Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/ponder-status-progress-indicator/review.md
+  created_at: 2026-03-07T15:42:35.920103Z
+  approved_at: 2026-03-07T15:42:39.284671Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/ponder-status-progress-indicator/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:43:02.280434Z
+  waive_reason: Pure presentational React component — no API calls, no user input handling, no security surface
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/ponder-status-progress-indicator/qa-results.md
+  created_at: 2026-03-07T15:43:16.276841Z
+  approved_at: 2026-03-07T15:43:18.701344Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create PonderStepIndicator component
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:41:02.495467Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:33.035332Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Integrate into PonderPage detail view
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:41:03.022044Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:58.756725Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Integrate compact variant into list rows
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:41:03.496137Z
+  started_at: null
+  completed_at: 2026-03-07T15:42:09.094194Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T15:23:42.753302Z
+  exited: 2026-03-07T15:39:13.111739Z
+- phase: specified
+  entered: 2026-03-07T15:39:13.111739Z
+  exited: 2026-03-07T15:40:47.003048Z
+- phase: planned
+  entered: 2026-03-07T15:40:47.003048Z
+  exited: 2026-03-07T15:40:52.233309Z
+- phase: ready
+  entered: 2026-03-07T15:40:52.233309Z
+  exited: 2026-03-07T15:40:52.241407Z
+- phase: implementation
+  entered: 2026-03-07T15:40:52.241407Z
+  exited: 2026-03-07T15:42:39.290223Z
+- phase: review
+  entered: 2026-03-07T15:42:39.290223Z
+  exited: 2026-03-07T15:42:54.369715Z
+- phase: audit
+  entered: 2026-03-07T15:42:54.369715Z
+  exited: 2026-03-07T15:43:02.282709Z
+- phase: qa
+  entered: 2026-03-07T15:43:02.282709Z
+  exited: 2026-03-07T15:43:18.708165Z
+- phase: merge
+  entered: 2026-03-07T15:43:18.708165Z
+  exited: 2026-03-07T15:43:27.201625Z
+- phase: released
+  entered: 2026-03-07T15:43:27.201625Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -1,0 +1,118 @@
+slug: milestone-detail-prepare-panel
+title: Milestone Detail — add MilestonePreparePanel for Run UAT and wave plan
+phase: released
+created_at: 2026-03-07T15:30:55.623541Z
+updated_at: 2026-03-07T15:42:50.581253Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/spec.md
+  created_at: 2026-03-07T15:38:41.483968Z
+  approved_at: 2026-03-07T15:38:44.117109Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/design.md
+  created_at: 2026-03-07T15:38:57.716126Z
+  approved_at: 2026-03-07T15:39:00.372400Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/tasks.md
+  created_at: 2026-03-07T15:39:07.036172Z
+  approved_at: 2026-03-07T15:39:09.816140Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/qa-plan.md
+  created_at: 2026-03-07T15:39:16.245813Z
+  approved_at: 2026-03-07T15:39:18.823681Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/review.md
+  created_at: 2026-03-07T15:42:00.637545Z
+  approved_at: 2026-03-07T15:42:02.978112Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/audit.md
+  created_at: 2026-03-07T15:42:18.689230Z
+  approved_at: 2026-03-07T15:42:21.117547Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/milestone-detail-prepare-panel/qa-results.md
+  created_at: 2026-03-07T15:42:36.225135Z
+  approved_at: 2026-03-07T15:42:42.375009Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add MilestonePreparePanel to MilestoneDetail page
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:39:37.396004Z
+  started_at: null
+  completed_at: 2026-03-07T15:39:47.880203Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Build verification (cargo test + clippy)
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:39:37.964793Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:33.698684Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T15:30:55.623541Z
+  exited: 2026-03-07T15:38:44.125021Z
+- phase: specified
+  entered: 2026-03-07T15:38:44.125021Z
+  exited: 2026-03-07T15:39:18.830521Z
+- phase: planned
+  entered: 2026-03-07T15:39:18.830521Z
+  exited: 2026-03-07T15:39:23.956661Z
+- phase: ready
+  entered: 2026-03-07T15:39:23.956661Z
+  exited: 2026-03-07T15:39:31.248248Z
+- phase: implementation
+  entered: 2026-03-07T15:39:31.248248Z
+  exited: 2026-03-07T15:42:02.981289Z
+- phase: review
+  entered: 2026-03-07T15:42:02.981289Z
+  exited: 2026-03-07T15:42:08.137604Z
+- phase: audit
+  entered: 2026-03-07T15:42:08.137604Z
+  exited: 2026-03-07T15:42:21.119956Z
+- phase: qa
+  entered: 2026-03-07T15:42:21.119956Z
+  exited: 2026-03-07T15:42:42.381767Z
+- phase: merge
+  entered: 2026-03-07T15:42:42.381767Z
+  exited: 2026-03-07T15:42:50.581253Z
+- phase: released
+  entered: 2026-03-07T15:42:50.581253Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

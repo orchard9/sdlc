@@ -1,0 +1,16 @@
+id: "20260307-160309-kvx"
+milestone_slug: v46-realtime-activity-feed
+started_at: "2026-03-07T16:03:09Z"
+completed_at: "2026-03-07T16:05:30Z"
+verdict: pass
+tests_total: 6
+tests_passed: 6
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v46-realtime-activity-feed/uat-runs/20260307-160309-kvx/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v46-realtime-activity-feed/uat-runs/20260307-160309-kvx/01-dashboard-loads.png
+  - .sdlc/milestones/v46-realtime-activity-feed/uat-runs/20260307-160309-kvx/02-expanded-run-activity-feed.png
+  - .sdlc/milestones/v46-realtime-activity-feed/uat-runs/20260307-160309-kvx/03-navigation-link-visible.png
+  - .sdlc/milestones/v46-realtime-activity-feed/uat-runs/20260307-160309-kvx/04-navigation-routes-correctly.png
+  - .sdlc/milestones/v46-realtime-activity-feed/uat-runs/20260307-160309-kvx/05-dead-code-removed.png

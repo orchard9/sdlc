@@ -1,0 +1,13 @@
+slug: fix-ponder-commit-reference-url
+title: fix ponder commit reference url
+status: committed
+created_at: 2026-03-07T15:05:32.550785Z
+updated_at: 2026-03-07T15:23:53.534596Z
+committed_at: 2026-03-07T15:23:19.907549Z
+committed_to:
+- fix-run-lifecycle
+sessions: 1
+orientation:
+  current: Root cause identified — SSE RunStarted event lacks run_type and target fields, frontend hardcodes 'feature' and uses full key as target
+  next: Commit to feature and implement the 3-file fix
+  commit: Met — bug is fully diagnosed with a clear, minimal fix

@@ -1,0 +1,73 @@
+slug: fix-run-started-sse-fields
+title: Fix RunStarted SSE event — add run_type and target fields
+phase: draft
+created_at: 2026-03-07T15:23:47.304092Z
+updated_at: 2026-03-07T15:23:47.304092Z
+artifacts:
+- artifact_type: spec
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/fix-run-started-sse-fields/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T15:23:47.304092Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

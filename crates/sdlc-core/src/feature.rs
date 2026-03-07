@@ -85,16 +85,21 @@ pub struct Feature {
     pub phase: Phase,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
-    #[serde(deserialize_with = "deserialize_artifacts")]
+    #[serde(default, deserialize_with = "deserialize_artifacts")]
     pub artifacts: Vec<Artifact>,
+    #[serde(default)]
     pub tasks: Vec<Task>,
     #[serde(default)]
     pub comments: Vec<Comment>,
     #[serde(default)]
     pub next_comment_seq: u32,
+    #[serde(default)]
     pub blockers: Vec<String>,
+    #[serde(default)]
     pub phase_history: Vec<PhaseTransition>,
+    #[serde(default)]
     pub dependencies: Vec<String>,
+    #[serde(default)]
     pub archived: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub scores: Vec<QualityScore>,

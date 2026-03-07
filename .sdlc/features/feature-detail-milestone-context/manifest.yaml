@@ -1,0 +1,145 @@
+slug: feature-detail-milestone-context
+title: Feature Detail — milestone breadcrumb and enhanced done state
+phase: released
+created_at: 2026-03-07T15:30:56.564930Z
+updated_at: 2026-03-07T15:43:57.230310Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/spec.md
+  created_at: 2026-03-07T15:39:25.747781Z
+  approved_at: 2026-03-07T15:39:28.342791Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/design.md
+  created_at: 2026-03-07T15:40:11.181336Z
+  approved_at: 2026-03-07T15:40:14.078259Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/tasks.md
+  created_at: 2026-03-07T15:40:26.385031Z
+  approved_at: 2026-03-07T15:40:34.222061Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/qa-plan.md
+  created_at: 2026-03-07T15:40:44.503023Z
+  approved_at: 2026-03-07T15:40:47.235058Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/review.md
+  created_at: 2026-03-07T15:42:52.814922Z
+  approved_at: 2026-03-07T15:42:56.994319Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/audit.md
+  created_at: 2026-03-07T15:43:22.569575Z
+  approved_at: 2026-03-07T15:43:26.476991Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/feature-detail-milestone-context/qa-results.md
+  created_at: 2026-03-07T15:43:41.050762Z
+  approved_at: 2026-03-07T15:43:46.347798Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add milestone lookup to GET /api/features/:slug response
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:40:29.359778Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:15.743445Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update FeatureDetail TypeScript type with milestone field
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:40:29.865553Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:23.043274Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Replace back link with milestone breadcrumb navigation
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:40:30.784306Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:50.160172Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Enhanced done-state panel with release date and journey duration
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:40:31.198204Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:50.600975Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Archived badge next to phase StatusBadge
+  description: null
+  status: completed
+  created_at: 2026-03-07T15:40:31.428797Z
+  started_at: null
+  completed_at: 2026-03-07T15:41:50.723860Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T15:30:56.564930Z
+  exited: 2026-03-07T15:39:28.350988Z
+- phase: specified
+  entered: 2026-03-07T15:39:28.350988Z
+  exited: 2026-03-07T15:40:47.240737Z
+- phase: planned
+  entered: 2026-03-07T15:40:47.240737Z
+  exited: 2026-03-07T15:40:59.489731Z
+- phase: ready
+  entered: 2026-03-07T15:40:59.489731Z
+  exited: 2026-03-07T15:40:59.496592Z
+- phase: implementation
+  entered: 2026-03-07T15:40:59.496592Z
+  exited: 2026-03-07T15:42:57.002470Z
+- phase: review
+  entered: 2026-03-07T15:42:57.002470Z
+  exited: 2026-03-07T15:43:08.693010Z
+- phase: audit
+  entered: 2026-03-07T15:43:08.693010Z
+  exited: 2026-03-07T15:43:26.482478Z
+- phase: qa
+  entered: 2026-03-07T15:43:26.482478Z
+  exited: 2026-03-07T15:43:46.352499Z
+- phase: merge
+  entered: 2026-03-07T15:43:46.352499Z
+  exited: 2026-03-07T15:43:57.230310Z
+- phase: released
+  entered: 2026-03-07T15:43:57.230310Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

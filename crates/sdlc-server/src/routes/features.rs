@@ -44,6 +44,14 @@ pub async fn get_feature(
     let root = app.root.clone();
     let result = tokio::task::spawn_blocking(move || {
         let f = sdlc_core::feature::Feature::load(&root, &slug)?;
+
+        // Find parent milestone (if any)
+        let milestone_info = sdlc_core::milestone::Milestone::list(&root)
+            .unwrap_or_default()
+            .into_iter()
+            .find(|m| m.features.contains(&f.slug))
+            .map(|m| serde_json::json!({ "slug": m.slug, "title": m.title }));
+
         let artifacts: Vec<serde_json::Value> = f
             .artifacts
             .iter()
@@ -82,6 +90,7 @@ pub async fn get_feature(
             "dependencies": f.dependencies,
             "created_at": f.created_at,
             "updated_at": f.updated_at,
+            "milestone": milestone_info,
         }))
     })
     .await

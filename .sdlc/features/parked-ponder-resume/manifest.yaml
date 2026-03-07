@@ -1,0 +1,102 @@
+slug: parked-ponder-resume
+title: Parked ponder resume button to re-enter exploring state
+phase: released
+created_at: 2026-03-07T15:23:42.268304Z
+updated_at: 2026-03-07T15:43:39.744423Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/parked-ponder-resume/spec.md
+  created_at: 2026-03-07T15:38:41.877399Z
+  approved_at: 2026-03-07T15:38:55.721426Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/parked-ponder-resume/design.md
+  created_at: 2026-03-07T15:39:14.970559Z
+  approved_at: 2026-03-07T15:39:49.526766Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/parked-ponder-resume/tasks.md
+  created_at: 2026-03-07T15:40:06.545698Z
+  approved_at: 2026-03-07T15:40:10.344342Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/parked-ponder-resume/qa-plan.md
+  created_at: 2026-03-07T15:40:26.825818Z
+  approved_at: 2026-03-07T15:40:29.410202Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/parked-ponder-resume/review.md
+  created_at: 2026-03-07T15:42:50.022613Z
+  approved_at: 2026-03-07T15:42:56.807692Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/parked-ponder-resume/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:43:09.243731Z
+  waive_reason: Frontend-only UI button using existing PUT endpoint. No new API surface, no auth changes, no user input beyond a status enum value already validated server-side.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/parked-ponder-resume/qa-results.md
+  created_at: 2026-03-07T15:43:24.001719Z
+  approved_at: 2026-03-07T15:43:31.026920Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T15:23:42.268304Z
+  exited: 2026-03-07T15:38:55.730326Z
+- phase: specified
+  entered: 2026-03-07T15:38:55.730326Z
+  exited: 2026-03-07T15:40:29.424247Z
+- phase: planned
+  entered: 2026-03-07T15:40:29.424247Z
+  exited: 2026-03-07T15:40:36.181322Z
+- phase: ready
+  entered: 2026-03-07T15:40:36.181322Z
+  exited: 2026-03-07T15:40:36.189123Z
+- phase: implementation
+  entered: 2026-03-07T15:40:36.189123Z
+  exited: 2026-03-07T15:42:56.814970Z
+- phase: review
+  entered: 2026-03-07T15:42:56.814970Z
+  exited: 2026-03-07T15:43:02.138437Z
+- phase: audit
+  entered: 2026-03-07T15:43:02.138437Z
+  exited: 2026-03-07T15:43:09.246227Z
+- phase: qa
+  entered: 2026-03-07T15:43:09.246227Z
+  exited: 2026-03-07T15:43:31.030564Z
+- phase: merge
+  entered: 2026-03-07T15:43:31.030564Z
+  exited: 2026-03-07T15:43:39.744423Z
+- phase: released
+  entered: 2026-03-07T15:43:39.744423Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -130,133 +130,15 @@ active_features:
 - rich-live-activity-renderer
 - activity-tile-navigation-links
 - activity-dead-code-cleanup
+- committed-ponder-forward-motion
+- parked-ponder-resume
+- ponder-status-progress-indicator
+- fix-run-started-sse-fields
+- milestone-detail-prepare-panel
+- feature-detail-milestone-context
+- milestone-list-clickable-features
 active_directives: []
 history:
-- feature: fix-run-startup-recovery
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T15:42:11.037539Z
-  outcome: transition
-- feature: fix-run-startup-recovery
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T15:42:17.046865Z
-  outcome: transition
-- feature: knowledge-research-web-tools
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T15:42:34.559189Z
-  outcome: transition
-- feature: knowledge-research-web-tools
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T15:42:39.430977Z
-  outcome: transition
-- feature: knowledge-research-modal
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T15:44:13.675202Z
-  outcome: transition
-- feature: knowledge-research-modal
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T15:44:19.010656Z
-  outcome: transition
-- feature: knowledge-research-modal
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T15:50:10.853142Z
-  outcome: transition
-- feature: knowledge-research-modal
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T15:53:03.057661Z
-  outcome: merged
-- feature: fix-alignbuttonneedsdirectioninputmodal
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T16:17:28.839809Z
-  outcome: transition
-- feature: fix-alignbuttonneedsdirectioninputmodal
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T16:17:33.236757Z
-  outcome: transition
-- feature: secrets-env-ui
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T19:30:10.993807Z
-  outcome: transition
-- feature: secrets-env-ui
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T19:30:14.466994Z
-  outcome: transition
-- feature: fix-run-startup-recovery
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:32:30.766199Z
-  outcome: transition
-- feature: fix-run-startup-recovery
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:34:47.124664Z
-  outcome: merged
-- feature: knowledge-research-web-tools
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:35:38.949911Z
-  outcome: transition
-- feature: knowledge-research-web-tools
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:36:22.237768Z
-  outcome: merged
-- feature: citadel-query-logs-tool
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T19:45:51.646480Z
-  outcome: transition
-- feature: citadel-query-logs-tool
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T19:45:55.628539Z
-  outcome: transition
-- feature: citadel-webhook-handler
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T19:46:23.649707Z
-  outcome: transition
-- feature: citadel-webhook-handler
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T19:46:27.535661Z
-  outcome: transition
-- feature: citadel-app-registration
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T19:46:35.323578Z
-  outcome: transition
-- feature: citadel-annotate-log-tool
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T19:46:38.756536Z
-  outcome: transition
-- feature: citadel-app-registration
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T19:46:39.101277Z
-  outcome: transition
-- feature: citadel-annotate-log-tool
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T19:46:43.312496Z
-  outcome: transition
-- feature: citadel-webhook-handler
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:47:02.947566Z
-  outcome: transition
 - feature: citadel-app-registration
   action: implement_task
   phase: audit
@@ -1132,6 +1014,131 @@ history:
   phase: released
   timestamp: 2026-03-07T07:26:55.648370Z
   outcome: merged
+- feature: milestone-detail-prepare-panel
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T15:39:23.958967Z
+  outcome: transition
+- feature: milestone-detail-prepare-panel
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T15:39:31.250141Z
+  outcome: transition
+- feature: committed-ponder-forward-motion
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T15:40:26.648978Z
+  outcome: transition
+- feature: committed-ponder-forward-motion
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T15:40:26.658425Z
+  outcome: transition
+- feature: parked-ponder-resume
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T15:40:36.182758Z
+  outcome: transition
+- feature: parked-ponder-resume
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T15:40:36.190480Z
+  outcome: transition
+- feature: ponder-status-progress-indicator
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T15:40:52.234803Z
+  outcome: transition
+- feature: ponder-status-progress-indicator
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T15:40:52.242764Z
+  outcome: transition
+- feature: feature-detail-milestone-context
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T15:40:59.490994Z
+  outcome: transition
+- feature: feature-detail-milestone-context
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T15:40:59.497847Z
+  outcome: transition
+- feature: milestone-detail-prepare-panel
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T15:42:08.138909Z
+  outcome: transition
+- feature: committed-ponder-forward-motion
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T15:42:27.298287Z
+  outcome: transition
+- feature: milestone-list-clickable-features
+  action: implement_task
+  phase: planned
+  timestamp: 2026-03-07T15:42:47.542160Z
+  outcome: transition
+- feature: milestone-detail-prepare-panel
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T15:42:50.586319Z
+  outcome: merged
+- feature: milestone-list-clickable-features
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T15:42:52.739220Z
+  outcome: transition
+- feature: ponder-status-progress-indicator
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T15:42:54.371819Z
+  outcome: transition
+- feature: milestone-list-clickable-features
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T15:42:58.483368Z
+  outcome: transition
+- feature: parked-ponder-resume
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T15:43:02.140559Z
+  outcome: transition
+- feature: committed-ponder-forward-motion
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T15:43:07.424438Z
+  outcome: merged
+- feature: feature-detail-milestone-context
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T15:43:08.694224Z
+  outcome: transition
+- feature: ponder-status-progress-indicator
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T15:43:27.207812Z
+  outcome: merged
+- feature: milestone-list-clickable-features
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T15:43:34.646495Z
+  outcome: transition
+- feature: parked-ponder-resume
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T15:43:39.751220Z
+  outcome: merged
+- feature: feature-detail-milestone-context
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T15:43:57.236638Z
+  outcome: merged
+- feature: milestone-list-clickable-features
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T15:44:06.275634Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1174,6 +1181,8 @@ milestones:
 - v44-ask-ponder
 - v45-auto-specialize-setup
 - v46-realtime-activity-feed
+- v47-ponder-committed-flow
+- v48-milestone-feature-forward-motion
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1185,4 +1194,4 @@ active_ponders:
 - git-binary-hygiene
 - test-rich-input-modal-uat
 - user-workspaces
-last_updated: 2026-03-07T07:26:55.648398Z
+last_updated: 2026-03-07T15:44:06.275666Z

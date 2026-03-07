@@ -1,4 +1,5 @@
-import { GitMerge, Loader2, Zap } from 'lucide-react'
+import { GitMerge, Loader2, Play, Zap } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { api } from '@/api/client'
 import { OrientationStrip } from './OrientationStrip'
 import { TeamRow } from './TeamRow'
@@ -56,9 +57,10 @@ interface Props {
   onRefresh: () => void
   onCommit?: () => void
   commitRunning?: boolean
+  onResume?: () => void
 }
 
-export function DialoguePanel({ entry, onRefresh, onCommit, commitRunning = false }: Props) {
+export function DialoguePanel({ entry, onRefresh, onCommit, commitRunning = false, onResume }: Props) {
   const { slug } = entry
 
   const header = (
@@ -93,8 +95,29 @@ export function DialoguePanel({ entry, onRefresh, onCommit, commitRunning = fals
       <p className="text-xs text-muted-foreground/30 -mt-1">
         or add a seed thought below
       </p>
+      {entry.status === 'parked' && onResume && (
+        <button
+          onClick={onResume}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors"
+          title="Resume exploring this ponder"
+        >
+          <Play className="w-3 h-3" />
+          Resume exploring
+        </button>
+      )}
       {entry.status !== 'committed' && entry.status !== 'parked' && onCommit && (
         <ZeroStateCommitButton onCommit={onCommit} running={commitRunning} />
+      )}
+      {entry.status === 'committed' && entry.committed_to.length > 0 && (
+        <div className="flex flex-col items-center gap-1.5">
+          <p className="text-xs text-emerald-400/60">Committed to:</p>
+          {entry.committed_to.map(ms => (
+            <Link key={ms} to={`/milestones/${ms}`}
+              className="text-xs font-mono text-emerald-300 hover:underline">
+              {ms}
+            </Link>
+          ))}
+        </div>
       )}
     </div>
   )

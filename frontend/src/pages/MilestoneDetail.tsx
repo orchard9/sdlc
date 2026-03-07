@@ -6,6 +6,7 @@ import { useProjectState } from '@/hooks/useProjectState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { UatHistoryPanel } from '@/components/milestones/UatHistoryPanel'
+import { MilestonePreparePanel } from '@/components/milestones/MilestonePreparePanel'
 import { ArrowLeft, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import type { MilestoneDetail as MilestoneDetailType } from '@/lib/types'
 
@@ -104,6 +105,8 @@ export function MilestoneDetail() {
           </span>
         </div>
       </div>
+
+      <MilestonePreparePanel milestoneSlug={slug} />
 
       <section>
         <h3 className="text-sm font-semibold mb-3">Features</h3>

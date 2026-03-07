@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import { PonderStepIndicator } from '@/components/ponder/PonderStepIndicator'
 import { Skeleton } from '@/components/shared/Skeleton'
 import { DialoguePanel } from '@/components/ponder/DialoguePanel'
 import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
@@ -13,7 +14,7 @@ import { NewIdeaModal } from '@/components/ponder/NewIdeaModal'
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell'
 import {
   Plus, X, ArrowLeft, Lightbulb, Loader2, Users, Files, GitMerge, Sparkles, SlidersHorizontal,
-  MessageSquare, ChevronLeft, ChevronRight, ArrowUpRight, Eye, EyeOff,
+  MessageSquare, ChevronLeft, ChevronRight, ArrowUpRight, Eye, EyeOff, Play,
 } from 'lucide-react'
 
 const WORKSPACE_WIDTH_LS_KEY = 'ponder_workspace_width'
@@ -66,7 +67,7 @@ function EntryRow({
     >
       <div className="flex items-center gap-2 mb-0.5">
         <span className="text-sm font-medium truncate">{entry.title}</span>
-        <StatusBadge status={entry.status} />
+        <PonderStepIndicator status={entry.status} compact />
       </div>
       {isMerged && (
         <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
@@ -391,7 +392,7 @@ function EntryDetailPane({
   const dragStartX = useRef<number | null>(null)
   const dragStartWidth = useRef<number>(DEFAULT_WORKSPACE_WIDTH)
   const navigate = useNavigate()
-  const { isRunning, focusRun } = useAgentRuns()
+  const { isRunning, focusRun, startRun } = useAgentRuns()
   const commitKey = `ponder-commit:${slug}`
   const commitRunning = isRunning(commitKey)
 
@@ -496,7 +497,42 @@ function EntryDetailPane({
           <h2 className="text-base font-semibold leading-snug truncate">{entry.title}</h2>
           <p className="text-xs text-muted-foreground/60 font-mono truncate hidden sm:block">{entry.slug}</p>
         </div>
-        <StatusBadge status={entry.status} />
+        <PonderStepIndicator status={entry.status} />
+        {entry.status === 'committed' && entry.committed_to.length > 0 && (() => {
+          const prepareSlug = entry.committed_to[0]
+          const prepareKey = `milestone-prepare:${prepareSlug}`
+          const prepareRunning = isRunning(prepareKey)
+          return (
+            <button
+              onClick={() => startRun({
+                key: prepareKey,
+                runType: 'milestone_prepare',
+                target: prepareSlug,
+                label: `prepare: ${prepareSlug}`,
+                startUrl: `/api/milestone/${prepareSlug}/prepare`,
+                stopUrl: `/api/milestone/${prepareSlug}/prepare/stop`,
+              })}
+              disabled={prepareRunning}
+              className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              title={`Prepare milestone ${prepareSlug}`}
+            >
+              {prepareRunning
+                ? <Loader2 className="w-3 h-3 animate-spin" />
+                : <Play className="w-3 h-3" />}
+              <span className="hidden sm:inline">{prepareRunning ? 'Preparing…' : 'Prepare'}</span>
+            </button>
+          )
+        })()}
+        {entry.status === 'parked' && (
+          <button
+            onClick={() => handleStatusChange('exploring')}
+            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border bg-emerald-600 hover:bg-emerald-500 text-white border-emerald-600 transition-colors whitespace-nowrap"
+            title="Resume exploring this ponder"
+          >
+            <Play className="w-3 h-3" />
+            <span className="hidden sm:inline">Resume</span>
+          </button>
+        )}
         {entry.status !== 'committed' && entry.status !== 'parked' && (
           <button
             onClick={handleCommit}
@@ -524,6 +560,24 @@ function EntryDetailPane({
         </button>
       </div>
 
+      {/* Committed milestone links */}
+      {entry.status === 'committed' && entry.committed_to.length > 0 && (
+        <div className="shrink-0 px-4 py-2.5 border-b border-border/50 bg-emerald-500/5">
+          <p className="text-xs font-medium text-emerald-400/80 mb-1.5">Committed milestones</p>
+          <div className="flex flex-wrap gap-1.5">
+            {entry.committed_to.map(ms => (
+              <Link
+                key={ms}
+                to={`/milestones/${ms}`}
+                className="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+              >
+                {ms}
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Desktop: dialogue + resizable workspace sidebar */}
       <div ref={containerRef} className="hidden md:flex flex-1 min-h-0">
         <div className="flex-1 min-w-0 min-h-0">
@@ -532,6 +586,7 @@ function EntryDetailPane({
             onRefresh={() => { load(); onRefresh() }}
             onCommit={handleCommit}
             commitRunning={commitRunning}
+            onResume={() => handleStatusChange('exploring')}
           />
         </div>
         {/* Resize handle */}
@@ -559,6 +614,7 @@ function EntryDetailPane({
             onRefresh={() => { load(); onRefresh() }}
             onCommit={handleCommit}
             commitRunning={commitRunning}
+            onResume={() => handleStatusChange('exploring')}
           />
         )}
         {mobileTab === 'files' && (

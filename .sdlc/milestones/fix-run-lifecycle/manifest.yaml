@@ -5,6 +5,7 @@ features:
 - fix-run-startup-recovery
 - fix-uat-fail-signaling
 - fix-investigation-session-completion
+- fix-run-started-sse-fields
 created_at: 2026-03-03T05:30:00Z
-updated_at: 2026-03-05T17:32:02.638611Z
+updated_at: 2026-03-07T15:23:50.185022Z
 schema_version: 1

@@ -317,12 +317,12 @@ pub fn default_rules() -> Vec<Rule> {
             next_command: |ctx| format!("/tasks-feature {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/tasks.md", feature_dir(ctx))
         },
-        // 12. Specified — tasks approved, no QA plan
+        // 12. Specified — tasks approved/waived, no QA plan
         rule! {
             id: "needs_qa_plan",
             condition: |ctx| in_phase(ctx, Phase::Specified)
                 && artifact_satisfied(ctx, ArtifactType::Design)
-                && artifact_approved(ctx, ArtifactType::Tasks)
+                && artifact_satisfied(ctx, ArtifactType::Tasks)
                 && artifact_missing(ctx, ArtifactType::QaPlan),
             action: ActionType::CreateQaPlan,
             message: |ctx| format!("Write the QA plan for '{}'.", ctx.feature.slug),
@@ -334,7 +334,7 @@ pub fn default_rules() -> Vec<Rule> {
             id: "qa_plan_needs_approval",
             condition: |ctx| in_phase(ctx, Phase::Specified)
                 && artifact_satisfied(ctx, ArtifactType::Design)
-                && artifact_approved(ctx, ArtifactType::Tasks)
+                && artifact_satisfied(ctx, ArtifactType::Tasks)
                 && artifact_needs_approval(ctx, ArtifactType::QaPlan),
             action: ActionType::ApproveQaPlan,
             message: |ctx| format!("QA plan for '{}' is ready for verification.", ctx.feature.slug),
@@ -345,20 +345,20 @@ pub fn default_rules() -> Vec<Rule> {
             id: "qa_plan_rejected",
             condition: |ctx| in_phase(ctx, Phase::Specified)
                 && artifact_satisfied(ctx, ArtifactType::Design)
-                && artifact_approved(ctx, ArtifactType::Tasks)
+                && artifact_satisfied(ctx, ArtifactType::Tasks)
                 && artifact_rejected(ctx, ArtifactType::QaPlan),
             action: ActionType::CreateQaPlan,
             message: |ctx| format!("QA plan for '{}' was rejected. Rewrite it.", ctx.feature.slug),
             next_command: |ctx| format!("/qa-plan {}", ctx.feature.slug),
             output_path: |ctx| format!("{}/qa-plan.md", feature_dir(ctx))
         },
-        // 15. Specified — all planning artifacts approved, transition to Planned
+        // 15. Specified — all planning artifacts satisfied, transition to Planned
         rule! {
             id: "ready_to_plan",
             condition: |ctx| in_phase(ctx, Phase::Specified)
                 && artifact_satisfied(ctx, ArtifactType::Design)
-                && artifact_approved(ctx, ArtifactType::Tasks)
-                && artifact_approved(ctx, ArtifactType::QaPlan),
+                && artifact_satisfied(ctx, ArtifactType::Tasks)
+                && artifact_satisfied(ctx, ArtifactType::QaPlan),
             action: ActionType::ImplementTask,
             message: |ctx| format!("All planning artifacts approved. Transitioning '{}' to planned.", ctx.feature.slug),
             next_command: |ctx| format!("sdlc feature transition {} planned", ctx.feature.slug),

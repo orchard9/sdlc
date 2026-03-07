@@ -341,6 +341,7 @@ export interface FeatureDetail {
   dependencies: string[]
   created_at: string
   updated_at: string
+  milestone: { slug: string; title: string } | null
 }
 
 export interface PhaseTransition {

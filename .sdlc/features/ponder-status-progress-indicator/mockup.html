@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ponder Step Indicator Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0b; color: #e4e4e7; font-family: system-ui, -apple-system, sans-serif; }
+  nav { display: flex; gap: 8px; padding: 16px; background: #18181b; border-bottom: 1px solid #27272a; flex-wrap: wrap; }
+  nav a { color: #a1a1aa; text-decoration: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; }
+  nav a:hover, nav a.active { background: #27272a; color: #e4e4e7; }
+  section { display: none; padding: 32px; }
+  section:target, section.default { display: block; }
+  h2 { font-size: 18px; margin-bottom: 20px; color: #fafafa; }
+  h3 { font-size: 14px; margin: 24px 0 12px; color: #a1a1aa; }
+  .card { background: #18181b; border: 1px solid #27272a; border-radius: 8px; padding: 20px; margin-bottom: 16px; }
+
+  /* Step indicator - full */
+  .step-indicator { display: flex; align-items: center; gap: 6px; }
+  .step { display: flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; }
+  .step.completed { color: rgba(161,161,170,0.6); }
+  .step.completed::before { content: "✓"; margin-right: 2px; font-size: 10px; }
+  .step.current-exploring { background: rgba(124,58,237,0.2); color: #a78bfa; font-weight: 600; }
+  .step.current-converging { background: rgba(217,119,6,0.2); color: #fbbf24; font-weight: 600; }
+  .step.current-committed { background: rgba(5,150,105,0.2); color: #6ee7b7; font-weight: 600; }
+  .step.upcoming { color: rgba(161,161,170,0.3); }
+  .step.parked-muted { color: rgba(161,161,170,0.25); }
+  .separator { color: rgba(161,161,170,0.2); font-size: 12px; user-select: none; }
+  .separator.bright { color: rgba(161,161,170,0.4); }
+  .parked-badge { background: rgba(115,115,115,0.3); color: #a3a3a3; padding: 3px 10px; border-radius: 4px; font-size: 12px; font-weight: 500; margin-left: 8px; }
+
+  /* Step indicator - compact */
+  .step-compact { display: flex; align-items: center; gap: 4px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot.completed-violet { background: #8b5cf6; }
+  .dot.completed-amber { background: #f59e0b; }
+  .dot.completed-emerald { background: #10b981; }
+  .dot.current-violet { background: #8b5cf6; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px rgba(139,92,246,0.4); }
+  .dot.current-amber { background: #f59e0b; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px rgba(245,158,11,0.4); }
+  .dot.current-emerald { background: #10b981; box-shadow: 0 0 0 2px #0a0a0b, 0 0 0 4px rgba(16,185,129,0.4); }
+  .dot.upcoming { background: transparent; border: 1px solid rgba(161,161,170,0.3); }
+  .dot.muted { background: rgba(161,161,170,0.2); }
+  .line { width: 12px; height: 1px; background: rgba(161,161,170,0.2); }
+  .line.bright { background: rgba(161,161,170,0.4); }
+
+  /* List row mock */
+  .list-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid #27272a; }
+  .list-title { font-size: 14px; flex: 1; }
+  .list-meta { font-size: 12px; color: #71717a; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#screen-exploring" class="active">Exploring</a>
+  <a href="#screen-converging">Converging</a>
+  <a href="#screen-committed">Committed</a>
+  <a href="#screen-parked">Parked</a>
+  <a href="#screen-list">List View</a>
+</nav>
+
+<section id="screen-exploring" class="default">
+  <h2>Detail View — Exploring</h2>
+  <div class="card">
+    <div style="margin-bottom:12px;font-size:16px;font-weight:600;">Iterate Ponder UI Flow</div>
+    <div class="step-indicator">
+      <span class="step current-exploring">Exploring</span>
+      <span class="separator">→</span>
+      <span class="step upcoming">Converging</span>
+      <span class="separator">→</span>
+      <span class="step upcoming">Committed</span>
+    </div>
+  </div>
+  <h3>Compact variant</h3>
+  <div class="step-compact">
+    <span class="dot current-violet" title="Exploring"></span>
+    <span class="line"></span>
+    <span class="dot upcoming" title="Converging"></span>
+    <span class="line"></span>
+    <span class="dot upcoming" title="Committed"></span>
+  </div>
+</section>
+
+<section id="screen-converging">
+  <h2>Detail View — Converging</h2>
+  <div class="card">
+    <div style="margin-bottom:12px;font-size:16px;font-weight:600;">Fix Ponder Commit Reference URL</div>
+    <div class="step-indicator">
+      <span class="step completed">Exploring</span>
+      <span class="separator bright">→</span>
+      <span class="step current-converging">Converging</span>
+      <span class="separator">→</span>
+      <span class="step upcoming">Committed</span>
+    </div>
+  </div>
+  <h3>Compact variant</h3>
+  <div class="step-compact">
+    <span class="dot completed-violet" title="Exploring"></span>
+    <span class="line bright"></span>
+    <span class="dot current-amber" title="Converging"></span>
+    <span class="line"></span>
+    <span class="dot upcoming" title="Committed"></span>
+  </div>
+</section>
+
+<section id="screen-committed">
+  <h2>Detail View — Committed</h2>
+  <div class="card">
+    <div style="margin-bottom:12px;font-size:16px;font-weight:600;">Milestone Feature Forward Motion</div>
+    <div class="step-indicator">
+      <span class="step completed">Exploring</span>
+      <span class="separator bright">→</span>
+      <span class="step completed">Converging</span>
+      <span class="separator bright">→</span>
+      <span class="step current-committed">Committed</span>
+    </div>
+  </div>
+  <h3>Compact variant</h3>
+  <div class="step-compact">
+    <span class="dot completed-violet" title="Exploring"></span>
+    <span class="line bright"></span>
+    <span class="dot completed-amber" title="Converging"></span>
+    <span class="line bright"></span>
+    <span class="dot current-emerald" title="Committed"></span>
+  </div>
+</section>
+
+<section id="screen-parked">
+  <h2>Detail View — Parked</h2>
+  <div class="card">
+    <div style="margin-bottom:12px;font-size:16px;font-weight:600;">Old Idea (Parked)</div>
+    <div class="step-indicator">
+      <span class="step parked-muted">Exploring</span>
+      <span class="separator">→</span>
+      <span class="step parked-muted">Converging</span>
+      <span class="separator">→</span>
+      <span class="step parked-muted">Committed</span>
+      <span class="parked-badge">Parked</span>
+    </div>
+  </div>
+  <h3>Compact variant</h3>
+  <div class="step-compact">
+    <span class="dot muted" title="Exploring"></span>
+    <span class="line"></span>
+    <span class="dot muted" title="Converging"></span>
+    <span class="line"></span>
+    <span class="dot muted" title="Committed"></span>
+    <span style="margin-left:6px;font-size:11px;color:#737373;">Parked</span>
+  </div>
+</section>
+
+<section id="screen-list">
+  <h2>List View — Compact Indicators</h2>
+  <div class="card" style="padding:0;">
+    <div class="list-row">
+      <div class="step-compact">
+        <span class="dot current-violet"></span>
+        <span class="line"></span>
+        <span class="dot upcoming"></span>
+        <span class="line"></span>
+        <span class="dot upcoming"></span>
+      </div>
+      <div class="list-title">Iterate Ponder UI Flow</div>
+      <div class="list-meta">3 sessions · 2 team</div>
+    </div>
+    <div class="list-row">
+      <div class="step-compact">
+        <span class="dot completed-violet"></span>
+        <span class="line bright"></span>
+        <span class="dot current-amber"></span>
+        <span class="line"></span>
+        <span class="dot upcoming"></span>
+      </div>
+      <div class="list-title">Fix Ponder Commit Reference URL</div>
+      <div class="list-meta">5 sessions · 3 team</div>
+    </div>
+    <div class="list-row">
+      <div class="step-compact">
+        <span class="dot completed-violet"></span>
+        <span class="line bright"></span>
+        <span class="dot completed-amber"></span>
+        <span class="line bright"></span>
+        <span class="dot current-emerald"></span>
+      </div>
+      <div class="list-title">Milestone Feature Forward Motion</div>
+      <div class="list-meta">8 sessions · 4 team</div>
+    </div>
+    <div class="list-row">
+      <div class="step-compact">
+        <span class="dot muted"></span>
+        <span class="line"></span>
+        <span class="dot muted"></span>
+        <span class="line"></span>
+        <span class="dot muted"></span>
+      </div>
+      <div class="list-title" style="color:#71717a;">Old Idea (Parked)</div>
+      <div class="list-meta">1 session</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Show targeted section, hide default
+  function updateView() {
+    const hash = location.hash || '#screen-exploring';
+    document.querySelectorAll('section').forEach(s => {
+      s.style.display = s.id === hash.slice(1) ? 'block' : 'none';
+      s.classList.remove('default');
+    });
+    document.querySelectorAll('nav a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === hash);
+    });
+  }
+  window.addEventListener('hashchange', updateView);
+  if (location.hash) updateView();
+</script>
+</body>
+</html>

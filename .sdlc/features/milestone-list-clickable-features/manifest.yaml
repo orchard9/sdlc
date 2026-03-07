@@ -1,0 +1,110 @@
+slug: milestone-list-clickable-features
+title: Milestones List — make feature pills clickable links
+phase: released
+created_at: 2026-03-07T15:30:57.085334Z
+updated_at: 2026-03-07T15:44:06.265384Z
+artifacts:
+- artifact_type: spec
+  status: waived
+  path: .sdlc/features/milestone-list-clickable-features/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:39:02.116685Z
+  waive_reason: Feature pills in MilestonesPage.tsx (lines 29-36) are already clickable <Link> components navigating to /features/{slug}. No code change needed.
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/milestone-list-clickable-features/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:39:10.008934Z
+  waive_reason: No design needed — feature pills are already clickable Link components in MilestonesPage.tsx. No UI change required.
+- artifact_type: tasks
+  status: waived
+  path: .sdlc/features/milestone-list-clickable-features/tasks.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:39:15.791959Z
+  waive_reason: No tasks needed — clickable feature pills already exist in the codebase (MilestonesPage.tsx lines 29-36). Zero implementation work required.
+- artifact_type: qa_plan
+  status: waived
+  path: .sdlc/features/milestone-list-clickable-features/qa-plan.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:39:38.626851Z
+  waive_reason: No QA plan needed — feature was already implemented before this feature entry was created. Clickable pills verified in MilestonesPage.tsx.
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/milestone-list-clickable-features/review.md
+  created_at: 2026-03-07T15:43:16.960181Z
+  approved_at: 2026-03-07T15:43:24.865412Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/milestone-list-clickable-features/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T15:43:40.930147Z
+  waive_reason: No code changes — feature was already implemented. No security surface to audit.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/milestone-list-clickable-features/qa-results.md
+  created_at: 2026-03-07T15:43:52.949807Z
+  approved_at: 2026-03-07T15:43:57.632067Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T15:30:57.085334Z
+  exited: 2026-03-07T15:39:02.118735Z
+- phase: specified
+  entered: 2026-03-07T15:39:02.118735Z
+  exited: 2026-03-07T15:42:47.539680Z
+- phase: planned
+  entered: 2026-03-07T15:42:47.539680Z
+  exited: 2026-03-07T15:42:52.737270Z
+- phase: ready
+  entered: 2026-03-07T15:42:52.737270Z
+  exited: 2026-03-07T15:42:58.481024Z
+- phase: implementation
+  entered: 2026-03-07T15:42:58.481024Z
+  exited: 2026-03-07T15:43:24.870034Z
+- phase: review
+  entered: 2026-03-07T15:43:24.870034Z
+  exited: 2026-03-07T15:43:34.643801Z
+- phase: audit
+  entered: 2026-03-07T15:43:34.643801Z
+  exited: 2026-03-07T15:43:40.932453Z
+- phase: qa
+  entered: 2026-03-07T15:43:40.932453Z
+  exited: 2026-03-07T15:43:57.639212Z
+- phase: merge
+  entered: 2026-03-07T15:43:57.639212Z
+  exited: 2026-03-07T15:44:06.265384Z
+- phase: released
+  entered: 2026-03-07T15:44:06.265384Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

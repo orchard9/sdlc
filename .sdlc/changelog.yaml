@@ -3046,3 +3046,141 @@
   timestamp: 2026-03-06T19:11:21.590455Z
   metadata:
     run_key: milestone-run-wave:v39-run-max-turns-recovery
+- id: ev-0551
+  kind: feature_phase_advanced
+  slug: milestone-detail-prepare-panel
+  timestamp: 2026-03-07T15:42:02.988035Z
+  metadata:
+    phase: review
+- id: ev-0552
+  kind: feature_phase_advanced
+  slug: milestone-detail-prepare-panel
+  timestamp: 2026-03-07T15:42:21.131106Z
+  metadata:
+    phase: qa
+- id: ev-0553
+  kind: feature_phase_advanced
+  slug: committed-ponder-forward-motion
+  timestamp: 2026-03-07T15:42:22.196607Z
+  metadata:
+    phase: review
+- id: ev-0554
+  kind: feature_phase_advanced
+  slug: ponder-status-progress-indicator
+  timestamp: 2026-03-07T15:42:39.296264Z
+  metadata:
+    phase: review
+- id: ev-0555
+  kind: feature_phase_advanced
+  slug: milestone-detail-prepare-panel
+  timestamp: 2026-03-07T15:42:42.389169Z
+  metadata:
+    phase: merge
+- id: ev-0556
+  kind: feature_phase_advanced
+  slug: committed-ponder-forward-motion
+  timestamp: 2026-03-07T15:42:43.907833Z
+  metadata:
+    phase: qa
+- id: ev-0557
+  kind: feature_merged
+  slug: milestone-detail-prepare-panel
+  timestamp: 2026-03-07T15:42:50.595614Z
+  metadata: {}
+- id: ev-0558
+  kind: feature_phase_advanced
+  slug: parked-ponder-resume
+  timestamp: 2026-03-07T15:42:56.824509Z
+  metadata:
+    phase: review
+- id: ev-0559
+  kind: feature_phase_advanced
+  slug: feature-detail-milestone-context
+  timestamp: 2026-03-07T15:42:57.010965Z
+  metadata:
+    phase: review
+- id: ev-0560
+  kind: feature_phase_advanced
+  slug: committed-ponder-forward-motion
+  timestamp: 2026-03-07T15:42:59.492785Z
+  metadata:
+    phase: merge
+- id: ev-0561
+  kind: feature_phase_advanced
+  slug: ponder-status-progress-indicator
+  timestamp: 2026-03-07T15:43:02.285702Z
+  metadata:
+    phase: qa
+- id: ev-0562
+  kind: feature_merged
+  slug: committed-ponder-forward-motion
+  timestamp: 2026-03-07T15:43:07.434453Z
+  metadata: {}
+- id: ev-0563
+  kind: feature_phase_advanced
+  slug: parked-ponder-resume
+  timestamp: 2026-03-07T15:43:09.249651Z
+  metadata:
+    phase: qa
+- id: ev-0564
+  kind: feature_phase_advanced
+  slug: ponder-status-progress-indicator
+  timestamp: 2026-03-07T15:43:18.714360Z
+  metadata:
+    phase: merge
+- id: ev-0565
+  kind: feature_phase_advanced
+  slug: milestone-list-clickable-features
+  timestamp: 2026-03-07T15:43:24.878546Z
+  metadata:
+    phase: review
+- id: ev-0566
+  kind: feature_phase_advanced
+  slug: feature-detail-milestone-context
+  timestamp: 2026-03-07T15:43:26.489592Z
+  metadata:
+    phase: qa
+- id: ev-0567
+  kind: feature_merged
+  slug: ponder-status-progress-indicator
+  timestamp: 2026-03-07T15:43:27.217026Z
+  metadata: {}
+- id: ev-0568
+  kind: feature_phase_advanced
+  slug: parked-ponder-resume
+  timestamp: 2026-03-07T15:43:31.034746Z
+  metadata:
+    phase: merge
+- id: ev-0569
+  kind: feature_merged
+  slug: parked-ponder-resume
+  timestamp: 2026-03-07T15:43:39.760430Z
+  metadata: {}
+- id: ev-0570
+  kind: feature_phase_advanced
+  slug: milestone-list-clickable-features
+  timestamp: 2026-03-07T15:43:40.935793Z
+  metadata:
+    phase: qa
+- id: ev-0571
+  kind: feature_phase_advanced
+  slug: feature-detail-milestone-context
+  timestamp: 2026-03-07T15:43:46.359138Z
+  metadata:
+    phase: merge
+- id: ev-0572
+  kind: feature_merged
+  slug: feature-detail-milestone-context
+  timestamp: 2026-03-07T15:43:57.244373Z
+  metadata: {}
+- id: ev-0573
+  kind: feature_phase_advanced
+  slug: milestone-list-clickable-features
+  timestamp: 2026-03-07T15:43:57.644789Z
+  metadata:
+    phase: merge
+- id: ev-0574
+  kind: feature_merged
+  slug: milestone-list-clickable-features
+  timestamp: 2026-03-07T15:44:06.282670Z
+  metadata: {}
