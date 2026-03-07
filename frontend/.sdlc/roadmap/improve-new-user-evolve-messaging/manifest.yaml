@@ -1,0 +1,10 @@
+slug: improve-new-user-evolve-messaging
+title: Improve new user evolve messaging
+status: converging
+created_at: 2026-03-07T17:39:09.558189Z
+updated_at: 2026-03-07T17:39:15.633098Z
+sessions: 1
+orientation:
+  current: Implemented rich empty-state content for the Evolve page detail pane
+  next: Verify visually in browser, iterate on copy/layout if needed
+  commit: Owner confirms the page no longer feels empty and communicates Evolve's purpose clearly

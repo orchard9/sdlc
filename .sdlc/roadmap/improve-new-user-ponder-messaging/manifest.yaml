@@ -1,0 +1,10 @@
+slug: improve-new-user-ponder-messaging
+title: improve new user ponder messaging
+status: converging
+created_at: 2026-03-07T17:34:59.128253Z
+updated_at: 2026-03-07T17:40:11.456672Z
+sessions: 1
+orientation:
+  current: Implementation complete — rich onboarding content replaces blank empty state on /ponder
+  next: Verify on mobile viewport, consider similar treatment for other workspace pages (Root Cause, Evolve, Guidelines, Spikes)
+  commit: Owner confirms the messaging and layout work for new users

@@ -137,6 +137,8 @@ export const api = {
     request<{ slug: string; title: string; status: string }>('/api/roadmap', { method: 'POST', body: JSON.stringify(data) }),
   updatePonderEntry: (slug: string, data: Partial<{ title: string; status: import('@/lib/types').PonderStatus; tags: string[]; committed_to: string[] }>) =>
     request<{ slug: string; title: string; status: string; tags: string[]; committed_to: string[] }>(`/api/roadmap/${slug}`, { method: 'PUT', body: JSON.stringify(data) }),
+  deletePonderEntry: (slug: string) =>
+    request<{ slug: string; deleted: boolean }>(`/api/roadmap/${slug}`, { method: 'DELETE' }),
   capturePonderArtifact: (slug: string, data: { filename: string; content: string }) =>
     request<void>(`/api/roadmap/${slug}/capture`, { method: 'POST', body: JSON.stringify(data) }),
   getPonderSessions: (slug: string) =>
