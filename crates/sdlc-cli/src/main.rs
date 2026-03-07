@@ -287,7 +287,14 @@ fn main() {
     }
 
     let root_path = cli.root.as_deref();
-    let root = root::resolve_root(root_path);
+    // `sdlc init` always targets CWD — don't walk up to an ancestor .sdlc/
+    let root = if matches!(cli.command, Commands::Init { .. }) {
+        root_path
+            .map(|p| p.to_path_buf())
+            .unwrap_or_else(|| std::env::current_dir().unwrap_or_else(|_| PathBuf::from(".")))
+    } else {
+        root::resolve_root(root_path)
+    };
 
     let result = match cli.command {
         Commands::Init { platform } => cmd::init::run(&root, platform.as_deref()),
