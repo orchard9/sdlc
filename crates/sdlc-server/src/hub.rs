@@ -582,6 +582,33 @@ impl HubRegistry {
         }
     }
 
+    /// Remove a project from both the projects and provisions maps.
+    /// Emits `ProjectRemoved` SSE event and persists.
+    pub fn remove_project(&mut self, slug: &str) {
+        // Projects are keyed by URL — find by name match
+        let url = self
+            .projects
+            .iter()
+            .find(|(_, p)| p.name == slug)
+            .map(|(url, _)| url.clone());
+        if let Some(url) = &url {
+            self.projects.remove(url);
+            let _ = self
+                .event_tx
+                .send(HubSseMessage::ProjectRemoved { url: url.clone() });
+        }
+        self.provisions.remove(slug);
+        self.push_activity(
+            "project_deleted",
+            ActivitySeverity::Warning,
+            format!("{slug} deleted"),
+            None,
+            Some(slug.to_string()),
+            url,
+        );
+        self.persist();
+    }
+
     /// Return all projects sorted by `last_seen` descending (most recent first).
     pub fn projects_sorted(&self) -> Vec<ProjectEntry> {
         let mut entries: Vec<ProjectEntry> = self.projects.values().cloned().collect();
@@ -789,6 +816,33 @@ mod tests {
         assert_eq!(provision.status, ProvisionState::Requested);
         assert!(reg.provisions.contains_key("auth-service"));
         assert!(!reg.activity.is_empty());
+    }
+
+    #[test]
+    fn remove_project_clears_both_maps_and_persists() {
+        let tmp = TempDir::new().unwrap();
+        let mut reg = temp_registry(tmp.path());
+        reg.apply_heartbeat(payload("my-app", "http://localhost:4000"));
+        reg.start_provision(
+            "my-app",
+            "https://my-app.sdlc.threesix.ai".to_string(),
+            "manual",
+            None,
+        );
+        assert!(reg.projects.contains_key("http://localhost:4000"));
+        assert!(reg.provisions.contains_key("my-app"));
+
+        reg.remove_project("my-app");
+
+        assert!(!reg.projects.contains_key("http://localhost:4000"));
+        assert!(!reg.provisions.contains_key("my-app"));
+        // Verify persisted file exists (persist was called)
+        assert!(tmp.path().join("hub-state.yaml").exists());
+        // Verify activity was logged
+        assert!(reg
+            .activity
+            .iter()
+            .any(|a| a.kind == "project_deleted" && a.slug.as_deref() == Some("my-app")));
     }
 
     #[test]

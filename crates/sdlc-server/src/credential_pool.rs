@@ -1,6 +1,6 @@
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{PgPool, Row};
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 
 /// A single Claude credential checked out from the pool.
 #[derive(Debug, Clone)]
@@ -108,7 +108,7 @@ impl CredentialPool {
 
         tx.commit().await?;
 
-        info!(account_name = %account_name, "checked out Claude credential from pool");
+        debug!(account_name = %account_name, "credential checked out");
         Ok(Some(ClaudeCredential {
             id,
             account_name,
@@ -177,7 +177,7 @@ impl CredentialPool {
             .bind(id)
             .execute(&self.pool)
             .await?;
-        info!(id = id, "deleted Claude credential from pool");
+        info!(credential_id = id, "credential deleted");
         Ok(result.rows_affected() > 0)
     }
 

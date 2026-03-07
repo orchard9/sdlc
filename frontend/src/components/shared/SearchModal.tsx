@@ -3,11 +3,18 @@ import { useNavigate } from 'react-router-dom'
 import { useSearch } from '@/hooks/useSearch'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { cn } from '@/lib/utils'
-import { Lightbulb } from 'lucide-react'
+import { Lightbulb, Milestone, Microscope } from 'lucide-react'
 
 interface SearchModalProps {
   open: boolean
   onClose: () => void
+}
+
+const routeMap: Record<string, (slug: string) => string> = {
+  feature: (s) => `/features/${s}`,
+  ponder: (s) => `/ponder/${s}`,
+  milestone: (s) => `/milestones/${s}`,
+  investigation: (s) => `/investigations/${s}`,
 }
 
 export function SearchModal({ open, onClose }: SearchModalProps) {
@@ -33,10 +40,8 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
   const navigateToResult = (index: number) => {
     const result = results[index]
     if (!result) return
-    const path = result.kind === 'ponder'
-      ? `/ponder/${result.slug}`
-      : `/features/${result.slug}`
-    navigate(path)
+    const pathFn = routeMap[result.kind] ?? ((s: string) => `/features/${s}`)
+    navigate(pathFn(result.slug))
     onClose()
   }
 
@@ -74,7 +79,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
     <div
       role="dialog"
       aria-modal="true"
-      aria-label="Search features and ideas"
+      aria-label="Search features, milestones, ideas, and investigations"
       className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh] bg-black/60"
       onClick={onClose}
     >
@@ -94,7 +99,7 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
           aria-autocomplete="list"
           value={query}
           onChange={e => setQuery(e.target.value)}
-          placeholder="Search features and ideas..."
+          placeholder="Search features, milestones, ideas..."
           className="w-full px-4 py-3 text-sm bg-transparent outline-none placeholder:text-muted-foreground"
         />
 
@@ -142,6 +147,12 @@ export function SearchModal({ open, onClose }: SearchModalProps) {
                   <span className="flex items-center gap-2 shrink-0">
                     {result.kind === 'ponder' && (
                       <Lightbulb className="w-3.5 h-3.5 text-violet-400" />
+                    )}
+                    {result.kind === 'milestone' && (
+                      <Milestone className="w-3.5 h-3.5 text-blue-400" />
+                    )}
+                    {result.kind === 'investigation' && (
+                      <Microscope className="w-3.5 h-3.5 text-amber-400" />
                     )}
                     <StatusBadge status={result.status} />
                     <span className="text-xs text-muted-foreground font-mono">{result.slug}</span>

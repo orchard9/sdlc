@@ -458,11 +458,11 @@ fn select_agent_provider() -> Arc<dyn claude_agent::AgentProvider> {
         .as_str()
     {
         "codex" => {
-            tracing::info!("Agent provider: codex");
+            tracing::debug!("Agent provider: codex");
             Arc::new(claude_agent::CodexProvider)
         }
         "opencode" => {
-            tracing::info!("Agent provider: opencode");
+            tracing::debug!("Agent provider: opencode");
             Arc::new(claude_agent::OpenCodeProvider)
         }
         _ => {

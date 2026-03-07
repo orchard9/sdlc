@@ -102,23 +102,16 @@ export interface DiagnoseResult {
   confidence: string
 }
 
-export interface QuerySearchResult {
+export interface EntitySearchResult {
+  kind: 'feature' | 'ponder' | 'milestone' | 'investigation'
   slug: string
   title: string
-  phase: string
-  score: number
-}
-
-export interface QueryPonderSearchResult {
-  slug: string
-  title: string
-  status: PonderStatus
+  status: string
   score: number
 }
 
 export interface QuerySearchResponse {
-  results: QuerySearchResult[]
-  ponder_results: QueryPonderSearchResult[]
+  results: EntitySearchResult[]
   parse_error: string | null
 }
 

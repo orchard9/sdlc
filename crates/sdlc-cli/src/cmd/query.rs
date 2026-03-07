@@ -6,7 +6,7 @@ use sdlc_core::{
     config::Config,
     feature::Feature,
     rules::default_rules,
-    search::{FeatureIndex, TaskIndex},
+    search::{EntityIndex, EntitySources, TaskIndex},
     state::State,
     types::ActionType,
 };
@@ -206,22 +206,46 @@ fn is_approval_action(action: ActionType) -> bool {
 
 fn search(root: &Path, query_str: &str, limit: usize, json: bool) -> anyhow::Result<()> {
     let features = Feature::list(root).context("failed to list features")?;
-    let index = FeatureIndex::build(&features, root).context("failed to build search index")?;
+
+    let ponder_entries = sdlc_core::ponder::PonderEntry::list(root).unwrap_or_default();
+    let ponder_artifacts: Vec<_> = ponder_entries
+        .iter()
+        .map(|e| {
+            let arts = sdlc_core::ponder::list_artifacts(root, &e.slug).unwrap_or_default();
+            (e.clone(), arts)
+        })
+        .collect();
+
+    let milestones = sdlc_core::milestone::Milestone::list(root).unwrap_or_default();
+    let milestone_statuses: Vec<_> = milestones
+        .into_iter()
+        .map(|m| {
+            let status = m.compute_status(&features);
+            (m, status)
+        })
+        .collect();
+
+    let investigations = sdlc_core::investigation::list(root).unwrap_or_default();
+    let inv_artifacts: Vec<_> = investigations
+        .into_iter()
+        .map(|e| {
+            let arts = sdlc_core::investigation::list_artifacts(root, &e.slug).unwrap_or_default();
+            (e, arts)
+        })
+        .collect();
+
+    let index = EntityIndex::build(EntitySources {
+        features: &features,
+        ponders: &ponder_artifacts,
+        milestones: &milestone_statuses,
+        investigations: &inv_artifacts,
+        root,
+    })
+    .context("failed to build search index")?;
     let results = index.search(query_str, limit).context("search failed")?;
 
     if json {
-        let out: Vec<_> = results
-            .iter()
-            .map(|r| {
-                serde_json::json!({
-                    "slug":  r.slug,
-                    "title": r.title,
-                    "phase": r.phase,
-                    "score": r.score,
-                })
-            })
-            .collect();
-        return print_json(&out);
+        return print_json(&results);
     }
 
     if results.is_empty() {
@@ -237,8 +261,8 @@ fn search(root: &Path, query_str: &str, limit: usize, json: bool) -> anyhow::Res
     );
     for r in &results {
         println!(
-            "  [{:.2}] {:<30} {:<40} {}",
-            r.score, r.slug, r.title, r.phase
+            "  [{:.2}] {:<12} {:<30} {:<40} {}",
+            r.score, r.kind, r.slug, r.title, r.status
         );
     }
     Ok(())

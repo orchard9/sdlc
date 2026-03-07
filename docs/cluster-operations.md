@@ -318,3 +318,93 @@ kubectl delete pod -n sdlc-<slug> -l app.kubernetes.io/name=sdlc-server
 ```
 
 The pod restarts with the init container doing a fresh `git clone` before the server starts.
+
+---
+
+## Citadel Telemetry
+
+Ponder can ship structured tracing events to Citadel for centralized log aggregation. This is optional — when the env vars are absent, Ponder uses standard stderr logging with zero overhead.
+
+### How it works
+
+A custom `tracing::Layer` captures all INFO+ events, serializes them as JSON, and ships them to Citadel's batch ingest endpoint (`POST /api/v1/ingest`) every 5 seconds. Events are buffered in a bounded channel (4096 capacity) and dropped if the channel fills. Failed batches are logged as warnings and discarded (no retry queue).
+
+Each event includes:
+- `message`, `level`, `timestamp` — standard tracing fields
+- `service` — `ponder-hub` or `ponder-<slug>` (derived from `SDLC_BASE_URL`)
+- `environment` — `local` or `production`
+- `target` — Rust module path (e.g. `sdlc_server::heartbeat`)
+- `fields` — all structured key-value fields from the tracing event
+
+### Env vars
+
+| Variable | Required | Default | Purpose |
+|----------|----------|---------|---------|
+| `PONDER_CITADEL_URL` | Yes | — | Citadel ingest URL (e.g. `https://citadel-staging.orchard9.ai`) |
+| `PONDER_CITADEL_API_KEY` | Yes | — | Citadel API key (`ck_live_*`) |
+| `PONDER_CITADEL_TENANT_ID` | Yes | — | Citadel tenant UUID |
+| `PONDER_ENVIRONMENT` | No | `production` if `SDLC_HUB=true`, else `local` | Environment tag |
+
+All three required vars must be set for the layer to activate.
+
+### Local development
+
+Set the env vars when starting the server:
+
+```bash
+PONDER_CITADEL_URL=https://citadel-staging.orchard9.ai \
+PONDER_CITADEL_API_KEY=ck_live_... \
+PONDER_CITADEL_TENANT_ID=b1692b26-... \
+PONDER_ENVIRONMENT=local \
+cargo run --bin ponder -- ui start --port 7777 --no-open --no-tunnel
+```
+
+Verify logs are flowing:
+
+```bash
+# Wait 10 seconds for the first batch, then query
+curl -s "https://citadel-staging.orchard9.ai/api/v1/ingest/event" \
+  -H "Authorization: Bearer $PONDER_CITADEL_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "test from ponder", "level": "info", "attributes": {"service": "ponder-test"}}'
+```
+
+### Production (k3s cluster)
+
+**Hub** — create the secret:
+
+```bash
+kubectl create secret generic sdlc-hub-citadel \
+  --namespace sdlc-hub \
+  --from-literal=url="https://citadel-staging.orchard9.ai" \
+  --from-literal=api-key="ck_live_..." \
+  --from-literal=tenant-id="b1692b26-..."
+```
+
+The hub deployment manifest (`sdlc-hub-deployment.yaml`) reads from this secret with `optional: true` — if the secret doesn't exist, the hub runs without Citadel.
+
+**Project instances** — enable in Helm values:
+
+```yaml
+citadel:
+  enabled: true
+  url: https://citadel-staging.orchard9.ai
+  tenantId: b1692b26-...
+```
+
+Then create the API key secret in the project namespace:
+
+```bash
+kubectl create secret generic sdlc-citadel-credentials \
+  --namespace sdlc-<slug> \
+  --from-literal=api-key="ck_live_..."
+```
+
+### Graceful degradation
+
+| Condition | Behavior |
+|-----------|----------|
+| Any `PONDER_CITADEL_*` var missing | Layer not created, zero overhead |
+| Citadel unreachable | Batch dropped, warning logged to stderr |
+| Channel full (burst > 4096 events) | Oldest events dropped silently |
+| Citadel returns non-2xx | Batch dropped, warning logged to stderr |

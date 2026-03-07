@@ -24,24 +24,8 @@ pub async fn search(
     let result = tokio::task::spawn_blocking(move || {
         let limit = params.limit.unwrap_or(10);
 
-        // Feature search
         let features = sdlc_core::feature::Feature::list(&root)?;
-        let feature_index = sdlc_core::search::FeatureIndex::build(&features, &root)?;
-        let feature_results = feature_index.search(&params.q, limit)?;
 
-        let out: Vec<serde_json::Value> = feature_results
-            .iter()
-            .map(|r| {
-                serde_json::json!({
-                    "slug": r.slug,
-                    "title": r.title,
-                    "phase": r.phase,
-                    "score": r.score,
-                })
-            })
-            .collect();
-
-        // Ponder search
         let ponder_entries = sdlc_core::ponder::PonderEntry::list(&root)?;
         let ponder_artifacts: Vec<_> = ponder_entries
             .iter()
@@ -50,23 +34,38 @@ pub async fn search(
                 (e.clone(), arts)
             })
             .collect();
-        let ponder_index = sdlc_core::search::PonderIndex::build(&ponder_artifacts, &root)?;
-        let ponder_out = ponder_index
-            .search(&params.q, limit)?
-            .iter()
-            .map(|r| {
-                serde_json::json!({
-                    "slug": r.slug,
-                    "title": r.title,
-                    "status": r.status,
-                    "score": r.score,
-                })
+
+        let milestones = sdlc_core::milestone::Milestone::list(&root)?;
+        let milestone_statuses: Vec<_> = milestones
+            .into_iter()
+            .map(|m| {
+                let status = m.compute_status(&features);
+                (m, status)
             })
-            .collect::<Vec<_>>();
+            .collect();
+
+        let investigations = sdlc_core::investigation::list(&root)?;
+        let inv_artifacts: Vec<_> = investigations
+            .into_iter()
+            .map(|e| {
+                let arts =
+                    sdlc_core::investigation::list_artifacts(&root, &e.slug).unwrap_or_default();
+                (e, arts)
+            })
+            .collect();
+
+        let index = sdlc_core::search::EntityIndex::build(sdlc_core::search::EntitySources {
+            features: &features,
+            ponders: &ponder_artifacts,
+            milestones: &milestone_statuses,
+            investigations: &inv_artifacts,
+            root: &root,
+        })?;
+
+        let results = index.search(&params.q, limit)?;
 
         Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
-            "results": out,
-            "ponder_results": ponder_out,
+            "results": results,
             "parse_error": serde_json::Value::Null,
         }))
     })

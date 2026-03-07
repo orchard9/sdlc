@@ -2359,9 +2359,9 @@ fn query_search_phase_field_scope() {
         .assert()
         .success();
 
-    // All fresh features are in draft phase
+    // All fresh features are in draft phase — field is now `status` in unified EntityIndex
     sdlc(&dir)
-        .args(["query", "search", "phase:draft"])
+        .args(["query", "search", "status:draft"])
         .assert()
         .success()
         .stdout(predicate::str::contains("feat-a"));
@@ -2387,7 +2387,7 @@ fn query_search_limit_respected() {
 
     // Search for a common term with limit 1 — output must contain exactly one slug reference
     let output = sdlc(&dir)
-        .args(["query", "search", "phase:draft", "--limit", "1"])
+        .args(["query", "search", "status:draft", "--limit", "1"])
         .assert()
         .success()
         .get_output()
@@ -2430,7 +2430,8 @@ fn query_search_json_output() {
     let arr = json.as_array().expect("JSON array");
     assert_eq!(arr.len(), 1);
     assert_eq!(arr[0]["slug"], "oauth-flow");
-    assert_eq!(arr[0]["phase"], "draft");
+    assert_eq!(arr[0]["kind"], "feature");
+    assert_eq!(arr[0]["status"], "draft");
     assert!(arr[0]["score"].as_f64().unwrap() > 0.0);
 }
 

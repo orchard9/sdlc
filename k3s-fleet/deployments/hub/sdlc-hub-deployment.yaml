@@ -60,7 +60,7 @@ spec:
                   name: sdlc-hub-fleet-tokens
                   key: gitea-api-token
             - name: WOODPECKER_URL
-              value: http://woodpecker-server.woodpecker.svc.cluster.local:8000
+              value: http://woodpecker-server.threesix.svc.cluster.local:8000
             - name: WOODPECKER_API_TOKEN
               valueFrom:
                 secretKeyRef:

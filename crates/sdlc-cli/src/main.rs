@@ -264,8 +264,9 @@ fn main() {
     use tracing_subscriber::layer::SubscriberExt;
     use tracing_subscriber::util::SubscriberInitExt;
 
-    let filter =
-        tracing_subscriber::EnvFilter::from_default_env().add_directive(default_level.into());
+    let filter = tracing_subscriber::EnvFilter::from_default_env()
+        .add_directive(default_level.into())
+        .add_directive("redb=warn".parse().expect("valid directive"));
     let fmt_layer = tracing_subscriber::fmt::layer().with_target(false);
 
     if let Some(citadel_config) = sdlc_server::citadel::CitadelConfig::from_env() {

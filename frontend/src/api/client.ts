@@ -501,6 +501,10 @@ export const api = {
       body: JSON.stringify({ name }),
       headers: { 'Content-Type': 'application/json' },
     }),
+  deleteProject: (slug: string) =>
+    request<{ deleted: boolean; slug: string }>(`/api/hub/projects/${encodeURIComponent(slug)}`, {
+      method: 'DELETE',
+    }),
 
   // Auth tokens (named tunnel-access tokens)
   getAuthTokens: () => request<import('@/lib/types').AuthToken[]>('/api/auth/tokens'),

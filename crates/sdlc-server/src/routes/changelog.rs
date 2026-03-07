@@ -26,8 +26,6 @@ pub async fn get_changelog(
     Query(params): Query<ChangelogQuery>,
     State(app): State<AppState>,
 ) -> Result<Json<serde_json::Value>, AppError> {
-    tracing::info!(since = ?params.since, limit = ?params.limit, "changelog: handler entered");
-
     // Parse `since` on the async thread before entering spawn_blocking so we
     // can return 400 quickly without occupying a blocking thread.
     let since: Option<DateTime<Utc>> = match params.since {
@@ -40,17 +38,11 @@ pub async fn get_changelog(
     let limit = params.limit.unwrap_or(100);
     let root = app.root.clone();
 
-    tracing::info!("changelog: queuing spawn_blocking");
     let events = tokio::task::spawn_blocking(move || {
-        tracing::info!("changelog: spawn_blocking started, reading file");
-        let result = sdlc_core::event_log::query_events(&root, since, limit);
-        tracing::info!("changelog: spawn_blocking done");
-        result
+        sdlc_core::event_log::query_events(&root, since, limit)
     })
     .await
     .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
-
-    tracing::info!(count = events.len(), "changelog: returning events");
     let total = events.len();
     Ok(Json(
         serde_json::json!({ "events": events, "total": total }),

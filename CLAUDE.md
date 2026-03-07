@@ -19,6 +19,16 @@ Send test emails to `jordan@livelyvideo.tv`.
 
 To release: tag HEAD with the next semver (`git tag vX.Y.Z && git push origin vX.Y.Z`), then watch `gh run list --repo orchard9/sdlc` and fix any workflow errors found.
 
+## Deploying to Cluster
+
+**Hub** (`sdlc.threesix.ai`): Push to `main` → GitHub Actions builds Docker image → pushes `ghcr.io/orchard9/sdlc:latest` → restart hub pod:
+```bash
+KUBECONFIG=~/.kube/orchard9-k3sf.yaml kubectl rollout restart deployment/sdlc-hub -n sdlc-hub
+KUBECONFIG=~/.kube/orchard9-k3sf.yaml kubectl rollout status deployment/sdlc-hub -n sdlc-hub
+```
+
+**Project pods** (`<slug>.sdlc.threesix.ai`): Provisioned via Woodpecker pipeline triggered from hub UI. Uses `.woodpecker/provision.yaml` + helm chart at `k3s-fleet/deployments/helm/sdlc-server/`. Image: `ghcr.io/orchard9/sdlc:latest` (same as hub).
+
 ## Project
 
 `Ponder` (`sdlc`) is a Rust CLI + library that implements a deterministic state machine for feature lifecycle management. It tracks features through structured phases, emits directives for AI consumers, and records approvals. It has no LLM calls — it is the state layer that agents operate against.

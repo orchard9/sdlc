@@ -34,9 +34,9 @@ async fn log_request(
     let start = std::time::Instant::now();
     let is_events = uri.path() == "/api/events";
     if is_events {
-        tracing::debug!(method = %method, path = %uri, "→");
+        tracing::debug!(method = %method, path = %uri, "request started");
     } else {
-        tracing::info!(method = %method, path = %uri, "→");
+        tracing::info!(method = %method, path = %uri, "request started");
     }
     let resp = next.run(req).await;
     if is_events {
@@ -45,7 +45,7 @@ async fn log_request(
             path = %uri,
             status = resp.status().as_u16(),
             latency_ms = start.elapsed().as_millis(),
-            "←"
+            "request completed"
         );
     } else {
         tracing::info!(
@@ -53,7 +53,7 @@ async fn log_request(
             path = %uri,
             status = resp.status().as_u16(),
             latency_ms = start.elapsed().as_millis(),
-            "←"
+            "request completed"
         );
     }
     resp
@@ -715,6 +715,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/hub/import", post(routes::hub::import))
         .route("/api/hub/create-repo", post(routes::hub::create_repo))
         .route("/api/hub/agents", get(routes::hub::agents))
+        .route(
+            "/api/hub/projects/{slug}",
+            delete(routes::hub::delete_project),
+        )
         // OTP invite management (admin endpoints — behind auth middleware)
         .route(
             "/api/invites",

@@ -1,7 +1,8 @@
-import { Activity, ChevronDown, ChevronUp, ExternalLink, TriangleAlert } from 'lucide-react'
-import { Fragment } from 'react'
+import { Activity, ChevronDown, ChevronUp, ExternalLink, Trash2, TriangleAlert } from 'lucide-react'
+import { Fragment, useState } from 'react'
 import type { FleetInstance } from '@/lib/types'
 import { cn } from '@/lib/utils'
+import { api } from '@/api/client'
 
 type FleetStatusTone = 'online' | 'degraded' | 'provisioning' | 'failed'
 
@@ -155,22 +156,25 @@ export function FleetTable({
                                 </div>
                               </div>
                             </div>
-                            <div className="rounded-lg border border-border bg-card/70 p-4">
-                              <div className="mb-3 text-sm font-medium tracking-tight">At a glance</div>
-                              <div className="space-y-2 text-sm text-muted-foreground">
-                                <div className="flex items-center justify-between gap-4">
-                                  <span>Provision</span>
-                                  <span className="capitalize">{instance.provision_status || 'none'}</span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4">
-                                  <span>Heartbeat</span>
-                                  <span className="capitalize">{instance.heartbeat_status || 'unknown'}</span>
-                                </div>
-                                <div className="flex items-center justify-between gap-4">
-                                  <span>Created</span>
-                                  <span>{instance.created_at ? new Date(instance.created_at).toLocaleString() : '—'}</span>
+                            <div className="space-y-4">
+                              <div className="rounded-lg border border-border bg-card/70 p-4">
+                                <div className="mb-3 text-sm font-medium tracking-tight">At a glance</div>
+                                <div className="space-y-2 text-sm text-muted-foreground">
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span>Provision</span>
+                                    <span className="capitalize">{instance.provision_status || 'none'}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span>Heartbeat</span>
+                                    <span className="capitalize">{instance.heartbeat_status || 'unknown'}</span>
+                                  </div>
+                                  <div className="flex items-center justify-between gap-4">
+                                    <span>Created</span>
+                                    <span>{instance.created_at ? new Date(instance.created_at).toLocaleString() : '—'}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <DeleteProjectButton slug={instance.slug} onDeleted={() => onSelect(null)} />
                             </div>
                           </div>
                         </td>
@@ -184,5 +188,32 @@ export function FleetTable({
         </div>
       )}
     </section>
+  )
+}
+
+function DeleteProjectButton({ slug, onDeleted }: { slug: string; onDeleted: () => void }) {
+  const [deleting, setDeleting] = useState(false)
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!window.confirm(`Delete ${slug}? This removes the k8s namespace and all its resources.`)) return
+    setDeleting(true)
+    try {
+      await api.deleteProject(slug)
+      onDeleted()
+    } catch {
+      setDeleting(false)
+    }
+  }
+
+  return (
+    <button
+      onClick={handleDelete}
+      disabled={deleting}
+      className="inline-flex items-center gap-2 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-1.5 text-xs font-medium text-rose-300 hover:bg-rose-500/20 hover:text-rose-200 transition-colors disabled:opacity-50"
+    >
+      <Trash2 className="w-3.5 h-3.5" />
+      {deleting ? 'Deleting…' : 'Delete project'}
+    </button>
   )
 }

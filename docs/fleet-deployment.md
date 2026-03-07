@@ -204,6 +204,9 @@ kubectl create secret generic sdlc-hub-notify \
 | `WOODPECKER_URL` | Woodpecker server URL for provisioning |
 | `WOODPECKER_API_TOKEN` | Woodpecker API token |
 | `HUB_SERVICE_TOKENS` | M2M bearer tokens (optional) |
+| `PONDER_CITADEL_URL` | Citadel ingest URL (optional, from `sdlc-hub-citadel` secret) |
+| `PONDER_CITADEL_API_KEY` | Citadel API key (optional, from `sdlc-hub-citadel` secret) |
+| `PONDER_CITADEL_TENANT_ID` | Citadel tenant UUID (optional, from `sdlc-hub-citadel` secret) |
 | `NOTIFY_URL` | `https://notify.orchard9.ai` — OTP email delivery |
 | `NOTIFY_API_KEY` | notify send key (`sdlc-hub-notify` secret) |
 | `NOTIFY_HOST` | `mail.sdlc.threesix.ai` |
@@ -218,6 +221,9 @@ kubectl create secret generic sdlc-hub-notify \
 | `DATABASE_URL` | Postgres connection string (optional, enables cluster storage) |
 | `ANTHROPIC_API_KEY` | For agent runs (fallback — credential pool preferred in fleet) |
 | `CLAUDE_CODE_OAUTH_TOKEN` | Injected per agent run from credential pool (not set manually) |
+| `PONDER_CITADEL_URL` | Citadel ingest URL (optional, from `sdlc-citadel-credentials` secret) |
+| `PONDER_CITADEL_API_KEY` | Citadel API key (optional, from `sdlc-citadel-credentials` secret) |
+| `PONDER_CITADEL_TENANT_ID` | Citadel tenant UUID (optional, via Helm `citadel.tenantId`) |
 
 ---
 

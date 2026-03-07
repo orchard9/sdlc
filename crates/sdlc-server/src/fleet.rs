@@ -654,6 +654,81 @@ pub async fn get_gitea_username(
 }
 
 // ---------------------------------------------------------------------------
+// Namespace deletion
+// ---------------------------------------------------------------------------
+
+/// Delete the `sdlc-{slug}` namespace, cascading all resources within it.
+pub async fn delete_namespace(
+    kube_client: Option<&kube::Client>,
+    slug: &str,
+) -> Result<(), FleetError> {
+    let client = kube_client
+        .ok_or_else(|| FleetError::K8sUnavailable("kube client not available".into()))?;
+    let ns = format!("sdlc-{slug}");
+    let ns_api: kube::Api<k8s_openapi::api::core::v1::Namespace> = kube::Api::all(client.clone());
+    ns_api
+        .delete(&ns, &kube::api::DeleteParams::default())
+        .await
+        .map_err(|e| FleetError::K8sUnavailable(format!("delete namespace {ns}: {e}")))?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Cloudflare DNS cleanup
+// ---------------------------------------------------------------------------
+
+/// Delete Cloudflare DNS A records for `{slug}.sdlc.threesix.ai` (best-effort).
+pub async fn delete_cloudflare_dns(
+    http_client: &reqwest::Client,
+    slug: &str,
+) -> Result<(), FleetError> {
+    let token = std::env::var("THREESIX_CLOUDFLARE_API_TOKEN")
+        .map_err(|_| FleetError::InvalidRequest("THREESIX_CLOUDFLARE_API_TOKEN not set".into()))?;
+    let zone_id = std::env::var("THREESIX_CLOUDFLARE_ZONE_ID")
+        .map_err(|_| FleetError::InvalidRequest("THREESIX_CLOUDFLARE_ZONE_ID not set".into()))?;
+
+    let record_name = format!("{slug}.sdlc.threesix.ai");
+    let list_url = format!(
+        "https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records?name={record_name}"
+    );
+
+    let resp = http_client
+        .get(&list_url)
+        .header("Authorization", format!("Bearer {token}"))
+        .send()
+        .await
+        .map_err(|e| FleetError::InvalidRequest(format!("cloudflare list: {e}")))?;
+
+    #[derive(serde::Deserialize)]
+    struct CfRecord {
+        id: String,
+    }
+    #[derive(serde::Deserialize)]
+    struct CfResponse {
+        result: Vec<CfRecord>,
+    }
+
+    let cf: CfResponse = resp
+        .json()
+        .await
+        .map_err(|e| FleetError::InvalidRequest(format!("cloudflare parse: {e}")))?;
+
+    for record in &cf.result {
+        let del_url = format!(
+            "https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{}",
+            record.id
+        );
+        let _ = http_client
+            .delete(&del_url)
+            .header("Authorization", format!("Bearer {token}"))
+            .send()
+            .await;
+    }
+
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 // Errors
 // ---------------------------------------------------------------------------
 

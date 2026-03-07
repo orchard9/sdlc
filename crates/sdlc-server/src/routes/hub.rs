@@ -806,6 +806,37 @@ pub async fn create_repo(
     .into_response()
 }
 
+/// DELETE /api/hub/projects/:slug
+///
+/// Deletes a project: removes k8s namespace (cascade), Cloudflare DNS record,
+/// and hub registry entries. Gitea repo is preserved.
+pub async fn delete_project(
+    State(app): State<AppState>,
+    axum::extract::Path(slug): axum::extract::Path<String>,
+) -> axum::response::Response {
+    if app.hub_registry.is_none() {
+        return not_hub_mode();
+    }
+
+    // 1. Delete k8s namespace (best-effort)
+    if let Err(e) = fleet::delete_namespace(app.kube_client.as_ref(), &slug).await {
+        tracing::warn!(slug = %slug, error = %e, "k8s namespace deletion failed");
+    }
+
+    // 2. Delete Cloudflare DNS (best-effort)
+    if let Err(e) = fleet::delete_cloudflare_dns(&app.http_client, &slug).await {
+        tracing::warn!(slug = %slug, error = %e, "cloudflare DNS deletion failed");
+    }
+
+    // 3. Remove from hub registry
+    if let Some(hub) = &app.hub_registry {
+        let mut registry = hub.lock().await;
+        registry.remove_project(&slug);
+    }
+
+    Json(serde_json::json!({ "deleted": true, "slug": slug })).into_response()
+}
+
 /// GET /api/hub/agents
 pub async fn agents(State(app): State<AppState>) -> axum::response::Response {
     if app.hub_registry.is_none() {
