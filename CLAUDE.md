@@ -48,10 +48,11 @@ In cluster mode, sdlc runs as a fleet of autonomous dev environments behind a hu
   - Project toolchain (from `Dockerfile.sdlc` extending base image)
   - git-sync sidecar (30s poll from Gitea)
   - Shared `/workspace` volume (emptyDir)
-- **Credential pool** — shared `CLAUDE_CODE_OAUTH_TOKEN` values in postgres, checked out per `spawn_agent_run`
-- **Image layering** (target) — base image (ponder + claude + opencode + git) → project extends via `Dockerfile.sdlc`. Current Dockerfile is minimal (ponder only).
+- **Credential pool** — PostgreSQL-backed round-robin checkout of `CLAUDE_CODE_OAUTH_TOKEN` values per `spawn_agent_run`. Uses `SELECT FOR UPDATE SKIP LOCKED` for deadlock-free concurrent access. Gracefully degrades to ambient auth when `DATABASE_URL` is unset or pool is empty. See [`docs/cluster-operations.md`](docs/cluster-operations.md#credential-pool).
+- **Heartbeat** — instances POST to `{SDLC_HUB_URL}/api/hub/heartbeat` every 30s with project name, URL, active milestone, feature count, and agent status. Hub classifies as online (<30s), stale (30–90s), offline (90s–5min), then sweeps. See [`docs/cluster-operations.md`](docs/cluster-operations.md#heartbeat-protocol).
+- **Image layering** — base image (`sdlc-base:latest`, built from `Dockerfile.base`) includes ponder + Claude Code CLI + OpenCode CLI + Node.js + git + build tools. Projects extend via `Dockerfile.sdlc` for project-specific toolchains. When no `Dockerfile.sdlc` exists, the base image is used directly.
 
-Key paths: `k3s-fleet/deployments/hub/` (hub manifests), `k3s-fleet/deployments/helm/sdlc-server/` (project helm chart), `crates/sdlc-server/src/routes/hub.rs` (hub routes), `crates/sdlc-server/src/fleet.rs` (fleet discovery + provisioning). See [`docs/local-fleet-stack.md`](docs/local-fleet-stack.md) for running the full hub + provision pipeline locally.
+Key paths: `k3s-fleet/deployments/hub/` (hub manifests), `k3s-fleet/deployments/helm/sdlc-server/` (project helm chart), `crates/sdlc-server/src/routes/hub.rs` (hub routes), `crates/sdlc-server/src/fleet.rs` (fleet discovery + provisioning). See [`docs/local-fleet-stack.md`](docs/local-fleet-stack.md) for local dev setup, [`docs/cluster-operations.md`](docs/cluster-operations.md) for production operations, and [`docs/troubleshooting-fleet.md`](docs/troubleshooting-fleet.md) for common failure modes.
 
 ## Build & Test
 

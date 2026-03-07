@@ -28,6 +28,12 @@ resources:
     requests: { cpu: 10m, memory: 32Mi }
     limits:   { cpu: 100m, memory: 64Mi }
 
+citadel:
+  enabled: false        # Enable Citadel telemetry shipping
+  url: ""               # e.g. https://citadel-staging.orchard9.ai
+  tenantId: ""          # Citadel tenant UUID
+  # API key is read from sdlc-citadel-credentials secret (key: api-key)
+
 postgres:
   externalSecret:
     # GCP Secret Manager key for the shared Postgres connection string.

@@ -84,6 +84,27 @@ spec:
               value: mail.sdlc.threesix.ai
             - name: NOTIFY_FROM
               value: "noreply@mail.sdlc.threesix.ai"
+            # Citadel telemetry (optional)
+            - name: PONDER_CITADEL_URL
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-citadel
+                  key: url
+                  optional: true
+            - name: PONDER_CITADEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-citadel
+                  key: api-key
+                  optional: true
+            - name: PONDER_CITADEL_TENANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-hub-citadel
+                  key: tenant-id
+                  optional: true
+            - name: PONDER_ENVIRONMENT
+              value: "production"
           resources:
             requests:
               cpu: 50m

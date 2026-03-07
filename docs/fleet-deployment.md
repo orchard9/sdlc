@@ -218,3 +218,11 @@ kubectl create secret generic sdlc-hub-notify \
 | `DATABASE_URL` | Postgres connection string (optional, enables cluster storage) |
 | `ANTHROPIC_API_KEY` | For agent runs (fallback — credential pool preferred in fleet) |
 | `CLAUDE_CODE_OAUTH_TOKEN` | Injected per agent run from credential pool (not set manually) |
+
+---
+
+## Related Docs
+
+- [`cluster-operations.md`](cluster-operations.md) — secrets creation, credential pool management, heartbeat protocol, cert renewal, hub state debugging
+- [`troubleshooting-fleet.md`](troubleshooting-fleet.md) — common failure modes and resolutions
+- [`local-fleet-stack.md`](local-fleet-stack.md) — running the full hub + provision pipeline locally

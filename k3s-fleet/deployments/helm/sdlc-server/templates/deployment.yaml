@@ -79,6 +79,19 @@ spec:
                   name: postgres-sdlc-credentials
                   key: DATABASE_URL
             {{- end }}
+            {{- if .Values.citadel.enabled }}
+            - name: PONDER_CITADEL_URL
+              value: {{ .Values.citadel.url }}
+            - name: PONDER_CITADEL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: sdlc-citadel-credentials
+                  key: api-key
+            - name: PONDER_CITADEL_TENANT_ID
+              value: {{ .Values.citadel.tenantId }}
+            - name: PONDER_ENVIRONMENT
+              value: "production"
+            {{- end }}
           volumeMounts:
             - name: workspace
               mountPath: /workspace
