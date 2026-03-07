@@ -1,0 +1,15 @@
+id: "20260307-192310-kvf"
+milestone_slug: v50-ui-title
+started_at: "2026-03-07T19:23:10Z"
+completed_at: "2026-03-07T19:26:00Z"
+verdict: pass
+tests_total: 10
+tests_passed: 10
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v50-ui-title/uat-runs/20260307-192310-kvf/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v50-ui-title/uat-runs/20260307-192310-kvf/01-dashboard-title.png
+  - .sdlc/milestones/v50-ui-title/uat-runs/20260307-192310-kvf/02-list-pages-knowledge.png
+  - .sdlc/milestones/v50-ui-title/uat-runs/20260307-192310-kvf/03-detail-page-title.png
+  - .sdlc/milestones/v50-ui-title/uat-runs/20260307-192310-kvf/04-navigation-update.png

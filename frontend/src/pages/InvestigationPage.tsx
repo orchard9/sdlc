@@ -13,6 +13,7 @@ import { WorkspaceShell } from '@/components/layout/WorkspaceShell'
 import { CreateWorkspaceModal } from '@/components/shared/CreateWorkspaceModal'
 import {
   Plus, ArrowLeft, Microscope, Loader2, Files,
+  Target, Layers, FileText, CheckCircle2,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type {
@@ -337,13 +338,57 @@ export function InvestigationPage() {
   const detailPane = slug ? (
     <EntryDetailPane key={slug} slug={slug} onRefresh={load} onBack={() => navigate('/investigations')} />
   ) : (
-    <div className="flex items-center justify-center h-full text-muted-foreground">
-      <div className="text-center">
-        <Microscope className="w-8 h-8 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">Select an investigation to continue</p>
-        <p className="text-xs text-muted-foreground/60 mt-1">
-          or press <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">+</kbd> to start a new one
-        </p>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-xl mx-auto px-6 py-10 space-y-8">
+        {/* Hero */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-1">
+            <Microscope className="w-6 h-6 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold">Find the root cause.</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Root Cause is a structured investigation workspace. Describe the symptoms and
+            an agent digs through code, logs, and context to find the real problem — not just the surface.
+          </p>
+        </div>
+
+        {/* How it works */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">How it works</h3>
+          <div className="grid gap-2">
+            {[
+              { icon: Target, title: 'Describe the symptoms', desc: 'What broke? What changed? Provide context — the agent uses it to narrow the search.' },
+              { icon: Layers, title: 'Agent investigates areas', desc: 'The investigation fans out across relevant code areas, building confidence as patterns emerge.' },
+              { icon: FileText, title: 'Synthesis & output', desc: 'Findings converge into a root cause summary with evidence, affected areas, and a fix strategy.' },
+              { icon: CheckCircle2, title: 'Action plan', desc: 'The output becomes tasks you can commit into features — or fix directly.' },
+            ].map(({ icon: Icon, title, desc }) => (
+              <div key={title} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-card/50">
+                <Icon className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="flex items-center justify-center pt-2">
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            New Root Cause
+          </button>
+        </div>
+
+        {entries.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground/40">
+            Or select an investigation from the list to continue.
+          </p>
+        )}
       </div>
     </div>
   )

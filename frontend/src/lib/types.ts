@@ -955,6 +955,21 @@ export interface AppTunnelStatus {
   configured_port: number | null
 }
 
+export interface CheckedLocation {
+  location: string
+  found: boolean
+}
+
+export interface TunnelPreflightResult {
+  installed: boolean
+  path: string | null
+  version: string | null
+  source: string | null
+  process_path_stale: boolean
+  checked: CheckedLocation[]
+  install_hint: string | null
+}
+
 // ---------------------------------------------------------------------------
 // Agent types
 // ---------------------------------------------------------------------------

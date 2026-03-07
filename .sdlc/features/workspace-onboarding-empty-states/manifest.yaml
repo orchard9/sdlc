@@ -1,0 +1,103 @@
+slug: workspace-onboarding-empty-states
+title: Rich onboarding empty states for all workspace pages
+description: Replace blank detail panes with structured what/how/CTA onboarding content across Ponder, Root Cause, Guidelines, Spikes, and Knowledge pages
+phase: released
+created_at: 2026-03-07T19:09:34.931353Z
+updated_at: 2026-03-07T19:20:21.898508Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/workspace-onboarding-empty-states/spec.md
+  created_at: 2026-03-07T19:17:09.596530Z
+  approved_at: 2026-03-07T19:17:16.880232Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/workspace-onboarding-empty-states/design.md
+  created_at: 2026-03-07T19:17:44.421592Z
+  approved_at: 2026-03-07T19:17:44.431033Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/workspace-onboarding-empty-states/tasks.md
+  created_at: 2026-03-07T19:17:59.647035Z
+  approved_at: 2026-03-07T19:17:59.655622Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/workspace-onboarding-empty-states/qa-plan.md
+  created_at: 2026-03-07T19:18:20.126091Z
+  approved_at: 2026-03-07T19:18:20.136300Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/workspace-onboarding-empty-states/review.md
+  created_at: 2026-03-07T19:19:04.182714Z
+  approved_at: 2026-03-07T19:19:10.758254Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/workspace-onboarding-empty-states/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T19:19:24.181680Z
+  waive_reason: 'Pure frontend UI change: replaces static placeholder text with richer static placeholder text. No API calls, no auth changes, no user input handling, no data persistence. Zero security surface.'
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/workspace-onboarding-empty-states/qa-results.md
+  created_at: 2026-03-07T19:20:09.732354Z
+  approved_at: 2026-03-07T19:20:15.424327Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T19:09:34.931353Z
+  exited: 2026-03-07T19:17:16.882947Z
+- phase: specified
+  entered: 2026-03-07T19:17:16.882947Z
+  exited: 2026-03-07T19:18:20.138354Z
+- phase: planned
+  entered: 2026-03-07T19:18:20.138354Z
+  exited: 2026-03-07T19:18:25.175516Z
+- phase: ready
+  entered: 2026-03-07T19:18:25.175516Z
+  exited: 2026-03-07T19:18:32.609954Z
+- phase: implementation
+  entered: 2026-03-07T19:18:32.609954Z
+  exited: 2026-03-07T19:19:10.768032Z
+- phase: review
+  entered: 2026-03-07T19:19:10.768032Z
+  exited: 2026-03-07T19:19:17.014737Z
+- phase: audit
+  entered: 2026-03-07T19:19:17.014737Z
+  exited: 2026-03-07T19:19:24.183779Z
+- phase: qa
+  entered: 2026-03-07T19:19:24.183779Z
+  exited: 2026-03-07T19:20:15.432828Z
+- phase: merge
+  entered: 2026-03-07T19:20:15.432828Z
+  exited: 2026-03-07T19:20:21.898508Z
+- phase: released
+  entered: 2026-03-07T19:20:21.898508Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

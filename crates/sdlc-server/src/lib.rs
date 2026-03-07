@@ -667,6 +667,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/tunnel", get(routes::tunnel::get_tunnel))
         .route("/api/tunnel", post(routes::tunnel::start_tunnel))
         .route("/api/tunnel", delete(routes::tunnel::stop_tunnel))
+        .route("/api/tunnel/preflight", get(routes::tunnel::tunnel_preflight))
         // Agents (Claude agent definitions from ~/.claude/agents/)
         .route("/api/agents", get(routes::agents::list_agents))
         .route("/api/agents/{name}", get(routes::agents::get_agent))

@@ -1,0 +1,1122 @@
+- generic [ref=e3]:
+  - complementary [ref=e5]:
+    - generic [ref=e6]:
+      - heading "Ponder" [level=1] [ref=e8]
+      - button "Collapse sidebar" [ref=e9]:
+        - img [ref=e10]
+    - navigation [ref=e13]:
+      - generic [ref=e14]:
+        - paragraph [ref=e15]: work
+        - generic [ref=e16]:
+          - link "Dashboard" [ref=e17] [cursor=pointer]:
+            - /url: /
+            - img [ref=e18]
+            - text: Dashboard
+          - link "Milestones" [ref=e23] [cursor=pointer]:
+            - /url: /milestones
+            - img [ref=e24]
+            - text: Milestones
+          - link "Features" [ref=e26] [cursor=pointer]:
+            - /url: /features
+            - img [ref=e27]
+            - text: Features
+          - link "Run History" [ref=e29] [cursor=pointer]:
+            - /url: /runs
+            - img [ref=e30]
+            - text: Run History
+      - generic [ref=e31]:
+        - paragraph [ref=e32]: plan
+        - generic [ref=e33]:
+          - link "Threads" [ref=e34] [cursor=pointer]:
+            - /url: /threads
+            - img [ref=e35]
+            - text: Threads
+          - link "Ponder" [ref=e38] [cursor=pointer]:
+            - /url: /ponder
+            - img [ref=e39]
+            - text: Ponder
+          - link "Root Cause" [ref=e41] [cursor=pointer]:
+            - /url: /investigations
+            - img [ref=e42]
+            - text: Root Cause
+          - link "Evolve" [ref=e46] [cursor=pointer]:
+            - /url: /evolve
+            - img [ref=e47]
+            - text: Evolve
+          - link "Guidelines" [ref=e50] [cursor=pointer]:
+            - /url: /guidelines
+            - img [ref=e51]
+            - text: Guidelines
+          - link "Spikes" [ref=e54] [cursor=pointer]:
+            - /url: /spikes
+            - img [ref=e55]
+            - text: Spikes
+          - link "Knowledge" [ref=e57] [cursor=pointer]:
+            - /url: /knowledge
+            - img [ref=e58]
+            - text: Knowledge
+      - generic [ref=e60]:
+        - paragraph [ref=e61]: setup
+        - generic [ref=e62]:
+          - link "Tools" [ref=e63] [cursor=pointer]:
+            - /url: /tools
+            - img [ref=e64]
+            - text: Tools
+          - link "Secrets" [ref=e66] [cursor=pointer]:
+            - /url: /secrets
+            - img [ref=e67]
+            - text: Secrets
+          - link "Agents" [ref=e70] [cursor=pointer]:
+            - /url: /agents
+            - img [ref=e71]
+            - text: Agents
+          - link "Actions" [ref=e74] [cursor=pointer]:
+            - /url: /actions
+            - img [ref=e75]
+            - text: Actions
+      - generic [ref=e79]:
+        - paragraph [ref=e80]: integrate
+        - link "Network" [ref=e82] [cursor=pointer]:
+          - /url: /network
+          - img [ref=e83]
+          - text: Network
+      - generic [ref=e87]:
+        - paragraph [ref=e88]: project
+        - generic [ref=e89]:
+          - link "Vision" [ref=e90] [cursor=pointer]:
+            - /url: /vision
+            - img [ref=e91]
+            - text: Vision
+          - link "Architecture" [ref=e95] [cursor=pointer]:
+            - /url: /architecture
+            - img [ref=e96]
+            - text: Architecture
+      - generic [ref=e100]:
+        - paragraph [ref=e101]: docs
+        - generic [ref=e102]:
+          - link "Quick Start" [ref=e103] [cursor=pointer]:
+            - /url: /docs/quickstart
+            - img [ref=e104]
+            - text: Quick Start
+          - link "Commands" [ref=e109] [cursor=pointer]:
+            - /url: /docs/commands
+            - img [ref=e110]
+            - text: Commands
+          - link "Planning Flow" [ref=e112] [cursor=pointer]:
+            - /url: /docs/planning-flow
+            - img [ref=e113]
+            - text: Planning Flow
+          - link "Development Flow" [ref=e115] [cursor=pointer]:
+            - /url: /docs/development-flow
+            - img [ref=e116]
+            - text: Development Flow
+          - link "Release Notes" [ref=e120] [cursor=pointer]:
+            - /url: /docs/release-notes
+            - img [ref=e121]
+            - text: Release Notes
+    - generic [ref=e124]:
+      - button "Ask Code ⌘/" [ref=e125]:
+        - img [ref=e126]
+        - generic [ref=e130]: Ask Code
+        - generic [ref=e131]: ⌘/
+      - button "Fix Right Away ⌘⇧F" [ref=e132]:
+        - img [ref=e133]
+        - generic [ref=e135]: Fix Right Away
+        - generic [ref=e136]: ⌘⇧F
+      - button "Search ⌘K" [ref=e137]:
+        - img [ref=e138]
+        - generic [ref=e141]: Search
+        - generic [ref=e142]: ⌘K
+  - main [ref=e144]:
+    - generic [ref=e146]:
+      - generic [ref=e147]:
+        - generic [ref=e148]:
+          - heading "Root Cause" [level=2] [ref=e149]
+          - button "New Investigation" [ref=e150]:
+            - img [ref=e151]
+        - generic [ref=e152]:
+          - button "All 2" [ref=e153]:
+            - generic [ref=e154]: All
+            - generic [ref=e155]: "2"
+          - button "Active 1" [ref=e156]:
+            - generic [ref=e157]: Active
+            - generic [ref=e158]: "1"
+          - button "Complete 1" [ref=e159]:
+            - generic [ref=e160]: Complete
+            - generic [ref=e161]: "1"
+          - button "Parked 0" [ref=e162]:
+            - generic [ref=e163]: Parked
+            - generic [ref=e164]: "0"
+        - generic [ref=e166]:
+          - 'button "UAT Test: SSE event system root cause triage complete no sessions yet" [ref=e167]':
+            - generic [ref=e168]:
+              - generic [ref=e169]: "UAT Test: SSE event system root cause"
+              - generic [ref=e170]: triage
+              - generic [ref=e171]: complete
+            - generic [ref=e173]: no sessions yet
+          - button "agent activity missing details triage in progress no sessions yet" [ref=e174]:
+            - generic [ref=e175]:
+              - generic [ref=e176]: agent activity missing details
+              - generic [ref=e177]: triage
+              - generic [ref=e178]: in progress
+            - generic [ref=e180]: no sessions yet
+      - generic [ref=e183]:
+        - generic [ref=e184]:
+          - img [ref=e186]
+          - heading "Find the root cause." [level=2] [ref=e190]
+          - paragraph [ref=e191]: Root Cause is a structured investigation workspace. Describe the symptoms and an agent digs through code, logs, and context to find the real problem — not just the surface.
+        - generic [ref=e192]:
+          - heading "How it works" [level=3] [ref=e193]
+          - generic [ref=e194]:
+            - generic [ref=e195]:
+              - img [ref=e196]
+              - generic [ref=e200]:
+                - paragraph [ref=e201]: Describe the symptoms
+                - paragraph [ref=e202]: What broke? What changed? Provide context — the agent uses it to narrow the search.
+            - generic [ref=e203]:
+              - img [ref=e204]
+              - generic [ref=e208]:
+                - paragraph [ref=e209]: Agent investigates areas
+                - paragraph [ref=e210]: The investigation fans out across relevant code areas, building confidence as patterns emerge.
+            - generic [ref=e211]:
+              - img [ref=e212]
+              - generic [ref=e215]:
+                - paragraph [ref=e216]: Synthesis & output
+                - paragraph [ref=e217]: Findings converge into a root cause summary with evidence, affected areas, and a fix strategy.
+            - generic [ref=e218]:
+              - img [ref=e219]
+              - generic [ref=e222]:
+                - paragraph [ref=e223]: Action plan
+                - paragraph [ref=e224]: The output becomes tasks you can commit into features — or fix directly.
+        - button "New Root Cause" [ref=e226]:
+          - img [ref=e227]
+          - text: New Root Cause
+        - paragraph [ref=e228]: Or select an investigation from the list to continue.
+  - complementary [ref=e229]:
+    - generic [ref=e231]:
+      - heading "Agent Activity" [level=2] [ref=e232]
+      - generic [ref=e233]:
+        - button "Fullscreen" [ref=e234]:
+          - img [ref=e235]
+        - button "Collapse panel" [ref=e240]:
+          - img [ref=e241]
+    - generic [ref=e244]:
+      - generic [ref=e245]:
+        - 'generic "Concurrency strip: 15 peak concurrent runs" [ref=e246]':
+          - generic "idle" [ref=e247]
+          - generic "1 active" [ref=e249]
+          - generic "idle" [ref=e251]
+          - generic "idle" [ref=e253]
+          - generic "idle" [ref=e255]
+          - generic "idle" [ref=e257]
+          - generic "idle" [ref=e259]
+          - generic "idle" [ref=e261]
+          - generic "idle" [ref=e263]
+          - generic "idle" [ref=e265]
+          - generic "idle" [ref=e267]
+          - generic "1 active" [ref=e269]
+          - generic "4 active" [ref=e271]
+          - generic "1 active" [ref=e273]
+          - generic "6 active" [ref=e275]
+          - generic "3 active" [ref=e277]
+          - generic "idle" [ref=e279]
+          - generic "idle" [ref=e281]
+          - generic "idle" [ref=e283]
+          - generic "idle" [ref=e285]
+          - generic "idle" [ref=e287]
+          - generic "idle" [ref=e289]
+          - generic "idle" [ref=e291]
+          - generic "idle" [ref=e293]
+          - generic "idle" [ref=e295]
+          - generic "idle" [ref=e297]
+          - generic "idle" [ref=e299]
+          - generic "idle" [ref=e301]
+          - generic "idle" [ref=e303]
+          - generic "idle" [ref=e305]
+          - generic "4 active" [ref=e307]
+          - generic "8 active" [ref=e309]
+          - generic "6 active" [ref=e311]
+          - generic "6 active" [ref=e313]
+          - generic "2 active" [ref=e315]
+          - generic "4 active" [ref=e317]
+          - generic "idle" [ref=e319]
+          - generic "idle" [ref=e321]
+          - generic "15 active" [ref=e323]
+          - generic "3 active" [ref=e325]
+          - generic "idle" [ref=e327]
+          - generic "idle" [ref=e329]
+        - paragraph [ref=e331]: 58 runs · peak 15 concurrent · 18h 41m
+      - link "full view →" [ref=e332] [cursor=pointer]:
+        - /url: /runs
+    - generic [ref=e333]:
+      - generic [ref=e334]:
+        - generic [ref=e336]:
+          - 'button "UAT: v51-workspace-empty-states 11:30 AM milestones/v51-workspace-empty-states" [ref=e337]':
+            - img [ref=e338]
+            - generic [ref=e340]:
+              - paragraph [ref=e341]: "UAT: v51-workspace-empty-states"
+              - generic [ref=e343]: 11:30 AM
+              - link "milestones/v51-workspace-empty-states" [ref=e344] [cursor=pointer]:
+                - /url: /milestones/v51-workspace-empty-states
+                - img [ref=e345]
+                - text: milestones/v51-workspace-empty-states
+          - button "Stop run" [ref=e349]:
+            - img [ref=e350]
+          - button [ref=e352]:
+            - img [ref=e353]
+        - generic [ref=e356]:
+          - 'button "run-wave: v51-tunnel-discovery 11:22 AM milestones/v51-tunnel-discovery" [ref=e357]':
+            - img [ref=e358]
+            - generic [ref=e360]:
+              - paragraph [ref=e361]: "run-wave: v51-tunnel-discovery"
+              - generic [ref=e363]: 11:22 AM
+              - link "milestones/v51-tunnel-discovery" [ref=e364] [cursor=pointer]:
+                - /url: /milestones/v51-tunnel-discovery
+                - img [ref=e365]
+                - text: milestones/v51-tunnel-discovery
+          - button "Stop run" [ref=e369]:
+            - img [ref=e370]
+          - button [ref=e372]:
+            - img [ref=e373]
+      - generic [ref=e376]:
+        - generic [ref=e378]:
+          - 'button "UAT: v50-ui-title 11:23 AM · $0.76 · 35 turns milestones/v50-ui-title" [ref=e379]':
+            - img [ref=e380]
+            - generic [ref=e383]:
+              - paragraph [ref=e384]: "UAT: v50-ui-title"
+              - generic [ref=e385]:
+                - generic [ref=e386]: 11:23 AM
+                - generic [ref=e387]: · $0.76
+                - generic [ref=e388]: · 35 turns
+              - link "milestones/v50-ui-title" [ref=e389] [cursor=pointer]:
+                - /url: /milestones/v50-ui-title
+                - img [ref=e390]
+                - text: milestones/v50-ui-title
+          - button [ref=e394]:
+            - img [ref=e395]
+        - generic [ref=e398]:
+          - 'button "prepare: v51-tunnel-discovery 11:22 AM · $0.04 · 3 turns milestones/v51-tunnel-discovery" [ref=e399]':
+            - img [ref=e400]
+            - generic [ref=e403]:
+              - paragraph [ref=e404]: "prepare: v51-tunnel-discovery"
+              - generic [ref=e405]:
+                - generic [ref=e406]: 11:22 AM
+                - generic [ref=e407]: · $0.04
+                - generic [ref=e408]: · 3 turns
+              - link "milestones/v51-tunnel-discovery" [ref=e409] [cursor=pointer]:
+                - /url: /milestones/v51-tunnel-discovery
+                - img [ref=e410]
+                - text: milestones/v51-tunnel-discovery
+          - button [ref=e414]:
+            - img [ref=e415]
+        - generic [ref=e418]:
+          - 'button "prepare: v51-tunnel-discovery 11:19 AM · $0.18 · 6 turns milestones/v51-tunnel-discovery" [ref=e419]':
+            - img [ref=e420]
+            - generic [ref=e423]:
+              - paragraph [ref=e424]: "prepare: v51-tunnel-discovery"
+              - generic [ref=e425]:
+                - generic [ref=e426]: 11:19 AM
+                - generic [ref=e427]: · $0.18
+                - generic [ref=e428]: · 6 turns
+              - link "milestones/v51-tunnel-discovery" [ref=e429] [cursor=pointer]:
+                - /url: /milestones/v51-tunnel-discovery
+                - img [ref=e430]
+                - text: milestones/v51-tunnel-discovery
+          - button [ref=e434]:
+            - img [ref=e435]
+        - generic [ref=e438]:
+          - 'button "run-wave: v51-workspace-empty-states 11:15 AM · $2.47 · 5 turns milestones/v51-workspace-empty-states" [ref=e439]':
+            - img [ref=e440]
+            - generic [ref=e443]:
+              - paragraph [ref=e444]: "run-wave: v51-workspace-empty-states"
+              - generic [ref=e445]:
+                - generic [ref=e446]: 11:15 AM
+                - generic [ref=e447]: · $2.47
+                - generic [ref=e448]: · 5 turns
+              - link "milestones/v51-workspace-empty-states" [ref=e449] [cursor=pointer]:
+                - /url: /milestones/v51-workspace-empty-states
+                - img [ref=e450]
+                - text: milestones/v51-workspace-empty-states
+          - button [ref=e454]:
+            - img [ref=e455]
+        - generic [ref=e458]:
+          - 'button "prepare: v51-workspace-empty-states 11:14 AM · $0.11 · 3 turns milestones/v51-workspace-empty-states" [ref=e459]':
+            - img [ref=e460]
+            - generic [ref=e463]:
+              - paragraph [ref=e464]: "prepare: v51-workspace-empty-states"
+              - generic [ref=e465]:
+                - generic [ref=e466]: 11:14 AM
+                - generic [ref=e467]: · $0.11
+                - generic [ref=e468]: · 3 turns
+              - link "milestones/v51-workspace-empty-states" [ref=e469] [cursor=pointer]:
+                - /url: /milestones/v51-workspace-empty-states
+                - img [ref=e470]
+                - text: milestones/v51-workspace-empty-states
+          - button [ref=e474]:
+            - img [ref=e475]
+        - generic [ref=e478]:
+          - 'button "ponder: improve-start-tunnel-error-recovery 11:14 AM · $0.84 · 29 turns ponder/improve-start-tunnel-error-recovery" [ref=e479]':
+            - img [ref=e480]
+            - generic [ref=e483]:
+              - paragraph [ref=e484]: "ponder: improve-start-tunnel-error-recovery"
+              - generic [ref=e485]:
+                - generic [ref=e486]: 11:14 AM
+                - generic [ref=e487]: · $0.84
+                - generic [ref=e488]: · 29 turns
+              - link "ponder/improve-start-tunnel-error-recovery" [ref=e489] [cursor=pointer]:
+                - /url: /ponder/improve-start-tunnel-error-recovery
+                - img [ref=e490]
+                - text: ponder/improve-start-tunnel-error-recovery
+          - button [ref=e494]:
+            - img [ref=e495]
+        - generic [ref=e498]:
+          - 'button "run-wave: v50-ui-title 11:09 AM · $0.81 · 5 turns milestones/v50-ui-title" [ref=e499]':
+            - img [ref=e500]
+            - generic [ref=e503]:
+              - paragraph [ref=e504]: "run-wave: v50-ui-title"
+              - generic [ref=e505]:
+                - generic [ref=e506]: 11:09 AM
+                - generic [ref=e507]: · $0.81
+                - generic [ref=e508]: · 5 turns
+              - link "milestones/v50-ui-title" [ref=e509] [cursor=pointer]:
+                - /url: /milestones/v50-ui-title
+                - img [ref=e510]
+                - text: milestones/v50-ui-title
+          - button [ref=e514]:
+            - img [ref=e515]
+        - generic [ref=e518]:
+          - 'button "commit: improve-start-tunnel-error-recovery 11:09 AM · $0.34 · 20 turns ponder/improve-start-tunnel-error-recovery" [ref=e519]':
+            - img [ref=e520]
+            - generic [ref=e523]:
+              - paragraph [ref=e524]: "commit: improve-start-tunnel-error-recovery"
+              - generic [ref=e525]:
+                - generic [ref=e526]: 11:09 AM
+                - generic [ref=e527]: · $0.34
+                - generic [ref=e528]: · 20 turns
+              - link "ponder/improve-start-tunnel-error-recovery" [ref=e529] [cursor=pointer]:
+                - /url: /ponder/improve-start-tunnel-error-recovery
+                - img [ref=e530]
+                - text: ponder/improve-start-tunnel-error-recovery
+          - button [ref=e534]:
+            - img [ref=e535]
+        - generic [ref=e538]:
+          - 'button "commit: improve-new-user-ponder-messaging 11:08 AM · $0.29 · 19 turns ponder/improve-new-user-ponder-messaging" [ref=e539]':
+            - img [ref=e540]
+            - generic [ref=e543]:
+              - paragraph [ref=e544]: "commit: improve-new-user-ponder-messaging"
+              - generic [ref=e545]:
+                - generic [ref=e546]: 11:08 AM
+                - generic [ref=e547]: · $0.29
+                - generic [ref=e548]: · 19 turns
+              - link "ponder/improve-new-user-ponder-messaging" [ref=e549] [cursor=pointer]:
+                - /url: /ponder/improve-new-user-ponder-messaging
+                - img [ref=e550]
+                - text: ponder/improve-new-user-ponder-messaging
+          - button [ref=e554]:
+            - img [ref=e555]
+        - generic [ref=e558]:
+          - 'button "run-wave: v50-ui-title 11:06 AM · server restarted milestones/v50-ui-title" [ref=e559]':
+            - img [ref=e560]
+            - generic [ref=e564]:
+              - paragraph [ref=e565]: "run-wave: v50-ui-title"
+              - generic [ref=e566]:
+                - generic [ref=e567]: 11:06 AM
+                - generic [ref=e568]: · server restarted
+              - link "milestones/v50-ui-title" [ref=e569] [cursor=pointer]:
+                - /url: /milestones/v50-ui-title
+                - img [ref=e570]
+                - text: milestones/v50-ui-title
+          - button [ref=e574]:
+            - img [ref=e575]
+        - generic [ref=e578]:
+          - 'button "prepare: v50-ui-title 11:00 AM · $0.14 · 5 turns milestones/v50-ui-title" [ref=e579]':
+            - img [ref=e580]
+            - generic [ref=e583]:
+              - paragraph [ref=e584]: "prepare: v50-ui-title"
+              - generic [ref=e585]:
+                - generic [ref=e586]: 11:00 AM
+                - generic [ref=e587]: · $0.14
+                - generic [ref=e588]: · 5 turns
+              - link "milestones/v50-ui-title" [ref=e589] [cursor=pointer]:
+                - /url: /milestones/v50-ui-title
+                - img [ref=e590]
+                - text: milestones/v50-ui-title
+          - button [ref=e594]:
+            - img [ref=e595]
+        - generic [ref=e598]:
+          - 'button "ponder: improve-start-tunnel-error-recovery 11:00 AM · Process error: Claude Code process termi ponder/improve-start-tunnel-error-recovery" [ref=e599]':
+            - img [ref=e600]
+            - generic [ref=e604]:
+              - paragraph [ref=e605]: "ponder: improve-start-tunnel-error-recovery"
+              - generic [ref=e606]:
+                - generic [ref=e607]: 11:00 AM
+                - generic [ref=e608]: "· Process error: Claude Code process termi"
+              - link "ponder/improve-start-tunnel-error-recovery" [ref=e609] [cursor=pointer]:
+                - /url: /ponder/improve-start-tunnel-error-recovery
+                - img [ref=e610]
+                - text: ponder/improve-start-tunnel-error-recovery
+          - button [ref=e614]:
+            - img [ref=e615]
+        - generic [ref=e618]:
+          - 'button "ponder: improve-new-user-ponder-messaging 10:56 AM · server restarted ponder/improve-new-user-ponder-messaging" [ref=e619]':
+            - img [ref=e620]
+            - generic [ref=e624]:
+              - paragraph [ref=e625]: "ponder: improve-new-user-ponder-messaging"
+              - generic [ref=e626]:
+                - generic [ref=e627]: 10:56 AM
+                - generic [ref=e628]: · server restarted
+              - link "ponder/improve-new-user-ponder-messaging" [ref=e629] [cursor=pointer]:
+                - /url: /ponder/improve-new-user-ponder-messaging
+                - img [ref=e630]
+                - text: ponder/improve-new-user-ponder-messaging
+          - button [ref=e634]:
+            - img [ref=e635]
+        - generic [ref=e638]:
+          - 'button "commit: ui-title 10:55 AM · $0.31 · 17 turns ponder/ui-title" [ref=e639]':
+            - img [ref=e640]
+            - generic [ref=e643]:
+              - paragraph [ref=e644]: "commit: ui-title"
+              - generic [ref=e645]:
+                - generic [ref=e646]: 10:55 AM
+                - generic [ref=e647]: · $0.31
+                - generic [ref=e648]: · 17 turns
+              - link "ponder/ui-title" [ref=e649] [cursor=pointer]:
+                - /url: /ponder/ui-title
+                - img [ref=e650]
+                - text: ponder/ui-title
+          - button [ref=e654]:
+            - img [ref=e655]
+        - generic [ref=e658]:
+          - 'button "ponder: ui-title 09:41 AM · $0.47 · 20 turns ponder/ui-title" [ref=e659]':
+            - img [ref=e660]
+            - generic [ref=e663]:
+              - paragraph [ref=e664]: "ponder: ui-title"
+              - generic [ref=e665]:
+                - generic [ref=e666]: 09:41 AM
+                - generic [ref=e667]: · $0.47
+                - generic [ref=e668]: · 20 turns
+              - link "ponder/ui-title" [ref=e669] [cursor=pointer]:
+                - /url: /ponder/ui-title
+                - img [ref=e670]
+                - text: ponder/ui-title
+          - button [ref=e674]:
+            - img [ref=e675]
+        - generic [ref=e678]:
+          - 'button "ponder: improve-new-user-evolve-messaging 09:36 AM · server restarted ponder/improve-new-user-evolve-messaging" [ref=e679]':
+            - img [ref=e680]
+            - generic [ref=e684]:
+              - paragraph [ref=e685]: "ponder: improve-new-user-evolve-messaging"
+              - generic [ref=e686]:
+                - generic [ref=e687]: 09:36 AM
+                - generic [ref=e688]: · server restarted
+              - link "ponder/improve-new-user-evolve-messaging" [ref=e689] [cursor=pointer]:
+                - /url: /ponder/improve-new-user-evolve-messaging
+                - img [ref=e690]
+                - text: ponder/improve-new-user-evolve-messaging
+          - button [ref=e694]:
+            - img [ref=e695]
+        - generic [ref=e698]:
+          - 'button "ponder: improve-new-user-ponder-messaging 09:34 AM · server restarted ponder/improve-new-user-ponder-messaging" [ref=e699]':
+            - img [ref=e700]
+            - generic [ref=e704]:
+              - paragraph [ref=e705]: "ponder: improve-new-user-ponder-messaging"
+              - generic [ref=e706]:
+                - generic [ref=e707]: 09:34 AM
+                - generic [ref=e708]: · server restarted
+              - link "ponder/improve-new-user-ponder-messaging" [ref=e709] [cursor=pointer]:
+                - /url: /ponder/improve-new-user-ponder-messaging
+                - img [ref=e710]
+                - text: ponder/improve-new-user-ponder-messaging
+          - button [ref=e714]:
+            - img [ref=e715]
+        - generic [ref=e718]:
+          - 'button "ponder: improve-start-tunnel-error-recovery 09:26 AM · $0.75 · 28 turns ponder/improve-start-tunnel-error-recovery" [ref=e719]':
+            - img [ref=e720]
+            - generic [ref=e723]:
+              - paragraph [ref=e724]: "ponder: improve-start-tunnel-error-recovery"
+              - generic [ref=e725]:
+                - generic [ref=e726]: 09:26 AM
+                - generic [ref=e727]: · $0.75
+                - generic [ref=e728]: · 28 turns
+              - link "ponder/improve-start-tunnel-error-recovery" [ref=e729] [cursor=pointer]:
+                - /url: /ponder/improve-start-tunnel-error-recovery
+                - img [ref=e730]
+                - text: ponder/improve-start-tunnel-error-recovery
+          - button [ref=e734]:
+            - img [ref=e735]
+        - generic [ref=e738]:
+          - button "fix-whenanewagentactivitytile 08:57 AM · $2.60 · 69 turns features/fix-whenanewagentactivitytile" [ref=e739]:
+            - img [ref=e740]
+            - generic [ref=e743]:
+              - paragraph [ref=e744]: fix-whenanewagentactivitytile
+              - generic [ref=e745]:
+                - generic [ref=e746]: 08:57 AM
+                - generic [ref=e747]: · $2.60
+                - generic [ref=e748]: · 69 turns
+              - link "features/fix-whenanewagentactivitytile" [ref=e749] [cursor=pointer]:
+                - /url: /features/fix-whenanewagentactivitytile
+                - img [ref=e750]
+                - text: features/fix-whenanewagentactivitytile
+          - button [ref=e754]:
+            - img [ref=e755]
+        - generic [ref=e758]:
+          - 'button "run-wave: v49-released-milestone-ux 08:52 AM · $4.63 · 4 turns milestones/v49-released-milestone-ux" [ref=e759]':
+            - img [ref=e760]
+            - generic [ref=e763]:
+              - paragraph [ref=e764]: "run-wave: v49-released-milestone-ux"
+              - generic [ref=e765]:
+                - generic [ref=e766]: 08:52 AM
+                - generic [ref=e767]: · $4.63
+                - generic [ref=e768]: · 4 turns
+              - link "milestones/v49-released-milestone-ux" [ref=e769] [cursor=pointer]:
+                - /url: /milestones/v49-released-milestone-ux
+                - img [ref=e770]
+                - text: milestones/v49-released-milestone-ux
+          - button [ref=e774]:
+            - img [ref=e775]
+        - generic [ref=e778]:
+          - 'button "prepare: v49-released-milestone-ux 08:50 AM · $0.18 · 6 turns milestones/v49-released-milestone-ux" [ref=e779]':
+            - img [ref=e780]
+            - generic [ref=e783]:
+              - paragraph [ref=e784]: "prepare: v49-released-milestone-ux"
+              - generic [ref=e785]:
+                - generic [ref=e786]: 08:50 AM
+                - generic [ref=e787]: · $0.18
+                - generic [ref=e788]: · 6 turns
+              - link "milestones/v49-released-milestone-ux" [ref=e789] [cursor=pointer]:
+                - /url: /milestones/v49-released-milestone-ux
+                - img [ref=e790]
+                - text: milestones/v49-released-milestone-ux
+          - button [ref=e794]:
+            - img [ref=e795]
+        - generic [ref=e798]:
+          - 'button "commit: milestone-status-after-uat-success 08:48 AM · $0.33 · 25 turns ponder/milestone-status-after-uat-success" [ref=e799]':
+            - img [ref=e800]
+            - generic [ref=e803]:
+              - paragraph [ref=e804]: "commit: milestone-status-after-uat-success"
+              - generic [ref=e805]:
+                - generic [ref=e806]: 08:48 AM
+                - generic [ref=e807]: · $0.33
+                - generic [ref=e808]: · 25 turns
+              - link "ponder/milestone-status-after-uat-success" [ref=e809] [cursor=pointer]:
+                - /url: /ponder/milestone-status-after-uat-success
+                - img [ref=e810]
+                - text: ponder/milestone-status-after-uat-success
+          - button [ref=e814]:
+            - img [ref=e815]
+        - generic [ref=e818]:
+          - 'button "ponder: milestone-status-after-uat-success 08:41 AM · $1.58 · 37 turns ponder/milestone-status-after-uat-success" [ref=e819]':
+            - img [ref=e820]
+            - generic [ref=e823]:
+              - paragraph [ref=e824]: "ponder: milestone-status-after-uat-success"
+              - generic [ref=e825]:
+                - generic [ref=e826]: 08:41 AM
+                - generic [ref=e827]: · $1.58
+                - generic [ref=e828]: · 37 turns
+              - link "ponder/milestone-status-after-uat-success" [ref=e829] [cursor=pointer]:
+                - /url: /ponder/milestone-status-after-uat-success
+                - img [ref=e830]
+                - text: ponder/milestone-status-after-uat-success
+          - button [ref=e834]:
+            - img [ref=e835]
+        - generic [ref=e838]:
+          - 'button "UAT: v48-milestone-feature-forward-motion 08:28 AM · $2.03 · 54 turns milestones/v48-milestone-feature-forward-motion" [ref=e839]':
+            - img [ref=e840]
+            - generic [ref=e843]:
+              - paragraph [ref=e844]: "UAT: v48-milestone-feature-forward-motion"
+              - generic [ref=e845]:
+                - generic [ref=e846]: 08:28 AM
+                - generic [ref=e847]: · $2.03
+                - generic [ref=e848]: · 54 turns
+              - link "milestones/v48-milestone-feature-forward-motion" [ref=e849] [cursor=pointer]:
+                - /url: /milestones/v48-milestone-feature-forward-motion
+                - img [ref=e850]
+                - text: milestones/v48-milestone-feature-forward-motion
+          - button [ref=e854]:
+            - img [ref=e855]
+        - generic [ref=e858]:
+          - 'button "UAT: v47-ponder-committed-flow 08:22 AM · $2.22 · 54 turns milestones/v47-ponder-committed-flow" [ref=e859]':
+            - img [ref=e860]
+            - generic [ref=e863]:
+              - paragraph [ref=e864]: "UAT: v47-ponder-committed-flow"
+              - generic [ref=e865]:
+                - generic [ref=e866]: 08:22 AM
+                - generic [ref=e867]: · $2.22
+                - generic [ref=e868]: · 54 turns
+              - link "milestones/v47-ponder-committed-flow" [ref=e869] [cursor=pointer]:
+                - /url: /milestones/v47-ponder-committed-flow
+                - img [ref=e870]
+                - text: milestones/v47-ponder-committed-flow
+          - button [ref=e874]:
+            - img [ref=e875]
+        - generic [ref=e878]:
+          - 'button "UAT: v45-auto-specialize-setup 08:09 AM · $2.10 · 69 turns milestones/v45-auto-specialize-setup" [ref=e879]':
+            - img [ref=e880]
+            - generic [ref=e883]:
+              - paragraph [ref=e884]: "UAT: v45-auto-specialize-setup"
+              - generic [ref=e885]:
+                - generic [ref=e886]: 08:09 AM
+                - generic [ref=e887]: · $2.10
+                - generic [ref=e888]: · 69 turns
+              - link "milestones/v45-auto-specialize-setup" [ref=e889] [cursor=pointer]:
+                - /url: /milestones/v45-auto-specialize-setup
+                - img [ref=e890]
+                - text: milestones/v45-auto-specialize-setup
+          - button [ref=e894]:
+            - img [ref=e895]
+        - generic [ref=e898]:
+          - 'button "UAT: v45-auto-specialize-setup 08:03 AM · server restarted milestones/v45-auto-specialize-setup" [ref=e899]':
+            - img [ref=e900]
+            - generic [ref=e904]:
+              - paragraph [ref=e905]: "UAT: v45-auto-specialize-setup"
+              - generic [ref=e906]:
+                - generic [ref=e907]: 08:03 AM
+                - generic [ref=e908]: · server restarted
+              - link "milestones/v45-auto-specialize-setup" [ref=e909] [cursor=pointer]:
+                - /url: /milestones/v45-auto-specialize-setup
+                - img [ref=e910]
+                - text: milestones/v45-auto-specialize-setup
+          - button [ref=e914]:
+            - img [ref=e915]
+        - generic [ref=e918]:
+          - 'button "UAT: v46-realtime-activity-feed 08:03 AM · $0.89 · 26 turns milestones/v46-realtime-activity-feed" [ref=e919]':
+            - img [ref=e920]
+            - generic [ref=e923]:
+              - paragraph [ref=e924]: "UAT: v46-realtime-activity-feed"
+              - generic [ref=e925]:
+                - generic [ref=e926]: 08:03 AM
+                - generic [ref=e927]: · $0.89
+                - generic [ref=e928]: · 26 turns
+              - link "milestones/v46-realtime-activity-feed" [ref=e929] [cursor=pointer]:
+                - /url: /milestones/v46-realtime-activity-feed
+                - img [ref=e930]
+                - text: milestones/v46-realtime-activity-feed
+          - button [ref=e934]:
+            - img [ref=e935]
+        - generic [ref=e938]:
+          - 'button "UAT: v48-milestone-feature-forward-motion 08:02 AM · server restarted milestones/v48-milestone-feature-forward-motion" [ref=e939]':
+            - img [ref=e940]
+            - generic [ref=e944]:
+              - paragraph [ref=e945]: "UAT: v48-milestone-feature-forward-motion"
+              - generic [ref=e946]:
+                - generic [ref=e947]: 08:02 AM
+                - generic [ref=e948]: · server restarted
+              - link "milestones/v48-milestone-feature-forward-motion" [ref=e949] [cursor=pointer]:
+                - /url: /milestones/v48-milestone-feature-forward-motion
+                - img [ref=e950]
+                - text: milestones/v48-milestone-feature-forward-motion
+          - button [ref=e954]:
+            - img [ref=e955]
+        - generic [ref=e958]:
+          - 'button "UAT: v47-ponder-committed-flow 08:02 AM · server restarted milestones/v47-ponder-committed-flow" [ref=e959]':
+            - img [ref=e960]
+            - generic [ref=e964]:
+              - paragraph [ref=e965]: "UAT: v47-ponder-committed-flow"
+              - generic [ref=e966]:
+                - generic [ref=e967]: 08:02 AM
+                - generic [ref=e968]: · server restarted
+              - link "milestones/v47-ponder-committed-flow" [ref=e969] [cursor=pointer]:
+                - /url: /milestones/v47-ponder-committed-flow
+                - img [ref=e970]
+                - text: milestones/v47-ponder-committed-flow
+          - button [ref=e974]:
+            - img [ref=e975]
+        - generic [ref=e978]:
+          - button "milestone-list-clickable-features 07:37 AM · $1.87 · 65 turns features/milestone-list-clickable-features" [ref=e979]:
+            - img [ref=e980]
+            - generic [ref=e983]:
+              - paragraph [ref=e984]: milestone-list-clickable-features
+              - generic [ref=e985]:
+                - generic [ref=e986]: 07:37 AM
+                - generic [ref=e987]: · $1.87
+                - generic [ref=e988]: · 65 turns
+              - link "features/milestone-list-clickable-features" [ref=e989] [cursor=pointer]:
+                - /url: /features/milestone-list-clickable-features
+                - img [ref=e990]
+                - text: features/milestone-list-clickable-features
+          - button [ref=e994]:
+            - img [ref=e995]
+        - generic [ref=e998]:
+          - button "feature-detail-milestone-context 07:37 AM · $2.16 · 69 turns features/feature-detail-milestone-context" [ref=e999]:
+            - img [ref=e1000]
+            - generic [ref=e1003]:
+              - paragraph [ref=e1004]: feature-detail-milestone-context
+              - generic [ref=e1005]:
+                - generic [ref=e1006]: 07:37 AM
+                - generic [ref=e1007]: · $2.16
+                - generic [ref=e1008]: · 69 turns
+              - link "features/feature-detail-milestone-context" [ref=e1009] [cursor=pointer]:
+                - /url: /features/feature-detail-milestone-context
+                - img [ref=e1010]
+                - text: features/feature-detail-milestone-context
+          - button [ref=e1014]:
+            - img [ref=e1015]
+        - generic [ref=e1018]:
+          - button "milestone-detail-prepare-panel 07:37 AM · $1.54 · 61 turns features/milestone-detail-prepare-panel" [ref=e1019]:
+            - img [ref=e1020]
+            - generic [ref=e1023]:
+              - paragraph [ref=e1024]: milestone-detail-prepare-panel
+              - generic [ref=e1025]:
+                - generic [ref=e1026]: 07:37 AM
+                - generic [ref=e1027]: · $1.54
+                - generic [ref=e1028]: · 61 turns
+              - link "features/milestone-detail-prepare-panel" [ref=e1029] [cursor=pointer]:
+                - /url: /features/milestone-detail-prepare-panel
+                - img [ref=e1030]
+                - text: features/milestone-detail-prepare-panel
+          - button [ref=e1034]:
+            - img [ref=e1035]
+        - generic [ref=e1038]:
+          - button "ponder-status-progress-indicator 07:37 AM · $2.33 · 67 turns features/ponder-status-progress-indicator" [ref=e1039]:
+            - img [ref=e1040]
+            - generic [ref=e1043]:
+              - paragraph [ref=e1044]: ponder-status-progress-indicator
+              - generic [ref=e1045]:
+                - generic [ref=e1046]: 07:37 AM
+                - generic [ref=e1047]: · $2.33
+                - generic [ref=e1048]: · 67 turns
+              - link "features/ponder-status-progress-indicator" [ref=e1049] [cursor=pointer]:
+                - /url: /features/ponder-status-progress-indicator
+                - img [ref=e1050]
+                - text: features/ponder-status-progress-indicator
+          - button [ref=e1054]:
+            - img [ref=e1055]
+        - generic [ref=e1058]:
+          - button "parked-ponder-resume 07:37 AM · $2.18 · 77 turns features/parked-ponder-resume" [ref=e1059]:
+            - img [ref=e1060]
+            - generic [ref=e1063]:
+              - paragraph [ref=e1064]: parked-ponder-resume
+              - generic [ref=e1065]:
+                - generic [ref=e1066]: 07:37 AM
+                - generic [ref=e1067]: · $2.18
+                - generic [ref=e1068]: · 77 turns
+              - link "features/parked-ponder-resume" [ref=e1069] [cursor=pointer]:
+                - /url: /features/parked-ponder-resume
+                - img [ref=e1070]
+                - text: features/parked-ponder-resume
+          - button [ref=e1074]:
+            - img [ref=e1075]
+        - generic [ref=e1078]:
+          - button "committed-ponder-forward-motion 07:37 AM · $2.18 · 68 turns features/committed-ponder-forward-motion" [ref=e1079]:
+            - img [ref=e1080]
+            - generic [ref=e1083]:
+              - paragraph [ref=e1084]: committed-ponder-forward-motion
+              - generic [ref=e1085]:
+                - generic [ref=e1086]: 07:37 AM
+                - generic [ref=e1087]: · $2.18
+                - generic [ref=e1088]: · 68 turns
+              - link "features/committed-ponder-forward-motion" [ref=e1089] [cursor=pointer]:
+                - /url: /features/committed-ponder-forward-motion
+                - img [ref=e1090]
+                - text: features/committed-ponder-forward-motion
+          - button [ref=e1094]:
+            - img [ref=e1095]
+        - generic [ref=e1098]:
+          - 'button "commit: iterate-milestones-features-ui-flow 07:30 AM · $0.35 · 24 turns ponder/iterate-milestones-features-ui-flow" [ref=e1099]':
+            - img [ref=e1100]
+            - generic [ref=e1103]:
+              - paragraph [ref=e1104]: "commit: iterate-milestones-features-ui-flow"
+              - generic [ref=e1105]:
+                - generic [ref=e1106]: 07:30 AM
+                - generic [ref=e1107]: · $0.35
+                - generic [ref=e1108]: · 24 turns
+              - link "ponder/iterate-milestones-features-ui-flow" [ref=e1109] [cursor=pointer]:
+                - /url: /ponder/iterate-milestones-features-ui-flow
+                - img [ref=e1110]
+                - text: ponder/iterate-milestones-features-ui-flow
+          - button [ref=e1114]:
+            - img [ref=e1115]
+        - generic [ref=e1118]:
+          - 'button "ponder: iterate-milestones-features-ui-flow 07:25 AM · $1.42 · 34 turns ponder/iterate-milestones-features-ui-flow" [ref=e1119]':
+            - img [ref=e1120]
+            - generic [ref=e1123]:
+              - paragraph [ref=e1124]: "ponder: iterate-milestones-features-ui-flow"
+              - generic [ref=e1125]:
+                - generic [ref=e1126]: 07:25 AM
+                - generic [ref=e1127]: · $1.42
+                - generic [ref=e1128]: · 34 turns
+              - link "ponder/iterate-milestones-features-ui-flow" [ref=e1129] [cursor=pointer]:
+                - /url: /ponder/iterate-milestones-features-ui-flow
+                - img [ref=e1130]
+                - text: ponder/iterate-milestones-features-ui-flow
+          - button [ref=e1134]:
+            - img [ref=e1135]
+        - generic [ref=e1138]:
+          - 'button "commit: fix-ponder-commit-reference-url 07:23 AM · $0.25 · 17 turns ponder/fix-ponder-commit-reference-url" [ref=e1139]':
+            - img [ref=e1140]
+            - generic [ref=e1143]:
+              - paragraph [ref=e1144]: "commit: fix-ponder-commit-reference-url"
+              - generic [ref=e1145]:
+                - generic [ref=e1146]: 07:23 AM
+                - generic [ref=e1147]: · $0.25
+                - generic [ref=e1148]: · 17 turns
+              - link "ponder/fix-ponder-commit-reference-url" [ref=e1149] [cursor=pointer]:
+                - /url: /ponder/fix-ponder-commit-reference-url
+                - img [ref=e1150]
+                - text: ponder/fix-ponder-commit-reference-url
+          - button [ref=e1154]:
+            - img [ref=e1155]
+        - generic [ref=e1158]:
+          - 'button "commit: iterate-ponder-ui-flow 07:22 AM · $0.33 · 19 turns ponder/iterate-ponder-ui-flow" [ref=e1159]':
+            - img [ref=e1160]
+            - generic [ref=e1163]:
+              - paragraph [ref=e1164]: "commit: iterate-ponder-ui-flow"
+              - generic [ref=e1165]:
+                - generic [ref=e1166]: 07:22 AM
+                - generic [ref=e1167]: · $0.33
+                - generic [ref=e1168]: · 19 turns
+              - link "ponder/iterate-ponder-ui-flow" [ref=e1169] [cursor=pointer]:
+                - /url: /ponder/iterate-ponder-ui-flow
+                - img [ref=e1170]
+                - text: ponder/iterate-ponder-ui-flow
+          - button [ref=e1174]:
+            - img [ref=e1175]
+        - generic [ref=e1178]:
+          - 'button "ponder: iterate-ponder-ui-flow 07:11 AM · $1.05 · 41 turns ponder/iterate-ponder-ui-flow" [ref=e1179]':
+            - img [ref=e1180]
+            - generic [ref=e1183]:
+              - paragraph [ref=e1184]: "ponder: iterate-ponder-ui-flow"
+              - generic [ref=e1185]:
+                - generic [ref=e1186]: 07:11 AM
+                - generic [ref=e1187]: · $1.05
+                - generic [ref=e1188]: · 41 turns
+              - link "ponder/iterate-ponder-ui-flow" [ref=e1189] [cursor=pointer]:
+                - /url: /ponder/iterate-ponder-ui-flow
+                - img [ref=e1190]
+                - text: ponder/iterate-ponder-ui-flow
+          - button [ref=e1194]:
+            - img [ref=e1195]
+        - generic [ref=e1198]:
+          - 'button "ponder: fix-ponder-commit-reference-url 07:05 AM · $1.39 · 56 turns ponder/fix-ponder-commit-reference-url" [ref=e1199]':
+            - img [ref=e1200]
+            - generic [ref=e1203]:
+              - paragraph [ref=e1204]: "ponder: fix-ponder-commit-reference-url"
+              - generic [ref=e1205]:
+                - generic [ref=e1206]: 07:05 AM
+                - generic [ref=e1207]: · $1.39
+                - generic [ref=e1208]: · 56 turns
+              - link "ponder/fix-ponder-commit-reference-url" [ref=e1209] [cursor=pointer]:
+                - /url: /ponder/fix-ponder-commit-reference-url
+                - img [ref=e1210]
+                - text: ponder/fix-ponder-commit-reference-url
+          - button [ref=e1214]:
+            - img [ref=e1215]
+        - generic [ref=e1218]:
+          - 'button "UAT: v46-realtime-activity-feed 11:28 PM · $0.49 · 27 turns milestones/v46-realtime-activity-feed" [ref=e1219]':
+            - img [ref=e1220]
+            - generic [ref=e1223]:
+              - paragraph [ref=e1224]: "UAT: v46-realtime-activity-feed"
+              - generic [ref=e1225]:
+                - generic [ref=e1226]: 11:28 PM
+                - generic [ref=e1227]: · $0.49
+                - generic [ref=e1228]: · 27 turns
+              - link "milestones/v46-realtime-activity-feed" [ref=e1229] [cursor=pointer]:
+                - /url: /milestones/v46-realtime-activity-feed
+                - img [ref=e1230]
+                - text: milestones/v46-realtime-activity-feed
+          - button [ref=e1234]:
+            - img [ref=e1235]
+        - generic [ref=e1238]:
+          - button "rich-live-activity-renderer 11:26 PM · $0.17 · 5 turns features/rich-live-activity-renderer" [ref=e1239]:
+            - img [ref=e1240]
+            - generic [ref=e1243]:
+              - paragraph [ref=e1244]: rich-live-activity-renderer
+              - generic [ref=e1245]:
+                - generic [ref=e1246]: 11:26 PM
+                - generic [ref=e1247]: · $0.17
+                - generic [ref=e1248]: · 5 turns
+              - link "features/rich-live-activity-renderer" [ref=e1249] [cursor=pointer]:
+                - /url: /features/rich-live-activity-renderer
+                - img [ref=e1250]
+                - text: features/rich-live-activity-renderer
+          - button [ref=e1254]:
+            - img [ref=e1255]
+        - generic [ref=e1258]:
+          - button "activity-dead-code-cleanup 11:17 PM · $2.14 · 79 turns features/activity-dead-code-cleanup" [ref=e1259]:
+            - img [ref=e1260]
+            - generic [ref=e1263]:
+              - paragraph [ref=e1264]: activity-dead-code-cleanup
+              - generic [ref=e1265]:
+                - generic [ref=e1266]: 11:17 PM
+                - generic [ref=e1267]: · $2.14
+                - generic [ref=e1268]: · 79 turns
+              - link "features/activity-dead-code-cleanup" [ref=e1269] [cursor=pointer]:
+                - /url: /features/activity-dead-code-cleanup
+                - img [ref=e1270]
+                - text: features/activity-dead-code-cleanup
+          - button [ref=e1274]:
+            - img [ref=e1275]
+        - generic [ref=e1278]:
+          - button "activity-tile-navigation-links 11:17 PM · $2.34 · 71 turns features/activity-tile-navigation-links" [ref=e1279]:
+            - img [ref=e1280]
+            - generic [ref=e1283]:
+              - paragraph [ref=e1284]: activity-tile-navigation-links
+              - generic [ref=e1285]:
+                - generic [ref=e1286]: 11:17 PM
+                - generic [ref=e1287]: · $2.34
+                - generic [ref=e1288]: · 71 turns
+              - link "features/activity-tile-navigation-links" [ref=e1289] [cursor=pointer]:
+                - /url: /features/activity-tile-navigation-links
+                - img [ref=e1290]
+                - text: features/activity-tile-navigation-links
+          - button [ref=e1294]:
+            - img [ref=e1295]
+        - generic [ref=e1298]:
+          - button "rich-live-activity-renderer 11:17 PM · $1.81 · 63 turns features/rich-live-activity-renderer" [ref=e1299]:
+            - img [ref=e1300]
+            - generic [ref=e1303]:
+              - paragraph [ref=e1304]: rich-live-activity-renderer
+              - generic [ref=e1305]:
+                - generic [ref=e1306]: 11:17 PM
+                - generic [ref=e1307]: · $1.81
+                - generic [ref=e1308]: · 63 turns
+              - link "features/rich-live-activity-renderer" [ref=e1309] [cursor=pointer]:
+                - /url: /features/rich-live-activity-renderer
+                - img [ref=e1310]
+                - text: features/rich-live-activity-renderer
+          - button [ref=e1314]:
+            - img [ref=e1315]
+        - generic [ref=e1318]:
+          - 'button "commit: improve-realtime-agent-activity 11:14 PM · $0.38 · 30 turns ponder/improve-realtime-agent-activity" [ref=e1319]':
+            - img [ref=e1320]
+            - generic [ref=e1323]:
+              - paragraph [ref=e1324]: "commit: improve-realtime-agent-activity"
+              - generic [ref=e1325]:
+                - generic [ref=e1326]: 11:14 PM
+                - generic [ref=e1327]: · $0.38
+                - generic [ref=e1328]: · 30 turns
+              - link "ponder/improve-realtime-agent-activity" [ref=e1329] [cursor=pointer]:
+                - /url: /ponder/improve-realtime-agent-activity
+                - img [ref=e1330]
+                - text: ponder/improve-realtime-agent-activity
+          - button [ref=e1334]:
+            - img [ref=e1335]
+        - generic [ref=e1338]:
+          - 'button "ponder: improve-realtime-agent-activity 11:11 PM · $0.53 · 23 turns ponder/improve-realtime-agent-activity" [ref=e1339]':
+            - img [ref=e1340]
+            - generic [ref=e1343]:
+              - paragraph [ref=e1344]: "ponder: improve-realtime-agent-activity"
+              - generic [ref=e1345]:
+                - generic [ref=e1346]: 11:11 PM
+                - generic [ref=e1347]: · $0.53
+                - generic [ref=e1348]: · 23 turns
+              - link "ponder/improve-realtime-agent-activity" [ref=e1349] [cursor=pointer]:
+                - /url: /ponder/improve-realtime-agent-activity
+                - img [ref=e1350]
+                - text: ponder/improve-realtime-agent-activity
+          - button [ref=e1354]:
+            - img [ref=e1355]
+        - generic [ref=e1358]:
+          - 'button "ponder: improve-realtime-agent-activity 11:04 PM · $1.25 · 26 turns ponder/improve-realtime-agent-activity" [ref=e1359]':
+            - img [ref=e1360]
+            - generic [ref=e1363]:
+              - paragraph [ref=e1364]: "ponder: improve-realtime-agent-activity"
+              - generic [ref=e1365]:
+                - generic [ref=e1366]: 11:04 PM
+                - generic [ref=e1367]: · $1.25
+                - generic [ref=e1368]: · 26 turns
+              - link "ponder/improve-realtime-agent-activity" [ref=e1369] [cursor=pointer]:
+                - /url: /ponder/improve-realtime-agent-activity
+                - img [ref=e1370]
+                - text: ponder/improve-realtime-agent-activity
+          - button [ref=e1374]:
+            - img [ref=e1375]
+        - generic [ref=e1378]:
+          - button "agents-page-two-tier 10:26 PM · $1.67 · 53 turns features/agents-page-two-tier" [ref=e1379]:
+            - img [ref=e1380]
+            - generic [ref=e1383]:
+              - paragraph [ref=e1384]: agents-page-two-tier
+              - generic [ref=e1385]:
+                - generic [ref=e1386]: 10:26 PM
+                - generic [ref=e1387]: · $1.67
+                - generic [ref=e1388]: · 53 turns
+              - link "features/agents-page-two-tier" [ref=e1389] [cursor=pointer]:
+                - /url: /features/agents-page-two-tier
+                - img [ref=e1390]
+                - text: features/agents-page-two-tier
+          - button [ref=e1394]:
+            - img [ref=e1395]
+        - generic [ref=e1398]:
+          - button "standard-agents-scaffolding 10:15 PM · $3.39 · 98 turns features/standard-agents-scaffolding" [ref=e1399]:
+            - img [ref=e1400]
+            - generic [ref=e1403]:
+              - paragraph [ref=e1404]: standard-agents-scaffolding
+              - generic [ref=e1405]:
+                - generic [ref=e1406]: 10:15 PM
+                - generic [ref=e1407]: · $3.39
+                - generic [ref=e1408]: · 98 turns
+              - link "features/standard-agents-scaffolding" [ref=e1409] [cursor=pointer]:
+                - /url: /features/standard-agents-scaffolding
+                - img [ref=e1410]
+                - text: features/standard-agents-scaffolding
+          - button [ref=e1414]:
+            - img [ref=e1415]
+        - generic [ref=e1418]:
+          - button "init-specialize-handoff 10:02 PM · $2.35 · 90 turns features/init-specialize-handoff" [ref=e1419]:
+            - img [ref=e1420]
+            - generic [ref=e1423]:
+              - paragraph [ref=e1424]: init-specialize-handoff
+              - generic [ref=e1425]:
+                - generic [ref=e1426]: 10:02 PM
+                - generic [ref=e1427]: · $2.35
+                - generic [ref=e1428]: · 90 turns
+              - link "features/init-specialize-handoff" [ref=e1429] [cursor=pointer]:
+                - /url: /features/init-specialize-handoff
+                - img [ref=e1430]
+                - text: features/init-specialize-handoff
+          - button [ref=e1434]:
+            - img [ref=e1435]
+        - generic [ref=e1438]:
+          - 'button "commit: auto-specialize-during-setup 09:59 PM · $0.59 · 37 turns ponder/auto-specialize-during-setup" [ref=e1439]':
+            - img [ref=e1440]
+            - generic [ref=e1443]:
+              - paragraph [ref=e1444]: "commit: auto-specialize-during-setup"
+              - generic [ref=e1445]:
+                - generic [ref=e1446]: 09:59 PM
+                - generic [ref=e1447]: · $0.59
+                - generic [ref=e1448]: · 37 turns
+              - link "ponder/auto-specialize-during-setup" [ref=e1449] [cursor=pointer]:
+                - /url: /ponder/auto-specialize-during-setup
+                - img [ref=e1450]
+                - text: ponder/auto-specialize-during-setup
+          - button [ref=e1454]:
+            - img [ref=e1455]
+        - generic [ref=e1458]:
+          - 'button "ponder: auto-specialize-during-setup 09:51 PM · $1.19 · 47 turns ponder/auto-specialize-during-setup" [ref=e1459]':
+            - img [ref=e1460]
+            - generic [ref=e1463]:
+              - paragraph [ref=e1464]: "ponder: auto-specialize-during-setup"
+              - generic [ref=e1465]:
+                - generic [ref=e1466]: 09:51 PM
+                - generic [ref=e1467]: · $1.19
+                - generic [ref=e1468]: · 47 turns
+              - link "ponder/auto-specialize-during-setup" [ref=e1469] [cursor=pointer]:
+                - /url: /ponder/auto-specialize-during-setup
+                - img [ref=e1470]
+                - text: ponder/auto-specialize-during-setup
+          - button [ref=e1474]:
+            - img [ref=e1475]
+        - generic [ref=e1478]:
+          - 'button "ponder: auto-specialize-during-setup 04:50 PM · $0.73 · 28 turns ponder/auto-specialize-during-setup" [ref=e1479]':
+            - img [ref=e1480]
+            - generic [ref=e1483]:
+              - paragraph [ref=e1484]: "ponder: auto-specialize-during-setup"
+              - generic [ref=e1485]:
+                - generic [ref=e1486]: 04:50 PM
+                - generic [ref=e1487]: · $0.73
+                - generic [ref=e1488]: · 28 turns
+              - link "ponder/auto-specialize-during-setup" [ref=e1489] [cursor=pointer]:
+                - /url: /ponder/auto-specialize-during-setup
+                - img [ref=e1490]
+                - text: ponder/auto-specialize-during-setup
+          - button [ref=e1494]:
+            - img [ref=e1495]
+    - generic [ref=e1498]:
+      - paragraph [ref=e1499]: Quota
+      - generic [ref=e1500]:
+        - generic [ref=e1501]: $41.12 today
+        - generic [ref=e1503]: 4%
+      - progressbar "Daily API quota usage" [ref=e1504]
+      - paragraph [ref=e1506]:
+        - text: ≈ 792 runs remaining
+        - generic [ref=e1507]: (at $1.21/run avg)

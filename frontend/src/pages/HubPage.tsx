@@ -159,6 +159,9 @@ export function HubPage() {
   const [available, setAvailable] = useState<AvailableRepo[]>([])
   const [activity, setActivity] = useState<HubActivityEntry[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Dynamic tab title for hub mode
+  useEffect(() => { document.title = 'Ponder Hub' }, [])
   const [selectedSlug, setSelectedSlug] = useState<string | null>(null)
   const [addModalOpen, setAddModalOpen] = useState(false)
   const [search, setSearch] = useState('')

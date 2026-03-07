@@ -2,8 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { QRCodeSVG } from 'qrcode.react'
 import { api } from '@/api/client'
-import type { TunnelStatus, AppTunnelStatus } from '@/lib/types'
-import { Wifi, WifiOff, Copy, Check, Loader2, AlertCircle, ExternalLink, MessageSquare } from 'lucide-react'
+import type { TunnelStatus, AppTunnelStatus, TunnelPreflightResult } from '@/lib/types'
+import { Wifi, WifiOff, Copy, Check, Loader2, AlertCircle, ExternalLink, MessageSquare, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 // ---------------------------------------------------------------------------
@@ -42,24 +42,26 @@ function UrlRow({ label, value }: { label: string; value: string }) {
 function TunnelToggleButton({
   active,
   toggling,
+  disabled,
   onStart,
   onStop,
 }: {
   active: boolean
   toggling: boolean
+  disabled?: boolean
   onStart: () => void
   onStop: () => void
 }) {
   return (
     <button
       onClick={active ? onStop : onStart}
-      disabled={toggling}
+      disabled={toggling || disabled}
       className={cn(
         'flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap',
         active
           ? 'bg-destructive/10 text-destructive hover:bg-destructive/20'
           : 'bg-primary text-primary-foreground hover:bg-primary/90',
-        toggling && 'opacity-50 cursor-not-allowed'
+        (toggling || disabled) && 'opacity-50 cursor-not-allowed'
       )}
     >
       {toggling ? (
@@ -85,16 +87,71 @@ function QrDisplay({ url, label }: { url: string; label?: string }) {
   )
 }
 
-function TunnelDisclosure() {
+// ---------------------------------------------------------------------------
+// Preflight-aware disclosure / warning
+// ---------------------------------------------------------------------------
+
+function PreflightWarning({ preflight }: { preflight: TunnelPreflightResult }) {
+  return (
+    <div className="bg-amber-500/8 border border-amber-500/25 rounded-lg px-4 py-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+        <span className="text-sm font-medium text-amber-500">orch-tunnel not found</span>
+      </div>
+      <p className="text-xs text-muted-foreground">
+        Install to enable tunnels:
+      </p>
+      <div className="flex items-center gap-2">
+        <code className="text-xs font-mono bg-muted/50 px-2 py-1 rounded">brew install orch-tunnel</code>
+        <CopyButton text="brew install orch-tunnel" />
+      </div>
+      <p className="text-xs text-muted-foreground/70">
+        or <code className="font-mono text-xs">gh release download --repo orchard9/tunnel</code>
+      </p>
+      {preflight.checked.length > 0 && (
+        <details className="text-xs text-muted-foreground/60">
+          <summary className="cursor-pointer hover:text-muted-foreground transition-colors">
+            Checked {preflight.checked.length} locations
+          </summary>
+          <ul className="mt-1.5 space-y-0.5 pl-1">
+            {preflight.checked.map((loc, i) => (
+              <li key={i} className="flex items-center gap-1.5">
+                <span className={loc.found ? 'text-green-500' : 'text-red-400'}>
+                  {loc.found ? 'Y' : 'N'}
+                </span>
+                <span className="font-mono">{loc.location}</span>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )}
+    </div>
+  )
+}
+
+function TunnelDisclosure({ preflight }: { preflight: TunnelPreflightResult | null }) {
+  // If preflight says not installed, show warning instead of generic disclosure
+  if (preflight && !preflight.installed) {
+    return <PreflightWarning preflight={preflight} />
+  }
+
   return (
     <div className="border-t border-border/50 pt-3 space-y-1.5">
-      <p className="text-xs text-muted-foreground/70">
-        <span className="font-medium text-muted-foreground">Requires orch-tunnel.</span>{' '}
-        Install:{' '}
-        <code className="font-mono">brew install orch-tunnel</code>
-        {' '}or{' '}
-        <code className="font-mono">gh release download --repo orchard9/tunnel</code>
-      </p>
+      {preflight?.installed && (
+        <p className="text-xs text-muted-foreground/70">
+          <code className="font-mono text-xs bg-muted/50 px-1.5 py-0.5 rounded">
+            {preflight.version ?? 'orch-tunnel'}
+          </code>
+          {preflight.path && (
+            <span className="ml-1.5">
+              at <code className="font-mono text-xs">{preflight.path}</code>
+            </span>
+          )}
+          {preflight.process_path_stale && (
+            <span className="ml-1.5 text-amber-500">(found via fallback — not on process PATH)</span>
+          )}
+        </p>
+      )}
       <p className="text-xs text-muted-foreground/70">
         <span className="font-medium text-muted-foreground">Proxy only.</span>{' '}
         Tunnels proxy HTTP requests — no static hosting beyond what the server exposes.
@@ -107,12 +164,14 @@ function TunnelDisclosure() {
 // SDLC Tunnel section
 // ---------------------------------------------------------------------------
 
-function SdlcTunnelSection() {
+function SdlcTunnelSection({ preflight, preflightLoading }: { preflight: TunnelPreflightResult | null; preflightLoading: boolean }) {
   const [status, setStatus] = useState<TunnelStatus | null>(null)
   const [loading, setLoading] = useState(true)
   const [toggling, setToggling] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionToken, setSessionToken] = useState<string | null>(null)
+
+  const tunnelUnavailable = preflightLoading || (preflight != null && !preflight.installed)
 
   const load = useCallback(async () => {
     try {
@@ -176,15 +235,22 @@ function SdlcTunnelSection() {
             </p>
           )}
         </div>
-        {!loading && status && (
+        {preflightLoading && (
+          <button disabled className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed bg-primary text-primary-foreground whitespace-nowrap">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            Checking...
+          </button>
+        )}
+        {!preflightLoading && !loading && status && (
           <TunnelToggleButton
             active={status.active}
             toggling={toggling}
+            disabled={tunnelUnavailable && !status.active}
             onStart={handleStart}
             onStop={handleStop}
           />
         )}
-        {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mt-0.5" />}
+        {!preflightLoading && loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mt-0.5" />}
       </div>
 
       {error && (
@@ -210,7 +276,7 @@ function SdlcTunnelSection() {
         </div>
       )}
 
-      <TunnelDisclosure />
+      <TunnelDisclosure preflight={preflight} />
     </section>
   )
 }
@@ -219,7 +285,7 @@ function SdlcTunnelSection() {
 // App Tunnel section
 // ---------------------------------------------------------------------------
 
-function AppTunnelSection() {
+function AppTunnelSection({ preflight, preflightLoading }: { preflight: TunnelPreflightResult | null; preflightLoading: boolean }) {
   const navigate = useNavigate()
   const [status, setStatus] = useState<AppTunnelStatus | null>(null)
   const [loading, setLoading] = useState(true)
@@ -228,6 +294,8 @@ function AppTunnelSection() {
   const [portInput, setPortInput] = useState('')
   const [portSaved, setPortSaved] = useState(false)
   const [feedbackCount, setFeedbackCount] = useState(0)
+
+  const tunnelUnavailable = preflightLoading || (preflight != null && !preflight.installed)
 
   const load = useCallback(async () => {
     try {
@@ -259,7 +327,7 @@ function AppTunnelSection() {
   const handleStart = async () => {
     const port = parseInt(portInput, 10)
     if (!portInput || isNaN(port) || port < 1 || port > 65535) {
-      setError('Enter a valid port number (1–65535)')
+      setError('Enter a valid port number (1-65535)')
       return
     }
     setToggling(true)
@@ -296,15 +364,22 @@ function AppTunnelSection() {
             Shares your app publicly and injects a feedback widget into every page — reviewers can leave notes that appear directly in your Ponder feedback inbox
           </p>
         </div>
-        {!loading && status && (
+        {preflightLoading && (
+          <button disabled className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium opacity-50 cursor-not-allowed bg-primary text-primary-foreground whitespace-nowrap">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            Checking...
+          </button>
+        )}
+        {!preflightLoading && !loading && status && (
           <TunnelToggleButton
             active={status.active}
             toggling={toggling}
+            disabled={tunnelUnavailable && !status.active}
             onStart={handleStart}
             onStop={handleStop}
           />
         )}
-        {loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mt-0.5" />}
+        {!preflightLoading && loading && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground mt-0.5" />}
       </div>
 
       {/* Port input — shown when tunnel is not active */}
@@ -364,7 +439,7 @@ function AppTunnelSection() {
           <div className="flex items-center gap-2 text-xs text-muted-foreground/70">
             <span>Proxying</span>
             <code className="font-mono">localhost:{status.configured_port}</code>
-            <span className="text-muted-foreground/40">→ sdlc-server → reviewers</span>
+            <span className="text-muted-foreground/40">-&gt; sdlc-server -&gt; reviewers</span>
           </div>
           <UrlRow label="Tunnel URL" value={status.url} />
           <QrDisplay url={status.url} label="Share with reviewers" />
@@ -380,7 +455,7 @@ function AppTunnelSection() {
         </div>
       )}
 
-      <TunnelDisclosure />
+      <TunnelDisclosure preflight={preflight} />
     </section>
   )
 }
@@ -390,6 +465,19 @@ function AppTunnelSection() {
 // ---------------------------------------------------------------------------
 
 export function NetworkPage() {
+  const [preflight, setPreflight] = useState<TunnelPreflightResult | null>(null)
+  const [preflightLoading, setPreflightLoading] = useState(true)
+
+  useEffect(() => {
+    api.getTunnelPreflight()
+      .then(setPreflight)
+      .catch(() => {
+        // Preflight failed — degrade gracefully: allow buttons (old behavior)
+        setPreflight({ installed: true, path: null, version: null, source: null, process_path_stale: false, checked: [], install_hint: null })
+      })
+      .finally(() => setPreflightLoading(false))
+  }, [])
+
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
       <div>
@@ -397,8 +485,8 @@ export function NetworkPage() {
         <p className="text-sm text-muted-foreground mt-1">Tunnels and connectivity</p>
       </div>
 
-      <SdlcTunnelSection />
-      <AppTunnelSection />
+      <SdlcTunnelSection preflight={preflight} preflightLoading={preflightLoading} />
+      <AppTunnelSection preflight={preflight} preflightLoading={preflightLoading} />
     </div>
   )
 }

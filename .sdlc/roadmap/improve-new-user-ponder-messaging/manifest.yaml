@@ -1,10 +1,13 @@
 slug: improve-new-user-ponder-messaging
 title: improve new user ponder messaging
-status: converging
+status: committed
 created_at: 2026-03-07T17:34:59.128253Z
-updated_at: 2026-03-07T17:40:11.456672Z
-sessions: 1
+updated_at: 2026-03-07T19:09:41.204119Z
+committed_at: 2026-03-07T19:08:56.243895Z
+committed_to:
+- v51-workspace-empty-states
+sessions: 2
 orientation:
-  current: Implementation complete — rich onboarding content replaces blank empty state on /ponder
-  next: Verify on mobile viewport, consider similar treatment for other workspace pages (Root Cause, Evolve, Guidelines, Spikes)
-  commit: Owner confirms the messaging and layout work for new users
+  current: All workspace pages now have rich onboarding empty states — verified on desktop and mobile
+  next: Owner review — check each page visually, confirm messaging and layout
+  commit: Owner confirms the messaging across all workspace pages

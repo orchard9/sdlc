@@ -1,0 +1,146 @@
+slug: tunnel-preflight-check
+title: Tunnel preflight check — endpoint, UI gating, and actionable error formatting
+description: Add a /api/tunnel/preflight endpoint that verifies orch-tunnel reachability and version before starting a tunnel session, gate the UI start button on preflight status, and format errors as actionable user-facing messages.
+phase: released
+created_at: 2026-03-07T19:09:51.004972Z
+updated_at: 2026-03-07T19:31:38.869524Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/spec.md
+  created_at: 2026-03-07T19:24:16.980953Z
+  approved_at: 2026-03-07T19:24:22.942852Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/design.md
+  created_at: 2026-03-07T19:25:22.075061Z
+  approved_at: 2026-03-07T19:25:22.084782Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/tasks.md
+  created_at: 2026-03-07T19:25:37.577518Z
+  approved_at: 2026-03-07T19:25:37.587019Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/qa-plan.md
+  created_at: 2026-03-07T19:26:01.627422Z
+  approved_at: 2026-03-07T19:26:01.635717Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/review.md
+  created_at: 2026-03-07T19:30:32.358352Z
+  approved_at: 2026-03-07T19:30:32.364949Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/audit.md
+  created_at: 2026-03-07T19:30:57.777477Z
+  approved_at: 2026-03-07T19:30:57.789146Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/tunnel-preflight-check/qa-results.md
+  created_at: 2026-03-07T19:31:33.053616Z
+  approved_at: 2026-03-07T19:31:33.067501Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add check_orch_tunnel() and PreflightResult types to tunnel.rs
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:25:41.661425Z
+  started_at: 2026-03-07T19:26:32.707965Z
+  completed_at: 2026-03-07T19:26:32.714662Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add GET /api/tunnel/preflight route handler
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:25:41.669437Z
+  started_at: 2026-03-07T19:27:24.851020Z
+  completed_at: 2026-03-07T19:27:24.857108Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add preflight API client method and TypeScript types
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:25:41.675978Z
+  started_at: 2026-03-07T19:27:28.579659Z
+  completed_at: 2026-03-07T19:27:50.826350Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Gate tunnel buttons on preflight status in NetworkPage
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:25:41.681698Z
+  started_at: 2026-03-07T19:27:54.257448Z
+  completed_at: 2026-03-07T19:29:02.606694Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Add unit tests for check_orch_tunnel and preflight route
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:25:41.686736Z
+  started_at: 2026-03-07T19:29:05.727783Z
+  completed_at: 2026-03-07T19:30:07.365141Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T19:09:51.004972Z
+  exited: 2026-03-07T19:24:22.944919Z
+- phase: specified
+  entered: 2026-03-07T19:24:22.944919Z
+  exited: 2026-03-07T19:26:01.637622Z
+- phase: planned
+  entered: 2026-03-07T19:26:01.637622Z
+  exited: 2026-03-07T19:26:07.156039Z
+- phase: ready
+  entered: 2026-03-07T19:26:07.156039Z
+  exited: 2026-03-07T19:26:11.995274Z
+- phase: implementation
+  entered: 2026-03-07T19:26:11.995274Z
+  exited: 2026-03-07T19:30:32.370584Z
+- phase: review
+  entered: 2026-03-07T19:30:32.370584Z
+  exited: 2026-03-07T19:30:37.890082Z
+- phase: audit
+  entered: 2026-03-07T19:30:37.890082Z
+  exited: 2026-03-07T19:30:57.797055Z
+- phase: qa
+  entered: 2026-03-07T19:30:57.797055Z
+  exited: 2026-03-07T19:31:33.075128Z
+- phase: merge
+  entered: 2026-03-07T19:31:33.075128Z
+  exited: 2026-03-07T19:31:38.869524Z
+- phase: released
+  entered: 2026-03-07T19:31:38.869524Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

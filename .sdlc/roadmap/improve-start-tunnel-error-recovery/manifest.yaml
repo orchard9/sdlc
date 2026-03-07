@@ -1,10 +1,13 @@
 slug: improve-start-tunnel-error-recovery
 title: improve start tunnel error recovery
-status: converging
+status: committed
 created_at: 2026-03-07T17:26:23.438238Z
-updated_at: 2026-03-07T17:28:40.626918Z
-sessions: 1
+updated_at: 2026-03-07T19:16:57.214319Z
+committed_at: 2026-03-07T19:09:11.551630Z
+committed_to:
+- v51-tunnel-discovery
+sessions: 2
 orientation:
-  current: 'Root cause identified — stale PATH in running process. Fix is clear: augment find_orch_tunnel() with fallback paths.'
-  next: Implement Fix 1 (PATH fallback in find_orch_tunnel) and Fix 3 (preflight endpoint). Small, shippable change.
-  commit: Fix 1 alone is sufficient to commit. It solves the actual bug.
+  current: 'Command design decided: `sdlc tunnel check [--json]` with login-shell PATH refresh + fallback probing. Implementation spec is concrete and ready to build.'
+  next: Implement `sdlc tunnel check` — add TunnelSubcommand to CLI, implement check_orch_tunnel() with login-shell PATH + fallbacks, wire --json output.
+  commit: Commit signal already met in session 1. This session refines the design for immediate implementation.

@@ -3279,3 +3279,174 @@
   slug: fix-whenanewagentactivitytile
   timestamp: 2026-03-07T17:05:30.145061Z
   metadata: {}
+- id: ev-0592
+  kind: run_failed
+  slug: improve-start-tunnel-error-recovery
+  timestamp: 2026-03-07T19:02:42.389827Z
+  metadata:
+    run_key: ponder:improve-start-tunnel-error-recovery
+- id: ev-0593
+  kind: review_approved
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:09:53.724244Z
+  metadata: {}
+- id: ev-0594
+  kind: feature_phase_advanced
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:09:53.729349Z
+  metadata:
+    phase: review
+- id: ev-0595
+  kind: feature_phase_advanced
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:10:04.695814Z
+  metadata:
+    phase: qa
+- id: ev-0596
+  kind: qa_approved
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:10:30.345842Z
+  metadata: {}
+- id: ev-0597
+  kind: feature_phase_advanced
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:10:30.352639Z
+  metadata:
+    phase: merge
+- id: ev-0598
+  kind: feature_merged
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:10:35.396126Z
+  metadata: {}
+- id: ev-0599
+  kind: qa_approved
+  slug: dynamic-tab-title
+  timestamp: 2026-03-07T19:11:27.381996Z
+  metadata: {}
+- id: ev-0600
+  kind: milestone_wave_completed
+  slug: v50-ui-title
+  timestamp: 2026-03-07T19:11:49.115012Z
+  metadata:
+    run_key: milestone-run-wave:v50-ui-title
+- id: ev-0601
+  kind: review_approved
+  slug: workspace-onboarding-empty-states
+  timestamp: 2026-03-07T19:19:10.762940Z
+  metadata: {}
+- id: ev-0602
+  kind: feature_phase_advanced
+  slug: workspace-onboarding-empty-states
+  timestamp: 2026-03-07T19:19:10.771278Z
+  metadata:
+    phase: review
+- id: ev-0603
+  kind: feature_phase_advanced
+  slug: workspace-onboarding-empty-states
+  timestamp: 2026-03-07T19:19:24.186346Z
+  metadata:
+    phase: qa
+- id: ev-0604
+  kind: qa_approved
+  slug: workspace-onboarding-empty-states
+  timestamp: 2026-03-07T19:20:15.428635Z
+  metadata: {}
+- id: ev-0605
+  kind: feature_phase_advanced
+  slug: workspace-onboarding-empty-states
+  timestamp: 2026-03-07T19:20:15.435760Z
+  metadata:
+    phase: merge
+- id: ev-0606
+  kind: feature_merged
+  slug: workspace-onboarding-empty-states
+  timestamp: 2026-03-07T19:20:21.905520Z
+  metadata: {}
+- id: ev-0607
+  kind: milestone_wave_completed
+  slug: v51-workspace-empty-states
+  timestamp: 2026-03-07T19:20:39.671226Z
+  metadata:
+    run_key: milestone-run-wave:v51-workspace-empty-states
+- id: ev-0608
+  kind: review_approved
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:28:28.909365Z
+  metadata: {}
+- id: ev-0609
+  kind: feature_phase_advanced
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:28:28.915459Z
+  metadata:
+    phase: review
+- id: ev-0610
+  kind: audit_approved
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:28:56.212509Z
+  metadata: {}
+- id: ev-0611
+  kind: feature_phase_advanced
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:28:56.218836Z
+  metadata:
+    phase: qa
+- id: ev-0612
+  kind: review_approved
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:30:32.367563Z
+  metadata: {}
+- id: ev-0613
+  kind: feature_phase_advanced
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:30:32.372868Z
+  metadata:
+    phase: review
+- id: ev-0614
+  kind: qa_approved
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:30:51.949510Z
+  metadata: {}
+- id: ev-0615
+  kind: feature_phase_advanced
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:30:51.958364Z
+  metadata:
+    phase: merge
+- id: ev-0616
+  kind: audit_approved
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:30:57.793002Z
+  metadata: {}
+- id: ev-0617
+  kind: feature_phase_advanced
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:30:57.800023Z
+  metadata:
+    phase: qa
+- id: ev-0618
+  kind: feature_merged
+  slug: robust-orch-tunnel-lookup
+  timestamp: 2026-03-07T19:30:58.047716Z
+  metadata: {}
+- id: ev-0619
+  kind: qa_approved
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:31:33.071029Z
+  metadata: {}
+- id: ev-0620
+  kind: feature_phase_advanced
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:31:33.077826Z
+  metadata:
+    phase: merge
+- id: ev-0621
+  kind: feature_merged
+  slug: tunnel-preflight-check
+  timestamp: 2026-03-07T19:31:38.877673Z
+  metadata: {}
+- id: ev-0622
+  kind: milestone_wave_completed
+  slug: v51-tunnel-discovery
+  timestamp: 2026-03-07T19:32:10.671290Z
+  metadata:
+    run_key: milestone-run-wave:v51-tunnel-discovery

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { api } from '@/api/client'
 import { Skeleton } from '@/components/shared/Skeleton'
-import { FlaskConical, ArrowLeft, Copy, Check, ExternalLink } from 'lucide-react'
+import { FlaskConical, ArrowLeft, Copy, Check, ExternalLink, HelpCircle, Beaker, Scale } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { SpikeSummary, SpikeDetail, SpikeVerdict } from '@/lib/types'
 
@@ -488,10 +488,70 @@ export function SpikePage() {
               onSpikeUpdated={load}
             />
           ) : (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              <div className="text-center">
-                <FlaskConical className="w-8 h-8 mx-auto mb-3 opacity-30" />
-                <p className="text-sm">Select a spike to view details</p>
+            <div className="h-full overflow-y-auto">
+              <div className="max-w-xl mx-auto px-6 py-10 space-y-8">
+                {/* Hero */}
+                <div className="text-center space-y-3">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-1">
+                    <FlaskConical className="w-6 h-6 text-primary" />
+                  </div>
+                  <h2 className="text-xl font-semibold">Answer one question fast.</h2>
+                  <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+                    Spikes are time-boxed investigations that answer a focused technical question.
+                    Each spike concludes with a verdict that drives what happens next.
+                  </p>
+                </div>
+
+                {/* How it works */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">How it works</h3>
+                  <div className="grid gap-2">
+                    {[
+                      { icon: HelpCircle, title: 'Ask a question', desc: 'Frame the spike as a single, answerable question. The tighter the question, the better the answer.' },
+                      { icon: Beaker, title: 'Agent investigates', desc: 'The agent examines a reference project, searches for alternatives, and builds a working prototype in a temp workspace.' },
+                      { icon: Scale, title: 'Verdict rendered', desc: 'Every spike ends with ADOPT (proven, ready to build), ADAPT (needs refinement), or REJECT (not viable).' },
+                    ].map(({ icon: Icon, title, desc }) => (
+                      <div key={title} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-card/50">
+                        <Icon className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
+                        <div className="min-w-0">
+                          <p className="text-sm font-medium">{title}</p>
+                          <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Verdict strip */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Verdicts</h3>
+                  <div className="flex items-center gap-2 flex-wrap text-xs font-semibold">
+                    <span className="px-2.5 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">ADOPT</span>
+                    <span className="px-2.5 py-1 rounded-full bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300">ADAPT</span>
+                    <span className="px-2.5 py-1 rounded-full bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300">REJECT</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground/60 leading-relaxed">
+                    <strong className="text-muted-foreground">Adopt</strong> feeds into hypothetical planning.{' '}
+                    <strong className="text-muted-foreground">Adapt</strong> promotes to Ponder for refinement.{' '}
+                    <strong className="text-muted-foreground">Reject</strong> stores findings in the knowledge base.
+                  </p>
+                </div>
+
+                {/* CTA */}
+                <div className="text-center pt-2">
+                  <div className="inline-flex items-center gap-1 bg-muted/60 border border-border rounded-lg px-3 py-2 text-xs font-mono text-muted-foreground">
+                    /sdlc-spike &lt;slug&gt; — &lt;the question to answer&gt;
+                  </div>
+                  <p className="text-xs text-muted-foreground/60 mt-2">
+                    Start a spike from the CLI or an agent session.
+                  </p>
+                </div>
+
+                {spikes.length > 0 && (
+                  <p className="text-center text-xs text-muted-foreground/40">
+                    Or select a spike from the list to view its findings.
+                  </p>
+                )}
               </div>
             </div>
           )}

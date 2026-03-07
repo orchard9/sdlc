@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: robust-orch-tunnel-lookup
+    title: Robust orch-tunnel lookup — login-shell PATH refresh and fallback paths
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: tunnel-preflight-check
+    title: Tunnel preflight check — endpoint, UI gating, and actionable error formatting
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

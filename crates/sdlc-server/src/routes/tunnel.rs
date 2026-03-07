@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::auth::TunnelConfig;
 use crate::error::AppError;
 use crate::state::{AppState, TunnelSnapshot};
-use crate::tunnel::{generate_token, Tunnel};
+use crate::tunnel::{check_orch_tunnel, generate_token, TunnelCheckResult, Tunnel};
 
 // ---------------------------------------------------------------------------
 // Response types
@@ -102,6 +102,45 @@ pub async fn stop_tunnel(State(app): State<AppState>) -> Result<Json<TunnelStatu
 }
 
 // ---------------------------------------------------------------------------
+// GET /api/tunnel/preflight
+// ---------------------------------------------------------------------------
+
+/// Preflight response wraps `TunnelCheckResult` with an optional install hint.
+#[derive(Serialize, Deserialize)]
+pub struct PreflightResponse {
+    #[serde(flatten)]
+    pub check: TunnelCheckResult,
+    /// Present only when `installed` is `false`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub install_hint: Option<String>,
+}
+
+const INSTALL_HINT: &str =
+    "brew install orch-tunnel  OR  gh release download --repo orchard9/tunnel";
+
+pub async fn tunnel_preflight() -> Json<PreflightResponse> {
+    let result = tokio::task::spawn_blocking(check_orch_tunnel)
+        .await
+        .unwrap_or_else(|_| TunnelCheckResult {
+            installed: false,
+            path: None,
+            version: None,
+            source: None,
+            process_path_stale: false,
+            checked: vec![],
+        });
+    let install_hint = if result.installed {
+        None
+    } else {
+        Some(INSTALL_HINT.to_string())
+    };
+    Json(PreflightResponse {
+        check: result,
+        install_hint,
+    })
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -144,5 +183,45 @@ mod tests {
         // guard logic by checking the handle is None initially).
         let handle = app.tunnel_handle.lock().await;
         assert!(handle.is_none());
+    }
+
+    #[tokio::test]
+    async fn tunnel_preflight_returns_valid_json() {
+        let Json(resp) = tunnel_preflight().await;
+        // Should always have checked locations populated
+        assert!(
+            !resp.check.checked.is_empty() || !resp.check.installed,
+            "preflight should populate checked locations or report not installed"
+        );
+        // install_hint should be present only when not installed
+        if resp.check.installed {
+            assert!(resp.install_hint.is_none());
+        } else {
+            assert!(resp.install_hint.is_some());
+            assert!(resp.install_hint.as_ref().unwrap().contains("orch-tunnel"));
+        }
+    }
+
+    #[test]
+    fn preflight_response_serializes_flat() {
+        let resp = PreflightResponse {
+            check: TunnelCheckResult {
+                installed: false,
+                path: None,
+                version: None,
+                source: None,
+                process_path_stale: false,
+                checked: vec![crate::tunnel::CheckedLocation {
+                    location: "process PATH".to_string(),
+                    found: false,
+                }],
+            },
+            install_hint: Some(INSTALL_HINT.to_string()),
+        };
+        let json = serde_json::to_string(&resp).unwrap();
+        // Flattened — installed is at top level, not nested under "check"
+        assert!(json.contains("\"installed\":false"));
+        assert!(json.contains("\"install_hint\":"));
+        assert!(json.contains("\"checked\":["));
     }
 }

@@ -1,0 +1,10 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: workspace-onboarding-empty-states
+    title: Rich onboarding empty states for all workspace pages
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

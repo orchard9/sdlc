@@ -381,6 +381,7 @@ export const api = {
     }),
 
   // SDLC tunnel (exposes this UI)
+  getTunnelPreflight: () => request<import('@/lib/types').TunnelPreflightResult>('/api/tunnel/preflight'),
   getTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel'),
   startTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel', { method: 'POST' }),
   stopTunnel: () => request<import('@/lib/types').TunnelStatus>('/api/tunnel', { method: 'DELETE' }),

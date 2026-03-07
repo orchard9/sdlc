@@ -1,0 +1,18 @@
+id: "20260307-052300-vkm"
+milestone_slug: v51-workspace-empty-states
+started_at: "2026-03-07T19:23:00Z"
+completed_at: "2026-03-07T19:35:00Z"
+verdict: pass
+tests_total: 8
+tests_passed: 8
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/summary.md
+screenshot_paths:
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/01-ponder-empty-state.png
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/02-rootcause-empty-state.png
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/03-guidelines-empty-state.png
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/04-spikes-empty-state.png
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/05-knowledge-empty-state.png
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/06-spike-selected.png
+  - .sdlc/milestones/v51-workspace-empty-states/uat-runs/20260307-052300-vkm/07-visual-consistency.png

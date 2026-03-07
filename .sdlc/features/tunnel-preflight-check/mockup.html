@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tunnel Preflight Check — Mockup</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0b; color: #e4e4e7; line-height: 1.5; }
+  nav { position: sticky; top: 0; z-index: 10; background: #18181b; border-bottom: 1px solid #27272a; display: flex; gap: 0; overflow-x: auto; }
+  nav a { padding: 10px 16px; font-size: 13px; color: #a1a1aa; text-decoration: none; white-space: nowrap; border-bottom: 2px solid transparent; }
+  nav a:hover, nav a.active { color: #e4e4e7; border-bottom-color: #3b82f6; }
+  section { display: none; max-width: 640px; margin: 32px auto; padding: 0 16px; }
+  section:target { display: block; }
+  .card { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 20px; }
+  .card + .card { margin-top: 16px; }
+  h2 { font-size: 14px; font-weight: 600; }
+  .sub { font-size: 12px; color: #71717a; margin-top: 2px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; border: none; cursor: pointer; }
+  .btn-primary { background: #3b82f6; color: #fff; }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn-danger { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .warning { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+  .warning-title { font-size: 13px; font-weight: 600; color: #f59e0b; }
+  .warning-body { font-size: 12px; color: #a1a1aa; margin-top: 6px; }
+  .warning-body code { font-family: 'SF Mono', Menlo, monospace; font-size: 11px; background: #27272a; padding: 2px 6px; border-radius: 4px; }
+  .checked-list { list-style: none; margin-top: 8px; font-size: 12px; }
+  .checked-list li { padding: 2px 0; }
+  .checked-list .miss { color: #71717a; }
+  .checked-list .miss::before { content: "x "; color: #ef4444; }
+  .info { font-size: 11px; color: #52525b; margin-top: 12px; padding-top: 10px; border-top: 1px solid #27272a; }
+  .info code { font-family: 'SF Mono', Menlo, monospace; font-size: 10px; background: #27272a; padding: 1px 5px; border-radius: 3px; }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #3b82f6; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .version-badge { font-size: 11px; color: #52525b; font-family: 'SF Mono', Menlo, monospace; background: #27272a; padding: 2px 8px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#screen-loading" class="active">Loading</a>
+  <a href="#screen-not-installed">Not Installed</a>
+  <a href="#screen-installed-off">Installed (Off)</a>
+  <a href="#screen-installed-on">Installed (On)</a>
+</nav>
+
+<!-- Screen 1: Preflight loading -->
+<section id="screen-loading">
+  <div class="card">
+    <div class="row">
+      <div>
+        <h2>Ponder Tunnel</h2>
+        <p class="sub">Expose the Ponder UI publicly</p>
+      </div>
+      <button class="btn btn-primary" disabled><span class="spinner"></span> Checking...</button>
+    </div>
+    <div class="info">Checking orch-tunnel availability...</div>
+  </div>
+</section>
+
+<!-- Screen 2: Not installed -->
+<section id="screen-not-installed">
+  <div class="card">
+    <div class="row">
+      <div>
+        <h2>Ponder Tunnel</h2>
+        <p class="sub">Expose the Ponder UI publicly</p>
+      </div>
+      <button class="btn btn-primary" disabled>Start tunnel</button>
+    </div>
+    <div class="warning">
+      <div class="warning-title">orch-tunnel not found</div>
+      <div class="warning-body">
+        Install to enable tunnels:<br>
+        <code>brew install orch-tunnel</code> or <code>gh release download --repo orchard9/tunnel</code>
+        <ul class="checked-list">
+          <li class="miss">process PATH</li>
+          <li class="miss">/opt/homebrew/bin/orch-tunnel</li>
+          <li class="miss">/usr/local/bin/orch-tunnel</li>
+          <li class="miss">~/.cargo/bin/orch-tunnel</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 3: Installed, tunnel off -->
+<section id="screen-installed-off">
+  <div class="card">
+    <div class="row">
+      <div>
+        <h2>Ponder Tunnel</h2>
+        <p class="sub">Expose the Ponder UI publicly</p>
+        <p class="sub">Proxies <code style="font-family:monospace;font-size:11px;background:#27272a;padding:1px 5px;border-radius:3px;">localhost:7777</code></p>
+      </div>
+      <button class="btn btn-primary">Start tunnel</button>
+    </div>
+    <div class="info">
+      <span class="version-badge">v0.3.1</span> at <code>/opt/homebrew/bin/orch-tunnel</code>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 4: Installed, tunnel on -->
+<section id="screen-installed-on">
+  <div class="card">
+    <div class="row">
+      <div>
+        <h2>Ponder Tunnel</h2>
+        <p class="sub">Expose the Ponder UI publicly</p>
+        <p class="sub">Proxies <code style="font-family:monospace;font-size:11px;background:#27272a;padding:1px 5px;border-radius:3px;">localhost:7777</code></p>
+      </div>
+      <button class="btn btn-danger">Stop tunnel</button>
+    </div>
+    <div style="margin-top:12px;font-size:12px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="width:80px;color:#71717a;">Tunnel URL</span>
+        <code style="font-family:monospace;font-size:11px;background:#27272a;padding:3px 8px;border-radius:4px;flex:1;">https://my-project.tunnel.threesix.ai</code>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="width:80px;color:#71717a;">Auth URL</span>
+        <code style="font-family:monospace;font-size:11px;background:#27272a;padding:3px 8px;border-radius:4px;flex:1;">https://my-project.tunnel.threesix.ai/?auth=aBcD1234</code>
+      </div>
+    </div>
+    <div class="info">
+      <span class="version-badge">v0.3.1</span> at <code>/opt/homebrew/bin/orch-tunnel</code>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Show first screen by default
+  if (!location.hash) location.hash = '#screen-loading';
+  // Highlight active nav link
+  function updateNav() {
+    document.querySelectorAll('nav a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('href') === location.hash);
+    });
+    document.querySelectorAll('section').forEach(s => {
+      s.style.display = s.id === location.hash.slice(1) ? 'block' : 'none';
+    });
+  }
+  window.addEventListener('hashchange', updateNav);
+  updateNav();
+</script>
+</body>
+</html>

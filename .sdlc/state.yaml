@@ -140,88 +140,12 @@ active_features:
 - fix-released-milestone-panel
 - released-milestone-victory-panel
 - fix-whenanewagentactivitytile
+- dynamic-tab-title
+- workspace-onboarding-empty-states
+- robust-orch-tunnel-lookup
+- tunnel-preflight-check
 active_directives: []
 history:
-- feature: citadel-query-logs-tool
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:52:48.279123Z
-  outcome: merged
-- feature: beat-tool
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T22:27:49.634728Z
-  outcome: transition
-- feature: tool-streaming-async
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T22:27:56.393718Z
-  outcome: transition
-- feature: tool-streaming-async
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T22:28:00.382268Z
-  outcome: transition
-- feature: ponder-design-artifact-protocol
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T22:29:40.004463Z
-  outcome: merged
-- feature: human-uat-backend
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T22:30:38.775892Z
-  outcome: transition
-- feature: human-uat-backend
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T22:30:42.459808Z
-  outcome: transition
-- feature: beat-tool
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T22:31:37.206038Z
-  outcome: merged
-- feature: dev-driver-agentic-dispatch
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T22:31:43.934912Z
-  outcome: transition
-- feature: scrapbook-html-preview
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T22:31:47.528501Z
-  outcome: merged
-- feature: dev-driver-agentic-dispatch
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T22:31:47.783036Z
-  outcome: transition
-- feature: design-create-action-html
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T22:31:51.017017Z
-  outcome: merged
-- feature: human-uat-frontend
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T22:31:52.635285Z
-  outcome: transition
-- feature: human-uat-frontend
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T22:31:54.521499Z
-  outcome: transition
-- feature: human-uat-frontend
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T22:34:58.512675Z
-  outcome: transition
-- feature: human-uat-frontend
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T22:37:46.884853Z
-  outcome: merged
 - feature: tool-streaming-async
   action: implement_task
   phase: audit
@@ -1142,6 +1066,86 @@ history:
   phase: released
   timestamp: 2026-03-07T17:05:30.133787Z
   outcome: merged
+- feature: dynamic-tab-title
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T19:08:57.921317Z
+  outcome: transition
+- feature: dynamic-tab-title
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T19:09:02.899067Z
+  outcome: transition
+- feature: dynamic-tab-title
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T19:09:58.750315Z
+  outcome: transition
+- feature: dynamic-tab-title
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T19:10:35.391623Z
+  outcome: merged
+- feature: workspace-onboarding-empty-states
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T19:18:25.177729Z
+  outcome: transition
+- feature: workspace-onboarding-empty-states
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T19:18:32.612625Z
+  outcome: transition
+- feature: workspace-onboarding-empty-states
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T19:19:17.017603Z
+  outcome: transition
+- feature: workspace-onboarding-empty-states
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T19:20:21.900818Z
+  outcome: merged
+- feature: robust-orch-tunnel-lookup
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T19:25:13.180366Z
+  outcome: transition
+- feature: robust-orch-tunnel-lookup
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T19:25:18.176719Z
+  outcome: transition
+- feature: tunnel-preflight-check
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T19:26:07.158057Z
+  outcome: transition
+- feature: tunnel-preflight-check
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T19:26:11.998181Z
+  outcome: transition
+- feature: robust-orch-tunnel-lookup
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T19:28:34.568825Z
+  outcome: transition
+- feature: tunnel-preflight-check
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T19:30:37.895490Z
+  outcome: transition
+- feature: robust-orch-tunnel-lookup
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T19:30:58.042923Z
+  outcome: merged
+- feature: tunnel-preflight-check
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T19:31:38.872317Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1187,6 +1191,9 @@ milestones:
 - v47-ponder-committed-flow
 - v48-milestone-feature-forward-motion
 - v49-released-milestone-ux
+- v50-ui-title
+- v51-workspace-empty-states
+- v51-tunnel-discovery
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1198,8 +1205,5 @@ active_ponders:
 - git-binary-hygiene
 - test-rich-input-modal-uat
 - user-workspaces
-- improve-start-tunnel-error-recovery
-- improve-new-user-ponder-messaging
 - improve-new-user-evolve-messaging
-- ui-title
-last_updated: 2026-03-07T17:41:36.016924Z
+last_updated: 2026-03-07T19:31:38.872322Z

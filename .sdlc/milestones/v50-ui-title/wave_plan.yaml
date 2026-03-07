@@ -1,0 +1,10 @@
+- number: 1
+  label: Implementation
+  items:
+  - slug: dynamic-tab-title
+    title: Dynamic browser tab title — PROJECT · FOCUS · Ponder
+    phase: implementation
+    action: create_review
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

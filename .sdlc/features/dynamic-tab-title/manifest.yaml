@@ -1,0 +1,121 @@
+slug: dynamic-tab-title
+title: Dynamic browser tab title — PROJECT · FOCUS · Ponder
+description: 'Set the browser tab title dynamically based on the current page context — format: PROJECT · FOCUS · Ponder. Each page (milestones, features, guidelines, investigations, spikes, knowledge) sets a descriptive title so users can distinguish tabs.'
+phase: released
+created_at: 2026-03-07T18:56:01.111937Z
+updated_at: 2026-03-07T19:11:27.378547Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/dynamic-tab-title/spec.md
+  created_at: 2026-03-07T19:08:00.063023Z
+  approved_at: 2026-03-07T19:08:05.767799Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/dynamic-tab-title/design.md
+  created_at: 2026-03-07T19:08:23.907773Z
+  approved_at: 2026-03-07T19:08:23.915864Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/dynamic-tab-title/tasks.md
+  created_at: 2026-03-07T19:08:35.558401Z
+  approved_at: 2026-03-07T19:08:35.567013Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/dynamic-tab-title/qa-plan.md
+  created_at: 2026-03-07T19:08:52.556955Z
+  approved_at: 2026-03-07T19:08:52.565291Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: draft
+  path: .sdlc/features/dynamic-tab-title/review.md
+  created_at: 2026-03-07T19:10:16.766264Z
+  approved_at: 2026-03-07T19:09:53.721890Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/dynamic-tab-title/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T19:10:04.690667Z
+  waive_reason: Pure frontend document.title change — no user input, no API calls, no security surface
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/dynamic-tab-title/qa-results.md
+  created_at: 2026-03-07T19:11:27.368204Z
+  approved_at: 2026-03-07T19:11:27.378547Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add useEffect for document.title in AppShell
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:09:10.688627Z
+  started_at: null
+  completed_at: 2026-03-07T19:09:33.309508Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Set title in HubPage
+  description: null
+  status: completed
+  created_at: 2026-03-07T19:09:10.698057Z
+  started_at: null
+  completed_at: 2026-03-07T19:09:33.317899Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T18:56:01.111937Z
+  exited: 2026-03-07T19:08:05.770677Z
+- phase: specified
+  entered: 2026-03-07T19:08:05.770677Z
+  exited: 2026-03-07T19:08:52.567090Z
+- phase: planned
+  entered: 2026-03-07T19:08:52.567090Z
+  exited: 2026-03-07T19:08:57.919002Z
+- phase: ready
+  entered: 2026-03-07T19:08:57.919002Z
+  exited: 2026-03-07T19:09:02.896430Z
+- phase: implementation
+  entered: 2026-03-07T19:09:02.896430Z
+  exited: 2026-03-07T19:09:53.727469Z
+- phase: review
+  entered: 2026-03-07T19:09:53.727469Z
+  exited: 2026-03-07T19:09:58.749076Z
+- phase: audit
+  entered: 2026-03-07T19:09:58.749076Z
+  exited: 2026-03-07T19:10:04.692896Z
+- phase: qa
+  entered: 2026-03-07T19:10:04.692896Z
+  exited: 2026-03-07T19:10:30.349780Z
+- phase: merge
+  entered: 2026-03-07T19:10:30.349780Z
+  exited: 2026-03-07T19:10:35.389355Z
+- phase: released
+  entered: 2026-03-07T19:10:35.389355Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

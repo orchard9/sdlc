@@ -33,6 +33,11 @@ const PATH_LABELS: Record<string, string> = {
   '/actions': 'Actions',
   '/knowledge': 'Knowledge',
   '/guidelines': 'Guidelines',
+  '/spikes': 'Spikes',
+  '/setup': 'Setup',
+  '/runs': 'Runs',
+  '/config': 'Settings',
+  '/docs': 'Docs',
 }
 
 function titleFromPath(pathname: string): string {
@@ -94,6 +99,15 @@ export function AppShell({ children }: AppShellProps) {
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [])
+
+  // Dynamic tab title: PROJECT · FOCUS · Ponder
+  useEffect(() => {
+    const base = titleFromPath(location.pathname)
+    const parts = location.pathname.split('/').filter(Boolean)
+    // For detail routes like /features/:slug, prepend the slug
+    const focus = parts.length >= 2 ? `${parts[parts.length - 1]} · ${base}` : base
+    document.title = `${projectName} · ${focus} · Ponder`
+  }, [location.pathname, projectName])
 
   return (
     <div className="flex h-[100dvh] overflow-hidden">
