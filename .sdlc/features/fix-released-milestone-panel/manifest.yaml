@@ -1,0 +1,130 @@
+slug: fix-released-milestone-panel
+title: Fix released milestone showing verifying UI — status-aware panel routing
+description: Fix the milestone detail panel to route on actual milestone status rather than always showing the verifying UI. When a milestone is released, show the released panel instead of the verifying/in-progress view.
+phase: released
+created_at: 2026-03-07T16:48:52.604328Z
+updated_at: 2026-03-07T16:57:27.983827Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-released-milestone-panel/spec.md
+  created_at: 2026-03-07T16:53:47.049438Z
+  approved_at: 2026-03-07T16:53:50.210981Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-released-milestone-panel/design.md
+  created_at: 2026-03-07T16:54:07.155837Z
+  approved_at: 2026-03-07T16:54:07.165567Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-released-milestone-panel/tasks.md
+  created_at: 2026-03-07T16:54:18.270766Z
+  approved_at: 2026-03-07T16:54:18.280104Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-released-milestone-panel/qa-plan.md
+  created_at: 2026-03-07T16:54:36.230615Z
+  approved_at: 2026-03-07T16:54:36.239989Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-released-milestone-panel/review.md
+  created_at: 2026-03-07T16:56:18.395003Z
+  approved_at: 2026-03-07T16:56:18.404355Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-released-milestone-panel/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T16:56:28.924909Z
+  waive_reason: Pure frontend UI routing change — adds a prop and conditional render. No API changes, no auth changes, no data flow changes. No security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-released-milestone-panel/qa-results.md
+  created_at: 2026-03-07T16:57:22.750391Z
+  approved_at: 2026-03-07T16:57:22.757084Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add milestoneStatus prop and routing to MilestonePreparePanel
+  description: null
+  status: completed
+  created_at: 2026-03-07T16:54:21.807069Z
+  started_at: 2026-03-07T16:54:49.407141Z
+  completed_at: 2026-03-07T16:55:07.079555Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Thread milestone status from MilestoneDetail
+  description: null
+  status: completed
+  created_at: 2026-03-07T16:54:21.814144Z
+  started_at: 2026-03-07T16:55:14.490525Z
+  completed_at: 2026-03-07T16:55:20.667537Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify build compiles cleanly
+  description: null
+  status: completed
+  created_at: 2026-03-07T16:54:21.819923Z
+  started_at: 2026-03-07T16:55:26.173041Z
+  completed_at: 2026-03-07T16:55:55.004278Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T16:48:52.604328Z
+  exited: 2026-03-07T16:53:50.214008Z
+- phase: specified
+  entered: 2026-03-07T16:53:50.214008Z
+  exited: 2026-03-07T16:54:36.241850Z
+- phase: planned
+  entered: 2026-03-07T16:54:36.241850Z
+  exited: 2026-03-07T16:54:42.592084Z
+- phase: ready
+  entered: 2026-03-07T16:54:42.592084Z
+  exited: 2026-03-07T16:54:45.707642Z
+- phase: implementation
+  entered: 2026-03-07T16:54:45.707642Z
+  exited: 2026-03-07T16:56:18.411549Z
+- phase: review
+  entered: 2026-03-07T16:56:18.411549Z
+  exited: 2026-03-07T16:56:23.636359Z
+- phase: audit
+  entered: 2026-03-07T16:56:23.636359Z
+  exited: 2026-03-07T16:56:28.927734Z
+- phase: qa
+  entered: 2026-03-07T16:56:28.927734Z
+  exited: 2026-03-07T16:57:22.762485Z
+- phase: merge
+  entered: 2026-03-07T16:57:22.762485Z
+  exited: 2026-03-07T16:57:27.983827Z
+- phase: released
+  entered: 2026-03-07T16:57:27.983827Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

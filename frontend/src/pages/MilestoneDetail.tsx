@@ -7,6 +7,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { FeatureCard } from '@/components/features/FeatureCard'
 import { UatHistoryPanel } from '@/components/milestones/UatHistoryPanel'
 import { MilestonePreparePanel } from '@/components/milestones/MilestonePreparePanel'
+import { ReleasedPanel } from '@/components/milestones/ReleasedPanel'
 import { ArrowLeft, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
 import type { MilestoneDetail as MilestoneDetailType } from '@/lib/types'
 
@@ -106,7 +107,11 @@ export function MilestoneDetail() {
         </div>
       </div>
 
-      <MilestonePreparePanel milestoneSlug={slug} />
+      {milestone.status === 'released' ? (
+        <ReleasedPanel milestoneSlug={slug} />
+      ) : (
+        <MilestonePreparePanel milestoneSlug={slug} milestoneStatus={milestone.status} />
+      )}
 
       <section>
         <h3 className="text-sm font-semibold mb-3">Features</h3>

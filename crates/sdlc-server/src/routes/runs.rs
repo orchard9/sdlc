@@ -740,6 +740,8 @@ pub(crate) async fn spawn_agent_run(
         id: run_id.clone(),
         key: key.clone(),
         label: label.to_string(),
+        run_type: record.run_type.clone(),
+        target: record.target.clone(),
     });
 
     Ok(Json(serde_json::json!({

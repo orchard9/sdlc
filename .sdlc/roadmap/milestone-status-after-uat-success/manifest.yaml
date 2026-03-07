@@ -1,0 +1,13 @@
+slug: milestone-status-after-uat-success
+title: milestone status after uat success
+status: committed
+created_at: 2026-03-07T16:41:14.553594Z
+updated_at: 2026-03-07T16:49:00.440433Z
+committed_at: 2026-03-07T16:48:09.014346Z
+committed_to:
+- v49-released-milestone-ux
+sessions: 1
+orientation:
+  current: Problem is scoped and solution is designed — released milestones show wrong UI (Run UAT button), need a ReleasedPanel component
+  next: Commit to milestones/features — one bug fix (hide Run UAT for released), one small feature (ReleasedPanel with victory banner + next milestone link)
+  commit: This is ready to commit — the solution is small, well-scoped, and clearly needed

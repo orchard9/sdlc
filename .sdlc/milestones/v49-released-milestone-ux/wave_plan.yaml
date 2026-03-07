@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: fix-released-milestone-panel
+    title: Fix released milestone showing verifying UI — status-aware panel routing
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: released-milestone-victory-panel
+    title: ReleasedPanel component — victory banner, stats, re-run UAT, next milestone link
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

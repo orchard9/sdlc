@@ -5,7 +5,7 @@ import { Skeleton, SkeletonMilestone } from '@/components/shared/Skeleton'
 import { Link } from 'react-router-dom'
 import { MilestonePreparePanel } from '@/components/milestones/MilestonePreparePanel'
 import { ChevronDown, ChevronRight } from 'lucide-react'
-import type { FeatureSummary } from '@/lib/types'
+import type { FeatureSummary, MilestoneStatus } from '@/lib/types'
 
 function MilestoneCard({ m, showPrepare }: {
   m: { slug: string; title: string; vision: string | null; status: string; features: string[] }
@@ -39,7 +39,7 @@ function MilestoneCard({ m, showPrepare }: {
       )}
       {showPrepare && (
         <div className="mt-3 pt-3 border-t border-border/50">
-          <MilestonePreparePanel milestoneSlug={m.slug} />
+          <MilestonePreparePanel milestoneSlug={m.slug} milestoneStatus={m.status as MilestoneStatus} />
         </div>
       )}
     </div>
