@@ -206,6 +206,13 @@ enum Commands {
         limit: usize,
     },
 
+    /// Commit changes to main with safe upstream merge
+    Commit {
+        /// Commit message (defaults to "wip")
+        #[arg(long, short)]
+        message: Option<String>,
+    },
+
     /// Merge a feature (stub)
     Merge { slug: String },
 
@@ -322,6 +329,7 @@ fn main() {
         } => cmd::orchestrate::run(&root, subcommand, tick_rate, db),
         Commands::Update => cmd::update::run(&root),
         Commands::Changelog { since, limit } => cmd::changelog::run(&root, &since, limit, cli.json),
+        Commands::Commit { message } => cmd::commit::run(&root, message.as_deref(), cli.json),
         Commands::Merge { slug } => cmd::merge::run(&root, &slug, cli.json),
         Commands::Archive { slug } => {
             cmd::feature::run(&root, FeatureSubcommand::Archive { slug }, cli.json)

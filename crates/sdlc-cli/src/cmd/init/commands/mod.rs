@@ -1,5 +1,6 @@
 mod sdlc_approve;
 mod sdlc_architecture_adjustment;
+mod sdlc_commit;
 mod sdlc_beat;
 mod sdlc_convo_mine;
 mod sdlc_cookbook;
@@ -79,4 +80,5 @@ pub static ALL_COMMANDS: &[&CommandDef] = &[
     &sdlc_init::SDLC_INIT,
     &sdlc_convo_mine::SDLC_CONVO_MINE,
     &sdlc_recap::SDLC_RECAP,
+    &sdlc_commit::SDLC_COMMIT,
 ];

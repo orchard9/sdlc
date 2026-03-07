@@ -176,6 +176,7 @@ triggering "missing field `id`" schema errors on next load).
 | Approve artifact | `sdlc artifact approve <slug> <type>` |
 | Reject artifact | `sdlc artifact reject <slug> <type>` |
 | Merge (release feature) | `sdlc merge <slug>` |
+| Commit to main + reconcile | `sdlc commit [-m "message"]` |
 | Add task | `sdlc task add <slug> "title"` |
 | Start task | `sdlc task start <slug> <task-id>` |
 | Complete task | `sdlc task complete <slug> <task-id>` |

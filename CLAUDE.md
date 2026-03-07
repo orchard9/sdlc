@@ -240,6 +240,7 @@ See `AGENTS.md` for the full consumer-facing agent instruction set (mental model
 | `/sdlc-enterprise-readiness` | Production readiness analysis |
 | `/sdlc-setup-quality-gates` | Set up pre-commit hooks |
 | `/sdlc-quality-fix` | Fix failing quality-check results — triages by failure count and applies fix-forward / fix-all / remediate |
+| `/sdlc-commit` | Commit changes to main with safe upstream merge — stages, commits, fetches origin, reconciles diverged history |
 
 **Adding a command:** Add a `const SDLC_*_COMMAND: &str` (Claude format), `const SDLC_*_PLAYBOOK: &str` (Gemini/OpenCode), and `const SDLC_*_SKILL: &str` (Agents). Register in all four `write_user_*` functions. Add filenames to `migrate_legacy_project_scaffolding()`.
 
