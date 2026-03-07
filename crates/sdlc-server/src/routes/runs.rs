@@ -856,8 +856,9 @@ pub(crate) fn sdlc_guideline_query_options(
 }
 
 /// Build query options for ponder sessions — extends sdlc_query_options with
-/// WebSearch, WebFetch, and Playwright MCP so agents can research prior art,
-/// fetch documentation, and interact with real browser UIs during ideation.
+/// WebSearch and WebFetch for prior art research and documentation fetching.
+/// Playwright is intentionally excluded: ponder sessions are ideation workspaces,
+/// not browser automation contexts. Use WebSearch/WebFetch instead.
 pub(crate) fn sdlc_ponder_query_options(
     root: std::path::PathBuf,
     max_turns: u32,
@@ -866,21 +867,6 @@ pub(crate) fn sdlc_ponder_query_options(
     let mut opts = sdlc_query_options(root, max_turns, claude_token);
     opts.allowed_tools.push("WebSearch".into());
     opts.allowed_tools.push("WebFetch".into());
-    opts.mcp_servers.push(McpServerConfig {
-        name: "playwright".into(),
-        command: "npx".into(),
-        args: vec!["@playwright/mcp@latest".into()],
-        env: HashMap::new(),
-    });
-    opts.allowed_tools.extend([
-        "mcp__playwright__browser_navigate".into(),
-        "mcp__playwright__browser_click".into(),
-        "mcp__playwright__browser_type".into(),
-        "mcp__playwright__browser_snapshot".into(),
-        "mcp__playwright__browser_take_screenshot".into(),
-        "mcp__playwright__browser_console_messages".into(),
-        "mcp__playwright__browser_wait_for".into(),
-    ]);
     opts
 }
 
@@ -1033,11 +1019,12 @@ pub async fn start_milestone_uat(
 
     // Start from the standard sdlc options, then extend with Playwright MCP so the
     // UAT agent can interact with a real browser during acceptance tests.
+    // --headless keeps the browser off-screen so it doesn't steal focus.
     let mut opts = sdlc_query_options(app.root.clone(), 200, None);
     opts.mcp_servers.push(McpServerConfig {
         name: "playwright".into(),
         command: "npx".into(),
-        args: vec!["@playwright/mcp@latest".into()],
+        args: vec!["@playwright/mcp@latest".into(), "--headless".into()],
         env: HashMap::new(),
     });
     opts.allowed_tools.extend([
@@ -1441,8 +1428,6 @@ pub async fn start_ponder_chat(
          You have web research tools available when the idea benefits from external context:\n\
          - `WebSearch` — search for prior art, competitors, specifications, research papers\n\
          - `WebFetch` — fetch and read a specific URL (docs, APIs, blog posts)\n\
-         - Playwright browser tools (`mcp__playwright__browser_*`) — navigate live products, \
-           capture screenshots, read accessibility trees\n\
          \n\
          Use these tools when they would strengthen the analysis. Do not use them gratuitously.\n\
          \n\

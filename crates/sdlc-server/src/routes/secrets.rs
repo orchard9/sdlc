@@ -179,6 +179,60 @@ pub async fn create_env(
     Ok(key_names)
 }
 
+#[derive(serde::Deserialize)]
+pub struct UpdateEnvBody {
+    pub pairs: Vec<EnvPair>,
+}
+
+/// PATCH /api/secrets/envs/:name — replace all secrets in an existing env file.
+///
+/// Full-replacement semantics: the submitted pairs become the complete new content
+/// of the encrypted file. Keys not submitted are removed.
+///
+/// Returns 400 if `pairs` is empty or no keys are configured.
+/// Returns 404 if the env does not exist.
+/// Returns 200 with `{ status, env, key_names }` on success.
+pub async fn update_env(
+    State(app): State<AppState>,
+    Path(name): Path<String>,
+    Json(body): Json<UpdateEnvBody>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    if body.pairs.is_empty() {
+        return Err(AppError(anyhow::anyhow!("pairs must not be empty")));
+    }
+    let root = app.root.clone();
+    let env_name = name.clone();
+    let pairs_content: String = body
+        .pairs
+        .iter()
+        .map(|p| format!("{}={}", p.key, p.value))
+        .collect::<Vec<_>>()
+        .join("\n")
+        + "\n";
+    let result = tokio::task::spawn_blocking(move || {
+        let env_path = sdlc_core::paths::secrets_env_path(&root, &env_name);
+        if !env_path.exists() {
+            return Err(sdlc_core::SdlcError::SecretEnvNotFound(env_name.clone()));
+        }
+        let config = sdlc_core::secrets::load_config(&root)?;
+        if config.keys.is_empty() {
+            return Err(sdlc_core::SdlcError::AgeEncryptFailed(
+                "no keys configured — add a recipient key first".to_string(),
+            ));
+        }
+        sdlc_core::secrets::write_env(&root, &env_name, &pairs_content, &config.keys)?;
+        let meta = sdlc_core::secrets::load_env_meta(&root, &env_name)?;
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "status": "updated",
+            "env": env_name,
+            "key_names": meta.key_names,
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+    Ok(Json(result))
+}
+
 /// DELETE /api/secrets/envs/:name — delete an env file and its metadata sidecar.
 pub async fn delete_env(
     State(app): State<AppState>,
@@ -280,6 +334,60 @@ mod tests {
         };
         let (status, _) = create_env(State(app), Json(body)).await.unwrap();
         assert_eq!(status, StatusCode::BAD_REQUEST);
+    }
+
+    #[tokio::test]
+    async fn update_env_not_found_returns_404() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = UpdateEnvBody {
+            pairs: vec![EnvPair {
+                key: "API_KEY".to_string(),
+                value: "new".to_string(),
+            }],
+        };
+        let err = update_env(State(app), Path("nonexistent".to_string()), Json(body))
+            .await
+            .unwrap_err();
+        assert_eq!(err.into_response().status(), StatusCode::NOT_FOUND);
+    }
+
+    #[tokio::test]
+    async fn update_env_empty_pairs_returns_bad_request() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        let body = UpdateEnvBody { pairs: vec![] };
+        let err = update_env(State(app), Path("staging".to_string()), Json(body))
+            .await
+            .unwrap_err();
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+    }
+
+    #[tokio::test]
+    async fn update_env_no_keys_returns_bad_request() {
+        use std::fs;
+        let dir = tempfile::TempDir::new().unwrap();
+        let app = AppState::new(dir.path().to_path_buf());
+        // Create a stub env file so the "not found" check passes
+        let envs_dir = dir.path().join(".sdlc").join("secrets").join("envs");
+        fs::create_dir_all(&envs_dir).unwrap();
+        fs::write(envs_dir.join("staging.age"), b"fake-age-content").unwrap();
+        let body = UpdateEnvBody {
+            pairs: vec![EnvPair {
+                key: "API_KEY".to_string(),
+                value: "value".to_string(),
+            }],
+        };
+        let err = update_env(State(app), Path("staging".to_string()), Json(body))
+            .await
+            .unwrap_err();
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
     }
 
     #[tokio::test]

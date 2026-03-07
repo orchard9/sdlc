@@ -236,6 +236,7 @@ async fn load_fleet_instances(
 /// if the server is not running in hub mode.
 pub async fn heartbeat(
     State(app): State<AppState>,
+    headers: HeaderMap,
     Json(payload): Json<HeartbeatPayload>,
 ) -> axum::response::Response {
     let Some(hub) = &app.hub_registry else {
@@ -245,6 +246,25 @@ pub async fn heartbeat(
         )
             .into_response();
     };
+
+    // Validate Bearer token when hub_service_tokens are configured.
+    if !app.hub_service_tokens.is_empty() {
+        let authorized = headers
+            .get(header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .and_then(|v| v.strip_prefix("Bearer "))
+            .map(|token| app.hub_service_tokens.iter().any(|t| t == token))
+            .unwrap_or(false);
+
+        if !authorized {
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(serde_json::json!({"error": "invalid or missing bearer token"})),
+            )
+                .into_response();
+        }
+    }
+
     let mut registry = hub.lock().await;
     let _entry = registry.apply_heartbeat(payload);
     (
@@ -465,6 +485,71 @@ pub async fn summary(State(app): State<AppState>) -> axum::response::Response {
         Ok(instances) => Json(build_summary(&instances)).into_response(),
         Err(e) => e,
     }
+}
+
+/// GET /api/hub/metrics — Prometheus-compatible metrics endpoint.
+///
+/// Exposes fleet health gauges for Grafana alerting.
+pub async fn metrics(State(app): State<AppState>) -> axum::response::Response {
+    if app.hub_registry.is_none() {
+        return not_hub_mode();
+    }
+
+    let instances = match load_fleet_instances(&app).await {
+        Ok(i) => i,
+        Err(e) => return e,
+    };
+
+    let summary = build_summary(&instances);
+
+    let mut out = String::with_capacity(1024);
+
+    out.push_str("# HELP sdlc_fleet_instances Fleet instance count by status.\n");
+    out.push_str("# TYPE sdlc_fleet_instances gauge\n");
+    out.push_str(&format!(
+        "sdlc_fleet_instances{{status=\"online\"}} {}\n",
+        summary.online
+    ));
+    out.push_str(&format!(
+        "sdlc_fleet_instances{{status=\"degraded\"}} {}\n",
+        summary.degraded
+    ));
+    out.push_str(&format!(
+        "sdlc_fleet_instances{{status=\"provisioning\"}} {}\n",
+        summary.provisioning
+    ));
+    out.push_str(&format!(
+        "sdlc_fleet_instances{{status=\"failed\"}} {}\n",
+        summary.failed
+    ));
+
+    out.push_str("# HELP sdlc_fleet_total Total fleet instances.\n");
+    out.push_str("# TYPE sdlc_fleet_total gauge\n");
+    out.push_str(&format!("sdlc_fleet_total {}\n", summary.total_projects));
+
+    out.push_str("# HELP sdlc_fleet_agents_active Number of projects with active agent runs.\n");
+    out.push_str("# TYPE sdlc_fleet_agents_active gauge\n");
+    out.push_str(&format!(
+        "sdlc_fleet_agents_active {}\n",
+        summary.active_agents
+    ));
+
+    out.push_str("# HELP sdlc_fleet_attention Instances requiring attention.\n");
+    out.push_str("# TYPE sdlc_fleet_attention gauge\n");
+    out.push_str(&format!(
+        "sdlc_fleet_attention {}\n",
+        summary.attention_count
+    ));
+
+    (
+        StatusCode::OK,
+        [(
+            header::CONTENT_TYPE,
+            HeaderValue::from_static("text/plain; version=0.0.4; charset=utf-8"),
+        )],
+        out,
+    )
+        .into_response()
 }
 
 /// GET /api/hub/attention

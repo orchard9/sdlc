@@ -13,6 +13,7 @@ import {
   AlertCircle,
   X,
   Shield,
+  Pencil,
 } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
@@ -175,6 +176,131 @@ function AddEnvModal({ onAdd, onClose }: AddEnvModalProps) {
           >
             {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
             Create Environment
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Edit Environment modal
+// ---------------------------------------------------------------------------
+
+interface EditEnvModalProps {
+  env: SecretsEnvMeta
+  onUpdate: (env: string, pairs: Pair[]) => Promise<void>
+  onClose: () => void
+}
+
+function EditEnvModal({ env, onUpdate, onClose }: EditEnvModalProps) {
+  const [pairs, setPairs] = useState<Pair[]>(() =>
+    env.key_names.map(k => ({ key: k, value: '' }))
+  )
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const addRow = () => setPairs(prev => [...prev, { key: '', value: '' }])
+
+  const removeRow = (i: number) =>
+    setPairs(prev => prev.length > 1 ? prev.filter((_, idx) => idx !== i) : prev)
+
+  const updatePair = (i: number, field: keyof Pair, val: string) =>
+    setPairs(prev => prev.map((p, idx) => idx === i ? { ...p, [field]: val } : p))
+
+  const submit = async () => {
+    const validPairs = pairs.filter(p => p.key.trim() && p.value.trim())
+    if (validPairs.length === 0) {
+      setError('At least one key with a value is required')
+      return
+    }
+    setLoading(true)
+    setError(null)
+    try {
+      await onUpdate(env.env, validPairs)
+      onClose()
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to update environment')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+      <div className="bg-card border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-xl">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold">Edit Environment: <span className="font-mono">{env.env}</span></h3>
+          <button onClick={onClose} className="p-1 rounded hover:bg-accent transition-colors">
+            <X className="w-4 h-4 text-muted-foreground" />
+          </button>
+        </div>
+
+        <div className="flex items-start gap-2 p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-700 dark:text-amber-400 mb-4">
+          <AlertCircle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+          <span>Enter values for all keys you want to keep. Keys left blank will be removed. Submit re-encrypts this environment.</span>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex gap-2 mb-1">
+            <span className="flex-1 text-xs font-medium text-muted-foreground">KEY</span>
+            <span className="flex-1 text-xs font-medium text-muted-foreground">NEW VALUE</span>
+            <div className="w-7" />
+          </div>
+          {pairs.map((pair, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <input
+                value={pair.key}
+                onChange={e => updatePair(i, 'key', e.target.value)}
+                placeholder="KEY_NAME"
+                className="flex-1 px-3 py-2 text-xs font-mono bg-background border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <input
+                type="password"
+                value={pair.value}
+                onChange={e => updatePair(i, 'value', e.target.value)}
+                placeholder="new value…"
+                className="flex-1 px-3 py-2 text-xs font-mono bg-background border border-border rounded-lg focus:outline-none focus:ring-1 focus:ring-ring"
+              />
+              <button
+                onClick={() => removeRow(i)}
+                disabled={pairs.length === 1}
+                className="p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground disabled:opacity-30 disabled:cursor-not-allowed"
+                aria-label="Remove row"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+          <button
+            onClick={addRow}
+            className="mt-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+          >
+            + Add key
+          </button>
+        </div>
+
+        {error && (
+          <div className="flex items-center gap-2 text-destructive text-xs mt-3">
+            <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+            {error}
+          </div>
+        )}
+
+        <div className="flex justify-end gap-2 mt-5">
+          <button
+            onClick={onClose}
+            className="px-3 py-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={submit}
+            disabled={loading}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+          >
+            {loading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+            Update Secrets
           </button>
         </div>
       </div>
@@ -425,6 +551,7 @@ export function SecretsPage() {
   const [showAddKey, setShowAddKey] = useState(false)
   const [showAddEnv, setShowAddEnv] = useState(false)
   const [showAddToken, setShowAddToken] = useState(false)
+  const [editEnv, setEditEnv] = useState<SecretsEnvMeta | null>(null)
 
   const refresh = useCallback(() => {
     return Promise.all([api.getSecretsKeys(), api.getSecretsEnvs(), api.getAuthTokens()])
@@ -469,6 +596,11 @@ export function SecretsPage() {
 
   const handleCreateEnv = async (envName: string, pairs: Pair[]) => {
     await api.createSecretsEnv({ env: envName, pairs })
+    refresh()
+  }
+
+  const handleUpdateEnv = async (envName: string, pairs: Pair[]) => {
+    await api.updateSecretsEnv(envName, pairs)
     refresh()
   }
 
@@ -522,6 +654,13 @@ export function SecretsPage() {
         <AddTokenModal
           onAdd={handleAddToken}
           onClose={() => setShowAddToken(false)}
+        />
+      )}
+      {editEnv && (
+        <EditEnvModal
+          env={editEnv}
+          onUpdate={handleUpdateEnv}
+          onClose={() => setEditEnv(null)}
         />
       )}
 
@@ -648,13 +787,22 @@ export function SecretsPage() {
                         updated {new Date(env.updated_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <button
-                      onClick={() => handleDeleteEnv(env.env)}
-                      className="p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
-                      aria-label={`Delete ${env.env} env`}
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditEnv(env)}
+                        className="p-1 rounded hover:bg-accent hover:text-foreground transition-colors text-muted-foreground"
+                        aria-label={`Edit ${env.env} secrets`}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteEnv(env.env)}
+                        className="p-1 rounded hover:bg-destructive/10 hover:text-destructive transition-colors text-muted-foreground"
+                        aria-label={`Delete ${env.env} env`}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
 
                   {env.key_names.length > 0 && (

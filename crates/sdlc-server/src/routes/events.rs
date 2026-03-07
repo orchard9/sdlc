@@ -70,7 +70,13 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             .to_string();
             Some(Ok(Event::default().event("investigation").data(data)))
         }
-        Ok(SseMessage::RunStarted { id, key, label, run_type, target }) => {
+        Ok(SseMessage::RunStarted {
+            id,
+            key,
+            label,
+            run_type,
+            target,
+        }) => {
             let data = serde_json::json!({
                 "type": "run_started",
                 "id": id,

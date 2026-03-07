@@ -48,6 +48,10 @@ enum Commands {
     /// Show project state
     State,
 
+    /// Rebuild state.yaml from .sdlc/ directory contents (features, milestones, ponders)
+    #[command(name = "state-rebuild")]
+    StateRebuild,
+
     /// Classify the next action for a feature
     Next {
         /// Feature slug (omit to show all active features)
@@ -306,6 +310,7 @@ fn main() {
     let result = match cli.command {
         Commands::Init { platform } => cmd::init::run(&root, platform.as_deref()),
         Commands::State => cmd::state::run(&root, cli.json),
+        Commands::StateRebuild => cmd::state::rebuild(&root),
         Commands::Next { feature } => cmd::next::run(&root, feature.as_deref(), cli.json),
         Commands::Focus => cmd::focus::run(&root, cli.json),
         Commands::ParallelWork => cmd::parallel_work::run(&root, cli.json),

@@ -117,6 +117,9 @@ pub fn run(root: &Path, platform: Option<&str>) -> anyhow::Result<()> {
     // 8. Remove any legacy project-level sdlc files from prior versions
     migrate_legacy_project_scaffolding(root)?;
 
+    // 8.5. Configure git merge driver for state.yaml (avoids conflicts on pull/merge)
+    configure_state_merge_driver(root)?;
+
     // 9. Stamp sdlc_version in config.yaml
     stamp_sdlc_version(root)?;
 
@@ -159,6 +162,107 @@ pub fn stamp_sdlc_version(root: &Path) -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+/// Configure a custom git merge driver for `.sdlc/state.yaml` so that merges
+/// and rebases never produce conflict markers.  The driver picks the newer side
+/// by `last_updated` and then runs `ponder state-rebuild` to reconcile lists
+/// from the actual directories on disk.
+///
+/// Idempotent — safe to call on every `sdlc init` / `sdlc update`.
+pub fn configure_state_merge_driver(root: &Path) -> anyhow::Result<()> {
+    use std::process::Command;
+
+    // 1. Ensure .gitattributes contains the merge driver binding
+    let gitattributes_path = root.join(".gitattributes");
+    let marker = ".sdlc/state.yaml merge=sdlc-state";
+    let needs_write = if gitattributes_path.exists() {
+        let content = std::fs::read_to_string(&gitattributes_path).unwrap_or_default();
+        !content.contains(marker)
+    } else {
+        true
+    };
+    if needs_write {
+        let mut content = if gitattributes_path.exists() {
+            std::fs::read_to_string(&gitattributes_path).unwrap_or_default()
+        } else {
+            String::new()
+        };
+        if !content.is_empty() && !content.ends_with('\n') {
+            content.push('\n');
+        }
+        content
+            .push_str("# state.yaml is a derived index rebuilt from .sdlc/ directory contents.\n");
+        content.push_str("# On conflict, accept the newer side then rebuild from disk.\n");
+        content.push_str(marker);
+        content.push('\n');
+        std::fs::write(&gitattributes_path, content)?;
+        println!("  created: .gitattributes (state.yaml merge driver)");
+    }
+
+    // 2. Ensure .sdlc/merge-state.sh exists
+    let merge_script = root.join(".sdlc/merge-state.sh");
+    std::fs::write(&merge_script, MERGE_STATE_SH.as_bytes())?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        std::fs::set_permissions(&merge_script, std::fs::Permissions::from_mode(0o755))?;
+    }
+
+    // 3. Register the driver in local git config (repo-level, not global)
+    let _ = Command::new("git")
+        .args([
+            "config",
+            "merge.sdlc-state.name",
+            "SDLC state.yaml merge driver",
+        ])
+        .current_dir(root)
+        .output();
+    let _ = Command::new("git")
+        .args([
+            "config",
+            "merge.sdlc-state.driver",
+            ".sdlc/merge-state.sh %O %A %B",
+        ])
+        .current_dir(root)
+        .output();
+
+    Ok(())
+}
+
+const MERGE_STATE_SH: &str = r#"#!/usr/bin/env bash
+# Custom git merge driver for .sdlc/state.yaml
+#
+# state.yaml is a derived index — features, milestones, and ponders are
+# reconstructed from their respective directories on disk.  History is
+# preserved from whichever side has the newer last_updated timestamp.
+#
+# Git calls this with: %O (ancestor) %A (ours) %B (theirs)
+# Result must be written to %A.  Exit 0 = success, non-zero = conflict.
+
+set -euo pipefail
+
+ANCESTOR="$1"  # base
+OURS="$2"      # current branch
+THEIRS="$3"    # incoming branch
+
+# Pick the side with the newer last_updated as the base (preserves more history).
+ours_ts=$(grep '^last_updated:' "$OURS" 2>/dev/null | head -1 | sed 's/last_updated: *//')
+theirs_ts=$(grep '^last_updated:' "$THEIRS" 2>/dev/null | head -1 | sed 's/last_updated: *//')
+
+if [[ "$theirs_ts" > "$ours_ts" ]]; then
+    cp "$THEIRS" "$OURS"
+fi
+
+# Rebuild lists from disk (features/, milestones/, roadmap/).
+# If ponder/sdlc is available, use it.  Otherwise accept as-is.
+if command -v ponder &>/dev/null; then
+    ponder state-rebuild 2>&1 || true
+elif command -v sdlc &>/dev/null; then
+    sdlc state-rebuild 2>&1 || true
+fi
+
+exit 0
+"#;
 
 fn scaffold_platform(root: &Path, platform_name: &str) -> anyhow::Result<()> {
     match platform_name {

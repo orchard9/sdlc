@@ -469,6 +469,11 @@ export const api = {
     request(`/api/secrets/envs/${encodeURIComponent(name)}`, { method: 'DELETE' }),
   createSecretsEnv: (body: { env: string; pairs: { key: string; value: string }[] }) =>
     request('/api/secrets/envs', { method: 'POST', body: JSON.stringify(body) }),
+  updateSecretsEnv: (name: string, pairs: { key: string; value: string }[]) =>
+    request(`/api/secrets/envs/${encodeURIComponent(name)}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ pairs }),
+    }),
 
   // Spikes
   getSpikes: () => request<import('@/lib/types').SpikeSummary[]>('/api/spikes'),

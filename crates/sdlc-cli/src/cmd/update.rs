@@ -3,9 +3,9 @@ use sdlc_core::{config::Config, paths};
 use std::path::Path;
 
 use super::init::{
-    install_user_scaffolding, migrate_legacy_project_scaffolding, stamp_sdlc_version,
-    write_agents_md, write_core_tools, write_guidance_md, write_standard_agents,
-    SDLC_BINARY_VERSION,
+    configure_state_merge_driver, install_user_scaffolding, migrate_legacy_project_scaffolding,
+    stamp_sdlc_version, write_agents_md, write_core_tools, write_guidance_md,
+    write_standard_agents, SDLC_BINARY_VERSION,
 };
 
 /// `sdlc update` — refresh agent scaffolding and stamp the current binary version.
@@ -57,6 +57,9 @@ pub fn run(root: &Path) -> anyhow::Result<()> {
     // Refresh the SDLC section in AGENTS.md (creates, updates markers, or migrates legacy)
     println!();
     write_agents_md(root, &project_name)?;
+
+    // Configure git merge driver for state.yaml
+    configure_state_merge_driver(root)?;
 
     // Stamp the current binary version into config.yaml
     stamp_sdlc_version(root)?;

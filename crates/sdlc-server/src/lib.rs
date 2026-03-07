@@ -500,7 +500,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         )
         .route(
             "/api/secrets/envs/{name}",
-            delete(routes::secrets::delete_env),
+            delete(routes::secrets::delete_env).patch(routes::secrets::update_env),
         )
         // Auth tokens (named tunnel-access tokens stored in .sdlc/auth.yaml)
         .route(
@@ -667,7 +667,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/tunnel", get(routes::tunnel::get_tunnel))
         .route("/api/tunnel", post(routes::tunnel::start_tunnel))
         .route("/api/tunnel", delete(routes::tunnel::stop_tunnel))
-        .route("/api/tunnel/preflight", get(routes::tunnel::tunnel_preflight))
+        .route(
+            "/api/tunnel/preflight",
+            get(routes::tunnel::tunnel_preflight),
+        )
         // Agents (Claude agent definitions from ~/.claude/agents/)
         .route("/api/agents", get(routes::agents::list_agents))
         .route("/api/agents/{name}", get(routes::agents::get_agent))
@@ -712,6 +715,7 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         // Fleet management (hub mode only)
         .route("/api/hub/fleet", get(routes::hub::fleet))
         .route("/api/hub/summary", get(routes::hub::summary))
+        .route("/api/hub/metrics", get(routes::hub::metrics))
         .route("/api/hub/attention", get(routes::hub::attention))
         .route("/api/hub/activity", get(routes::hub::activity))
         .route("/api/hub/repos", get(routes::hub::repos))

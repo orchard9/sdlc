@@ -1,7 +1,7 @@
 mod sdlc_approve;
 mod sdlc_architecture_adjustment;
-mod sdlc_commit;
 mod sdlc_beat;
+mod sdlc_commit;
 mod sdlc_convo_mine;
 mod sdlc_cookbook;
 mod sdlc_cookbook_run;

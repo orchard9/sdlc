@@ -210,6 +210,94 @@ impl State {
     pub fn last_action(&self) -> Option<&HistoryEntry> {
         self.history.last()
     }
+
+    // ---------------------------------------------------------------------------
+    // Rebuild from disk
+    // ---------------------------------------------------------------------------
+
+    /// Reconstruct `active_features`, `milestones`, and `active_ponders` by
+    /// scanning the `.sdlc/` directory tree.  History and other fields are
+    /// preserved from the current in-memory state (caller should load first).
+    pub fn rebuild(root: &Path) -> Result<Self> {
+        let sdlc = root.join(".sdlc");
+
+        // Load existing state for project name + history, or start fresh.
+        let mut state = match Self::load(root) {
+            Ok(s) => s,
+            Err(SdlcError::NotInitialized) => {
+                // Derive project name from directory
+                let project = root
+                    .file_name()
+                    .map(|n| n.to_string_lossy().to_string())
+                    .unwrap_or_else(|| "unknown".to_string());
+                Self::new(project)
+            }
+            Err(e) => return Err(e),
+        };
+
+        // --- active_features: every subdir of .sdlc/features/ ---
+        state.active_features.clear();
+        let features_dir = sdlc.join("features");
+        if features_dir.is_dir() {
+            let mut slugs: Vec<String> = std::fs::read_dir(&features_dir)?
+                .filter_map(|e| e.ok())
+                .filter(|e| e.path().is_dir())
+                .filter_map(|e| e.file_name().into_string().ok())
+                .collect();
+            slugs.sort();
+            state.active_features = slugs;
+        }
+
+        // --- milestones: every subdir of .sdlc/milestones/ ---
+        state.milestones.clear();
+        let milestones_dir = sdlc.join("milestones");
+        if milestones_dir.is_dir() {
+            let mut slugs: Vec<String> = std::fs::read_dir(&milestones_dir)?
+                .filter_map(|e| e.ok())
+                .filter(|e| e.path().is_dir())
+                .filter_map(|e| e.file_name().into_string().ok())
+                .collect();
+            slugs.sort();
+            state.milestones = slugs;
+        }
+
+        // --- active_ponders: roadmap entries with exploring/converging status ---
+        state.active_ponders.clear();
+        let roadmap_dir = sdlc.join("roadmap");
+        if roadmap_dir.is_dir() {
+            let mut slugs: Vec<String> = Vec::new();
+            for entry in std::fs::read_dir(&roadmap_dir)?.filter_map(|e| e.ok()) {
+                if !entry.path().is_dir() {
+                    continue;
+                }
+                let manifest = entry.path().join("manifest.yaml");
+                if !manifest.exists() {
+                    continue;
+                }
+                // Check status field — active if exploring or converging
+                if let Ok(data) = std::fs::read_to_string(&manifest) {
+                    let is_active = data.lines().any(|line| {
+                        if let Some(val) = line.strip_prefix("status:") {
+                            let val = val.trim();
+                            val == "exploring" || val == "converging"
+                        } else {
+                            false
+                        }
+                    });
+                    if is_active {
+                        if let Ok(slug) = entry.file_name().into_string() {
+                            slugs.push(slug);
+                        }
+                    }
+                }
+            }
+            slugs.sort();
+            state.active_ponders = slugs;
+        }
+
+        state.last_updated = Utc::now();
+        Ok(state)
+    }
 }
 
 // ---------------------------------------------------------------------------

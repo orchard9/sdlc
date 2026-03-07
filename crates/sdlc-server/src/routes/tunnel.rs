@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use crate::auth::TunnelConfig;
 use crate::error::AppError;
 use crate::state::{AppState, TunnelSnapshot};
-use crate::tunnel::{check_orch_tunnel, generate_token, TunnelCheckResult, Tunnel};
+use crate::tunnel::{check_orch_tunnel, generate_token, Tunnel, TunnelCheckResult};
 
 // ---------------------------------------------------------------------------
 // Response types

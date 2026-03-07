@@ -1,0 +1,104 @@
+slug: fix-secretsenvnoinlinesecretrotationui
+title: Fix Secretsenvnoinlinesecretrotationui
+description: |-
+  Root cause: The backend has no PATCH/PUT endpoint for updating an individual secret within an existing env (only POST to create and DELETE to destroy the whole env), and the frontend `SecretsPage.tsx` never renders any edit controls per secret key — the env card shows only key names as read-only badges with no rotate/update affordance.
+
+  Problem: The /secrets page shows environment cards with a CLI hint for setting individual secrets (`sdlc secrets env set <env> KEY=value`), but there is no inline UI to update or rotate individual secret values within an existing environment. Users can only create a new environment or delete the entire environment — there is no per-key edit/rotate action in the frontend. The impact is that rotating a compromised or expired secret requires CLI access, defeating the purpose of the web UI.
+
+  Original report:
+  in "/secrets" - i have a way to add environments, but once an environment is added i dont have a way to modify the values within that environment, i need a way to rotate the secrets of individual items
+phase: merge
+created_at: 2026-03-07T21:21:12.539592Z
+updated_at: 2026-03-07T21:35:21.665319Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/spec.md
+  created_at: 2026-03-07T21:22:53.226406Z
+  approved_at: 2026-03-07T21:23:21.342561Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/design.md
+  created_at: 2026-03-07T21:23:31.983356Z
+  approved_at: 2026-03-07T21:24:52.092867Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/tasks.md
+  created_at: 2026-03-07T21:25:00.709479Z
+  approved_at: 2026-03-07T21:25:18.222249Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/qa-plan.md
+  created_at: 2026-03-07T21:25:24.592412Z
+  approved_at: 2026-03-07T21:25:43.545403Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/review.md
+  created_at: 2026-03-07T21:33:32.821101Z
+  approved_at: 2026-03-07T21:34:00.417753Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/audit.md
+  created_at: 2026-03-07T21:34:33.165794Z
+  approved_at: 2026-03-07T21:34:59.925504Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-secretsenvnoinlinesecretrotationui/qa-results.md
+  created_at: 2026-03-07T21:35:07.646841Z
+  approved_at: 2026-03-07T21:35:21.638706Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T21:21:12.539592Z
+  exited: 2026-03-07T21:23:21.344849Z
+- phase: specified
+  entered: 2026-03-07T21:23:21.344849Z
+  exited: 2026-03-07T21:25:43.547258Z
+- phase: planned
+  entered: 2026-03-07T21:25:43.547258Z
+  exited: 2026-03-07T21:25:47.740457Z
+- phase: ready
+  entered: 2026-03-07T21:25:47.740457Z
+  exited: 2026-03-07T21:25:53.492678Z
+- phase: implementation
+  entered: 2026-03-07T21:25:53.492678Z
+  exited: 2026-03-07T21:34:00.432192Z
+- phase: review
+  entered: 2026-03-07T21:34:00.432192Z
+  exited: 2026-03-07T21:34:27.596031Z
+- phase: audit
+  entered: 2026-03-07T21:34:27.596031Z
+  exited: 2026-03-07T21:34:59.931859Z
+- phase: qa
+  entered: 2026-03-07T21:34:59.931859Z
+  exited: 2026-03-07T21:35:21.665319Z
+- phase: merge
+  entered: 2026-03-07T21:35:21.665319Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

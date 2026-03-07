@@ -8,6 +8,19 @@ use sdlc_core::{
 use std::collections::HashSet;
 use std::path::Path;
 
+pub fn rebuild(root: &Path) -> anyhow::Result<()> {
+    let state = State::rebuild(root).context("failed to rebuild state from disk")?;
+    state.save(root).context("failed to save rebuilt state")?;
+    eprintln!(
+        "Rebuilt state.yaml: {} features, {} milestones, {} ponders, {} history entries",
+        state.active_features.len(),
+        state.milestones.len(),
+        state.active_ponders.len(),
+        state.history.len(),
+    );
+    Ok(())
+}
+
 pub fn run(root: &Path, json: bool) -> anyhow::Result<()> {
     let state = State::load(root).context("failed to load state")?;
     let features = Feature::list(root).unwrap_or_default();

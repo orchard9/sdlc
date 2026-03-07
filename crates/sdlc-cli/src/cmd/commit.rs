@@ -54,7 +54,11 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
     git(root, &["add", "-A"])?;
 
     // 4. Commit
-    let msg = message.ok_or_else(|| anyhow::anyhow!("--message is required. Use /sdlc-commit to auto-generate a message via the agent."))?;
+    let msg = message.ok_or_else(|| {
+        anyhow::anyhow!(
+            "--message is required. Use /sdlc-commit to auto-generate a message via the agent."
+        )
+    })?;
     git(root, &["commit", "-m", msg])?;
 
     let commit_sha = git(root, &["rev-parse", "--short", "HEAD"])?;
@@ -105,7 +109,10 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
     }
 
     // 8. Check divergence: ahead/behind
-    let counts = git(root, &["rev-list", "--left-right", "--count", "main...origin/main"])?;
+    let counts = git(
+        root,
+        &["rev-list", "--left-right", "--count", "main...origin/main"],
+    )?;
     let parts: Vec<&str> = counts.split_whitespace().collect();
     let ahead: u64 = parts.first().unwrap_or(&"0").parse().unwrap_or(0);
     let behind: u64 = parts.get(1).unwrap_or(&"0").parse().unwrap_or(0);
@@ -130,9 +137,7 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
 
     // 9. Diverged — reconcile
     if !json {
-        println!(
-            "Diverged: {ahead} ahead, {behind} behind origin/main. Reconciling..."
-        );
+        println!("Diverged: {ahead} ahead, {behind} behind origin/main. Reconciling...");
     }
 
     // Rename local main → dev/xist
@@ -147,8 +152,8 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
 
     if !merge_ok {
         // Conflict — report and stop
-        let conflict_files = git(root, &["diff", "--name-only", "--diff-filter=U"])
-            .unwrap_or_default();
+        let conflict_files =
+            git(root, &["diff", "--name-only", "--diff-filter=U"]).unwrap_or_default();
         if json {
             print_json(&serde_json::json!({
                 "committed": true,
@@ -176,7 +181,10 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
     let _ = git_try(root, &["branch", "-d", "dev/xist"]);
 
     let final_sha = git(root, &["rev-parse", "--short", "HEAD"])?;
-    let final_counts = git(root, &["rev-list", "--left-right", "--count", "main...origin/main"])?;
+    let final_counts = git(
+        root,
+        &["rev-list", "--left-right", "--count", "main...origin/main"],
+    )?;
     let final_parts: Vec<&str> = final_counts.split_whitespace().collect();
     let final_ahead: u64 = final_parts.first().unwrap_or(&"0").parse().unwrap_or(0);
 

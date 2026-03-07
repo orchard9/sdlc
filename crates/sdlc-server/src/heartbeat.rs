@@ -26,6 +26,8 @@ pub fn spawn_heartbeat_task(state: &AppState) -> Option<tokio::task::AbortHandle
         .ok()
         .unwrap_or_else(|| format!("http://localhost:{}", state.port));
 
+    let hub_token = std::env::var("SDLC_HUB_TOKEN").ok();
+
     let root = state.root.clone();
     let http_client = state.http_client.clone();
     let agent_runs = state.agent_runs.clone();
@@ -38,12 +40,16 @@ pub fn spawn_heartbeat_task(state: &AppState) -> Option<tokio::task::AbortHandle
             let payload = build_payload(&root, &base_url, &agent_runs).await;
             let endpoint = format!("{hub_url}/api/hub/heartbeat");
 
-            let result = http_client
+            let mut req = http_client
                 .post(&endpoint)
                 .timeout(std::time::Duration::from_secs(5))
-                .json(&payload)
-                .send()
-                .await;
+                .json(&payload);
+
+            if let Some(ref token) = hub_token {
+                req = req.bearer_auth(token);
+            }
+
+            let result = req.send().await;
 
             match result {
                 Ok(resp) if resp.status().is_success() => {
