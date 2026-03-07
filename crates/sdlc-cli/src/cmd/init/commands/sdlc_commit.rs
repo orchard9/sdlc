@@ -15,8 +15,8 @@ Commit all current changes to `main`, reconcile with `origin/main` if diverged, 
 ## Usage
 
 ```
-/sdlc-commit                → commit with default message "wip"
-/sdlc-commit fix auth bug   → commit with custom message
+/sdlc-commit                → auto-generates message from diff summary
+/sdlc-commit fix auth bug   → commit with explicit message
 ```
 
 ## Steps
@@ -27,7 +27,7 @@ Commit all current changes to `main`, reconcile with `origin/main` if diverged, 
 sdlc commit --message "$ARGUMENTS"
 ```
 
-If `$ARGUMENTS` is empty, omit `--message` (defaults to "wip").
+If `$ARGUMENTS` is empty, omit `--message` (auto-generates a brief description from the diff).
 
 If `--json` output reports `"conflict": true`, help the user resolve:
 - Show the conflicting files
@@ -52,7 +52,7 @@ Commit changes to main, reconcile with origin/main if diverged, never push.
 
 ## Steps
 
-1. Run: `sdlc commit --message "<message>"` (omit --message for default "wip")
+1. Run: `sdlc commit --message "<message>"` (omit --message to auto-generate from diff)
 2. If conflict reported: show files, instruct user to resolve then `git merge --continue && git branch -d dev/xist`
 3. Report commit SHA, merge status, ahead/behind count
 4. Remind: not pushed — `git push origin main` when ready
@@ -71,7 +71,7 @@ Commit all changes to main and reconcile with origin/main if it has diverged.
 
 ## Workflow
 
-1. Run: `sdlc commit --message "<message>"` (omit --message for default "wip")
+1. Run: `sdlc commit --message "<message>"` (omit --message to auto-generate from diff)
 2. If conflict: show files, instruct to resolve then `git merge --continue && git branch -d dev/xist`
 3. Report result: commit SHA, merge status, ahead/behind
 4. Never pushes — remind user to `git push origin main`
