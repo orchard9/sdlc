@@ -37,7 +37,7 @@ steps:
         fi
 
   - name: helm-deploy
-    image: alpine/helm:3.14
+    image: alpine/k8s:1.31.4
     commands:
       - |
         SLUG="${PROVISION_SLUG}"
@@ -105,6 +105,20 @@ steps:
           | jq ".metadata.namespace = \"$NAMESPACE\"" \
           | kubectl apply -f - \
           || echo "WARN: TLS copy failed — pod will work without TLS until cert is manually applied."
+
+        # --- Copy hub fleet token ---
+        # Gives the project pod a Bearer token to authenticate heartbeat calls to the hub.
+        # Source: sdlc-hub-token secret in sdlc-hub namespace (key: token).
+        if kubectl get secret sdlc-hub-token -n sdlc-hub &>/dev/null; then
+          echo "Copying hub fleet token to $NAMESPACE..."
+          kubectl get secret sdlc-hub-token -n sdlc-hub -o json \
+            | jq "del(.metadata.namespace,.metadata.resourceVersion,.metadata.uid,.metadata.creationTimestamp)" \
+            | jq ".metadata.namespace = \"$NAMESPACE\"" \
+            | kubectl apply -f - \
+            || echo "WARN: Hub token copy failed — heartbeats will be unauthenticated."
+        else
+          echo "WARN: sdlc-hub-token not found in sdlc-hub — heartbeats will be unauthenticated."
+        fi
 
         echo "Provision complete: https://${SLUG}.sdlc.threesix.ai"
     depends_on:

@@ -63,6 +63,16 @@ kubectl create secret generic anthropic-credentials \
 
 Created automatically when `postgres.externalSecret.gsmKey` is set in Helm values. The ExternalSecret operator fetches the connection string from GCP Secret Manager.
 
+**`sdlc-hub-token`** — shared fleet token for authenticated heartbeats (optional but recommended):
+
+```bash
+kubectl create secret generic sdlc-hub-token \
+  --namespace sdlc-hub \
+  --from-literal=token="$(openssl rand -hex 32)"
+```
+
+This token is copied by the provision pipeline into every project namespace as `sdlc-hub-token`. Project pods inject it as `SDLC_HUB_TOKEN`, which is sent as a Bearer token on heartbeat calls. On the hub side, add the same value to `HUB_SERVICE_TOKENS` in the `sdlc-hub-fleet-tokens` secret (comma-separated list). When `HUB_SERVICE_TOKENS` is empty, the hub accepts all heartbeats without auth.
+
 ### Rotating a secret
 
 ```bash
@@ -235,32 +245,135 @@ If the k8s API is unavailable, the hub falls back to the provision registry to s
 
 ---
 
-## Wildcard TLS Certificate
+## Automated Hub Rollout
 
-`*.sdlc.threesix.ai` is stored as the `sdlc-wildcard-tls` secret in the `sdlc-tls` namespace. The provision pipeline copies it into each new project namespace.
+Every push to `main` builds and pushes `ghcr.io/orchard9/sdlc:latest`, then the CI workflow automatically restarts the hub pod to pick up the new image.
 
-### Manual renewal
+This requires a `KUBE_CONFIG` secret in the GitHub repo (base64-encoded kubeconfig). If absent, the build step logs a warning and skips the rollout.
+
+### One-time setup
 
 ```bash
-# Update the cert in the source namespace
+# Generate a kubeconfig scoped to the sdlc-hub namespace
+# (use the existing kubeconfig — or create a restricted ServiceAccount for CI)
+cat ~/.kube/orchard9-k3sf.yaml | base64 | tr -d '\n' > /tmp/kubeconfig-b64.txt
+
+# Add to GitHub repo secrets
+gh secret set KUBE_CONFIG --repo orchard9/sdlc < /tmp/kubeconfig-b64.txt
+rm /tmp/kubeconfig-b64.txt
+```
+
+After adding the secret, every `main` push will: build image → push → restart hub → wait for rollout.
+
+To roll back to a specific SHA tag manually:
+```bash
+kubectl set image deployment/sdlc-hub sdlc-server=ghcr.io/orchard9/sdlc:sha-<7chars> -n sdlc-hub
+kubectl rollout status deployment/sdlc-hub -n sdlc-hub
+```
+
+---
+
+## Alerting
+
+SDLC-specific Prometheus alert rules are defined in `k3s-fleet/deployments/hub/alerting-rules-sdlc.yaml`. They are merged into the cluster-wide `prometheus-alerting-rules` configmap in the `observability` namespace. Alerts fire to Discord via Alertmanager.
+
+### Active alert groups
+
+| Group | Alerts |
+|-------|--------|
+| `sdlc-hub-alerts` | `SdlcHubDown` (critical, 2m), `SdlcHubCrashLooping` (critical, 5m) |
+| `sdlc-project-alerts` | `SdlcProjectCrashLooping` (warning, 5m), `SdlcWorkspacePVCFull` (warning, 10m), `SdlcProvisionStuck` (warning, 20m) |
+
+### Updating alert rules
+
+Edit `k3s-fleet/deployments/hub/alerting-rules-sdlc.yaml`, then apply:
+
+```bash
+# Fetch current rules, merge in updated sdlc groups, apply
+kubectl get configmap prometheus-alerting-rules -n observability \
+  -o jsonpath='{.data.alerting-rules\.yaml}' > /tmp/current-rules.yaml
+
+# Append the rules: block from alerting-rules-sdlc.yaml, then apply
+# (or edit /tmp/current-rules.yaml directly and apply below)
+
+kubectl create configmap prometheus-alerting-rules \
+  --namespace observability \
+  --from-file=alerting-rules.yaml=/tmp/current-rules.yaml \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+# Reload Prometheus
+kubectl exec -n observability deploy/prometheus -- wget -qO- --post-data='' http://localhost:9090/-/reload
+```
+
+---
+
+## Wildcard TLS Certificate
+
+`*.sdlc.threesix.ai` is managed by cert-manager using the `letsencrypt-prod` ClusterIssuer. The `Certificate` resource lives in the `sdlc-tls` namespace and auto-renews 30 days before expiry (renew-before: 720h).
+
+The secret is automatically mirrored to all `sdlc-*` namespaces via the Reflector operator (annotations on the Certificate resource). The provision pipeline also copies it as a belt-and-suspenders fallback.
+
+### Checking cert status
+
+```bash
+# Certificate health + renewal time
+kubectl describe certificate sdlc-wildcard-tls -n sdlc-tls
+
+# Verify the secret is present in a project namespace
+kubectl get secret sdlc-wildcard-tls -n sdlc-<slug>
+```
+
+### Manual emergency renewal
+
+Only needed if cert-manager is broken. Otherwise renewal is automatic.
+
+```bash
+# Force immediate renewal
+kubectl annotate certificate sdlc-wildcard-tls -n sdlc-tls \
+  cert-manager.io/issuer-kind=ClusterIssuer \
+  cert-manager.io/force-renewal="$(date +%s)"
+
+# If cert-manager is unavailable, renew manually and apply
 kubectl create secret tls sdlc-wildcard-tls \
   --namespace sdlc-tls \
   --cert=fullchain.pem \
   --key=privkey.pem \
   --dry-run=client -o yaml | kubectl apply -f -
-
-# Copy to all project namespaces
-for ns in $(kubectl get ns -o name | grep sdlc- | grep -v sdlc-tls | grep -v sdlc-hub | grep -v sdlc-system); do
-  ns_name=${ns#namespace/}
-  kubectl get secret sdlc-wildcard-tls -n sdlc-tls -o yaml \
-    | sed "s/namespace: sdlc-tls/namespace: $ns_name/" \
-    | kubectl apply -f -
-done
 ```
 
-### Cert-manager (if configured)
+---
 
-If cert-manager manages the wildcard cert, renewal is automatic. The provision pipeline still copies the secret into new namespaces — cert-manager only manages the source copy.
+## Workspace Storage
+
+Each project pod has a `PersistentVolumeClaim` (`workspace-<slug>`) that persists across pod restarts. This preserves agent work-in-progress, `.sdlc/` state, and embedded databases (redb) even if the pod is killed.
+
+**Default:** 5Gi Longhorn (replicated, survives node failure). Configurable via `storage.size` and `storage.storageClass` in Helm values.
+
+### Inspecting a project's PVC
+
+```bash
+kubectl get pvc workspace-<slug> -n sdlc-<slug>
+kubectl describe pvc workspace-<slug> -n sdlc-<slug>
+```
+
+### Resizing a PVC
+
+Longhorn supports online volume expansion:
+
+```bash
+kubectl patch pvc workspace-<slug> -n sdlc-<slug> \
+  --type merge -p '{"spec":{"resources":{"requests":{"storage":"20Gi"}}}}'
+```
+
+### Deleting a project (including storage)
+
+The Helm chart's PVC has `helm.sh/resource-policy: keep` by default — `helm uninstall` does **not** delete the PVC, preserving workspace data. Delete manually when you're sure the data is no longer needed:
+
+```bash
+helm uninstall sdlc-<slug> -n sdlc-<slug>
+kubectl delete pvc workspace-<slug> -n sdlc-<slug>
+kubectl delete namespace sdlc-<slug>
+```
 
 ---
 
@@ -291,15 +404,53 @@ kubectl rollout restart deployment/sdlc-server -n sdlc-<slug>
 kubectl rollout status deployment/sdlc-server -n sdlc-<slug> --timeout=120s
 ```
 
-### View project logs
+### View logs
+
+**Step 1 — Citadel (structured, searchable, persistent)**
+
+The cluster-wide citadel-agent DaemonSet tails `/var/log/containers/*.log` on every node, which includes all `sdlc-hub` and `sdlc-*` namespace pods. Logs are available in the Citadel dashboard at `https://citadel.orchard9.ai`.
+
+No extra setup is required for sdlc — the wildcard glob covers all namespaces automatically.
+
+**Step 2 — kubectl direct (fallback when Citadel is unavailable)**
 
 ```bash
+# --- Hub ---
+# Live tail hub logs
+kubectl logs deployment/sdlc-hub -n sdlc-hub -f
+
+# Last N lines (no streaming)
+kubectl logs deployment/sdlc-hub -n sdlc-hub --tail=100
+
+# Logs from the previous container (after a crash/restart)
+kubectl logs deployment/sdlc-hub -n sdlc-hub --previous
+
+# --- Project pod (2 containers: sdlc-server + git-sync) ---
 # Server logs
-kubectl logs -n sdlc-<slug> -l app.kubernetes.io/name=sdlc-server -c sdlc-server -f
+kubectl logs deployment/sdlc-server-<slug> -n sdlc-<slug> -c sdlc-server -f
 
 # Git-sync sidecar logs
-kubectl logs -n sdlc-<slug> -l app.kubernetes.io/name=sdlc-server -c git-sync -f
+kubectl logs deployment/sdlc-server-<slug> -n sdlc-<slug> -c git-sync --tail=50
+
+# Previous container logs (after crash)
+kubectl logs deployment/sdlc-server-<slug> -n sdlc-<slug> -c sdlc-server --previous
+
+# --- Cross-cutting ---
+# All sdlc namespaces at a glance
+kubectl get ns | grep sdlc
+
+# Recent events (OOM kills, restarts, scheduling failures) — k8s only keeps ~1hr
+kubectl get events -n sdlc-hub --sort-by='.lastTimestamp'
+kubectl get events -n sdlc-<slug> --sort-by='.lastTimestamp'
+
+# Pod status + restart count (restart count > 0 = previous crashes)
+kubectl get pods -n sdlc-hub -o wide
+kubectl get pods -n sdlc-<slug> -o wide
 ```
+
+All commands assume `KUBECONFIG=~/.kube/orchard9-k3sf.yaml` is set (or exported).
+
+> **Note:** `kubectl logs --previous` only works if the container has restarted at least once within the current pod. If the pod was deleted and recreated (e.g., rollout restart), previous logs are gone — use Citadel.
 
 ### Remove a project instance
 
