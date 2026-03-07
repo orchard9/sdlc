@@ -75,6 +75,13 @@ pub enum PonderSubcommand {
     },
     /// Archive (park) a ponder entry
     Archive { slug: String },
+    /// Permanently delete a ponder entry and all its artifacts
+    Delete {
+        slug: String,
+        /// Skip confirmation (for scripting)
+        #[arg(long)]
+        force: bool,
+    },
     /// List scrapbook artifacts
     Artifacts { slug: String },
     /// Manage session logs
@@ -171,6 +178,7 @@ pub fn run(root: &Path, subcmd: PonderSubcommand, json: bool) -> anyhow::Result<
         ),
         PonderSubcommand::Merge { source, into } => merge(root, &source, &into, json),
         PonderSubcommand::Archive { slug } => archive(root, &slug, json),
+        PonderSubcommand::Delete { slug, force } => delete(root, &slug, force, json),
         PonderSubcommand::Artifacts { slug } => artifacts(root, &slug, json),
         PonderSubcommand::Session { subcommand } => match subcommand {
             SessionSubcommand::Log {
@@ -565,6 +573,45 @@ fn archive(root: &Path, slug: &str, json: bool) -> anyhow::Result<()> {
         }))?;
     } else {
         println!("Archived ponder entry '{slug}'.");
+    }
+    Ok(())
+}
+
+fn delete(root: &Path, slug: &str, force: bool, json: bool) -> anyhow::Result<()> {
+    // Verify entry exists
+    let _entry = PonderEntry::load(root, slug)
+        .with_context(|| format!("ponder entry '{slug}' not found"))?;
+
+    if !force && !json {
+        eprint!("Permanently delete ponder '{slug}' and all its artifacts? [y/N] ");
+        let mut answer = String::new();
+        std::io::stdin()
+            .read_line(&mut answer)
+            .context("failed to read confirmation")?;
+        if !answer.trim().eq_ignore_ascii_case("y") {
+            println!("Aborted.");
+            return Ok(());
+        }
+    }
+
+    let dir = sdlc_core::paths::ponder_dir(root, slug);
+    if dir.exists() {
+        std::fs::remove_dir_all(&dir)
+            .with_context(|| format!("failed to remove ponder directory '{}'", dir.display()))?;
+    }
+
+    if let Ok(mut state) = State::load(root) {
+        state.remove_ponder(slug);
+        state.save(root).context("failed to save state")?;
+    }
+
+    if json {
+        print_json(&serde_json::json!({
+            "slug": slug,
+            "deleted": true,
+        }))?;
+    } else {
+        println!("Deleted ponder entry '{slug}'.");
     }
     Ok(())
 }

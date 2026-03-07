@@ -441,6 +441,14 @@ function EntryDetailPane({
     onRefresh()
   }, [slug, load, onRefresh])
 
+  const handleDelete = useCallback(async () => {
+    if (!window.confirm(`Permanently delete "${entry?.title ?? slug}" and all its artifacts?`)) return
+    await api.deletePonderEntry(slug)
+    setStatusModalOpen(false)
+    onRefresh()
+    navigate('/ponder')
+  }, [slug, entry?.title, onRefresh, navigate])
+
   useEffect(() => {
     setLoading(true)
     setEntry(null)
@@ -738,6 +746,14 @@ function EntryDetailPane({
                 Apply
               </button>
             </div>
+            <div className="border-t border-neutral-700 pt-3">
+              <button
+                onClick={handleDelete}
+                className="w-full px-3 py-1.5 text-xs rounded bg-red-900/40 hover:bg-red-800/60 text-red-400 hover:text-red-300 border border-red-800/50 transition-colors"
+              >
+                Delete permanently
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -914,27 +930,104 @@ export function PonderPage() {
       nextSlug={nextSlug}
     />
   ) : (
-    <div className="flex items-center justify-center h-full text-muted-foreground">
-      <div className="text-center">
-        <Lightbulb className="w-8 h-8 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">Select an idea to explore</p>
-        <div className="flex items-center justify-center gap-2 mt-2">
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-xl mx-auto px-6 py-10 space-y-8">
+        {/* Hero */}
+        <div className="text-center space-y-3">
+          <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 mb-1">
+            <Lightbulb className="w-6 h-6 text-primary" />
+          </div>
+          <h2 className="text-xl font-semibold">Think before you build.</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed max-w-md mx-auto">
+            Ponder is where ideas live before they become milestones and features.
+            Explore freely, recruit thought partners, and commit only when the shape is clear.
+          </p>
+        </div>
+
+        {/* How it works */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">How it works</h3>
+          <div className="grid gap-2">
+            {[
+              {
+                step: '1',
+                title: 'Seed an idea',
+                desc: 'Drop a rough thought, a problem statement, or a wild ambition. It doesn\'t need to be polished.',
+              },
+              {
+                step: '2',
+                title: 'Explore with AI thought partners',
+                desc: 'Chat with recruited experts who push back, surface tensions, and help you think deeper.',
+              },
+              {
+                step: '3',
+                title: 'Capture what matters',
+                desc: 'Insights, decisions, and open questions are saved as scrapbook artifacts alongside your sessions.',
+              },
+              {
+                step: '4',
+                title: 'Commit when ready',
+                desc: 'When the idea has shape, commit it — Ponder synthesizes milestones and features automatically.',
+              },
+            ].map(item => (
+              <div key={item.step} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-card/50">
+                <span className="shrink-0 flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">
+                  {item.step}
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-medium">{item.title}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Lifecycle strip */}
+        <div className="space-y-3">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Lifecycle</h3>
+          <div className="flex items-center gap-1.5 text-xs font-medium">
+            {[
+              { label: 'Exploring', color: 'bg-violet-500/20 text-violet-400 border-violet-500/30' },
+              { label: 'Converging', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+              { label: 'Committed', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+            ].map((s, i) => (
+              <div key={s.label} className="flex items-center gap-1.5">
+                {i > 0 && <span className="text-muted-foreground/30">&#8594;</span>}
+                <span className={cn('px-2.5 py-1 rounded-full border', s.color)}>{s.label}</span>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-muted-foreground/60 leading-relaxed">
+            Ideas start as <strong className="text-muted-foreground">exploring</strong>, move to <strong className="text-muted-foreground">converging</strong> when the shape solidifies, and become <strong className="text-muted-foreground">committed</strong> when they turn into milestones. Park ideas you want to revisit later.
+          </p>
+        </div>
+
+        {/* CTA */}
+        <div className="flex items-center justify-center gap-3 pt-2">
           <button
             onClick={() => setShowSuggest(true)}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary/10 text-primary border border-primary/20 rounded-lg hover:bg-primary/20 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
           >
-            <Sparkles className="w-3 h-3" />
+            <Sparkles className="w-3.5 h-3.5" />
             Suggest an idea
           </button>
           <span className="text-xs text-muted-foreground/40">or</span>
           <button
             onClick={() => setShowForm(true)}
-            className="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-accent/50 rounded-lg transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground border border-border rounded-lg hover:bg-accent/50 transition-colors"
           >
-            <Plus className="w-3 h-3" />
+            <Plus className="w-3.5 h-3.5" />
             New idea
           </button>
         </div>
+
+        {/* Select hint */}
+        {entries.length > 0 && (
+          <p className="text-center text-xs text-muted-foreground/40">
+            Or select an idea from the list to continue exploring.
+          </p>
+        )}
       </div>
     </div>
   )

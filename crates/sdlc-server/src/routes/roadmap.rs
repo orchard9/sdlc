@@ -272,6 +272,37 @@ pub async fn update_ponder(
     Ok(Json(result))
 }
 
+/// DELETE /api/roadmap/:slug — permanently delete a ponder entry and all its artifacts.
+pub async fn delete_ponder(
+    State(app): State<AppState>,
+    Path(slug): Path<String>,
+) -> Result<Json<serde_json::Value>, AppError> {
+    let root = app.root.clone();
+    let result = tokio::task::spawn_blocking(move || {
+        // Verify entry exists
+        let _entry = sdlc_core::ponder::PonderEntry::load(&root, &slug)?;
+
+        let dir = sdlc_core::paths::ponder_dir(&root, &slug);
+        if dir.exists() {
+            std::fs::remove_dir_all(&dir)?;
+        }
+
+        if let Ok(mut state) = sdlc_core::state::State::load(&root) {
+            state.remove_ponder(&slug);
+            let _ = state.save(&root);
+        }
+
+        Ok::<_, sdlc_core::SdlcError>(serde_json::json!({
+            "slug": slug,
+            "deleted": true,
+        }))
+    })
+    .await
+    .map_err(|e| AppError(anyhow::anyhow!("task join error: {e}")))??;
+
+    Ok(Json(result))
+}
+
 /// GET /api/roadmap/:slug/sessions — list session metadata, sorted by session number.
 pub async fn list_ponder_sessions(
     State(app): State<AppState>,

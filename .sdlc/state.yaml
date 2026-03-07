@@ -1198,4 +1198,8 @@ active_ponders:
 - git-binary-hygiene
 - test-rich-input-modal-uat
 - user-workspaces
-last_updated: 2026-03-07T17:05:30.133848Z
+- improve-start-tunnel-error-recovery
+- improve-new-user-ponder-messaging
+- improve-new-user-evolve-messaging
+- ui-title
+last_updated: 2026-03-07T17:41:36.016924Z

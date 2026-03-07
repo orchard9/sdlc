@@ -12,7 +12,8 @@ import { WorkspacePanel } from '@/components/ponder/WorkspacePanel'
 import { WorkspaceShell } from '@/components/layout/WorkspaceShell'
 import { CreateWorkspaceModal } from '@/components/shared/CreateWorkspaceModal'
 import {
-  Plus, ArrowLeft, Wrench, Loader2, Files,
+  Plus, ArrowLeft, Loader2, Files,
+  Search, BarChart3, GitFork, Map, Zap,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type {
@@ -368,13 +369,54 @@ export function EvolvePage() {
   const detailPane = slug ? (
     <EntryDetailPane key={slug} slug={slug} onRefresh={load} onBack={() => navigate('/evolve')} />
   ) : (
-    <div className="flex items-center justify-center h-full text-muted-foreground">
-      <div className="text-center">
-        <Wrench className="w-8 h-8 mx-auto mb-3 opacity-30" />
-        <p className="text-sm">Select a session to continue</p>
-        <p className="text-xs text-muted-foreground/60 mt-1">
-          or press <kbd className="text-xs bg-muted border border-border/50 rounded px-1.5 py-0.5 font-mono">+</kbd> to start a new evolution
-        </p>
+    <div className="h-full overflow-y-auto">
+      <div className="max-w-xl mx-auto px-6 py-10 space-y-8">
+        {/* Hero */}
+        <div className="space-y-2">
+          <h2 className="text-lg font-semibold tracking-tight">What is Evolve?</h2>
+          <p className="text-sm text-muted-foreground leading-relaxed">
+            Evolve is a structured workspace for improving what already exists. Point it at a
+            system, codebase area, or architecture concern and it runs an agent-driven analysis
+            through five phases — from survey to action plan. The output is a concrete roadmap
+            you can commit into milestones and features.
+          </p>
+        </div>
+
+        {/* Phase flow */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-semibold">How does it work?</h3>
+          <div className="grid gap-2">
+            {[
+              { icon: Search, phase: 'Survey', desc: 'Scan the target area — structure, entry points, docs state, TODOs and FIXMEs.' },
+              { icon: BarChart3, phase: 'Analyze', desc: 'Score maturity across five lenses: pit of success, coupling, growth readiness, self-documenting, and failure modes.' },
+              { icon: GitFork, phase: 'Paths', desc: 'Propose 2-4 evolution paths with effort/impact tradeoffs.' },
+              { icon: Map, phase: 'Roadmap', desc: 'Build a phased roadmap: proper solution, enabling changes, extended vision.' },
+              { icon: Zap, phase: 'Output', desc: 'Produce the action plan — chosen path, rationale, concrete next steps.' },
+            ].map(({ icon: Icon, phase, desc }) => (
+              <div key={phase} className="flex items-start gap-3 p-3 rounded-lg border border-border/50 bg-card/50">
+                <Icon className="w-4 h-4 mt-0.5 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
+                  <span className="text-sm font-medium">{phase}</span>
+                  <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* CTA */}
+        <div className="pt-2">
+          <button
+            onClick={() => setShowModal(true)}
+            className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            Start an Evolution
+          </button>
+          <p className="text-xs text-muted-foreground/60 mt-2">
+            Describe the pain point or area you want to improve and an agent takes it from there.
+          </p>
+        </div>
       </div>
     </div>
   )

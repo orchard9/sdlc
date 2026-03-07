@@ -3,6 +3,7 @@ pub mod artifact;
 pub mod auth;
 pub mod backlog;
 pub mod changelog;
+pub mod commit;
 pub mod comment;
 pub mod config;
 pub mod escalate;

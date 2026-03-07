@@ -218,6 +218,10 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         )
         .route("/api/roadmap/{slug}", put(routes::roadmap::update_ponder))
         .route(
+            "/api/roadmap/{slug}",
+            delete(routes::roadmap::delete_ponder),
+        )
+        .route(
             "/api/roadmap/{slug}/sessions",
             get(routes::roadmap::list_ponder_sessions),
         )
