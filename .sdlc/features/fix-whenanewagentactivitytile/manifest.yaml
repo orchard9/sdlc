@@ -1,0 +1,138 @@
+slug: fix-whenanewagentactivitytile
+title: Fix Whenanewagentactivitytile
+description: |-
+  Root cause: Could not automatically determine root cause.
+
+  Problem: when a new agent activity tile appears in the ui, the url it uses to link to its object is wrong. it later updates to be the correct link, but it needs to be correct as soon as the tile appears, or **as soon** as possible thereafter.
+
+  Original report:
+  when a new agent activity tile appears in the ui, the url it uses to link to its object is wrong. it later updates to be the correct link, but it needs to be correct as soon as the tile appears, or **as soon** as possible thereafter.
+phase: released
+created_at: 2026-03-07T16:57:07.468350Z
+updated_at: 2026-03-07T17:05:30.126134Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-whenanewagentactivitytile/spec.md
+  created_at: 2026-03-07T17:00:49.198314Z
+  approved_at: 2026-03-07T17:00:58.792543Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-whenanewagentactivitytile/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T17:01:06.308415Z
+  waive_reason: 'Bug fix: adding two fields to an existing SSE event and consuming them in the frontend. No design decisions or UI changes needed.'
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-whenanewagentactivitytile/tasks.md
+  created_at: 2026-03-07T17:01:16.326885Z
+  approved_at: 2026-03-07T17:01:22.912010Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-whenanewagentactivitytile/qa-plan.md
+  created_at: 2026-03-07T17:01:32.753713Z
+  approved_at: 2026-03-07T17:01:35.272276Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-whenanewagentactivitytile/review.md
+  created_at: 2026-03-07T17:03:15.782951Z
+  approved_at: 2026-03-07T17:03:18.433526Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-whenanewagentactivitytile/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T17:03:31.728183Z
+  waive_reason: 'No security surface: adds two existing string fields (run_type, target) to an internal SSE event payload. No new inputs, no auth changes, no user-facing data exposure.'
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-whenanewagentactivitytile/qa-results.md
+  created_at: 2026-03-07T17:05:14.899260Z
+  approved_at: 2026-03-07T17:05:20.600592Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add run_type and target to SseMessage::RunStarted (backend)
+  description: null
+  status: completed
+  created_at: 2026-03-07T17:01:51.867871Z
+  started_at: null
+  completed_at: 2026-03-07T17:02:33.484600Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update frontend to consume run_type and target from SSE
+  description: null
+  status: completed
+  created_at: 2026-03-07T17:01:52.706916Z
+  started_at: null
+  completed_at: 2026-03-07T17:02:33.616083Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Build and verify (cargo clippy + frontend build)
+  description: null
+  status: completed
+  created_at: 2026-03-07T17:01:53.131585Z
+  started_at: null
+  completed_at: 2026-03-07T17:02:55.202487Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T16:57:07.468350Z
+  exited: 2026-03-07T17:00:58.805709Z
+- phase: specified
+  entered: 2026-03-07T17:00:58.805709Z
+  exited: 2026-03-07T17:01:35.280905Z
+- phase: planned
+  entered: 2026-03-07T17:01:35.280905Z
+  exited: 2026-03-07T17:01:41.868059Z
+- phase: ready
+  entered: 2026-03-07T17:01:41.868059Z
+  exited: 2026-03-07T17:01:41.877827Z
+- phase: implementation
+  entered: 2026-03-07T17:01:41.877827Z
+  exited: 2026-03-07T17:03:18.440209Z
+- phase: review
+  entered: 2026-03-07T17:03:18.440209Z
+  exited: 2026-03-07T17:03:24.275827Z
+- phase: audit
+  entered: 2026-03-07T17:03:24.275827Z
+  exited: 2026-03-07T17:03:31.731067Z
+- phase: qa
+  entered: 2026-03-07T17:03:31.731067Z
+  exited: 2026-03-07T17:05:20.610879Z
+- phase: merge
+  entered: 2026-03-07T17:05:20.610879Z
+  exited: 2026-03-07T17:05:30.126134Z
+- phase: released
+  entered: 2026-03-07T17:05:30.126134Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

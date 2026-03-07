@@ -1,0 +1,130 @@
+slug: released-milestone-victory-panel
+title: ReleasedPanel component — victory banner, stats, re-run UAT, next milestone link
+description: Build a ReleasedPanel component that displays a victory banner, milestone stats summary, option to re-run UAT, and a link to the next milestone. Replaces the generic panel for released milestones.
+phase: released
+created_at: 2026-03-07T16:48:53.367980Z
+updated_at: 2026-03-07T17:00:53.157646Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/released-milestone-victory-panel/spec.md
+  created_at: 2026-03-07T16:53:55.628901Z
+  approved_at: 2026-03-07T16:54:00.795012Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/released-milestone-victory-panel/design.md
+  created_at: 2026-03-07T16:55:03.272882Z
+  approved_at: 2026-03-07T16:55:08.381686Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/released-milestone-victory-panel/tasks.md
+  created_at: 2026-03-07T16:55:31.770683Z
+  approved_at: 2026-03-07T16:55:33.565310Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/released-milestone-victory-panel/qa-plan.md
+  created_at: 2026-03-07T16:56:11.717058Z
+  approved_at: 2026-03-07T16:56:13.512600Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/released-milestone-victory-panel/review.md
+  created_at: 2026-03-07T16:59:09.584449Z
+  approved_at: 2026-03-07T16:59:11.405455Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/released-milestone-victory-panel/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T16:59:34.832840Z
+  waive_reason: Frontend-only UI component — no new API endpoints, no auth changes, no user input handling beyond existing hooks. No meaningful security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/released-milestone-victory-panel/qa-results.md
+  created_at: 2026-03-07T17:00:41.460223Z
+  approved_at: 2026-03-07T17:00:43.426836Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create ReleasedPanel component
+  description: null
+  status: completed
+  created_at: 2026-03-07T16:55:38.902844Z
+  started_at: 2026-03-07T16:57:24.113749Z
+  completed_at: 2026-03-07T16:57:26.154067Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Integrate ReleasedPanel into MilestoneDetail page
+  description: null
+  status: completed
+  created_at: 2026-03-07T16:55:44.045432Z
+  started_at: 2026-03-07T16:58:05.329541Z
+  completed_at: 2026-03-07T16:58:07.272253Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify build compiles cleanly
+  description: null
+  status: completed
+  created_at: 2026-03-07T16:55:45.865064Z
+  started_at: 2026-03-07T16:58:36.973779Z
+  completed_at: 2026-03-07T16:58:38.834589Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T16:48:53.367980Z
+  exited: 2026-03-07T16:54:00.815961Z
+- phase: specified
+  entered: 2026-03-07T16:54:00.815961Z
+  exited: 2026-03-07T16:56:13.529237Z
+- phase: planned
+  entered: 2026-03-07T16:56:13.529237Z
+  exited: 2026-03-07T16:56:22.803109Z
+- phase: ready
+  entered: 2026-03-07T16:56:22.803109Z
+  exited: 2026-03-07T16:56:32.133563Z
+- phase: implementation
+  entered: 2026-03-07T16:56:32.133563Z
+  exited: 2026-03-07T16:59:11.460646Z
+- phase: review
+  entered: 2026-03-07T16:59:11.460646Z
+  exited: 2026-03-07T16:59:23.007409Z
+- phase: audit
+  entered: 2026-03-07T16:59:23.007409Z
+  exited: 2026-03-07T16:59:34.849584Z
+- phase: qa
+  entered: 2026-03-07T16:59:34.849584Z
+  exited: 2026-03-07T17:00:43.480984Z
+- phase: merge
+  entered: 2026-03-07T17:00:43.480984Z
+  exited: 2026-03-07T17:00:53.157646Z
+- phase: released
+  entered: 2026-03-07T17:00:53.157646Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

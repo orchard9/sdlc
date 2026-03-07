@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReleasedPanel Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0b; color: #e4e4e7; padding: 20px; }
+  nav { display: flex; gap: 8px; margin-bottom: 24px; }
+  nav a { padding: 6px 12px; border-radius: 6px; background: #27272a; color: #a1a1aa; text-decoration: none; font-size: 13px; }
+  nav a.active, nav a:hover { background: #3f3f46; color: #e4e4e7; }
+  section { display: none; max-width: 640px; }
+  section.active { display: block; }
+
+  .panel { background: rgba(5, 46, 22, 0.3); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 8px; padding: 16px; }
+  .banner { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .icon { width: 20px; height: 20px; color: #4ade80; }
+  .label { color: #4ade80; font-weight: 500; font-size: 14px; }
+  .title { color: rgba(228, 228, 231, 0.8); font-size: 12px; margin-top: 2px; }
+
+  .stats { display: flex; gap: 16px; font-size: 12px; color: #a1a1aa; margin-bottom: 12px; font-variant-numeric: tabular-nums; }
+  .verdict { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; }
+  .verdict.pass { background: rgba(5, 150, 105, 0.8); color: #d1fae5; }
+  .verdict.fail { background: rgba(220, 38, 38, 0.8); color: #fecaca; }
+
+  .actions { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.2); color: #4ade80; font-size: 11px; cursor: pointer; }
+  .btn:hover { background: rgba(34, 197, 94, 0.3); }
+  .btn.running { border-color: #3f3f46; background: #27272a; color: #a1a1aa; }
+  .link { font-size: 11px; color: #a1a1aa; text-decoration: underline; cursor: pointer; }
+
+  .next-ms { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #4ade80; }
+  .next-ms a { color: #4ade80; text-decoration: none; }
+  .next-ms a:hover { text-decoration: underline; }
+
+  .separator { border-top: 1px solid rgba(34, 197, 94, 0.15); margin: 12px 0; }
+</style>
+</head>
+<body>
+<nav>
+  <a href="#screen-default" class="active" onclick="show('screen-default', this)">Default</a>
+  <a href="#screen-running" onclick="show('screen-running', this)">UAT Running</a>
+  <a href="#screen-no-next" onclick="show('screen-no-next', this)">No Next Milestone</a>
+</nav>
+
+<section id="screen-default" class="active">
+  <div class="panel">
+    <div class="banner">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <div class="label">Milestone Released</div>
+        <div class="title">v48 — Dashboard Rethink</div>
+      </div>
+    </div>
+    <div class="stats">
+      <span>6 features</span>
+      <span>3 UAT runs</span>
+      <span>Latest: <span class="verdict pass">PASS</span></span>
+      <span>Mar 5, 2026</span>
+    </div>
+    <div class="actions">
+      <button class="btn">&#9654; Re-run UAT</button>
+      <span class="link">Submit manually</span>
+    </div>
+    <div class="separator"></div>
+    <div class="next-ms">
+      Next milestone: <a href="#">v49 — Released Milestone UX</a> &rarr;
+    </div>
+  </div>
+</section>
+
+<section id="screen-running">
+  <div class="panel">
+    <div class="banner">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <div class="label">Milestone Released</div>
+        <div class="title">v48 — Dashboard Rethink</div>
+      </div>
+    </div>
+    <div class="stats">
+      <span>6 features</span>
+      <span>3 UAT runs</span>
+      <span>Latest: <span class="verdict pass">PASS</span></span>
+      <span>Mar 5, 2026</span>
+    </div>
+    <div class="actions">
+      <button class="btn running">&#8635; Running</button>
+    </div>
+    <div class="separator"></div>
+    <div class="next-ms">
+      Next milestone: <a href="#">v49 — Released Milestone UX</a> &rarr;
+    </div>
+  </div>
+</section>
+
+<section id="screen-no-next">
+  <div class="panel">
+    <div class="banner">
+      <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <div class="label">Milestone Released</div>
+        <div class="title">v48 — Dashboard Rethink</div>
+      </div>
+    </div>
+    <div class="stats">
+      <span>6 features</span>
+      <span>3 UAT runs</span>
+      <span>Latest: <span class="verdict pass">PASS</span></span>
+      <span>Mar 5, 2026</span>
+    </div>
+    <div class="actions">
+      <button class="btn">&#9654; Re-run UAT</button>
+      <span class="link">Submit manually</span>
+    </div>
+  </div>
+</section>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+</script>
+</body>
+</html>

@@ -4,8 +4,8 @@ import { useMilestoneUatRun } from '@/hooks/useMilestoneUatRun'
 import { api } from '@/api/client'
 import { WavePlan } from '@/components/features/WavePlan'
 import { HumanUatModal } from '@/components/shared/HumanUatModal'
-import type { PrepareResult, Wave } from '@/lib/types'
-import { CheckCircle, Loader2, Play } from 'lucide-react'
+import type { MilestoneStatus, PrepareResult, Wave } from '@/lib/types'
+import { CheckCircle, Loader2, Play, Trophy } from 'lucide-react'
 
 function ProgressBarMini({ progress, waves }: {
   progress: NonNullable<PrepareResult['milestone_progress']>
@@ -81,7 +81,16 @@ function VerifyingMini({ milestoneSlug }: { milestoneSlug: string }) {
   )
 }
 
-export function MilestonePreparePanel({ milestoneSlug }: { milestoneSlug: string }) {
+function ReleasedMini() {
+  return (
+    <div className="flex items-center gap-2 bg-green-950/20 border border-green-500/20 rounded-lg px-3 py-2">
+      <Trophy className="w-4 h-4 text-green-400 shrink-0" />
+      <span className="text-xs text-green-400 font-medium">Released</span>
+    </div>
+  )
+}
+
+export function MilestonePreparePanel({ milestoneSlug, milestoneStatus }: { milestoneSlug: string; milestoneStatus: MilestoneStatus }) {
   const [result, setResult] = useState<PrepareResult | null>(null)
 
   const load = useCallback(() => {
@@ -95,6 +104,11 @@ export function MilestonePreparePanel({ milestoneSlug }: { milestoneSlug: string
   useSSE(noop, undefined, (event) => { if (event.type === 'run_finished') load() })
 
   if (!result) return null
+
+  // Released milestones get a simple released indicator — no verifying UI
+  if (milestoneStatus === 'released') {
+    return <ReleasedMini />
+  }
 
   const { waves, blocked, milestone_progress, next_commands } = result
 

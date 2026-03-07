@@ -668,6 +668,10 @@ export interface RunSseEvent {
   key: string
   label?: string
   status?: string
+  run_type?: string
+  target?: string
+  session_id?: string
+  stop_reason?: string
 }
 
 export interface PonderDetail {

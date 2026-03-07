@@ -137,68 +137,11 @@ active_features:
 - milestone-detail-prepare-panel
 - feature-detail-milestone-context
 - milestone-list-clickable-features
+- fix-released-milestone-panel
+- released-milestone-victory-panel
+- fix-whenanewagentactivitytile
 active_directives: []
 history:
-- feature: citadel-app-registration
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:47:15.323974Z
-  outcome: transition
-- feature: citadel-incident-runbook
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T19:47:18.572646Z
-  outcome: transition
-- feature: citadel-incident-runbook
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T19:47:26.099901Z
-  outcome: transition
-- feature: citadel-annotate-log-tool
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:47:31.367957Z
-  outcome: transition
-- feature: secrets-env-ui
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:47:32.014188Z
-  outcome: transition
-- feature: citadel-incident-runbook
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:48:13.936129Z
-  outcome: transition
-- feature: secrets-env-ui
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:48:17.399692Z
-  outcome: merged
-- feature: citadel-app-registration
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:48:39.350335Z
-  outcome: merged
-- feature: citadel-query-logs-tool
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T19:48:41.608919Z
-  outcome: transition
-- feature: citadel-webhook-handler
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:49:22.323495Z
-  outcome: merged
-- feature: citadel-annotate-log-tool
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:50:31.736642Z
-  outcome: merged
-- feature: citadel-incident-runbook
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T19:51:23.853386Z
-  outcome: merged
 - feature: citadel-query-logs-tool
   action: merge
   phase: released
@@ -1139,6 +1082,66 @@ history:
   phase: released
   timestamp: 2026-03-07T15:44:06.275634Z
   outcome: merged
+- feature: fix-released-milestone-panel
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T16:54:42.594316Z
+  outcome: transition
+- feature: fix-released-milestone-panel
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T16:54:45.709956Z
+  outcome: transition
+- feature: released-milestone-victory-panel
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T16:56:22.814602Z
+  outcome: transition
+- feature: fix-released-milestone-panel
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T16:56:23.638388Z
+  outcome: transition
+- feature: released-milestone-victory-panel
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T16:56:32.147818Z
+  outcome: transition
+- feature: fix-released-milestone-panel
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T16:57:27.986406Z
+  outcome: merged
+- feature: released-milestone-victory-panel
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T16:59:23.022356Z
+  outcome: transition
+- feature: released-milestone-victory-panel
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T17:00:53.167305Z
+  outcome: merged
+- feature: fix-whenanewagentactivitytile
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T17:01:41.870223Z
+  outcome: transition
+- feature: fix-whenanewagentactivitytile
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T17:01:41.879538Z
+  outcome: transition
+- feature: fix-whenanewagentactivitytile
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T17:03:24.278262Z
+  outcome: transition
+- feature: fix-whenanewagentactivitytile
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T17:05:30.133787Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1183,6 +1186,7 @@ milestones:
 - v46-realtime-activity-feed
 - v47-ponder-committed-flow
 - v48-milestone-feature-forward-motion
+- v49-released-milestone-ux
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1194,4 +1198,4 @@ active_ponders:
 - git-binary-hygiene
 - test-rich-input-modal-uat
 - user-workspaces
-last_updated: 2026-03-07T16:26:19.932520Z
+last_updated: 2026-03-07T17:05:30.133848Z

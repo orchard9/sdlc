@@ -216,6 +216,8 @@ pub enum SseMessage {
         id: String,
         key: String,
         label: String,
+        run_type: String,
+        target: String,
     },
     /// An agent run finished (completed, failed, stopped).
     RunFinished {

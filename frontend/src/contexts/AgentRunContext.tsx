@@ -66,8 +66,8 @@ export function AgentRunProvider({ children }: { children: ReactNode }) {
         const newRun: RunRecord = {
           id: event.id,
           key: event.key,
-          run_type: 'feature', // will be corrected on next fetch
-          target: event.key,
+          run_type: (event.run_type ?? 'feature') as RunRecord['run_type'],
+          target: event.target ?? event.key,
           label: event.label ?? event.key,
           status: 'running' as RunStatus,
           started_at: new Date().toISOString(),

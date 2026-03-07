@@ -3184,3 +3184,98 @@
   slug: milestone-list-clickable-features
   timestamp: 2026-03-07T15:44:06.282670Z
   metadata: {}
+- id: ev-0575
+  kind: review_approved
+  slug: fix-released-milestone-panel
+  timestamp: 2026-03-07T16:56:18.407632Z
+  metadata: {}
+- id: ev-0576
+  kind: feature_phase_advanced
+  slug: fix-released-milestone-panel
+  timestamp: 2026-03-07T16:56:18.413984Z
+  metadata:
+    phase: review
+- id: ev-0577
+  kind: feature_phase_advanced
+  slug: fix-released-milestone-panel
+  timestamp: 2026-03-07T16:56:28.931431Z
+  metadata:
+    phase: qa
+- id: ev-0578
+  kind: qa_approved
+  slug: fix-released-milestone-panel
+  timestamp: 2026-03-07T16:57:22.759657Z
+  metadata: {}
+- id: ev-0579
+  kind: feature_phase_advanced
+  slug: fix-released-milestone-panel
+  timestamp: 2026-03-07T16:57:22.765593Z
+  metadata:
+    phase: merge
+- id: ev-0580
+  kind: feature_merged
+  slug: fix-released-milestone-panel
+  timestamp: 2026-03-07T16:57:27.990518Z
+  metadata: {}
+- id: ev-0581
+  kind: review_approved
+  slug: released-milestone-victory-panel
+  timestamp: 2026-03-07T16:59:11.429655Z
+  metadata: {}
+- id: ev-0582
+  kind: feature_phase_advanced
+  slug: released-milestone-victory-panel
+  timestamp: 2026-03-07T16:59:11.472542Z
+  metadata:
+    phase: review
+- id: ev-0583
+  kind: feature_phase_advanced
+  slug: released-milestone-victory-panel
+  timestamp: 2026-03-07T16:59:34.867603Z
+  metadata:
+    phase: qa
+- id: ev-0584
+  kind: qa_approved
+  slug: released-milestone-victory-panel
+  timestamp: 2026-03-07T17:00:43.449281Z
+  metadata: {}
+- id: ev-0585
+  kind: feature_phase_advanced
+  slug: released-milestone-victory-panel
+  timestamp: 2026-03-07T17:00:43.493107Z
+  metadata:
+    phase: merge
+- id: ev-0586
+  kind: feature_merged
+  slug: released-milestone-victory-panel
+  timestamp: 2026-03-07T17:00:53.186329Z
+  metadata: {}
+- id: ev-0587
+  kind: milestone_wave_completed
+  slug: v49-released-milestone-ux
+  timestamp: 2026-03-07T17:01:30.263200Z
+  metadata:
+    run_key: milestone-run-wave:v49-released-milestone-ux
+- id: ev-0588
+  kind: feature_phase_advanced
+  slug: fix-whenanewagentactivitytile
+  timestamp: 2026-03-07T17:03:18.448437Z
+  metadata:
+    phase: review
+- id: ev-0589
+  kind: feature_phase_advanced
+  slug: fix-whenanewagentactivitytile
+  timestamp: 2026-03-07T17:03:31.734463Z
+  metadata:
+    phase: qa
+- id: ev-0590
+  kind: feature_phase_advanced
+  slug: fix-whenanewagentactivitytile
+  timestamp: 2026-03-07T17:05:20.620818Z
+  metadata:
+    phase: merge
+- id: ev-0591
+  kind: feature_merged
+  slug: fix-whenanewagentactivitytile
+  timestamp: 2026-03-07T17:05:30.145061Z
+  metadata: {}
