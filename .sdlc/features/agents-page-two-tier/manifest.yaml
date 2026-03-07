@@ -1,0 +1,100 @@
+slug: agents-page-two-tier
+title: AgentsPage Two-Tier Display — project team primary, workstation agents secondary with not-shared warning
+phase: released
+created_at: 2026-03-07T06:00:25.306335Z
+updated_at: 2026-03-07T06:31:31.377615Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/spec.md
+  created_at: 2026-03-07T06:27:42.842706Z
+  approved_at: 2026-03-07T06:27:45.146208Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/design.md
+  created_at: 2026-03-07T06:27:57.954549Z
+  approved_at: 2026-03-07T06:28:00.104491Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/tasks.md
+  created_at: 2026-03-07T06:28:09.753030Z
+  approved_at: 2026-03-07T06:28:12.636063Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/qa-plan.md
+  created_at: 2026-03-07T06:28:22.758418Z
+  approved_at: 2026-03-07T06:28:25.334481Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/review.md
+  created_at: 2026-03-07T06:29:57.105777Z
+  approved_at: 2026-03-07T06:29:59.558794Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/audit.md
+  created_at: 2026-03-07T06:30:46.163337Z
+  approved_at: 2026-03-07T06:30:48.585332Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/agents-page-two-tier/qa-results.md
+  created_at: 2026-03-07T06:31:20.964978Z
+  approved_at: 2026-03-07T06:31:23.597146Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T06:00:25.306335Z
+  exited: 2026-03-07T06:27:45.154973Z
+- phase: specified
+  entered: 2026-03-07T06:27:45.154973Z
+  exited: 2026-03-07T06:28:25.343834Z
+- phase: planned
+  entered: 2026-03-07T06:28:25.343834Z
+  exited: 2026-03-07T06:28:32.428149Z
+- phase: ready
+  entered: 2026-03-07T06:28:32.428149Z
+  exited: 2026-03-07T06:28:37.026502Z
+- phase: implementation
+  entered: 2026-03-07T06:28:37.026502Z
+  exited: 2026-03-07T06:29:59.567561Z
+- phase: review
+  entered: 2026-03-07T06:29:59.567561Z
+  exited: 2026-03-07T06:30:36.615893Z
+- phase: audit
+  entered: 2026-03-07T06:30:36.615893Z
+  exited: 2026-03-07T06:30:48.590540Z
+- phase: qa
+  entered: 2026-03-07T06:30:48.590540Z
+  exited: 2026-03-07T06:31:23.612810Z
+- phase: merge
+  entered: 2026-03-07T06:31:23.612810Z
+  exited: 2026-03-07T06:31:31.377615Z
+- phase: released
+  entered: 2026-03-07T06:31:31.377615Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

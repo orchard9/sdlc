@@ -4,7 +4,8 @@ use std::path::Path;
 
 use super::init::{
     install_user_scaffolding, migrate_legacy_project_scaffolding, stamp_sdlc_version,
-    write_agents_md, write_core_tools, write_guidance_md, SDLC_BINARY_VERSION,
+    write_agents_md, write_core_tools, write_guidance_md, write_standard_agents,
+    SDLC_BINARY_VERSION,
 };
 
 /// `sdlc update` — refresh agent scaffolding and stamp the current binary version.
@@ -48,6 +49,10 @@ pub fn run(root: &Path) -> anyhow::Result<()> {
 
     // Remove deprecated project-level scaffolding files
     migrate_legacy_project_scaffolding(root)?;
+
+    // Write standard agents (.claude/agents/)
+    println!("\nInstalling standard agents:");
+    write_standard_agents(root)?;
 
     // Refresh the SDLC section in AGENTS.md (creates, updates markers, or migrates legacy)
     println!();

@@ -2862,3 +2862,82 @@
   slug: ask-ponder-modal
   timestamp: 2026-03-06T07:08:59.031405Z
   metadata: {}
+- id: ev-0518
+  kind: feature_phase_advanced
+  slug: init-specialize-handoff
+  timestamp: 2026-03-07T06:09:00.712526Z
+  metadata:
+    phase: review
+- id: ev-0519
+  kind: feature_phase_advanced
+  slug: init-specialize-handoff
+  timestamp: 2026-03-07T06:09:11.895891Z
+  metadata:
+    phase: qa
+- id: ev-0520
+  kind: feature_phase_advanced
+  slug: init-specialize-handoff
+  timestamp: 2026-03-07T06:09:32.155770Z
+  metadata:
+    phase: merge
+- id: ev-0521
+  kind: feature_merged
+  slug: init-specialize-handoff
+  timestamp: 2026-03-07T06:09:39.974789Z
+  metadata: {}
+- id: ev-0522
+  kind: review_approved
+  slug: standard-agents-scaffolding
+  timestamp: 2026-03-07T06:22:57.241768Z
+  metadata: {}
+- id: ev-0523
+  kind: feature_phase_advanced
+  slug: standard-agents-scaffolding
+  timestamp: 2026-03-07T06:22:57.248232Z
+  metadata:
+    phase: review
+- id: ev-0524
+  kind: feature_phase_advanced
+  slug: standard-agents-scaffolding
+  timestamp: 2026-03-07T06:23:10.301529Z
+  metadata:
+    phase: qa
+- id: ev-0525
+  kind: qa_approved
+  slug: standard-agents-scaffolding
+  timestamp: 2026-03-07T06:24:06.390050Z
+  metadata: {}
+- id: ev-0526
+  kind: feature_phase_advanced
+  slug: standard-agents-scaffolding
+  timestamp: 2026-03-07T06:24:06.396302Z
+  metadata:
+    phase: merge
+- id: ev-0527
+  kind: feature_merged
+  slug: standard-agents-scaffolding
+  timestamp: 2026-03-07T06:24:13.631217Z
+  metadata: {}
+- id: ev-0528
+  kind: feature_phase_advanced
+  slug: agents-page-two-tier
+  timestamp: 2026-03-07T06:29:59.576527Z
+  metadata:
+    phase: review
+- id: ev-0529
+  kind: feature_phase_advanced
+  slug: agents-page-two-tier
+  timestamp: 2026-03-07T06:30:48.598141Z
+  metadata:
+    phase: qa
+- id: ev-0530
+  kind: feature_phase_advanced
+  slug: agents-page-two-tier
+  timestamp: 2026-03-07T06:31:23.618004Z
+  metadata:
+    phase: merge
+- id: ev-0531
+  kind: feature_merged
+  slug: agents-page-two-tier
+  timestamp: 2026-03-07T06:31:31.399541Z
+  metadata: {}

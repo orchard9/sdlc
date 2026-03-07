@@ -64,6 +64,9 @@ Present your summary to the user:
 
 ## Session 2: Design the Team Roster
 
+> **Standard agents already exist.** `sdlc init` pre-installs `knowledge-librarian` and `cto-cpo-lens`
+> in `.claude/agents/`. Do not replace them. Design project-specific agents to complement them.
+
 Design 3–5 specialist roles that match the project's actual domain areas.
 
 For each role, define:
@@ -257,7 +260,7 @@ Survey this project and generate a tailored AI team (agents + skills).
 2. Run `sdlc state` to understand current SDLC phase and maturity.
 3. Summarize: purpose, tech stack, domain areas, current state.
 4. **Gate 1**: Present summary to user — wait for confirmation.
-5. Design 3-5 specialist roles matching domain areas (persona name, role, domain ownership, model, skill name).
+5. Design 3-5 specialist roles matching domain areas (persona name, role, domain ownership, model, skill name). Note: `knowledge-librarian` and `cto-cpo-lens` are pre-installed standard agents — do not replace them.
 6. **Gate 2**: Present roster table — wait for user approval.
 7. Generate `.claude/agents/<name>.md` and `.claude/skills/<role>/SKILL.md` for each role.
 8. Update `AGENTS.md` with a Team section listing all agents.
@@ -287,7 +290,7 @@ Use this skill to generate a project-specific AI team with agent personas and sk
 1. Survey: read project config, source dirs, VISION.md, AGENTS.md, `sdlc state`.
 2. Summarize purpose, tech stack, domain areas, current state.
 3. Gate 1: confirm understanding with user.
-4. Design 3-5 specialist roles matching domain areas.
+4. Design 3-5 specialist roles matching domain areas. Note: `knowledge-librarian` and `cto-cpo-lens` are pre-installed standard agents — do not replace them.
 5. Gate 2: approve roster with user.
 6. Generate `.claude/agents/<name>.md` and `.claude/skills/<role>/SKILL.md` for each.
 7. Update AGENTS.md with Team section.

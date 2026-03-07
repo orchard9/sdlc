@@ -1,0 +1,13 @@
+slug: auto-specialize-during-setup
+title: auto-specialize-during-setup
+status: committed
+created_at: 2026-03-06T22:56:07.922039Z
+updated_at: 2026-03-07T06:00:35.045672Z
+committed_at: 2026-03-07T05:59:23.603116Z
+committed_to:
+- v45-auto-specialize-setup
+sessions: 4
+orientation:
+  current: Four work items fully specified — Phase 6 replacement, AgentsPage two-tier display, not-shared warning, and standard agents scaffolding. Scope is closed.
+  next: Commit this ponder into milestones/features via /sdlc-ponder-commit
+  commit: All four deliverables have concrete specs. Owner directives from Sessions 3 and 4 incorporated. Ship it.

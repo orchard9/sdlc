@@ -1,0 +1,156 @@
+slug: standard-agents-scaffolding
+title: Standard Agents Scaffolding — knowledge-librarian and cto-cpo-lens created by CLI
+phase: released
+created_at: 2026-03-07T06:00:24.732965Z
+updated_at: 2026-03-07T06:24:13.624746Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/standard-agents-scaffolding/spec.md
+  created_at: 2026-03-07T06:17:04.552104Z
+  approved_at: 2026-03-07T06:17:07.039647Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/standard-agents-scaffolding/design.md
+  created_at: 2026-03-07T06:17:52.662916Z
+  approved_at: 2026-03-07T06:17:52.671650Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/standard-agents-scaffolding/tasks.md
+  created_at: 2026-03-07T06:19:00.638330Z
+  approved_at: 2026-03-07T06:19:00.647629Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/standard-agents-scaffolding/qa-plan.md
+  created_at: 2026-03-07T06:19:12.325078Z
+  approved_at: 2026-03-07T06:19:12.334444Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/standard-agents-scaffolding/review.md
+  created_at: 2026-03-07T06:22:49.571061Z
+  approved_at: 2026-03-07T06:22:57.235062Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/standard-agents-scaffolding/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T06:23:10.295706Z
+  waive_reason: 'Template-only change: adds const strings and write_if_missing calls. No user input handling, no network, no file path injection vectors.'
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/standard-agents-scaffolding/qa-results.md
+  created_at: 2026-03-07T06:24:06.376371Z
+  approved_at: 2026-03-07T06:24:06.386852Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add standard agent template constants
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:19:24.798300Z
+  started_at: null
+  completed_at: 2026-03-07T06:22:20.698692Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add write_standard_agents function
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:19:24.805034Z
+  started_at: null
+  completed_at: 2026-03-07T06:22:20.707463Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Integrate into sdlc init
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:19:24.811154Z
+  started_at: null
+  completed_at: 2026-03-07T06:22:20.715136Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Integrate into sdlc update
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:19:24.817506Z
+  started_at: null
+  completed_at: 2026-03-07T06:22:20.722428Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Update specialize template
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:19:24.823495Z
+  started_at: null
+  completed_at: 2026-03-07T06:22:20.729498Z
+  blocker: null
+  depends_on: []
+- id: T6
+  title: Test build and clippy
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:19:24.829581Z
+  started_at: null
+  completed_at: 2026-03-07T06:22:20.736057Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T06:00:24.732965Z
+  exited: 2026-03-07T06:17:07.042246Z
+- phase: specified
+  entered: 2026-03-07T06:17:07.042246Z
+  exited: 2026-03-07T06:19:12.336423Z
+- phase: planned
+  entered: 2026-03-07T06:19:12.336423Z
+  exited: 2026-03-07T06:19:17.013729Z
+- phase: ready
+  entered: 2026-03-07T06:19:17.013729Z
+  exited: 2026-03-07T06:19:17.024829Z
+- phase: implementation
+  entered: 2026-03-07T06:19:17.024829Z
+  exited: 2026-03-07T06:22:57.245678Z
+- phase: review
+  entered: 2026-03-07T06:22:57.245678Z
+  exited: 2026-03-07T06:23:02.723696Z
+- phase: audit
+  entered: 2026-03-07T06:23:02.723696Z
+  exited: 2026-03-07T06:23:10.298356Z
+- phase: qa
+  entered: 2026-03-07T06:23:10.298356Z
+  exited: 2026-03-07T06:24:06.393640Z
+- phase: merge
+  entered: 2026-03-07T06:24:06.393640Z
+  exited: 2026-03-07T06:24:13.624746Z
+- phase: released
+  entered: 2026-03-07T06:24:13.624746Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

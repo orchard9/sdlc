@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
 import { cn } from '@/lib/utils'
-import { Loader2, AlertCircle, Bot, ChevronDown, ChevronRight, Cpu, Wrench } from 'lucide-react'
+import { Loader2, AlertCircle, Bot, ChevronDown, ChevronRight, Cpu, Wrench, Users, Monitor, AlertTriangle } from 'lucide-react'
 import type { AgentDefinition } from '@/lib/types'
 
 // ---------------------------------------------------------------------------
@@ -86,51 +86,52 @@ function AgentCard({ agent }: { agent: AgentDefinition }) {
 }
 
 // ---------------------------------------------------------------------------
-// AgentsPage
+// Agent section
 // ---------------------------------------------------------------------------
 
-export function AgentsPage() {
-  const [agents, setAgents] = useState<AgentDefinition[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-
-  const load = useCallback(async () => {
-    try {
-      const data = await api.getAgents()
-      setAgents(data)
-      setError(null)
-    } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to load agents')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => { load() }, [load])
-  useSSE(load)
-
+function AgentSection({
+  title,
+  icon: Icon,
+  agents,
+  loading,
+  error,
+  warning,
+  emptyText,
+}: {
+  title: string
+  icon: React.ComponentType<{ className?: string }>
+  agents: AgentDefinition[]
+  loading: boolean
+  error: string | null
+  warning?: string
+  emptyText: string
+}) {
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-6">
-      {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Bot className="w-5 h-5 text-muted-foreground" />
-          <h2 className="text-xl font-semibold">Agents</h2>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Claude agents available in <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">~/.claude/agents/</code>. Use <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">/sdlc-recruit</code> to add thought partners.
-        </p>
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4 text-muted-foreground" />
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        {!loading && !error && (
+          <span className="text-xs text-muted-foreground">
+            {agents.length} agent{agents.length !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
-      {/* Loading */}
-      {loading && (
-        <div className="flex items-center gap-2 text-muted-foreground text-sm">
-          <Loader2 className="w-4 h-4 animate-spin" />
-          Loading agents…
+      {warning && agents.length > 0 && (
+        <div className="flex items-center gap-1.5 text-xs text-amber-400/80 bg-amber-500/5 border border-amber-500/10 rounded px-3 py-1.5">
+          <AlertTriangle className="w-3 h-3 shrink-0" />
+          {warning}
         </div>
       )}
 
-      {/* Error */}
+      {loading && (
+        <div className="flex items-center gap-2 text-muted-foreground text-sm">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          Loading…
+        </div>
+      )}
+
       {error && !loading && (
         <div className="flex items-center gap-2 text-destructive text-sm border border-destructive/20 bg-destructive/5 rounded-lg px-4 py-3">
           <AlertCircle className="w-4 h-4 shrink-0" />
@@ -138,8 +139,78 @@ export function AgentsPage() {
         </div>
       )}
 
-      {/* Empty state */}
       {!loading && !error && agents.length === 0 && (
+        <p className="text-xs text-muted-foreground/60 pl-6">{emptyText}</p>
+      )}
+
+      {!loading && !error && agents.length > 0 && (
+        <div className="space-y-3">
+          {agents.map(agent => (
+            <AgentCard key={agent.name} agent={agent} />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// AgentsPage
+// ---------------------------------------------------------------------------
+
+export function AgentsPage() {
+  const [projectAgents, setProjectAgents] = useState<AgentDefinition[]>([])
+  const [projectLoading, setProjectLoading] = useState(true)
+  const [projectError, setProjectError] = useState<string | null>(null)
+
+  const [workstationAgents, setWorkstationAgents] = useState<AgentDefinition[]>([])
+  const [workstationLoading, setWorkstationLoading] = useState(true)
+  const [workstationError, setWorkstationError] = useState<string | null>(null)
+
+  const load = useCallback(async () => {
+    const [projectResult, workstationResult] = await Promise.allSettled([
+      api.getProjectAgents(),
+      api.getAgents(),
+    ])
+
+    if (projectResult.status === 'fulfilled') {
+      setProjectAgents(projectResult.value)
+      setProjectError(null)
+    } else {
+      setProjectError(projectResult.reason instanceof Error ? projectResult.reason.message : 'Failed to load project agents')
+    }
+    setProjectLoading(false)
+
+    if (workstationResult.status === 'fulfilled') {
+      setWorkstationAgents(workstationResult.value)
+      setWorkstationError(null)
+    } else {
+      setWorkstationError(workstationResult.reason instanceof Error ? workstationResult.reason.message : 'Failed to load workstation agents')
+    }
+    setWorkstationLoading(false)
+  }, [])
+
+  useEffect(() => { load() }, [load])
+  useSSE(load)
+
+  const bothDone = !projectLoading && !workstationLoading
+  const bothEmpty = bothDone && !projectError && !workstationError && projectAgents.length === 0 && workstationAgents.length === 0
+
+  return (
+    <div className="max-w-3xl mx-auto p-4 sm:p-6 space-y-8">
+      {/* Header */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Bot className="w-5 h-5 text-muted-foreground" />
+          <h2 className="text-xl font-semibold">Agents</h2>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          Project team agents are shared via git. Workstation agents live in <code className="font-mono text-xs bg-muted px-1.5 py-0.5 rounded">~/.claude/agents/</code>.
+        </p>
+      </div>
+
+      {/* Full empty state — only when both sections have zero agents */}
+      {bothEmpty && (
         <div className="border border-dashed border-border rounded-lg px-6 py-10 text-center">
           <Cpu className="w-8 h-8 text-muted-foreground/30 mx-auto mb-3" />
           <p className="text-sm text-muted-foreground mb-1">No agents installed</p>
@@ -150,14 +221,28 @@ export function AgentsPage() {
         </div>
       )}
 
-      {/* Agent list */}
-      {!loading && !error && agents.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-xs text-muted-foreground">{agents.length} agent{agents.length !== 1 ? 's' : ''}</p>
-          {agents.map(agent => (
-            <AgentCard key={agent.name} agent={agent} />
-          ))}
-        </div>
+      {/* Two-tier display — hide sections only when both are truly empty */}
+      {!bothEmpty && (
+        <>
+          <AgentSection
+            title="Project Team"
+            icon={Users}
+            agents={projectAgents}
+            loading={projectLoading}
+            error={projectError}
+            emptyText="No project agents — add .claude/agents/*.md to share agents with the team."
+          />
+
+          <AgentSection
+            title="Workstation"
+            icon={Monitor}
+            agents={workstationAgents}
+            loading={workstationLoading}
+            error={workstationError}
+            warning="Not shared — these agents exist only on your machine"
+            emptyText="No workstation agents installed."
+          />
+        </>
       )}
     </div>
   )

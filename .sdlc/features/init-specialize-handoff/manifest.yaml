@@ -1,0 +1,147 @@
+slug: init-specialize-handoff
+title: Init Phase 6 → Specialize Handoff — replace team phase with specialize workflow
+phase: released
+created_at: 2026-03-07T06:00:23.680019Z
+updated_at: 2026-03-07T06:09:39.958859Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/init-specialize-handoff/spec.md
+  created_at: 2026-03-07T06:03:31.661590Z
+  approved_at: 2026-03-07T06:03:40.401604Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/init-specialize-handoff/design.md
+  created_at: 2026-03-07T06:04:20.366785Z
+  approved_at: 2026-03-07T06:04:23.912555Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/init-specialize-handoff/tasks.md
+  created_at: 2026-03-07T06:04:42.265103Z
+  approved_at: 2026-03-07T06:04:44.481974Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/init-specialize-handoff/qa-plan.md
+  created_at: 2026-03-07T06:05:00.606844Z
+  approved_at: 2026-03-07T06:05:02.828295Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/init-specialize-handoff/review.md
+  created_at: 2026-03-07T06:08:58.257348Z
+  approved_at: 2026-03-07T06:09:00.699573Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/init-specialize-handoff/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-07T06:09:11.890713Z
+  waive_reason: Template text-only change to Rust string constants — no runtime behavior, no user input handling, no security surface
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/init-specialize-handoff/qa-results.md
+  created_at: 2026-03-07T06:09:29.425756Z
+  approved_at: 2026-03-07T06:09:32.142727Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Replace Phase 6 in SDLC_INIT_COMMAND with specialize handoff
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:05:17.361475Z
+  started_at: null
+  completed_at: 2026-03-07T06:06:01.367467Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Update Finish block in SDLC_INIT_COMMAND
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:05:17.805581Z
+  started_at: null
+  completed_at: 2026-03-07T06:06:01.830790Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Replace team steps in SDLC_INIT_PLAYBOOK
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:05:18.420769Z
+  started_at: null
+  completed_at: 2026-03-07T06:06:02.244512Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Replace team steps in SDLC_INIT_SKILL
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:05:19.355221Z
+  started_at: null
+  completed_at: 2026-03-07T06:06:03.242324Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Verify build and tests pass
+  description: null
+  status: completed
+  created_at: 2026-03-07T06:05:19.428118Z
+  started_at: null
+  completed_at: 2026-03-07T06:08:31.099226Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T06:00:23.680019Z
+  exited: 2026-03-07T06:03:40.404504Z
+- phase: specified
+  entered: 2026-03-07T06:03:40.404504Z
+  exited: 2026-03-07T06:05:02.837375Z
+- phase: planned
+  entered: 2026-03-07T06:05:02.837375Z
+  exited: 2026-03-07T06:05:08.417670Z
+- phase: ready
+  entered: 2026-03-07T06:05:08.417670Z
+  exited: 2026-03-07T06:05:13.119287Z
+- phase: implementation
+  entered: 2026-03-07T06:05:13.119287Z
+  exited: 2026-03-07T06:09:00.705384Z
+- phase: review
+  entered: 2026-03-07T06:09:00.705384Z
+  exited: 2026-03-07T06:09:05.445688Z
+- phase: audit
+  entered: 2026-03-07T06:09:05.445688Z
+  exited: 2026-03-07T06:09:11.893093Z
+- phase: qa
+  entered: 2026-03-07T06:09:11.893093Z
+  exited: 2026-03-07T06:09:32.148877Z
+- phase: merge
+  entered: 2026-03-07T06:09:32.148877Z
+  exited: 2026-03-07T06:09:39.958859Z
+- phase: released
+  entered: 2026-03-07T06:09:39.958859Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

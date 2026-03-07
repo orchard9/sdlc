@@ -204,76 +204,19 @@ Do not touch fields that are already correctly set. Write the updated config.
 
 ---
 
-## Phase 6: Team
+## Phase 6: Specialize — AI Team
 
-### 6a: Design the roster
+Now that Vision and Architecture are written, survey the codebase and design a tailored AI team.
 
-Based on the project's domain and stack, design 2-4 specialist agents. Rules:
-- Always include: one expert in the core domain + one pragmatic skeptic who challenges assumptions
-- Backend/API → backend architect, data modeler
-- Frontend → UI engineer, UX critic
-- Infra/platform → reliability engineer, platform engineer
-- AI/ML → ML systems engineer, eval specialist
-- Security-sensitive → security engineer
+Follow the `/sdlc-specialize` workflow:
+1. Survey the project (reads VISION.md, ARCHITECTURE.md, source dirs, config files)
+2. Summarize purpose, stack, domain areas — present to user for confirmation
+3. Design 3-5 specialist roles matched to actual codebase structure
+4. Gate: present roster table, wait for user approval
+5. Generate `.claude/agents/<name>.md` and `.claude/skills/<role>/SKILL.md` for each
+6. Update AGENTS.md with Team section
 
-For each agent, decide:
-- **First Last name** — a real-sounding, specific person
-- **Role** — one clear domain they own
-- **Model** — `claude-opus-4-6` for senior strategists and architects; `claude-sonnet-4-6` for implementers
-- **Career background** — 2-3 named companies, 1 notable project or achievement
-
-### 6b: Gate — Roster Approval
-
-Present as a table:
-
-| Name | Role | Owns | Model |
-|---|---|---|---|
-| ... | ... | ... | ... |
-
-Ask: "Does this team cover your needs? Any roles to add or swap?"
-
-### 6c: Create agents
-
-For each approved agent, write `.claude/agents/<first-last>.md`:
-
-```markdown
----
-name: First Last
-description: [1-sentence trigger — when to invoke this agent, what they're best for]
-model: [claude-opus-4-6 | claude-sonnet-4-6]
----
-
-First Last is a [role] with [N] years of experience across [Company1], [Company2], and [Company3], where they [specific achievement in 1 sentence]. They believe [core technical philosophy — opinionated, not generic].
-
-## Principles
-
-1. **[Principle]** — [1-sentence explanation of what this means in practice]
-2. ...
-
-## This Project
-
-- **[Domain area]** (`path/to/key/files`) — [what they care about and how they think about it]
-- ...
-
-## ALWAYS
-
-- [Specific, concrete rule — not generic advice]
-- ...
-
-## NEVER
-
-- [Anti-pattern to avoid — specific to this domain]
-- ...
-
-## When You're Stuck
-
-- **[Specific failure mode]**: [Specific diagnostic — what to read, what command to run, what to look for]
-- ...
-```
-
-### 6d: Update AGENTS.md
-
-Add or update a **Team** section in AGENTS.md listing all agents with role and invocation trigger.
+This replaces any previously generated agents.
 
 ---
 
@@ -338,8 +281,7 @@ Summarize what was produced:
 ✓ VISION.md
 ✓ ARCHITECTURE.md
 ✓ .sdlc/config.yaml (project.name, project.description[, quality thresholds])
-✓ Agents: [Name — Role], [Name — Role], ...
-✓ AGENTS.md updated
+✓ AI Team: via /sdlc-specialize (agents + skills + AGENTS.md)
 ✓ First milestone seeded: <slug> (<N> features)   ← only if thick scope
 ```
 
@@ -361,11 +303,9 @@ Interview to bootstrap VISION.md, ARCHITECTURE.md, .sdlc/config.yaml, and a recr
 5. **Draft VISION.md** — Problem → Answer → Principles (opinionated) → Non-Goals → Success Criteria. Gate: show draft, get approval, then write.
 6. **Draft ARCHITECTURE.md** — Stack table → Layout → Components → Data Flow → Key Decisions → What to Read First. Gate: show draft, get approval, then write.
 7. **Patch config.yaml** — Update project.name, project.description. Adjust quality thresholds only if stated by user.
-8. **Design team** — 2-4 agents matched to domain (always: core domain expert + pragmatic skeptic). Present roster as table, gate approval.
-9. **Create agents** — Write `.claude/agents/<first-last>.md` with: background, Principles, This Project, ALWAYS, NEVER, When You're Stuck.
-10. **Update AGENTS.md** — Add Team section listing names, roles, invocation triggers.
-11. **Seed first milestone** — Assess scope thickness from Phase 2. If concrete deliverables exist: derive milestone slug/title/vision + 2-5 features, then seed via `sdlc milestone create`, `sdlc milestone update`, `sdlc milestone set-acceptance-test`, `sdlc feature create`, `sdlc milestone add-feature`. If scope is thin, skip.
-12. **Finish** — Summarize what was produced (include seeded milestone if applicable).
+8. **Specialize — AI Team** — Follow `/sdlc-specialize` workflow: survey project, summarize for user confirmation, design 3-5 specialists, gate roster approval, generate agent files + AGENTS.md.
+9. **Seed first milestone** — Assess scope thickness from Phase 2. If concrete deliverables exist: derive milestone slug/title/vision + 2-5 features, then seed via `sdlc milestone create`, `sdlc milestone update`, `sdlc milestone set-acceptance-test`, `sdlc feature create`, `sdlc milestone add-feature`. If scope is thin, skip.
+10. **Finish** — Summarize what was produced (include seeded milestone if applicable).
 
 | Outcome | Next |
 |---|---|
@@ -393,10 +333,8 @@ Interview the user to produce VISION.md, ARCHITECTURE.md, .sdlc/config.yaml upda
 5. Draft VISION.md: Problem → Answer → Principles (opinionated) → Non-Goals → Success Criteria. Gate: approval before writing.
 6. Draft ARCHITECTURE.md: Stack → Layout → Components → Data Flow → Key Decisions → What to Read First. Gate: approval before writing.
 7. Patch `.sdlc/config.yaml`: project.name, project.description, quality thresholds if stated.
-8. Design 2-4 agents by domain (always: core expert + pragmatic skeptic). Gate: roster approval before creating files.
-9. Create `.claude/agents/<first-last>.md` for each agent.
-10. Update AGENTS.md with Team section.
-11. **Seed first milestone** — if Phase 2 captured concrete deliverables: derive milestone slug/title/vision + 2-5 features and seed with `sdlc milestone create` / `sdlc feature create` / `sdlc milestone add-feature`. Idempotent: re-running updates existing, never duplicates.
+8. **Specialize — AI Team** — Follow `/sdlc-specialize` workflow: survey project, confirm with user, design 3-5 specialists, gate roster, generate `.claude/agents/` + AGENTS.md.
+9. **Seed first milestone** — if Phase 2 captured concrete deliverables: derive milestone slug/title/vision + 2-5 features and seed with `sdlc milestone create` / `sdlc feature create` / `sdlc milestone add-feature`. Idempotent: re-running updates existing, never duplicates.
 
 | Outcome | Next |
 |---|---|

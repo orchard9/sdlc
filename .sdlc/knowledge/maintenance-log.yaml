@@ -94,3 +94,7 @@ actions:
   action_type: harvest_create
   slug: ponder-ask-how-it-works
   detail: harvested from ponder/ask-how-it-works
+- timestamp: 2026-03-07T06:00:35.050350Z
+  action_type: harvest_create
+  slug: ponder-auto-specialize-during-setup
+  detail: harvested from ponder/auto-specialize-during-setup

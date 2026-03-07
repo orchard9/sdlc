@@ -1,0 +1,1 @@
+when initializing ponder sdlc in an existing project add `/sdlc-specialize` step after the ARCHITECTURE is worked out. suggest agent specialists and coordinate with the user to tune them. activate the resulting specialists in the project.

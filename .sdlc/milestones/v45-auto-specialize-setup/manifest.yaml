@@ -1,0 +1,9 @@
+slug: v45-auto-specialize-setup
+title: Auto-Specialize During Setup — standard agents, init handoff, and agents UI
+features:
+- init-specialize-handoff
+- standard-agents-scaffolding
+- agents-page-two-tier
+created_at: 2026-03-07T06:00:19.806836Z
+updated_at: 2026-03-07T06:00:28.956049Z
+schema_version: 1

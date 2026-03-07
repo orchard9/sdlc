@@ -124,68 +124,11 @@ active_features:
 - hub-empty-state-replace
 - tools-route-param-and-notfound
 - ask-ponder-modal
+- init-specialize-handoff
+- standard-agents-scaffolding
+- agents-page-two-tier
 active_directives: []
 history:
-- feature: tool-agent-invocation
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:15:18.947941Z
-  outcome: transition
-- feature: fix-toolspage-mobile-nav
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:15:30.457691Z
-  outcome: transition
-- feature: fix-toolspage-mobile-nav
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:15:30.507528Z
-  outcome: transition
-- feature: fix-toolspage-mobile-nav
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T11:15:36.455372Z
-  outcome: transition
-- feature: fix-toolspage-mobile-nav
-  action: merge
-  phase: released
-  timestamp: 2026-03-03T11:16:37.252528Z
-  outcome: merged
-- feature: scrapbook-html-preview
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:17:04.611767Z
-  outcome: transition
-- feature: scrapbook-html-preview
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:17:04.641810Z
-  outcome: transition
-- feature: scrapbook-html-preview
-  action: implement_task
-  phase: audit
-  timestamp: 2026-03-03T11:17:13.026888Z
-  outcome: transition
-- feature: ponder-design-artifact-protocol
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:17:28.339142Z
-  outcome: transition
-- feature: ponder-design-artifact-protocol
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:17:28.346026Z
-  outcome: transition
-- feature: fix-threadspage-mobile-layout
-  action: implement_task
-  phase: ready
-  timestamp: 2026-03-03T11:17:59.512299Z
-  outcome: transition
-- feature: fix-threadspage-mobile-layout
-  action: implement_task
-  phase: implementation
-  timestamp: 2026-03-03T11:17:59.792709Z
-  outcome: transition
 - feature: fix-threadspage-mobile-layout
   action: implement_task
   phase: audit
@@ -1126,6 +1069,66 @@ history:
   phase: released
   timestamp: 2026-03-06T07:08:59.028733Z
   outcome: merged
+- feature: init-specialize-handoff
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T06:05:08.418857Z
+  outcome: transition
+- feature: init-specialize-handoff
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T06:05:13.121418Z
+  outcome: transition
+- feature: init-specialize-handoff
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T06:09:05.447494Z
+  outcome: transition
+- feature: init-specialize-handoff
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T06:09:39.966102Z
+  outcome: merged
+- feature: standard-agents-scaffolding
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T06:19:17.016012Z
+  outcome: transition
+- feature: standard-agents-scaffolding
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T06:19:17.026567Z
+  outcome: transition
+- feature: standard-agents-scaffolding
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T06:23:02.726248Z
+  outcome: transition
+- feature: standard-agents-scaffolding
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T06:24:13.627297Z
+  outcome: merged
+- feature: agents-page-two-tier
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T06:28:32.442866Z
+  outcome: transition
+- feature: agents-page-two-tier
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T06:28:37.041500Z
+  outcome: transition
+- feature: agents-page-two-tier
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T06:30:36.629332Z
+  outcome: transition
+- feature: agents-page-two-tier
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T06:31:31.387040Z
+  outcome: merged
 blocked: []
 milestones:
 - v01-directive-core
@@ -1166,6 +1169,7 @@ milestones:
 - v43-hub-project-onboarding
 - tools-routing-cleanup
 - v44-ask-ponder
+- v45-auto-specialize-setup
 active_ponders:
 - sdlc-fleet-deploy
 - i-want-a-bot-for-whats-app-to-send-me-no
@@ -1176,4 +1180,4 @@ active_ponders:
 - artifact-share-capture
 - git-binary-hygiene
 - test-rich-input-modal-uat
-last_updated: 2026-03-06T07:08:59.028735Z
+last_updated: 2026-03-07T06:31:31.387129Z
