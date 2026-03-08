@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: git-file-browser-ui
+    title: File browser component with tree/flat toggle, filters, and keyboard nav
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-files-api
+    title: GET /api/git/files endpoint returning workspace files with status
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-page-shell
+    title: Git section in sidebar under Integrate with master-detail layout
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

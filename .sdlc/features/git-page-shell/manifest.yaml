@@ -1,0 +1,138 @@
+slug: git-page-shell
+title: Git section in sidebar under Integrate with master-detail layout
+phase: released
+created_at: 2026-03-07T20:25:38.094162Z
+updated_at: 2026-03-08T00:16:45.215751Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-page-shell/spec.md
+  created_at: 2026-03-08T00:12:08.877317Z
+  approved_at: 2026-03-08T00:12:10.481774Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-page-shell/design.md
+  created_at: 2026-03-08T00:13:08.964455Z
+  approved_at: 2026-03-08T00:13:08.974467Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-page-shell/tasks.md
+  created_at: 2026-03-08T00:13:28.657147Z
+  approved_at: 2026-03-08T00:13:28.669382Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-page-shell/qa-plan.md
+  created_at: 2026-03-08T00:13:47.669159Z
+  approved_at: 2026-03-08T00:13:47.675711Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/git-page-shell/review.md
+  created_at: 2026-03-08T00:15:52.859293Z
+  approved_at: 2026-03-08T00:15:52.866890Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/git-page-shell/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:16:08.738995Z
+  waive_reason: UI-only shell page with placeholder content. No new API endpoints, no auth changes, no data mutations. Uses existing useGitStatus hook (read-only GET). No security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/git-page-shell/qa-results.md
+  created_at: 2026-03-08T00:16:38.174817Z
+  approved_at: 2026-03-08T00:16:38.183257Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add Git entry to sidebar integrate group
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:33.158535Z
+  started_at: 2026-03-08T00:14:02.222089Z
+  completed_at: 2026-03-08T00:14:13.632261Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create GitPage component with WorkspaceShell layout
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:33.164952Z
+  started_at: 2026-03-08T00:14:15.619756Z
+  completed_at: 2026-03-08T00:14:36.537163Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Register /git routes in App.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:33.171357Z
+  started_at: 2026-03-08T00:14:38.775389Z
+  completed_at: 2026-03-08T00:14:52.244018Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Verify build compiles without errors
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:33.176756Z
+  started_at: 2026-03-08T00:14:59.245049Z
+  completed_at: 2026-03-08T00:15:27.231004Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.094162Z
+  exited: 2026-03-08T00:12:10.484526Z
+- phase: specified
+  entered: 2026-03-08T00:12:10.484526Z
+  exited: 2026-03-08T00:13:47.677148Z
+- phase: planned
+  entered: 2026-03-08T00:13:47.677148Z
+  exited: 2026-03-08T00:13:51.671537Z
+- phase: ready
+  entered: 2026-03-08T00:13:51.671537Z
+  exited: 2026-03-08T00:13:56.813360Z
+- phase: implementation
+  entered: 2026-03-08T00:13:56.813360Z
+  exited: 2026-03-08T00:15:52.872790Z
+- phase: review
+  entered: 2026-03-08T00:15:52.872790Z
+  exited: 2026-03-08T00:15:58.490464Z
+- phase: audit
+  entered: 2026-03-08T00:15:58.490464Z
+  exited: 2026-03-08T00:16:08.741214Z
+- phase: qa
+  entered: 2026-03-08T00:16:08.741214Z
+  exited: 2026-03-08T00:16:38.191392Z
+- phase: merge
+  entered: 2026-03-08T00:16:38.191392Z
+  exited: 2026-03-08T00:16:45.215751Z
+- phase: released
+  entered: 2026-03-08T00:16:45.215751Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

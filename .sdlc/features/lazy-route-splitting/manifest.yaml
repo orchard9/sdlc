@@ -1,0 +1,140 @@
+slug: lazy-route-splitting
+title: Lazy Route Splitting — React.lazy() for all 25 page imports
+phase: released
+created_at: 2026-03-08T00:09:00.293360Z
+updated_at: 2026-03-08T00:14:21.864502Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/lazy-route-splitting/spec.md
+  created_at: 2026-03-08T00:11:01.309622Z
+  approved_at: 2026-03-08T00:11:01.322670Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/lazy-route-splitting/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:11:08.494274Z
+  waive_reason: Pure code refactor in App.tsx — no UI changes, no new components beyond a spinner matching existing patterns. The spec fully describes the implementation approach.
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/lazy-route-splitting/tasks.md
+  created_at: 2026-03-08T00:11:23.048479Z
+  approved_at: 2026-03-08T00:11:23.057842Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/lazy-route-splitting/qa-plan.md
+  created_at: 2026-03-08T00:11:40.341648Z
+  approved_at: 2026-03-08T00:11:40.350345Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/lazy-route-splitting/review.md
+  created_at: 2026-03-08T00:13:22.996628Z
+  approved_at: 2026-03-08T00:13:23.005158Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/lazy-route-splitting/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:13:34.566617Z
+  waive_reason: Pure frontend refactor — converts static imports to React.lazy() dynamic imports. No new APIs, no auth changes, no data handling changes, no new dependencies. Single file (App.tsx) modified with standard React patterns only.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/lazy-route-splitting/qa-results.md
+  created_at: 2026-03-08T00:14:17.069956Z
+  approved_at: 2026-03-08T00:14:17.078844Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Convert 24 static page imports to React.lazy() in App.tsx
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:26.806472Z
+  started_at: 2026-03-08T00:12:24.889508Z
+  completed_at: 2026-03-08T00:12:24.896555Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add Suspense boundary with loading spinner
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:26.813664Z
+  started_at: 2026-03-08T00:12:24.903411Z
+  completed_at: 2026-03-08T00:12:24.909045Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify build produces per-page chunks
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:26.819862Z
+  started_at: 2026-03-08T00:12:53.432947Z
+  completed_at: 2026-03-08T00:12:53.440306Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Run existing tests
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:26.826838Z
+  started_at: 2026-03-08T00:13:02.931361Z
+  completed_at: 2026-03-08T00:13:02.937678Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-08T00:09:00.293360Z
+  exited: 2026-03-08T00:11:01.324548Z
+- phase: specified
+  entered: 2026-03-08T00:11:01.324548Z
+  exited: 2026-03-08T00:11:40.352208Z
+- phase: planned
+  entered: 2026-03-08T00:11:40.352208Z
+  exited: 2026-03-08T00:11:45.046802Z
+- phase: ready
+  entered: 2026-03-08T00:11:45.046802Z
+  exited: 2026-03-08T00:11:49.861821Z
+- phase: implementation
+  entered: 2026-03-08T00:11:49.861821Z
+  exited: 2026-03-08T00:13:23.014396Z
+- phase: review
+  entered: 2026-03-08T00:13:23.014396Z
+  exited: 2026-03-08T00:13:27.746577Z
+- phase: audit
+  entered: 2026-03-08T00:13:27.746577Z
+  exited: 2026-03-08T00:13:34.568774Z
+- phase: qa
+  entered: 2026-03-08T00:13:34.568774Z
+  exited: 2026-03-08T00:14:17.085774Z
+- phase: merge
+  entered: 2026-03-08T00:14:17.085774Z
+  exited: 2026-03-08T00:14:21.864502Z
+- phase: released
+  entered: 2026-03-08T00:14:21.864502Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

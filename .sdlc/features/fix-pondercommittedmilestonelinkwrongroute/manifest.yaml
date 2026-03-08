@@ -1,0 +1,113 @@
+slug: fix-pondercommittedmilestonelinkwrongroute
+title: Fix Pondercommittedmilestonelinkwrongroute
+description: |-
+  Root cause: PonderPage.tsx line 511 constructs the link with `/milestone/` but the React Router route is defined as `/milestones/:slug` in App.tsx.
+
+  Problem: On the /ponder/iterative-ponder page, the 'committed to' milestone link points to `/milestone/<slug>` (singular) instead of `/milestones/<slug>` (plural). This results in a 404 or blank page when clicking the milestone link from a ponder entry.
+
+  Original report:
+  the milestone link on /ponder/iterative-ponder is wrong, it links to `/milestone/` instead of `/milestones/`
+phase: released
+created_at: 2026-03-08T00:06:13.025224Z
+updated_at: 2026-03-08T00:07:52.686719Z
+artifacts:
+- artifact_type: spec
+  status: waived
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/spec.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:06:36.550253Z
+  waive_reason: 'One-line bug fix: /milestone/ → /milestones/ in PonderPage.tsx link'
+- artifact_type: design
+  status: waived
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/design.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:06:41.689233Z
+  waive_reason: One-line route fix, no design needed
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/tasks.md
+  created_at: 2026-03-08T00:06:48.405742Z
+  approved_at: 2026-03-08T00:06:50.650029Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/qa-plan.md
+  created_at: 2026-03-08T00:06:57.328078Z
+  approved_at: 2026-03-08T00:06:59.870386Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/review.md
+  created_at: 2026-03-08T00:07:14.626502Z
+  approved_at: 2026-03-08T00:07:16.905775Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:07:27.669535Z
+  waive_reason: String literal fix in a client-side link, no security surface
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-pondercommittedmilestonelinkwrongroute/qa-results.md
+  created_at: 2026-03-08T00:07:42.660152Z
+  approved_at: 2026-03-08T00:07:45.234386Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-08T00:06:13.025224Z
+  exited: 2026-03-08T00:06:36.552536Z
+- phase: specified
+  entered: 2026-03-08T00:06:36.552536Z
+  exited: 2026-03-08T00:06:59.883424Z
+- phase: planned
+  entered: 2026-03-08T00:06:59.883424Z
+  exited: 2026-03-08T00:07:05.459629Z
+- phase: ready
+  entered: 2026-03-08T00:07:05.459629Z
+  exited: 2026-03-08T00:07:05.469282Z
+- phase: implementation
+  entered: 2026-03-08T00:07:05.469282Z
+  exited: 2026-03-08T00:07:16.917028Z
+- phase: review
+  entered: 2026-03-08T00:07:16.917028Z
+  exited: 2026-03-08T00:07:22.181495Z
+- phase: audit
+  entered: 2026-03-08T00:07:22.181495Z
+  exited: 2026-03-08T00:07:27.672397Z
+- phase: qa
+  entered: 2026-03-08T00:07:27.672397Z
+  exited: 2026-03-08T00:07:45.245199Z
+- phase: merge
+  entered: 2026-03-08T00:07:45.245199Z
+  exited: 2026-03-08T00:07:52.686719Z
+- phase: released
+  entered: 2026-03-08T00:07:52.686719Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

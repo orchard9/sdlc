@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: git-commit-agent
+    title: Git Commit Agent — POST /api/git/commit via spawn_agent_run
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-details-hover-tile
+    title: Git Details Hover Tile — popover with structured status, guidance, and directory grouping
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-status-directory-counts
+    title: Git Status Directory Counts — extend API with per-directory file counts
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

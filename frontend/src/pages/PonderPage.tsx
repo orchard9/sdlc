@@ -392,7 +392,7 @@ function EntryDetailPane({
   const dragStartX = useRef<number | null>(null)
   const dragStartWidth = useRef<number>(DEFAULT_WORKSPACE_WIDTH)
   const navigate = useNavigate()
-  const { isRunning, focusRun, startRun } = useAgentRuns()
+  const { isRunning, focusRun } = useAgentRuns()
   const commitKey = `ponder-commit:${slug}`
   const commitRunning = isRunning(commitKey)
 
@@ -506,31 +506,16 @@ function EntryDetailPane({
           <p className="text-xs text-muted-foreground/60 font-mono truncate hidden sm:block">{entry.slug}</p>
         </div>
         <PonderStepIndicator status={entry.status} />
-        {entry.status === 'committed' && entry.committed_to.length > 0 && (() => {
-          const prepareSlug = entry.committed_to[0]
-          const prepareKey = `milestone-prepare:${prepareSlug}`
-          const prepareRunning = isRunning(prepareKey)
-          return (
-            <button
-              onClick={() => startRun({
-                key: prepareKey,
-                runType: 'milestone_prepare',
-                target: prepareSlug,
-                label: `prepare: ${prepareSlug}`,
-                startUrl: `/api/milestone/${prepareSlug}/prepare`,
-                stopUrl: `/api/milestone/${prepareSlug}/prepare/stop`,
-              })}
-              disabled={prepareRunning}
-              className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-              title={`Prepare milestone ${prepareSlug}`}
-            >
-              {prepareRunning
-                ? <Loader2 className="w-3 h-3 animate-spin" />
-                : <Play className="w-3 h-3" />}
-              <span className="hidden sm:inline">{prepareRunning ? 'Preparing…' : 'Prepare'}</span>
-            </button>
-          )
-        })()}
+        {entry.status === 'committed' && entry.committed_to.length > 0 && (
+          <Link
+            to={`/milestones/${entry.committed_to[0]}`}
+            className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+            title={`View milestone ${entry.committed_to[0]}`}
+          >
+            <ArrowUpRight className="w-3 h-3" />
+            <span className="hidden sm:inline">View Milestone</span>
+          </Link>
+        )}
         {entry.status === 'parked' && (
           <button
             onClick={() => handleStatusChange('exploring')}

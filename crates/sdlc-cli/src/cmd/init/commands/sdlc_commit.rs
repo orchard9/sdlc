@@ -48,15 +48,49 @@ Focus on the semantic meaning of the change, not the mechanical diff.
 sdlc commit --message "<generated or provided message>"
 ```
 
-If `--json` output reports `"conflict": true`, help the user resolve:
-- Show the conflicting files
-- Explain: resolve conflicts, then `git merge --continue && git branch -d dev/xist`
+If `--json` output reports `"conflict": true`, follow **Step 2a** to auto-resolve.
+
+### 2a. Auto-resolve SDLC changelog/state conflicts
+
+When the only conflicting files are `.sdlc/changelog.yaml` and/or `.sdlc/state.yaml`
+(the most common conflict from parallel agent work), resolve them automatically:
+
+1. **changelog.yaml** — Find the first conflicting event ID (the `ev-NNNN` line after
+   `<<<<<<< HEAD`). Count how many consecutive events are in YOUR side of the conflict
+   (between `<<<<<<< HEAD` and `=======`). Then:
+   ```bash
+   # Accept upstream (theirs) as the base, keep our events with suffixed IDs
+   git checkout --theirs .sdlc/changelog.yaml
+   git add .sdlc/changelog.yaml
+   ```
+   Now append your events back with reassigned IDs:
+   ```bash
+   sdlc changelog reassign --from ev-<FIRST> --suffix x --count <N>
+   ```
+   If you already resolved and both sides are present, just run the reassign command
+   on your event range to de-duplicate IDs.
+
+2. **state.yaml** — This file has list-based conflicts (features, history, milestones,
+   ponders). Manually edit to union both sides: keep all entries from both `<<<<<<< HEAD`
+   and `=======` sections, remove conflict markers. For `last_updated`, keep the later
+   timestamp.
+
+3. Stage and continue:
+   ```bash
+   git add .sdlc/changelog.yaml .sdlc/state.yaml
+   git merge --continue
+   git branch -d dev/xist
+   ```
+
+If the conflict involves files **outside** `.sdlc/`, show the conflicting files and
+explain: resolve conflicts, then `git merge --continue && git branch -d dev/xist`.
 
 ### 3. Report result
 
 Show what happened:
 - The commit SHA and message
 - Whether an upstream merge was needed
+- Whether changelog conflicts were auto-resolved (and which event IDs were reassigned)
 - The ahead/behind status
 - Remind: **not pushed** — run `git push origin main` when ready
 
@@ -73,9 +107,10 @@ Commit changes to main, reconcile with origin/main if diverged, never push.
 
 1. If no message provided: run `git diff HEAD --stat` and `git diff HEAD`, then write a 120-char-max commit message describing **what changed and why** (use `feat:`/`fix:`/`refactor:`/`docs:`/`chore:` prefixes)
 2. Run: `sdlc commit --message "<message>"`
-3. If conflict reported: show files, instruct user to resolve then `git merge --continue && git branch -d dev/xist`
-4. Report commit SHA, merge status, ahead/behind count
-5. Remind: not pushed — `git push origin main` when ready
+3. If conflict in `.sdlc/changelog.yaml`: accept theirs, then `sdlc changelog reassign --from ev-NNNN --suffix x --count N` to reassign your event IDs. If `.sdlc/state.yaml` conflicts: union both sides manually, remove markers. Then `git add .sdlc/ && git merge --continue && git branch -d dev/xist`
+4. If conflict in non-SDLC files: show files, instruct user to resolve then `git merge --continue && git branch -d dev/xist`
+5. Report commit SHA, merge status, ahead/behind count
+6. Remind: not pushed — `git push origin main` when ready
 "#;
 
 const SDLC_COMMIT_SKILL: &str = r#"---
@@ -93,9 +128,10 @@ Commit all changes to main and reconcile with origin/main if it has diverged.
 
 1. If no message provided: run `git diff HEAD --stat` and `git diff HEAD`, then write a 120-char-max commit message describing what changed and why (use feat:/fix:/refactor:/docs:/chore: prefixes)
 2. Run: `sdlc commit --message "<message>"`
-3. If conflict: show files, instruct to resolve then `git merge --continue && git branch -d dev/xist`
-4. Report result: commit SHA, merge status, ahead/behind
-5. Never pushes — remind user to `git push origin main`
+3. If conflict in `.sdlc/changelog.yaml`: accept theirs, then `sdlc changelog reassign --from ev-NNNN --suffix x --count N` to reassign your event IDs. If `.sdlc/state.yaml` conflicts: union both sides manually, remove markers. Then `git add .sdlc/ && git merge --continue && git branch -d dev/xist`
+4. If conflict in non-SDLC files: show files, instruct to resolve then `git merge --continue && git branch -d dev/xist`
+5. Report result: commit SHA, merge status, ahead/behind, any reassigned IDs
+6. Never pushes — remind user to `git push origin main`
 "#;
 
 pub static SDLC_COMMIT: CommandDef = CommandDef {

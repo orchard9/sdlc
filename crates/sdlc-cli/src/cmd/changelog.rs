@@ -272,6 +272,20 @@ pub fn run(root: &Path, since_str: &str, limit: usize, json: bool) -> anyhow::Re
     Ok(())
 }
 
+/// Reassign a range of sequential event IDs in the changelog.
+///
+/// Called by `sdlc changelog reassign --from ev-0623 --suffix x --count 7`.
+pub fn reassign(root: &Path, from: &str, suffix: &str, count: usize) -> anyhow::Result<()> {
+    let n = sdlc_core::event_log::reassign_ids(root, from, suffix, count)
+        .context("failed to reassign changelog IDs")?;
+    if n == 0 {
+        eprintln!("No events matched the specified range.");
+    } else {
+        eprintln!("✓ Reassigned {n} event(s): {from}..+{count} → suffix '{suffix}'");
+    }
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------

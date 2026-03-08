@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: git-commit-diff
+    title: Commit-specific file viewing and diff display
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-history-tab
+    title: History tab UI with compact commit list
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-log-api
+    title: GET /api/git/log endpoint with pagination
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

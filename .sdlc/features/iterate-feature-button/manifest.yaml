@@ -1,0 +1,128 @@
+slug: iterate-feature-button
+title: Iterate button on FeatureDetail — launch versioned ponder from released features
+description: Adds an 'Iterate' button to FeatureDetail for released features. Clicking it launches a versioned ponder session pre-seeded with the feature's spec, design, and outcomes.
+phase: released
+created_at: 2026-03-07T23:43:36.360508Z
+updated_at: 2026-03-08T00:15:07.843687Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/iterate-feature-button/spec.md
+  created_at: 2026-03-08T00:11:18.697093Z
+  approved_at: 2026-03-08T00:11:21.134602Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/iterate-feature-button/design.md
+  created_at: 2026-03-08T00:11:45.667542Z
+  approved_at: 2026-03-08T00:11:45.675965Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/iterate-feature-button/tasks.md
+  created_at: 2026-03-08T00:11:58.113966Z
+  approved_at: 2026-03-08T00:11:58.123530Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/iterate-feature-button/qa-plan.md
+  created_at: 2026-03-08T00:12:15.093120Z
+  approved_at: 2026-03-08T00:12:15.105477Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/iterate-feature-button/review.md
+  created_at: 2026-03-08T00:14:15.100117Z
+  approved_at: 2026-03-08T00:14:15.107030Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/iterate-feature-button/audit.md
+  created_at: 2026-03-08T00:14:35.748439Z
+  approved_at: 2026-03-08T00:14:35.760186Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/iterate-feature-button/qa-results.md
+  created_at: 2026-03-08T00:15:03.048173Z
+  approved_at: 2026-03-08T00:15:03.056169Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create nextIterationSlug utility
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:12:01.547707Z
+  started_at: 2026-03-08T00:12:30.869330Z
+  completed_at: 2026-03-08T00:12:40.758584Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add Iterate button to FeatureDetail released banner
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:12:01.553844Z
+  started_at: 2026-03-08T00:12:45.569577Z
+  completed_at: 2026-03-08T00:13:30.444073Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add unit tests for nextIterationSlug
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:12:01.559898Z
+  started_at: 2026-03-08T00:13:36.889275Z
+  completed_at: 2026-03-08T00:13:53.519466Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T23:43:36.360508Z
+  exited: 2026-03-08T00:11:21.136602Z
+- phase: specified
+  entered: 2026-03-08T00:11:21.136602Z
+  exited: 2026-03-08T00:12:15.107745Z
+- phase: planned
+  entered: 2026-03-08T00:12:15.107745Z
+  exited: 2026-03-08T00:12:20.287594Z
+- phase: ready
+  entered: 2026-03-08T00:12:20.287594Z
+  exited: 2026-03-08T00:12:25.406876Z
+- phase: implementation
+  entered: 2026-03-08T00:12:25.406876Z
+  exited: 2026-03-08T00:14:15.113389Z
+- phase: review
+  entered: 2026-03-08T00:14:15.113389Z
+  exited: 2026-03-08T00:14:20.092085Z
+- phase: audit
+  entered: 2026-03-08T00:14:20.092085Z
+  exited: 2026-03-08T00:14:35.768143Z
+- phase: qa
+  entered: 2026-03-08T00:14:35.768143Z
+  exited: 2026-03-08T00:15:03.062077Z
+- phase: merge
+  entered: 2026-03-08T00:15:03.062077Z
+  exited: 2026-03-08T00:15:07.843687Z
+- phase: released
+  entered: 2026-03-08T00:15:07.843687Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

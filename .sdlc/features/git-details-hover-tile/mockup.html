@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Details Hover Tile — Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e5e5e5; min-height: 100vh; }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; background: #1a1a1a; border-bottom: 1px solid #2a2a2a; padding: 12px 24px; display: flex; gap: 16px; z-index: 100; }
+  nav button { background: #2a2a2a; border: 1px solid #3a3a3a; color: #aaa; padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  nav button:hover, nav button.active { background: #3a3a3a; color: #fff; }
+
+  main { padding-top: 64px; display: flex; }
+
+  .sidebar { width: 224px; background: #111; border-right: 1px solid #2a2a2a; min-height: calc(100vh - 64px); display: flex; flex-direction: column; }
+  .sidebar-bottom { margin-top: auto; padding: 12px 6px; border-top: 1px solid #2a2a2a; }
+
+  .chip { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #888; cursor: pointer; position: relative; }
+  .chip:hover { background: rgba(255,255,255,0.04); }
+
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: #10b981; box-shadow: 0 0 4px rgba(16,185,129,0.4); }
+  .dot-yellow { background: #f59e0b; box-shadow: 0 0 4px rgba(245,158,11,0.4); }
+  .dot-red { background: #ef4444; box-shadow: 0 0 4px rgba(239,68,68,0.4); }
+
+  .popover { position: absolute; bottom: 100%; left: 0; margin-bottom: 8px; width: 260px; background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); padding: 0; z-index: 50; animation: pop-in 0.15s ease-out; }
+  @keyframes pop-in { from { opacity: 0; transform: scale(0.95) translateY(4px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+  .pop-section { padding: 10px 14px; }
+  .pop-section + .pop-section { border-top: 1px solid rgba(255,255,255,0.06); }
+
+  .branch-line { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; }
+  .branch-line .branch { color: #e5e5e5; }
+  .branch-line .tracking { color: #888; font-weight: 400; font-size: 12px; }
+
+  .status-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #aaa; padding: 3px 0; }
+  .status-row .mini-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .status-row .count { color: #e5e5e5; font-weight: 500; min-width: 14px; }
+
+  .sev-line { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+  .sev-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; font-size: 10px; }
+  .sev-label.green { color: #10b981; }
+  .sev-label.yellow { color: #f59e0b; }
+  .sev-label.red { color: #ef4444; }
+  .sev-text { color: #888; }
+
+  .guidance { font-size: 12px; color: #777; font-style: italic; }
+
+  .content { flex: 1; padding: 32px; color: #555; }
+
+  section { display: none; }
+  section.active { display: flex; }
+
+  .collapsed .sidebar { width: 52px; }
+  .collapsed .chip-text { display: none; }
+  .collapsed .chip { justify-content: center; padding: 8px; }
+  .collapsed .popover { left: 100%; bottom: auto; top: 0; margin-bottom: 0; margin-left: 8px; }
+</style>
+</head>
+<body>
+<nav>
+  <button class="active" onclick="show('screen-yellow')">Yellow (Modified)</button>
+  <button onclick="show('screen-green')">Green (Clean)</button>
+  <button onclick="show('screen-red')">Red (Conflicts)</button>
+  <button onclick="show('screen-collapsed')">Collapsed Sidebar</button>
+</nav>
+
+<section id="screen-yellow" class="active">
+<main>
+  <div class="sidebar">
+    <div class="sidebar-bottom">
+      <div class="chip">
+        <span class="dot dot-yellow"></span>
+        <span class="chip-text">main -- 3 modified</span>
+        <div class="popover">
+          <div class="pop-section">
+            <div class="branch-line">
+              <span class="branch">main</span>
+              <span class="tracking">2 ahead</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <div class="status-row"><span class="mini-dot dot-yellow"></span><span class="count">3</span> modified</div>
+            <div class="status-row"><span class="mini-dot dot-green"></span><span class="count">2</span> staged</div>
+            <div class="status-row"><span class="mini-dot" style="background:#555"></span><span class="count">1</span> untracked</div>
+          </div>
+          <div class="pop-section">
+            <div class="sev-line">
+              <span class="sev-label yellow">Yellow</span>
+              <span class="sev-text">Uncommitted changes</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <p class="guidance">Stage and commit when ready.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">Sidebar with yellow status popover shown</div>
+</main>
+</section>
+
+<section id="screen-green">
+<main>
+  <div class="sidebar">
+    <div class="sidebar-bottom">
+      <div class="chip">
+        <span class="dot dot-green"></span>
+        <span class="chip-text">main -- clean</span>
+        <div class="popover">
+          <div class="pop-section">
+            <div class="branch-line">
+              <span class="branch">main</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <div class="sev-line">
+              <span class="sev-label green">Green</span>
+              <span class="sev-text">Working tree clean</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <p class="guidance">All clear. Nothing to commit.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">Sidebar with green (clean) status popover shown</div>
+</main>
+</section>
+
+<section id="screen-red">
+<main>
+  <div class="sidebar">
+    <div class="sidebar-bottom">
+      <div class="chip">
+        <span class="dot dot-red"></span>
+        <span class="chip-text">feature-x -- conflicts</span>
+        <div class="popover">
+          <div class="pop-section">
+            <div class="branch-line">
+              <span class="branch">feature-x</span>
+              <span class="tracking">5 behind</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <div class="status-row"><span class="mini-dot dot-red"></span><span class="count">2</span> conflicts</div>
+            <div class="status-row"><span class="mini-dot dot-yellow"></span><span class="count">1</span> modified</div>
+          </div>
+          <div class="pop-section">
+            <div class="sev-line">
+              <span class="sev-label red">Red</span>
+              <span class="sev-text">Merge conflicts</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <p class="guidance">Resolve conflicts before continuing.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">Sidebar with red (conflict) status popover shown</div>
+</main>
+</section>
+
+<section id="screen-collapsed">
+<main class="collapsed">
+  <div class="sidebar">
+    <div class="sidebar-bottom">
+      <div class="chip">
+        <span class="dot dot-yellow"></span>
+        <span class="chip-text">main -- 3 modified</span>
+        <div class="popover">
+          <div class="pop-section">
+            <div class="branch-line">
+              <span class="branch">main</span>
+              <span class="tracking">2 ahead</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <div class="status-row"><span class="mini-dot dot-yellow"></span><span class="count">3</span> modified</div>
+            <div class="status-row"><span class="mini-dot dot-green"></span><span class="count">2</span> staged</div>
+          </div>
+          <div class="pop-section">
+            <div class="sev-line">
+              <span class="sev-label yellow">Yellow</span>
+              <span class="sev-text">Uncommitted changes</span>
+            </div>
+          </div>
+          <div class="pop-section">
+            <p class="guidance">Stage and commit when ready.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="content">Collapsed sidebar with popover appearing to the right</div>
+</main>
+</section>
+
+<script>
+function show(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

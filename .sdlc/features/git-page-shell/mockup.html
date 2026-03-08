@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Page Shell — Mockup</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --card: #18181b;
+    --border: #27272a;
+    --fg: #fafafa;
+    --muted: #a1a1aa;
+    --accent: #27272a;
+    --green: #10b981;
+    --yellow: #f59e0b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--fg); }
+  nav { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--border); background: var(--card); }
+  nav button { background: var(--accent); color: var(--muted); border: 1px solid var(--border); padding: 6px 14px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+  nav button.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+  section { display: none; height: calc(100vh - 49px); }
+  section.active { display: flex; }
+
+  .shell { display: flex; height: 100%; }
+  .list-pane { width: 288px; border-right: 1px solid var(--border); display: flex; flex-direction: column; background: var(--card); }
+  .detail-pane { flex: 1; display: flex; align-items: center; justify-content: center; }
+
+  .branch-header { padding: 16px; border-bottom: 1px solid var(--border); }
+  .branch-row { display: flex; align-items: center; gap: 8px; }
+  .severity-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .dot-green { background: var(--green); box-shadow: 0 0 4px rgba(16,185,129,0.4); }
+  .dot-yellow { background: var(--yellow); box-shadow: 0 0 4px rgba(245,158,11,0.4); }
+  .branch-name { font-size: 14px; font-weight: 600; }
+  .status-text { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; gap: 8px; color: var(--muted); }
+  .empty-state svg { width: 32px; height: 32px; opacity: 0.4; }
+  .empty-state p { font-size: 13px; }
+
+  .file-list { flex: 1; padding: 8px; overflow-y: auto; }
+  .file-item { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .file-item:hover { background: var(--accent); color: var(--fg); }
+  .file-item.selected { background: var(--accent); color: var(--fg); }
+
+  .detail-content { padding: 24px; width: 100%; max-width: 800px; }
+  .detail-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+  .detail-header .back-btn { display: none; background: none; border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .detail-path { font-size: 14px; font-weight: 500; font-family: monospace; }
+  .detail-placeholder { padding: 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 13px; text-align: center; }
+</style>
+</head>
+<body>
+
+<nav>
+  <button class="active" onclick="show('empty')">Empty State</button>
+  <button onclick="show('clean')">Clean Repo</button>
+  <button onclick="show('dirty')">Dirty Repo</button>
+  <button onclick="show('selected')">File Selected</button>
+</nav>
+
+<!-- Screen 1: Empty state (no git status loaded yet) -->
+<section id="screen-empty" class="active">
+  <div class="shell">
+    <div class="list-pane">
+      <div class="branch-header">
+        <div class="branch-row">
+          <span class="severity-dot" style="background: #52525b;"></span>
+          <span class="branch-name" style="color: var(--muted);">Loading...</span>
+        </div>
+      </div>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>File browser will appear here</p>
+      </div>
+    </div>
+    <div class="detail-pane">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>Select a file to view details</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 2: Clean repo -->
+<section id="screen-clean">
+  <div class="shell">
+    <div class="list-pane">
+      <div class="branch-header">
+        <div class="branch-row">
+          <span class="severity-dot dot-green"></span>
+          <span class="branch-name">main</span>
+        </div>
+        <div class="status-text">clean</div>
+      </div>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>File browser will appear here</p>
+      </div>
+    </div>
+    <div class="detail-pane">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>Select a file to view details</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 3: Dirty repo -->
+<section id="screen-dirty">
+  <div class="shell">
+    <div class="list-pane">
+      <div class="branch-header">
+        <div class="branch-row">
+          <span class="severity-dot dot-yellow"></span>
+          <span class="branch-name">feature-x</span>
+        </div>
+        <div class="status-text">3 dirty files, 1 staged</div>
+      </div>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>File browser will appear here</p>
+      </div>
+    </div>
+    <div class="detail-pane">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14,2 14,8 20,8"/></svg>
+        <p>Select a file to view details</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen 4: File selected -->
+<section id="screen-selected">
+  <div class="shell">
+    <div class="list-pane">
+      <div class="branch-header">
+        <div class="branch-row">
+          <span class="severity-dot dot-yellow"></span>
+          <span class="branch-name">feature-x</span>
+        </div>
+        <div class="status-text">3 dirty files, 1 staged</div>
+      </div>
+      <div class="file-list">
+        <div class="file-item selected">src/main.rs</div>
+        <div class="file-item">src/lib.rs</div>
+        <div class="file-item">Cargo.toml</div>
+      </div>
+    </div>
+    <div class="detail-pane">
+      <div class="detail-content">
+        <div class="detail-header">
+          <span class="detail-path">src/main.rs</span>
+        </div>
+        <div class="detail-placeholder">
+          Diff viewer will appear here (git-diff-viewer milestone)
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function show(id) {
+  document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>

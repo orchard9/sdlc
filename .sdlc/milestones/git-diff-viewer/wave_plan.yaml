@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: git-diff-api
+    title: GET /api/git/diff endpoint for single file diffs
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-diff-viewer-ui
+    title: Responsive diff viewer with @git-diff-view/react and blue/amber palette
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

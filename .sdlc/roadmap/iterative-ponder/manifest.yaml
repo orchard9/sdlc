@@ -1,0 +1,13 @@
+slug: iterative-ponder
+title: iterative-ponder
+status: committed
+created_at: 2026-03-07T23:35:38.820600Z
+updated_at: 2026-03-07T23:43:55.335623Z
+committed_at: 2026-03-07T23:42:59.637172Z
+committed_to:
+- iterative-ponder
+sessions: 1
+orientation:
+  current: Design is complete. All decisions resolved. Implementation plan is concrete with no unknowns.
+  next: 'Commit to milestones/features and implement: nextIterationSlug utility, Iterate button in ReleasedPanel + FeatureDetail.'
+  commit: Met — the idea is fully shaped, scope is small, no new APIs needed, and the existing NewIdeaModal props already support pre-population.

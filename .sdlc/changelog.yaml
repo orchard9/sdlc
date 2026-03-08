@@ -3452,38 +3452,626 @@
     run_key: milestone-run-wave:v51-tunnel-discovery
 - id: ev-0623
   kind: review_approved
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:42:48.488091Z
+  metadata: {}
+- id: ev-0624
+  kind: feature_phase_advanced
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:42:48.494260Z
+  metadata:
+    phase: review
+- id: ev-0625
+  kind: review_approved
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:42:56.979134Z
+  metadata: {}
+- id: ev-0626
+  kind: feature_phase_advanced
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:42:56.985156Z
+  metadata:
+    phase: review
+- id: ev-0627
+  kind: audit_approved
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:43:15.394870Z
+  metadata: {}
+- id: ev-0628
+  kind: feature_phase_advanced
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:43:15.402108Z
+  metadata:
+    phase: qa
+- id: ev-0629
+  kind: audit_approved
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:43:17.825837Z
+  metadata: {}
+- id: ev-0630
+  kind: feature_phase_advanced
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:43:17.831835Z
+  metadata:
+    phase: qa
+- id: ev-0631
+  kind: review_approved
+  slug: git-status-api
+  timestamp: 2026-03-07T20:43:27.137106Z
+  metadata: {}
+- id: ev-0632
+  kind: feature_phase_advanced
+  slug: git-status-api
+  timestamp: 2026-03-07T20:43:27.142848Z
+  metadata:
+    phase: review
+- id: ev-0633
+  kind: qa_approved
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:43:43.428866Z
+  metadata: {}
+- id: ev-0634
+  kind: feature_phase_advanced
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:43:43.437312Z
+  metadata:
+    phase: merge
+- id: ev-0635
+  kind: feature_merged
+  slug: git-green-quotes
+  timestamp: 2026-03-07T20:43:48.317208Z
+  metadata: {}
+- id: ev-0636
+  kind: qa_approved
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:43:48.354062Z
+  metadata: {}
+- id: ev-0637
+  kind: feature_phase_advanced
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:43:48.360135Z
+  metadata:
+    phase: merge
+- id: ev-0638
+  kind: feature_merged
+  slug: git-status-chip
+  timestamp: 2026-03-07T20:43:52.504711Z
+  metadata: {}
+- id: ev-0639
+  kind: audit_approved
+  slug: git-status-api
+  timestamp: 2026-03-07T20:43:53.208084Z
+  metadata: {}
+- id: ev-0640
+  kind: feature_phase_advanced
+  slug: git-status-api
+  timestamp: 2026-03-07T20:43:53.214127Z
+  metadata:
+    phase: qa
+- id: ev-0641
+  kind: qa_approved
+  slug: git-status-api
+  timestamp: 2026-03-07T20:44:46.702550Z
+  metadata: {}
+- id: ev-0642
+  kind: feature_phase_advanced
+  slug: git-status-api
+  timestamp: 2026-03-07T20:44:46.708918Z
+  metadata:
+    phase: merge
+- id: ev-0643
+  kind: feature_merged
+  slug: git-status-api
+  timestamp: 2026-03-07T20:44:50.564335Z
+  metadata: {}
+- id: ev-0644
+  kind: milestone_wave_completed
+  slug: git-status-indicator
+  timestamp: 2026-03-07T20:45:13.616113Z
+  metadata:
+    run_key: milestone-run-wave:git-status-indicator
+- id: ev-0645
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedactionshouldlinktomilestone
+  timestamp: 2026-03-07T23:50:00.371508Z
+  metadata:
+    phase: review
+- id: ev-0646
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedactionshouldlinktomilestone
+  timestamp: 2026-03-07T23:50:12.265860Z
+  metadata:
+    phase: audit
+- id: ev-0647
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedactionshouldlinktomilestone
+  timestamp: 2026-03-07T23:50:15.098338Z
+  metadata:
+    phase: qa
+- id: ev-0648
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedactionshouldlinktomilestone
+  timestamp: 2026-03-07T23:50:29.070711Z
+  metadata:
+    phase: merge
+- id: ev-0649
+  kind: feature_merged
+  slug: fix-pondercommittedactionshouldlinktomilestone
+  timestamp: 2026-03-07T23:50:37.851811Z
+  metadata: {}
+- id: ev-0650
+  kind: feature_phase_advanced
+  slug: fix-removeunusedstartrundestructureponderpage
+  timestamp: 2026-03-08T00:01:05.576320Z
+  metadata:
+    phase: review
+- id: ev-0651
+  kind: feature_phase_advanced
+  slug: fix-removeunusedstartrundestructureponderpage
+  timestamp: 2026-03-08T00:01:20.317226Z
+  metadata:
+    phase: qa
+- id: ev-0652
+  kind: feature_phase_advanced
+  slug: fix-removeunusedstartrundestructureponderpage
+  timestamp: 2026-03-08T00:01:31.081739Z
+  metadata:
+    phase: merge
+- id: ev-0653
+  kind: feature_merged
+  slug: fix-removeunusedstartrundestructureponderpage
+  timestamp: 2026-03-08T00:01:36.600228Z
+  metadata: {}
+- id: ev-0654
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedmilestonelinkwrongroute
+  timestamp: 2026-03-08T00:07:16.924910Z
+  metadata:
+    phase: review
+- id: ev-0655
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedmilestonelinkwrongroute
+  timestamp: 2026-03-08T00:07:27.676355Z
+  metadata:
+    phase: qa
+- id: ev-0656
+  kind: feature_phase_advanced
+  slug: fix-pondercommittedmilestonelinkwrongroute
+  timestamp: 2026-03-08T00:07:45.255009Z
+  metadata:
+    phase: merge
+- id: ev-0657
+  kind: feature_merged
+  slug: fix-pondercommittedmilestonelinkwrongroute
+  timestamp: 2026-03-08T00:07:52.706113Z
+  metadata: {}
+- id: ev-0658
+  kind: review_approved
+  slug: vendor-chunk-separation
+  timestamp: 2026-03-08T00:13:08.361617Z
+  metadata: {}
+- id: ev-0659
+  kind: feature_phase_advanced
+  slug: vendor-chunk-separation
+  timestamp: 2026-03-08T00:13:08.366642Z
+  metadata:
+    phase: review
+- id: ev-0660
+  kind: feature_phase_advanced
+  slug: vendor-chunk-separation
+  timestamp: 2026-03-08T00:13:19.681686Z
+  metadata:
+    phase: qa
+- id: ev-0661
+  kind: review_approved
+  slug: lazy-route-splitting
+  timestamp: 2026-03-08T00:13:23.011213Z
+  metadata: {}
+- id: ev-0662
+  kind: feature_phase_advanced
+  slug: lazy-route-splitting
+  timestamp: 2026-03-08T00:13:23.016794Z
+  metadata:
+    phase: review
+- id: ev-0663
+  kind: feature_phase_advanced
+  slug: lazy-route-splitting
+  timestamp: 2026-03-08T00:13:34.572131Z
+  metadata:
+    phase: qa
+- id: ev-0664
+  kind: qa_approved
+  slug: vendor-chunk-separation
+  timestamp: 2026-03-08T00:13:37.947309Z
+  metadata: {}
+- id: ev-0665
+  kind: feature_phase_advanced
+  slug: vendor-chunk-separation
+  timestamp: 2026-03-08T00:13:37.953617Z
+  metadata:
+    phase: merge
+- id: ev-0666
+  kind: feature_merged
+  slug: vendor-chunk-separation
+  timestamp: 2026-03-08T00:13:43.480706Z
+  metadata: {}
+- id: ev-0667
+  kind: review_approved
+  slug: iterate-slug-utility
+  timestamp: 2026-03-08T00:13:50.318798Z
+  metadata: {}
+- id: ev-0668
+  kind: feature_phase_advanced
+  slug: iterate-slug-utility
+  timestamp: 2026-03-08T00:13:50.323881Z
+  metadata:
+    phase: review
+- id: ev-0669
+  kind: feature_phase_advanced
+  slug: iterate-slug-utility
+  timestamp: 2026-03-08T00:14:00.466585Z
+  metadata:
+    phase: qa
+- id: ev-0670
+  kind: review_approved
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:14:15.109901Z
+  metadata: {}
+- id: ev-0671
+  kind: feature_phase_advanced
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:14:15.115726Z
+  metadata:
+    phase: review
+- id: ev-0672
+  kind: qa_approved
+  slug: lazy-route-splitting
+  timestamp: 2026-03-08T00:14:17.082300Z
+  metadata: {}
+- id: ev-0673
+  kind: feature_phase_advanced
+  slug: lazy-route-splitting
+  timestamp: 2026-03-08T00:14:17.088517Z
+  metadata:
+    phase: merge
+- id: ev-0674
+  kind: feature_merged
+  slug: lazy-route-splitting
+  timestamp: 2026-03-08T00:14:21.876653Z
+  metadata: {}
+- id: ev-0675
+  kind: audit_approved
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:14:35.764220Z
+  metadata: {}
+- id: ev-0676
+  kind: feature_phase_advanced
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:14:35.771010Z
+  metadata:
+    phase: qa
+- id: ev-0677
+  kind: qa_approved
+  slug: iterate-slug-utility
+  timestamp: 2026-03-08T00:14:38.707872Z
+  metadata: {}
+- id: ev-0678
+  kind: feature_phase_advanced
+  slug: iterate-slug-utility
+  timestamp: 2026-03-08T00:14:38.715309Z
+  metadata:
+    phase: merge
+- id: ev-0679
+  kind: feature_merged
+  slug: iterate-slug-utility
+  timestamp: 2026-03-08T00:14:44.299127Z
+  metadata: {}
+- id: ev-0680
+  kind: milestone_wave_completed
+  slug: frontend-bundle-splitting
+  timestamp: 2026-03-08T00:14:45.866471Z
+  metadata:
+    run_key: milestone-run-wave:frontend-bundle-splitting
+- id: ev-0681
+  kind: review_approved
+  slug: iterate-milestone-button
+  timestamp: 2026-03-08T00:15:00.063056Z
+  metadata: {}
+- id: ev-0682
+  kind: feature_phase_advanced
+  slug: iterate-milestone-button
+  timestamp: 2026-03-08T00:15:00.068416Z
+  metadata:
+    phase: review
+- id: ev-0683
+  kind: qa_approved
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:15:03.059046Z
+  metadata: {}
+- id: ev-0684
+  kind: feature_phase_advanced
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:15:03.064457Z
+  metadata:
+    phase: merge
+- id: ev-0685
+  kind: feature_merged
+  slug: iterate-feature-button
+  timestamp: 2026-03-08T00:15:07.848221Z
+  metadata: {}
+- id: ev-0686
+  kind: feature_phase_advanced
+  slug: iterate-milestone-button
+  timestamp: 2026-03-08T00:15:22.860022Z
+  metadata:
+    phase: qa
+- id: ev-0687
+  kind: review_approved
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:15:52.574510Z
+  metadata: {}
+- id: ev-0688
+  kind: feature_phase_advanced
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:15:52.580613Z
+  metadata:
+    phase: review
+- id: ev-0689
+  kind: review_approved
+  slug: git-page-shell
+  timestamp: 2026-03-08T00:15:52.869713Z
+  metadata: {}
+- id: ev-0690
+  kind: feature_phase_advanced
+  slug: git-page-shell
+  timestamp: 2026-03-08T00:15:52.875103Z
+  metadata:
+    phase: review
+- id: ev-0691
+  kind: qa_approved
+  slug: iterate-milestone-button
+  timestamp: 2026-03-08T00:15:54.391915Z
+  metadata: {}
+- id: ev-0692
+  kind: feature_phase_advanced
+  slug: iterate-milestone-button
+  timestamp: 2026-03-08T00:15:54.398429Z
+  metadata:
+    phase: merge
+- id: ev-0693
+  kind: feature_merged
+  slug: iterate-milestone-button
+  timestamp: 2026-03-08T00:15:58.445092Z
+  metadata: {}
+- id: ev-0694
+  kind: feature_phase_advanced
+  slug: git-page-shell
+  timestamp: 2026-03-08T00:16:08.744404Z
+  metadata:
+    phase: qa
+- id: ev-0695
+  kind: audit_approved
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:16:11.295724Z
+  metadata: {}
+- id: ev-0696
+  kind: feature_phase_advanced
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:16:11.302113Z
+  metadata:
+    phase: qa
+- id: ev-0697
+  kind: milestone_wave_completed
+  slug: iterative-ponder
+  timestamp: 2026-03-08T00:16:15.796034Z
+  metadata:
+    run_key: milestone-run-wave:iterative-ponder
+- id: ev-0698
+  kind: qa_approved
+  slug: git-page-shell
+  timestamp: 2026-03-08T00:16:38.187732Z
+  metadata: {}
+- id: ev-0699
+  kind: feature_phase_advanced
+  slug: git-page-shell
+  timestamp: 2026-03-08T00:16:38.194047Z
+  metadata:
+    phase: merge
+- id: ev-0700
+  kind: feature_merged
+  slug: git-page-shell
+  timestamp: 2026-03-08T00:16:45.222019Z
+  metadata: {}
+- id: ev-0701
+  kind: qa_approved
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:16:57.117225Z
+  metadata: {}
+- id: ev-0702
+  kind: feature_phase_advanced
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:16:57.123071Z
+  metadata:
+    phase: merge
+- id: ev-0703
+  kind: feature_merged
+  slug: git-details-hover-tile
+  timestamp: 2026-03-08T00:16:58.948507Z
+  metadata: {}
+- id: ev-0704
+  kind: review_approved
+  slug: git-file-browser-ui
+  timestamp: 2026-03-08T00:18:08.420391Z
+  metadata: {}
+- id: ev-0705
+  kind: feature_phase_advanced
+  slug: git-file-browser-ui
+  timestamp: 2026-03-08T00:18:08.426667Z
+  metadata:
+    phase: review
+- id: ev-0706
+  kind: review_approved
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:18:10.909626Z
+  metadata: {}
+- id: ev-0707
+  kind: feature_phase_advanced
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:18:10.915125Z
+  metadata:
+    phase: review
+- id: ev-0708
+  kind: audit_approved
+  slug: git-file-browser-ui
+  timestamp: 2026-03-08T00:18:30.214545Z
+  metadata: {}
+- id: ev-0709
+  kind: feature_phase_advanced
+  slug: git-file-browser-ui
+  timestamp: 2026-03-08T00:18:30.222768Z
+  metadata:
+    phase: qa
+- id: ev-0710
+  kind: audit_approved
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:18:33.522813Z
+  metadata: {}
+- id: ev-0711
+  kind: feature_phase_advanced
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:18:33.528392Z
+  metadata:
+    phase: qa
+- id: ev-0712
+  kind: review_approved
+  slug: git-diff-api
+  timestamp: 2026-03-08T00:18:37.705605Z
+  metadata: {}
+- id: ev-0713
+  kind: feature_phase_advanced
+  slug: git-diff-api
+  timestamp: 2026-03-08T00:18:37.711032Z
+  metadata:
+    phase: review
+- id: ev-0714
+  kind: review_approved
+  slug: git-diff-viewer-ui
+  timestamp: 2026-03-08T00:18:41.852868Z
+  metadata: {}
+- id: ev-0715
+  kind: feature_phase_advanced
+  slug: git-diff-viewer-ui
+  timestamp: 2026-03-08T00:18:41.858926Z
+  metadata:
+    phase: review
+- id: ev-0716
+  kind: audit_approved
+  slug: git-diff-api
+  timestamp: 2026-03-08T00:19:03.963634Z
+  metadata: {}
+- id: ev-0717
+  kind: feature_phase_advanced
+  slug: git-diff-api
+  timestamp: 2026-03-08T00:19:03.976386Z
+  metadata:
+    phase: qa
+- id: ev-0718
+  kind: qa_approved
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:19:05.718616Z
+  metadata: {}
+- id: ev-0719
+  kind: feature_phase_advanced
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:19:05.724246Z
+  metadata:
+    phase: merge
+- id: ev-0720
+  kind: audit_approved
+  slug: git-diff-viewer-ui
+  timestamp: 2026-03-08T00:19:07.778172Z
+  metadata: {}
+- id: ev-0721
+  kind: feature_phase_advanced
+  slug: git-diff-viewer-ui
+  timestamp: 2026-03-08T00:19:07.794764Z
+  metadata:
+    phase: qa
+- id: ev-0722
+  kind: feature_merged
+  slug: git-history-tab
+  timestamp: 2026-03-08T00:19:10.960128Z
+  metadata: {}
+- id: ev-0723
+  kind: milestone_wave_completed
+  slug: dashboard-dev-info
+  timestamp: 2026-03-08T00:19:42.760807Z
+  metadata:
+    run_key: milestone-run-wave:dashboard-dev-info
+- id: ev-0724
+  kind: milestone_wave_completed
+  slug: git-file-browser
+  timestamp: 2026-03-08T00:19:44.234113Z
+  metadata:
+    run_key: milestone-run-wave:git-file-browser
+- id: ev-0725
+  kind: milestone_wave_completed
+  slug: git-commit-history
+  timestamp: 2026-03-08T00:19:44.259462Z
+  metadata:
+    run_key: milestone-run-wave:git-commit-history
+- id: ev-0726
+  kind: milestone_wave_completed
+  slug: git-diff-viewer
+  timestamp: 2026-03-08T00:19:47.056232Z
+  metadata:
+    run_key: milestone-run-wave:git-diff-viewer
+- id: ev-0727
+  kind: milestone_wave_completed
+  slug: git-status-indicator-v2
+  timestamp: 2026-03-08T00:19:52.389495Z
+  metadata:
+    run_key: milestone-run-wave:git-status-indicator-v2
+- id: ev-0728
+  kind: milestone_wave_completed
+  slug: dashboard-dev-info
+  timestamp: 2026-03-08T00:20:55.446956Z
+  metadata:
+    run_key: milestone-run-wave:dashboard-dev-info
+- id: ev-0623x
+  kind: review_approved
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:34:00.424155Z
   metadata: {}
-- id: ev-0624
+- id: ev-0624x
   kind: feature_phase_advanced
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:34:00.438290Z
   metadata:
     phase: review
-- id: ev-0625
+- id: ev-0625x
   kind: audit_approved
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:34:59.928486Z
   metadata: {}
-- id: ev-0626
+- id: ev-0626x
   kind: feature_phase_advanced
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:34:59.934611Z
   metadata:
     phase: qa
-- id: ev-0627
+- id: ev-0627x
   kind: qa_approved
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:35:21.655567Z
   metadata: {}
-- id: ev-0628
+- id: ev-0628x
   kind: feature_phase_advanced
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:35:21.687359Z
   metadata:
     phase: merge
-- id: ev-0629
+- id: ev-0629x
   kind: feature_merged
   slug: fix-secretsenvnoinlinesecretrotationui
   timestamp: 2026-03-07T21:36:48.632164Z

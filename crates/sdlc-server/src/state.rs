@@ -243,6 +243,8 @@ pub enum SseMessage {
     AdvisoryRunCompleted,
     /// An advisory analysis agent run was stopped.
     AdvisoryRunStopped,
+    /// A git commit agent run completed — working tree committed.
+    GitCommitCompleted,
     /// Tool evolve agent completed — tool.ts updated.
     ToolEvolveCompleted { name: String },
     /// A result-action agent run completed for a tool.

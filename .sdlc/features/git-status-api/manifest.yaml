@@ -1,0 +1,128 @@
+slug: git-status-api
+title: GET /api/git/status endpoint with composite state model
+description: REST endpoint (GET /api/git/status) that shells out to git to collect branch, dirty-file count, ahead/behind, and conflict state, then returns a composite status model with an overall severity (green/yellow/red).
+phase: released
+created_at: 2026-03-07T20:25:38.064369Z
+updated_at: 2026-03-07T20:44:50.557563Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-status-api/spec.md
+  created_at: 2026-03-07T20:39:35.088891Z
+  approved_at: 2026-03-07T20:39:36.815254Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-status-api/design.md
+  created_at: 2026-03-07T20:40:09.807568Z
+  approved_at: 2026-03-07T20:40:09.816704Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-status-api/tasks.md
+  created_at: 2026-03-07T20:40:24.683589Z
+  approved_at: 2026-03-07T20:40:24.694542Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-status-api/qa-plan.md
+  created_at: 2026-03-07T20:40:46.575380Z
+  approved_at: 2026-03-07T20:40:46.585145Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/git-status-api/review.md
+  created_at: 2026-03-07T20:43:27.124408Z
+  approved_at: 2026-03-07T20:43:27.134045Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/git-status-api/audit.md
+  created_at: 2026-03-07T20:43:53.195119Z
+  approved_at: 2026-03-07T20:43:53.204825Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/git-status-api/qa-results.md
+  created_at: 2026-03-07T20:44:46.689303Z
+  approved_at: 2026-03-07T20:44:46.699305Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create git route module with GitStatus struct and git command parsing
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:40:27.887267Z
+  started_at: 2026-03-07T20:41:04.529089Z
+  completed_at: 2026-03-07T20:41:52.666241Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create get_git_status handler and register route
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:40:27.894825Z
+  started_at: 2026-03-07T20:41:56.956531Z
+  completed_at: 2026-03-07T20:42:20.008317Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add tests for parsing and severity logic
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:40:27.900997Z
+  started_at: 2026-03-07T20:42:24.568841Z
+  completed_at: 2026-03-07T20:42:54.797100Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.064369Z
+  exited: 2026-03-07T20:39:36.817450Z
+- phase: specified
+  entered: 2026-03-07T20:39:36.817450Z
+  exited: 2026-03-07T20:40:46.587197Z
+- phase: planned
+  entered: 2026-03-07T20:40:46.587197Z
+  exited: 2026-03-07T20:40:52.047624Z
+- phase: ready
+  entered: 2026-03-07T20:40:52.047624Z
+  exited: 2026-03-07T20:40:55.370119Z
+- phase: implementation
+  entered: 2026-03-07T20:40:55.370119Z
+  exited: 2026-03-07T20:43:27.140367Z
+- phase: review
+  entered: 2026-03-07T20:43:27.140367Z
+  exited: 2026-03-07T20:43:31.988919Z
+- phase: audit
+  entered: 2026-03-07T20:43:31.988919Z
+  exited: 2026-03-07T20:43:53.211521Z
+- phase: qa
+  entered: 2026-03-07T20:43:53.211521Z
+  exited: 2026-03-07T20:44:46.706249Z
+- phase: merge
+  entered: 2026-03-07T20:44:46.706249Z
+  exited: 2026-03-07T20:44:50.557563Z
+- phase: released
+  entered: 2026-03-07T20:44:50.557563Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

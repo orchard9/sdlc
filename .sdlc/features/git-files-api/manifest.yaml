@@ -1,0 +1,121 @@
+slug: git-files-api
+title: GET /api/git/files endpoint returning workspace files with status
+phase: implementation
+created_at: 2026-03-07T20:25:38.087378Z
+updated_at: 2026-03-08T00:13:13.852260Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-files-api/spec.md
+  created_at: 2026-03-08T00:11:41.770265Z
+  approved_at: 2026-03-08T00:11:53.533463Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-files-api/design.md
+  created_at: 2026-03-08T00:12:26.575641Z
+  approved_at: 2026-03-08T00:12:26.582315Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-files-api/tasks.md
+  created_at: 2026-03-08T00:12:39.055746Z
+  approved_at: 2026-03-08T00:12:39.063273Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-files-api/qa-plan.md
+  created_at: 2026-03-08T00:12:59.858440Z
+  approved_at: 2026-03-08T00:12:59.866877Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/git-files-api/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/git-files-api/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/git-files-api/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Implement parse_file_entries function
+  description: null
+  status: in_progress
+  created_at: 2026-03-08T00:12:43.439056Z
+  started_at: 2026-03-08T00:13:22.711926Z
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement get_git_files handler
+  description: null
+  status: pending
+  created_at: 2026-03-08T00:12:43.445730Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Register route in router
+  description: null
+  status: pending
+  created_at: 2026-03-08T00:12:43.451417Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add unit tests for parse_file_entries
+  description: null
+  status: pending
+  created_at: 2026-03-08T00:12:43.457207Z
+  started_at: null
+  completed_at: null
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.087378Z
+  exited: 2026-03-08T00:11:53.535821Z
+- phase: specified
+  entered: 2026-03-08T00:11:53.535821Z
+  exited: 2026-03-08T00:12:59.868443Z
+- phase: planned
+  entered: 2026-03-08T00:12:59.868443Z
+  exited: 2026-03-08T00:13:10.365228Z
+- phase: ready
+  entered: 2026-03-08T00:13:10.365228Z
+  exited: 2026-03-08T00:13:13.852260Z
+- phase: implementation
+  entered: 2026-03-08T00:13:13.852260Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

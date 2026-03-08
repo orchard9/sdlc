@@ -5,6 +5,7 @@ import {
   TrendingUp, MessagesSquare, Wifi, Target, GitBranch, Rocket, Terminal, Map, Code2, ScrollText,
   Zap, Bot, BookMarked, Library, CalendarClock, ChevronsLeft, ChevronsRight, BarChart2, FlaskConical,
 } from 'lucide-react'
+import { GitStatusChip } from './GitStatusChip'
 
 const navGroups = [
   {
@@ -41,6 +42,7 @@ const navGroups = [
     label: 'integrate',
     items: [
       { path: '/network', label: 'Network', icon: Wifi, exact: false },
+      { path: '/git', label: 'Git', icon: GitBranch, exact: false },
     ],
   },
   {
@@ -150,6 +152,7 @@ export function Sidebar({ collapsed = false, onToggle, onNavigate, onSearch, onF
 
       {/* Bottom utility */}
       <div className="px-1.5 py-3 border-t border-border space-y-0.5">
+        <GitStatusChip collapsed={collapsed} />
         <button
           onClick={onAskPonder}
           title={collapsed ? 'Ask Code' : undefined}

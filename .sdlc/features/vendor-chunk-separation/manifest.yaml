@@ -1,0 +1,129 @@
+slug: vendor-chunk-separation
+title: Vendor Chunk Separation — manualChunks for React, Markdown, and Mermaid
+phase: released
+created_at: 2026-03-08T00:09:00.305689Z
+updated_at: 2026-03-08T00:13:43.476389Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/vendor-chunk-separation/spec.md
+  created_at: 2026-03-08T00:10:40.902799Z
+  approved_at: 2026-03-08T00:10:40.913475Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/vendor-chunk-separation/design.md
+  created_at: 2026-03-08T00:10:59.960145Z
+  approved_at: 2026-03-08T00:10:59.969786Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/vendor-chunk-separation/tasks.md
+  created_at: 2026-03-08T00:11:09.796859Z
+  approved_at: 2026-03-08T00:11:09.806396Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/vendor-chunk-separation/qa-plan.md
+  created_at: 2026-03-08T00:11:26.706851Z
+  approved_at: 2026-03-08T00:11:26.717467Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/vendor-chunk-separation/review.md
+  created_at: 2026-03-08T00:13:08.352718Z
+  approved_at: 2026-03-08T00:13:08.358943Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/vendor-chunk-separation/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:13:19.674554Z
+  waive_reason: Build configuration change only — manualChunks in vite.config.ts. No new dependencies, no runtime behavior change, no security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/vendor-chunk-separation/qa-results.md
+  created_at: 2026-03-08T00:13:37.933990Z
+  approved_at: 2026-03-08T00:13:37.943972Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add manualChunks to vite.config.ts
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:13.050181Z
+  started_at: 2026-03-08T00:11:55.393175Z
+  completed_at: 2026-03-08T00:11:55.400749Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Verify build output
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:13.059324Z
+  started_at: 2026-03-08T00:12:38.024984Z
+  completed_at: 2026-03-08T00:12:38.030567Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Verify application loads correctly
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:11:13.066746Z
+  started_at: 2026-03-08T00:12:49.114807Z
+  completed_at: 2026-03-08T00:12:49.120292Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-08T00:09:00.305689Z
+  exited: 2026-03-08T00:10:40.915510Z
+- phase: specified
+  entered: 2026-03-08T00:10:40.915510Z
+  exited: 2026-03-08T00:11:26.719524Z
+- phase: planned
+  entered: 2026-03-08T00:11:26.719524Z
+  exited: 2026-03-08T00:11:32.405907Z
+- phase: ready
+  entered: 2026-03-08T00:11:32.405907Z
+  exited: 2026-03-08T00:11:37.938231Z
+- phase: implementation
+  entered: 2026-03-08T00:11:37.938231Z
+  exited: 2026-03-08T00:13:08.364477Z
+- phase: review
+  entered: 2026-03-08T00:13:08.364477Z
+  exited: 2026-03-08T00:13:13.240296Z
+- phase: audit
+  entered: 2026-03-08T00:13:13.240296Z
+  exited: 2026-03-08T00:13:19.677475Z
+- phase: qa
+  entered: 2026-03-08T00:13:19.677475Z
+  exited: 2026-03-08T00:13:37.950895Z
+- phase: merge
+  entered: 2026-03-08T00:13:37.950895Z
+  exited: 2026-03-08T00:13:43.476389Z
+- phase: released
+  entered: 2026-03-08T00:13:43.476389Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

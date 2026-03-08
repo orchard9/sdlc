@@ -225,6 +225,31 @@ active_features:
 - workspace-shell-component
 - workspace-slug-utils
 - fix-secretsenvnoinlinesecretrotationui
+- git-status-api
+- git-status-chip
+- git-green-quotes
+- git-files-api
+- git-page-shell
+- git-file-browser-ui
+- git-diff-api
+- git-diff-viewer-ui
+- git-log-api
+- git-history-tab
+- git-commit-diff
+- git-commit-agent
+- git-details-hover-tile
+- git-status-directory-counts
+- iterate-slug-utility
+- iterate-milestone-button
+- iterate-feature-button
+- fix-pondercommittedactionshouldlinktomilestone
+- fix-removeunusedstartrundestructureponderpage
+- fix-pondercommittedmilestonelinkwrongroute
+- lazy-route-splitting
+- vendor-chunk-separation
+- dashboard-running-indicators
+- dashboard-run-details-popover
+- run-user-attribution
 active_directives: []
 history:
 - feature: secrets-create-env-endpoint
@@ -1227,6 +1252,376 @@ history:
   phase: released
   timestamp: 2026-03-07T21:36:48.627774Z
   outcome: merged
+- feature: git-green-quotes
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T20:40:40.537158Z
+  outcome: transition
+- feature: git-green-quotes
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T20:40:46.977567Z
+  outcome: transition
+- feature: git-status-api
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T20:40:52.049604Z
+  outcome: transition
+- feature: git-status-api
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T20:40:55.372164Z
+  outcome: transition
+- feature: git-status-chip
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T20:41:25.489700Z
+  outcome: transition
+- feature: git-status-chip
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T20:41:29.068604Z
+  outcome: transition
+- feature: git-green-quotes
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T20:42:53.806903Z
+  outcome: transition
+- feature: git-status-chip
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T20:43:00.527843Z
+  outcome: transition
+- feature: git-status-api
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-07T20:43:31.994854Z
+  outcome: transition
+- feature: git-green-quotes
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T20:43:48.313130Z
+  outcome: merged
+- feature: git-status-chip
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T20:43:52.500632Z
+  outcome: merged
+- feature: git-status-api
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T20:44:50.559851Z
+  outcome: merged
+- feature: fix-pondercommittedactionshouldlinktomilestone
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-07T23:49:12.510947Z
+  outcome: transition
+- feature: fix-pondercommittedactionshouldlinktomilestone
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-07T23:49:12.519202Z
+  outcome: transition
+- feature: fix-pondercommittedactionshouldlinktomilestone
+  action: merge
+  phase: released
+  timestamp: 2026-03-07T23:50:37.842425Z
+  outcome: merged
+- feature: fix-removeunusedstartrundestructureponderpage
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:00:36.202380Z
+  outcome: transition
+- feature: fix-removeunusedstartrundestructureponderpage
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:00:36.215743Z
+  outcome: transition
+- feature: fix-removeunusedstartrundestructureponderpage
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:01:11.711764Z
+  outcome: transition
+- feature: fix-removeunusedstartrundestructureponderpage
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:01:36.589647Z
+  outcome: merged
+- feature: fix-pondercommittedmilestonelinkwrongroute
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:07:05.461756Z
+  outcome: transition
+- feature: fix-pondercommittedmilestonelinkwrongroute
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:07:05.470954Z
+  outcome: transition
+- feature: fix-pondercommittedmilestonelinkwrongroute
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:07:22.183821Z
+  outcome: transition
+- feature: fix-pondercommittedmilestonelinkwrongroute
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:07:52.694528Z
+  outcome: merged
+- feature: vendor-chunk-separation
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:11:32.408033Z
+  outcome: transition
+- feature: vendor-chunk-separation
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:11:37.940119Z
+  outcome: transition
+- feature: lazy-route-splitting
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:11:45.048317Z
+  outcome: transition
+- feature: lazy-route-splitting
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:11:49.867458Z
+  outcome: transition
+- feature: iterate-feature-button
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:12:20.289699Z
+  outcome: transition
+- feature: iterate-feature-button
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:12:25.408904Z
+  outcome: transition
+- feature: iterate-slug-utility
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:12:28.077073Z
+  outcome: transition
+- feature: iterate-slug-utility
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:12:32.464736Z
+  outcome: transition
+- feature: git-status-directory-counts
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:12:59.482749Z
+  outcome: transition
+- feature: git-status-directory-counts
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:04.597020Z
+  outcome: transition
+- feature: git-files-api
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:13:10.367547Z
+  outcome: transition
+- feature: vendor-chunk-separation
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:13:13.243152Z
+  outcome: transition
+- feature: git-files-api
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:13.854437Z
+  outcome: transition
+- feature: iterate-milestone-button
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:13:20.607678Z
+  outcome: transition
+- feature: git-log-api
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:13:20.793030Z
+  outcome: transition
+- feature: git-log-api
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:23.908067Z
+  outcome: transition
+- feature: iterate-milestone-button
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:25.082374Z
+  outcome: transition
+- feature: lazy-route-splitting
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:13:27.747906Z
+  outcome: transition
+- feature: git-diff-api
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:13:34.910096Z
+  outcome: transition
+- feature: git-diff-api
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:39.277916Z
+  outcome: transition
+- feature: vendor-chunk-separation
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:13:43.477735Z
+  outcome: merged
+- feature: git-page-shell
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:13:51.672992Z
+  outcome: transition
+- feature: git-commit-agent
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:13:53.722546Z
+  outcome: transition
+- feature: iterate-slug-utility
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:13:55.526626Z
+  outcome: transition
+- feature: git-page-shell
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:56.815027Z
+  outcome: transition
+- feature: git-commit-agent
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:13:57.419873Z
+  outcome: transition
+- feature: git-details-hover-tile
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:14:02.420184Z
+  outcome: transition
+- feature: git-details-hover-tile
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:14:04.088445Z
+  outcome: transition
+- feature: git-commit-diff
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:14:08.433014Z
+  outcome: transition
+- feature: git-commit-diff
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:14:16.703583Z
+  outcome: transition
+- feature: iterate-feature-button
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:14:20.093466Z
+  outcome: transition
+- feature: lazy-route-splitting
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:14:21.872490Z
+  outcome: merged
+- feature: git-history-tab
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:14:40.231093Z
+  outcome: transition
+- feature: iterate-slug-utility
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:14:44.294585Z
+  outcome: merged
+- feature: git-history-tab
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:14:45.553945Z
+  outcome: transition
+- feature: git-diff-viewer-ui
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:15:07.282460Z
+  outcome: transition
+- feature: iterate-milestone-button
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:15:07.779555Z
+  outcome: transition
+- feature: iterate-feature-button
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:15:07.845143Z
+  outcome: merged
+- feature: git-diff-viewer-ui
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:15:12.911480Z
+  outcome: transition
+- feature: git-file-browser-ui
+  action: implement_task
+  phase: ready
+  timestamp: 2026-03-08T00:15:14.832870Z
+  outcome: transition
+- feature: git-file-browser-ui
+  action: implement_task
+  phase: implementation
+  timestamp: 2026-03-08T00:15:17.494303Z
+  outcome: transition
+- feature: git-details-hover-tile
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:15:57.072748Z
+  outcome: transition
+- feature: iterate-milestone-button
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:15:58.441853Z
+  outcome: merged
+- feature: git-page-shell
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:15:58.491978Z
+  outcome: transition
+- feature: git-page-shell
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:16:45.217794Z
+  outcome: merged
+- feature: git-details-hover-tile
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:16:58.945326Z
+  outcome: merged
+- feature: git-file-browser-ui
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:18:14.348943Z
+  outcome: transition
+- feature: git-history-tab
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:18:16.248774Z
+  outcome: transition
+- feature: git-diff-api
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:18:42.827001Z
+  outcome: transition
+- feature: git-diff-viewer-ui
+  action: implement_task
+  phase: audit
+  timestamp: 2026-03-08T00:18:47.057246Z
+  outcome: transition
+- feature: git-history-tab
+  action: merge
+  phase: released
+  timestamp: 2026-03-08T00:19:10.956743Z
+  outcome: merged
 blocked: []
 milestones:
 - artifact-viewer-v1
@@ -1298,6 +1693,14 @@ milestones:
 - v50-ui-title
 - v51-tunnel-discovery
 - v51-workspace-empty-states
+- git-status-indicator
+- git-file-browser
+- git-diff-viewer
+- git-commit-history
+- git-status-indicator-v2
+- iterative-ponder
+- frontend-bundle-splitting
+- dashboard-dev-info
 active_ponders:
 - a2a-auth-interactions
 - ai-conceptual-merge
@@ -1320,4 +1723,5 @@ active_ponders:
 - user-workspaces
 - when-uats-fail-we-should-have-multiple-p
 - workspace-layout-improvements
-last_updated: 2026-03-07T21:36:48.627775Z
+- improve-new-user-evolve-messaging
+last_updated: 2026-03-08T00:19:10.956747Z

@@ -140,6 +140,10 @@ pub async fn sse_events(State(app): State<AppState>) -> impl axum::response::Int
             let data = serde_json::json!({ "type": "advisory_run_stopped" }).to_string();
             Some(Ok(Event::default().event("advisory").data(data)))
         }
+        Ok(SseMessage::GitCommitCompleted) => {
+            let data = serde_json::json!({ "type": "GitCommitCompleted" }).to_string();
+            Some(Ok(Event::default().event("update").data(data)))
+        }
         Ok(SseMessage::ToolEvolveCompleted { name }) => {
             let data =
                 serde_json::json!({ "type": "tool_evolve_completed", "name": name }).to_string();

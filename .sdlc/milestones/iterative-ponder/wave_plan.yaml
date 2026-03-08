@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: iterate-feature-button
+    title: Iterate button on FeatureDetail — launch versioned ponder from released features
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: iterate-milestone-button
+    title: Iterate button on ReleasedPanel — launch versioned ponder from shipped milestones
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: iterate-slug-utility
+    title: nextIterationSlug utility — versioned slug generation with collision avoidance
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

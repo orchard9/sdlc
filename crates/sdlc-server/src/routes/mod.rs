@@ -14,6 +14,7 @@ pub mod diagnose;
 pub mod escalations;
 pub mod events;
 pub mod features;
+pub mod git;
 pub mod feedback;
 pub mod hub;
 pub mod init;

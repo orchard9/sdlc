@@ -252,6 +252,7 @@ impl IntoResponse for AppError {
                     StatusCode::BAD_REQUEST
                 }
                 SdlcError::PonderMergeError(_) => StatusCode::UNPROCESSABLE_ENTITY,
+                SdlcError::Other(_) => StatusCode::INTERNAL_SERVER_ERROR,
             }
         } else {
             StatusCode::INTERNAL_SERVER_ERROR

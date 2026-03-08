@@ -1,0 +1,128 @@
+slug: git-green-quotes
+title: Weekly rotating quote system for clean git state
+description: Weekly rotating motivational quote system displayed when git status is clean (all-green). Quotes are embedded in the frontend bundle and rotate on a 7-day cycle.
+phase: released
+created_at: 2026-03-07T20:25:38.080193Z
+updated_at: 2026-03-07T20:43:48.311081Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-green-quotes/spec.md
+  created_at: 2026-03-07T20:39:12.045793Z
+  approved_at: 2026-03-07T20:39:19.995214Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-green-quotes/design.md
+  created_at: 2026-03-07T20:40:00.033215Z
+  approved_at: 2026-03-07T20:40:05.756280Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-green-quotes/tasks.md
+  created_at: 2026-03-07T20:40:16.486632Z
+  approved_at: 2026-03-07T20:40:16.496640Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-green-quotes/qa-plan.md
+  created_at: 2026-03-07T20:40:34.745254Z
+  approved_at: 2026-03-07T20:40:34.754754Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/git-green-quotes/review.md
+  created_at: 2026-03-07T20:42:42.813439Z
+  approved_at: 2026-03-07T20:42:48.484737Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/git-green-quotes/audit.md
+  created_at: 2026-03-07T20:43:08.480945Z
+  approved_at: 2026-03-07T20:43:15.390283Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/git-green-quotes/qa-results.md
+  created_at: 2026-03-07T20:43:37.604598Z
+  approved_at: 2026-03-07T20:43:43.424146Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create quote corpus module
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:40:20.625136Z
+  started_at: 2026-03-07T20:40:58.707608Z
+  completed_at: 2026-03-07T20:41:17.203816Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create GitGreenQuote component
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:40:20.633002Z
+  started_at: 2026-03-07T20:41:27.311470Z
+  completed_at: 2026-03-07T20:41:37.545581Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Unit tests for quote logic and component
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:40:20.639174Z
+  started_at: 2026-03-07T20:41:43.243560Z
+  completed_at: 2026-03-07T20:42:21.246394Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.080193Z
+  exited: 2026-03-07T20:39:19.998421Z
+- phase: specified
+  entered: 2026-03-07T20:39:19.998421Z
+  exited: 2026-03-07T20:40:34.756784Z
+- phase: planned
+  entered: 2026-03-07T20:40:34.756784Z
+  exited: 2026-03-07T20:40:40.534959Z
+- phase: ready
+  entered: 2026-03-07T20:40:40.534959Z
+  exited: 2026-03-07T20:40:46.975172Z
+- phase: implementation
+  entered: 2026-03-07T20:40:46.975172Z
+  exited: 2026-03-07T20:42:48.491723Z
+- phase: review
+  entered: 2026-03-07T20:42:48.491723Z
+  exited: 2026-03-07T20:42:53.804903Z
+- phase: audit
+  entered: 2026-03-07T20:42:53.804903Z
+  exited: 2026-03-07T20:43:15.398955Z
+- phase: qa
+  entered: 2026-03-07T20:43:15.398955Z
+  exited: 2026-03-07T20:43:43.433676Z
+- phase: merge
+  entered: 2026-03-07T20:43:43.433676Z
+  exited: 2026-03-07T20:43:48.311081Z
+- phase: released
+  entered: 2026-03-07T20:43:48.311081Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

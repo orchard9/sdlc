@@ -1,0 +1,8 @@
+slug: git-diff-viewer
+title: Git Page — Diff Viewer with colorblind-safe palette
+features:
+- git-diff-api
+- git-diff-viewer-ui
+created_at: 2026-03-07T20:25:29.428139Z
+updated_at: 2026-03-07T20:25:42.972811Z
+schema_version: 1

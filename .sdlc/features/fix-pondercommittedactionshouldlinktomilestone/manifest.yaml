@@ -1,0 +1,108 @@
+slug: fix-pondercommittedactionshouldlinktomilestone
+title: Fix Pondercommittedactionshouldlinktomilestone
+description: |-
+  Root cause: The PonderPage.tsx committed-state action (lines 509-533) unconditionally renders a 'Prepare' button for the first committed milestone, without checking whether preparation is the appropriate next step — the correct action for a committed ponder is to navigate to the milestone.
+
+  Problem: On the ponder detail page (/ponder/iterative-ponder), when a ponder has status 'committed' and has committed milestones, the action button still shows 'Prepare' (to re-run milestone preparation). Since the ponder's job is done once committed, the action should instead direct the user to the milestone — e.g. 'View Milestone' or 'Go to Milestone' — rather than offering to prepare it again.
+
+  Original report:
+  on this page /ponder/iterative-ponder
+  the "prepare" button is active, but the ponder session has already been prepared and there is now a milestone for it. fix the status of the ponder and change the action item in this case to go edit the milestone, however that is best said in sdlc talk.
+phase: released
+created_at: 2026-03-07T23:47:32.591762Z
+updated_at: 2026-03-07T23:50:37.836568Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/spec.md
+  created_at: 2026-03-07T23:48:16.720991Z
+  approved_at: 2026-03-07T23:48:19.478208Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/design.md
+  created_at: 2026-03-07T23:48:35.629406Z
+  approved_at: 2026-03-07T23:48:38.638912Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/tasks.md
+  created_at: 2026-03-07T23:48:48.537910Z
+  approved_at: 2026-03-07T23:48:51.017946Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/qa-plan.md
+  created_at: 2026-03-07T23:48:59.250911Z
+  approved_at: 2026-03-07T23:49:01.744842Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/review.md
+  created_at: 2026-03-07T23:49:55.893318Z
+  approved_at: 2026-03-07T23:50:00.352757Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/audit.md
+  created_at: 2026-03-07T23:50:12.252460Z
+  approved_at: 2026-03-07T23:50:15.083200Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/fix-pondercommittedactionshouldlinktomilestone/qa-results.md
+  created_at: 2026-03-07T23:50:26.487588Z
+  approved_at: 2026-03-07T23:50:29.053695Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T23:47:32.591762Z
+  exited: 2026-03-07T23:48:19.485742Z
+- phase: specified
+  entered: 2026-03-07T23:48:19.485742Z
+  exited: 2026-03-07T23:49:01.751490Z
+- phase: planned
+  entered: 2026-03-07T23:49:01.751490Z
+  exited: 2026-03-07T23:49:12.509110Z
+- phase: ready
+  entered: 2026-03-07T23:49:12.509110Z
+  exited: 2026-03-07T23:49:12.517724Z
+- phase: implementation
+  entered: 2026-03-07T23:49:12.517724Z
+  exited: 2026-03-07T23:50:00.362056Z
+- phase: review
+  entered: 2026-03-07T23:50:00.362056Z
+  exited: 2026-03-07T23:50:12.257637Z
+- phase: audit
+  entered: 2026-03-07T23:50:12.257637Z
+  exited: 2026-03-07T23:50:15.091873Z
+- phase: qa
+  entered: 2026-03-07T23:50:15.091873Z
+  exited: 2026-03-07T23:50:29.061325Z
+- phase: merge
+  entered: 2026-03-07T23:50:29.061325Z
+  exited: 2026-03-07T23:50:37.836568Z
+- phase: released
+  entered: 2026-03-07T23:50:37.836568Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iterate Milestone Button - Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0a; color: #e5e5e5; padding: 24px; }
+  nav { display: flex; gap: 12px; margin-bottom: 24px; }
+  nav a { color: #a3a3a3; text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 6px; border: 1px solid #262626; }
+  nav a:hover, nav a.active { color: #e5e5e5; border-color: #525252; background: #171717; }
+
+  .panel { background: rgba(0, 80, 30, 0.15); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 8px; padding: 16px; max-width: 600px; }
+  .header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .check-icon { width: 20px; height: 20px; color: #4ade80; }
+  .title { font-size: 14px; color: #4ade80; font-weight: 500; }
+  .subtitle { font-size: 12px; color: #a3a3a3; }
+
+  .stats { display: flex; gap: 12px; font-size: 12px; color: #737373; margin-bottom: 12px; }
+  .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 6px; font-size: 10px; font-weight: 500; background: rgba(16, 185, 129, 0.5); color: #a7f3d0; }
+
+  .actions { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .btn { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 4px; font-size: 11px; border: 1px solid; cursor: pointer; transition: background 0.15s; }
+  .btn-uat { border-color: rgba(34, 197, 94, 0.2); background: rgba(34, 197, 94, 0.12); color: #4ade80; }
+  .btn-uat:hover { background: rgba(34, 197, 94, 0.2); }
+  .btn-iterate { border-color: #333; background: #1a1a1a; color: #a3a3a3; }
+  .btn-iterate:hover { background: #262626; color: #e5e5e5; }
+  .link { font-size: 11px; color: #737373; text-decoration: underline; cursor: pointer; }
+  .link:hover { color: #e5e5e5; }
+
+  .separator { border-top: 1px solid rgba(34, 197, 94, 0.1); margin: 12px 0; }
+  .next-link { font-size: 12px; color: #4ade80; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+
+  /* Modal */
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: flex-start; justify-content: center; padding-top: 12vh; z-index: 50; }
+  .modal-card { background: #171717; border: 1px solid #262626; border-radius: 12px; width: 100%; max-width: 480px; box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
+  .modal-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid #262626; }
+  .modal-header span { font-size: 14px; font-weight: 600; }
+  .modal-body { padding: 20px; }
+  .modal-body label { display: block; font-size: 11px; color: #737373; font-weight: 500; margin-bottom: 4px; }
+  .modal-body input, .modal-body textarea { width: 100%; padding: 8px 12px; font-size: 13px; background: #0d0d0d; border: 1px solid #262626; border-radius: 8px; color: #e5e5e5; outline: none; margin-bottom: 12px; }
+  .modal-body textarea { resize: none; height: 100px; font-family: inherit; }
+  .modal-body .slug-preview { font-family: monospace; font-size: 11px; color: #737373; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 12px; padding: 16px 20px; border-top: 1px solid #262626; }
+  .modal-footer .btn-cancel { background: none; border: none; color: #737373; font-size: 13px; cursor: pointer; }
+  .modal-footer .btn-create { background: #e5e5e5; color: #0a0a0a; border: none; padding: 6px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; }
+
+  section { display: none; }
+  section:target, section.default { display: block; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#screen-default" class="active">Default State</a>
+  <a href="#screen-modal">Modal Open</a>
+</nav>
+
+<section id="screen-default" class="default">
+  <h3 style="font-size: 13px; color: #737373; margin-bottom: 12px;">ReleasedPanel with Iterate button</h3>
+  <div class="panel">
+    <div class="header">
+      <svg class="check-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div>
+        <div class="title">Milestone Released</div>
+        <div class="subtitle">Git Status Indicator</div>
+      </div>
+    </div>
+    <div class="stats">
+      <span>5 features</span>
+      <span>2 UAT runs</span>
+      <span style="display: flex; align-items: center; gap: 6px;">Latest: <span class="badge">PASS</span></span>
+      <span>Mar 7, 2026</span>
+    </div>
+    <div class="actions">
+      <button class="btn btn-uat">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Re-run UAT
+      </button>
+      <button class="btn btn-iterate">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Iterate
+      </button>
+      <span class="link">Submit manually</span>
+    </div>
+    <div class="separator"></div>
+    <span class="next-link">
+      Next milestone: Frontend Bundle Splitting
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </span>
+  </div>
+</section>
+
+<section id="screen-modal">
+  <h3 style="font-size: 13px; color: #737373; margin-bottom: 12px;">NewIdeaModal pre-populated from milestone</h3>
+  <div class="modal-backdrop" style="position: relative; inset: auto; padding-top: 0; min-height: 500px; border-radius: 12px;">
+    <div class="modal-card" style="margin-top: 24px;">
+      <div class="modal-header">
+        <span>New Idea</span>
+        <span style="cursor: pointer; color: #737373;">x</span>
+      </div>
+      <div class="modal-body">
+        <label>Title</label>
+        <input type="text" value="Git Status Indicator" readonly />
+        <label>Slug</label>
+        <input type="text" value="git-status-indicator-v2" class="slug-preview" readonly />
+        <label>Description</label>
+        <textarea readonly>Iteration of milestone: Git Status Indicator (git-status-indicator)
+
+Original vision:
+Show real-time git status in the sidebar so users always know the state of their working tree.
+
+What worked well, what to improve, and what to explore next:</textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel">Cancel</button>
+        <button class="btn-create">Create Idea</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Show default section when no hash
+  if (!location.hash) document.querySelector('.default').style.display = 'block';
+  // Update nav active state
+  document.querySelectorAll('nav a').forEach(a => {
+    a.addEventListener('click', () => {
+      document.querySelectorAll('nav a').forEach(x => x.classList.remove('active'));
+      a.classList.add('active');
+      document.querySelector('.default')?.classList.remove('default');
+    });
+  });
+</script>
+</body>
+</html>

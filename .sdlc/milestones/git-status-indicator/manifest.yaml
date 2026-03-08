@@ -1,0 +1,10 @@
+slug: git-status-indicator
+title: Git Status Indicator — glanceable repo health from every screen
+features:
+- git-status-api
+- git-status-chip
+- git-green-quotes
+created_at: 2026-03-07T20:25:28.114530Z
+updated_at: 2026-03-07T21:43:49.140460Z
+released_at: 2026-03-07T21:43:49.140460Z
+schema_version: 1

@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: dashboard-run-details-popover
+    title: Run Details Popover — hover to see run type, duration, turns, and cost
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: dashboard-running-indicators
+    title: Running Indicators — pulsing dot on FeatureCard and MilestoneDigestRow for active agent runs
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: run-user-attribution
+    title: Run User Attribution — created_by field on RunRecord with auth/git identity
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

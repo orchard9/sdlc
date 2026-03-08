@@ -1,0 +1,15 @@
+id: "20260307-120000-kxm"
+milestone_slug: git-status-indicator
+started_at: "2026-03-07T21:36:00Z"
+completed_at: "2026-03-07T21:42:00Z"
+verdict: pass
+tests_total: 7
+tests_passed: 7
+tests_failed: 0
+tasks_created: 0
+summary_path: .sdlc/milestones/git-status-indicator/uat-runs/20260307-120000-kxm/summary.md
+screenshot_paths:
+  - .sdlc/milestones/git-status-indicator/uat-runs/20260307-120000-kxm/01-api-git-status.png
+  - .sdlc/milestones/git-status-indicator/uat-runs/20260307-120000-kxm/02-sidebar-git-status-chip.png
+  - .sdlc/milestones/git-status-indicator/uat-runs/20260307-120000-kxm/03-features-page-chip-persists.png
+  - .sdlc/milestones/git-status-indicator/uat-runs/20260307-120000-kxm/04-collapsed-sidebar-dot.png

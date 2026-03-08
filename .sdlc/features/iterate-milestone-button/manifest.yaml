@@ -1,0 +1,121 @@
+slug: iterate-milestone-button
+title: Iterate button on ReleasedPanel — launch versioned ponder from shipped milestones
+description: Adds an 'Iterate' button to the ReleasedPanel in the milestone view. Clicking it launches a new versioned ponder session pre-seeded with context from the shipped milestone.
+phase: released
+created_at: 2026-03-07T23:43:35.583409Z
+updated_at: 2026-03-08T00:15:58.440439Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/iterate-milestone-button/spec.md
+  created_at: 2026-03-08T00:11:40.799310Z
+  approved_at: 2026-03-08T00:11:44.985518Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/iterate-milestone-button/design.md
+  created_at: 2026-03-08T00:12:43.989938Z
+  approved_at: 2026-03-08T00:12:44.000695Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/iterate-milestone-button/tasks.md
+  created_at: 2026-03-08T00:12:57.051331Z
+  approved_at: 2026-03-08T00:12:57.059813Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/iterate-milestone-button/qa-plan.md
+  created_at: 2026-03-08T00:13:15.534950Z
+  approved_at: 2026-03-08T00:13:15.545973Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/iterate-milestone-button/review.md
+  created_at: 2026-03-08T00:15:00.052768Z
+  approved_at: 2026-03-08T00:15:00.060195Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/iterate-milestone-button/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:15:22.855773Z
+  waive_reason: Pure frontend UI addition — new button opens existing modal with pre-populated data. No new API endpoints, no auth changes, no user input handling beyond existing NewIdeaModal validation. No security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/iterate-milestone-button/qa-results.md
+  created_at: 2026-03-08T00:15:54.377822Z
+  approved_at: 2026-03-08T00:15:54.388509Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add Iterate button and modal wiring to ReleasedPanel
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:00.045081Z
+  started_at: 2026-03-08T00:14:28.796028Z
+  completed_at: 2026-03-08T00:14:28.803131Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Verify integration with iterate-slug-utility
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:00.051180Z
+  started_at: 2026-03-08T00:14:40.147182Z
+  completed_at: 2026-03-08T00:14:40.156790Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T23:43:35.583409Z
+  exited: 2026-03-08T00:11:44.988248Z
+- phase: specified
+  entered: 2026-03-08T00:11:44.988248Z
+  exited: 2026-03-08T00:13:15.547691Z
+- phase: planned
+  entered: 2026-03-08T00:13:15.547691Z
+  exited: 2026-03-08T00:13:20.605043Z
+- phase: ready
+  entered: 2026-03-08T00:13:20.605043Z
+  exited: 2026-03-08T00:13:25.080159Z
+- phase: implementation
+  entered: 2026-03-08T00:13:25.080159Z
+  exited: 2026-03-08T00:15:00.066040Z
+- phase: review
+  entered: 2026-03-08T00:15:00.066040Z
+  exited: 2026-03-08T00:15:07.778068Z
+- phase: audit
+  entered: 2026-03-08T00:15:07.778068Z
+  exited: 2026-03-08T00:15:22.857366Z
+- phase: qa
+  entered: 2026-03-08T00:15:22.857366Z
+  exited: 2026-03-08T00:15:54.395643Z
+- phase: merge
+  entered: 2026-03-08T00:15:54.395643Z
+  exited: 2026-03-08T00:15:58.440439Z
+- phase: released
+  entered: 2026-03-08T00:15:58.440439Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

@@ -1,0 +1,71 @@
+/*
+ * DiffViewer theme overrides — colorblind-safe blue/amber palette.
+ *
+ * Overrides @git-diff-view/react's default red/green with:
+ *   Additions: blue-500 (#3b82f6)
+ *   Deletions: amber-500 (#f59e0b)
+ *
+ * This palette avoids red/green, making diffs accessible to users
+ * with protanopia, deuteranopia, and other color vision deficiencies.
+ */
+
+/* Override dark theme variables (our only theme) */
+.diff-viewer .diff-tailwindcss-wrapper[data-theme="dark"] .diff-style-root,
+.diff-viewer .diff-tailwindcss-wrapper .diff-style-root {
+  /* Additions — blue tint */
+  --diff-add-content--: rgba(59, 130, 246, 0.08);
+  --diff-add-lineNumber--: rgba(59, 130, 246, 0.15);
+  --diff-add-content-highlight--: rgba(59, 130, 246, 0.2);
+
+  /* Deletions — amber tint */
+  --diff-del-content--: rgba(245, 158, 11, 0.08);
+  --diff-del-lineNumber--: rgba(245, 158, 11, 0.15);
+  --diff-del-content-highlight--: rgba(245, 158, 11, 0.2);
+
+  /* Background — match our card/muted tokens */
+  --diff-border--: hsl(var(--border));
+  --diff-plain-content--: hsl(var(--card));
+  --diff-expand-content--: hsl(var(--muted));
+  --diff-plain-lineNumber--: hsl(var(--muted));
+  --diff-expand-lineNumber--: hsl(var(--muted));
+  --diff-plain-lineNumber-color--: hsl(var(--muted-foreground));
+  --diff-expand-lineNumber-color--: hsl(var(--muted-foreground));
+  --diff-empty-content--: hsl(var(--muted));
+
+  /* Hunk headers — subtle blue */
+  --diff-hunk-content--: rgba(59, 130, 246, 0.04);
+  --diff-hunk-lineNumber--: rgba(59, 130, 246, 0.08);
+  --diff-hunk-lineNumber-hover--: #3b82f6;
+  --diff-hunk-content-color--: hsl(var(--muted-foreground));
+
+  /* Widget */
+  --diff-add-widget--: #3b82f6;
+  --diff-add-widget-color--: #ffffff;
+
+  color: hsl(var(--foreground));
+}
+
+/* Ensure the wrapper fills its container */
+.diff-viewer .diff-tailwindcss-wrapper {
+  font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+}
+
+/* Scrollbar styling for the diff content area */
+.diff-viewer .diff-tailwindcss-wrapper ::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+.diff-viewer .diff-tailwindcss-wrapper ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diff-viewer .diff-tailwindcss-wrapper ::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+.diff-viewer .diff-tailwindcss-wrapper ::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}

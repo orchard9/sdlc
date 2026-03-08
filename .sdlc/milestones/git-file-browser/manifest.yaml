@@ -1,0 +1,9 @@
+slug: git-file-browser
+title: Git Page — File Browser with status, filters, and tree/flat toggle
+features:
+- git-files-api
+- git-page-shell
+- git-file-browser-ui
+created_at: 2026-03-07T20:25:28.538351Z
+updated_at: 2026-03-07T20:25:42.962960Z
+schema_version: 1

@@ -148,6 +148,53 @@ pub fn query_events(
     Ok(filtered)
 }
 
+/// Reassign a range of consecutive event IDs by appending a suffix.
+///
+/// Starting from `from_id` (e.g. `"ev-0623"`), rewrites `count` consecutive
+/// IDs so that `ev-0623` becomes `ev-0623{suffix}`, `ev-0624` becomes
+/// `ev-0624{suffix}`, etc.
+///
+/// Returns the number of events actually reassigned (may be less than `count`
+/// if some IDs don't exist in the log).
+pub fn reassign_ids(root: &Path, from_id: &str, suffix: &str, count: usize) -> Result<usize> {
+    // Parse the starting numeric portion from from_id (e.g. "ev-0623" → 623)
+    let start_num: usize = from_id
+        .strip_prefix("ev-")
+        .ok_or_else(|| crate::error::SdlcError::Other(format!(
+            "Invalid event ID format: '{from_id}' (expected ev-NNNN)"
+        )))?
+        .parse()
+        .map_err(|_| crate::error::SdlcError::Other(format!(
+            "Invalid event ID format: '{from_id}' (expected ev-NNNN)"
+        )))?;
+
+    // Build the old→new ID mapping
+    let mapping: std::collections::HashMap<String, String> = (0..count)
+        .map(|i| {
+            let n = start_num + i;
+            let old = format!("ev-{n:04}");
+            let new = format!("ev-{n:04}{suffix}");
+            (old, new)
+        })
+        .collect();
+
+    let mut events = load_events(root)?;
+    let mut reassigned = 0usize;
+    for event in &mut events {
+        if let Some(new_id) = mapping.get(&event.id) {
+            event.id = new_id.clone();
+            reassigned += 1;
+        }
+    }
+
+    if reassigned > 0 {
+        let yaml = serde_yaml::to_string(&events)?;
+        io::atomic_write(&changelog_path(root), yaml.as_bytes())?;
+    }
+
+    Ok(reassigned)
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -252,5 +299,38 @@ mod tests {
         .unwrap();
         assert_eq!(e1.id, "ev-0001");
         assert_eq!(e2.id, "ev-0002");
+    }
+
+    #[test]
+    fn reassign_ids_rewrites_matching_events() {
+        let dir = make_root();
+        for _ in 0..5 {
+            append_event(dir.path(), EventKind::FeatureMerged, None, serde_json::json!({})).unwrap();
+        }
+        // Reassign ev-0002 and ev-0003 with suffix "x"
+        let n = reassign_ids(dir.path(), "ev-0002", "x", 2).unwrap();
+        assert_eq!(n, 2);
+
+        let events = query_events(dir.path(), None, 100).unwrap();
+        assert_eq!(events[0].id, "ev-0001");
+        assert_eq!(events[1].id, "ev-0002x");
+        assert_eq!(events[2].id, "ev-0003x");
+        assert_eq!(events[3].id, "ev-0004");
+        assert_eq!(events[4].id, "ev-0005");
+    }
+
+    #[test]
+    fn reassign_ids_returns_zero_when_no_match() {
+        let dir = make_root();
+        append_event(dir.path(), EventKind::FeatureMerged, None, serde_json::json!({})).unwrap();
+        let n = reassign_ids(dir.path(), "ev-0099", "x", 1).unwrap();
+        assert_eq!(n, 0);
+    }
+
+    #[test]
+    fn reassign_ids_rejects_invalid_prefix() {
+        let dir = make_root();
+        let result = reassign_ids(dir.path(), "bad-id", "x", 1);
+        assert!(result.is_err());
     }
 }

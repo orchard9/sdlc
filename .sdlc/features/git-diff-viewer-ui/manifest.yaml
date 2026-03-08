@@ -1,0 +1,130 @@
+slug: git-diff-viewer-ui
+title: Responsive diff viewer with @git-diff-view/react and blue/amber palette
+phase: qa
+created_at: 2026-03-07T20:25:38.112673Z
+updated_at: 2026-03-08T00:19:07.787966Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-diff-viewer-ui/spec.md
+  created_at: 2026-03-08T00:12:33.901309Z
+  approved_at: 2026-03-08T00:12:35.772448Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-diff-viewer-ui/design.md
+  created_at: 2026-03-08T00:14:05.342152Z
+  approved_at: 2026-03-08T00:14:05.351776Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-diff-viewer-ui/tasks.md
+  created_at: 2026-03-08T00:14:32.941617Z
+  approved_at: 2026-03-08T00:14:32.951068Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-diff-viewer-ui/qa-plan.md
+  created_at: 2026-03-08T00:14:52.762877Z
+  approved_at: 2026-03-08T00:14:52.770141Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/git-diff-viewer-ui/review.md
+  created_at: 2026-03-08T00:18:41.842137Z
+  approved_at: 2026-03-08T00:18:41.849925Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/git-diff-viewer-ui/audit.md
+  created_at: 2026-03-08T00:19:07.761508Z
+  approved_at: 2026-03-08T00:19:07.769467Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/git-diff-viewer-ui/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Install @git-diff-view/react dependency
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:37.288575Z
+  started_at: 2026-03-08T00:15:17.761516Z
+  completed_at: 2026-03-08T00:15:24.754500Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Implement DiffViewer component with useDiff hook
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:37.295916Z
+  started_at: 2026-03-08T00:15:30.656163Z
+  completed_at: 2026-03-08T00:17:18.061764Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Apply blue/amber colorblind-safe theme
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:37.301827Z
+  started_at: 2026-03-08T00:17:25.139257Z
+  completed_at: 2026-03-08T00:17:45.816907Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add unified/split view toggle with responsive collapse
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:37.307647Z
+  started_at: 2026-03-08T00:17:52.803416Z
+  completed_at: 2026-03-08T00:18:11.877556Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.112673Z
+  exited: 2026-03-08T00:12:35.774127Z
+- phase: specified
+  entered: 2026-03-08T00:12:35.774127Z
+  exited: 2026-03-08T00:14:52.771683Z
+- phase: planned
+  entered: 2026-03-08T00:14:52.771683Z
+  exited: 2026-03-08T00:15:07.280927Z
+- phase: ready
+  entered: 2026-03-08T00:15:07.280927Z
+  exited: 2026-03-08T00:15:12.909447Z
+- phase: implementation
+  entered: 2026-03-08T00:15:12.909447Z
+  exited: 2026-03-08T00:18:41.856331Z
+- phase: review
+  entered: 2026-03-08T00:18:41.856331Z
+  exited: 2026-03-08T00:18:47.055799Z
+- phase: audit
+  entered: 2026-03-08T00:18:47.055799Z
+  exited: 2026-03-08T00:19:07.787966Z
+- phase: qa
+  entered: 2026-03-08T00:19:07.787966Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

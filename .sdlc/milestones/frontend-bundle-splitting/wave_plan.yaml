@@ -1,0 +1,16 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: lazy-route-splitting
+    title: Lazy Route Splitting — React.lazy() for all 25 page imports
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: vendor-chunk-separation
+    title: Vendor Chunk Separation — manualChunks for React, Markdown, and Mermaid
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false
