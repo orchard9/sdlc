@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git File Browser - Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #09090b; color: #fafafa; }
+
+  nav { position: fixed; top: 0; left: 0; right: 0; background: #18181b; border-bottom: 1px solid #27272a; padding: 8px 16px; display: flex; gap: 8px; z-index: 100; }
+  nav a { color: #a1a1aa; text-decoration: none; font-size: 13px; padding: 6px 12px; border-radius: 6px; cursor: pointer; }
+  nav a:hover, nav a.active { background: #27272a; color: #fafafa; }
+
+  .screen { display: none; padding: 72px 24px 24px; max-width: 380px; }
+  .screen.active { display: block; }
+
+  .panel { background: #18181b; border: 1px solid #27272a; border-radius: 8px; overflow: hidden; }
+
+  .panel-header { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid #27272a; }
+  .panel-title { font-size: 13px; font-weight: 600; color: #fafafa; }
+  .count-badge { font-size: 11px; background: #27272a; color: #a1a1aa; padding: 1px 6px; border-radius: 10px; }
+
+  .filters { display: flex; gap: 4px; margin-left: auto; }
+  .filter-btn { font-size: 11px; padding: 3px 8px; border-radius: 4px; border: 1px solid #27272a; background: transparent; color: #71717a; cursor: pointer; }
+  .filter-btn:hover { color: #a1a1aa; border-color: #3f3f46; }
+  .filter-btn.active { background: #27272a; color: #fafafa; border-color: #3f3f46; }
+
+  .view-toggle { background: transparent; border: 1px solid #27272a; color: #71717a; padding: 3px 6px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+  .view-toggle:hover { color: #a1a1aa; border-color: #3f3f46; }
+
+  .file-list { max-height: 400px; overflow-y: auto; }
+
+  .file-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+  .file-row:hover { background: rgba(39,39,42,0.3); }
+  .file-row.selected { background: #27272a; }
+  .file-row.cursored { background: rgba(39,39,42,0.5); outline: 1px solid #3f3f46; outline-offset: -1px; }
+
+  .status-badge { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; font-weight: 600; width: 16px; text-align: center; flex-shrink: 0; }
+  .status-M { color: #f59e0b; }
+  .status-A { color: #10b981; }
+  .status-D { color: #ef4444; }
+  .status-R { color: #3b82f6; }
+  .status-U { color: #71717a; }
+
+  .file-path { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #d4d4d8; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .staged-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; flex-shrink: 0; }
+
+  /* Tree-specific */
+  .tree-dir { display: flex; align-items: center; gap: 6px; padding: 5px 12px; cursor: pointer; font-size: 13px; color: #a1a1aa; }
+  .tree-dir:hover { background: rgba(39,39,42,0.3); }
+  .chevron { font-size: 10px; width: 12px; color: #71717a; }
+  .dir-name { font-size: 13px; font-weight: 500; }
+  .dir-count { font-size: 11px; color: #52525b; margin-left: auto; }
+
+  .tree-file { padding-left: 28px; }
+  .tree-file-nested { padding-left: 44px; }
+
+  /* Empty state */
+  .empty-state { padding: 40px 20px; text-align: center; color: #52525b; }
+  .empty-icon { font-size: 24px; margin-bottom: 8px; }
+  .empty-text { font-size: 13px; }
+
+  /* Loading skeleton */
+  .skeleton-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px; }
+  .skeleton-badge { width: 16px; height: 16px; border-radius: 3px; background: #27272a; animation: pulse 1.5s infinite; }
+  .skeleton-path { height: 14px; border-radius: 3px; background: #27272a; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+  .kbd { font-size: 10px; background: #27272a; border: 1px solid #3f3f46; border-radius: 3px; padding: 1px 4px; font-family: 'SF Mono', monospace; color: #71717a; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a onclick="showScreen('flat-modified')" class="active" id="nav-flat-modified">Flat + Modified</a>
+  <a onclick="showScreen('flat-all')" id="nav-flat-all">Flat + All</a>
+  <a onclick="showScreen('tree-view')" id="nav-tree-view">Tree View</a>
+  <a onclick="showScreen('staged-filter')" id="nav-staged-filter">Staged</a>
+  <a onclick="showScreen('empty-state')" id="nav-empty-state">Empty</a>
+  <a onclick="showScreen('loading')" id="nav-loading">Loading</a>
+</nav>
+
+<!-- Screen: Flat view with Modified filter (default) -->
+<section id="screen-flat-modified" class="screen active">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Files</span>
+      <span class="count-badge">5</span>
+      <div class="filters">
+        <button class="filter-btn active" title="Modified (m)">M</button>
+        <button class="filter-btn" title="All (a)">All</button>
+        <button class="filter-btn" title="Staged (s)">S</button>
+        <button class="filter-btn" title="Untracked (u)">U</button>
+      </div>
+      <button class="view-toggle" title="Switch to tree view (f)">&#9776;</button>
+    </div>
+    <div class="file-list">
+      <div class="file-row selected">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">crates/sdlc-server/src/lib.rs</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">crates/sdlc-server/src/routes/mod.rs</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">frontend/src/components/layout/Sidebar.tsx</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">frontend/src/pages/PonderPage.tsx</span>
+        <span class="staged-dot" title="Staged"></span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">.sdlc/state.yaml</span>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:12px; font-size:11px; color:#52525b;">
+    Keyboard: <span class="kbd">j</span><span class="kbd">k</span> navigate
+    <span class="kbd">Enter</span> select
+    <span class="kbd">f</span> toggle view
+    <span class="kbd">m</span><span class="kbd">a</span><span class="kbd">s</span><span class="kbd">u</span> filters
+  </p>
+</section>
+
+<!-- Screen: Flat view with All filter -->
+<section id="screen-flat-all" class="screen">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Files</span>
+      <span class="count-badge">8</span>
+      <div class="filters">
+        <button class="filter-btn" title="Modified (m)">M</button>
+        <button class="filter-btn active" title="All (a)">All</button>
+        <button class="filter-btn" title="Staged (s)">S</button>
+        <button class="filter-btn" title="Untracked (u)">U</button>
+      </div>
+      <button class="view-toggle" title="Switch to tree view (f)">&#9776;</button>
+    </div>
+    <div class="file-list">
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">crates/sdlc-server/src/lib.rs</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">crates/sdlc-server/src/routes/mod.rs</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-A">A</span>
+        <span class="file-path">crates/sdlc-server/src/routes/git.rs</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">frontend/src/components/layout/Sidebar.tsx</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-U">?</span>
+        <span class="file-path">frontend/src/components/GitGreenQuote.tsx</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-U">?</span>
+        <span class="file-path">frontend/src/hooks/useGitStatus.ts</span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">frontend/src/pages/PonderPage.tsx</span>
+        <span class="staged-dot" title="Staged"></span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-D">D</span>
+        <span class="file-path">old-config.yaml</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Tree view -->
+<section id="screen-tree-view" class="screen">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Files</span>
+      <span class="count-badge">5</span>
+      <div class="filters">
+        <button class="filter-btn active">M</button>
+        <button class="filter-btn">All</button>
+        <button class="filter-btn">S</button>
+        <button class="filter-btn">U</button>
+      </div>
+      <button class="view-toggle" title="Switch to flat view (f)" style="color:#fafafa; border-color:#3f3f46;">&#9776;</button>
+    </div>
+    <div class="file-list">
+      <div class="tree-dir">
+        <span class="chevron">&#9660;</span>
+        <span class="dir-name">crates/</span>
+        <span class="dir-count">2</span>
+      </div>
+      <div class="tree-dir" style="padding-left: 28px;">
+        <span class="chevron">&#9660;</span>
+        <span class="dir-name">sdlc-server/src/</span>
+        <span class="dir-count">2</span>
+      </div>
+      <div class="file-row tree-file-nested">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">lib.rs</span>
+      </div>
+      <div class="file-row tree-file-nested selected">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">routes/mod.rs</span>
+      </div>
+      <div class="tree-dir">
+        <span class="chevron">&#9660;</span>
+        <span class="dir-name">frontend/src/</span>
+        <span class="dir-count">2</span>
+      </div>
+      <div class="file-row tree-file" style="padding-left: 28px;">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">components/layout/Sidebar.tsx</span>
+      </div>
+      <div class="file-row tree-file" style="padding-left: 28px;">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">pages/PonderPage.tsx</span>
+        <span class="staged-dot" title="Staged"></span>
+      </div>
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">.sdlc/state.yaml</span>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:12px; font-size:11px; color:#52525b;">
+    Tree: <span class="kbd">&#8594;</span> expand <span class="kbd">&#8592;</span> collapse
+  </p>
+</section>
+
+<!-- Screen: Staged filter -->
+<section id="screen-staged-filter" class="screen">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Files</span>
+      <span class="count-badge">1</span>
+      <div class="filters">
+        <button class="filter-btn">M</button>
+        <button class="filter-btn">All</button>
+        <button class="filter-btn active">S</button>
+        <button class="filter-btn">U</button>
+      </div>
+      <button class="view-toggle">&#9776;</button>
+    </div>
+    <div class="file-list">
+      <div class="file-row">
+        <span class="status-badge status-M">M</span>
+        <span class="file-path">frontend/src/pages/PonderPage.tsx</span>
+        <span class="staged-dot" title="Staged"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Empty state -->
+<section id="screen-empty-state" class="screen">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Files</span>
+      <span class="count-badge">0</span>
+      <div class="filters">
+        <button class="filter-btn">M</button>
+        <button class="filter-btn">All</button>
+        <button class="filter-btn active">S</button>
+        <button class="filter-btn">U</button>
+      </div>
+      <button class="view-toggle">&#9776;</button>
+    </div>
+    <div class="empty-state">
+      <div class="empty-icon">&#128230;</div>
+      <div class="empty-text">No staged files</div>
+    </div>
+  </div>
+</section>
+
+<!-- Screen: Loading state -->
+<section id="screen-loading" class="screen">
+  <div class="panel">
+    <div class="panel-header">
+      <span class="panel-title">Files</span>
+      <div class="filters">
+        <button class="filter-btn active">M</button>
+        <button class="filter-btn">All</button>
+        <button class="filter-btn">S</button>
+        <button class="filter-btn">U</button>
+      </div>
+      <button class="view-toggle">&#9776;</button>
+    </div>
+    <div class="file-list">
+      <div class="skeleton-row"><div class="skeleton-badge"></div><div class="skeleton-path" style="width:70%"></div></div>
+      <div class="skeleton-row"><div class="skeleton-badge"></div><div class="skeleton-path" style="width:85%"></div></div>
+      <div class="skeleton-row"><div class="skeleton-badge"></div><div class="skeleton-path" style="width:60%"></div></div>
+      <div class="skeleton-row"><div class="skeleton-badge"></div><div class="skeleton-path" style="width:75%"></div></div>
+      <div class="skeleton-row"><div class="skeleton-badge"></div><div class="skeleton-path" style="width:50%"></div></div>
+    </div>
+  </div>
+</section>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  document.getElementById('nav-' + id).classList.add('active');
+}
+</script>
+</body>
+</html>

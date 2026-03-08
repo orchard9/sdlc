@@ -1,0 +1,9 @@
+slug: frontend-bundle-splitting
+title: Frontend Bundle Splitting — lazy routes and vendor chunks
+features:
+- lazy-route-splitting
+- vendor-chunk-separation
+created_at: 2026-03-08T00:09:00.838455Z
+updated_at: 2026-03-08T00:17:39.521910Z
+released_at: 2026-03-08T00:17:39.521909Z
+schema_version: 1

@@ -1,0 +1,145 @@
+slug: git-history-tab
+title: History tab UI with compact commit list
+phase: released
+created_at: 2026-03-07T20:25:38.124744Z
+updated_at: 2026-03-08T00:19:10.952333Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-history-tab/spec.md
+  created_at: 2026-03-08T00:12:47.712870Z
+  approved_at: 2026-03-08T00:12:49.503471Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-history-tab/design.md
+  created_at: 2026-03-08T00:14:01.375521Z
+  approved_at: 2026-03-08T00:14:01.385148Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-history-tab/tasks.md
+  created_at: 2026-03-08T00:14:11.832214Z
+  approved_at: 2026-03-08T00:14:11.843130Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-history-tab/qa-plan.md
+  created_at: 2026-03-08T00:14:32.794966Z
+  approved_at: 2026-03-08T00:14:32.805861Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/git-history-tab/review.md
+  created_at: 2026-03-08T00:18:10.899551Z
+  approved_at: 2026-03-08T00:18:10.906761Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/git-history-tab/audit.md
+  created_at: 2026-03-08T00:18:33.505154Z
+  approved_at: 2026-03-08T00:18:33.519941Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/git-history-tab/qa-results.md
+  created_at: 2026-03-08T00:19:05.708433Z
+  approved_at: 2026-03-08T00:19:05.715723Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create useGitLog hook
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:17.631079Z
+  started_at: 2026-03-08T00:15:15.039995Z
+  completed_at: 2026-03-08T00:15:27.202770Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create relativeTime utility
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:17.636671Z
+  started_at: 2026-03-08T00:15:32.689004Z
+  completed_at: 2026-03-08T00:15:41.071235Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Create GitHistoryTab component
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:17.641615Z
+  started_at: 2026-03-08T00:15:46.589375Z
+  completed_at: 2026-03-08T00:16:07.566716Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Create GitPage shell
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:17.647038Z
+  started_at: 2026-03-08T00:16:12.443448Z
+  completed_at: 2026-03-08T00:16:44.698850Z
+  blocker: null
+  depends_on: []
+- id: T5
+  title: Wire routing and sidebar
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:14:17.652129Z
+  started_at: 2026-03-08T00:16:54.243831Z
+  completed_at: 2026-03-08T00:17:08.832196Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.124744Z
+  exited: 2026-03-08T00:12:49.505088Z
+- phase: specified
+  entered: 2026-03-08T00:12:49.505088Z
+  exited: 2026-03-08T00:14:32.808378Z
+- phase: planned
+  entered: 2026-03-08T00:14:32.808378Z
+  exited: 2026-03-08T00:14:40.229586Z
+- phase: ready
+  entered: 2026-03-08T00:14:40.229586Z
+  exited: 2026-03-08T00:14:45.551843Z
+- phase: implementation
+  entered: 2026-03-08T00:14:45.551843Z
+  exited: 2026-03-08T00:18:10.912669Z
+- phase: review
+  entered: 2026-03-08T00:18:10.912669Z
+  exited: 2026-03-08T00:18:16.247262Z
+- phase: audit
+  entered: 2026-03-08T00:18:16.247262Z
+  exited: 2026-03-08T00:18:33.525883Z
+- phase: qa
+  entered: 2026-03-08T00:18:33.525883Z
+  exited: 2026-03-08T00:19:05.721698Z
+- phase: merge
+  entered: 2026-03-08T00:19:05.721698Z
+  exited: 2026-03-08T00:19:10.952333Z
+- phase: released
+  entered: 2026-03-08T00:19:10.952333Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

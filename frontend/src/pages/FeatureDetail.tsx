@@ -1,4 +1,4 @@
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useFeature } from '@/hooks/useFeature'
 import { useAgentRuns } from '@/contexts/AgentRunContext'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -7,22 +7,27 @@ import { ArtifactViewer } from '@/components/features/ArtifactViewer'
 import { SkeletonFeatureDetail } from '@/components/shared/Skeleton'
 import { CopyButton } from '@/components/shared/CopyButton'
 import { HumanUatModal } from '@/components/shared/HumanUatModal'
-import { ArrowLeft, Play, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Play, Loader2, AlertTriangle, CheckCircle2, RefreshCw } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { api } from '@/api/client'
 import { BlockedPanel } from '@/components/features/BlockedPanel'
+import { nextIterationSlug } from '@/lib/iterateSlug'
 
 const ARTIFACT_TYPES = ['spec', 'design', 'tasks', 'qa_plan', 'review', 'audit', 'qa_results']
 
 export function FeatureDetail() {
   const { slug } = useParams<{ slug: string }>()
+  const navigate = useNavigate()
   const { feature, classification, error, loading } = useFeature(slug ?? '')
   const { isRunning, startRun, focusRun, getRunForKey } = useAgentRuns()
   const [allSlugs, setAllSlugs] = useState<string[]>([])
   const [humanQaModalOpen, setHumanQaModalOpen] = useState(false)
+  const [iterating, setIterating] = useState(false)
+  const [ponderSlugs, setPonderSlugs] = useState<string[]>([])
 
   useEffect(() => {
     api.getFeatures().then(features => setAllSlugs(features.map((f: { slug: string }) => f.slug))).catch(() => {})
+    api.getRoadmap(true).then(entries => setPonderSlugs(entries.map((e: { slug: string }) => e.slug))).catch(() => {})
   }, [])
 
   if (!slug) return null
@@ -99,6 +104,24 @@ export function FeatureDetail() {
 
   const handleFocus = () => {
     if (activeRun) focusRun(activeRun.id)
+  }
+
+  const handleIterate = async () => {
+    if (!feature) return
+    setIterating(true)
+    try {
+      const newSlug = nextIterationSlug(feature.slug, ponderSlugs)
+      await api.createPonderEntry({
+        slug: newSlug,
+        title: `Iterate: ${feature.title}`,
+        brief: `Follow-up iteration on "${feature.title}". Original feature slug: ${feature.slug}.`,
+      })
+      navigate(`/ponder/${newSlug}`)
+    } catch (err) {
+      console.error('Failed to create iteration ponder:', err)
+    } finally {
+      setIterating(false)
+    }
   }
 
   return (
@@ -225,9 +248,19 @@ export function FeatureDetail() {
         const journeyDays = releasedAt ? Math.max(1, Math.round((releasedAt.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24))) : null
         return (
           <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <CheckCircle2 className="w-4 h-4 text-green-400" />
-              <span className="text-sm font-medium text-green-400">Released</span>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-green-400" />
+                <span className="text-sm font-medium text-green-400">Released</span>
+              </div>
+              <button
+                onClick={handleIterate}
+                disabled={iterating}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-green-500/20 text-green-400 text-xs font-medium hover:bg-green-500/30 transition-colors disabled:opacity-50"
+              >
+                {iterating ? <Loader2 className="w-3 h-3 animate-spin" /> : <RefreshCw className="w-3 h-3" />}
+                Iterate
+              </button>
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               {releasedAt && <span>Released {releasedAt.toLocaleDateString()}</span>}

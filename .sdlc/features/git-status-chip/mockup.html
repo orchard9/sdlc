@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Status Chip Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111; color: #e5e5e5; }
+
+  nav { display: flex; gap: 8px; padding: 12px 16px; background: #1a1a1a; border-bottom: 1px solid #333; flex-wrap: wrap; }
+  nav button { padding: 6px 14px; border-radius: 6px; border: 1px solid #444; background: #222; color: #ccc; cursor: pointer; font-size: 13px; }
+  nav button:hover { background: #333; }
+  nav button.active { background: #2563eb; border-color: #2563eb; color: #fff; }
+
+  section { display: none; padding: 32px; }
+  section.visible { display: flex; gap: 48px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+
+  .sidebar { width: 224px; background: #1c1c1c; border: 1px solid #2a2a2a; border-radius: 12px; overflow: hidden; }
+  .sidebar.collapsed { width: 52px; }
+
+  .sidebar-header { padding: 16px; border-bottom: 1px solid #2a2a2a; font-weight: 600; font-size: 16px; }
+  .sidebar.collapsed .sidebar-header { padding: 16px 10px; text-align: center; font-size: 12px; }
+
+  .sidebar-nav { padding: 12px 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 14px; color: #888; cursor: pointer; }
+  .nav-item:hover { background: #262626; color: #ccc; }
+  .sidebar.collapsed .nav-item { justify-content: center; padding: 8px; }
+  .sidebar.collapsed .nav-item .label { display: none; }
+
+  .sidebar-bottom { padding: 8px 6px; border-top: 1px solid #2a2a2a; }
+
+  /* Git Status Chip */
+  .git-chip { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #888; cursor: default; }
+  .git-chip:hover { background: #262626; }
+  .sidebar.collapsed .git-chip { justify-content: center; padding: 8px; }
+  .sidebar.collapsed .git-chip .chip-text { display: none; }
+  .sidebar.collapsed .git-chip .commit-btn { display: none; }
+
+  .severity-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .severity-dot.green { background: #10b981; box-shadow: 0 0 4px #10b98166; }
+  .severity-dot.yellow { background: #f59e0b; box-shadow: 0 0 4px #f59e0b66; }
+  .severity-dot.red { background: #ef4444; box-shadow: 0 0 4px #ef444466; }
+  .severity-dot.grey { background: #555; }
+
+  .chip-text { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 13px; }
+  .chip-branch { color: #ccc; font-weight: 500; }
+  .chip-summary { color: #777; }
+
+  .commit-btn { padding: 2px 6px; border-radius: 4px; border: 1px solid #444; background: #2a2a2a; color: #ccc; font-size: 11px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .commit-btn:hover { background: #333; border-color: #555; }
+
+  /* Utility buttons (existing) */
+  .util-btn { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 8px; font-size: 13px; color: #888; cursor: pointer; width: 100%; border: none; background: none; text-align: left; }
+  .util-btn:hover { background: #262626; color: #ccc; }
+  .sidebar.collapsed .util-btn { justify-content: center; padding: 8px; }
+  .sidebar.collapsed .util-btn .label { display: none; }
+  .sidebar.collapsed .util-btn .kbd { display: none; }
+
+  .kbd { font-size: 10px; background: #333; border: 1px solid #444; border-radius: 3px; padding: 1px 5px; font-family: monospace; margin-left: auto; }
+
+  .icon { width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 14px; }
+
+  .state-label { text-align: center; color: #666; font-size: 12px; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+</style>
+</head>
+<body>
+
+<nav id="screen-nav">
+  <button class="active" onclick="show('screen-green')">Green (Clean)</button>
+  <button onclick="show('screen-yellow')">Yellow (Dirty)</button>
+  <button onclick="show('screen-red')">Red (Conflicts)</button>
+  <button onclick="show('screen-staged')">Staged + Commit</button>
+  <button onclick="show('screen-collapsed')">Collapsed</button>
+  <button onclick="show('screen-error')">Error State</button>
+</nav>
+
+<!-- Green / Clean -->
+<section id="screen-green" class="visible">
+  <div>
+    <div class="state-label">Expanded - Clean Repo</div>
+    <div class="sidebar">
+      <div class="sidebar-header">Ponder</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span> <span class="label">Dashboard</span></div>
+        <div class="nav-item"><span class="icon">M</span> <span class="label">Milestones</span></div>
+        <div class="nav-item"><span class="icon">F</span> <span class="label">Features</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip">
+          <span class="severity-dot green"></span>
+          <span class="chip-text"><span class="chip-branch">main</span> <span class="chip-summary">- clean</span></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span> <span class="label">Ask Code</span> <span class="kbd">&#8984;/</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span> <span class="label">Fix Right Away</span> <span class="kbd">&#8984;&#8679;F</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span> <span class="label">Search</span> <span class="kbd">&#8984;K</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Yellow / Dirty -->
+<section id="screen-yellow">
+  <div>
+    <div class="state-label">Expanded - Dirty Repo</div>
+    <div class="sidebar">
+      <div class="sidebar-header">Ponder</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span> <span class="label">Dashboard</span></div>
+        <div class="nav-item"><span class="icon">M</span> <span class="label">Milestones</span></div>
+        <div class="nav-item"><span class="icon">F</span> <span class="label">Features</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip">
+          <span class="severity-dot yellow"></span>
+          <span class="chip-text"><span class="chip-branch">dev/feature</span> <span class="chip-summary">- 5 modified</span></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span> <span class="label">Ask Code</span> <span class="kbd">&#8984;/</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span> <span class="label">Fix Right Away</span> <span class="kbd">&#8984;&#8679;F</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span> <span class="label">Search</span> <span class="kbd">&#8984;K</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Red / Conflicts -->
+<section id="screen-red">
+  <div>
+    <div class="state-label">Expanded - Conflicts</div>
+    <div class="sidebar">
+      <div class="sidebar-header">Ponder</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span> <span class="label">Dashboard</span></div>
+        <div class="nav-item"><span class="icon">M</span> <span class="label">Milestones</span></div>
+        <div class="nav-item"><span class="icon">F</span> <span class="label">Features</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip">
+          <span class="severity-dot red"></span>
+          <span class="chip-text"><span class="chip-branch">main</span> <span class="chip-summary">- 2 conflicts</span></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span> <span class="label">Ask Code</span> <span class="kbd">&#8984;/</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span> <span class="label">Fix Right Away</span> <span class="kbd">&#8984;&#8679;F</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span> <span class="label">Search</span> <span class="kbd">&#8984;K</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Staged + Commit Button -->
+<section id="screen-staged">
+  <div>
+    <div class="state-label">Expanded - Staged Changes</div>
+    <div class="sidebar">
+      <div class="sidebar-header">Ponder</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span> <span class="label">Dashboard</span></div>
+        <div class="nav-item"><span class="icon">M</span> <span class="label">Milestones</span></div>
+        <div class="nav-item"><span class="icon">F</span> <span class="label">Features</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip">
+          <span class="severity-dot yellow"></span>
+          <span class="chip-text"><span class="chip-branch">main</span> <span class="chip-summary">- 3 staged</span></span>
+          <button class="commit-btn">Commit</button>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span> <span class="label">Ask Code</span> <span class="kbd">&#8984;/</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span> <span class="label">Fix Right Away</span> <span class="kbd">&#8984;&#8679;F</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span> <span class="label">Search</span> <span class="kbd">&#8984;K</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Collapsed -->
+<section id="screen-collapsed">
+  <div>
+    <div class="state-label">Collapsed - Green</div>
+    <div class="sidebar collapsed">
+      <div class="sidebar-header">P</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span></div>
+        <div class="nav-item"><span class="icon">M</span></div>
+        <div class="nav-item"><span class="icon">F</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip" title="main - clean">
+          <span class="severity-dot green"></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span></button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="state-label">Collapsed - Yellow</div>
+    <div class="sidebar collapsed">
+      <div class="sidebar-header">P</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span></div>
+        <div class="nav-item"><span class="icon">M</span></div>
+        <div class="nav-item"><span class="icon">F</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip" title="dev/feature - 5 modified">
+          <span class="severity-dot yellow"></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span></button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="state-label">Collapsed - Red</div>
+    <div class="sidebar collapsed">
+      <div class="sidebar-header">P</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span></div>
+        <div class="nav-item"><span class="icon">M</span></div>
+        <div class="nav-item"><span class="icon">F</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip" title="main - 2 conflicts">
+          <span class="severity-dot red"></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Error State -->
+<section id="screen-error">
+  <div>
+    <div class="state-label">Expanded - API Unavailable</div>
+    <div class="sidebar">
+      <div class="sidebar-header">Ponder</div>
+      <div class="sidebar-nav">
+        <div class="nav-item"><span class="icon">D</span> <span class="label">Dashboard</span></div>
+        <div class="nav-item"><span class="icon">M</span> <span class="label">Milestones</span></div>
+        <div class="nav-item"><span class="icon">F</span> <span class="label">Features</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <div class="git-chip" title="Git status unavailable">
+          <span class="severity-dot grey"></span>
+          <span class="chip-text"><span class="chip-summary" style="color:#555;">Git status unavailable</span></span>
+        </div>
+        <button class="util-btn"><span class="icon">&lt;/&gt;</span> <span class="label">Ask Code</span> <span class="kbd">&#8984;/</span></button>
+        <button class="util-btn"><span class="icon">&#9889;</span> <span class="label">Fix Right Away</span> <span class="kbd">&#8984;&#8679;F</span></button>
+        <button class="util-btn"><span class="icon">&#128269;</span> <span class="label">Search</span> <span class="kbd">&#8984;K</span></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('visible'));
+    document.getElementById(id).classList.add('visible');
+    document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+  }
+</script>
+</body>
+</html>

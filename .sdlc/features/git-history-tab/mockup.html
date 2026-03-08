@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git History Tab Mockup</title>
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --card: #111113;
+    --border: #27272a;
+    --fg: #fafafa;
+    --muted: #71717a;
+    --accent: #18181b;
+    --accent-fg: #fafafa;
+    --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--fg); }
+  nav { display: flex; gap: 8px; padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--border); }
+  nav a { color: var(--muted); text-decoration: none; font-size: 13px; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+  nav a:hover { color: var(--fg); background: var(--accent); }
+  nav a.active { color: var(--fg); font-weight: 600; }
+  section { display: none; padding: 24px; max-width: 900px; margin: 0 auto; }
+  section.active { display: block; }
+  h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--fg); }
+
+  .page-header { display: flex; align-items: center; gap: 12px; padding: 20px 24px; border-bottom: 1px solid var(--border); }
+  .page-header h1 { font-size: 18px; font-weight: 600; }
+  .tab-bar { display: flex; gap: 0; border-bottom: 1px solid var(--border); padding: 0 24px; background: var(--card); }
+  .tab { padding: 10px 16px; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab.active { color: var(--fg); border-bottom-color: var(--fg); font-weight: 500; }
+  .tab:hover { color: var(--fg); }
+
+  .commit-list { display: flex; flex-direction: column; }
+  .commit-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .commit-row:hover { background: var(--accent); }
+  .commit-hash { font-family: var(--mono); font-size: 12px; color: var(--muted); min-width: 60px; }
+  .commit-msg { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--fg); }
+  .commit-author { font-size: 12px; color: var(--muted); min-width: 80px; text-align: right; }
+  .commit-time { font-size: 12px; color: var(--muted); min-width: 70px; text-align: right; }
+
+  .load-more { display: flex; justify-content: center; padding: 16px; }
+  .load-more button { background: var(--accent); color: var(--fg); border: 1px solid var(--border); padding: 6px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+  .load-more button:hover { background: #222; }
+
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state svg { width: 48px; height: 48px; margin-bottom: 16px; opacity: 0.3; }
+  .empty-state p { font-size: 14px; }
+
+  .skeleton-row { display: flex; align-items: center; gap: 12px; padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  .skeleton { background: var(--accent); border-radius: 4px; animation: pulse 1.5s infinite; }
+  .skeleton.hash { width: 56px; height: 14px; }
+  .skeleton.msg { flex: 1; height: 14px; }
+  .skeleton.author { width: 70px; height: 14px; }
+  .skeleton.time { width: 60px; height: 14px; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .error-state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: var(--muted); }
+  .error-state p { font-size: 14px; margin-bottom: 12px; }
+  .error-state button { background: var(--accent); color: var(--fg); border: 1px solid var(--border); padding: 6px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+</style>
+</head>
+<body>
+  <nav>
+    <a onclick="show('screen-commits')" class="active" id="nav-commits">Commit List</a>
+    <a onclick="show('screen-loading')" id="nav-loading">Loading</a>
+    <a onclick="show('screen-empty')" id="nav-empty">Empty</a>
+    <a onclick="show('screen-error')" id="nav-error">Error</a>
+  </nav>
+
+  <!-- Screen: Commit List -->
+  <section id="screen-commits" class="active">
+    <div class="page-header">
+      <h1>Git</h1>
+    </div>
+    <div class="tab-bar">
+      <div class="tab active">History</div>
+      <div class="tab">Files</div>
+      <div class="tab">Diff</div>
+    </div>
+    <div class="commit-list">
+      <div class="commit-row">
+        <span class="commit-hash">9e55e55</span>
+        <span class="commit-msg">feat: add tunnel preflight check, dynamic tab titles, workspace empty states</span>
+        <span class="commit-author">xist</span>
+        <span class="commit-time">2h ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">ce7f076</span>
+        <span class="commit-msg">refactor: move commit message generation from Rust CLI to agent skill template</span>
+        <span class="commit-author">xist</span>
+        <span class="commit-time">5h ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">bf51ea9</span>
+        <span class="commit-msg">update: crates/sdlc-cli/src/cmd, 2 files (+140/-7)</span>
+        <span class="commit-author">claude</span>
+        <span class="commit-time">8h ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">5f25bf2</span>
+        <span class="commit-msg">Merge branch 'dev/xist'</span>
+        <span class="commit-author">xist</span>
+        <span class="commit-time">1d ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">21beab4</span>
+        <span class="commit-msg">wip</span>
+        <span class="commit-author">xist</span>
+        <span class="commit-time">1d ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">a3b8c9d</span>
+        <span class="commit-msg">feat: implement git status chip with severity indicators and auto-refresh</span>
+        <span class="commit-author">claude</span>
+        <span class="commit-time">2d ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">e4f5a6b</span>
+        <span class="commit-msg">fix: correct porcelain v2 parser for renamed entries with tab separator</span>
+        <span class="commit-author">claude</span>
+        <span class="commit-time">2d ago</span>
+      </div>
+      <div class="commit-row">
+        <span class="commit-hash">c7d8e9f</span>
+        <span class="commit-msg">chore: update dependencies and fix clippy warnings across workspace</span>
+        <span class="commit-author">xist</span>
+        <span class="commit-time">3d ago</span>
+      </div>
+    </div>
+    <div class="load-more">
+      <button>Load more commits</button>
+    </div>
+  </section>
+
+  <!-- Screen: Loading -->
+  <section id="screen-loading">
+    <div class="page-header"><h1>Git</h1></div>
+    <div class="tab-bar">
+      <div class="tab active">History</div>
+      <div class="tab">Files</div>
+      <div class="tab">Diff</div>
+    </div>
+    <div class="commit-list">
+      <div class="skeleton-row"><div class="skeleton hash"></div><div class="skeleton msg"></div><div class="skeleton author"></div><div class="skeleton time"></div></div>
+      <div class="skeleton-row"><div class="skeleton hash"></div><div class="skeleton msg"></div><div class="skeleton author"></div><div class="skeleton time"></div></div>
+      <div class="skeleton-row"><div class="skeleton hash"></div><div class="skeleton msg"></div><div class="skeleton author"></div><div class="skeleton time"></div></div>
+      <div class="skeleton-row"><div class="skeleton hash"></div><div class="skeleton msg"></div><div class="skeleton author"></div><div class="skeleton time"></div></div>
+      <div class="skeleton-row"><div class="skeleton hash"></div><div class="skeleton msg"></div><div class="skeleton author"></div><div class="skeleton time"></div></div>
+      <div class="skeleton-row"><div class="skeleton hash"></div><div class="skeleton msg"></div><div class="skeleton author"></div><div class="skeleton time"></div></div>
+    </div>
+  </section>
+
+  <!-- Screen: Empty -->
+  <section id="screen-empty">
+    <div class="page-header"><h1>Git</h1></div>
+    <div class="tab-bar">
+      <div class="tab active">History</div>
+      <div class="tab">Files</div>
+      <div class="tab">Diff</div>
+    </div>
+    <div class="empty-state">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="4"/><line x1="1.05" y1="12" x2="7" y2="12"/><line x1="17.01" y1="12" x2="22.96" y2="12"/>
+      </svg>
+      <p>No commits yet</p>
+    </div>
+  </section>
+
+  <!-- Screen: Error -->
+  <section id="screen-error">
+    <div class="page-header"><h1>Git</h1></div>
+    <div class="tab-bar">
+      <div class="tab active">History</div>
+      <div class="tab">Files</div>
+      <div class="tab">Diff</div>
+    </div>
+    <div class="error-state">
+      <p>Failed to load commit history</p>
+      <button>Retry</button>
+    </div>
+  </section>
+
+  <script>
+    function show(id) {
+      document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('nav-' + id.replace('screen-', '')).classList.add('active');
+    }
+  </script>
+</body>
+</html>

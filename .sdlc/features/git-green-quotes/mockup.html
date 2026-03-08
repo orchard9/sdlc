@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Git Green Quotes - Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0d1117; color: #c9d1d9; }
+  nav { background: #161b22; border-bottom: 1px solid #30363d; padding: 12px 24px; display: flex; gap: 16px; }
+  nav a { color: #58a6ff; text-decoration: none; font-size: 14px; padding: 4px 8px; border-radius: 4px; }
+  nav a:hover, nav a.active { background: #1f2937; }
+  section { display: none; padding: 48px 24px; max-width: 480px; margin: 0 auto; }
+  section:target, section.default { display: block; }
+  h2 { font-size: 14px; color: #8b949e; margin-bottom: 24px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .chip { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 16px; }
+  .chip-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.green { background: #3fb950; box-shadow: 0 0 6px rgba(63, 185, 80, 0.4); }
+  .dot.yellow { background: #d29922; box-shadow: 0 0 6px rgba(210, 153, 34, 0.4); }
+  .dot.red { background: #f85149; box-shadow: 0 0 6px rgba(248, 81, 73, 0.4); }
+  .chip-label { font-size: 13px; font-weight: 600; }
+
+  .quote-block { padding: 8px 0 0 0; }
+  .quote-text { font-style: italic; color: #8b949e; font-size: 13px; line-height: 1.5; }
+  .quote-author { text-align: right; font-size: 12px; color: #6e7681; margin-top: 6px; }
+
+  .status-summary { font-size: 13px; color: #8b949e; padding-top: 4px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#screen-green" class="active" onclick="document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));this.classList.add('active')">Green (Quote)</a>
+  <a href="#screen-yellow" onclick="document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));this.classList.add('active')">Yellow (No Quote)</a>
+  <a href="#screen-red" onclick="document.querySelectorAll('nav a').forEach(a=>a.classList.remove('active'));this.classList.add('active')">Red (No Quote)</a>
+</nav>
+
+<section id="screen-green" class="default">
+  <h2>Git Status Chip - Clean State</h2>
+  <div class="chip">
+    <div class="chip-header">
+      <span class="dot green"></span>
+      <span class="chip-label">Clean</span>
+    </div>
+    <div class="quote-block">
+      <div class="quote-text">"First, solve the problem. Then, write the code."</div>
+      <div class="quote-author">-- John Johnson</div>
+    </div>
+  </div>
+</section>
+
+<section id="screen-yellow">
+  <h2>Git Status Chip - Dirty State</h2>
+  <div class="chip">
+    <div class="chip-header">
+      <span class="dot yellow"></span>
+      <span class="chip-label">Modified</span>
+    </div>
+    <div class="status-summary">3 files modified, 1 untracked</div>
+  </div>
+</section>
+
+<section id="screen-red">
+  <h2>Git Status Chip - Conflict State</h2>
+  <div class="chip">
+    <div class="chip-header">
+      <span class="dot red"></span>
+      <span class="chip-label">Conflict</span>
+    </div>
+    <div class="status-summary">2 merge conflicts in src/</div>
+  </div>
+</section>
+
+<script>
+  // Show default section if no hash
+  if (!location.hash) document.querySelector('.default').style.display = 'block';
+  window.addEventListener('hashchange', () => {
+    document.querySelectorAll('section').forEach(s => s.classList.remove('default'));
+  });
+</script>
+
+</body>
+</html>

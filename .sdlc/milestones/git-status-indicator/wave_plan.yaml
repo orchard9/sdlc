@@ -1,0 +1,22 @@
+- number: 1
+  label: Planning
+  items:
+  - slug: git-green-quotes
+    title: Weekly rotating quote system for clean git state
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-status-api
+    title: GET /api/git/status endpoint with composite state model
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  - slug: git-status-chip
+    title: Sidebar status chip with green/yellow/red severity and commit button
+    phase: draft
+    action: create_spec
+    needs_worktree: false
+    blocked_by: []
+  needs_worktrees: false

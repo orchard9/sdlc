@@ -1,0 +1,121 @@
+slug: git-log-api
+title: GET /api/git/log endpoint with pagination
+phase: implementation
+created_at: 2026-03-07T20:25:38.118572Z
+updated_at: 2026-03-08T00:13:23.906733Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-log-api/spec.md
+  created_at: 2026-03-08T00:12:09.400664Z
+  approved_at: 2026-03-08T00:12:10.977022Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-log-api/design.md
+  created_at: 2026-03-08T00:12:36.235554Z
+  approved_at: 2026-03-08T00:12:36.243840Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-log-api/tasks.md
+  created_at: 2026-03-08T00:13:00.866894Z
+  approved_at: 2026-03-08T00:13:00.877108Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-log-api/qa-plan.md
+  created_at: 2026-03-08T00:13:16.730240Z
+  approved_at: 2026-03-08T00:13:16.736690Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: missing
+  path: .sdlc/features/git-log-api/review.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: missing
+  path: .sdlc/features/git-log-api/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: missing
+  path: .sdlc/features/git-log-api/qa-results.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Add CommitEntry struct and git log parser
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:03.524018Z
+  started_at: 2026-03-08T00:19:26.396491Z
+  completed_at: 2026-03-08T00:19:26.402165Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add collect_git_log function
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:03.530770Z
+  started_at: 2026-03-08T00:19:26.408898Z
+  completed_at: 2026-03-08T00:19:26.414303Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Add get_git_log handler and register route
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:03.536837Z
+  started_at: 2026-03-08T00:19:26.420980Z
+  completed_at: 2026-03-08T00:19:26.426017Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add unit tests for parse_git_log_output
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:13:03.542585Z
+  started_at: 2026-03-08T00:19:26.432191Z
+  completed_at: 2026-03-08T00:19:26.437299Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.118572Z
+  exited: 2026-03-08T00:12:10.979273Z
+- phase: specified
+  entered: 2026-03-08T00:12:10.979273Z
+  exited: 2026-03-08T00:13:16.738182Z
+- phase: planned
+  entered: 2026-03-08T00:13:16.738182Z
+  exited: 2026-03-08T00:13:20.791150Z
+- phase: ready
+  entered: 2026-03-08T00:13:20.791150Z
+  exited: 2026-03-08T00:13:23.906733Z
+- phase: implementation
+  entered: 2026-03-08T00:13:23.906733Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

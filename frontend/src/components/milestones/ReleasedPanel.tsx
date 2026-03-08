@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { api } from '@/api/client'
 import { useSSE } from '@/hooks/useSSE'
 import { useProjectState } from '@/hooks/useProjectState'
 import { useMilestoneUatRun } from '@/hooks/useMilestoneUatRun'
 import { HumanUatModal } from '@/components/shared/HumanUatModal'
-import { CheckCircle, Loader2, Play, ArrowRight } from 'lucide-react'
+import { NewIdeaModal } from '@/components/ponder/NewIdeaModal'
+import { nextIterationSlug } from '@/lib/iterate'
+import { CheckCircle, Loader2, Play, ArrowRight, RefreshCw } from 'lucide-react'
 import type { UatRun, UatVerdict } from '@/lib/types'
 
 const verdictStyles: Record<UatVerdict, { classes: string; label: string }> = {
@@ -36,6 +38,13 @@ export function ReleasedPanel({ milestoneSlug }: ReleasedPanelProps) {
   const [uatRuns, setUatRuns] = useState<UatRun[]>([])
   const { state } = useProjectState()
   const { running, handleStart, handleFocus, modalOpen, setModalOpen } = useMilestoneUatRun(milestoneSlug)
+  const navigate = useNavigate()
+
+  // Iterate modal state
+  const [iterateModalOpen, setIterateModalOpen] = useState(false)
+  const [iterateSlug, setIterateSlug] = useState('')
+  const [iterateBrief, setIterateBrief] = useState('')
+  const [iterateTitle, setIterateTitle] = useState('')
 
   const loadRuns = useCallback(() => {
     api.listMilestoneUatRuns(milestoneSlug)
@@ -71,6 +80,24 @@ export function ReleasedPanel({ milestoneSlug }: ReleasedPanelProps) {
   const nextActiveMilestone = state?.milestones.find(
     m => m.status === 'active' && m.slug !== milestoneSlug
   ) ?? null
+
+  const handleIterate = useCallback(async () => {
+    try {
+      const entries = await api.getRoadmap(true)
+      const existingSlugs = entries.map(e => e.slug)
+      const newSlug = nextIterationSlug(milestoneSlug, existingSlugs)
+      const title = milestone?.title ?? milestoneSlug
+      const vision = milestone?.vision ?? 'No vision recorded.'
+      const brief = `Iteration of milestone: ${title} (${milestoneSlug})\n\nOriginal vision:\n${vision}\n\nWhat worked well, what to improve, and what to explore next:`
+
+      setIterateTitle(title)
+      setIterateSlug(newSlug)
+      setIterateBrief(brief)
+      setIterateModalOpen(true)
+    } catch {
+      // Silently fail — user can retry
+    }
+  }, [milestoneSlug, milestone])
 
   return (
     <>
@@ -121,6 +148,15 @@ export function ReleasedPanel({ milestoneSlug }: ReleasedPanelProps) {
           )}
           {!running && (
             <button
+              onClick={handleIterate}
+              className="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded border border-border bg-muted text-muted-foreground text-[11px] hover:bg-muted/80 transition-colors"
+            >
+              <RefreshCw className="w-3 h-3" />
+              Iterate
+            </button>
+          )}
+          {!running && (
+            <button
               onClick={() => setModalOpen(true)}
               className="text-[11px] text-muted-foreground underline hover:text-foreground transition-colors"
             >
@@ -149,6 +185,18 @@ export function ReleasedPanel({ milestoneSlug }: ReleasedPanelProps) {
         onClose={() => setModalOpen(false)}
         mode="milestone"
         slug={milestoneSlug}
+      />
+
+      <NewIdeaModal
+        open={iterateModalOpen}
+        onClose={() => setIterateModalOpen(false)}
+        onCreated={(slug) => {
+          setIterateModalOpen(false)
+          navigate(`/ponder/${slug}`)
+        }}
+        initialTitle={iterateTitle}
+        initialSlug={iterateSlug}
+        initialBrief={iterateBrief}
       />
     </>
   )

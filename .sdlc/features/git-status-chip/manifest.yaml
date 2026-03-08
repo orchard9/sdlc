@@ -1,0 +1,137 @@
+slug: git-status-chip
+title: Sidebar status chip with green/yellow/red severity and commit button
+description: React sidebar chip that polls the git status API and renders a green/yellow/red indicator with summary text. Includes a commit button shortcut when the repo has staged changes.
+phase: released
+created_at: 2026-03-07T20:25:38.072494Z
+updated_at: 2026-03-07T20:43:52.498423Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/git-status-chip/spec.md
+  created_at: 2026-03-07T20:39:35.316081Z
+  approved_at: 2026-03-07T20:39:35.325953Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/git-status-chip/design.md
+  created_at: 2026-03-07T20:40:49.791179Z
+  approved_at: 2026-03-07T20:40:49.800166Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/git-status-chip/tasks.md
+  created_at: 2026-03-07T20:41:02.443216Z
+  approved_at: 2026-03-07T20:41:02.451519Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/git-status-chip/qa-plan.md
+  created_at: 2026-03-07T20:41:20.740679Z
+  approved_at: 2026-03-07T20:41:20.749970Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/git-status-chip/review.md
+  created_at: 2026-03-07T20:42:56.967056Z
+  approved_at: 2026-03-07T20:42:56.975911Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: approved
+  path: .sdlc/features/git-status-chip/audit.md
+  created_at: 2026-03-07T20:43:17.812207Z
+  approved_at: 2026-03-07T20:43:17.822445Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/git-status-chip/qa-results.md
+  created_at: 2026-03-07T20:43:48.344693Z
+  approved_at: 2026-03-07T20:43:48.351578Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Create useGitStatus hook
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:41:04.891913Z
+  started_at: 2026-03-07T20:41:49.455856Z
+  completed_at: 2026-03-07T20:41:59.852873Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Create GitStatusChip component
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:41:04.901281Z
+  started_at: 2026-03-07T20:41:59.863058Z
+  completed_at: 2026-03-07T20:42:17.653961Z
+  blocker: null
+  depends_on: []
+- id: T3
+  title: Integrate GitStatusChip into Sidebar
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:41:04.909246Z
+  started_at: 2026-03-07T20:42:17.660912Z
+  completed_at: 2026-03-07T20:42:32.637086Z
+  blocker: null
+  depends_on: []
+- id: T4
+  title: Add commit button action
+  description: null
+  status: completed
+  created_at: 2026-03-07T20:41:04.916701Z
+  started_at: 2026-03-07T20:42:32.645122Z
+  completed_at: 2026-03-07T20:42:36.049809Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T20:25:38.072494Z
+  exited: 2026-03-07T20:39:35.332293Z
+- phase: specified
+  entered: 2026-03-07T20:39:35.332293Z
+  exited: 2026-03-07T20:41:20.752008Z
+- phase: planned
+  entered: 2026-03-07T20:41:20.752008Z
+  exited: 2026-03-07T20:41:25.487589Z
+- phase: ready
+  entered: 2026-03-07T20:41:25.487589Z
+  exited: 2026-03-07T20:41:29.065214Z
+- phase: implementation
+  entered: 2026-03-07T20:41:29.065214Z
+  exited: 2026-03-07T20:42:56.982599Z
+- phase: review
+  entered: 2026-03-07T20:42:56.982599Z
+  exited: 2026-03-07T20:43:00.525785Z
+- phase: audit
+  entered: 2026-03-07T20:43:00.525785Z
+  exited: 2026-03-07T20:43:17.829280Z
+- phase: qa
+  entered: 2026-03-07T20:43:17.829280Z
+  exited: 2026-03-07T20:43:48.356816Z
+- phase: merge
+  entered: 2026-03-07T20:43:48.356816Z
+  exited: 2026-03-07T20:43:52.498423Z
+- phase: released
+  entered: 2026-03-07T20:43:52.498423Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3

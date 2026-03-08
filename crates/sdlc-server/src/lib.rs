@@ -127,6 +127,12 @@ fn build_router_from_state(app_state: state::AppState) -> Router {
         .route("/api/events", post(routes::events::sse_events))
         // State
         .route("/api/state", get(routes::state::get_state))
+        // Git status & history
+        .route("/api/git/status", get(routes::git::get_git_status))
+        .route("/api/git/log", get(routes::git::get_git_log))
+        .route("/api/git/show/{sha}", get(routes::git::get_commit_detail))
+        .route("/api/git/commit", post(routes::git::start_git_commit))
+        .route("/api/git/diff", get(routes::git::get_git_diff))
         // Changelog
         .route("/api/changelog", get(routes::changelog::get_changelog))
         // Backlog

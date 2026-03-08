@@ -37,6 +37,22 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
+pub enum ChangelogSubcommand {
+    /// Reassign a range of event IDs to resolve merge conflicts
+    Reassign {
+        /// First event ID to reassign (e.g. ev-0623)
+        #[arg(long)]
+        from: String,
+        /// Suffix to append to each reassigned ID (e.g. "x")
+        #[arg(long)]
+        suffix: String,
+        /// Number of consecutive events to reassign
+        #[arg(long)]
+        count: usize,
+    },
+}
+
+#[derive(Subcommand)]
 enum Commands {
     /// Initialize SDLC in the current project
     Init {
@@ -208,6 +224,8 @@ enum Commands {
         /// Maximum events to show
         #[arg(long, default_value_t = 20)]
         limit: usize,
+        #[command(subcommand)]
+        subcommand: Option<ChangelogSubcommand>,
     },
 
     /// Commit changes to main with safe upstream merge
@@ -340,7 +358,18 @@ fn main() {
             subcommand,
         } => cmd::orchestrate::run(&root, subcommand, tick_rate, db),
         Commands::Update => cmd::update::run(&root),
-        Commands::Changelog { since, limit } => cmd::changelog::run(&root, &since, limit, cli.json),
+        Commands::Changelog {
+            since,
+            limit,
+            subcommand,
+        } => match subcommand {
+            Some(ChangelogSubcommand::Reassign {
+                from,
+                suffix,
+                count,
+            }) => cmd::changelog::reassign(&root, &from, &suffix, count),
+            None => cmd::changelog::run(&root, &since, limit, cli.json),
+        },
         Commands::Commit { message } => cmd::commit::run(&root, message.as_deref(), cli.json),
         Commands::Merge { slug } => cmd::merge::run(&root, &slug, cli.json),
         Commands::Archive { slug } => {

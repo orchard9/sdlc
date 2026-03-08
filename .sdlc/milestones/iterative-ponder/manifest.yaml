@@ -1,0 +1,14 @@
+slug: iterative-ponder
+title: Iterative Ponder — one-click follow-up from released work
+features:
+- iterate-slug-utility
+- iterate-milestone-button
+- iterate-feature-button
+created_at: 2026-03-07T23:43:30.711953Z
+updated_at: 2026-03-07T23:43:39.751689Z
+schema_version: 1
+vision: |
+  When a milestone or feature ships, the user can click "Iterate" to launch a
+  versioned ponder pre-populated with the original title, an auto-incremented
+  slug (e.g. git-status-indicator-v2), and the original vision as a starting
+  brief. This closes the build-ship-reflect loop with zero friction.

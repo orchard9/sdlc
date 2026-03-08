@@ -1,33 +1,44 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { AgentRunProvider } from '@/contexts/AgentRunContext'
 import { SseProvider } from '@/contexts/SseContext'
 import { AppShell } from '@/components/layout/AppShell'
-import { Dashboard } from '@/pages/Dashboard'
-import { FeatureDetail } from '@/pages/FeatureDetail'
-import { FeaturesPage } from '@/pages/FeaturesPage'
-import { MilestonesPage } from '@/pages/MilestonesPage'
-import { MilestoneDetail } from '@/pages/MilestoneDetail'
-import { PonderPage } from '@/pages/PonderPage'
-import { InvestigationPage } from '@/pages/InvestigationPage'
-import { EvolvePage } from '@/pages/EvolvePage'
-import { GuidelinePage } from '@/pages/GuidelinePage'
-import { KnowledgePage } from '@/pages/KnowledgePage'
-import { SettingsPage } from '@/pages/SettingsPage'
-import { SecretsPage } from '@/pages/SecretsPage'
-import { ToolsPage } from '@/pages/ToolsPage'
-import { FeedbackPage } from '@/pages/FeedbackPage'
-import { NetworkPage } from '@/pages/NetworkPage'
-import { VisionPage } from '@/pages/VisionPage'
-import { ArchitecturePage } from '@/pages/ArchitecturePage'
-import { DocsPage } from '@/pages/DocsPage'
-import { AgentsPage } from '@/pages/AgentsPage'
-import { SetupPage } from '@/pages/SetupPage'
-import { ActionsPage } from '@/pages/ActionsPage'
-import { ThreadsPage } from '@/pages/ThreadsPage'
-import { RunsPage } from '@/pages/RunsPage'
 import { HubPage } from '@/pages/HubPage'
-import { SpikePage } from '@/pages/SpikePage'
+
+// Lazy-loaded page components — each becomes a separate chunk
+const Dashboard = lazy(() => import('@/pages/Dashboard').then(m => ({ default: m.Dashboard })))
+const FeatureDetail = lazy(() => import('@/pages/FeatureDetail').then(m => ({ default: m.FeatureDetail })))
+const FeaturesPage = lazy(() => import('@/pages/FeaturesPage').then(m => ({ default: m.FeaturesPage })))
+const MilestonesPage = lazy(() => import('@/pages/MilestonesPage').then(m => ({ default: m.MilestonesPage })))
+const MilestoneDetail = lazy(() => import('@/pages/MilestoneDetail').then(m => ({ default: m.MilestoneDetail })))
+const PonderPage = lazy(() => import('@/pages/PonderPage').then(m => ({ default: m.PonderPage })))
+const InvestigationPage = lazy(() => import('@/pages/InvestigationPage').then(m => ({ default: m.InvestigationPage })))
+const EvolvePage = lazy(() => import('@/pages/EvolvePage').then(m => ({ default: m.EvolvePage })))
+const GuidelinePage = lazy(() => import('@/pages/GuidelinePage').then(m => ({ default: m.GuidelinePage })))
+const KnowledgePage = lazy(() => import('@/pages/KnowledgePage').then(m => ({ default: m.KnowledgePage })))
+const SettingsPage = lazy(() => import('@/pages/SettingsPage').then(m => ({ default: m.SettingsPage })))
+const SecretsPage = lazy(() => import('@/pages/SecretsPage').then(m => ({ default: m.SecretsPage })))
+const ToolsPage = lazy(() => import('@/pages/ToolsPage').then(m => ({ default: m.ToolsPage })))
+const FeedbackPage = lazy(() => import('@/pages/FeedbackPage').then(m => ({ default: m.FeedbackPage })))
+const NetworkPage = lazy(() => import('@/pages/NetworkPage').then(m => ({ default: m.NetworkPage })))
+const VisionPage = lazy(() => import('@/pages/VisionPage').then(m => ({ default: m.VisionPage })))
+const ArchitecturePage = lazy(() => import('@/pages/ArchitecturePage').then(m => ({ default: m.ArchitecturePage })))
+const DocsPage = lazy(() => import('@/pages/DocsPage').then(m => ({ default: m.DocsPage })))
+const AgentsPage = lazy(() => import('@/pages/AgentsPage').then(m => ({ default: m.AgentsPage })))
+const SetupPage = lazy(() => import('@/pages/SetupPage').then(m => ({ default: m.SetupPage })))
+const ActionsPage = lazy(() => import('@/pages/ActionsPage').then(m => ({ default: m.ActionsPage })))
+const ThreadsPage = lazy(() => import('@/pages/ThreadsPage').then(m => ({ default: m.ThreadsPage })))
+const RunsPage = lazy(() => import('@/pages/RunsPage').then(m => ({ default: m.RunsPage })))
+const SpikePage = lazy(() => import('@/pages/SpikePage').then(m => ({ default: m.SpikePage })))
+const GitPage = lazy(() => import('@/pages/GitPage'))
+
+function PageSpinner() {
+  return (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="w-6 h-6 border-2 border-border border-t-primary rounded-full animate-spin" />
+    </div>
+  )
+}
 
 type HubMode = 'loading' | 'hub' | 'normal'
 
@@ -67,6 +78,7 @@ export default function App() {
       <SseProvider>
       <AgentRunProvider>
         <AppShell>
+          <Suspense fallback={<PageSpinner />}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
             <Route path="/setup" element={<SetupPage />} />
@@ -95,6 +107,8 @@ export default function App() {
             <Route path="/threads" element={<ThreadsPage />} />
             <Route path="/threads/:slug" element={<ThreadsPage />} />
             <Route path="/network" element={<NetworkPage />} />
+            <Route path="/git" element={<GitPage />} />
+            <Route path="/git/*" element={<GitPage />} />
             <Route path="/agents" element={<AgentsPage />} />
             <Route path="/actions" element={<ActionsPage />} />
             <Route path="/runs" element={<RunsPage />} />
@@ -102,6 +116,7 @@ export default function App() {
             <Route path="/docs" element={<DocsPage />} />
             <Route path="/docs/:section" element={<DocsPage />} />
           </Routes>
+          </Suspense>
         </AppShell>
       </AgentRunProvider>
       </SseProvider>

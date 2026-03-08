@@ -1,0 +1,9 @@
+slug: git-status-indicator-v2
+title: Git Status Indicator V2 — commit agent and detail tile
+features:
+- git-commit-agent
+- git-details-hover-tile
+- git-status-directory-counts
+created_at: 2026-03-07T23:43:28.844825Z
+updated_at: 2026-03-07T23:43:32.128554Z
+schema_version: 1

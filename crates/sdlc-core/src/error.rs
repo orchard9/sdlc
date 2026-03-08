@@ -174,6 +174,10 @@ pub enum SdlcError {
         fix_hint: String,
     },
 
+    /// Generic error for cases that don't fit a specific variant.
+    #[error("{0}")]
+    Other(String),
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 

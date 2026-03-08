@@ -1,0 +1,13 @@
+slug: 500kb-chunk-minification-errors
+title: 500kb-chunk-minification-errors
+status: committed
+created_at: 2026-03-08T00:03:35.129648Z
+updated_at: 2026-03-08T00:09:06.489563Z
+committed_at: 2026-03-08T00:08:19.963974Z
+committed_to:
+- frontend-bundle-splitting
+sessions: 1
+orientation:
+  current: Root-caused the 2.3MB index chunk — zero code splitting, three heavy libraries inlined
+  next: Implement manualChunks + lazy routes in vite.config.ts and App.tsx
+  commit: Solution is clear and mechanical — ready to commit now

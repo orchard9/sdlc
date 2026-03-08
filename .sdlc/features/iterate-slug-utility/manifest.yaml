@@ -1,0 +1,121 @@
+slug: iterate-slug-utility
+title: nextIterationSlug utility — versioned slug generation with collision avoidance
+description: Pure utility that takes a base slug and returns the next versioned slug (e.g. foo → foo-v2, foo-v2 → foo-v3), checking existing milestones and ponder entries for collisions.
+phase: released
+created_at: 2026-03-07T23:43:35.062308Z
+updated_at: 2026-03-08T00:14:44.292540Z
+artifacts:
+- artifact_type: spec
+  status: approved
+  path: .sdlc/features/iterate-slug-utility/spec.md
+  created_at: 2026-03-08T00:11:19.326099Z
+  approved_at: 2026-03-08T00:11:21.361985Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: design
+  status: approved
+  path: .sdlc/features/iterate-slug-utility/design.md
+  created_at: 2026-03-08T00:11:49.434131Z
+  approved_at: 2026-03-08T00:11:49.443207Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: tasks
+  status: approved
+  path: .sdlc/features/iterate-slug-utility/tasks.md
+  created_at: 2026-03-08T00:11:59.425292Z
+  approved_at: 2026-03-08T00:11:59.434138Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: qa_plan
+  status: approved
+  path: .sdlc/features/iterate-slug-utility/qa-plan.md
+  created_at: 2026-03-08T00:12:19.891574Z
+  approved_at: 2026-03-08T00:12:19.900206Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: review
+  status: approved
+  path: .sdlc/features/iterate-slug-utility/review.md
+  created_at: 2026-03-08T00:13:50.309067Z
+  approved_at: 2026-03-08T00:13:50.316194Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+- artifact_type: audit
+  status: waived
+  path: .sdlc/features/iterate-slug-utility/audit.md
+  created_at: null
+  approved_at: null
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+  waived_at: 2026-03-08T00:14:00.460242Z
+  waive_reason: Pure frontend utility function with no API calls, no user input handling, no auth, and no side effects. No meaningful security surface.
+- artifact_type: qa_results
+  status: approved
+  path: .sdlc/features/iterate-slug-utility/qa-results.md
+  created_at: 2026-03-08T00:14:29.969307Z
+  approved_at: 2026-03-08T00:14:38.703749Z
+  rejected_at: null
+  rejection_reason: null
+  approved_by: null
+tasks:
+- id: T1
+  title: Implement nextIterationSlug function
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:12:01.775491Z
+  started_at: 2026-03-08T00:12:36.619067Z
+  completed_at: 2026-03-08T00:12:50.144887Z
+  blocker: null
+  depends_on: []
+- id: T2
+  title: Add unit tests
+  description: null
+  status: completed
+  created_at: 2026-03-08T00:12:01.782106Z
+  started_at: 2026-03-08T00:13:04.241800Z
+  completed_at: 2026-03-08T00:13:26.247958Z
+  blocker: null
+  depends_on: []
+comments: []
+next_comment_seq: 0
+blockers: []
+phase_history:
+- phase: draft
+  entered: 2026-03-07T23:43:35.062308Z
+  exited: 2026-03-08T00:11:21.364506Z
+- phase: specified
+  entered: 2026-03-08T00:11:21.364506Z
+  exited: 2026-03-08T00:12:19.902212Z
+- phase: planned
+  entered: 2026-03-08T00:12:19.902212Z
+  exited: 2026-03-08T00:12:28.075728Z
+- phase: ready
+  entered: 2026-03-08T00:12:28.075728Z
+  exited: 2026-03-08T00:12:32.463401Z
+- phase: implementation
+  entered: 2026-03-08T00:12:32.463401Z
+  exited: 2026-03-08T00:13:50.321603Z
+- phase: review
+  entered: 2026-03-08T00:13:50.321603Z
+  exited: 2026-03-08T00:13:55.524630Z
+- phase: audit
+  entered: 2026-03-08T00:13:55.524630Z
+  exited: 2026-03-08T00:14:00.462823Z
+- phase: qa
+  entered: 2026-03-08T00:14:00.462823Z
+  exited: 2026-03-08T00:14:38.712100Z
+- phase: merge
+  entered: 2026-03-08T00:14:38.712100Z
+  exited: 2026-03-08T00:14:44.292540Z
+- phase: released
+  entered: 2026-03-08T00:14:44.292540Z
+  exited: null
+dependencies: []
+archived: false
+schema_version: 3
