@@ -209,3 +209,4 @@ pub fn run(root: &Path, message: Option<&str>, json: bool) -> anyhow::Result<()>
 
     Ok(())
 }
+
