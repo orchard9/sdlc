@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
 use chrono::{DateTime, Utc};
@@ -158,6 +158,10 @@ pub struct HubRegistry {
     pub event_tx: broadcast::Sender<HubSseMessage>,
     /// Path for persistent cache file (`~/.sdlc/hub-state.yaml`).
     pub persist_path: PathBuf,
+    /// Slugs recently deleted — prevents the fleet watcher from re-adding
+    /// a project while k8s namespace deletion is still in progress.
+    /// Cleared when the slug is no longer discovered by the fleet scanner.
+    pub deleted_slugs: HashSet<String>,
 }
 
 impl HubRegistry {
@@ -172,6 +176,7 @@ impl HubRegistry {
             activity: Vec::new(),
             event_tx: tx,
             persist_path,
+            deleted_slugs: HashSet::new(),
         };
         registry.load_saved_state();
         registry
@@ -345,7 +350,17 @@ impl HubRegistry {
     }
 
     pub fn reconcile_fleet(&mut self, instances: &[crate::fleet::FleetInstance]) {
+        // Collect discovered slugs so we can clear tombstones for namespaces
+        // that are now gone (deletion completed).
+        let discovered_slugs: HashSet<String> = instances.iter().map(|i| i.slug.clone()).collect();
+        self.deleted_slugs
+            .retain(|slug| discovered_slugs.contains(slug));
+
         for instance in instances {
+            // Skip tombstoned slugs — deletion is in progress
+            if self.deleted_slugs.contains(&instance.slug) {
+                continue;
+            }
             let target = match instance.deployment_status {
                 crate::fleet::DeploymentStatus::Failed => Some(ProvisionState::Failed),
                 crate::fleet::DeploymentStatus::Pending => Some(ProvisionState::Provisioning),
@@ -374,7 +389,12 @@ impl HubRegistry {
     }
 
     /// Apply a heartbeat payload: upsert the entry, update last_seen, emit event.
-    pub fn apply_heartbeat(&mut self, payload: HeartbeatPayload) -> ProjectEntry {
+    /// Returns `None` if the project is tombstoned (recently deleted).
+    pub fn apply_heartbeat(&mut self, payload: HeartbeatPayload) -> Option<ProjectEntry> {
+        // Reject heartbeats from tombstoned projects (namespace deletion in progress)
+        if self.deleted_slugs.contains(&payload.name) {
+            return None;
+        }
         let now = Utc::now();
         let mut is_new = false;
         let entry = self.projects.entry(payload.url.clone()).or_insert_with(|| {
@@ -472,7 +492,7 @@ impl HubRegistry {
             self.broadcast_agent_summary();
         }
         self.persist();
-        result
+        Some(result)
     }
 
     /// Sweep: recompute statuses, remove entries older than 5 minutes.
@@ -583,7 +603,7 @@ impl HubRegistry {
     }
 
     /// Remove a project from both the projects and provisions maps.
-    /// Emits `ProjectRemoved` SSE event and persists.
+    /// Emits `ProjectRemoved` SSE event, adds to tombstone set, and persists.
     pub fn remove_project(&mut self, slug: &str) {
         // Projects are keyed by URL — find by name match
         let url = self
@@ -598,6 +618,9 @@ impl HubRegistry {
                 .send(HubSseMessage::ProjectRemoved { url: url.clone() });
         }
         self.provisions.remove(slug);
+        // Tombstone: prevent fleet watcher from re-adding while k8s deletion
+        // is in progress.  Cleared by reconcile_fleet once the namespace is gone.
+        self.deleted_slugs.insert(slug.to_string());
         self.push_activity(
             "project_deleted",
             ActivitySeverity::Warning,
@@ -666,7 +689,9 @@ mod tests {
     fn apply_heartbeat_creates_online_entry() {
         let tmp = TempDir::new().unwrap();
         let mut reg = temp_registry(tmp.path());
-        let entry = reg.apply_heartbeat(payload("payments", "http://localhost:3001"));
+        let entry = reg
+            .apply_heartbeat(payload("payments", "http://localhost:3001"))
+            .expect("heartbeat should succeed");
         assert_eq!(entry.name, "payments");
         assert_eq!(entry.status, ProjectStatus::Online);
         assert!(reg.projects.contains_key("http://localhost:3001"));
@@ -843,6 +868,12 @@ mod tests {
             .activity
             .iter()
             .any(|a| a.kind == "project_deleted" && a.slug.as_deref() == Some("my-app")));
+        // Verify tombstone was set
+        assert!(reg.deleted_slugs.contains("my-app"));
+        // Heartbeats from tombstoned projects should be rejected
+        assert!(reg
+            .apply_heartbeat(payload("my-app", "http://localhost:4000"))
+            .is_none());
     }
 
     #[test]

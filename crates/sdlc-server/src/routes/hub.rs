@@ -266,12 +266,18 @@ pub async fn heartbeat(
     }
 
     let mut registry = hub.lock().await;
-    let _entry = registry.apply_heartbeat(payload);
-    (
-        StatusCode::OK,
-        Json(serde_json::json!({"registered": true})),
-    )
-        .into_response()
+    match registry.apply_heartbeat(payload) {
+        Some(_entry) => (
+            StatusCode::OK,
+            Json(serde_json::json!({"registered": true})),
+        )
+            .into_response(),
+        None => (
+            StatusCode::GONE,
+            Json(serde_json::json!({"registered": false, "reason": "project deleted"})),
+        )
+            .into_response(),
+    }
 }
 
 /// GET /api/hub/projects
@@ -903,20 +909,29 @@ pub async fn delete_project(
         return not_hub_mode();
     }
 
-    // 1. Delete k8s namespace (best-effort)
-    if let Err(e) = fleet::delete_namespace(app.kube_client.as_ref(), &slug).await {
-        tracing::warn!(slug = %slug, error = %e, "k8s namespace deletion failed");
-    }
-
-    // 2. Delete Cloudflare DNS (best-effort)
-    if let Err(e) = fleet::delete_cloudflare_dns(&app.http_client, &slug).await {
-        tracing::warn!(slug = %slug, error = %e, "cloudflare DNS deletion failed");
-    }
-
-    // 3. Remove from hub registry
+    // 1. Remove from hub registry first (adds tombstone to prevent re-discovery)
     if let Some(hub) = &app.hub_registry {
         let mut registry = hub.lock().await;
         registry.remove_project(&slug);
+    }
+
+    // 2. Delete k8s namespace — report failure to the client
+    if let Err(e) = fleet::delete_namespace(app.kube_client.as_ref(), &slug).await {
+        tracing::warn!(slug = %slug, error = %e, "k8s namespace deletion failed");
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({
+                "deleted": false,
+                "slug": slug,
+                "error": format!("namespace deletion failed: {e}"),
+            })),
+        )
+            .into_response();
+    }
+
+    // 3. Delete Cloudflare DNS (best-effort — not critical)
+    if let Err(e) = fleet::delete_cloudflare_dns(&app.http_client, &slug).await {
+        tracing::warn!(slug = %slug, error = %e, "cloudflare DNS deletion failed (non-fatal)");
     }
 
     Json(serde_json::json!({ "deleted": true, "slug": slug })).into_response()

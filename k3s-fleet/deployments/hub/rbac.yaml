@@ -10,7 +10,10 @@ metadata:
   name: sdlc-hub-reader
 rules:
   - apiGroups: [""]
-    resources: ["namespaces", "pods"]
+    resources: ["namespaces"]
+    verbs: ["list", "delete"]
+  - apiGroups: [""]
+    resources: ["pods"]
     verbs: ["list"]
   - apiGroups: ["apps"]
     resources: ["deployments"]

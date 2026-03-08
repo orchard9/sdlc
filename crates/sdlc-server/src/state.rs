@@ -698,7 +698,7 @@ impl AppState {
                         }
                     };
 
-                    let (tx, projects_with_agents) = {
+                    let (tx, projects_with_agents, deleted_slugs) = {
                         let mut registry = hub_for_fleet.lock().await;
                         registry.reconcile_fleet(&instances);
                         let projects_with_agents = registry
@@ -709,10 +709,15 @@ impl AppState {
                                     && project.status != ProjectStatus::Offline
                             })
                             .count();
-                        (registry.event_tx.clone(), projects_with_agents)
+                        let deleted = registry.deleted_slugs.clone();
+                        (registry.event_tx.clone(), projects_with_agents, deleted)
                     };
 
                     for instance in instances {
+                        // Don't broadcast tombstoned slugs to UI
+                        if deleted_slugs.contains(&instance.slug) {
+                            continue;
+                        }
                         let _ = tx.send(HubSseMessage::FleetUpdated(instance));
                     }
                     let _ = tx.send(HubSseMessage::FleetAgentStatus {
